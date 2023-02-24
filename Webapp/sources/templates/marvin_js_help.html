@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+<div class="container">
+    <h2>Marvin JS Help Centre</h2>
+    <br>
+    <div id="accordion">
+      <div class="card">
+        <div class="card-header" id="headingOne">
+          <h5 class="mb-0">
+            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+              Where can I find the Marvin JS User Guide?
+            </button>
+          </h5>
+        </div>
+        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+          <div class="card-body">
+            Marvin JS by Chemaxon has a number of resources on their website how to use Marvin JS. Click <a target="_blank" href="https://docs.chemaxon.com/display/docs/marvin-js-user-s-guide.md">here<i class="fa fa-external-link"></i></a> to access these resources.
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header" id="headingTwo">
+          <h5 class="mb-0">
+            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+              How do I add non-standard atoms or groups into the sketcher?
+            </button>
+          </h5>
+        </div>
+        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+          <div class="card-body">
+            <p>Non-standard atoms can be inserted by clicking the button in the top-right corner, then choosing the atom.</p>
+            <img style="width: 70%" src="{{url_for('static', filename='img/get_atom_screenshot.jpg')}}">
+            <br>
+            <br>
+            <p>Common abbreviations, e.g. Boc for <i>tert</i>-butyloxycarbonyl protecting group, can be inserted by clicking the button in the bottom left corner. This can be left as the abbreviation or expanded to the full form.</p>
+            <img style="width: 70%" src="{{url_for('static', filename='img/get_abbreviated_screenshot.jpg')}}">
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header" id="headingThree">
+          <h5 class="mb-0">
+            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+              Can I paste in pre-drawn reactions or SMILES strings into Marvin JS?
+            </button>
+          </h5>
+        </div>
+        <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+          <div class="card-body">
+            <p>A number of formats, including SMILES, can be imported using the button in the top left corner. It is not currently possible to directly paste a reaction from ChemDraw into Marvin JS. However, a reaction scheme from ChemDraw can be copied as SMILES using the 'edit, copy as' button or keyboard shortcut 'alt + ctrl + c'. This can then be pasted into the SMILES import dialogue in Marvin JS.</p>
+            <img style="width: 70%" src="{{url_for('static', filename='img/import_screenshot.jpg')}}">
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header" id="headingFour">
+          <h5 class="mb-0">
+            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+              Can I include reagents, catalysts, or solvents in my reaction scheme?
+            </button>
+          </h5>
+        </div>
+        <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion">
+          <div class="card-body">
+            Reagents, catalysts, and solvents are currently not supported in the reaction sketcher if added above or below the arrow. These can be directly added in the reaction table.
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header" id="headingFive">
+          <h5 class="mb-0">
+            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+              What should I do if I have any other questions?
+            </button>
+          </h5>
+        </div>
+        <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordion">
+          <div class="card-body">
+            If you have any other questions about Marvin JS please contact us and a member of the AI4Green team will be happy to help you.
+            <br><br>
+            Email: <a href="mailto:admin@ai4green.app">admin@ai4green.app</a>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+<br>
+</body>
+{% endblock %}

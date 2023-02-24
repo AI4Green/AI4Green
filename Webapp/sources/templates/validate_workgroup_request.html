@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <h2>Manage Workgroup Membership Request</h2>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            Workgroup: {{ workgroup }}<br>
+            Request username: {{ requester.username }}<br>
+            Request email address: {{ requester.email }}
+        </p>
+        <p>
+            {{ form.approve }} {{ form.deny }}<br>
+        </p>
+    </form>
+</div>
+{% endblock %}

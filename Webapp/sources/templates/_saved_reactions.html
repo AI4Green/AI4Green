@@ -1,0 +1,92 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<script type="text/javascript" src="{{ url_for('static', filename='js/workgroup.js') }}"></script>
+{% if reactions %}
+<script>
+    // if reactions show option to export data
+    document.getElementById("export-div").style.display = "block";
+</script>
+<div class="btn-group btn-group-toggle" data-toggle="buttons">
+  <label class="btn btn-secondary btn-sm{% if sort_crit == "AZ" %} active{% else %}{% endif %}" id="AZ">
+    <input value="1" type="radio" name="options" id="Sort-A-Z" autocomplete="off"{% if sort_crit == "AZ" %} checked{% else %}{% endif %} /> A-Z &#8645;
+  </label>
+  <label class="btn btn-secondary btn-sm{% if sort_crit == "time" %} active{% else %}{% endif %}" id="time">
+    <input value="2" type="radio" name="options" id="Sort-Time" autocomplete="off"{% if sort_crit == "time" %} checked{% else %}{% endif %} /> Date Created (Newest First) &#8645;
+  </label>
+</div>
+<script>
+  $('#AZ').on("click",function(){
+    getReactions("AZ");
+  });
+  $('#time').on("click",function(){
+    getReactions("time");
+  });
+</script>
+{% for reaction in reactions %}
+<div id="reaction-{{ loop.index }}"><h4>{{ reaction.name }}</h4></div>
+<div id="reaction-id{{ loop.index }}"><h5>{{ reaction.reaction_id }}</h5></div>
+<div class="description">{{ reaction.description }}</div>
+<div id="image{{ loop.index }}"></div>
+<div class="reaction-time">{{ reaction.time_of_creation }}</div>
+<button id="{{ reaction.name }}-reload" class="btn btn-success">Reload</button>
+{% if reaction.creator_email == current_user.email %}
+    <button id="{{ reaction.name }}-delete" class="btn btn-danger">Delete</button>
+    <script>
+        document.getElementById("{{ reaction.name }}-delete").onclick = function () {
+            const completeConfirm = window.confirm("Are you sure you want to permanently delete this reaction?");
+                if (completeConfirm === false) {
+                    return;
+                }
+            let reaction_name = "{{ reaction.name }}"
+            let workgroup = $("#workgroup_selected").val();
+            let workbook = $("#WB-select").val()
+            location.href = "/delete_reaction/" + reaction_name + "/" + workgroup + "/" + workbook;
+        };
+    </script>
+{% endif %}
+{% if reaction.completion_status == "complete" %}
+    <i class="fa fa-lock" style="font-size:20px; color:darkgrey;"></i><b style="font-size:12px; color:darkgrey;">  Reaction Locked</b>
+{% endif %}
+{% if reaction.creator_email != current_user.email %}
+    <i class="fa fa-lock" style="font-size:20px; color:darkgrey;"></i><b style="font-size:12px; color:darkgrey;">  Read-only reaction created by {{ reaction.creator_username }}</b>
+{% endif %}
+<script>
+    document.getElementById("{{ reaction.name }}-reload").onclick = function () {
+        window.location.href = "/sketcher/{{ reaction.workgroup }}/{{ reaction.workbook }}/{{ reaction.reaction_id }}/no"
+    };
+</script>
+<hr class="line">
+{% endfor %}
+{% else %}
+<script>
+    // if no reactions don't give option to export reactions
+    document.getElementById("no-reactions").style.display = "block";
+    document.getElementById("export-div").style.display = "none";
+</script>
+{% endif %}
+<input type="hidden" value="{{ reactions|length }}" id="js-number-of-reactions">
+<input type="hidden" value="{{ sort_crit }}" id="js-sort-crit">
+<script>
+    $(document).ready(function() {
+      const sort_crit = $("#js-sort-crit").val();
+      let workbook = $("#WB-select").val()
+      let workgroup = $('#workgroup_selected').val()
+        $.ajax({
+            method: "POST",
+            url: "/get_schemata",
+            dataType: 'json',
+          data: {
+            sort_crit: sort_crit,
+            workgroup: workgroup,
+            workbook: workbook,
+            size: "small"
+                },
+            success: function (data) {
+                let x = $("#js-number-of-reactions").val();
+                for (let i = 1; i < x + 1; i++) {
+                    $("#image" + i).append($('<div>').html(data.schemes[i - 1]));
+                }
+            }
+        })
+    })
+
+</script>

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
+</head>
+<div id="page-contents" class="container-fluid">
+<h2>Demo Reaction Constructor</h2>
+Need some help getting started?
+<br>
+<a id="tutorial-mode" href="/sketcher_tutorial/yes" class="btn btn-success btn-sm" style="color: white;" target="_blank">Enter Tutorial Mode <i class="bi bi-box-arrow-in-up-right"></i></a>
+<br><br>
+<p>Please sketch or upload your reaction to begin. Click <a target="_blank" href="{{ url_for('main.marvin_js_help') }}">here</a> to view our Marvin JS help guide.</p>
+<p>Please note compounds drawn above or underneath the arrow will not be recognised.</p>
+<p><b>Reactions cannot be saved in demo mode and only common compounds in our database may be used.</b></p>
+<div id="marvin-test" style="width: 1020px; height: 480px"></div>
+<br>
+<p><button id="demo-button" type="button" class="btn btn-primary" style="width: 100px;">Example</button></p>
+<p><button id="action-button-submit" type="button" class="btn btn-primary">Submit</button></p>
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/integrated_marvin.js') }}"></script>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
+
+<!--The loading bar div-->
+<div class="loading-bar"></div>
+
+<style>
+    .loading-bar{
+        display: none; /* by default hidden */
+        position: fixed;
+        z-index: 1000; /* always on top */
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%; /* full screen */
+        background-image: url('http://i.stack.imgur.com/FhHRx.gif');
+        background-position: 50% 50%; /* centre */
+        background-color: rgba(255, 255, 255, 0.8); /* transparency */
+        background-repeat: no-repeat;
+    }
+    body.loading{ /* when body has loading class */
+        overflow: hidden; /* hide scrolling bar */
+    }
+    body.loading .loading-bar{
+        display: block; /* when body has loading class, display tha loader */
+    }
+</style>
+    
+<br>
+	
+<div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;"></div>
+
+<!--Output of reaction table-->
+<div id="successAlert1"></div>
+<br>
+<input type="submit" value="Summary" id="action-summary" class="btn btn-primary" onclick="showSummary()" title="Generate summary table"
+       style="display: none; width: 100px;">
+<!--Output of reaction image and summary table-->
+
+
+<div id="dvContainer" class="container-fluid" style="padding-left: 0px">
+    <div id="imageContainer" style="display: none;">
+        <img id="image" />
+    </div>
+    <p id="js-summary-table"></p>
+</div>
+
+    <script>
+        function printContent(){
+            window.print();
+        }
+    </script>
+<div id="mark-complete-div" style="display:none;">
+    <input type="checkbox" id="mark-complete">
+    <label for="mark-complete"><b>Mark Reaction as Complete</b></label>
+</div>
+<div id="update-reaction-div" style="display:none;">
+    <button id="update-reaction" onclick="updateReaction()" class="btn btn-primary" style="width: fit-content;">Update</button>
+</div>
+<br>
+<div id="save-reaction-div" style="display:none;">
+    <button id="save-as-reaction" onclick="saveAsReaction()" class="btn btn-primary" style="width: fit-content;">Save As</button>
+</div>
+<br>
+<button id="print-pdf" onclick="printContent()" class="btn btn-primary" style="display: none; width:140px">Print Summary</button>
+<!--input type="button" value="Print Form" onclick="PrintElem('#dvContainer')" /-->
+</div>
+<br>
+<div class="notToPrint" id="printoutput"></div>
+<input type="hidden" id="js-reaction-smiles">
+<input type="hidden" value="{{ demo }}" id="js-demo">
+<input type="hidden" value="{{ active_workgroup }}" id="js-active-workgroup">
+<input type="hidden" value="{{ active_workbook }}" id="js-active-workbook">
+</div>
+{% endblock %}

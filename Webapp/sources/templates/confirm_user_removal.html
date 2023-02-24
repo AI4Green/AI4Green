@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2>Confirm removal of user from workgroup and/or books</h2>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+           {{ confirmation_message|safe }}
+        </p>
+        <p>
+            {{ form.approve }} {{ form.deny }}<br>
+        </p>
+    </form>
+</div>
+{% endblock %}

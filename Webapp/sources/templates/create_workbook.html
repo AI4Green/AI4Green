@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2>Create Workbook</h2>
+    <form method="POST">
+        {{ form.csrf_token }}
+        Workgroup:
+        <br>
+        <b>{{ workgroup }}</b>
+        <br>
+        <br>
+        Workbook Name:
+        <br>
+        {{ form.workbook }}
+        <br>
+        <br>
+        {% for error in form.workbook.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+        <br>
+        Workbook Abbreviation:
+        <br>
+        {{ form.abbreviation }}
+        <br>
+        <br>
+        {% for error in form.abbreviation.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+        <br>
+        <p>The workbook abbreviation is a 3 letter code used to form the reaction ID for all reactions within that workbook.</p>
+        <p>For example, if the abbreviation is WB1, the reaction IDs would follow the pattern of WB1-001, WB1-002, etc.</p>
+        <br>
+        {{ form.submit }}
+    </form>
+</div>
+{% endblock %}
+
+
+

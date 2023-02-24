@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/custom_colours.js') }}"></script>
+</head>
+
+<div class="container-fluid">
+    <h2>Solvent Guide</h2>
+    <p><a class="btn btn-primary" href="{{ url_for('solvent_guide.solvent_guide_help') }}">About the Solvent Guide &#10097;</a></p>
+    <p>Choose up to two solvents from the classes below to compare them!</p>
+    <div class="row">
+      <div class="col-2">
+        {% for family in families %}
+        <a id="family{{ loop.index }}" style="color: black; border: none" class="my-0 py-1 list-group-item" data-toggle="collapse" href="#collapse{{ loop.index }}" role="button" aria-expanded="false" aria-controls="collapseExample">
+          <b>{{ family }}</b>
+        </a>
+        <div class="collapse" id="collapse{{ loop.index }}">
+          {% for solvent in solvents %}
+          {% if solvent["Family"] == family %}
+          <button id="solvent{{ loop.index }}" class="my-0 py-1 pl-5 btn btn-link" style="white-space: normal; text-align: left" data-toggle="list" onclick="showTab({{ solvent['Number'] }}, 'no')">{{ solvent["Solvent"] }}</button>
+          <br>
+          {% endif %}
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+      <div style="display: none">
+        <div class="list-group" id="list-tab" role="tablist">
+          <a class="my-0 py-1 pl-5" id="list-default-list" data-toggle="list" href="#list-default" role="tab" aria-controls="default">Default</a>
+          {% for solvent in solvents %}
+          <a class="my-0 py-1 pl-5" id="list-{{ loop.index }}-list" data-toggle="list" href="#list-{{ solvent["Number"] }}" role="tab" aria-controls="{{ solvent["Number"] }}">{{ solvent["Solvent"] }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-5">
+        <div class="tab-content" id="nav-tabContent">
+          <div class="tab-pane fade active show" id="list-default" role="tabpanel" aria-labelledby="list-default-list">
+            <div class="card" style="border-width: 5px;">
+              <div class="card-body">
+                <h5 class="card-title">Choose a Solvent to Begin</h5>
+              </div>
+            </div>
+          </div>
+          {% for solvent in solvents %}
+          <div class="tab-pane fade" id="list-{{ solvent["Number"] }}" role="tabpanel" aria-labelledby="list-{{ solvent["Number"] }}-list">
+            <div style="border-width: 5px;" class="card {% if solvent["Ranking Discussion"] == "Recommended" %}hazard-acceptable-outline{% elif solvent["Ranking Discussion"] == "Problematic" %}hazard-warning-outline{% elif solvent["Ranking Discussion"] == "Hazardous" %}hazard-hazardous-outline{% elif solvent["Ranking Discussion"] == "Highly Hazardous" %}hazard-highly-hazardous-outline{% endif %}">
+              <div class="card-body">
+                <a onclick="showTab('default', 'no')" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <h5 class="card-title">{{ solvent["Solvent"] }}</h5>
+                <div class="row">
+                  <div class="col">
+                    <h6 class="card-subtitle mb-2 text-muted">{{ solvent["Ranking Discussion"] }}</h6>
+                    <table class="table table-sm" style="font-size: 12px; border-collapse:collapse">
+                      <tr>
+                        <th scope="row" style="width: 50%; border-style: hidden!important;">CAS</th>
+                        <td style="width: 50%; border-style: hidden!important;"><a href='https://pubchem.ncbi.nlm.nih.gov/compound/{{ solvent["PubChem ID"] }}' target="_blank">{{ solvent["CAS"] }}</a></td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="width: 50%; border-style: hidden!important;">Family</th>
+                        <td style="width: 50%; border-style: hidden!important;">{{ solvent["Family"] }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Boiling Point / &deg;C</th>
+                        <td style="border-style: hidden!important;">{{ solvent["BP"] }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Flash Point / &deg;C</th>
+                        <td style="border-style: hidden!important;">{{ solvent["FP"] }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Safety</th>
+                        <td style="border-style: hidden!important" class="{% if solvent["Safety"] < 4 %}hazard-acceptable{% elif solvent["Safety"] < 7 %}hazard-warning{% else %}hazard-hazardous{% endif %}">{{ solvent["Safety"] }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Health</th>
+                        <td style="border-style: hidden!important" class="{% if solvent["Health"] < 4 %}hazard-acceptable{% elif solvent["Health"] < 7 %}hazard-warning{% else %}hazard-hazardous{% endif %}">{{ solvent["Health"] }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Environment</th>
+                        <td style="border-style: hidden!important" class="{% if solvent["Env"] < 4 %}hazard-acceptable{% elif solvent["Env"] < 7 %}hazard-warning{% else %}hazard-hazardous{% endif %}">{{ solvent["Env"] }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Worst H3xx</th>
+                        <td style="border-style: hidden!important;">{{ solvent["Worst H3xx"] }}{% if solvent["Worst H3xx"] != "None" %}<a data-toggle="tooltip" data-placement="right" title='{{ solvent["H3_phrase"] }}'>&#x1F6C8;</a>{% endif %}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Worst H4xx</th>
+                        <td style="border-style: hidden!important;">{{ solvent["Worst H4xx"] }}{% if solvent["Worst H4xx"] != "None" %}<a data-toggle="tooltip" data-placement="right" title='{{ solvent["H4_phrase"] }}'>&#x1F6C8;</a>{% endif %}</td>
+                      </tr>
+                    </table>
+                    <br>
+                  </div>
+                  <div class="col">
+                    <div id='chart{{ solvent["Number"] }}' class='chart'></div>
+                  </div>
+                </div>
+                <p class="card-text" style="font-size: 12px">
+                  <b>Issues: </b> {% if solvent["Replacement 1"] != "" %}{{ solvent["Replacement Issues"] }}{% else %}na{% endif %}<br>
+                  <b>Possible Substitution(s):</b> {% if solvent["Replacement 1"] != "" %}<button id="sub1_{{ loop.index }}" class="btn btn-link" style="font-size: 12px" onclick="showTab({{ solvent['Replacement 1 Number'] }}, 'sub1')">{{ solvent["Replacement 1"] }}</button><button id="sub2_{{ loop.index }}" class="btn btn-link" style="font-size: 12px" onclick="showTab({{ solvent['Replacement 2 Number'] }}, 'sub1')">{{ solvent["Replacement 2"] }}</button>{% else %}No Substitutions Found<button class="btn btn-link" style="font-size: 12px; visibility: hidden">Formatting</button>{% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div style="display: none">
+        <div class="list-group" id="list-tab2" role="tablist">
+          <a class="my-0 py-1 pl-5" id="list2-default-list" data-toggle="list" href="#list2-default" role="tab" aria-controls="default">Default</a>
+          {% for solvent in solvents %}
+          <a class="my-0 py-1 pl-5" id="list2-{{ loop.index }}-list" data-toggle="list" href="#list2-{{ solvent["Number"] }}" role="tab" aria-controls="{{ solvent["Number"] }}">{{ solvent["Solvent"] }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-5">
+        <div class="tab-content" id="nav2-tabContent">
+          <div class="tab-pane fade active show" id="list2-default" role="tabpanel" aria-labelledby="list-default-list">
+            <div class="card" style="border-width: 5px;">
+              <div class="card-body">
+                <h5 class="card-title">Choose a Solvent to Begin</h5>
+              </div>
+            </div>
+          </div>
+          {% for solvent in solvents %}
+          <div class="tab-pane fade" id="list2-{{ solvent["Number"] }}" role="tabpanel" aria-labelledby="list-{{ solvent["Number"] }}-list">
+            <div style="border-width: 5px;" class="card {% if solvent["Ranking Discussion"] == "Recommended" %}hazard-acceptable-outline{% elif solvent["Ranking Discussion"] == "Problematic" %}hazard-warning-outline{% elif solvent["Ranking Discussion"] == "Hazardous" %}hazard-hazardous-outline{% elif solvent["Ranking Discussion"] == "Highly Hazardous" %}hazard-highly-hazardous-outline{% endif %}">
+              <div class="card-body">
+                <a onclick="showTab('default2', 'no')" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <h5 class="card-title">{{ solvent["Solvent"] }}</h5>
+                <div class="row">
+                  <div class="col">
+                    <h6 class="card-subtitle mb-2 text-muted">{{ solvent["Ranking Discussion"] }}</h6>
+                    <table class="table table-sm" style="font-size: 12px; border-collapse:collapse">
+                      <tr>
+                        <th scope="row" style="width: 50%; border-style: hidden!important;">CAS</th>
+                        <td style="width: 50%; border-style: hidden!important;"><a href='https://pubchem.ncbi.nlm.nih.gov/compound/{{ solvent["PubChem ID"] }}' target="_blank">{{ solvent["CAS"] }}</a></td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="width: 50%; border-style: hidden!important;">Family</th>
+                        <td style="width: 50%; border-style: hidden!important;">{{ solvent["Family"] }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Boiling Point / &deg;C</th>
+                        <td style="border-style: hidden!important;">{{ solvent["BP"] }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Flash Point / &deg;C</th>
+                        <td style="border-style: hidden!important;">{{ solvent["FP"] }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Safety</th>
+                        <td style="border-style: hidden!important" class="{% if solvent["Safety"] < 4 %}hazard-acceptable{% elif solvent["Safety"] < 7 %}hazard-warning{% else %}hazard-hazardous{% endif %}">{{ solvent["Safety"] }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Health</th>
+                        <td style="border-style: hidden!important" class="{% if solvent["Health"] < 4 %}hazard-acceptable{% elif solvent["Health"] < 7 %}hazard-warning{% else %}hazard-hazardous{% endif %}">{{ solvent["Health"] }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Environment</th>
+                        <td style="border-style: hidden!important" class="{% if solvent["Env"] < 4 %}hazard-acceptable{% elif solvent["Env"] < 7 %}hazard-warning{% else %}hazard-hazardous{% endif %}">{{ solvent["Env"] }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Worst H3xx</th>
+                        <td style="border-style: hidden!important;">{{ solvent["Worst H3xx"] }}{% if solvent["Worst H3xx"] != "None" %}<a data-toggle="tooltip" data-placement="right" title='{{ solvent["H3_phrase"] }}'>&#x1F6C8;</a>{% endif %}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" style="border-style: hidden!important;">Worst H4xx</th>
+                        <td style="border-style: hidden!important;">{{ solvent["Worst H4xx"] }}{% if solvent["Worst H4xx"] != "None" %}<a data-toggle="tooltip" data-placement="right" title='{{ solvent["H4_phrase"] }}'>&#x1F6C8;</a>{% endif %}</td>
+                      </tr>
+                    </table>
+                    <br>
+                  </div>
+                  <div class="col">
+                    <div id='chart2_{{ solvent["Number"] }}' class='chart'></div>
+                  </div>
+                </div>
+                <p class="card-text" style="font-size: 12px">
+                  <b>Issues: </b> {% if solvent["Replacement 1"] != "" %}{{ solvent["Replacement Issues"] }}{% else %}na{% endif %}<br>
+                  <b>Possible Substitution(s):</b> {% if solvent["Replacement 1"] != "" %}<button class="btn btn-link" style="font-size: 12px" onclick="showTab({{ solvent['Replacement 1 Number'] }}, 'sub2')">{{ solvent["Replacement 1"] }}</button><button class="btn btn-link" style="font-size: 12px" onclick="showTab({{ solvent['Replacement 2 Number'] }}, 'sub2')">{{ solvent["Replacement 2"] }}</button>{% else %}No Substitutions Found<button class="btn btn-link" style="font-size: 12px; visibility: hidden">Formatting</button>{% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+</div>
+
+
+
+
+<script>
+  $(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+   setColours();
+});
+  let iteration = 0;
+  function showTab(sol, sub){
+    iteration = iteration + 1
+    if (sub === "sub1"){
+      sol = '[href="#list2-' + sol + '"]';
+      $(sol).tab('show');
+    }
+    else if(sub === "sub2"){
+      sol = '[href="#list-' + sol + '"]';
+      $(sol).tab('show');
+    }
+    if (sol === "default"){
+      sol = '[href="#list-' + sol + '"]';
+      $(sol).tab('show');
+      if(iteration % 2 !== 0){
+        iteration = iteration + 1
+      }
+      return
+    }
+    if (sol === "default2"){
+      sol = "default"
+      sol = '[href="#list2-' + sol + '"]';
+      $(sol).tab('show');
+      if(iteration % 2 === 0){
+        iteration = iteration + 1
+      }
+      return
+    }
+    if(iteration % 2 === 0){
+      sol = '[href="#list2-' + sol + '"]';
+      $(sol).tab('show');
+    }
+    else{
+      sol = '[href="#list-' + sol + '"]';
+      $(sol).tab('show');
+    }
+  }
+</script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% for solvent in solvents %}
+<script>
+  var graph = {{ solvent["graph"] | safe}}
+  Plotly.newPlot('chart{{ solvent["Number"] }}', graph, {});
+  Plotly.newPlot('chart2_{{ solvent["Number"] }}', graph, {});
+</script>
+{% endfor %}
+{% if sol %}
+<script>
+  $(document).ready(function(){
+    showTab({{ sol }}, 'no')
+  });
+</script>
+{% endif %}
+{% endblock %}

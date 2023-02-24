@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2>Delete Profile</h2>
+    <p style="color:red">Caution! If you delete your profile you will lose access to your workgroups, workbooks and reactions. This cannot be reversed.</p>
+    <a class="btn btn-danger" id="confirm-delete-profile" href="{{url_for('delete_profile.confirm_delete_profile')}}">Delete Profile</a>
+</div>
+{% endblock %}
