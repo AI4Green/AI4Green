@@ -3,7 +3,9 @@ AI4Green is an Electronic Laboratory Notebook which combines data storage and sh
 green and sustainable chemistry.<br><br>
 <b>We highly recommend using Chromium-based browsers such as Google Chrome for accessing AI4Green.</b><br><br>
 See the following video tutorials on how to use AI4Green:
-https://youtube.com/playlist?list=PL7u_tOd0vTynC0tgWt0cb7jLlnEoDwiO4
+https://youtube.com/playlist?list=PL7u_tOd0vTynC0tgWt0cb7jLlnEoDwiO4<br><br>
+Visit our [quick start guide](Webapp/sources/static/AI4Green_quick_guide.pdf) and 
+[user guide](Webapp/sources/static/AI4Green_User_Manual.pdf) for more information.
 
 
 ## Option 1: <i>Via</i> Our Web Application
