@@ -6,7 +6,7 @@ See the following video tutorials on how to use AI4Green:
 https://youtube.com/playlist?list=PL7u_tOd0vTynC0tgWt0cb7jLlnEoDwiO4<br><br>
 Visit our [quick start guide](Webapp/sources/static/AI4Green_quick_guide.pdf) and 
 [user guide](Webapp/sources/static/AI4Green_User_Manual.pdf) for more information.<br><br>
-If you use AI4Green in your research, please cite our preprint: https://10.26434/chemrxiv-2023-tjhkw.<br>
+If you use AI4Green in your research, please cite our preprint: https://doi.org/10.26434/chemrxiv-2023-tjhkw.<br>
 This work is supported by Royal Academy of Engineering.<br>
 Contact us at admin@ai4green.app with any queries, suggestions, or feedback.
 
