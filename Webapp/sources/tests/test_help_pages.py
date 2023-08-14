@@ -16,20 +16,15 @@ class HelpPagesTest(flask_testing.LiveServerTestCase, flask_testing.TestCase):
     # set up, register and log in
     def setUp(self):
         """We load a test instance of the app, clear the db, register a new user then login"""
-        self.browser_login()
+        setup_selenium(self)
+        login(self)
+        self.driver.find_element_by_id('InfoButton').click()
+        time.sleep(1)
 
     def tearDown(self):
         # close the browser window
         self.driver.quit()
         restore_db()
-
-    # set up browser, used to log in
-    def browser_login(self):
-        """This function sets the headless browser up, logs the user in and is called from setUp"""
-        setup_selenium(self)
-        login(self)
-        self.driver.find_element_by_id('InfoButton').click()
-        time.sleep(1)
 
     def test_help_page_video(self):
         """Tests help video button is clickable"""
@@ -74,14 +69,18 @@ class HelpPagesTest(flask_testing.LiveServerTestCase, flask_testing.TestCase):
         time.sleep(1)
         self.assertIn('Hazard Disclaimer', self.driver.page_source)
 
-    def test_email_link(self):
-        """Tests email link"""
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        self.assertIn('admin@ai4green.app', self.driver.page_source)
-        self.driver.find_element_by_id("email-link").click()
-
     def test_marvin_js_link(self):
         """Tests marvin js link"""
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         self.driver.find_element_by_id("marvin-js-help").click()
         self.assertIn('Marvin JS Help Centre', self.driver.page_source)
+
+    def test_github_link(self):
+        """Tests github link"""
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        self.driver.find_element_by_id("github_link").click()
+        # change to the 2nd tab since link opens in new tab
+        chwd = self.driver.window_handles[1]
+        self.driver.switch_to.window(chwd)
+        time.sleep(2)
+        self.assertIn('AI4Green Installation Guide', self.driver.page_source)

@@ -2,9 +2,9 @@
 {% block content %}
 <body>
 <div class="container">
-    <h2>AI4Green Documentation</h2>
+    <h2>AI4Green Documentation & Help</h2>
     <h3>Video Tutorials</h3>
-    <p>We have several video tutorials to explain Workgroups & Workbooks, the Reaction Constructor, and our Solvent Guide. Click the icon in the top right of the player to view this playlist on YouTube.</p>
+    <p>We have several video tutorials to explain Workgroups & Workbooks, the Reaction Constructor, and our Solvent Guide. Click the icon in the top right of the player to view all videos in this playlist.</p>
     <iframe id="help-video" width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PL7u_tOd0vTynC0tgWt0cb7jLlnEoDwiO4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><br><br>
     <h3>User Guides</h3>
     <a id="quickstart-guide" href="{{ url_for('main.send_quickstart_guide') }}" class="btn btn-primary btn-lg">Quickstart Guide</a>
@@ -20,9 +20,7 @@
     Click here to view the <a id="hazard_link" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank">hazard disclaimer</a>.
     <br>
     <br>
-    For any queries, feedback, or suggestions, please contact us: <a id="email-link" href="mailto:admin@ai4green.app">admin@ai4green.app</a>
-
+    <a id="github_link" href="https://github.com/AI4Green/AI4Green" target="_blank" class="btn btn-success btn-lg">GitHub Repository</a>
 </div>
-<br>
 </body>
 {% endblock %}

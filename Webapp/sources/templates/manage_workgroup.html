@@ -130,10 +130,10 @@
                 {% for request in requests %}
                 <tr>
                     <td class="align-middle">
-                        {{ request.person.user.fullname }}
+                        {{ request.Person.user.fullname }}
                     </td>
                     <td class="align-middle">
-                        {{ request.person.user.email }}
+                        {{ request.Person.user.email }}
                     </td>
                     <td class="align-middle">
                         {{ request.current_role }}
@@ -148,19 +148,19 @@
                     <td class="align-middle">
                         {% if request.current_role == "Standard Member" %}
                         {% if request.new_role == "Senior Researcher" %}
-                        <button id="request_approve{{ loop.index }}" value="{{ request.person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'sm-to-sr', 'approve')" style="width:110px;">Approve</button>
-                        <button id="request_deny{{ loop.index }}" value="{{ request.person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'sm-to-sr', 'deny')" style="width:110px;">Deny</button>
+                        <button id="request_approve{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'sm-to-sr', 'approve')" style="width:110px;">Approve</button>
+                        <button id="request_deny{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'sm-to-sr', 'deny')" style="width:110px;">Deny</button>
                         {% else %}
-                        <button id="request_approve{{ loop.index }}" value="{{ request.person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'sm-to-pi', 'approve')" style="width:110px;">Approve</button>
-                        <button id="request_deny{{ loop.index }}" value="{{ request.person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'sm-to-pi', 'deny')" style="width:110px;">Deny</button>
+                        <button id="request_approve{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'sm-to-pi', 'approve')" style="width:110px;">Approve</button>
+                        <button id="request_deny{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'sm-to-pi', 'deny')" style="width:110px;">Deny</button>
                         {% endif %}
                         {% elif request.current_role == "Senior Researcher" %}
-                        <button id="request_approve{{ loop.index }}" value="{{ request.person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'sr-to-pi', 'approve')" style="width:110px;">Approve</button>
-                        <button id="request_deny{{ loop.index }}" value="{{ request.person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'sr-to-pi', 'deny')" style="width:110px;">Deny</button>
+                        <button id="request_approve{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'sr-to-pi', 'approve')" style="width:110px;">Approve</button>
+                        <button id="request_deny{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'sr-to-pi', 'deny')" style="width:110px;">Deny</button>
                         {% endif %}
                         {% if request.current_role == "Non-Member" %}
-                        <button id="request_approve{{ loop.index }}" value="{{ request.person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'to-sm', 'approve')" style="width:110px;">Approve</button>
-                        <button id="request_deny{{ loop.index }}" value="{{ request.person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'to-sm', 'deny')" style="width:110px;">Deny</button>
+                        <button id="request_approve{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'to-sm', 'approve')" style="width:110px;">Approve</button>
+                        <button id="request_deny{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'to-sm', 'deny')" style="width:110px;">Deny</button>
                         {% endif %}
 
                     </td>

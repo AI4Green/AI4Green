@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<body>
+    <div class="container">
+        <h1>About AI4Green</h1>
+        AI4Green is open-source software developed in the group of Jonathan Hirst at University of Nottingham, UK. This work is supported by a grant from the Royal Academy of Engineering.
+        <br><br>
+        <img src="{{ url_for('static', filename='img/RAE.png') }}" alt="Royal Society of Engineering Logo">
+        <br><br>
+        <a id="github_link" href="https://github.com/AI4Green/AI4Green" target="_blank">Visit our GitHub Repository</a> for full source code and instructions on how to build your own instance of AI4Green.
+        <br><br>
+        <a id="about-to-help" href="{{ url_for('main.info') }}" class="btn btn-large btn-primary">Documentation & Help</a>
+        <br><br>
+        For any queries, feedback, or suggestions, please contact us: <a id="email-link" href="mailto:admin@ai4green.app">admin@ai4green.app</a>.
+        <br><br>
+        <h3>Publications</h3>
+        S. Boobier, J. C. Davies, I. N. Derbenev, C. M. Handley, and J. D. Hirst, AI4Green: An Open-Source ELN for Green and Sustainable Chemistry. <i>ChemRxiv</i>, 2023, <a id="paper-link" href="https://doi.org/10.26434/chemrxiv-2023-tjhkw" target="_blank">https://doi.org/10.26434/chemrxiv-2023-tjhkw</a>.
+    </div>
+</body>
+{% endblock %}

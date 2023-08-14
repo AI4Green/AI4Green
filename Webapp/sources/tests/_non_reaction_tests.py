@@ -13,6 +13,7 @@ import test_manage_workgroup
 import test_news_feed
 import test_notification_email
 import test_notification_read
+import test_search
 import test_pi_sr_request
 import test_reaction_list
 import test_reset_password
@@ -45,6 +46,7 @@ def non_reaction_suite_test():
     suite_test.addTests(loader.loadTestsFromModule(test_news_feed))
     suite_test.addTests(loader.loadTestsFromModule(test_notification_email))
     suite_test.addTests(loader.loadTestsFromModule(test_notification_read))
+    suite_test.addTests(loader.loadTestsFromModule(test_search))
     suite_test.addTests(loader.loadTestsFromModule(test_pi_sr_request))
     suite_test.addTests(loader.loadTestsFromModule(test_reaction_list))
     suite_test.addTests(loader.loadTestsFromModule(test_reset_password))

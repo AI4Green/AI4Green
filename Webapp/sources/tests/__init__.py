@@ -1,4 +1,5 @@
 import test_accessibility
+import test_about_page
 import test_add_reagent_new_cas
 import test_admin_dashboard
 import test_auth
@@ -24,6 +25,8 @@ import test_pdf_summary
 import test_pi_sr_request
 import test_primary_product_change
 import test_reactant_tickbox_mass
+import test_reaction_addenda
+import test_reaction_attachments
 import test_reaction_list
 import test_reaction_reload
 import test_reaction_table
@@ -39,6 +42,7 @@ import test_reset_password
 import test_resubmit_dataloss_warning
 import test_return_to_login_page
 import test_save_reaction
+import test_search
 import test_solvent_cas
 import test_solvent_guide
 import test_solvent_selection
@@ -62,6 +66,7 @@ def suite_test():
     loader = unittest.TestLoader()
     suite_test = unittest.TestSuite()
     suite_test.addTests(loader.loadTestsFromModule(test_accessibility))
+    suite_test.addTests(loader.loadTestsFromModule(test_about_page))
     suite_test.addTests(loader.loadTestsFromModule(test_add_reagent_new_cas))
     suite_test.addTests(loader.loadTestsFromModule(test_admin_dashboard))
     suite_test.addTests(loader.loadTestsFromModule(test_auth))
@@ -87,6 +92,8 @@ def suite_test():
     suite_test.addTests(loader.loadTestsFromModule(test_pi_sr_request))
     suite_test.addTests(loader.loadTestsFromModule(test_primary_product_change))
     suite_test.addTests(loader.loadTestsFromModule(test_reactant_tickbox_mass))
+    suite_test.addTests(loader.loadTestsFromModule(test_reaction_addenda))
+    suite_test.addTests(loader.loadTestsFromModule(test_reaction_attachments))
     suite_test.addTests(loader.loadTestsFromModule(test_reaction_list))
     suite_test.addTests(loader.loadTestsFromModule(test_reaction_reload))
     suite_test.addTests(loader.loadTestsFromModule(test_reaction_table))
@@ -103,6 +110,7 @@ def suite_test():
     suite_test.addTests(loader.loadTestsFromModule(test_remove_any_order))
     suite_test.addTests(loader.loadTestsFromModule(test_return_to_login_page))
     suite_test.addTests(loader.loadTestsFromModule(test_save_reaction))
+    suite_test.addTests(loader.loadTestsFromModule(test_search))
     # suite_test.addTests(loader.loadTestsFromModule(test_solvent_cas))
     suite_test.addTests(loader.loadTestsFromModule(test_solvent_guide))
     suite_test.addTests(loader.loadTestsFromModule(test_solvent_selection))
