@@ -10,9 +10,21 @@
 {#        Institution:<br>#}
 {#        {{ form.institution }}<br><br>#}
         Workgroup Name:<br>
-        {{ form.workgroup }}<br><br>
+        {{ form.workgroup }}<br>
+        {% for error in form.workgroup.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+        <br>
         Please indicate why you need to set up a Workgroup:<br>
-        {{ form.info }}<br><br>
+        {{ form.info }}<br>
+        {% for error in form.info.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+        <br>
         {{ form.submit }}
     </form>
 </div>

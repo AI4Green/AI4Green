@@ -7,6 +7,8 @@ import test_novel_compounds
 import test_novel_solvents
 import test_pdf_summary
 import test_primary_product_change
+import test_reaction_addenda
+import test_reaction_attachments
 import test_reactant_tickbox_mass
 import test_reaction_reload
 import test_reaction_table
@@ -43,6 +45,8 @@ def reaction_suite_test():
     suite_test.addTests(loader.loadTestsFromModule(test_pdf_summary))
     suite_test.addTests(loader.loadTestsFromModule(test_primary_product_change))
     suite_test.addTests(loader.loadTestsFromModule(test_reactant_tickbox_mass))
+    suite_test.addTests(loader.loadTestsFromModule(test_reaction_addenda))
+    suite_test.addTests(loader.loadTestsFromModule(test_reaction_attachments))
     suite_test.addTests(loader.loadTestsFromModule(test_reaction_reload))
     suite_test.addTests(loader.loadTestsFromModule(test_reaction_table))
     suite_test.addTests(loader.loadTestsFromModule(test_reaction_table_button_hovers))

@@ -9,7 +9,7 @@
         <h2>Welcome to AI4Green, {{ current_user.username }}!</h2>
         <p>AI4Green is an Electronic Laboratory Notebook built around encouraging green and sustainable chemistry.</p>
         <p>
-            <a class="btn btn-primary btn-lg" href="{{ url_for('main.info') }}" role="button">Learn more &raquo;</a>
+            <a id="about-button" class="btn btn-primary btn-lg" href="{{ url_for('main.about') }}" role="button">Learn more &raquo;</a>
             <a id="quickstart-guide" href="{{ url_for('main.send_quickstart_guide') }}" class="btn btn-primary btn-lg">Quickstart Guide &raquo;</a>
         </p>
     </div>

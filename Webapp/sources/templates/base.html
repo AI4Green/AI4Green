@@ -22,6 +22,7 @@
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css'>
 <!--    Internal Javascript files-->
     <script type="text/javascript" src="{{ url_for('static', filename='js/auxiliary.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/marvin_js_utils.js') }}"></script>
 <!--    Internal CSS styling-->
     <link id="sketcher-button" rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/pagestyle.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/pagestyle.css') }}">
@@ -51,6 +52,9 @@
               {% endfor %}
             </div>
           </li>
+          <li {% if request.path == '/search' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
+            <a class="nav-link" id="TopNavSearchButton" href="{{ url_for('main.search') }}">Search <span class="sr-only">(current)</span></a>
+          </li>
           {% endif %}
         </ul>
           <div id="reaction-saved-indicator" class="reaction-save-hidden">
@@ -58,6 +62,8 @@
           {% if current_user.is_anonymous %}
           <a class="btn btn-light my-2 my-sm-0" type="submit" id="TopNavLoginButton" href="{{ url_for('auth.login') }}">Login</a>
           {% else %}
+          <a id="AboutButton" class="btn btn-primary" href="{{ url_for('main.about') }}"> About AI4Green <span class="sr-only">(current)</span></a>
+          <p style="visibility: hidden;">x</p>
           <a id="InfoButton" class="btn btn-primary" href="{{ url_for('main.info') }}"><i class="bi bi-question-diamond-fill"></i> Help <span class="sr-only">(current)</span></a>
           <p style="visibility: hidden;">x</p>
           <div class="btn-group">
@@ -111,7 +117,8 @@
             <tr>
                 <a class="text-dark" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank">Hazard Disclaimer</a> |
                 <a class="text-dark" href="{{ url_for('auth.privacy_notice') }}" target="_blank">Privacy Notice</a> |
-                <a class="text-dark" href="https://twitter.com/ai4green" target="_blank">Twitter</a>
+                <a class="text-dark" href="https://twitter.com/ai4green" target="_blank">Twitter</a> |
+                <a class="text-dark" href="https://github.com/AI4Green/AI4Green" target="_blank">GitHub</a>
             <tr style="width: 33%;">
                 <span class="text-right" style="position: fixed; right:1em; width: 33%;">
                     <p style="display: inline; width: 33%;" class="text-dark text-right">Hazard data sourced from ECHA references on PubChem</p>
