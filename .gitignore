@@ -20,3 +20,5 @@ __pycache__/
 Pubchem-Database
 Pubchem-update
 *.eml
+pytest-coverage.txt
+.coverage
