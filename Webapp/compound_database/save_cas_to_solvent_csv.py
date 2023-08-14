@@ -11,7 +11,7 @@ def link_solvent_and_compound():
 		'filename': os.environ.get('DATABASE_URL') or os.path.join(basedir, 'test_database.sqlite'),
 		'create_db': False
 	}
-	db = CDE.open_database_compound(db_config)
+	db = CDE.open_database(db_config)
 	# iterate through solvents
 	with db_session:
 		solvent_ls = select(x for x in db.Solvent)[:]

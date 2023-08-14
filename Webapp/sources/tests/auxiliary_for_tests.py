@@ -1,7 +1,7 @@
 from selenium.common.exceptions import ElementNotInteractableException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
-from sources import db
+from sources.extensions import db
 from utilities import basedir
 from selenium import webdriver
 import os
@@ -96,7 +96,7 @@ def restore_db():
     dropped_tables_ls = ['Reaction', 'User', 'Person', 'WorkBook', 'WorkGroup', 'Institution', 'NovelCompound',
                          'Reaction_Reaction', 'Person_WorkBook', 'Person_WorkGroup', 'Person_WorkGroup_2',
                          'Person_WorkGroup_3', 'WorkGroup_request', 'Notification', 'WBStatusRequest',
-                         'WGStatusRequest', 'NewsItem']
+                         'WGStatusRequest', 'NewsItem', 'ReactionNote', 'ReactionDataFile']
     for table in dropped_tables_ls:
         db.drop_table(table, with_all_data=True)
     db.disconnect()
@@ -117,8 +117,8 @@ def fill_in_physical_forms(self, phys_form_dic):
 def add_reaction_sketcher(self, rxn_smiles, replace=False):
     """This function takes a reaction smiles string and puts it into the Marvin JS sketcher"""
     # scroll to the top of the page
-    top_page_elem = self.driver.find_element_by_id("tutorial-mode")
-    self.driver.execute_script("arguments[0].scrollIntoView(true);", top_page_elem)
+    # top_page_elem = self.driver.find_element_by_id("tutorial-mode")
+    # self.driver.execute_script("arguments[0].scrollIntoView(true);", top_page_elem)
     # switch to the marvin js frame
     self.driver.switch_to.frame(0)
     # click on the import button (2nd along) to open import structure popup
@@ -170,3 +170,26 @@ def scroll_element(self, elem_id, click=False):
         self.driver.find_element_by_id(elem_id).click()
     else:
         return element
+
+def fill_in_reaction_table_for_demo_reaction(self):
+    self.driver.find_element_by_id('js-reactant-rounded-mass1').send_keys("500")
+    self.driver.find_element_by_id('js-reactant-equivalent2').send_keys("2")
+    phys_form_dic = {'js-reactant-physical-form1': 1, 'js-reactant-physical-form2': 1,
+                     'js-product-physical-form1': 1}
+    fill_in_physical_forms(self, phys_form_dic)
+    self.driver.find_element_by_id('action-summary').click()
+    time.sleep(8)
+
+def fill_in_required_summary_fields(self):
+    clear_and_send_keys(self, 'js-unreacted-reactant-mass', '1')
+    clear_and_send_keys(self, 'js-real-product-mass', '9')
+    # lock reaction
+    self.driver.find_element_by_id('complete-reaction-button').click()
+    time.sleep(1)
+
+
+def make_and_lock_demo_reaction(self):
+    make_new_reaction(self)
+    demo_reaction(self)
+    fill_in_reaction_table_for_demo_reaction(self)
+    fill_in_required_summary_fields(self)

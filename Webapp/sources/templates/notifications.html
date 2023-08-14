@@ -12,10 +12,10 @@
     <div id="notification{{ loop.index }}" class="alert alert-primary alert-dismissible fade show" role="alert">
         <h4 class="alert-heading">{{ notification.type }}</h4>
         <p>{{ notification.info | safe }}</p>
-        {% if notification.WB %}
-        <a id="wb{{ loop.index }}" href='/manage_workbook/go_to_workbook/{{ notification.WB }}/{{ notification.WG }}' class="btn btn-primary">See Request</a>
-        {% elif notification.WG %}
-        <a id="wg{{ loop.index }}" href='/manage_workgroup/go_to_workgroup/{{ notification.WG }}' class="btn btn-primary">See Request</a>
+        {% if notification.wb %}
+        <a id="wb{{ loop.index }}" href='/manage_workbook/go_to_workbook/{{ notification.wb }}/{{ notification.wg }}' class="btn btn-primary">See Request</a>
+        {% elif notification.wg %}
+        <a id="wg{{ loop.index }}" href='/manage_workgroup/go_to_workgroup/{{ notification.wg }}' class="btn btn-primary">See Request</a>
         {% endif %}
         <hr>
         <p style="font-size:12px">{{ notification.time }}</p>

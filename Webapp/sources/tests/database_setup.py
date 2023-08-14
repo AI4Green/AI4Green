@@ -1,3 +1,5 @@
+import os
+
 from pony.orm import db_session, select
 from pony.orm.core import TransactionIntegrityError
 from sources import app, db
@@ -5,13 +7,19 @@ from datetime import datetime
 import time
 import pytz
 import json
+from utilities import read_yaml
 
+DB_PROVIDER = read_yaml(['database_configurations', 'active_db'])
 
 def test_database_create(db):
+    if 'UNIT_TEST' not in os.environ:
+        print("Add Environmental variable: 'UNIT_TEST=1' when running a unit test")
+        exit()
+
     dropped_tables_ls = ['Reaction', 'User', 'Person', 'WorkBook', 'WorkGroup', 'Institution', 'NovelCompound',
                          'Reaction_Reaction', 'Person_WorkBook', 'Person_WorkGroup', 'Person_WorkGroup_2',
                          'Person_WorkGroup_3', 'WorkGroup_request', 'Notification', 'WBStatusRequest',
-                         'WGStatusRequest', 'NewsItem']
+                         'WGStatusRequest', 'NewsItem', 'ReactionNote', 'ReactionDataFile']
 
     try:
         for table in dropped_tables_ls:
@@ -19,10 +27,13 @@ def test_database_create(db):
     except:
         pass
     db.disconnect()
-    db_config = app.config['PONY_TEST']
+    db_config = app.config['PONY_DATABASE']
     db.provider = None
     db.schema = None
-    db.bind(provider=db_config['provider'], filename=db_config['filename'], create_db=db_config['create_db'])
+    db_config['provider'] = DB_PROVIDER
+    # app.config.from_object('config.TestConfig')
+    db.bind(db_config)
+    #db.bind(provider=db_config['provider'], filename=db_config['filename'], create_db=db_config['create_db'])
     db.generate_mapping(create_tables=True)  # Makes tables based off the structure imported from models
     try:
         with db_session:
@@ -90,6 +101,14 @@ def test_database_create(db):
             ethanol_id = select(x.id for x in db.Compound if x.name == 'Ethanol').first()
             thf_id = select(x.id for x in db.Compound if x.name == 'Tetrahydrofuran').first()
             aniline_id = select(x.id for x in db.Compound if x.name == 'Aniline').first()
+
+            nitrobenzene_smiles = select(x.smiles for x in db.Compound if x.name == 'Nitrobenzene').first()
+            water_smiles = select(x.smiles for x in db.Compound if x.name == 'Water').first()
+            methane_smiles = select(x.smiles for x in db.Compound if x.name == 'Methane').first()
+            octane_smiles = select(x.smiles for x in db.Compound if x.name.lower() == 'octane').first()
+            ethanol_smiles = select(x.smiles for x in db.Compound if x.name == 'Ethanol').first()
+            thf_smiles = select(x.smiles for x in db.Compound if x.name == 'Tetrahydrofuran').first()
+            aniline_smiles = select(x.smiles for x in db.Compound if x.name == 'Aniline').first()
 
             # data for saving a reaction
             reaction_table = json.dumps({'reaction_smiles': '[O-][N+](=O)C1=CC=CC=C1>>NC1=CC=CC=C1',
@@ -166,9 +185,10 @@ def test_database_create(db):
 
             reaction2 = db.Reaction(creator=p1, time_of_creation=time_of_creation, reaction_id='TW6-001',
                                     name='a nitro reduction2', description='iron catalysed nitro reduction',
-                                    reactants=[nitrobenzene_id, water_id], products=[aniline_id, water_id],
-                                    reagents=[methane_id, octane_id], solvent=[ethanol_id, thf_id], reaction_smiles='[O-][N+](=O)C1=CC=CC=C1.O>>NC1=CC=CC=C1.OCC',
+                                    reactants=[nitrobenzene_smiles, water_smiles], products=[aniline_smiles, water_smiles],
+                                    reagents=[methane_smiles, octane_smiles], solvent=[ethanol_smiles, thf_smiles], reaction_smiles='[O-][N+](=O)C1=CC=CC=C1.O>>NC1=CC=CC=C1.OCC',
                                     workbooks=wb6, reaction_table_data=reaction_table, summary_table_data=summary_table, complete="not complete", status="active")
+
             time.sleep(1)
             time_of_creation2 = datetime.now(pytz.timezone('Europe/London')).replace(tzinfo=None)
             reaction3 = db.Reaction(creator=p1, time_of_creation=time_of_creation2, reaction_id='TW6-002',

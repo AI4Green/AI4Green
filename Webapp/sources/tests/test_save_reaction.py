@@ -290,7 +290,7 @@ class BrowserAutosaveTest(flask_testing.LiveServerTestCase, flask_testing.TestCa
 
     def setUp(self):
         """We load a test instance of the app, clear the db, register a new user then login"""
-        setup_selenium(self, headless='no')
+        setup_selenium(self)
         login(self, "BB_Test", "BB_login")
         select_workgroup(self)
         select_workbook(self, 0)

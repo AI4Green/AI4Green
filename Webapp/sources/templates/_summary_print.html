@@ -20,7 +20,7 @@
                     <i class="fa fa-lock" style="color:darkgrey;"></i>
                 {% endif %}
             </h1>
-            <p><b>Owner: {{ reaction.creator.user.username }}</b></p>
+            <p><b>Owner: {{ reaction.creator_person.user.username }}</b></p>
             <p style="font-size: 10px; color: grey">
             Created: {{ reaction.time_of_creation }}
             <br>
@@ -62,31 +62,22 @@
     </script>
     <script>
         $(document).ready(function() {
+            showPrintedReactions()
+        });
+        async function showPrintedReactions(){
             const sort_crit = "{{ sort_crit }}";
-            let workbook = "{{ reaction_list[0].workbooks.name }}";
-            let workgroup = "{{ reaction_list[0].workbooks.group.name }}";
-            $.ajax({
-                method: "POST",
-                url: "/get_schemata",
-                dataType: 'json',
-                data: {
-                    sort_crit: sort_crit,
-                    workgroup: workgroup,
-                    workbook: workbook,
-                    size: "large"
-                },
-                success: function (data) {
-                    let x = Number({{ reaction_list|length }});
-                    for (let i = 1; i < x + 1; i++) {
-                        $("#image" + i).append($('<div>').html(data.schemes[i - 1]));
-                    }
-                    // remove footer
-                    document.getElementsByClassName("footer-at-bottom")[0].style.display = "none";
-                    window.print();
-                    // add footer
-                    document.getElementsByClassName("footer-at-bottom")[0].style.display = "block";
-                }
-            })
-        })
+            let workbook = "{{ reaction_list[0].WorkBook.name }}";
+            let workgroup = "{{ reaction_list[0].WorkBook.WorkGroup.name }}";
+            let schemes = await getSchemata(sort_crit, workbook, workgroup, "large")
+            for (const [idx, scheme] of schemes.entries()){
+                let idx1 = idx + 1
+                $(`#image${idx1}`).append($('<div>').html(scheme))
+            }
+            // remove footer
+            document.getElementsByClassName("footer-at-bottom")[0].style.display = "none";
+            window.print();
+            // add footer
+            document.getElementsByClassName("footer-at-bottom")[0].style.display = "block";
+        }
     </script>
 {% endblock %}
