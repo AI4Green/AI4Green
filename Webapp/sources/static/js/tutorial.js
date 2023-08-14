@@ -160,6 +160,7 @@ function tutorial_14(){
 function tutorial_15(){
     document.getElementById("dvContainer").style.display = "none";
     document.getElementById("complete-reaction-div").style.display = "none";
+    document.getElementById("file-upload-div").style.display = "none";
     document.getElementById("print-pdf").style.display = "none";
     window.scrollTo(0, document.body.scrollHeight);
     $('#js-solvent-table-row1').removeClass('highlight');

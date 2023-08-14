@@ -81,7 +81,7 @@
 <input type="hidden" value="{{ sort_crit }}" id="js-sort-crit">
 <input id="workbook_corresponding_next_reaction_ids" type="hidden" value="{{ workbook_next_reaction_ids }}">
 
-<!-- Report compound modal -->
+<!-- new reaction modal -->
 <div class="modal fade" id="new-reaction-modal" tabindex="-1" role="dialog" aria-labelledby="new-reaction-modal-title">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -120,17 +120,7 @@
         // when page loads get the reactions
         updateSelectedWorkbook()
     })
-    function getpdf(){
-        let workbook = $("#WB-select").val();
-        let workgroup = $('#workgroup_selected').val();
-        let sort_crit = $("#js-sort-crit").val();
-        window.open("/export_data_pdf/" + workgroup + "/" + workbook + "/" + sort_crit, '_blank').focus();
-    }
-    function getcsv(){
-        let workbook = $("#WB-select").val();
-        let workgroup = $('#workgroup_selected').val();
-        window.location ="/export_data_csv/" + workgroup + "/" + workbook;
-    }
+
 </script>
 
 

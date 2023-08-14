@@ -18,8 +18,8 @@ function observer(){
     });
 }
 
-function autoSaveCheck(e=null, sketcher=false) {
-    if ($("#js-tutorial").val() === "yes" ||  $("#js-demo").val() === 'demo'){
+function autoSaveCheck(marvin, e=null, sketcher=false) {
+    if (! checkIfSaveEnabled()){
         return
     }
     let listOfClasses = []
@@ -37,10 +37,9 @@ function autoSaveCheck(e=null, sketcher=false) {
             // dont autosave sketcher if reaction table has loaded
             let reactionDiv = document.getElementById("successAlert1")
             if (reactionDiv.childNodes.length === 0){
-                sketcherAutoSave()
+                sketcherAutoSave(marvin)
             }
         }
-
     }
 }
 
@@ -59,6 +58,36 @@ function ifCurrentUserIsNotCreator(){
     let currentUser = $("#js-email").val()
     let creator = $("#js-creator-email").val()
     return (creator !== currentUser)
+}
+
+
+async function sketcherAutoSave(marvin) {
+    // autosave for when the sketcher has been updated
+    let smiles = await exportSmilesFromSketcher(marvin)
+    let smilesNew = removeReagentsFromSmiles(smiles)
+    $("#js-reaction-smiles").val(smilesNew);
+    let workgroup = $("#js-active-workgroup").val();
+    let workbook = $("#js-active-workbook").val();
+    let reactionID = $("#js-reaction-id").val();
+    let userEmail = "{{ current_user.email }}";
+    $.ajax({
+        url: '/_autosave_sketcher',
+        type: 'post',
+        data: {
+            workgroup: workgroup,
+            workbook: workbook,
+            reactionID: reactionID,
+            userEmail: userEmail,
+            reactionSmiles: smilesNew
+        },
+        dataType: "json",
+        success: function () {
+            flashUserSaveMessage()
+        },
+        error: function () {
+            flashUserErrorSavingMessage()
+        }
+    });
 }
 
 function postReactionData(complete='not complete') {
@@ -204,6 +233,9 @@ function postReactionData(complete='not complete') {
                     }
                     // do not lock print
                     $("#print-pdf").prop("disabled", false);
+                    // show and enable add note button and reactionNote modal window
+                    $("#reaction-note-button").show().prop("disabled", false);
+                    $("#new-reaction-note-modal").find("*").prop("disabled", false);
                 }
             } else {
                 // if not locking reaction save as normal

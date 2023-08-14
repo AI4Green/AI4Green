@@ -86,3 +86,25 @@ datalist>option:hover, datalist>option.active {
     border: 2px solid blue;
 }
 
+
+.loading-bar{
+    display: none; /* by default hidden */
+    position: fixed;
+    z-index: 1000; /* always on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%; /* full screen */
+    background-image: url('http://i.stack.imgur.com/FhHRx.gif');
+    background-position: 50% 50%; /* centre */
+    background-color: rgba(255, 255, 255, 0.8); /* transparency */
+    background-repeat: no-repeat;
+}
+body.loading{ /* when body has loading class */
+    overflow: hidden; /* hide scrolling bar */
+}
+body.loading .loading-bar{
+    display: block; /* when body has loading class, display tha loader */
+}
+
+

@@ -98,10 +98,10 @@
                 {% for request in requests %}
                 <tr>
                     <td class="align-middle">
-                        {{ request.person.user.fullname }}
+                        {{ request.Person.user.fullname }}
                     </td>
                     <td class="align-middle">
-                        {{ request.person.user.email }}
+                        {{ request.Person.user.email }}
                     </td>
                     <td class="align-middle">
                         Join Workbook
@@ -111,8 +111,8 @@
                         {{ time[:-7] }}
                     </td>
                     <td class="align-middle">
-                        <button id="request_approve{{ loop.index }}" value="{{ request.person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'approve')" style="width:110px;">Approve</button>
-                        <button id="request_deny{{ loop.index }}" value="{{ request.person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'deny')" style="width:110px;">Deny</button>
+                        <button id="request_approve{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'approve')" style="width:110px;">Approve</button>
+                        <button id="request_deny{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'deny')" style="width:110px;">Deny</button>
                     </td>
                 </tr>
                 {% endfor %}

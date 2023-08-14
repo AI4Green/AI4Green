@@ -183,7 +183,7 @@ function showSummary() {
         let solventPhysicalFormID = "#js-solvent-physical-form" + i;
         solventPhysicalForms += $(solventPhysicalFormID).val().replace(/ *\([^)]*\) */g, "") + ";";
         let solventPrimaryKeyID = "#js-solvent-primary-key" + i;
-        solventPrimaryKeys += $(solventPrimaryKeyID).val(); + ";";
+        solventPrimaryKeys += $(solventPrimaryKeyID).val() + ";";
     }
     solvents = solvents.slice(0, -1);
     solventTableNumbers = solventTableNumbers.slice(0, -1);
@@ -305,9 +305,13 @@ function showSummary() {
                 disableSummaryIfNotCreator()
                 autoSaveCheck()
                 $("#complete-reaction-div").show()
+                $("#file-upload-div").show()
                 if ($("#js-complete").val() === "complete"){
                     $("#page-contents :input").prop("disabled", true);
                     $("#print-pdf").prop("disabled", false);
+                    $("#reaction-note-button").prop("disabled", false);
+                    // enable element and all its children
+                    $("#new-reaction-note-modal").find("*").prop("disabled", false);
                 }
                 $("#js-load-status").val("loaded")
             }
@@ -329,6 +333,7 @@ function disableSummaryIfNotCreator(){
     if (ifCurrentUserIsNotCreator()){
         $("#page-contents :input").prop("disabled", true);
         $("#print-pdf").prop("disabled", false);
+        $("#reaction-note-button").hide()
         // enable button to copy reaction
     }
 }
