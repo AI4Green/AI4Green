@@ -35,7 +35,7 @@ class BaseConfig(object):  # class to store configuration variables
 
     # Marvin JS - Change to your own
     MARVIN_JS_API_KEY = os.getenv(
-        "MARVIN_JS_API_KEY", "69b0c6c7851547258e92db7880f174ef"
+        "MARVIN_JS_API_KEY", ""
     )
 
     # Azurite file storage
