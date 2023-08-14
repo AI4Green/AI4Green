@@ -42,12 +42,12 @@ def solvent_guide(sol: Optional[str] = None) -> Response:
     solvents = CHEM21.to_dict("index")
     solvents = list(solvents.values())
     families = sorted(list(set(CHEM21["Family"].tolist())))
-    # if from reaction table and a solvent was selected
+    # if from reaction table and a solvent was selected. Alternative name is name used in compound/solvent database tables
     if sol:
-        if sol not in CHEM21["Solvent Alternative Name"].tolist():
+        if not CHEM21["Solvent Alternative Name"].str.lower().eq(sol.lower()).any():
             sol = None
         else:
-            sol = CHEM21[CHEM21["Solvent Alternative Name"] == sol]["Number"].tolist()[
+            sol = CHEM21[CHEM21["Solvent Alternative Name"].str.lower() == sol]["Number"].tolist()[
                 0
             ]
     return render_template(

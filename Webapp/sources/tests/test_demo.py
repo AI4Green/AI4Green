@@ -49,6 +49,8 @@ class TestMarvinPresent(flask_testing.TestCase):
         #               self.response.data)
         # self.assertIn('https://marvinjs.chemicalize.com/v1/69b0c6c7851547258e92db7880f174ef/client-settings.js',
         #               html_string)
+
+        ## SCRIPTS AND KEY REMOVED FROM HTML. Replace test
         self.assertIn(b'"https://marvinjs.chemicalize.com/v1/bb45b77a07a64428b9825de4be63c424/client-settings.js"',
                       self.response.data)
         self.assertIn('"https://marvinjs.chemicalize.com/v1/{{ marvin_js_key }}/client-settings.js"',

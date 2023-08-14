@@ -12,7 +12,7 @@ from sources import models
 from sources.extensions import db, login, ma, mail, migrate
 
 
-def create_app(c: str = "") -> Flask:
+def create_app(c: str = "dev") -> Flask:
     """
     Create the Flask app.
 

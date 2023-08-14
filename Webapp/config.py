@@ -13,8 +13,7 @@ class BaseConfig(object):  # class to store configuration variables
     key as a cryptographic key to generate signatures or tokens.
     The Flask-WTF extension uses it to protect web forms against
     Cross-Site Request Forgery."""
-    SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
-    DEBUG = False
+    SECRET_KEY = os.getenv("SECRET_KEY", "lkjadwe7823j830NH")
     WTF_CSRF_ENABLED = False
     LIVESERVER_TIMEOUT = 10
     MAX_CONTENT_LENGTH = 1024 * 1024
@@ -36,7 +35,7 @@ class BaseConfig(object):  # class to store configuration variables
 
     # Marvin JS - Change to your own
     MARVIN_JS_API_KEY = os.getenv(
-        "MARVIN_JS_API_KEY", ""
+        "MARVIN_JS_API_KEY", "69b0c6c7851547258e92db7880f174ef"
     )
 
     # Azurite file storage

@@ -30,4 +30,5 @@ def load_user(user_id) -> models.User:
     to a new page, Flask-Login retrieves the ID of
     the user from the session, and then loads that
     user into memory by the user loader function"""
+    x = current_app
     return models.User.query.get(user_id)

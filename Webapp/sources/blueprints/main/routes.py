@@ -1,6 +1,5 @@
-from flask import jsonify  # renders html templates
 from flask import (Response, flash, redirect, render_template, request,
-                   send_file, session, url_for)
+                   send_file, session, url_for, jsonify, current_app)
 from flask_login import (  # protects a view function against anonymous users
     current_user, login_required)
 
@@ -45,6 +44,14 @@ def index() -> Response:
         notification_number=notification_number,
         news_items=news_items,
     )
+
+@main_bp.route(
+    "/get_marvinjs_key", methods=["POST"]
+)
+@login_required
+def get_marvinjs_key():
+    print(current_app.config["MARVIN_JS_API_KEY"])
+    return jsonify({'marvinjs_key': current_app.config["MARVIN_JS_API_KEY"]})
 
 
 # Go to the sketcher

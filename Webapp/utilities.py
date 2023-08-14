@@ -1,16 +1,17 @@
 import os
 import yaml
 from shutil import copyfile
+from typing import Optional
 
 basedir = os.path.abspath(os.path.dirname(__file__))  # path to the user database
-yaml_filepath = os.path.join(os.path.dirname(basedir), 'Webapp', 'configs.yaml')
+configs_yaml_filepath = os.path.join(os.path.dirname(basedir), 'Webapp', 'configs.yaml')
 
 
-def read_yaml(target_keys: list):
+def read_yaml(target_keys: list, filepath: Optional[str] = configs_yaml_filepath):
     """
     target_keys: iterates through keys to find nested data in yaml config
     """
-    with open(yaml_filepath, "r") as stream:
+    with open(filepath, "r") as stream:
         try:
             target_data = yaml.safe_load(stream)
             for key in target_keys:

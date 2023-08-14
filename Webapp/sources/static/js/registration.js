@@ -1,6 +1,4 @@
-
-$(document).ready(function() {
-    // if partial form reloaded due to error, e.g., duplicate email, then restores the checkboxes to previous status
+$(function() {
     if ($("#hazard_disclaimer").is(':checked') && $("#privacy").is(':checked')) {
         $("#submit").removeAttr('disabled');
     } else{
@@ -12,6 +10,7 @@ $(document).ready(function() {
     if ($("#privacy").is(':checked')){
         $("#privacy").removeAttr('disabled')
     }
+
 });
 
 // enable the checkboxes once the user has clicked on the hyperlink to the relevant information
