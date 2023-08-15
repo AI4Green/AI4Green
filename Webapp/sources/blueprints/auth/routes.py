@@ -74,7 +74,7 @@ def login() -> Response:  # the login view function
         )
         session["role"] = role.name
         user.last_login_time = datetime.now(pytz.timezone('Europe/London')).replace(tzinfo=None)
-        db.session.commit()
+        user.update()
 
         """If the username and password are both correct, then the login_user() function
         from Flask-Login is called. This function will register the user as logged in,

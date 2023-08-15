@@ -45,12 +45,12 @@ def index() -> Response:
         news_items=news_items,
     )
 
+
 @main_bp.route(
     "/get_marvinjs_key", methods=["POST"]
 )
 @login_required
 def get_marvinjs_key():
-    print(current_app.config["MARVIN_JS_API_KEY"])
     return jsonify({'marvinjs_key': current_app.config["MARVIN_JS_API_KEY"]})
 
 
