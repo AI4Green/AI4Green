@@ -49,7 +49,6 @@ def test_send_email_local_save(app):
     html_body = "<p>HTML body of the email.</p>"
 
     with app.app_context():
-        app.config["MAIL_SAVE_DIR"] = tempfile.mkdtemp()
         mail.send_email(subject, sender, recipients, text_body, html_body)
 
         file_path = os.path.join(

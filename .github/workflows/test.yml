@@ -4,6 +4,7 @@ on: [pull_request]
 
 env:
   TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+  MAIL_SAVE_DIR: ${{ runner.temp }}
 
 jobs:
   pytest:
