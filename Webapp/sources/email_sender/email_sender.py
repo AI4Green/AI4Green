@@ -1,3 +1,4 @@
+import logging
 import os
 from email import generator
 from email.mime.multipart import MIMEMultipart
@@ -6,6 +7,9 @@ from typing import List
 
 from flask import current_app
 from flask_mail import Mail, Message
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 class EmailSender:
@@ -93,9 +97,6 @@ class EmailSender:
         save_dir = current_app.config.get("MAIL_SAVE_DIR")
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
-
-        # Debugging
-        print("🌳 Save directory:", save_dir)
 
         file_path = os.path.join(save_dir, f"{subject} - {recipients[0]}.eml")
         with open(file_path, "w") as f:
