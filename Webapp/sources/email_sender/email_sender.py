@@ -94,6 +94,9 @@ class EmailSender:
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
+        # Debugging
+        print("🌳 Save directory:", save_dir)
+
         file_path = os.path.join(save_dir, f"{subject} - {recipients[0]}.eml")
         with open(file_path, "w") as f:
             gen = generator.Generator(f)
