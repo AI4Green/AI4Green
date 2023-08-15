@@ -137,7 +137,7 @@ class AutoSaveReactionTestCase(flask_testing.TestCase):
                       unreactedReactantMass=unreacted_product_mass, reactionTemperature=100,
                       elementSustainability='500+ years', batchFlow='Batch', productAmountUnits="mmol",
                       productMassUnits="mg",
-                      isolationMethod='Filtration', catalystUsed='No catalyst', catalystRecovered='-select',
+                      isolationMethod='Filtration', catalystUsed='No catalyst or reagents', catalystRecovered='-select',
                       selectedRadioButtons=['#HPLC', '#pyrophorics'],
                       customProtocol1='', customProtocol2='', otherHazardTextArea='', researcher="", supervisor="",
                       complete=complete, summary_to_print='no', massEfficiency='90', toExport='no')

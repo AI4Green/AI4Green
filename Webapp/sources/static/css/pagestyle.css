@@ -86,6 +86,24 @@ datalist>option:hover, datalist>option.active {
     border: 2px solid blue;
 }
 
+.loading-circle {
+  width: 60px;
+  height: 60px;
+  border: 3px solid #ccc;
+  border-radius: 50%;
+  border-top: 3px solid #007bff; /* Change the color to your preferred loading color */
+  animation: spin 1s linear infinite; /* The spin animation will rotate the circle */
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 
 .loading-bar{
     display: none; /* by default hidden */

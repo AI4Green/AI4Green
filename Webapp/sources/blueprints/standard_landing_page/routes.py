@@ -42,9 +42,10 @@ def get_reactions() -> Response:
 @login_required
 def get_schemata() -> Response:
     # must be logged in
+    reaction_id = request.form.get('reaction_id')
     workbook = str(request.form["workbook"])
     workgroup = str(request.form["workgroup"])
     size = str(request.form["size"])
     sort_crit = request.form["sort_crit"]
-    schemes = get_scheme_list(workbook, workgroup, sort_crit, size)
+    schemes = get_scheme_list(workbook, workgroup, sort_crit, size, reaction_id)
     return {"schemes": schemes, "sort_crit": sort_crit}
