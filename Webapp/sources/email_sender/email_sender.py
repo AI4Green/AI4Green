@@ -89,10 +89,12 @@ class EmailSender:
         msg["Subject"] = subject
         msg.attach(MIMEText(text_body, "plain"))
 
-        # Create the '/temp' directory if it doesn't exist
-        if not os.path.exists("temp"):
-            os.makedirs("temp")
+        # Create the directory if it doesn't exist
+        save_dir = current_app.config.get("MAIL_SAVE_DIR")
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
 
-        with open(f"temp/{subject} - {recipients[0]}.eml", "w") as f:
+        file_path = os.path.join(save_dir, f"{subject} - {recipients[0]}.eml")
+        with open(file_path, "w") as f:
             gen = generator.Generator(f)
             gen.flatten(msg)
