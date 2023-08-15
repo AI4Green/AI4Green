@@ -27,11 +27,11 @@ jobs:
           - 5432:5432
 
     steps:
+      - name: checkout code
+        uses: actions/checkout@v3
       - name: Set up environment variables
         run: |
           echo "MAIL_SAVE_DIR=${RUNNER_TEMP}" >> $GITHUB_ENV
-      - name: checkout code
-        uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
