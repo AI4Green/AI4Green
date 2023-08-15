@@ -284,6 +284,7 @@ def change_status_from_request(
                 status="active",
             )
         else:
+            print("else reuqest")
             notification = models.Notification(
                 person=person.id,
                 type="Your Request to become a Senior Researcher",

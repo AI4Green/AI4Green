@@ -1,23 +1,24 @@
-$(document).ready(function() {
-    initialiseSearchPage()
-});
-let searchMarvin
-
-function initialiseSearchPage(){
-    initialiseSketcher()
+$(async function() {
+    showSketcherLoadingCircle()
+    await setupNewKetcherSketcher("800px");
+    await setupNewMarvinSketcher();
+    // sleep used to allow sketchers to load scripts and make js Objects
+    await sleep(1000)
+    // sketcher changes when user clicks radio button
+    await switchActiveEditor()
+    // setTimeout(switchActiveEditor, 500);
+    $('input[name="sketcher-select"]').click(function () {
+        switchActiveEditor();
+    });
+    hideSketcherLoadingCircle()
     updateSelectedWorkGroup()
-}
-
-async function initialiseSketcher(){
-    searchMarvin = await newMarvinSketcher("#marvin-search")
-    searchMarvin.setDisplaySettings({"toolbars": "education"});
-}
+});
 
 async function structureSearch(){
     let workgroup = $("#workgroup-select").val()
     let workbook = $("#workbook-select").val()
     let searchType = "exact_structure"
-    let smiles = await exportSmilesFromSketcher(searchMarvin)
+    let smiles = await exportSmilesFromActiveEditor()
     $.ajax({
         url: '/structure_search_handler',
         type: 'post',

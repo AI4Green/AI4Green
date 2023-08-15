@@ -64,7 +64,7 @@ def join_workgroup() -> Response:
             .first()
         )
 
-        # check to see if there are any new requests
+        # check to see if there is already an active request to join this workgroup from this user
         duplicates = (
             db.session.query(models.WGStatusRequest)
             .join(models.Person, models.WGStatusRequest.person == models.Person.id)
@@ -72,6 +72,7 @@ def join_workgroup() -> Response:
             .filter(models.User.email == current_user.email)
             .join(models.WorkGroup)
             .filter(models.WorkGroup.id == wg.id)
+            .filter(models.WGStatusRequest.status == 'active')
             .all()
         )
         if duplicates:

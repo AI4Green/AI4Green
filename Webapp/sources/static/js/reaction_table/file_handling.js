@@ -192,7 +192,6 @@ function validateFileExtension(file){
 function deleteFile(clickedFile){
    let index =  clickedFile.id.split('delete-file-button').pop()
     if (! confirmFileDeletion(index)){
-        console.log("cancelling deletion")
         return
     }
     let workgroup = $("#js-active-workgroup").val();
