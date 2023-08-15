@@ -1,6 +1,6 @@
 name: Pytest
 
-on: [pull_request]
+on: [push]
 
 env:
   TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
