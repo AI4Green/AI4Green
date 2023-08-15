@@ -17,8 +17,13 @@ function observer(){
         setTimeout(autoSaveCheck(e), 500)
     });
 }
-
-function autoSaveCheck(marvin, e=null, sketcher=false) {
+/**
+ * checks whether to autosave and if so what type of save to perform or returns blank if no save should be done
+ *
+ * @param {HTMLElement} [e=null] - the changed element that triggered the autosave function
+ * @param {boolean} [sketcher=false] - true if the changed element is a chemical sketcher
+*/
+function autoSaveCheck(e=null, sketcher=false) {
     if (! checkIfSaveEnabled()){
         return
     }
@@ -35,9 +40,9 @@ function autoSaveCheck(marvin, e=null, sketcher=false) {
             autoSave()
         } else if (sketcher === true) {
             // dont autosave sketcher if reaction table has loaded
-            let reactionDiv = document.getElementById("successAlert1")
+            let reactionDiv = document.getElementById("reaction-table-div")
             if (reactionDiv.childNodes.length === 0){
-                sketcherAutoSave(marvin)
+                sketcherAutoSave()
             }
         }
     }
@@ -61,9 +66,19 @@ function ifCurrentUserIsNotCreator(){
 }
 
 
-async function sketcherAutoSave(marvin) {
+async function sketcherAutoSave() {
     // autosave for when the sketcher has been updated
-    let smiles = await exportSmilesFromSketcher(marvin)
+    let smiles
+    let selectedSketcher = $('input[name="sketcher-select"]:checked').attr('id');
+    if (selectedSketcher === 'marvin-select'){
+        smiles = await exportSmilesFromMarvin()
+    } else if (selectedSketcher === 'ketcher-select'){
+        smiles = await exportSmilesFromKetcher()
+    }
+    if (smiles === '>>' || smiles === '' || smiles ===undefined){
+        // catches if autosave occurs during a sketcher crash
+        return
+    }
     let smilesNew = removeReagentsFromSmiles(smiles)
     $("#js-reaction-smiles").val(smilesNew);
     let workgroup = $("#js-active-workgroup").val();

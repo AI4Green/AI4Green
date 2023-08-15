@@ -14,7 +14,6 @@ class BaseConfig(object):  # class to store configuration variables
     The Flask-WTF extension uses it to protect web forms against
     Cross-Site Request Forgery."""
     SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
-    DEBUG = False
     WTF_CSRF_ENABLED = False
     LIVESERVER_TIMEOUT = 10
     MAX_CONTENT_LENGTH = 1024 * 1024

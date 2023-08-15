@@ -36,7 +36,7 @@ function getCookie(cname) {
   return "";
 }
 
-function getSchemata(sort_crit, workbook, workgroup, size){
+function getSchemata(sort_crit, workbook, workgroup, size, reaction_id){
     return new Promise(function(resolve, reject){
         // post to get_schemata and get the schemes for reaction images
         $.ajax({
@@ -45,6 +45,7 @@ function getSchemata(sort_crit, workbook, workgroup, size){
             dataType: 'json',
             data: {
                 sort_crit: sort_crit,
+                reaction_id: reaction_id,
                 workgroup: workgroup,
                 workbook: workbook,
                 size: size

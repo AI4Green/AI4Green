@@ -6,10 +6,10 @@
         }
     </style>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/form_summary_table.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/autofill_summary_table.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/form_summary_table.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/autofill_summary_table.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/custom_colours.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/summary_table.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/summary_table.js') }}"></script>
     <input type="hidden" id="number-of-reactions" value="{{ reaction_list|length }}">
     <input type="hidden" id="js-summary-table-data">
     <div class="container-fluid" id="print-all" class="print-all">
@@ -66,9 +66,14 @@
         });
         async function showPrintedReactions(){
             const sort_crit = "{{ sort_crit }}";
+            let reaction_id = 'none'
+            if (sort_crit === 'single'){
+                reaction_id = "{{ reaction_list[0].reaction_id }}"
+            }
             let workbook = "{{ reaction_list[0].WorkBook.name }}";
             let workgroup = "{{ reaction_list[0].WorkBook.WorkGroup.name }}";
-            let schemes = await getSchemata(sort_crit, workbook, workgroup, "large")
+
+            let schemes = await getSchemata(sort_crit, workbook, workgroup, "large", reaction_id)
             for (const [idx, scheme] of schemes.entries()){
                 let idx1 = idx + 1
                 $(`#image${idx1}`).append($('<div>').html(scheme))
