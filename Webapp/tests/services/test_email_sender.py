@@ -1,3 +1,6 @@
+import os
+import tempfile
+
 import pytest
 from flask import current_app
 from sources.extensions import mail
@@ -46,11 +49,15 @@ def test_send_email_local_save(app):
     html_body = "<p>HTML body of the email.</p>"
 
     with app.app_context():
+        app.config["MAIL_SAVE_DIR"] = tempfile.mkdtemp()
         mail.send_email(subject, sender, recipients, text_body, html_body)
 
-    with open(f"temp/{subject} - {recipients[0]}.eml", "r") as file:
-        content = file.read()
-        assert subject in content
-        assert sender in content
-        assert recipients[0] in content
-        assert text_body in content
+        file_path = os.path.join(
+            app.config["MAIL_SAVE_DIR"], f"{subject} - {recipients[0]}.eml"
+        )
+        with open(file_path, "r") as file:
+            content = file.read()
+            assert subject in content
+            assert sender in content
+            assert recipients[0] in content
+            assert text_body in content
