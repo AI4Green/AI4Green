@@ -34,7 +34,6 @@ from . import \
 
 # Processing data from Marvin JS and creating reaction table
 @reaction_table_bp.route("/_process", methods=["GET"])
-@login_required
 def process():
     # must be logged in
     """This function receives reagents and product from browser, finds

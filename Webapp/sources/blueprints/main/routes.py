@@ -47,9 +47,7 @@ def index() -> Response:
 @main_bp.route(
     "/get_marvinjs_key", methods=["POST"]
 )
-@login_required
 def get_marvinjs_key():
-    print(current_app.config["MARVIN_JS_API_KEY"])
     return jsonify({'marvinjs_key': current_app.config["MARVIN_JS_API_KEY"]})
 
 
@@ -115,8 +113,11 @@ def sketcher(
 # Go to the sketcher tutorial
 @main_bp.route("/sketcher_tutorial/<tutorial>", methods=["GET", "POST"])
 def sketcher_tutorial(tutorial: str) -> Response:
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
+    workgroups = []
+    notification_number = 0
+    if current_user.is_authenticated:
+        workgroups = get_workgroups()
+        notification_number = get_notification_number()
     return render_template(
         "sketcher_reload.html",
         reaction={"name": "Tutorial Reaction", "reaction_id": "TUT-001"},
@@ -241,9 +242,19 @@ def accessibility() -> Response:
 
 
 @main_bp.route("/get_custom_colours", methods=["GET", "POST"])
-@login_required
 def get_custom_colours() -> Response:
-    colours = current_user.hazard_colors
+    if current_user.is_authenticated:
+        colours = current_user.hazard_colors
+    else:
+        # use default colours if user is not logged in
+        colours = {'Recommended': '#00ff00',
+                   'Problematic': '#ffff00',
+                   'Hazardous': '#ff0000',
+                   'HighlyHazardous': '#8b0000',
+                   'Recommended_text': '#000000',
+                   'Problematic_text': '#000000',
+                   'Hazardous_text': '#000000',
+                   'HighlyHazardous_text': '#ffffff'}
     return jsonify({"colours": colours})
 
 

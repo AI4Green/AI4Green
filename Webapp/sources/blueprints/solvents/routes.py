@@ -14,7 +14,6 @@ from . import solvents_bp  # imports the blueprint of the reagents route
 
 # Getting the solvent name from browser and returning its data
 @solvents_bp.route("/_solvents", methods=["POST"])
-@login_required
 def solvents() -> Response:
     """This function gets a solvent name from browser,
     makes request to the solvent database, and returns

@@ -22,7 +22,6 @@ from . import summary_bp  # imports the blueprint of the summary route
 
 # Processing data from the reaction table and creating summary with H&S report
 @summary_bp.route("/_summary", methods=["POST"])
-@login_required
 def summary() -> Response:
     # must be logged in
     """This function receives the reaction information from browser, calculates

@@ -14,7 +14,6 @@ from . import reagents_bp  # imports the blueprint of the reagents route
 
 # Getting the reagent name from browser and returning its data
 @reagents_bp.route("/_reagents", methods=["POST"])
-@login_required
 def reagents() -> Response:
     # must be logged in
     """This function gets a reagent name from browser,
@@ -43,7 +42,7 @@ def reagents() -> Response:
             .filter(models.Compound.cas == reagent)
             .first()
         )
-        if found_reagent is None:  # check the novel compound db for the cas number
+        if found_reagent is None and workbook:  # check the novel compound db for the cas number
             found_reagent = (
                 db.session.query(models.NovelCompound)
                 .filter(models.NovelCompound.cas == reagent)
@@ -60,7 +59,7 @@ def reagents() -> Response:
             .filter(func.lower(models.Compound.name) == reagent.lower())
             .first()
         )
-        if found_reagent is None:  # check novel compound db
+        if found_reagent is None and workbook:  # check novel compound db
             found_reagent = (
                 db.session.query(models.NovelCompound)
                 .filter(func.lower(models.NovelCompound.name) == reagent.lower())
