@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <h2>About the Solvent Guide</h2>
+    <div class="row">
+      <div class="col-12">
+        <p><a class="btn btn-primary" href="{{ url_for('solvent_guide.solvent_guide') }}">&#10096; Return to Solvent Guide</a></p>
+        <p>Solvent flash cards were created using the information provided by CHEM21 and an industry solvent substitution guide. This tool is intended only as a guide to allow the user to think about different aspects of solvent sustainable.</p>
+      </div>
+      <div class="col-5">
+        <div class="card" style="border-width: 5px; border-color: red">
+          <div class="card-body">
+            <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <h5 class="card-title">Solvent Name</h5>
+            <div class="row">
+              <div class="col">
+                <h6 class="card-subtitle mb-2 text-muted"><i>CHEM21 Hazard Rating</i><sup>&#10013;</sup></h6>
+                <table class="table table-sm" style="font-size: 12px; border-collapse:collapse">
+                  <tr>
+                    <th scope="row" style="width: 50%; border-style: hidden!important;">CAS<sup>#</sup></th>
+                    <td style="width: 50%; border-style: hidden!important;"><a><i>XXX-XX-X</i></a></td>
+                  </tr>
+                  <tr>
+                    <th scope="row" style="width: 50%; border-style: hidden!important;">Family<sup>*</sup></th>
+                    <td style="width: 50%; border-style: hidden!important;"><i>Solvent Class</i></td>
+                  </tr>
+                  <tr>
+                    <th scope="row" style="border-style: hidden!important;">Boiling Point / &deg;C<sup>*</sup></th>
+                    <td style="border-style: hidden!important;"><i>BP</i></td>
+                  </tr>
+                  <tr>
+                    <th scope="row" style="border-style: hidden!important;">Flash Point / &deg;C<sup>*</sup></th>
+                    <td style="border-style: hidden!important;"><i>FP</i></td>
+                  </tr>
+                  <tr>
+                    <th scope="row" style="border-style: hidden!important;">Safety<sup>*</sup></th>
+                    <td style="border-style: hidden!important; background-color: red"><i>e.g. 8</i></td>
+                  </tr>
+                  <tr>
+                    <th scope="row" style="border-style: hidden!important;">Health<sup>*</sup></th>
+                    <td style="border-style: hidden!important;  background-color: green"><i>e.g. 3</i></td>
+                  </tr>
+                  <tr>
+                    <th scope="row" style="border-style: hidden!important;">Environment<sup>*</sup></th>
+                    <td style="border-style: hidden!important; background-color: gold"><i>e.g. 5</i></td>
+                  </tr>
+                  <tr>
+                    <th scope="row" style="border-style: hidden!important;">Worst H3xx<sup>*</sup></th>
+                    <td style="border-style: hidden!important;"><i>e.g. H304</i><a data-toggle="tooltip" data-placement="right" title='May be fatal if swallowed and enters airways'>&#x1F6C8;</a></td>
+                  </tr>
+                  <tr>
+                    <th scope="row" style="border-style: hidden!important;">Worst H4xx<sup>*</sup></th>
+                    <td style="border-style: hidden!important;"><i>e.g. H411</i><a data-toggle="tooltip" data-placement="right" title='Toxic to aquatic life with long lasting effects'>&#x1F6C8;</a></td>
+                  </tr>
+                </table>
+                <br>
+              </div>
+              <div class="col">
+                <div id='chart' class='chart'></div>
+              </div>
+            </div>
+            <p class="card-text" style="font-size: 12px">
+              <b>Issues:<sup>^</sup></b> <i>Justification for substitution</i><br>
+              <b>Possible Substitution(s):<sup>^</sup></b> <button class="btn btn-link" style="font-size: 12px"><i>Link to alternative solvent</i></button>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-7">
+      </div>
+      <div class="col-12">
+        <br>
+        <p><b>Notes:</b></p>
+        <p><sup>&#10013;</sup>There are four CHEM21 hazard rating categories: <i>Recommended</i>, <i>Problematic</i>, <i>Hazardous</i>, and <i>Highly Hazardous</i>. Default ranking was determined from the Safety, Health, and Environmental scores. These ratings were updated after discussion leading to the fourth <i>Highly Hazardous</i> category. Cards are coloured to this overall rating. In this example, the overall rating of <i>Hazardous</i> is shown by the red border.</p>
+        <p><sup>#</sup>CAS codes were collected from PubChem. The CAS code is linked to the corresponding page on PubChem.</p>
+        <p><sup>*</sup>This data was provided by CHEM21.[1] See the CHEM21 publications for details on how individual Safety, Health, and Environment ratings were calculated. The radar plot also shows this data. The worst H3xx and H4xx are shown. Be aware that there may be other hazards associated with the solvent.</p>
+        <p><sup>^</sup>This data is from an industry substitution guide.[2] This is purely to illustrate a potential issue with a solvent and how an alternative solvent may be more appropriate.</p>
+        <p><b>References:</b></p>
+        <p>[1] CHEM21 selection guide of classical- and less classical-solvents <i>Green Chem.</i>, 2016, <b>18</b>, 288-296.</p>
+        <p>[2] Green chemistry tools to influence a medicinal chemistry and research chemistry based organisation <i>Green Chem.</i>, 2008, <b>10</b>, 31-36.</p>
+      </div>
+    </div>
+</div>
+<script>
+  $(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+  var graph = {{ graphJSON[0] | safe}}
+  Plotly.newPlot('chart', graph, {});
+</script>
+{% endblock %}

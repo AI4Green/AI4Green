@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+    <style>
+        @media print {
+            .print-all {-webkit-print-color-adjust: exact;}
+        }
+    </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/form_summary_table.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/autofill_summary_table.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/custom_colours.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/summary_table.js') }}"></script>
+    <input type="hidden" id="number-of-reactions" value="{{ reaction_list|length }}">
+    <input type="hidden" id="js-summary-table-data">
+    <div class="container-fluid" id="print-all" class="print-all">
+        {% for reaction in reaction_list %}
+            <h1>
+                {{ reaction.name }}
+                {% if reaction.complete == "complete" %}
+                    <i class="fa fa-lock" style="color:darkgrey;"></i>
+                {% endif %}
+            </h1>
+            <p><b>Owner: {{ reaction.creator_person.user.username }}</b></p>
+            <p style="font-size: 10px; color: grey">
+            Created: {{ reaction.time_of_creation }}
+            <br>
+            Last updated: {{ reaction.time_of_update }}
+            </p>
+            <p>{{ reaction.description }}</p>
+            <div id="image{{ loop.index }}"></div>
+            <div id="summary-table-{{ loop.index }}"></div>
+            <br>
+            <input type="hidden" id="js-summary-table-data-{{ loop.index }}" value="{{ reaction_list[loop.index - 1].summary_table_data }}">
+            <input type="hidden" id="loop-number" value="{{ loop.index }}">
+        {% endfor %}
+    </div>
+    <script>
+        for (let index=1; index <= $("#number-of-reactions").val(); index++) {
+            // reload basic table
+            let js_summary_table_data = JSON.parse(document.getElementById("js-summary-table-data-" + index).value);
+            if (js_summary_table_data["summary_to_print"] === "no summary data"){
+                continue;
+            }
+            $("#summary-table-" + index).html(js_summary_table_data["summary_to_print"]);
+            // assign summary table data and reload
+            $("#js-summary-table-data").val($("#js-summary-table-data-" + index).val())
+            reloadSummary();
+            // reassign ids, names, and classes ready for next reload
+            let summary_input = $("#summary-table-" + index + " :input");
+            summary_input.each(function (e) {
+                let current_id = $("#" + this.id)
+                current_id.prop('id', this.id + '-' + index)
+                current_id.prop('name', this.name + '-' + index)
+                current_id.prop('class', this.className + '-' + index)
+            });
+            $("#summary-table-" + index + " td").each(function (e) {
+                $("#" + this.id).prop('id', this.id + '-' + index)
+            });
+            // lock table for editing
+            summary_input.prop("disabled", true);
+        }
+    </script>
+    <script>
+        $(document).ready(function() {
+            showPrintedReactions()
+        });
+        async function showPrintedReactions(){
+            const sort_crit = "{{ sort_crit }}";
+            let reaction_id = 'none'
+            if (sort_crit === 'single'){
+                reaction_id = "{{ reaction_list[0].reaction_id }}"
+            }
+            let workbook = "{{ reaction_list[0].WorkBook.name }}";
+            let workgroup = "{{ reaction_list[0].WorkBook.WorkGroup.name }}";
+
+            let schemes = await getSchemata(sort_crit, workbook, workgroup, "large", reaction_id)
+            for (const [idx, scheme] of schemes.entries()){
+                let idx1 = idx + 1
+                $(`#image${idx1}`).append($('<div>').html(scheme))
+            }
+            // remove footer
+            document.getElementsByClassName("footer-at-bottom")[0].style.display = "none";
+            window.print();
+            // add footer
+            document.getElementsByClassName("footer-at-bottom")[0].style.display = "block";
+        }
+    </script>
+{% endblock %}

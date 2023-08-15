@@ -1,0 +1,16 @@
+.tutorial{
+    display: none;
+    position: fixed;
+    z-index: 100;
+    right: 50px;
+    top: 100px;
+}
+
+.stop-scrolling {
+    height: 100%;
+    overflow: hidden;
+}
+
+.highlight {
+    outline: 9999px solid rgba(0,0,0,0.5);
+}

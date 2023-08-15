@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/notifications.css') }}">
+</head>
+
+<div class="container">
+    <h2>Notifications</h2>
+    {% if notifications %}
+    {% for notification in notifications %}
+    {% if notification.status != "inactive" %}
+    <div id="notification{{ loop.index }}" class="alert alert-primary alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading">{{ notification.type }}</h4>
+        <p>{{ notification.info | safe }}</p>
+        {% if notification.wb %}
+        <a id="wb{{ loop.index }}" href='/manage_workbook/go_to_workbook/{{ notification.wb }}/{{ notification.wg }}' class="btn btn-primary">See Request</a>
+        {% elif notification.wg %}
+        <a id="wg{{ loop.index }}" href='/manage_workgroup/go_to_workgroup/{{ notification.wg }}' class="btn btn-primary">See Request</a>
+        {% endif %}
+        <hr>
+        <p style="font-size:12px">{{ notification.time }}</p>
+        <a title="Delete Notification" class="gg-trash" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </a>
+    </div>
+    <script>
+        $('#notification{{ loop.index }}').on('closed.bs.alert', function () {
+            $.ajax({
+                url: '/archive_notification',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    type: "{{ notification.type }}",
+                    info: "{{ notification.info }}",
+                    time: "{{ notification.time }}"
+                },
+                success: function (response) {
+                    location.reload();
+                }
+            });
+        })
+    </script>
+    {% endif %}
+    {% endfor %}
+    {% else %}
+    <p>You are all caught up on notifications!</p>
+    {% endif %}
+</div>
+{% endblock %}

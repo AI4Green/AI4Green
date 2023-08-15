@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="container" class="container">
+    <h2>Manage Workbooks</h2>
+    <br>
+    <p><b>Workgroup Name: {{ current_workgroup }}</b></p>
+    {% if not workbook %}
+    <p>No workbooks to show</p>
+    {% else %}
+    <p>Select a workbook to begin:</p>
+    {{ form.workbooks() }}<br><br>
+
+    <ul id="myTab" class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link {% if has_request == "no" %}active{% endif %}" role="tab" data-toggle="tab" href="#overview" aria-selected="{% if has_request == "no" %}true{% else %}false{% endif %}">Overview</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if has_request == "yes" %}active{% endif %}" role="tab" data-toggle="tab" href="#requests" aria-selected="{% if has_request == "no" %}false{% else %}true{% endif %}">Requests</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+<!-- Overview table-->
+        <div class="tab-pane fade {% if has_request == "no" %}show active{% else %}in{% endif %}" id="overview" role="tabpanel">
+            <br>
+            <table id="manage_workgroup_table" class="table table-bordered table-sm">
+                <tr>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Email
+                    </th>
+                    <th colspan="3">
+                        Action
+                    </th>
+                </tr>
+                <tr>
+                    <th colspan="5">
+                        Workbook Members
+                    </th>
+                </tr>
+                {% for member in members %}
+                <tr>
+                    <td class="align-middle">
+                        {{ member.user.fullname }}
+                    </td>
+                    <td class="align-middle">
+                        {{ member.user.email }}
+                    </td>
+                    <td class="align-middle">
+                        <button id="remove{{ loop.index }}" value="{{ member.user.email }}" class="btn btn-danger" onclick="make_change('remove{{ loop.index }}', 'remove')" style="width:220px;">&#8595; Remove From Workbook</button>
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <th colspan="5">
+                        Other Members in Workgroup
+                    </th>
+                </tr>
+                {% for other_member in other_members %}
+                <tr>
+                    <td class="align-middle">
+                        {{ other_member.user.fullname }}
+                    </td>
+                    <td class="align-middle">
+                        {{ other_member.user.email }}
+                    </td>
+                    <td class="align-middle">
+                        <button id="add{{ loop.index }}" value="{{ other_member.user.email }}" class="btn btn-primary" onclick="make_change('add{{ loop.index }}', 'add')" style="width:220px;">&#8593; Add to Workbook</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            <br>
+        </div>
+<!--Requests table-->
+        <div class="tab-pane fade {% if has_request == "no" %}in{% else %}show active{% endif %}" id="requests" role="tabpanel">
+            <br>
+            {% if requests %}
+            <table id="manage_workgroup_request_table" class="table table-striped table-sm">
+                <tr>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Email
+                    </th>
+                    <th>
+                        Request
+                    </th>
+                    <th>
+                        Time
+                    </th>
+                    <th>
+                        Decision
+                    </th>
+                </tr>
+                {% for request in requests %}
+                <tr>
+                    <td class="align-middle">
+                        {{ request.Person.user.fullname }}
+                    </td>
+                    <td class="align-middle">
+                        {{ request.Person.user.email }}
+                    </td>
+                    <td class="align-middle">
+                        Join Workbook
+                    </td>
+                    <td class="align-middle">
+                        {% set time = request.time|string %}
+                        {{ time[:-7] }}
+                    </td>
+                    <td class="align-middle">
+                        <button id="request_approve{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'approve')" style="width:110px;">Approve</button>
+                        <button id="request_deny{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'deny')" style="width:110px;">Deny</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p>You currently have no requests.</p>
+            {% endif %}
+        </div>
+    </div>
+    <br>
+    {% endif %}
+    <a href="{{url_for('create_workbook.create_workbook', workgroup=current_workgroup)}}" id="create-workbook-button" class="btn btn-success">Create Workbook</a>
+<input type="hidden" id="current_workgroup" value="{{ current_workgroup }}">
+</div>
+<script>
+    // when workbooks dropdown is changed, the list of workbook users is updated
+    // manage_workgroup/book
+    $(document).on('change', '#workbooks', function(url) {
+        let workbook = $("#workbooks").val();
+        let workgroup = $("#current_workgroup").val()
+        window.location.href = "/manage_workbook/" + workgroup + "/no/" + workbook;
+    });
+    function make_change(id, mode){
+        let workbook = $("#workbooks").val();
+        let workgroup = $("#current_workgroup").val()
+        let email = $("#" + id).val()
+        fetch('/manage_workbook/' +  workgroup + '/' + workbook + '/' + email + '/' + mode).then(function(response) {
+            response.json().then(function(data) {
+                alert(data.feedback);
+                window.location.href = "/manage_workbook/" + workgroup + "/" + "no/" + workbook;
+            });
+        });
+    }
+     function make_change_request(id, mode){
+        let workbook = $("#workbooks").val();
+        let workgroup = $("#current_workgroup").val();
+        let email = $("#" + id).val()
+        fetch('/manage_workbook_request/' + workgroup + "/" + workbook + '/' + email + '/' + mode).then(function(response) {
+            response.json().then(function(data) {
+                alert(data.feedback);
+                window.location.href = "/manage_workbook/" + workgroup + "/yes/" + workbook;
+            });
+        });
+    }
+</script>
+{% endblock %}

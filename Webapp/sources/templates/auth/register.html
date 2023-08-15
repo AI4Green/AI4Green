@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/registration.js') }}"></script>
+<br><br>
+<div class="container text-center">
+    <h2>Register</h2><br>
+    <div class="form-outline mb-4" style="margin: auto; width: 50%">
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            Username (Only letters, numbers, and underscores):
+            {{ form.username }}<br>
+            {% for error in form.username.errors %}
+                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+            Fullname:
+            {{ form.fullname }}<br>
+            {% for error in form.fullname.errors %}
+                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+            Email:
+            {{ form.email }}<br>
+            {% for error in form.email.errors %}
+                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+            Password:
+            {{ form.password }}<br>
+            {% for error in form.password.errors %}
+                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+            Confirm Password:
+            {{ form.password2 }}<br>
+            {% for error in form.password2.errors %}
+                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+            {{ form.privacy }} I have read and agree to the conditions in the <a id="privacy_link" href="{{ url_for('auth.privacy_notice') }}" target="_blank" onclick="enablePrivacyCheckbox()">privacy notice</a><br>
+
+            {% for error in form.privacy.errors %}
+                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+            {{ form.hazard_disclaimer }} I have read and agree to the conditions in the <a id="hazard_link" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank" onclick="enableHazardCheckbox()">hazard disclaimer</a> <br>
+            {% for error in form.hazard_disclaimer.errors %}
+                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+
+
+            {{ form.submit() }}
+        </form>
+    </div>
+</div>
+{% endblock %}

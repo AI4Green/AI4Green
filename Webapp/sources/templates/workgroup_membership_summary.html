@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <h2>Workgroup Membership Summary</h2>
+    <br>
+    <form action="" method="POST">
+        Workgroups: <br>
+        {{ form.csrf_token }}
+        {{ form.workgroups }} <br><br>
+        {{ form.submit(class_="btn btn-primary") }}<br>
+    </form>
+    No workgroups shown? Click <a id="join-workgroup" href="{{ url_for('join_workgroup.join_workgroup') }}">here</a> to join a workgroup.<br><br>
+    {% if workbooks is defined %}
+    Workgroup Selected:<br>
+    <b>{{ workgroup }}</b><br><br>
+    You are a member of the following workbooks within this workgroup:<br>
+    {% for workbook in workbooks %}
+    <b>{{ workbook }}</b><br>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

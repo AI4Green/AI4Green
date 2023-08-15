@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2>Request to Join a Workgroup</h2>
+    <br>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.workgroups }}<br>
+        </p>
+        <p>{{ form.submit() }}</p>
+        {% for error in form.workgroups.errors %}
+            <div class="alert alert-danger" style="margin: auto; width: 50%" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+    </form>
+</div>
+{% endblock %}

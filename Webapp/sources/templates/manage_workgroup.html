@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="container" class="container">
+    <h2>Manage Workgroup</h2>
+    <br>
+    <p><b>Workgroup Name: {{ current_workgroup }}</b></p>
+    <br>
+    <ul id="myTab" class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link {% if has_request == "no" %}active{% endif %}" role="tab" data-toggle="tab" href="#overview" aria-selected="{% if has_request == "no" %}true{% else %}false{% endif %}">Overview</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if has_request == "yes" %}active{% endif %}" role="tab" data-toggle="tab" href="#requests" aria-selected="{% if has_request == "no" %}false{% else %}true{% endif %}">Requests</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+<!-- Overview table-->
+        <div class="tab-pane fade {% if has_request == "no" %}show active{% else %}in{% endif %}" id="overview" role="tabpanel">
+            <br>
+            <table id="manage_workgroup_table" class="table table-bordered table-sm">
+                <tr>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Email
+                    </th>
+                    <th colspan="3">
+                        Actions
+                    </th>
+                </tr>
+                <tr>
+                    <th colspan="5">
+                        Principal Investigators
+                    </th>
+                </tr>
+                {% for pis in pi %}
+                <tr>
+                    <td class="align-middle">
+                        {{ pis.user.fullname }}
+                    </td>
+                    <td class="align-middle">
+                        {{ pis.user.email }}
+                    </td>
+                    <td class="align-middle">
+                        <button style="width:110px; visibility: hidden;"></button>
+                    </td>
+                    <td class="align-middle">
+                        <button id="pi-to-sr{{ loop.index }}" value="{{ pis.user.email }}" class="btn btn-secondary" onclick="make_change('pi-to-sr{{ loop.index }}', 'pi-to-sr', 'pi')" style="width:110px;">&#8595; PI to SR</button>
+                    </td>
+                    <td class="align-middle">
+                        <button id="pi-remove{{ loop.index }}" value="{{ pis.user.email }}" class="btn btn-danger" onclick="make_change('pi-remove{{ loop.index }}', 'remove', 'pi')" style="width:250px;">Remove from Workgroup</button>
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <th colspan="5">
+                        Senior Researchers
+                    </th>
+                </tr>
+                {% for srs in sr %}
+                <tr>
+                    <td class="align-middle">
+                        {{ srs.user.fullname }}
+                    </td>
+                    <td class="align-middle">
+                        {{ srs.user.email }}
+                    </td>
+                    <td class="align-middle">
+                        <button id="sr-to-pi{{ loop.index }}" value="{{ srs.user.email }}" class="btn btn-primary" onclick="make_change('sr-to-pi{{ loop.index }}', 'sr-to-pi', 'sr')" style="width:110px;">&#8593; SR to PI</button>
+                    </td>
+                    <td class="align-middle">
+                        <button id="sr-to-sm{{ loop.index }}" value="{{ srs.user.email }}" class="btn btn-secondary" onclick="make_change('sr-to-sm{{ loop.index }}', 'sr-to-sm', 'sr')" style="width:110px;">&#8595; SR to SM</button>
+                    </td>
+                    <td class="align-middle">
+                        <button id="sr-remove{{ loop.index }}" value="{{ srs.user.email }}"  class="btn btn-danger" onclick="make_change('sr-remove{{ loop.index }}', 'remove', 'sr')" style="width:250px;">Remove from Workgroup</button>
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <th colspan="5">
+                        Standard Members
+                    </th>
+                </tr>
+                {% for sms in sm %}
+                <tr>
+                    <td class="align-middle">
+                        {{ sms.user.fullname }}
+                    </td>
+                    <td class="align-middle">
+                        {{ sms.user.email }}
+                    </td>
+                    <td class="align-middle">
+                        <button id="sm-to-sr{{ loop.index }}" value="{{ sms.user.email }}" class="btn btn-primary" onclick="make_change('sm-to-sr{{ loop.index }}', 'sm-to-sr', 'sm')" style="width:110px;">&#8593; SM to SR</button>
+                    </td>
+                    <td class="align-middle">
+                    </td>
+                    <td class="align-middle">
+                        <button id="sm-remove{{ loop.index }}" value="{{ sms.user.email }}" class="btn btn-danger" onclick="make_change('sm-to-sr{{ loop.index }}', 'remove', 'sm')" style="width:250px;">Remove from Workgroup</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+<!--Requests table-->
+        <div class="tab-pane fade {% if has_request == "no" %}in{% else %}show active{% endif %}" id="requests" role="tabpanel">
+            <br>
+            {% if requests %}
+            <table id="manage_workgroup_request_table" class="table table-striped table-sm">
+                <tr>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Email
+                    </th>
+                    <th>
+                        Current Role
+                    </th>
+                    <th>
+                        New Role
+                    </th>
+                    <th>
+                        Time
+                    </th>
+                    <th>
+                        Decision
+                    </th>
+                </tr>
+                {% for request in requests %}
+                <tr>
+                    <td class="align-middle">
+                        {{ request.Person.user.fullname }}
+                    </td>
+                    <td class="align-middle">
+                        {{ request.Person.user.email }}
+                    </td>
+                    <td class="align-middle">
+                        {{ request.current_role }}
+                    </td>
+                    <td class="align-middle">
+                        {{ request.new_role }}
+                    </td>
+                    <td class="align-middle">
+                        {% set time = request.time|string %}
+                        {{ time[:-7] }}
+                    </td>
+                    <td class="align-middle">
+                        {% if request.current_role == "Standard Member" %}
+                        {% if request.new_role == "Senior Researcher" %}
+                        <button id="request_approve{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'sm-to-sr', 'approve')" style="width:110px;">Approve</button>
+                        <button id="request_deny{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'sm-to-sr', 'deny')" style="width:110px;">Deny</button>
+                        {% else %}
+                        <button id="request_approve{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'sm-to-pi', 'approve')" style="width:110px;">Approve</button>
+                        <button id="request_deny{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'sm-to-pi', 'deny')" style="width:110px;">Deny</button>
+                        {% endif %}
+                        {% elif request.current_role == "Senior Researcher" %}
+                        <button id="request_approve{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'sr-to-pi', 'approve')" style="width:110px;">Approve</button>
+                        <button id="request_deny{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'sr-to-pi', 'deny')" style="width:110px;">Deny</button>
+                        {% endif %}
+                        {% if request.current_role == "Non-Member" %}
+                        <button id="request_approve{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_approve{{ loop.index }}', 'to-sm', 'approve')" style="width:110px;">Approve</button>
+                        <button id="request_deny{{ loop.index }}" value="{{ request.Person.user.email }}" class="btn btn-primary" onclick="make_change_request('request_deny{{ loop.index }}', 'to-sm', 'deny')" style="width:110px;">Deny</button>
+                        {% endif %}
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p>You currently have no requests.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<input type="hidden" id="current_workgroup" value="{{ current_workgroup }}">
+<script>
+    function make_change(id, mode, current_status){
+
+        if (mode === "remove"){
+            const completeConfirm = window.confirm("Are you sure you want to remove this user entirely from the Workgroup? They will also be removed from any Workbooks they are part of within this Workgroup.");
+            if (completeConfirm === false) {
+                return;
+            }
+        }
+        let email = $("#" + id).val()
+        let workgroup = $("#current_workgroup").val();
+        fetch('/manage_workgroup/make_change/' + workgroup + '/' + email + '/' + mode + '/' + current_status).then(function(response) {
+            response.json().then(function(data) {
+                alert(data.feedback);
+                window.location.href = "/manage_workgroup/" + workgroup;
+            });
+        });
+    }
+    function make_change_request(id, mode, decision){
+        let email = $("#" + id).val()
+        let workgroup = $("#current_workgroup").val();
+        fetch('/manage_workgroup/change_status_request/' + workgroup + '/' + email + '/' + mode + '/' + decision).then(function(response) {
+            response.json().then(function(data) {
+                alert(data.feedback);
+                window.location.href = "/manage_workgroup/" + workgroup + "/yes";
+            });
+        });
+    }
+</script>
+{% endblock %}
+
+
+

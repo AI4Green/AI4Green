@@ -1,0 +1,26 @@
+.readonly-cell {
+    background-color: transparent;
+    border: none;
+}
+
+.editable-cell {
+    background-color: white;
+    border-color: black;
+    border-width: thin;
+}
+
+.remove-highlight-summary-cell {
+    border-color: transparent;
+    border-width: thin;
+}
+
+.remove-highlight-filled-cell {
+    border-color: black;
+    border-width: thin;
+    background-color: white;
+}
+
+.add-highlight-unfilled-cell {
+    border-color: red;
+    border-width: medium;
+}

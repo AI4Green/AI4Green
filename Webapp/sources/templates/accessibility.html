@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+{% block content %}
+<body>
+<div class="container">
+    <h2>Accessibility</h2>
+    <h3>Hazard Colours</h3>
+    <p>AI4Green uses four colours to denote different hazard levels.</p>
+    <div class="card">
+        <div class="card-header">
+            Recommended
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                The least hazardous classification. Attention should still be taken to specific hazards (e.g. hazard codes) and safety/disposal procedures.
+            </p>
+            <div class="col-6">
+                <table class="table">
+                    <tr>
+                        <td style="width: 50%;">
+                            <b>Fill Colour</b>
+                        </td>
+                        <td>
+                            <input id="acceptable-colours" type="color" list="acceptableColours">
+                            <datalist id="acceptableColours">
+                                <option value="#008000"></option>
+                                <option value="#00ff7f"></option>
+                                <option value="#00ff00"></option>
+                                <option value="#E5E4E2"></option>
+                            </datalist>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Text Colour</b>
+                        </td>
+                        <td>
+                            <input id="acceptable-colours-text" type="color" list="acceptableColours_text">
+                            <datalist id="acceptableColours_text">
+                                <option value="#ffffff"></option>
+                                <option value="#000000"></option>
+                            </datalist>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Preview</b>
+                        </td>
+                        <td class="acceptable-colours-preview acceptable-colours-text-preview">
+                            Recommended
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="card">
+        <div class="card-header">
+            Problematic
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                Caution should be taken with this classification. Care should be taken to follow health, safety, and environmental procedures.
+            </p>
+            <div class="col-6">
+                <table class="table">
+                    <tr>
+                        <td style="width: 50%;">
+                            <b>Fill Colour</b>
+                        </td>
+                        <td>
+                            <input id="warning-colours" type="color" list="warningColours">
+                            <datalist id="warningColours">
+                                <option value="#d2b48c" selected></option>
+                                <option value="#f0e68c"></option>
+                                <option value="#ffff00"></option>
+                                <option value="#C0C0C0"></option>
+                            </datalist>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Text Colour</b>
+                        </td>
+                        <td>
+                            <input id="warning-colours-text" type="color" list="warningColours_text">
+                            <datalist id="warningColours_text">
+                                <option value="#ffffff"></option>
+                                <option value="#000000"></option>
+                            </datalist>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Preview</b>
+                        </td>
+                        <td class="warning-colours-preview warning-colours-text-preview">
+                            Problematic
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="card">
+        <div class="card-header">
+            Hazardous
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                These procedures should be avoided, but may still be acceptable in certain circumstances. Extreme care should be taken to mitigate hazards.
+            </p>
+            <div class="col-6">
+                <table class="table">
+                    <tr>
+                        <td style="width: 50%;">
+                            <b>Fill Colour</b>
+                        </td>
+                        <td>
+                            <input id="hazard-colours" type="color" list="hazardColours">
+                            <datalist id="hazardColours">
+                                <option value="#ff0000"></option>
+                                <option value="#f08080"></option>
+                                <option value="#ffa07a"></option>
+                                <option value="#A9A9A9"></option>
+                            </datalist>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Text Colour</b>
+                        </td>
+                        <td>
+                            <input id="hazard-colours-text" type="color" list="hazardColours_text">
+                            <datalist id="hazardColours_text">
+                                <option value="#ffffff"></option>
+                                <option value="#000000"></option>
+                            </datalist>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Preview</b>
+                        </td>
+                        <td class="hazard-colours-preview hazard-colours-text-preview">
+                            Hazardous
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="card">
+        <div class="card-header">
+            Highly Hazardous
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                Solvents only: this classification indicates banned or highly problematic solvents, the use of which should be highly discouraged.
+            </p>
+            <div class="col-6">
+                <table class="table">
+                    <tr>
+                        <td style="width: 50%;">
+                            <b>Fill Colour</b>
+                        </td>
+                        <td>
+                            <input id="highly-hazard-colours" type="color" list="highlyHazardColours">
+                            <datalist id="highlyHazardColours">
+                                <option value="#cb4154"></option>
+                                <option value="#8B0000"></option>
+                                <option value="#a52a2a"></option>
+                                <option value="#36454F"></option>
+                            </datalist>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Text Colour</b>
+                        </td>
+                        <td>
+                            <input id="highly-hazard-colours-text" type="color" list="highlyHazardColours_text">
+                            <datalist id="highlyHazardColours_text">
+                                <option value="#ffffff"></option>
+                                <option value="#000000"></option>
+                            </datalist>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Preview</b>
+                        </td>
+                        <td class="highly-hazard-colours-preview highly-hazard-colours-text-preview">
+                            Highly Hazardous
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <br>
+    <button id="reset-colours" onclick="resetColours()" class="btn btn-primary">Reset to Default</button>
+    <br><br>
+    <button id="change-colours" onclick="changeColours('update')" class="btn btn-success">Save Changes</button>
+</div>
+<br>
+<script>
+    function fillPreviews_on_load(){
+        fillPreviews("acceptable-colours", "bg");
+        fillPreviews("warning-colours", "bg");
+        fillPreviews("hazard-colours", "bg");
+        fillPreviews("highly-hazard-colours", "bg");
+        fillPreviews("acceptable-colours-text", "text");
+        fillPreviews("warning-colours-text", "text");
+        fillPreviews("hazard-colours-text", "text");
+        fillPreviews("highly-hazard-colours-text", "text");
+    }
+    // on load of page assign colour values to the correct colour from the database
+    $(document).ready(function() {
+        $.ajax({
+        url: '/get_custom_colours',
+        type: 'post',
+        success: function (response){
+            // modify the fill and text colour
+            $("#acceptable-colours").val(response.colours["Recommended"]);
+            $("#acceptable-colours-text").val(response.colours["Recommended_text"]);
+            $("#warning-colours").val(response.colours["Problematic"]);
+            $("#warning-colours-text").val(response.colours["Problematic_text"]);
+            $("#hazard-colours").val(response.colours["Hazardous"]);
+            $("#hazard-colours-text").val(response.colours["Hazardous_text"]);
+            $("#highly-hazard-colours").val(response.colours["HighlyHazardous"]);
+            $("#highly-hazard-colours-text").val(response.colours["HighlyHazardous_text"]);
+            // fill the previews
+            fillPreviews_on_load();
+            }
+        });
+    })
+    function changeColours(mode){
+        $.ajax({
+            url: '/change_hazard_colours',
+            type: 'post',
+            data: {"mode": mode, "Recommended": $("#acceptable-colours").val(), "Problematic": $("#warning-colours").val(),
+                   "Hazardous": $("#hazard-colours").val(), "HighlyHazardous": $("#highly-hazard-colours").val(),
+                   "Recommended_text": $("#acceptable-colours-text").val(), "Problematic_text": $("#warning-colours-text").val(),
+                   "Hazardous_text": $("#hazard-colours-text").val(), "HighlyHazardous_text": $("#highly-hazard-colours-text").val()},
+            dataType: 'json',
+            success: function (response) {
+                alert(response.message)
+            }
+        })
+    }
+    function resetColours(){
+        $("#acceptable-colours").val("#00ff00");
+        $("#acceptable-colours-text").val("#000000");
+        $("#warning-colours").val("#ffff00");
+        $("#warning-colours-text").val("#000000");
+        $("#hazard-colours").val("#ff0000");
+        $("#hazard-colours-text").val("#000000");
+        $("#highly-hazard-colours").val("#8B0000");
+        $("#highly-hazard-colours-text").val("#ffffff");
+        changeColours('reset');
+        // fill the previews
+        fillPreviews_on_load();
+    }
+    function fillPreviews(changedParameter, mode){
+        const element_class = document.querySelectorAll("." + changedParameter + "-preview");
+        if (mode === "bg"){
+            element_class.forEach(element => {
+                element.style.backgroundColor = $("#" + changedParameter).val();
+            });
+        }
+        if (mode === "text"){
+            element_class.forEach(element => {
+                element.style.color = $("#" + changedParameter).val();
+            });
+        }
+    }
+    function autofillPreview(changedParameter, mode) {
+        $("#" + changedParameter).on('input', function () {
+            fillPreviews(changedParameter, mode);
+        });
+    }
+    autofillPreview("acceptable-colours", "bg");
+    autofillPreview("warning-colours", "bg");
+    autofillPreview("hazard-colours", "bg");
+    autofillPreview("highly-hazard-colours", "bg");
+    autofillPreview("acceptable-colours-text", "text");
+    autofillPreview("warning-colours-text", "text");
+    autofillPreview("hazard-colours-text", "text");
+    autofillPreview("highly-hazard-colours-text", "text");
+</script>
+</body>
+{% endblock %}

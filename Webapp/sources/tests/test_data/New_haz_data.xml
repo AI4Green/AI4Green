@@ -1,0 +1,1033 @@
+<?xml version="1.0"?>
+<Records
+    xmlns="http://pubchem.ncbi.nlm.nih.gov/pug_view"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+    xs:schemaLocation="http://pubchem.ncbi.nlm.nih.gov/pug_view https://pubchem.ncbi.nlm.nih.gov/pug_view/pug_view.xsd"
+>
+<Record>
+  <RecordType>CID</RecordType>
+  <RecordNumber>7301</RecordNumber>
+  <RecordTitle>2-Methyltetrahydrofuran</RecordTitle>
+  <Section>
+    <TOCHeading>2D Structure</TOCHeading>
+    <Description>A two-dimensional representation of the compound</Description>
+    <DisplayControls>
+      <HideThisSection>true</HideThisSection>
+      <MoveToTop>true</MoveToTop>
+    </DisplayControls>
+    <Information>
+      <ReferenceNumber>74</ReferenceNumber>
+      <Value>
+        <Boolean>true</Boolean>
+      </Value>
+    </Information>
+  </Section>
+  <Section>
+    <TOCHeading>Depositor-Supplied Synonyms</TOCHeading>
+    <Description>Chemical names provided by individual data contributors. Synonyms of Substances corresponding to a PubChem Compound record are combined. Some contributed names may be considered erroneous and filtered out. The link on each synonym shows which depositors provided that particular synonym for this structure.</Description>
+    <DisplayControls>
+      <HideThisSection>true</HideThisSection>
+      <MoveToTop>true</MoveToTop>
+    </DisplayControls>
+    <Information>
+      <ReferenceNumber>74</ReferenceNumber>
+      <Value>
+        <StringWithMarkup>
+          <String>2-METHYLTETRAHYDROFURAN</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>96-47-9</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyloxolane</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Methyltetrahydrofuran</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Tetrahydro-2-methylfuran</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Tetrahydrosylvan</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Furan, tetrahydro-2-methyl-</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Furan, 2-methyl-tetrahydro-</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-methyl tetrahydrofuran</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>25265-68-3</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-MeTHF</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-methyl-tetrahydrofuran</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>MFCD00005367</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Furan, tetrahydromethyl-</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>methyl tetrahydrofuran</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyltetrahydrofuran, 99+%, pure, stabilized</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>NSC 2115</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>EINECS 202-507-4</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-methyl-tetrahydro-furan</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>BRN 0102448</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Tetrahydrosilvan</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyltetrahydrofuran, 99+%, Extra Dry, stabilized, AcroSeal(R)</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>AI3-25425</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>CCRIS 8717</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyltetrahydrofuran, 99+%, Extra Dry, stabilizer free, AcroSeal(R)</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyltetrahydrofuran, For Grignard reaction, anhydrous, stabilized</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyltetrahydrofuran, 99+%, Extra Dry over Molecular Sieve, Stabilized, AcroSeal(R)</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methylfuranidine</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>MeTHF</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>EINECS 246-769-8</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>methyltetrahydrofurane</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>UN2536</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>methyl-tetrahydrofuran</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Me-THF</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyletrahydrofuran</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Methyl tetrahydrofurane</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-methyltetrahyrdofuran</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>PubChem10841</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-methyltetrahydrofurane</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-methyl tetrahydrofurane</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-methyl-tetrahydrofurane</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>EC 202-507-4</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Tetrahydrofuran, 2-methyl-</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>WLN: T5OTJ B1</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>[C]C1CCCO1</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>DSSTox_CID_10258</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>DSSTox_RID_78841</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>DSSTox_GSID_30258</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>5-17-01-00078 (Beilstein Handbook Reference)</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>KSC206A7P</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>(2S)-2-methyltetrahydrofuran</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>CHEMBL1580503</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>DTXSID9030258</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>NSC2115</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>BCP16203</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>NSC-2115</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>STR08776</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Tox21_200383</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>AKOS009157664</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>ACN-048247</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>AM81816</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>CAS-96-47-9</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>NCGC00090914-01</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>NCGC00090914-02</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>NCGC00257937-01</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>SC-18056</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyltetrahydrofuran, analytical standard</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>DB-015964</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>CS-0010107</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>FT-0613084</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>M0437</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>V0551</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyltetrahydrofuran, purum, &gt;=97.0% (GC)</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>22891-EP2315502A1</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>25825-EP2275411A2</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>25825-EP2287154A1</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>25825-EP2289897A1</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>25825-EP2295399A2</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>25825-EP2315303A1</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>97280-EP2275411A2</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>97280-EP2284157A1</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>97280-EP2305688A1</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>148877-EP2269986A1</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>148877-EP2281821A1</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>148877-EP2289509A2</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>148877-EP2289881A1</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Q209444</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Methyltetrahydrofuran [UN2536]  [Flammable liquid]</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Q-200307</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>4-amino-chroman-8-carboxylicacidmethylesterhydrochloride</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyltetrahydrofuran, anhydrous, &gt;=99%, Inhibitor-free</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyltetrahydrofuran, absolute, stored over molecular sieve</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyltetrahydrofuran, anhydrous, &gt;=99.0%, contains 250 ppm BHT as stabilizer</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyltetrahydrofuran, ReagentPlus(R), &gt;=99.5%, contains 150-400 ppm BHT as stabilizer</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>2-Methyltetrahydrofuran, anhydrous, contains 250 ppm BHT as stabilizer, ZerO2(TM), &gt;=99.0%</String>
+        </StringWithMarkup>
+      </Value>
+    </Information>
+  </Section>
+  <Section>
+    <TOCHeading>Molecular Formula</TOCHeading>
+    <Description>A chemical formula is a way of expressing information about the proportions of atoms that constitute a particular chemical compound, using a single line of chemical element symbols and numbers. PubChem uses the Hill system whereby the number of carbon atoms in a molecule is indicated first, the number of hydrogen atoms second, and then the number of all other chemical elements in alphabetical order. When the formula contains no carbon, all the elements, including hydrogen, are listed alphabetically. Sources other than PubChem may include a variant of the formula that is more structural or natural to chemists, for example &quot;H2SO4&quot; for sulfuric acid, rather than the Hill version &quot;H2O4S.&quot;</Description>
+    <DisplayControls>
+      <HideThisSection>true</HideThisSection>
+      <MoveToTop>true</MoveToTop>
+    </DisplayControls>
+    <Information>
+      <ReferenceNumber>1</ReferenceNumber>
+      <Value>
+        <StringWithMarkup>
+          <String>C5H10O</String>
+        </StringWithMarkup>
+      </Value>
+    </Information>
+    <Information>
+      <ReferenceNumber>74</ReferenceNumber>
+      <Reference>Computed by PubChem 2.1 (PubChem release 2019.06.18)</Reference>
+      <Value>
+        <StringWithMarkup>
+          <String>C5H10O</String>
+        </StringWithMarkup>
+      </Value>
+    </Information>
+  </Section>
+  <Section>
+    <TOCHeading>Molecular Weight</TOCHeading>
+    <Description>Molecular weight or molecular mass refers to the mass of a molecule. It is calculated as the sum of the mass of each constituent atom multiplied by the number of atoms of that element in the molecular formula.</Description>
+    <DisplayControls>
+      <HideThisSection>true</HideThisSection>
+      <MoveToTop>true</MoveToTop>
+    </DisplayControls>
+    <Information>
+      <ReferenceNumber>74</ReferenceNumber>
+      <Reference>Computed by PubChem 2.1 (PubChem release 2019.06.18)</Reference>
+      <Value>
+        <StringWithMarkup>
+          <String>86.13</String>
+        </StringWithMarkup>
+        <Unit>g/mol</Unit>
+      </Value>
+    </Information>
+  </Section>
+  <Section>
+    <TOCHeading>GHS Classification</TOCHeading>
+    <Description>GHS (Globally Harmonized System of Classification and Labelling of Chemicals) is a United Nations system to identify hazardous chemicals and to inform users about these hazards. GHS has been adopted by many countries around the world and is now also used as the basis for international and national transport regulations for dangerous goods. The GHS hazard statements, class categories, pictograms, signal words, and the precautionary statements can be found on the PubChem GHS page.</Description>
+    <URL>https://pubchem.ncbi.nlm.nih.gov/ghs/</URL>
+    <DisplayControls>
+      <CreateTable>
+        <FromInformationIn>ThisSection</FromInformationIn>
+        <NumberOfColumns>2</NumberOfColumns>
+        <ColumnContents>Name</ColumnContents>
+        <ColumnContents>Value</ColumnContents>
+      </CreateTable>
+      <ShowAtMost>1</ShowAtMost>
+    </DisplayControls>
+    <Information>
+      <ReferenceNumber>11</ReferenceNumber>
+      <Name>Pictogram(s)</Name>
+      <Value>
+        <StringWithMarkup>
+          <String>          </String>
+          <Markup>
+            <Start>0</Start>
+            <Length>1</Length>
+            <URL>https://pubchem.ncbi.nlm.nih.gov/images/ghs/GHS02.svg</URL>
+            <Type>Icon</Type>
+            <Extra>Flammable</Extra>
+          </Markup>
+          <Markup>
+            <Start>1</Start>
+            <Length>1</Length>
+            <URL>https://pubchem.ncbi.nlm.nih.gov/images/ghs/GHS05.svg</URL>
+            <Type>Icon</Type>
+            <Extra>Corrosive</Extra>
+          </Markup>
+          <Markup>
+            <Start>2</Start>
+            <Length>1</Length>
+            <URL>https://pubchem.ncbi.nlm.nih.gov/images/ghs/GHS07.svg</URL>
+            <Type>Icon</Type>
+            <Extra>Irritant</Extra>
+          </Markup>
+        </StringWithMarkup>
+      </Value>
+    </Information>
+    <Information>
+      <ReferenceNumber>11</ReferenceNumber>
+      <Name>Signal</Name>
+      <Value>
+        <StringWithMarkup>
+          <String>Danger</String>
+          <Markup>
+            <Start>0</Start>
+            <Length>6</Length>
+            <Type>Color</Type>
+            <Extra>GHSDanger</Extra>
+          </Markup>
+        </StringWithMarkup>
+      </Value>
+    </Information>
+    <Information>
+      <ReferenceNumber>11</ReferenceNumber>
+      <Name>GHS Hazard Statements</Name>
+      <Value>
+        <StringWithMarkup>
+          <String>H999 (69.38%): Highly Flammable liquid and vapor [Danger Flammable liquids]</String>
+          <Markup>
+            <Start>50</Start>
+            <Length>6</Length>
+            <Type>Color</Type>
+            <Extra>GHSDanger</Extra>
+          </Markup>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>H998 (24.76%): Harmful if swallowed [Warning Acute toxicity, oral]</String>
+          <Markup>
+            <Start>37</Start>
+            <Length>7</Length>
+            <Type>Color</Type>
+            <Extra>GHSWarning</Extra>
+          </Markup>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>H997 (55.37%): Causes skin irritation [Warning Skin corrosion/irritation]</String>
+          <Markup>
+            <Start>39</Start>
+            <Length>7</Length>
+            <Type>Color</Type>
+            <Extra>GHSWarning</Extra>
+          </Markup>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>H996 (24.1%): Causes serious eye damage [Danger Serious eye damage/eye irritation]</String>
+          <Markup>
+            <Start>41</Start>
+            <Length>6</Length>
+            <Type>Color</Type>
+            <Extra>GHSDanger</Extra>
+          </Markup>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>H995 (45.93%): Causes serious eye irritation [Warning Serious eye damage/eye irritation]</String>
+          <Markup>
+            <Start>46</Start>
+            <Length>7</Length>
+            <Type>Color</Type>
+            <Extra>GHSWarning</Extra>
+          </Markup>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>H994 (19.87%): May cause respiratory irritation [Warning Specific target organ toxicity, single exposure; Respiratory tract irritation]</String>
+          <Markup>
+            <Start>49</Start>
+            <Length>7</Length>
+            <Type>Color</Type>
+            <Extra>GHSWarning</Extra>
+          </Markup>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>H999 : Unit testing hazard code</String>
+          <Markup>
+            <Start>50</Start>
+            <Length>7</Length>
+            <Type>Color</Type>
+            <Extra>GHSWarning</Extra>
+          </Markup>
+        </StringWithMarkup>
+      </Value>
+    </Information>
+    <Information>
+      <ReferenceNumber>11</ReferenceNumber>
+      <Name>Precautionary Statement Codes</Name>
+      <Value>
+        <StringWithMarkup>
+          <String>P210, P233, P240, P241, P242, P243, P261, P264, P270, P271, P280, P301+P312, P302+P352, P303+P361+P353, P304+P340, P305+P351+P338, P310, P312, P321, P330, P332+P313, P337+P313, P362, P370+P378, P403+P233, P403+P235, P405, and P501</String>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>(The corresponding statement to each P-code can be found at the GHS Classification page.)</String>
+          <Markup>
+            <Start>64</Start>
+            <Length>18</Length>
+            <URL>https://pubchem.ncbi.nlm.nih.gov/ghs/#_prec</URL>
+          </Markup>
+        </StringWithMarkup>
+      </Value>
+    </Information>
+    <Information>
+      <ReferenceNumber>11</ReferenceNumber>
+      <Name>ECHA C&amp;L Notifications Summary</Name>
+      <Value>
+        <StringWithMarkup>
+          <String>Aggregated GHS information provided by 307 companies from 20 notifications to the ECHA C&amp;L Inventory. Each notification may be associated with multiple companies.</String>
+          <Markup>
+            <Start>0</Start>
+            <Length>166</Length>
+            <Type>Italics</Type>
+          </Markup>
+        </StringWithMarkup>
+        <StringWithMarkup>
+          <String>Information may vary between notifications depending on impurities, additives, and other factors. The percentage value in parenthesis indicates the notified classification ratio from companies that provide hazard codes. Only hazard codes with percentage values above 10% are shown.</String>
+          <Markup>
+            <Start>0</Start>
+            <Length>281</Length>
+            <Type>Italics</Type>
+          </Markup>
+        </StringWithMarkup>
+      </Value>
+    </Information>
+  </Section>
+  <Section>
+    <TOCHeading>Identifiers</TOCHeading>
+    <Description>Important identifiers assigned to this chemical compound</Description>
+    <Section>
+      <TOCHeading>CAS</TOCHeading>
+      <Description>A proprietary registry number assigned by the Chemical Abstracts Service (CAS) division of the American Chemical Society (ACS) often used to help describe chemical ingredients.</Description>
+      <URL>http://en.wikipedia.org/wiki/CAS_Registry_Number</URL>
+      <Information>
+        <ReferenceNumber>1</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>25265-68-3</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+      <Information>
+        <ReferenceNumber>2</ReferenceNumber>
+        <URL>https://commonchemistry.cas.org/detail?cas_rn=96-47-9&amp;search=96479</URL>
+        <Value>
+          <StringWithMarkup>
+            <String>96-47-9</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+      <Information>
+        <ReferenceNumber>3</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>96-47-9</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+      <Information>
+        <ReferenceNumber>4</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>25265-68-3</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+      <Information>
+        <ReferenceNumber>7</ReferenceNumber>
+        <Name>CAS</Name>
+        <Value>
+          <StringWithMarkup>
+            <String>96-47-9</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+      <Information>
+        <ReferenceNumber>9</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>96-47-9</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+      <Information>
+        <ReferenceNumber>10</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>96-47-9</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+      <Information>
+        <ReferenceNumber>12</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>96-47-9</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+      <Information>
+        <ReferenceNumber>13</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>25265-68-3</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+    </Section>
+    <Section>
+      <TOCHeading>InChI</TOCHeading>
+      <Description>International Chemical Identifier (InChI) computed from chemical structure using the International Union of Pure and Applied Chemistry (IUPAC) standard.</Description>
+      <URL>http://www.iupac.org/home/publications/e-resources/inchi.html</URL>
+      <Information>
+        <ReferenceNumber>74</ReferenceNumber>
+        <Reference>Computed by InChI 1.0.5 (PubChem release 2019.06.18)</Reference>
+        <Value>
+          <StringWithMarkup>
+            <String>InChI=1S/C5H10O/c1-5-3-2-4-6-5/h5H,2-4H2,1H3</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+    </Section>
+    <Section>
+      <TOCHeading>InChI Key</TOCHeading>
+      <Description>International Chemical Identifier hash (InChIKey) computed from chemical structure using the International Union of Pure and Applied Chemistry (IUPAC) standard.</Description>
+      <URL>http://www.iupac.org/home/publications/e-resources/inchi.html</URL>
+      <Information>
+        <ReferenceNumber>74</ReferenceNumber>
+        <Reference>Computed by InChI 1.0.5 (PubChem release 2019.06.18)</Reference>
+        <Value>
+          <StringWithMarkup>
+            <String>JWUJQDFVADABEY-UHFFFAOYSA-N</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+    </Section>
+  </Section>
+  <Section>
+    <TOCHeading>Physical Properties</TOCHeading>
+    <Description>Physical properties such as melting point, density, etc.</Description>
+    <Section>
+      <TOCHeading>Physical Description</TOCHeading>
+      <Description>Physical description refers to the appearance or features of a given chemical compound including color, odor, state, taste and more in general</Description>
+      <DisplayControls>
+        <ShowAtMost>2</ShowAtMost>
+      </DisplayControls>
+      <Information>
+        <ReferenceNumber>1</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>Methyltetrahydrofuran appears as a colorless liquid with an ether-like odor. Less dense than water. Vapors heavier than air. Used to make other chemicals and as a solvent.</String>
+            <Markup>
+              <Start>0</Start>
+              <Length>21</Length>
+              <URL>https://pubchem.ncbi.nlm.nih.gov/compound/Methyltetrahydrofuran</URL>
+              <Type>PubChem Internal Link</Type>
+              <Extra>CID-7301</Extra>
+            </Markup>
+            <Markup>
+              <Start>93</Start>
+              <Length>5</Length>
+              <URL>https://pubchem.ncbi.nlm.nih.gov/compound/water</URL>
+              <Type>PubChem Internal Link</Type>
+              <Extra>CID-962</Extra>
+            </Markup>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+      <Information>
+        <ReferenceNumber>9</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>Liquid</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+    </Section>
+    <Section>
+      <TOCHeading>Boiling Point</TOCHeading>
+      <Description>The boiling point of a substance is the temperature at which the vapor pressure of the liquid equals the pressure surrounding the liquid and the liquid changes into a vapor</Description>
+      <DisplayControls>
+        <ShowAtMost>2</ShowAtMost>
+      </DisplayControls>
+      <Information>
+        <ReferenceNumber>10</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>78.0 Â°C</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+    </Section>
+    <Section>
+      <TOCHeading>Solubility</TOCHeading>
+      <Description>The solubility of a substance is the amount of that substance that will dissolve in a given amount of solvent. The default solvent is water, if not indicated.</Description>
+      <DisplayControls>
+        <ShowAtMost>2</ShowAtMost>
+      </DisplayControls>
+      <Information>
+        <ReferenceNumber>10</ReferenceNumber>
+        <Reference>RIDDICK,JA ET AL. (1986)</Reference>
+        <Value>
+          <StringWithMarkup>
+            <String>1.81 M</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+    </Section>
+    <Section>
+      <TOCHeading>Vapor Pressure</TOCHeading>
+      <Description>Vapor pressure is the pressure of a vapor in thermodynamic equilibrium with its condensed phases in a closed system.</Description>
+      <DisplayControls>
+        <ShowAtMost>2</ShowAtMost>
+      </DisplayControls>
+      <Information>
+        <ReferenceNumber>10</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>97.34 mmHg</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+    </Section>
+  </Section>
+  <Section>
+    <TOCHeading>Health and Symptoms</TOCHeading>
+    <Description>Safety and hazards information, symptoms...</Description>
+    <Section>
+      <TOCHeading>Fire Hazards</TOCHeading>
+      <Description>Description of the Fire Hazard information</Description>
+      <Information>
+        <ReferenceNumber>1</ReferenceNumber>
+        <Reference>U.S. Department of Transportation, Transport Canada, and Secretariat of Communications and Transport of Mexico, with collaboration from Argentina&apos;s Centro de InformaciÃ³n QuÃ­mica para Emergencias. 2016 Emergency Response Guidebook. https://www.phmsa.dot.gov/hazmat/outreach-training/erg (accessed April 26, 2016).</Reference>
+        <Value>
+          <StringWithMarkup>
+            <String>Excerpt from ERG Guide 127 [Flammable Liquids (Water-Miscible)]:  HIGHLY FLAMMABLE: Will be easily ignited by heat, sparks or flames. Vapors may form explosive mixtures with air. Vapors may travel to source of ignition and flash back. Most vapors are heavier than air. They will spread along ground and collect in low or confined areas (sewers, basements, tanks). Vapor explosion hazard indoors, outdoors or in sewers. Those substances designated with a (P) may polymerize explosively when heated or involved in a fire. Runoff to sewer may create fire or explosion hazard. Containers may explode when heated. Many liquids are lighter than water. (ERG, 2016)</String>
+            <Markup>
+              <Start>47</Start>
+              <Length>5</Length>
+              <URL>https://pubchem.ncbi.nlm.nih.gov/compound/Water</URL>
+              <Type>PubChem Internal Link</Type>
+              <Extra>CID-962</Extra>
+            </Markup>
+            <Markup>
+              <Start>639</Start>
+              <Length>5</Length>
+              <URL>https://pubchem.ncbi.nlm.nih.gov/compound/water</URL>
+              <Type>PubChem Internal Link</Type>
+              <Extra>CID-962</Extra>
+            </Markup>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+      <Information>
+        <ReferenceNumber>22</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>Flammable - 3rd degree, Reactive - 1st degree</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+    </Section>
+  </Section>
+  <Section>
+    <TOCHeading>First Aid</TOCHeading>
+    <Description>First Aid information</Description>
+    <Information>
+      <ReferenceNumber>1</ReferenceNumber>
+      <Reference>U.S. Department of Transportation, Transport Canada, and Secretariat of Communications and Transport of Mexico, with collaboration from Argentina&apos;s Centro de InformaciÃ³n QuÃ­mica para Emergencias. 2016 Emergency Response Guidebook. https://www.phmsa.dot.gov/hazmat/outreach-training/erg (accessed April 26, 2016).</Reference>
+      <Value>
+        <StringWithMarkup>
+          <String>Excerpt from ERG Guide 127 [Flammable Liquids (Water-Miscible)]:  Ensure that medical personnel are aware of the material(s) involved and take precautions to protect themselves. Move victim to fresh air. Call 911 or emergency medical service. Give artificial respiration if victim is not breathing. Administer oxygen if breathing is difficult. Remove and isolate contaminated clothing and shoes. In case of contact with substance, immediately flush skin or eyes with running water for at least 20 minutes. Wash skin with soap and water. In case of burns, immediately cool affected skin for as long as possible with cold water. Do not remove clothing if adhering to skin. Keep victim calm and warm. (ERG, 2016)</String>
+          <Markup>
+            <Start>47</Start>
+            <Length>5</Length>
+            <URL>https://pubchem.ncbi.nlm.nih.gov/compound/Water</URL>
+            <Type>PubChem Internal Link</Type>
+            <Extra>CID-962</Extra>
+          </Markup>
+          <Markup>
+            <Start>310</Start>
+            <Length>6</Length>
+            <URL>https://pubchem.ncbi.nlm.nih.gov/element/Oxygen</URL>
+            <Type>PubChem Internal Link</Type>
+            <Extra>Element-Oxygen</Extra>
+          </Markup>
+          <Markup>
+            <Start>475</Start>
+            <Length>5</Length>
+            <URL>https://pubchem.ncbi.nlm.nih.gov/compound/water</URL>
+            <Type>PubChem Internal Link</Type>
+            <Extra>CID-962</Extra>
+          </Markup>
+          <Markup>
+            <Start>530</Start>
+            <Length>5</Length>
+            <URL>https://pubchem.ncbi.nlm.nih.gov/compound/water</URL>
+            <Type>PubChem Internal Link</Type>
+            <Extra>CID-962</Extra>
+          </Markup>
+          <Markup>
+            <Start>620</Start>
+            <Length>5</Length>
+            <URL>https://pubchem.ncbi.nlm.nih.gov/compound/water</URL>
+            <Type>PubChem Internal Link</Type>
+            <Extra>CID-962</Extra>
+          </Markup>
+        </StringWithMarkup>
+      </Value>
+    </Information>
+  </Section>
+  <Section>
+    <TOCHeading>Stability and Reactivity</TOCHeading>
+    <Description>Stability and reactivity lists chemical stability and possibility of hazardous reactions. (See also Stability section under the Experimental Properties if available)</Description>
+    <Section>
+      <TOCHeading>Reactivity Profile</TOCHeading>
+      <Description>Generic reactivity information from CAMEO.</Description>
+      <Information>
+        <ReferenceNumber>1</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>METHYL TETRAHYDROFURAN reacts violently with oxidants, causing fire and explosion hazards [Handling Chemicals Safely 1980. p. 891].</String>
+            <Markup>
+              <Start>0</Start>
+              <Length>22</Length>
+              <URL>https://pubchem.ncbi.nlm.nih.gov/compound/METHYL-TETRAHYDROFURAN</URL>
+              <Type>PubChem Internal Link</Type>
+              <Extra>CID-7301</Extra>
+            </Markup>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+    </Section>
+    <Section>
+      <TOCHeading>Reactivity Alerts</TOCHeading>
+      <Description>Special alerts if the chemical is especially reactive</Description>
+      <Information>
+        <ReferenceNumber>1</ReferenceNumber>
+        <Value>
+          <StringWithMarkup>
+            <String>Highly Flammable</String>
+          </StringWithMarkup>
+          <StringWithMarkup>
+            <String>Peroxidizable Compound</String>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+    </Section>
+  </Section>
+  <Section>
+    <TOCHeading>Storage and Handling</TOCHeading>
+    <Description>General guidelines for the storage and handling of chemicals along with recommendations for the use of personal protective equipment and clothing. For guidance on the selection and use of ventilators, consult OSHA regulation 29 CFR Â§1910.134.</Description>
+    <Section>
+      <TOCHeading>Personal Protective Equipment (PPE)</TOCHeading>
+      <Description>Personal Protection and related information</Description>
+      <DisplayControls>
+        <ShowAtMost>2</ShowAtMost>
+      </DisplayControls>
+      <Information>
+        <ReferenceNumber>1</ReferenceNumber>
+        <Reference>U.S. Department of Transportation, Transport Canada, and Secretariat of Communications and Transport of Mexico, with collaboration from Argentina&apos;s Centro de InformaciÃ³n QuÃ­mica para Emergencias. 2016 Emergency Response Guidebook. https://www.phmsa.dot.gov/hazmat/outreach-training/erg (accessed April 26, 2016).</Reference>
+        <Value>
+          <StringWithMarkup>
+            <String>Excerpt from ERG Guide 127 [Flammable Liquids (Water-Miscible)]:  Wear positive pressure self-contained breathing apparatus (SCBA). Structural firefighters&apos; protective clothing will only provide limited protection. (ERG, 2016)</String>
+            <Markup>
+              <Start>47</Start>
+              <Length>5</Length>
+              <URL>https://pubchem.ncbi.nlm.nih.gov/compound/Water</URL>
+              <Type>PubChem Internal Link</Type>
+              <Extra>CID-962</Extra>
+            </Markup>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+    </Section>
+    <Section>
+      <TOCHeading>Nonfire Spill Response</TOCHeading>
+      <Description>Information for Nonfire Spill Response</Description>
+      <Information>
+        <ReferenceNumber>1</ReferenceNumber>
+        <Reference>U.S. Department of Transportation, Transport Canada, and Secretariat of Communications and Transport of Mexico, with collaboration from Argentina&apos;s Centro de InformaciÃ³n QuÃ­mica para Emergencias. 2016 Emergency Response Guidebook. https://www.phmsa.dot.gov/hazmat/outreach-training/erg (accessed April 26, 2016).</Reference>
+        <Value>
+          <StringWithMarkup>
+            <String>Excerpt from ERG Guide 127 [Flammable Liquids (Water-Miscible)]:  ELIMINATE all ignition sources (no smoking, flares, sparks or flames in immediate area). All equipment used when handling the product must be grounded. Do not touch or walk through spilled material. Stop leak if you can do it without risk. Prevent entry into waterways, sewers, basements or confined areas. A vapor-suppressing foam may be used to reduce vapors. Absorb or cover with dry earth, sand or other non-combustible material and transfer to containers. Use clean, non-sparking tools to collect absorbed material.  LARGE SPILL: Dike far ahead of liquid spill for later disposal. Water spray may reduce vapor, but may not prevent ignition in closed spaces. (ERG, 2016)</String>
+            <Markup>
+              <Start>47</Start>
+              <Length>5</Length>
+              <URL>https://pubchem.ncbi.nlm.nih.gov/compound/Water</URL>
+              <Type>PubChem Internal Link</Type>
+              <Extra>CID-962</Extra>
+            </Markup>
+            <Markup>
+              <Start>652</Start>
+              <Length>5</Length>
+              <URL>https://pubchem.ncbi.nlm.nih.gov/compound/Water</URL>
+              <Type>PubChem Internal Link</Type>
+              <Extra>CID-962</Extra>
+            </Markup>
+          </StringWithMarkup>
+        </Value>
+      </Information>
+    </Section>
+  </Section>
+  <Reference>
+    <ReferenceNumber>1</ReferenceNumber>
+    <SourceName>CAMEO Chemicals</SourceName>
+    <SourceID>3972</SourceID>
+    <Name>METHYLTETRAHYDROFURAN</Name>
+    <Description>CAMEO Chemicals is a chemical database designed for people who are involved in hazardous material incident response and planning. CAMEO Chemicals contains a library with thousands of datasheets containing response-related information and recommendations for hazardous materials that are commonly transported, used, or stored in the United States. CAMEO Chemicals was developed by the National Oceanic and Atmospheric Administration&apos;s Office of Response and Restoration in partnership with the Environmental Protection Agency&apos;s Office of Emergency Management.</Description>
+    <URL>https://cameochemicals.noaa.gov/chemical/3972</URL>
+    <LicenseNote>CAMEO Chemicals and all other CAMEO products are available at no charge to those organizations and individuals (recipients) responsible for the safe handling of chemicals. However, some of the chemical data itself is subject to the copyright restrictions of the companies or organizations that provided the data.</LicenseNote>
+    <LicenseURL>https://cameochemicals.noaa.gov/help/reference/terms_and_conditions.htm?d_f=false</LicenseURL>
+    <ANID>759534</ANID>
+  </Reference>
+  <Reference>
+    <ReferenceNumber>2</ReferenceNumber>
+    <SourceName>CAS Common Chemistry</SourceName>
+    <SourceID>96-47-9</SourceID>
+    <Name>2-Methyltetrahydrofuran</Name>
+    <Description>CAS Common Chemistry is an open community resource for accessing chemical information. Nearly 500,000 chemical substances from CAS REGISTRY cover areas of community interest, including common and frequently regulated chemicals, and those relevant to high school and undergraduate chemistry classes. This chemical information, curated by our expert scientists, is provided in alignment with our mission as a division of the American Chemical Society.</Description>
+    <URL>https://commonchemistry.cas.org/detail?cas_rn=96-47-9&amp;search=96479</URL>
+    <LicenseNote>The data from CAS Common Chemistry is provided under a CC-BY-NC 4.0 license, unless otherwise stated.</LicenseNote>
+    <LicenseURL>https://creativecommons.org/licenses/by-nc/4.0/</LicenseURL>
+    <ANID>12768535</ANID>
+  </Reference>
+  <Reference>
+    <ReferenceNumber>3</ReferenceNumber>
+    <SourceName>ChemIDplus</SourceName>
+    <SourceID>0000096479</SourceID>
+    <Name>2-Methyltetrahydrofuran</Name>
+    <Description>ChemIDplus is a free, web search system that provides access to the structure and nomenclature authority files used for the identification of chemical substances cited in National Library of Medicine (NLM) databases, including the TOXNET system.</Description>
+    <URL>https://chem.nlm.nih.gov/chemidplus/sid/0000096479</URL>
+    <LicenseURL>https://www.nlm.nih.gov/copyright.html</LicenseURL>
+    <ANID>764471</ANID>
+  </Reference>
+  <Reference>
+    <ReferenceNumber>4</ReferenceNumber>
+    <SourceName>ChemIDplus</SourceName>
+    <SourceID>0025265683</SourceID>
+    <Name>Methyltetrahydrofuran</Name>
+    <Description>ChemIDplus is a free, web search system that provides access to the structure and nomenclature authority files used for the identification of chemical substances cited in National Library of Medicine (NLM) databases, including the TOXNET system.</Description>
+    <URL>https://chem.nlm.nih.gov/chemidplus/sid/0025265683</URL>
+    <LicenseURL>https://www.nlm.nih.gov/copyright.html</LicenseURL>
+    <ANID>868782</ANID>
+  </Reference>
+  <Reference>
+    <ReferenceNumber>7</ReferenceNumber>
+    <SourceName>DTP/NCI</SourceName>
+    <SourceID>NSC 2115</SourceID>
+    <Name>2-METHYLTETRAHYDROFURAN</Name>
+    <Description>The NCI Development Therapeutics Program (DTP) provides services and resources to the academic and private-sector research communities worldwide to facilitate the discovery and development of new cancer therapeutic agents.</Description>
+    <URL>https://dtp.cancer.gov/dtpstandard/servlet/dwindex?searchtype=NSC&amp;outputformat=html&amp;searchlist=2115</URL>
+    <LicenseNote>Unless otherwise indicated, all text within NCI products is free of copyright and may be reused without our permission. Credit the National Cancer Institute as the source.</LicenseNote>
+    <LicenseURL>https://www.cancer.gov/policies/copyright-reuse</LicenseURL>
+    <ANID>6875843</ANID>
+  </Reference>
+  <Reference>
+    <ReferenceNumber>9</ReferenceNumber>
+    <SourceName>EPA Chemicals under the TSCA</SourceName>
+    <SourceID>96-47-9</SourceID>
+    <Name>Furan, tetrahydro-2-methyl-</Name>
+    <Description>EPA Chemicals under the Toxic Substances Control Act (TSCA) collection contains information on chemicals and their regulation under TSCA, including non-confidential content from the TSCA Chemical Substance Inventory, Acute Exposure Guideline Levels (AEGLs), and Chemical Data Reporting.</Description>
+    <URL>https://www.epa.gov/chemicals-under-tsca</URL>
+    <LicenseURL>https://www.epa.gov/privacy/privacy-act-laws-policies-and-resources</LicenseURL>
+    <ANID>7755647</ANID>
+  </Reference>
+  <Reference>
+    <ReferenceNumber>10</ReferenceNumber>
+    <SourceName>EPA DSSTox</SourceName>
+    <SourceID>DTXSID9030258</SourceID>
+    <Name>2-Methyltetrahydrofuran</Name>
+    <Description>DSSTox provides a high quality public chemistry resource for supporting improved predictive toxicology.</Description>
+    <URL>https://comptox.epa.gov/dashboard/DTXSID9030258</URL>
+    <LicenseURL>https://www.epa.gov/privacy/privacy-act-laws-policies-and-resources</LicenseURL>
+    <ANID>1155826</ANID>
+  </Reference>
+  <Reference>
+    <ReferenceNumber>12</ReferenceNumber>
+    <SourceName>European Chemicals Agency (ECHA)</SourceName>
+    <SourceID>202-507-4</SourceID>
+    <Name>Tetrahydro-2-methylfuran</Name>
+    <Description>The European Chemicals Agency (ECHA) is an agency of the European Union which is the driving force among regulatory authorities in implementing the EU&apos;s groundbreaking chemicals legislation for the benefit of human health and the environment as well as for innovation and competitiveness.</Description>
+    <URL>https://echa.europa.eu/substance-information/-/substanceinfo/100.002.281</URL>
+    <LicenseNote>Use of the information, documents and data from the ECHA website is subject to the terms and conditions of this Legal Notice, and subject to other binding limitations provided for under applicable law, the information, documents and data made available on the ECHA website may be reproduced, distributed and/or used, totally or in part, for non-commercial purposes provided that ECHA is acknowledged as the source: &quot;Source: European Chemicals Agency, http://echa.europa.eu/&quot;. Such acknowledgement must be included in each copy of the material. ECHA permits and encourages organisations and individuals to create links to the ECHA website under the following cumulative conditions: Links can only be made to webpages that provide a link to the Legal Notice page.</LicenseNote>
+    <LicenseURL>https://echa.europa.eu/web/guest/legal-notice</LicenseURL>
+    <ANID>2006810</ANID>
+  </Reference>
+  <Reference>
+    <ReferenceNumber>13</ReferenceNumber>
+    <SourceName>European Chemicals Agency (ECHA)</SourceName>
+    <SourceID>246-769-8</SourceID>
+    <Name>Methyltetrahydrofuran</Name>
+    <Description>The European Chemicals Agency (ECHA) is an agency of the European Union which is the driving force among regulatory authorities in implementing the EU&apos;s groundbreaking chemicals legislation for the benefit of human health and the environment as well as for innovation and competitiveness.</Description>
+    <URL>https://echa.europa.eu/substance-information/-/substanceinfo/100.042.503</URL>
+    <LicenseNote>Use of the information, documents and data from the ECHA website is subject to the terms and conditions of this Legal Notice, and subject to other binding limitations provided for under applicable law, the information, documents and data made available on the ECHA website may be reproduced, distributed and/or used, totally or in part, for non-commercial purposes provided that ECHA is acknowledged as the source: &quot;Source: European Chemicals Agency, http://echa.europa.eu/&quot;. Such acknowledgement must be included in each copy of the material. ECHA permits and encourages organisations and individuals to create links to the ECHA website under the following cumulative conditions: Links can only be made to webpages that provide a link to the Legal Notice page.</LicenseNote>
+    <LicenseURL>https://echa.europa.eu/web/guest/legal-notice</LicenseURL>
+    <ANID>2057589</ANID>
+  </Reference>
+  <Reference>
+    <ReferenceNumber>22</ReferenceNumber>
+    <SourceName>NJDOH RTK Hazardous Substance List</SourceName>
+    <SourceID>1294</SourceID>
+    <Name>2-methyl tetrahydrofuran</Name>
+    <Description>New Jersey Department of Health, Right to Know Hazardous Substance List, read more: https://www.nj.gov/health/workplacehealthandsafety/right-to-know/hazardous-substances/</Description>
+    <URL>http://nj.gov/health/eoh/rtkweb/documents/fs/1294.pdf</URL>
+    <ANID>2269985</ANID>
+  </Reference>
+  <Reference>
+    <ReferenceNumber>11</ReferenceNumber>
+    <SourceName>European Chemicals Agency (ECHA)</SourceName>
+    <SourceID>77485</SourceID>
+    <Name>Tetrahydro-2-methylfuran</Name>
+    <Description>The information provided here is aggregated from the &quot;Notified classification and labelling&quot; from ECHA&apos;s C&amp;L Inventory. Read more: https://echa.europa.eu/information-on-chemicals/cl-inventory-database</Description>
+    <URL>https://echa.europa.eu/information-on-chemicals/cl-inventory-database/-/discli/details/77485</URL>
+    <LicenseNote>Use of the information, documents and data from the ECHA website is subject to the terms and conditions of this Legal Notice, and subject to other binding limitations provided for under applicable law, the information, documents and data made available on the ECHA website may be reproduced, distributed and/or used, totally or in part, for non-commercial purposes provided that ECHA is acknowledged as the source: &quot;Source: European Chemicals Agency, http://echa.europa.eu/&quot;. Such acknowledgement must be included in each copy of the material. ECHA permits and encourages organisations and individuals to create links to the ECHA website under the following cumulative conditions: Links can only be made to webpages that provide a link to the Legal Notice page.</LicenseNote>
+    <LicenseURL>https://echa.europa.eu/web/guest/legal-notice</LicenseURL>
+    <ANID>1873964</ANID>
+  </Reference>
+  <Reference>
+    <ReferenceNumber>74</ReferenceNumber>
+    <SourceName>PubChem</SourceName>
+    <SourceID>PubChem</SourceID>
+    <Description>Data deposited in or computed by PubChem</Description>
+    <URL>https://pubchem.ncbi.nlm.nih.gov</URL>
+  </Reference>
+</Record>
+</Records>

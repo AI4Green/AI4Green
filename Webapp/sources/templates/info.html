@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<body>
+<div class="container">
+    <h2>AI4Green Documentation & Help</h2>
+    <h3>Video Tutorials</h3>
+    <p>We have several video tutorials to explain Workgroups & Workbooks, the Reaction Constructor, and our Solvent Guide. Click the icon in the top right of the player to view all videos in this playlist.</p>
+    <iframe id="help-video" width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PL7u_tOd0vTynC0tgWt0cb7jLlnEoDwiO4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><br><br>
+    <h3>User Guides</h3>
+    <a id="quickstart-guide" href="{{ url_for('main.send_quickstart_guide') }}" class="btn btn-primary btn-lg">Quickstart Guide</a>
+    <br><br>
+    <a id="get-manual" href="{{ url_for('main.send_guide') }}" class="btn btn-primary btn-lg">User Guide</a>
+    <br><br>
+    <a id="marvin-js-help" href="{{ url_for('main.marvin_js_help') }}" class="btn btn-primary btn-lg">Marvin JS Help Page</a>
+    <br><br>
+    <a id="tutorial-mode" href="/sketcher_tutorial/yes" class="btn btn-success btn-lg" style="color: white;" target="_blank">Reaction Builder Tutorial <i class="bi bi-box-arrow-in-up-right"></i></a>
+    <br><br>
+    Click here to view the <a id="privacy_link" href="{{ url_for('auth.privacy_notice') }}" target="_blank">privacy notice</a>.
+    <br>
+    Click here to view the <a id="hazard_link" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank">hazard disclaimer</a>.
+    <br>
+    <br>
+    <a id="github_link" href="https://github.com/AI4Green/AI4Green" target="_blank" class="btn btn-success btn-lg">GitHub Repository</a>
+</div>
+</body>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2>Create Workgroup</h2>
+    <p style="color:red">
+        Please note that you must be a Principal Investigator to set up a Workgroup. All other researchers should contact their PI directly and ask them to set up a Workgroup for their research group.
+    </p>
+    <form method="POST">
+        {{ form.csrf_token }}
+{#        Institution:<br>#}
+{#        {{ form.institution }}<br><br>#}
+        Workgroup Name:<br>
+        {{ form.workgroup }}<br>
+        {% for error in form.workgroup.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+        <br>
+        Please indicate why you need to set up a Workgroup:<br>
+        {{ form.info }}<br>
+        {% for error in form.info.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+        <br>
+        {{ form.submit }}
+    </form>
+</div>
+{% endblock %}
+
+
+

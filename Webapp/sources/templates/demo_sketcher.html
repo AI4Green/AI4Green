@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
+</head>
+<div id="page-contents" class="container-fluid">
+    <h2>Demo Reaction Constructor</h2>
+    <div>
+        <label for="tutorial-mode">Need some help getting started?<br>
+            <a id="tutorial-mode" href="/sketcher_tutorial/yes" class="btn btn-success btn-sm" style="color: white;" target="_blank">Enter Tutorial Mode <i class="bi bi-box-arrow-in-up-right"></i></a>
+        </label>
+        <p>Please sketch or upload your reaction to begin. Click <a target="_blank" href="{{ url_for('main.marvin_js_help') }}">here</a> to view our Marvin JS help guide.</p>
+        <p>Please note compounds drawn above or underneath the arrow will not be recognised.</p>
+        <p><b>Reactions cannot be saved in demo mode and only common compounds in our database may be used.</b></p>
+    </div>
+    <div id="sketchers-div">
+        <div>
+            Selected Reaction Sketcher:
+            <label> MarvinJS
+                <input type="radio" id="marvin-select" name="sketcher-select" checked="checked">
+            </label>
+            <label> Ketcher
+                <input type="radio" id="ketcher-select" name="sketcher-select">
+            </label>
+        </div>
+        <div class="loading-circle"></div>
+        <div id="ketcher-sketcher"></div>
+        <div id="marvin-sketcher" style="width: 1020px; height: 480px"></div>
+    </div>
+    <br>
+    <input type="hidden" id="js-reaction-scheme-image" value="0" style="{'width': 600, 'height': 400}">
+    <p><button id="demo-button" type="button" class="btn btn-primary" onclick="loadExampleSmiles()" style="width: 100px;">Example</button></p>
+    <p><button id="action-button-submit" type="button" class="btn btn-primary" onclick="createReactionTable()">Submit</button></p>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
+
+    <!--The loading bar div-->
+    <div class="loading-bar"></div>
+
+    <br>
+
+    <div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;"></div>
+
+    <!--Output of reaction table-->
+    <div id="reaction-table-div"></div>
+    <br>
+    <input type="submit" value="Summary" id="action-summary" class="btn btn-primary" onclick="showSummary()" title="Generate summary table"
+           style="display: none; width: 100px;">
+    <!--Output of reaction image and summary table-->
+
+
+    <div id="dvContainer" class="container-fluid" style="padding-left: 0px">
+        <div id="imageContainer" style="display: none;">
+            <img id="image" />
+        </div>
+        <p id="js-summary-table"></p>
+    </div>
+
+
+    <div id="mark-complete-div" style="display:none;">
+        <input type="checkbox" id="mark-complete">
+        <label for="mark-complete"><b>Mark Reaction as Complete</b></label>
+    </div>
+    <div id="update-reaction-div" style="display:none;">
+        <button id="update-reaction" onclick="updateReaction()" class="btn btn-primary" style="width: fit-content;">Update</button>
+    </div>
+    <br>
+    <div id="save-reaction-div" style="display:none;">
+        <button id="save-as-reaction" onclick="saveAsReaction()" class="btn btn-primary" style="width: fit-content;">Save As</button>
+    </div>
+    <br>
+    <button id="print-pdf" onclick="window.print()" class="btn btn-primary" style="display: none; width:140px">Print Summary</button>
+    <!--input type="button" value="Print Form" onclick="PrintElem('#dvContainer')" /-->
+    </div>
+    <br>
+    <div class="notToPrint" id="printoutput"></div>
+    <input type="hidden" id="js-reaction-smiles">
+    <input type="hidden" value="{{ demo }}" id="js-demo">
+    <input type="hidden" value="{{ active_workgroup }}" id="js-active-workgroup">
+    <input type="hidden" value="{{ active_workbook }}" id="js-active-workbook">
+    <input type="hidden" value="{{ url_for('static', filename='ketcher/index.html') }}" id="ketcher-source">
+</div>
+{% endblock %}

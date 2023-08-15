@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher_utils.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/search.js') }}"></script>
+</head>
+<div class="container-fluid">
+    {% if not workgroups %}
+        <b>You must belong to a workgroup to use the search feature</b>
+    {% else %}
+    <div class="row">
+        <div id="search-options" class="col-2 py-3">
+            <h5>Filters</h5>
+            <form class="form">
+                <div class="form-group">
+                    <!--            workgroups -->
+                    <label for="workgroup-select">Workgroup</label>
+                    <select id="workgroup-select" class="form-control" onchange="updateSelectedWorkGroup()">
+                        <option value="All">All</option>
+                        {% for workgroup in workgroups %}
+                        <option value="{{ workgroup }}">{{ workgroup }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!--            workbooks -->
+                <div class="form-group">
+                    <label for="workbook-select">Workbook</label>
+                    <select id="workbook-select" class="form-control"></select>
+                </div>
+<!--                following inputs require backend support before being made visible-->
+
+                <!--                Creator dropdown - requires backend support -->
+                <!--                <div class="form-group">-->
+                <!--                    <label for="creator-select">Creator</label>-->
+                <!--                    <select id="creator-select" class="form-control">-->
+                <!--                    </select>-->
+                <!--                </div>-->
+
+                <!--                date range input requirs backend support-->
+                <!--                <div class="form-group">-->
+                <!--                    <label for="daterange">Creation Date Range</label>-->
+                <!--                    <div id="daterange" class="input-group">-->
+                <!--                        <input type="date" class="form-control">-->
+                <!--                        <div class="input-group-text">to</div>-->
+                <!--                        <input type="date" class="form-control">-->
+                <!--                    </div>-->
+                <!--                </div>-->
+
+            </form>
+        </div>
+
+        <!--        end of search options-->
+        <!--        search query column-->
+        <div id="search-query" class="col-6 py-3">
+            <h5>Search reactants and products by exact structure</h5>
+            <div id="sketchers-div">
+                <div>
+                    Selected Reaction Sketcher:
+                    <label> MarvinJS
+                        <input type="radio" id="marvin-select" name="sketcher-select" checked="checked">
+                    </label>
+                    <label> Ketcher
+                        <input type="radio" id="ketcher-select" name="sketcher-select">
+                    </label>
+                </div>
+                <div class="loading-circle"></div>
+                <div id="ketcher-sketcher"></div>
+                <div id="marvin-sketcher" style="width: 800px; height: 480px"></div>
+            </div>
+<!--            structure search-->
+            <div class="row mb-3">
+<!--                <div class="col py-2">-->
+<!--                    &lt;!&ndash;                radio buttons for structure search options&ndash;&gt;-->
+<!--                    <b>Structure Search Options</b>-->
+<!--                    <div class="form-check">-->
+<!--                        <input name="structure-search-option" id="exact-structure" type="radio" class="form-check-input" checked="checked">-->
+<!--                        <label for="exact-structure" class="form-check-label">Exact Structure</label>-->
+<!--                    </div>-->
+<!--                    <div class="form-check">-->
+<!--                        <input name="structure-search-option" id="substructure" type="radio" class="form-check-input">-->
+<!--                        <label for="substructure" class="form-check-label">Substructure</label>-->
+<!--                    </div>-->
+<!--                </div>-->
+                <!--                end of radio buttons-->
+                <div class="col d-flex align-items-end py-2">
+                    <button id="structure-search-btn" class="btn btn-success ml-auto" onclick="structureSearch()">Structure Search</button>
+                </div>
+            </div>
+<!--            end of structure search-->
+
+            <!--            text search-->
+<!--            <b>Text Search Options</b>-->
+<!--            <div class="row mb-3">-->
+<!--                <div class="col">-->
+<!--                    <div class="form-check">-->
+<!--                        <input name="text-search-option" id="exact-cas" type="radio" class="form-check-input" checked="checked">-->
+<!--                        <label for="exact-cas" class="form-check-label">Exact CAS</label>-->
+<!--                    </div>-->
+<!--                    <div class="form-check">-->
+<!--                        <input name="text-search-option" id="exact-name" type="radio" class="form-check-input">-->
+<!--                        <label for="exact-name" class="form-check-label">Exact Compound Name</label>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="col">-->
+<!--                    <div class="form-check">-->
+<!--                        <input name="text-search-option" id="similar name" type="radio" class="form-check-input">-->
+<!--                        <label for="similar name" class="form-check-label">Similar Compound Name</label>-->
+<!--                    </div>-->
+<!--                    <div class="form-check">-->
+<!--                        <input name="text-search-option" id="metadata" type="radio" class="form-check-input">-->
+<!--                        <label for="metadata" class="form-check-label">Metadata (Name/Description)</label>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="input-group mb-3">-->
+<!--                <input type="text" class="form-control" placeholder="Text Search" aria-label="Text Search">-->
+<!--                <div class="input-group-append">-->
+<!--                    <button class="btn btn-outline-primary" onclick="textSearch()" type="button">Text Search</button>-->
+<!--                </div>-->
+<!--            </div>-->
+            <!--        end of text search-->
+        </div>
+<!--        end of search query options-->
+        <!--        search results column-->
+        <div id="search-results" class="col-4 py-3">
+            <h5>Results</h5>
+            <div id="search-results-message">
+            </div>
+            <div id="search-results-contents" class="scrollClass">
+
+            </div>
+
+            <div id="export-div" style="display: none;">
+                <h3>Export Reaction Data</h3>
+                <button id="export-csv" class="btn btn-primary" onclick="getcsv()">Export as CSV</button>
+                <button id="export-pdf" class="btn btn-primary" onclick="getpdf()">Export to Print/PDF</button>
+                <br><br>
+                <p>Please note that not all data will be exported for reactions last updated before version 1.5.</p>
+            </div>
+
+        </div>
+
+    </div>
+    {% endif %}
+    <input type="hidden" value="{{ url_for('static', filename='ketcher/index.html') }}" id="ketcher-source">
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+.reaction-time {
+    font-size: 11px;
+    color: darkgrey;
+}
+
+.line {
+    height: 2px;
+    border-width: 0;
+    color: gray;
+    background-color: gray;
+}
+
+.line-news {
+    height: 2px;
+    border-width: 0;
+    color: black;
+    background-color: black;
+}
+
+.description {
+    font-size: 12px;
+}
+
+.reaction-heading{
+    width: 400px;
+}
+
+.scrollClass {
+  height:400px;
+  overflow-y: scroll;
+}

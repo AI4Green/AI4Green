@@ -1,0 +1,376 @@
+<div id="section-to-print">
+<table class="table table-sm">
+    <tr>
+        <td style="background-color: rgb(184, 184, 184);"><b>&#8470;</b></td>
+        <td style="width:30%; background-color: rgb(184, 184, 184);"><b>Reactants/catalysts/reagents</b></td>
+        <td style="width:10%; background-color: rgb(184, 184, 184);"><b>Mol.Wt</b></td>
+        <td style="width:10%; background-color: rgb(184, 184, 184);"><b>Density (g/mL)</b></td>
+        <td style="width:10%; background-color: rgb(184, 184, 184);"><b>Conc. (M)</b></td>
+        <td style="width:10%; background-color: rgb(184, 184, 184);"><b>Equiv.</b></td>
+        <td style="width:10%; background-color: rgb(184, 184, 184);"><b>Amount ({{ amount_unit }})</b></td>
+        <td style="width:10%; background-color: rgb(184, 184, 184);"><b>Volume ({{ volume_unit }})</b></td>
+        <td style="width:10%;background-color: rgb(184, 184, 184);"><b>Mass ({{ mass_unit }})</b></td>
+    </tr>
+    {% for reactant in reactants %}
+    <tr>
+        <td style="background-color: rgb(184, 184, 184);">{{ loop.index }}</td>
+        <td>{{ reactant }}</td>
+        <td><input type="number" value="{{ reactant_molecular_weights[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ reactant_densities[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ reactant_concentrations[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ reactant_equivalents[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ rounded_reactant_amounts[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ rounded_reactant_volumes[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ rounded_reactant_masses[loop.index0] }}" style="width:80px; border:none" readonly></td>
+    </tr>
+    {% endfor %}
+    {% for reagent in reagents %}
+    <tr>
+        <td style="background-color: rgb(184, 184, 184);">{{ reagent_table_numbers[loop.index0] }}</td>
+        <td>{{ reagent }}</td>
+        <td><input type="number" value="{{ reagent_molecular_weights[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ reagent_densities[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ reagent_concentrations[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ reagent_equivalents[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ rounded_reagent_amounts[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ rounded_reagent_volumes[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ rounded_reagent_masses[loop.index0] }}" style="width:80px; border:none" readonly></td>
+    </tr>    
+    {% endfor %}
+    <tr>
+        <td style="background-color: rgb(184, 184, 184);"></td>
+        <td style="background-color: rgb(184, 184, 184);"><b>Solvents</b></td>
+        <td style="background-color: rgb(184, 184, 184);"></td>
+        <td style="background-color: rgb(184, 184, 184);"></td>
+        <td style="background-color: rgb(184, 184, 184);"></td>
+        <td style="background-color: rgb(184, 184, 184);" id="scrollToUnreacted"></td>
+        <td style="background-color: rgb(184, 184, 184);"></td>
+        <td style="background-color: rgb(184, 184, 184);"><b>Volume ({{ solvent_volume_unit }})</b></td>
+        <td style="background-color: rgb(184, 184, 184);"></td>
+    </tr>
+    {% for solvent in solvents %}
+    <tr>
+        <td style="background-color: rgb(184, 184, 184);">{{ solvent_table_numbers[loop.index0] }}</td>
+        <td>{{ solvent }}</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><input type="number" value="{{ solvent_volumes[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td></td>
+    </tr>    
+    {% endfor %}
+    <tr>
+        <td style="background-color: rgb(184, 184, 184);"></td>
+        <td id="summary-product-cell" style="background-color: rgb(184, 184, 184);"><b>Product</b></td>
+        <td style="background-color: rgb(184, 184, 184);"><b>Mol.Wt</b></td>
+        <td colspan="2" style="background-color: rgb(184, 184, 184);"><b>Theoretical Yield ({{ product_mass_unit }})</b></td>
+        <td style="background-color: rgb(184, 184, 184);" title="The approximate mass of the limiting reactant which has not reacted. Used to calculate the reaction conversion."><b>Unreacted ({{ product_mass_unit }})</b><i class="bi bi-info-circle"></i></td>
+        <td style="background-color: rgb(184, 184, 184);"><b>Product Mass ({{ product_mass_unit }})</b></td>
+        <td style="background-color: rgb(184, 184, 184);"><b>&#37; Yield</b></td>
+        <td style="background-color: rgb(184, 184, 184);"></td>
+    </tr>
+    {% for product in products %}
+    <tr>
+        <td style="background-color: rgb(184, 184, 184);">{{ product_table_numbers[loop.index0] }}</td>
+        <td>{{ product }}</td>
+        <td><input type="number" value="{{ product_molecular_weights[loop.index0] }}" style="width:80px; border:none" readonly></td>
+
+        <td colspan="2"><input type="number" id="js-product-rounded-mass{{ loop.index }}"
+                               value="{{ rounded_product_masses[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        {% if loop.index0 == main_product_index %}
+        <td><input type="number" step="any" placeholder="-" min="0" style="width:80px;"
+                   id="js-unreacted-reactant-mass" class="main-product{{ loop.index }}"></td>
+        <td><input type="number" step="any" placeholder="-" min="0" style="width:80px;"
+                   id="js-real-product-mass" class="main-product{{ loop.index }}"></td>
+        <td><input type="number" id="js-percentage-yield" style="width:80px; border:none" readonly></td>
+        <td></td>
+        {% else %}
+        <td></td><td></td><td></td><td></td>
+        {% endif %}
+    </tr>
+    {% endfor %}
+<input type="hidden" id="js-limited-reactant-mass" value="{{ reactant_masses[0] }}">
+<input type="hidden" id="js-main-product-mass" value="{{ product_masses[main_product_index] }}">
+    <tr><td colspan="9">&nbsp;</td></tr>
+    <tr>
+        <td style="background-color: rgb(184, 184, 184);"></td>
+        <td colspan="2" style="background-color: rgb(184, 184, 184);"><b>Hazards</b></td>
+        <td colspan="2" style="background-color: rgb(184, 184, 184);"><b>Hazard Rating</b></td>
+        <td colspan="2" style="background-color: rgb(184, 184, 184);"><b>Exposure Potential</b></td>
+        <td colspan="2" style="background-color: rgb(184, 184, 184);"><b>Risk Rating</b></td>
+    </tr>
+    {% for reactant in reactants %}
+    <tr>
+        <td style="background-color: rgb(184, 184, 184);">{{ loop.index }}</td>
+        <td id="Reactant-Hazard-Sentence{{ loop.index }}" class="to-export-hazard-matrix" colspan="2">{{ reactant_hazard_sentences[loop.index0] }}</td>
+        <td id="Reactant-Hazard-Rating{{ loop.index }}" colspan="2" class="{{ reactant_hazard_colors[loop.index0] }} to-export-hazard-matrix">{{ reactant_hazard_ratings[loop.index0] }}</td>
+        <td id="Reactant-Exposure-Potential{{ loop.index }}" colspan="2" class="to-export-hazard-matrix">{{ reactant_exposure_potentials[loop.index0] }}</td>
+        <td id="Reactant-Risk-Rating{{ loop.index }}" colspan="2" class="{{ reactant_risk_colors[loop.index0] }} to-export-hazard-matrix">{{ reactant_risk_ratings[loop.index0] }}</td>
+    </tr>    
+    {%  endfor %}
+    {% for reagent in reagents %}
+    <tr>
+        <td style="background-color: rgb(184, 184, 184);">{{ reagent_table_numbers[loop.index0] }}</td>
+        <td id="Reagent-Hazard-Sentence{{ loop.index }}" class="to-export-hazard-matrix" colspan="2">{{ reagent_hazard_sentences[loop.index0] }}</td>
+        <td id="Reagent-Hazard-Rating{{ loop.index }}" colspan="2" class="{{ reagent_hazard_colors[loop.index0] }} to-export-hazard-matrix">{{ reagent_hazard_ratings[loop.index0] }}</td>
+        <td id="Reagent-Exposure-Potential{{ loop.index }}" class="to-export-hazard-matrix" colspan="2">{{ reagent_exposure_potentials[loop.index0] }}</td>
+        <td id="Reagent-Risk-Rating{{ loop.index }}" colspan="2" class="{{ reagent_risk_colors[loop.index0] }} to-export-hazard-matrix">{{ reagent_risk_ratings[loop.index0] }}</td>
+    </tr>    
+    {% endfor %}
+    {% for solvent in solvents %}
+    <tr>
+        <td style="background-color: rgb(184, 184, 184);">{{ solvent_table_numbers[loop.index0] }}</td>
+        <td id="Solvent-Hazard-Sentence{{ loop.index }}" class="to-export-hazard-matrix" colspan="2">{{ solvent_hazard_sentences[loop.index0] }}</td>
+        <td id="Solvent-Hazard-Rating{{ loop.index }}" colspan="2" class="{{ solvent_risk_colors[loop.index0] }} to-export-hazard-matrix">{{ solvent_hazard_ratings[loop.index0] }}</td>
+        <td id="Solvent-Exposure-Potential{{ loop.index }}" class="to-export-hazard-matrix" colspan="2">{{ solvent_exposure_potentials[loop.index0] }}</td>
+        <td id="Solvent-Risk-Rating{{ loop.index }}" colspan="2" class="{{ solvent_risk_colors[loop.index0] }} to-export-hazard-matrix">{{ solvent_risk_ratings[loop.index0] }}</td>
+    </tr>
+    {% endfor %}
+    {% for product in products %}
+    <tr>
+        <td style="background-color: rgb(184, 184, 184);">{{ product_table_numbers[loop.index0] }}</td>
+        <td id="Product-Hazard-Sentence{{ loop.index }}" class="to-export-hazard-matrix" colspan="2">{{ product_hazard_sentences[loop.index0] }}</td>
+        <td id="Product-Hazard-Rating{{ loop.index }}" colspan="2" class="{{ product_hazard_colors[loop.index0] }} to-export-hazard-matrix">{{ product_hazard_ratings[loop.index0] }}</td>
+        <td id="Product-Exposure-Potential{{ loop.index }}" class="to-export-hazard-matrix" colspan="2">{{ product_exposure_potentials[loop.index0] }}</td>
+        <td id="Product-Risk-Rating{{ loop.index }}" colspan="2" class="{{ product_risk_colors[loop.index0] }} to-export-hazard-matrix">{{ product_risk_ratings[loop.index0] }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td colspan="5"></td>
+        <td colspan="2">Risk Rating:</td>
+        <td id="Overall-Risk-Rating" colspan="2" class="{{ risk_color }} to-export-hazard-matrix">{{ risk_rating }}</td>
+    </tr>
+    <tr><td colspan="9">&nbsp;</td></tr>
+    <tr><td colspan="9" style="background-color: rgb(184, 184, 184);"><b>Sustainability (CHEM21)</b></td></tr>
+    <tr>
+        <td colspan="2" style="vertical-align: top;">
+            <table class="table table-sm w-auto">
+                <tr>
+                    <td style="background-color: rgb(184, 184, 184);"><b>Solvents</b></td>
+                </tr>
+                {% for solvent in solvents %}
+                <tr>
+                    <td class="{{ solvent_flags[loop.index0] }}">{{ solvent }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </td>
+        <td colspan="7" style="vertical-align: top;">
+            <table class="nested-table">
+                <tr>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Safety</b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Temp &#8451;</b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);">
+                        <a href="{{ url_for('summary.element_sustainability') }}" target="_blank" style="color: #333333">
+                            <b>Elements <i class="fa fa-external-link"></i></b>
+                        </a>
+                    </td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Batch/flow</b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Isolation</b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Catalyst</b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Recovery</b></td>
+                </tr>
+                <tr>
+                    <td id="js-safety-cell" class="{{ risk_color }}">{{ risk_rating }}</td>
+                    <td id="js-temperature-cell"><input type="number" id="js-temperature" placeholder="-" style="width: 80px;"></td>
+                    <td id="js-elements-cell" class="{{ element_sustainability_flag }}"><select size="1" id="js-elements" class="{{ element_sustainability_flag }}">
+                        <option class='hazard-reset-hazard' selected>-select-</option>
+                        <option class="hazard-hazardous" {{'selected' if element_sustainability == '5-50 years'}}>5-50 years</option>
+                        <option class="hazard-warning" {{'selected' if element_sustainability == '50-500 years'}}>50-500 years</option>
+                        <option class="hazard-acceptable" {{'selected' if element_sustainability == '+500 years'}}>+500 years</option>
+                    </select></td>
+                    <td id="js-batch-flow-cell"><select size="1" id="js-batch-flow">
+                        <option class='hazard-reset-hazard' selected>-select-</option>
+                        <option class="hazard-warning">Batch</option>
+                        <option class="hazard-acceptable">Flow</option>
+                    </select></td>
+                    <td id="js-isolation-cell"><select size="1" id="js-isolation">
+                        <option class='hazard-reset-hazard' selected>-select-</option>
+                        <option class="hazard-hazardous">Column</option>
+                        <option class="hazard-hazardous">HPLC</option>
+                        <option class="hazard-hazardous">Ion exchange</option>
+                        <option class="hazard-acceptable">Crystallization</option>
+                        <option class="hazard-acceptable">Filtration</option>
+                        <option class="hazard-hazardous">Multiple recryst.</option>
+                        <option class="hazard-acceptable">Distillation &lt; 140&#8451;</option>
+                        <option class="hazard-hazardous">Distillation &gt; 140&#8451;</option>
+                    </select></td>
+                    <td id="js-catalyst-cell"><select size="1" id="js-catalyst">
+                        <option class='hazard-reset-hazard' selected>-select-</option>
+                        <option class="hazard-acceptable">No catalyst or reagents</option>
+                        <option class="hazard-acceptable">Catalyst or enzyme</option>
+                        <option class="hazard-warning">Stoichiometric reagents</option>
+                        <option class="hazard-hazardous">Excess reagents</option>
+                    </select></td>
+                    <td id="js-recovery-cell"><select size="1" id="js-recovery">
+                        <option class='hazard-reset-hazard' selected>-select-</option>
+                        <option class="hazard-acceptable">Recovered catalyst</option>
+                        <option class="hazard-warning">Not recovered catalyst</option>
+                    </select></td>
+                </tr>
+                <tr>
+                    <td style="background-color: rgb(184, 184, 184);"><b>Atom Efficiency</b></td>
+                    <td style="background-color: rgb(184, 184, 184);"><b>Mass Efficiency</b></td>
+                    <td style="background-color: rgb(184, 184, 184);"><b>Yield</b></td>
+                    <td style="background-color: rgb(184, 184, 184);"><b>Conversion</b></td>
+                    <td style="background-color: rgb(184, 184, 184);"><b>Selectivity</b></td>
+                    <td colspan="2" style="background-color: rgb(184, 184, 184);"></td>
+                </tr>
+                <tr>
+                    <td id="js-ae-cell" class="{{ ae_flag }}"><input type="number" class="{{ ae_flag }} to-export" name="Atom Efficiency" value="{{ ae }}" style="width: 80px; border:none;" readonly></td>
+                    <td id="js-me-cell"><input type="number" id="js-me" class="to-export" name="Mass Efficiency" style="width: 80px; border:none;" readonly></td>
+                    <td id="js-yield-cell"><input type="number" id="js-yield" class="to-export" name="Yield" style="width: 80px; border:none" readonly></td>
+                    <td id="js-conversion-cell"><input type="number" id="js-conversion" class="to-export" name="Conversion" style="width: 80px; border:none" readonly></td>
+                    <td id="js-selectivity-cell"><input type="number" id="js-selectivity" class="to-export" name="Selectivity" style="width: 80px;border:none" readonly></td>
+                    <td colspan="2"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="9" style="background-color: rgb(184, 184, 184);"><b>Standard Protocols:</b></td>
+    </tr>
+    <tr>
+        <td colspan="9">
+            <table class="table table-sm w-auto">
+                <tr>
+                    <td><input type="checkbox" id="cyanide" class="to-export-checkbox" name="Standard Protocol Cyanide"><label for="cyanide">Cyanide</label></td>
+                    <td><input type="checkbox" id="hplc" class="to-export-checkbox" name="Standard HPLC"><label for="hplc">HPLC</label></td>
+                    <td><input type="checkbox" id="massSpec" class="to-export-checkbox" name="Standard Protocol Mass Spectrometry"><label for="massSpec">Mass Spec</label></td>
+                    <td><input type="checkbox" id="pyrophorics" class="to-export-checkbox" name="Standard Protocol Pyrophorics"><label for="pyrophorics">Pyrophorics</label></td>
+                    <td><input type="checkbox" id="microwave" class="to-export-checkbox" name="Standard Protocol Microwave"><label for="microwave">Microwave</label></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" id="diazotisation" class="to-export-checkbox" name="Standard Protocol Diazotisation"><label for="diazotisation">Diazotisation</label></td>
+                    <td><input type="checkbox" id="hydrogenation" class="to-export-checkbox" name="Standard Protocol Hydrogenation"><label for="hydrogenation">Hydrogenation</label></td>
+                    <td><input type="checkbox" id="peptideSynthesis" class="to-export-checkbox" name="Standard Protocol Peptide Synthesis"><label for="peptideSynthesis">Peptide Synthesis</label></td>
+                    <td><input type="checkbox" id="ozone" class="to-export-checkbox" name="Standard Protocol Ozone"><label for="ozone">Ozone</label></td>
+                    <td><input type="checkbox" id="field1" class="to-export-checkbox" name="Standard Protocol Custom 1"><label for="field1"><input id="field1-text" type="text"></label></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" id="freeRadicals" class="to-export-checkbox" name="Standard Protocol Free Radicals"><label for="freeRadicals">Free Radicals</label></td>
+                    <td><input type="checkbox" id="liquidAmmonia" class="to-export-checkbox" name="Standard Protocol Liquid Ammonia"><label for="liquidAmmonia">Liquid Ammonia</label></td>
+                    <td><input type="checkbox" id="peroxides" class="to-export-checkbox" name="Standard Protocol Peroxides"><label for="peroxides">Peroxides</label></td>
+                    <td><input type="checkbox" id="sealedTube" class="to-export-checkbox" name="Standard Protocol Sealed Tube"><label for="sealedTube">Sealed Tube</label></td>
+                    <td><input type="checkbox" id="field2" class="to-export-checkbox" name="Standard Protocol Custom 2"><label for="field2"><input id="field2-text" type="text"></label></td>
+                    <td></td>
+                </tr>
+
+    <tr>
+        <td colspan="6" style="background-color: rgb(184, 184, 184);"><b>Disposal of Waste Materials:</b></td>
+    </tr>
+    <tr>
+
+                    <td><input type="checkbox" id="nonHalogenatedSolvent" class="to-export-checkbox" name="Disposal Non-Halogenated Solvent"><label for="nonHalogenatedSolvent">Non-Halogenated Solvent</label></td>
+                    <td><input type="checkbox" id="halogenatedSolvent" class="to-export-checkbox" name="Disposal Halogenated Solvent"><label for="halogenatedSolvent">Halogenated Solvent</label></td>
+                    <td><input type="checkbox" id="specialistContainer" class="to-export-checkbox" name="Disposal Specialist Container"><label for="specialistContainer">Specialist Container</label></td>
+                    <td><input type="checkbox" id="sinkWithExcessWater" class="to-export-checkbox" name="Sink with Excess Water"><label for="sinkWithExcessWater">Sink with Excess Water</label></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+    <tr>
+        <td colspan="6" style="background-color: rgb(184, 184, 184);"><b>Spillage Procedure:</b></td>
+    </tr>
+
+                <tr>
+                    <td><input type="checkbox" id="standardSpillResponse" class="to-export-checkbox" name="Spillage Procedure Standard"><label
+                            for="standardSpillResponse">Standard Spill Response</label></td>
+                    <td colspan="3"><input type="checkbox" id="otherSpillResponse" class="to-export-checkbox" name="Spillage Procedure Other"><label
+                            for="otherSpillResponse">Other Spill Response (Give details on unattended experiment
+                            board)</label></td>
+                    <td></td>
+                    <td></td>
+
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="9" style="background-color: rgb(184, 184, 184);">
+            <b>Other Risks, controls, containment, location and PPE.</b><br>
+            (Hazardous by Products. Exothermic reactions. The need to inform others of risks. Lab and hood number.)</td>
+    </tr>
+    <tr>
+        <td colspan="9"><textarea class="text-in-table" id="other-risks-textbox" style="width: 100%; background-color: white;"></textarea></td>
+    </tr>
+    <tr>
+        <td colspan="9" style="background-color: rgb(184, 184, 184);"><b>Hazard categorisation given GLP and other controls
+                specified</b></td>
+    </tr>
+    <tr>
+        <td colspan="9">
+            <table class="nested-table-noborder">
+                <tr>
+                    <td style="width: 25%">Hazard<br><i>Potential to cause harm</i></td>
+                    <td style="width: 25%">
+                        <input type="radio" class="js-hazard to-export-risk" id="slight" name="hazard" value="1">
+                        <label for="slight">1. Slight</label><br>
+                        <input type="radio" class="js-hazard to-export-risk" id="serious" name="hazard" value="2">
+                        <label for="serious">2. Serious</label><br>
+                        <input type="radio" class="js-hazard to-export-risk" id="major" name="hazard" value="3">
+                        <label for="major">3. Major</label></td>
+                    <td style="width: 25%"><b>Risk Category (A-D)<br>
+                        <br><input type="radio" id="categoryA" name="category" value="A" disabled>
+                        <label for="categoryA">A (10-27)</label></b></td>
+                    <td style="width: 25%"><b>Risk Score HxRxC</b></td>
+                </tr>
+                <tr>
+                    <td>Risk<br><i>Likelihood of exposure</i></td>
+                    <td>
+                        <input type="radio" class="js-risk to-export-risk" id="lowLikelihood" name="risk" value="1">
+                        <label for="lowLikelihood">1. Low likelihood</label><br>
+                        <input type="radio" class="js-risk to-export-risk" id="possible" name="risk" value="2">
+                        <label for="possible">2. Possible</label><br>
+                        <input type="radio" class="js-risk to-export-risk" id="frequentOccur" name="risk" value="3">
+                        <label for="frequentOccur">3. Frequent Occur</label></td>
+                    <td><br><b><input type="radio" id="categoryB" name="category" value="B" disabled>
+                        <label for="categoryB">B (6-9)</label></b></td>
+                    <td><input type="number" id="js-risk-score" class="to-export" name="risk-score" readonly></td>
+                </tr>
+                <tr>
+                    <td>Consequences<br><i>Who will be affected</i></td>
+                    <td>
+                        <input type="radio" class="js-consequences to-export-risk" id="individual" name="consequences" value="1">
+                        <label for="individual">1. Individual</label><br>
+                        <input type="radio" class="js-consequences to-export-risk" id="localLabs" name="consequences" value="2">
+                        <label for="localLabs">2. Local Labs</label><br>
+                        <input type="radio" class="js-consequences to-export-risk" id="buildingWide" name="consequences" value="3">
+                        <label for="buildingWide">3. Building wide</label>
+                    </td>
+                    <td><b><input type="radio" class="js-consequences" id="categoryC" name="category" value="C" disabled>
+                        <label for="categoryC">C (3-5)</label><br>
+                        <br><input type="radio" id="categoryD" name="category" value="D" disabled>
+                        <label for="categoryD">D (1-2)</label></b></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Signed:</td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td colspan="4"><br></td>
+                </tr>
+                <tr>
+                    <td colspan="2">Researcher: <input id="js-researcher" type="text" size="25em"></td>
+                    <td colspan="2">Supervisor: <input id="js-supervisor" type="text" size="25em"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</div>
+<script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/autofill_summary_table.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/custom_colours.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/summary_table.js') }}"></script>
+
+<p></p>
+
+
+<input type="hidden" value="{{ reactant_primary_keys }}" id="js-reactant-primary-keys">
+<input type="hidden" value="{{ product_primary_keys }}" id="js-product-primary-keys">
+<input type="hidden" value="{{ reagent_primary_keys }}" id="js-reagent-primary-keys">
+<input type="hidden" value="{{ solvent_primary_keys }}" id="js-solvent-primary-keys">
