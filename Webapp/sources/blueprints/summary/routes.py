@@ -369,9 +369,9 @@ def summary() -> Response:
     # Solvent flags
     flag_rate = {
         1: "hazard-highly-hazardous",
-        4: "hazard-acceptable",
-        3: "hazard-warning",
         2: "hazard-hazardous",
+        3: "hazard-warning",
+        4: "hazard-acceptable",
         5: "non-chem21",
     }  # flag rate dictionary
     solvent_flags = []  # solvent flag list

@@ -1,15 +1,15 @@
-$(document).ready(function() {
+$(function() {
     const tutorial = $("#js-tutorial").val()
-    if (tutorial === "yes"){
+    if (tutorial === "yes") {
         // disable page and scrolling
         setTimeout(() => {
             window.scrollTo(0, 0);
         }, "200")
-        $('#page-contents').css('pointer-events','none');
+        $('#page-contents').css('pointer-events', 'none');
         // show tutorial text
         document.getElementById("tutorial-1").style.display = "block";
     }
-})
+});
 
 function tutorialNext(number){
     document.getElementById("tutorial-" + number).style.display = "none";
@@ -56,7 +56,7 @@ function tutorial_6(){
 }
 
 function tutorial_7(){
-    $('#successAlert1').html("").hide();
+    $('#reaction-table-div').html("").hide();
     document.getElementById("summary-div").style.display = "none";
     document.getElementById("demo-button").click();
     $('#editor-instructions').removeClass('highlight');

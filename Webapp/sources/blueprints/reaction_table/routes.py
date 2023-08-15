@@ -281,11 +281,18 @@ def process():
         identifiers = []
         # Solvents - keep solvents that are not novel compounds or are novel compounds within the current workbook
         sol_rows = db.session.query(models.Solvent).all()
-        sol_rows = [
-            x
-            for x in sol_rows
-            if x.novel_compound == [] or x.novel_compound[0].workbook == workbook.id
-        ]
+        if demo == 'demo':
+            sol_rows = [
+                x
+                for x in sol_rows
+                if x.novel_compound == []
+            ]
+        else:
+            sol_rows = [
+                x
+                for x in sol_rows
+                if x.novel_compound == [] or x.novel_compound[0].workbook == workbook.id
+            ]
         # Now it renders the reaction table template
         reaction_table = render_template(
             "_reaction_table.html",

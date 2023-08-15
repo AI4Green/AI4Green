@@ -7,6 +7,7 @@ services:
     ports:
       - 5432:5432
     environment:
+      POSTGRES_DB: ai4green
       POSTGRES_PASSWORD: postgres
 
   azurite:
