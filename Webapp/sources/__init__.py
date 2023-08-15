@@ -12,7 +12,7 @@ from sources import models
 from sources.extensions import db, login, ma, mail, migrate
 
 
-def create_app(c: str = "") -> Flask:
+def create_app(c: str = "dev") -> Flask:
     """
     Create the Flask app.
 
@@ -73,7 +73,7 @@ def register_extensions(app: Flask) -> None:
 
     login.init_app(app)
     login.login_view = "auth.login"
-
+    # login.login_view = "main.landing_page"
     @login.user_loader
     def load_user(user_id: int):
         return models.User.query.get(user_id)
@@ -138,9 +138,9 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(summary_bp)
 
-    from sources.blueprints.standard_landing_page import standard_landing_page_bp
+    from sources.blueprints.reaction_list import reaction_list_bp
 
-    app.register_blueprint(standard_landing_page_bp)
+    app.register_blueprint(reaction_list_bp)
 
     from sources.blueprints.delete_profile import delete_profile_bp
 

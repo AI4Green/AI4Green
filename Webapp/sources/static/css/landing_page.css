@@ -1,0 +1,8 @@
+#bg {
+    background-image: url('../../static/img/bg_img.png');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: auto auto;
+    height: 100vh;
+    width: 100vw;
+}

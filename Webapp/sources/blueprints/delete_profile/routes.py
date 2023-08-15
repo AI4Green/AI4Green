@@ -14,6 +14,20 @@ from sources.extensions import db
 from . import delete_profile_bp  # imports the blueprint of the route
 
 
+# Go to the delete profile page
+@delete_profile_bp.route("/delete_profile", methods=["GET", "POST"])
+@login_required
+def delete_profile() -> Response:
+    # must be logged in
+    workgroups = get_workgroups()
+    notification_number = get_notification_number()
+    return render_template(
+        "delete_profile.html",
+        workgroups=workgroups,
+        notification_number=notification_number,
+    )
+
+
 @delete_profile_bp.route("/confirm_delete_profile", methods=["GET", "POST"])
 @login_required
 def confirm_delete_profile() -> Response:
