@@ -23,6 +23,7 @@ from sqlalchemy import func
 # url_for generates URLs using its internal mapping of URLs to view functions
 # flash stores a message for the user to show it when called from the templates
 # request parses incoming request data and gives access to it
+
 from werkzeug.urls import url_parse
 from datetime import datetime
 import pytz

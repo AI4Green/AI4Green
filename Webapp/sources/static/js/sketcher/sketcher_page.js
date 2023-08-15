@@ -6,10 +6,6 @@ $(function() {
     }
 });
 
-function printContent(){
-    window.print()
-}
-
 function lockReactionButtonHandler() {
     // disable complete reaction button once reaction is completed
     if ($("#js-complete").val() === "not complete") {
