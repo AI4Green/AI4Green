@@ -14,7 +14,6 @@ from . import main_bp  # imports the blueprint of the main route
 
 
 # The standard user page is rendered
-@main_bp.route("/", methods=["GET", "POST"])
 @main_bp.route("/home", methods=["GET", "POST"])
 @login_required
 def index() -> Response:
@@ -45,6 +44,11 @@ def index() -> Response:
         notification_number=notification_number,
         news_items=news_items,
     )
+
+
+@main_bp.route("/", methods=["GET", "POST"])
+def landing_page() -> Response:
+    return render_template("landing_page.html")
 
 
 # Go to the sketcher
@@ -120,11 +124,13 @@ def sketcher_tutorial(tutorial: str) -> Response:
 
 # Go to demo
 @main_bp.route("/demo", methods=["GET", "POST"])
-@login_required
 def demo() -> Response:
     # must be logged in
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
+    workgroups = []
+    notification_number = 0
+    if current_user.is_authenticated:
+        workgroups = get_workgroups()
+        notification_number = get_notification_number()
     return render_template(
         "demo_sketcher.html",
         demo="demo",
@@ -197,42 +203,6 @@ def send_guide() -> Response:
 def send_quickstart_guide() -> Response:
     # must be logged in
     return send_file("static/AI4Green_quick_guide.pdf", as_attachment=True)
-
-
-# delete reaction
-@main_bp.route(
-    "/delete_reaction/<reaction_name>/<workgroup>/<workbook>", methods=["GET", "POST"]
-)
-@login_required
-def delete_reaction(reaction_name: str, workgroup: str, workbook: str) -> Response:
-    # must be logged in a member of the workgroup and workbook
-    if not security_member_workgroup_workbook(workgroup, workbook):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
-    # find reaction
-    reaction = (
-        db.session.query(models.Reaction)
-        .join(models.WorkBook)
-        .join(models.WorkGroup)
-        .filter(models.WorkBook.name == workbook)
-        .filter(models.WorkGroup.name == workgroup)
-        .filter(models.Reaction.creator_person.user.email == current_user.email)
-        .first()
-    )
-    # check user is creator of reaction
-    if not reaction:
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
-    # change to inactive
-    reaction.status = "inactive"
-    db.session.commit()
-    return redirect(
-        url_for(
-            "workgroup.workgroup",
-            workgroup_selected=workgroup,
-            workbook_selected=workbook,
-        )
-    )
 
 
 # marvin js help page

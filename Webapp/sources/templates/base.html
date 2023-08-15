@@ -1,6 +1,9 @@
 <html>
 
 <head>
+    <!-- add icon link -->
+    <link rel ="icon" href="{{ url_for('static', filename='img/favicon.ico') }}"
+        type="image/x-icon">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <!--    External JavaScript + libraries-->
@@ -9,8 +12,6 @@
     <script type="text/javascript">
         var $SCRIPT_ROOT = {{ request.script_root| tojson | safe }};
     </script>
-    <script src="https://marvinjs.chemicalize.com/v1/{{ marvin_js_key }}/client-settings.js"></script>
-    <script src="https://marvinjs.chemicalize.com/v1/client.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"
         integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous">
