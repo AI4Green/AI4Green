@@ -1,4 +1,3 @@
-import logging
 import os
 from email import generator
 from email.mime.multipart import MIMEMultipart
@@ -7,9 +6,6 @@ from typing import List
 
 from flask import current_app
 from flask_mail import Mail, Message
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
 
 
 class EmailSender:
