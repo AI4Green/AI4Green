@@ -1,9 +1,10 @@
 import os
-import tempfile
 
 import pytest
 from flask import current_app
 from sources.extensions import mail
+
+IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
 def test_send_email_sending(app):
@@ -31,6 +32,7 @@ def test_send_email_sending(app):
             assert outbox[0].subject == subject
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Local temp files don't work in CI")
 def test_send_email_local_save(app):
     """
     Test saving an email locally when MAIL_USE_LOCAL is set to True.
