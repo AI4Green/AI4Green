@@ -35,9 +35,7 @@ class BaseConfig(object):  # class to store configuration variables
     MAIL_ADMIN_SENDER = os.getenv("MAIL_ADMIN_SENDER", "admin@ai4green.app")
 
     # Marvin JS - Change to your own
-    MARVIN_JS_API_KEY = os.getenv(
-        "MARVIN_JS_API_KEY", ""
-    )
+    MARVIN_JS_API_KEY = os.getenv("MARVIN_JS_API_KEY", "")
 
     # Azurite file storage
     AZURE_STORAGE_CONNECTION_STRING = os.getenv(
