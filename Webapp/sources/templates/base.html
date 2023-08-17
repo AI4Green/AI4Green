@@ -2,7 +2,7 @@
 
 <head>
     <!-- add icon link -->
-    <link rel ="icon" href="{{ url_for('static', filename='img/favicon.ico') }}"
+    <link rel ="icon" href="{{ url_for('static', filename='img/favicon2.ico') }}"
         type="image/x-icon">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -36,9 +36,11 @@
           <li {% if request.path == '/demo' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
             <a class="nav-link" id="TopNavSketcherButton" href="{{ url_for('main.demo') }}">Demo <span class="sr-only">(current)</span></a>
           </li>
+          {% if current_user.is_authenticated %}
           <li {% if request.path == '/solvent_guide' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
             <a class="nav-link" id="solvent-guide" href="{{ url_for('solvent_guide.solvent_guide') }}">Solvent Guide<span class="sr-only">(current)</span></a>
           </li>
+          {% endif %}
           {% if current_user.is_anonymous %}
           {% else %}
           <li class="nav-item dropdown">
@@ -56,13 +58,15 @@
         </ul>
           <div id="reaction-saved-indicator" class="reaction-save-hidden">
           </div>
-          {% if current_user.is_anonymous %}
-          <a class="btn btn-light my-2 my-sm-0" type="submit" id="TopNavLoginButton" href="{{ url_for('auth.login') }}">Login</a>
-          {% else %}
           <a id="AboutButton" class="btn btn-primary" href="{{ url_for('main.about') }}"> About AI4Green <span class="sr-only">(current)</span></a>
           <p style="visibility: hidden;">x</p>
           <a id="InfoButton" class="btn btn-primary" href="{{ url_for('main.info') }}"><i class="bi bi-question-diamond-fill"></i> Help <span class="sr-only">(current)</span></a>
           <p style="visibility: hidden;">x</p>
+          {% if current_user.is_anonymous %}
+          <a class="btn btn-light my-2 my-sm-0" type="submit" id="TopNavLoginButton" href="{{ url_for('auth.login') }}">Log in</a>
+          {% endif %}
+
+          {% if current_user.is_authenticated %}
           <div class="btn-group">
               <button id="user-dropdown" type="button" class="btn btn-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <sup>{% if notification_number %}<span class="badge badge-pill badge-danger">{{ notification_number }}</span>{% endif %}</sup>{{ current_user.username }}
