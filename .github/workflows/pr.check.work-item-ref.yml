@@ -1,0 +1,46 @@
+name: "Azure Boards Reference"
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  # All other permissions are set to none
+  checks: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  # check presence of id in title
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: deepakputhraya/action-pr-title@master
+        with:
+          regex: '^AB#\d+: ' # Match pull request titles in the form AB#<id>: Title.
+          github_token: ${{ github.token }} # Default: ${{ github.token }}
+  # if found, comment to ensure it gets linked
+  # only one comment will be made per PR, but will be updated
+  # if the title changes (and continues to pass the check)
+  # in case the work item reference changes.
+  comment:
+    runs-on: ubuntu-latest
+    needs: check # only do this if the check passes
+    steps:
+      - name: Find Comment
+        uses: peter-evans/find-comment@v1
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "ℹ Linked Title:"
+      - name: Create or update Work Item Link
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            **ℹ Linked Title:**
+            ${{ github.event.pull_request.title }}
+
+            *This bot comment serves to ensure the title work item gets hyperlinked.*
+          edit-mode: replace
