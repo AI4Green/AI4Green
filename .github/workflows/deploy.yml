@@ -7,7 +7,7 @@ name: Build and deploy Python app to Azure Web App - ai4green-uat
 on:
   push:
     branches:
-      - 117089-add-test-ci
+      - main
   workflow_dispatch:
 
 jobs:
