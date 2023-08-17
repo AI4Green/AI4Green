@@ -4,61 +4,95 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/standard_user.css') }}">
 </head>
 <body>
-<div id="home-page" class="jumbotron">
-    <div class="container">
-        <h2>Welcome to AI4Green, {{ current_user.username }}!</h2>
-        <p>AI4Green is an Electronic Laboratory Notebook built around encouraging green and sustainable chemistry.</p>
-        <p>
-            <a id="about-button" class="btn btn-primary btn-lg" href="{{ url_for('main.about') }}" role="button">Learn more &raquo;</a>
-            <a id="quickstart-guide" href="{{ url_for('main.send_quickstart_guide') }}" class="btn btn-primary btn-lg">Quickstart Guide &raquo;</a>
-        </p>
-    </div>
-</div>
-<div class="container">
-    <div class="row">
-        <div class="col-7">
-            <h2>Please select a Workgroup to get started</h2>
-            <br>
-            <form method="post" novalidate>
-                <select name="WG-select" id="WG-select" class="form-select">
-                    <option>-Select Workgroup-</option>
-                    {% for workgroup in workgroups %}
-                        <option value="{{ workgroup }}">{{ workgroup }}</option>
-                    {% endfor %}
-                </select><br><br>
-                <button type="submit" id="go-to-workgroup" class="btn btn-success" style="width: 190px;">Proceed to Workgroup</button>
-            </form>
-            <p><a href="{{ url_for('join_workgroup.join_workgroup') }}" id="join-WG" class="btn btn-primary">+ Join Existing Workgroup</a></p>
-            <p><a href="{{ url_for('create_workgroup.create_workgroup') }}" id="create-workgroup" class="btn btn-primary">+ Create Workgroup</a></p>
-            <p><a href="{{ url_for('workgroup_membership_summary.workgroup_membership_summary') }}" id="WG-membership-summary" class="btn btn-primary">Workgroup Membership Summary</a></p>
-            {% if user_role == 'Admin' %}
-                <p><a href="{{ url_for('admin_dashboard.admin_dashboard') }}" id="admin_dashboard" class="btn btn-primary">Admin Dashboard</a></p>
-            {% endif %}
+{% if current_user.is_authenticated %}
+
+    <div class="jumbotron">
+        <div class="container">
+            <h2>Welcome to AI4Green, {{ current_user.username }}!</h2>
+            <p>AI4Green is an Electronic Laboratory Notebook built around encouraging green and sustainable chemistry.</p>
+            <p>
+                <a id="about-button" class="btn btn-primary btn-lg" href="{{ url_for('main.about') }}" role="button">Learn more &raquo;</a>
+                <a id="quickstart-guide" href="{{ url_for('main.send_quickstart_guide') }}" class="btn btn-primary btn-lg">Quickstart Guide &raquo;</a>
+            </p>
         </div>
-        <div class="col-5">
-            <h2><i class="bi bi-pin-angle"></i> News Feed</h2>
-            <hr class="line-news">
-            <div class="scrollClass">
-                {% if news_items %}
-                    {% for item in news_items %}
-                        <h4 id="title-{{ item.id }}">{{ item.title|safe }}</h4>
-                        <p>{{ item.message|safe }}</p>
-                        <div class="reaction-time">{{ (item.time|string)[:-7] }}</div>
-                        {% if user_role == 'Admin' %}
-                        <form action="{{ url_for('news_feed.delete_news_post') }}" method="post">
-                            <input type="hidden" value="{{ item.id }}" name="post-to-delete">
-                            <button type="submit" class="btn btn-danger" id="delete-{{ item.id }}">Delete</button>
-                        </form>
-                        {% endif %}
-                        <hr class="line">
-                    {% endfor %}
-                {% else %}
-                    No news items to show!
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-7">
+                <h2>Please select a Workgroup to get started</h2>
+                <br>
+                <form method="post" novalidate>
+                    <select name="WG-select" id="WG-select" class="form-select">
+                        <option>-Select Workgroup-</option>
+                        {% for workgroup in workgroups %}
+                            <option value="{{ workgroup }}">{{ workgroup }}</option>
+                        {% endfor %}
+                    </select><br><br>
+                    <button type="submit" id="go-to-workgroup" class="btn btn-success" style="width: 190px;">Proceed to Workgroup</button>
+                </form>
+                <p><a href="{{ url_for('join_workgroup.join_workgroup') }}" id="join-WG" class="btn btn-primary">+ Join Existing Workgroup</a></p>
+                <p><a href="{{ url_for('create_workgroup.create_workgroup') }}" id="create-workgroup" class="btn btn-primary">+ Create Workgroup</a></p>
+                <p><a href="{{ url_for('workgroup_membership_summary.workgroup_membership_summary') }}" id="WG-membership-summary" class="btn btn-primary">Workgroup Membership Summary</a></p>
+                {% if user_role == 'Admin' %}
+                    <p><a href="{{ url_for('admin_dashboard.admin_dashboard') }}" id="admin_dashboard" class="btn btn-primary">Admin Dashboard</a></p>
                 {% endif %}
+            </div>
+            <div class="col-5">
+                <h2><i class="bi bi-pin-angle"></i> News Feed</h2>
+                <hr class="line-news">
+                <div class="scrollClass">
+                    {% if news_items %}
+                        {% for item in news_items %}
+                            <h4 id="title-{{ item.id }}">{{ item.title|safe }}</h4>
+                            <p>{{ item.message|safe }}</p>
+                            <div class="reaction-time">{{ (item.time|string)[:-7] }}</div>
+                            {% if user_role == 'Admin' %}
+                            <form action="{{ url_for('news_feed.delete_news_post') }}" method="post">
+                                <input type="hidden" value="{{ item.id }}" name="post-to-delete">
+                                <button type="submit" class="btn btn-danger" id="delete-{{ item.id }}">Delete</button>
+                            </form>
+                            {% endif %}
+                            <hr class="line">
+                        {% endfor %}
+                    {% else %}
+                        No news items to show!
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-</div>
-<br>
+{% else %}
+<!--    current user is not logged in-->
+    <div class="jumbotron">
+<!--        welcome text and description of AI4Green-->
+        <h1>Welcome to AI4Green</h1>
+        <h5>
+            AI4Green provides an ELN including collaboration tools, data archival and management and green and sustainability metrics for organic chemistry.<br><br>
+        </h5>
+        <p>It is accessible via a web interface and fully available on an open source basis.</p>
+        <b>Key features include:</b>
+        <ul>
+          <li>Automatic calculations, hazard lookup and CAS database linkage</li>
+          <li>Solvent selection guide</li>
+          <li>Reaction summary including colour coding of solvent sustainability and hazards</li>
+        </ul>
+        <p>For any queries please contact us at <a id="email-link" href="mailto:ai4green@nottingham.ac.uk">ai4green@nottingham.ac.uk</a>.</p>
+    </div>
+<!--    video and login/registration buttons-->
+    <div class="container text-center">
+        <iframe id="help-video" width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PL7u_tOd0vTynC0tgWt0cb7jLlnEoDwiO4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><br><br>
+        <div class="row my-5">
+            <div class="col">
+                <h3>Existing User</h3>
+                <a class="btn btn-primary btn-lg" href="{{ url_for('auth.login') }}">Log in</a>
+            </div>
+            <div class="col">
+                <h3>New User</h3>
+                <a class="btn btn-success btn-lg" href="{{ url_for('auth.register') }}">Register</a>
+            </div>
+        </div>
+    </div>
+{% endif %}
 </body>
+
 {% endblock %}

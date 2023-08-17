@@ -1,5 +1,5 @@
 from flask import (Response, flash, redirect, render_template, request,
-                   send_file, session, url_for, jsonify, current_app)
+                   send_file, url_for, jsonify, current_app)
 from flask_login import (  # protects a view function against anonymous users
     current_user, login_required)
 
@@ -13,32 +13,37 @@ from . import main_bp  # imports the blueprint of the main route
 
 
 # The standard user page is rendered
+@main_bp.route("/", methods=["GET", "POST"])
 @main_bp.route("/home", methods=["GET", "POST"])
-@login_required
 def index() -> Response:
-    # Set the "role" session variable for a user
-    if not session.__contains__("role"):
-        role = (
-            db.session.query(models.Role)
-            .join(models.User)
+    # gets jinja variables if user is logged in to populate their homepage, else the non-logged in user homepage is loaded
+    if current_user.is_authenticated:
+        # get the users role to determine if they can access the admin dashboard button or not
+        user = (
+            db.session.query(models.User)
             .filter(models.User.email == current_user.email)
             .first()
         )
-        session["role"] = role.name
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
-    if request.method == "POST":
-        workgroup_selected = request.form["WG-select"]
-        if workgroup_selected != "-Select Workgroup-":
-            return redirect(
-                url_for("workgroup.workgroup", workgroup_selected=workgroup_selected)
-            )
-    news_items = (
-        db.session.query(models.NewsItem).order_by(models.NewsItem.time.desc()).all()
-    )
+        user_role = user.Role.name
+        workgroups = get_workgroups()
+        notification_number = get_notification_number()
+        if request.method == "POST":
+            workgroup_selected = request.form["WG-select"]
+            if workgroup_selected != "-Select Workgroup-":
+                return redirect(
+                    url_for("workgroup.workgroup", workgroup_selected=workgroup_selected)
+                )
+        news_items = (
+            db.session.query(models.NewsItem).order_by(models.NewsItem.time.desc()).all()
+        )
+    else:
+        user_role = None
+        workgroups = []
+        notification_number = 0
+        news_items = []
     return render_template(
         "home.html",
-        user_role=session["role"],
+        user_role=user_role,
         workgroups=workgroups,
         notification_number=notification_number,
         news_items=news_items,
@@ -49,11 +54,6 @@ def index() -> Response:
 )
 def get_marvinjs_key():
     return jsonify({'marvinjs_key': current_app.config["MARVIN_JS_API_KEY"]})
-
-
-@main_bp.route("/", methods=["GET", "POST"])
-def landing_page() -> Response:
-    return render_template("landing_page.html")
 
 
 # Go to the sketcher
@@ -175,11 +175,12 @@ def manage_account() -> Response:
 
 # info page
 @main_bp.route("/info", methods=["GET", "POST"])
-@login_required
 def info() -> Response:
-    # must be logged in
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
+    workgroups = []
+    notification_number = 0
+    if current_user.is_authenticated:
+        workgroups = get_workgroups()
+        notification_number = get_notification_number()
     return render_template(
         "info.html", workgroups=workgroups, notification_number=notification_number
     )
@@ -187,11 +188,12 @@ def info() -> Response:
 
 # about page
 @main_bp.route("/about", methods=["GET", "POST"])
-@login_required
 def about() -> Response:
-    # must be logged in
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
+    workgroups = []
+    notification_number = 0
+    if current_user.is_authenticated:
+        workgroups = get_workgroups()
+        notification_number = get_notification_number()
     return render_template(
         "about.html", workgroups=workgroups, notification_number=notification_number
     )
@@ -199,7 +201,6 @@ def about() -> Response:
 
 # send guide
 @main_bp.route("/send_guide", methods=["GET", "POST"])
-@login_required
 def send_guide() -> Response:
     # must be logged in
     return send_file("static/AI4Green_User_Manual.pdf", as_attachment=True)
@@ -207,7 +208,6 @@ def send_guide() -> Response:
 
 # send quickstart guide
 @main_bp.route("/send_quickstart_guide", methods=["GET", "POST"])
-@login_required
 def send_quickstart_guide() -> Response:
     # must be logged in
     return send_file("static/AI4Green_quick_guide.pdf", as_attachment=True)
