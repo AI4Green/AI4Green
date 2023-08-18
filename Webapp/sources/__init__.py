@@ -6,9 +6,8 @@ The main file of the app
 import os
 from typing import Dict
 
-import config
 from flask import Flask
-from sources import models
+from sources import config, models
 from sources.extensions import db, login, ma, mail, migrate
 
 
