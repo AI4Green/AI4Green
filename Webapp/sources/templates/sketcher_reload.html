@@ -54,7 +54,6 @@
     <input type="hidden" id="js-reaction-scheme-image" value="0" style="{'width': 600, 'height': 400}">
     <input type="hidden" value="{{ demo }}" id="js-demo">
     <input type="hidden" value="{{ reaction.complete }}" id="js-complete">
-    <input type="hidden" value="{{ url_for('static', filename='ketcher/index.html') }}" id="ketcher-source">
 
     {% if tutorial == 'no' %}
         <input type="hidden" value="{{ reaction.creator_person.user.email }}" id="js-creator-email">
