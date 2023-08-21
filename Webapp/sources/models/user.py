@@ -47,7 +47,6 @@ class User(Model, UserMixin):
         nullable=False,
     )
     time_of_creation = db.Column(db.DateTime)
-    last_login_time = db.Column(db.DateTime)
     Role = db.relationship("Role")
 
     """Password hashing is implemented by the two following methods"""
