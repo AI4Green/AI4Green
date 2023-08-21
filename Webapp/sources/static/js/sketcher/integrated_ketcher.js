@@ -3,9 +3,8 @@
  * @param {string} [width="1020px"] - width of the sketcher in pixels
  */
 function setupNewKetcherSketcher(width="1020px"){
-    let ketcherSource = $("#ketcher-source").val()
-    let ketcherHTML = `<iframe id="ketcher-editor" src=${ketcherSource} width=${width} height="480px"></iframe>`
-    $("#ketcher-sketcher").html(ketcherHTML).hide()
+    let ketcherHTML = `<iframe id="ketcher-editor" src=/static/ketcher/index.html width=${width} height="480px"></iframe>`
+    $("#ketcher-sketcher").empty().append(ketcherHTML).hide();
 }
 
 /**
