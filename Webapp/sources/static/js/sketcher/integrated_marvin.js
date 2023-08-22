@@ -118,6 +118,7 @@ function marvinExampleSmiles(){
 function exportMarvinImage() {
     let settings = {'width': 600, 'height': 400};
     marvin.exportStructure("jpeg", settings).then(function (source) {
-        $("#js-reaction-scheme-image").val(source);
+        sessionStorage.setItem("reactionSchemeImage", source)
+        //$("#js-reaction-scheme-image").val(source);
     });
 }
