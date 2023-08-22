@@ -11,7 +11,7 @@ from sources import models
 from sources.extensions import db
 
 
-def get_scheme_list(workbook, workgroup, sort_crit, size, reaction_id) -> List[str]:
+def get_scheme_list(workbook, workgroup, sort_crit, size) -> List[str]:
     reaction_list = []
     query = (
         db.session.query(models.Reaction)
@@ -25,8 +25,6 @@ def get_scheme_list(workbook, workgroup, sort_crit, size, reaction_id) -> List[s
         reaction_list = query.order_by(models.Reaction.time_of_creation.desc()).all()
     elif sort_crit == 'AZ':
         reaction_list = query.order_by(models.Reaction.name.asc()).all()
-    elif sort_crit == 'single':
-        reaction_list = query.filter(models.Reaction.reaction_id == reaction_id).all()
     return make_scheme_list(reaction_list, size)
 
 

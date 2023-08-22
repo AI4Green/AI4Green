@@ -25,10 +25,12 @@ def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response
         db.session.query(models.Reaction)
         .join(models.WorkBook)
         .join(models.WorkGroup)
+        .join(models.Person)
+        .join(models.User)
         .filter(models.Reaction.reaction_id == reaction_id)
         .filter(models.WorkBook.name == workbook)
         .filter(models.WorkGroup.name == workgroup)
-        .filter(models.Reaction.creator_person.user.email == current_user.email)
+        .filter(models.User.email == current_user.email)
         .first()
     )
     # check user is creator of reaction
@@ -66,10 +68,9 @@ def get_reactions() -> Response:
 @login_required
 def get_schemata() -> Response:
     # must be logged in
-    reaction_id = str(request.form.get('reaction_id'))
     workbook = str(request.form["workbook"])
     workgroup = str(request.form["workgroup"])
     size = str(request.form["size"])
     sort_crit = str(request.form["sort_crit"])
-    schemes = get_scheme_list(workbook, workgroup, sort_crit, size, reaction_id)
+    schemes = get_scheme_list(workbook, workgroup, sort_crit, size)
     return {"schemes": schemes, "sort_crit": sort_crit}

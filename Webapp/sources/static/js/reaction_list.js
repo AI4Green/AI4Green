@@ -1,7 +1,9 @@
 $(function() {
     // run function if loaded reaction list on workgroup page. don't run on search page.
     if (window.location.pathname.split("/")[1] !== 'search') {
+        updateSelectedWorkbook()
         showSavedReactions()
+
     }
 });
 
@@ -139,19 +141,18 @@ function redirectToReloadReaction(reaction){
  * @param workbook {string} - the active workbook name
  * @param workgroup {string} - the active workgroup name
  * @param size {string} - the size of the reaction scheme image
- * @param reaction_id {string} - the reaction_id of the reaction (
  * @return {Promise<unknown>}
  */
-function getSchemata(sort_crit, workbook, workgroup, size, reaction_id){
+function getSchemata(sort_crit, workbook, workgroup, size){
     return new Promise(function(resolve, reject){
         // post to get_schemata and get the schemes for reaction images
+        alert(sort_crit)
         $.ajax({
             method: "POST",
             url: "/get_schemata",
             dataType: 'json',
             data: {
                 sort_crit: sort_crit,
-                reaction_id: reaction_id,
                 workgroup: workgroup,
                 workbook: workbook,
                 size: size

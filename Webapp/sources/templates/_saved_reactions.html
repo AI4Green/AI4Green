@@ -1,5 +1,4 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-<script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
 {% if reactions %}
 
 <div class="btn-group btn-group-toggle" data-toggle="buttons">
@@ -22,9 +21,9 @@
             <div class="description">{{ reaction.description }}</div>
             <div id="image{{ loop.index }}"></div>
             <div class="reaction-time">{{ reaction.time_of_creation[:-7] }}</div>
-            <button onclick="redirectToReloadReaction(this)" id="{{ reaction.reaction_id }}-reload" class="btn btn-success reload-btn">Reload</button>
+            <button onclick="redirectToReloadReaction(this)" id="{{ reaction.reaction_id }}" class="btn btn-success reload-btn">Reload</button>
             {% if reaction.creator_email == current_user.email %}
-                <button onclick="deleteReaction(this)" id="{{ reaction.reaction_id }}-delete" name="delete-reaction" class="btn btn-danger">Delete</button>
+                <button onclick="deleteReaction(this)" id="{{ reaction.reaction_id }}" name="delete-reaction" class="btn btn-danger">Delete</button>
             {% endif %}
             {% if reaction.completion_status == "complete" %}
                 <i class="fa fa-lock" style="font-size:20px; color:darkgrey;"></i><b style="font-size:12px; color:darkgrey;">  Reaction Locked</b>
