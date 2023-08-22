@@ -1,0 +1,12 @@
+migrations:
+  - 'Webapp/migrations/**/*'
+
+tests:
+  - 'Webapp/tests/**/*'
+
+dependencies:
+  - 'requirements.in'
+  - 'requirements.txt'
+
+CI:
+  - '.github/**/*'

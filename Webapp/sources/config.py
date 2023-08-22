@@ -32,11 +32,10 @@ class BaseConfig(object):  # class to store configuration variables
     MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", True)
     MAIL_USE_LOCAL = os.getenv("MAIL_USE_LOCAL", True)
     MAIL_ADMIN_SENDER = os.getenv("MAIL_ADMIN_SENDER", "admin@ai4green.app")
+    MAIL_SAVE_DIR = os.getenv("MAIL_SAVE_DIR", "temp")
 
     # Marvin JS - Change to your own
-    MARVIN_JS_API_KEY = os.getenv(
-        "MARVIN_JS_API_KEY", ""
-    )
+    MARVIN_JS_API_KEY = os.getenv("MARVIN_JS_API_KEY", "")
 
     # Azurite file storage
     AZURE_STORAGE_CONNECTION_STRING = os.getenv(
@@ -62,6 +61,10 @@ class TestConfig(BaseConfig):
     LIVESERVER_PORT = 8943
     LOGIN_DISABLED = False
     SQLALCHEMY_DATABASE_URI = os.getenv("TEST_DATABASE_URL")
+    SQLALCHEMY_BINDS = {
+        "db": SQLALCHEMY_DATABASE_URI,
+        "update": "sqlite:///temp_update.sqlite",
+    }
 
 
 class DevConfig(BaseConfig):
