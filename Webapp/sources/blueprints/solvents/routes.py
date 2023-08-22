@@ -46,7 +46,9 @@ def solvents() -> Response:
     primary_key = ""
     alert_message = ""
     new_solvent = False
-    if re.findall(cas_regex, solvent):  # if it's a cas, find the corresponding name
+    cas_number = re.findall(cas_regex, solvent)
+    if cas_number:  # if it's a cas, find the corresponding name
+        solvent = cas_number[0]
         solvent_cas_match = (
             db.session.query(models.Compound)
             .filter(models.Compound.cas == solvent)

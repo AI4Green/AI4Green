@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "./static/css/main.72005bf6.css",
+    "main.js": "./static/js/main.fd276b03.js",
+    "static/js/34.aac75d43.chunk.js": "./static/js/34.aac75d43.chunk.js",
+    "index.html": "./index.html",
+    "static/media/overlay.svg": "./static/media/overlay.8faf238632c16c841197.svg"
+  },
+  "entrypoints": [
+    "static/css/main.72005bf6.css",
+    "static/js/main.fd276b03.js"
+  ]
+}
