@@ -108,7 +108,7 @@ function exportSmilesFromMarvin() {
  * Enters the example reaction into the Marvin editor
  */
 function marvinExampleSmiles(){
-    let smiles = "OC(=O)C1=CC=CC=C1>>CCNC(=O)C1=CC=CC=C1";
+    let smiles = "OC(=O)C1=CC=CC=C1.CCN>>CCNC(=O)C1=CC=CC=C1";
     marvin.importStructure("cxsmiles", smiles);
 }
 
@@ -118,6 +118,7 @@ function marvinExampleSmiles(){
 function exportMarvinImage() {
     let settings = {'width': 600, 'height': 400};
     marvin.exportStructure("jpeg", settings).then(function (source) {
-        $("#js-reaction-scheme-image").val(source);
+        sessionStorage.setItem("reactionSchemeImage", source)
+        //$("#js-reaction-scheme-image").val(source);
     });
 }

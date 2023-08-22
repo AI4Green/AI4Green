@@ -323,8 +323,8 @@ function exportImage() {
     // make reaction image above summary table
     let $image = $("#image")
     $image.attr("src", "");
-    let image_source = $("#js-reaction-scheme-image").val()
-    $image.attr("src", image_source);
+    let imgSource = sessionStorage.getItem('reactionSchemeImage')
+    $image.attr("src", imgSource);
     $("#imageContainer").css("display", "block");
 }
 

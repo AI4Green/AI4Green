@@ -88,7 +88,7 @@ function exportKetcherImage(smiles){
     ketcher.generateImage(smiles).then(function (source) {
         // Shrink the blob image and display the shrunken image
         shrinkBlobImage(source, 600, 400, function (shrunkenBlob) {
-            $("#js-reaction-scheme-image").val(URL.createObjectURL(shrunkenBlob))
+            sessionStorage.setItem("reactionSchemeImage", URL.createObjectURL(shrunkenBlob))
         });
     });
 }
