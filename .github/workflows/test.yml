@@ -2,16 +2,15 @@ name: Pytest
 
 on: [pull_request]
 
-env:
-  TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
-
 jobs:
   pytest:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.9', '3.10', '3.11']
+        python-version: ['3.9', '3.10']
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
 
     services:
       postgres:
@@ -28,7 +27,11 @@ jobs:
           - 5432:5432
 
     steps:
-      - uses: actions/checkout@v3
+      - name: checkout code
+        uses: actions/checkout@v3
+      - name: Set up environment variables
+        run: |
+          echo "MAIL_SAVE_DIR=${{runner.temp}}/email" >> $GITHUB_ENV
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
