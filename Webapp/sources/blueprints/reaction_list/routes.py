@@ -1,25 +1,49 @@
-from flask import (Response, jsonify,  # renders html templates
-                   render_template, request)
+from flask import (Response, jsonify,
+                   render_template, request, flash, redirect, url_for)
 from flask_login import \
-    login_required  # protects a view function against anonymous users
-
-from sources.auxiliary import get_notification_number, get_workgroups
+    login_required, current_user
+from sources.extensions import db
+from sources import models
+from sources.auxiliary import security_member_workgroup_workbook
 
 from . import reaction_list_bp  # imports the blueprint of route
 from .reaction_list import get_reaction_list, get_scheme_list
 
 
-# Go to the delete profile page
-@reaction_list_bp.route("/delete_profile", methods=["GET", "POST"])
+# delete reaction
+@reaction_list_bp.route(
+    "/delete_reaction/<reaction_id>/<workgroup>/<workbook>", methods=["GET", "POST"]
+)
 @login_required
-def delete_profile() -> Response:
-    # must be logged in
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
-    return render_template(
-        "delete_profile.html",
-        workgroups=workgroups,
-        notification_number=notification_number,
+def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response:
+    # must be logged in a member of the workgroup and workbook
+    if not security_member_workgroup_workbook(workgroup, workbook):
+        flash("You do not have permission to view this page")
+        return redirect(url_for("main.index"))
+    # find reaction
+    reaction = (
+        db.session.query(models.Reaction)
+        .join(models.WorkBook)
+        .join(models.WorkGroup)
+        .filter(models.Reaction.reaction_id == reaction_id)
+        .filter(models.WorkBook.name == workbook)
+        .filter(models.WorkGroup.name == workgroup)
+        .filter(models.Reaction.creator_person.user.email == current_user.email)
+        .first()
+    )
+    # check user is creator of reaction
+    if not reaction:
+        flash("You do not have permission to view this page")
+        return redirect(url_for("main.index"))
+    # change to inactive
+    reaction.status = "inactive"
+    db.session.commit()
+    return redirect(
+        url_for(
+            "workgroup.workgroup",
+            workgroup_selected=workgroup,
+            workbook_selected=workbook,
+        )
     )
 
 
@@ -42,10 +66,10 @@ def get_reactions() -> Response:
 @login_required
 def get_schemata() -> Response:
     # must be logged in
-    reaction_id = request.form.get('reaction_id')
+    reaction_id = str(request.form.get('reaction_id'))
     workbook = str(request.form["workbook"])
     workgroup = str(request.form["workgroup"])
     size = str(request.form["size"])
-    sort_crit = request.form["sort_crit"]
+    sort_crit = str(request.form["sort_crit"])
     schemes = get_scheme_list(workbook, workgroup, sort_crit, size, reaction_id)
     return {"schemes": schemes, "sort_crit": sort_crit}
