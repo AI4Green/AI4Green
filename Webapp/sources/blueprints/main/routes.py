@@ -49,6 +49,7 @@ def index() -> Response:
         news_items=news_items,
     )
 
+
 @main_bp.route(
     "/get_marvinjs_key", methods=["POST"]
 )
