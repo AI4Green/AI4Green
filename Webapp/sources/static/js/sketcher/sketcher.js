@@ -96,7 +96,7 @@ function generateReactionTable(data){
     $("#action-summary").show()
     $("#js-reaction-name2").val($("#js-reaction-name").val());
     // initial mass and equivalents to highlight
-    let limitingReactantTableNumber = $("input[name='reactant-limiting']:checked").val();
+    let limitingReactantTableNumber = String(Number($("input[name='reactant-limiting']:checked").val()))
     let colorRoundedReactantMassID = "#js-reactant-rounded-mass" + limitingReactantTableNumber;
     $("#js-reactant-equivalent" + limitingReactantTableNumber).val(1)
     autoChangeRequiredStyling2(colorRoundedReactantMassID);
