@@ -47,9 +47,7 @@ def solvent_guide(sol: Optional[str] = None) -> Response:
         if not CHEM21["Solvent Alternative Name"].str.lower().eq(sol.lower()).any():
             sol = None
         else:
-            sol = CHEM21[CHEM21["Solvent Alternative Name"].str.lower() == sol]["Number"].tolist()[
-                0
-            ]
+            sol = CHEM21[CHEM21["Solvent Alternative Name"].str.lower() == sol.lower()]["Number"].iloc[0]
     return render_template(
         "solvent_guide.html",
         workgroups=workgroups,
