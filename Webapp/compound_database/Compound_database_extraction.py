@@ -14,10 +14,11 @@ import pytz
 from chemspipy import ChemSpider
 from compound_database.auxiliary import compound_database_dir
 from lxml import etree as et
+import os
 from rdkit import Chem
 from sources import models
 from sources.extensions import db
-from utilities import read_yaml
+from utilities import read_yaml, basedir
 
 ns = {
     "xmlns": "http://pubchem.ncbi.nlm.nih.gov/pug_view",  # Defines the url used in the xml tags
@@ -761,9 +762,10 @@ def seed_predefined_data():
     )
 
     # Adding predefined data from the yaml file.
-    users_to_add = read_yaml(["predefined_users"])
+    seed_data_yaml_filepath = os.path.join(os.path.dirname(basedir), 'Webapp', 'seed_data.yaml')
+    users_to_add = read_yaml(["predefined_users"], seed_data_yaml_filepath)
     try:
-        workgroups_to_add = read_yaml(["predefined_workgroups"])
+        workgroups_to_add = read_yaml(["predefined_workgroups"], seed_data_yaml_filepath)
     except Exception:
         workgroups_to_add = None
     for user in users_to_add.values():

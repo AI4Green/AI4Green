@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <head>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher_utils.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/search.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/marvin_js_utils.js') }}"></script>
 </head>
 <div class="container-fluid">
     {% if not workgroups %}
@@ -53,8 +55,19 @@
         <!--        search query column-->
         <div id="search-query" class="col-6 py-3">
             <h5>Search reactants and products by exact structure</h5>
-            <div
-                    id="marvin-search" class="mb-3" style="width: 100%; height: 480px;">
+            <div id="sketchers-div">
+                <div>
+                    Selected Reaction Sketcher:
+                    <label> MarvinJS
+                        <input type="radio" id="marvin-select" name="sketcher-select" checked="checked">
+                    </label>
+                    <label> Ketcher
+                        <input type="radio" id="ketcher-select" name="sketcher-select">
+                    </label>
+                </div>
+                <div class="loading-circle"></div>
+                <div id="ketcher-sketcher"></div>
+                <div id="marvin-sketcher" style="width: 800px; height: 480px"></div>
             </div>
 <!--            structure search-->
             <div class="row mb-3">

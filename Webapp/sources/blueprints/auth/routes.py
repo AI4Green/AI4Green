@@ -23,8 +23,10 @@ from sqlalchemy import func
 # url_for generates URLs using its internal mapping of URLs to view functions
 # flash stores a message for the user to show it when called from the templates
 # request parses incoming request data and gives access to it
-from werkzeug.urls import url_parse
 
+from werkzeug.urls import url_parse
+from datetime import datetime
+import pytz
 from . import auth_bp  # imports the blueprint of the
 from .forms import LoginForm, RegistrationForm
 from .utils import login_not_allowed
@@ -71,7 +73,6 @@ def login() -> Response:  # the login view function
             .first()
         )
         session["role"] = role.name
-
         """If the username and password are both correct, then the login_user() function
         from Flask-Login is called. This function will register the user as logged in,
         which means that any future pages the user navigates to will have the current_user

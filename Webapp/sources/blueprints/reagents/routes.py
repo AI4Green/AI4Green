@@ -35,9 +35,9 @@ def reagents() -> Response:
     )
     number = request.form["number"]  # gets the reagent number from the browser
     cas_regex = r"\b[1-9]{1}[0-9]{1,6}-\d{2}-\d\b"
-    if re.findall(
-        cas_regex, reagent
-    ):  # if it's a cas, find the corresponding name in the compound db
+    cas_number = re.findall(cas_regex, reagent)
+    if cas_number:
+        reagent = cas_number[0]
         found_reagent = (
             db.session.query(models.Compound)
             .filter(models.Compound.cas == reagent)

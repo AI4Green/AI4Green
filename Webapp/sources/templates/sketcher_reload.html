@@ -4,7 +4,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/sketcher_page.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher_page.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/addendum.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/file_handling.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
@@ -25,12 +25,25 @@
         <p>Please sketch or upload your reaction to begin. Click <a target="_blank" href="{{ url_for('main.marvin_js_help') }}">here</a> to view our Marvin JS help guide.</p>
         <p>Please note compounds drawn above or underneath the arrow will not be recognised.</p>
     </div>
-    <div id="marvin-test" style="width: 1020px; height: 480px;">
+    <div id="sketchers-div">
+        <div>
+            Selected Reaction Sketcher:
+            <label> MarvinJS
+                <input type="radio" id="marvin-select" name="sketcher-select" checked="checked">
+            </label>
+            <label> Ketcher
+                <input type="radio" id="ketcher-select" name="sketcher-select">
+            </label>
+        </div>
+        <div class="loading-circle"></div>
+        <div id="ketcher-sketcher"></div>
+        <div id="marvin-sketcher" style="width: 1020px; height: 480px"></div>
     </div>
     <div id="editor-hint">
         <p>Hint: You can copy & paste reaction schemes from ChemDraw by selecting the scheme and use CTRL + ALT + C to copy
         and then CTRL + V to paste into this sketcher</p>
     </div>
+
     <input type="hidden" id="js-tutorial" value="{{ tutorial }}">
     <input type="hidden" id="js-reaction-name" value="{{ reaction.name }}">
     <input type="hidden" id="js-reaction-id" value="{{ reaction.reaction_id }}">
@@ -38,18 +51,21 @@
     <input type="hidden" id="js-reaction-smiles" value="{{ reaction.reaction_smiles }}">
     <input type="hidden" value="{{ reaction.reaction_table_data }}" id="js-reaction-table-data">
     <input type="hidden" value="{{ reaction.summary_table_data }}" id="js-summary-table-data">
-    <input type="hidden" id="js-reloaded-image" value="0">
+    <input type="hidden" id="js-reaction-scheme-image" value="0" style="{'width': 600, 'height': 400}">
     <input type="hidden" value="{{ demo }}" id="js-demo">
     <input type="hidden" value="{{ reaction.complete }}" id="js-complete">
+
     {% if tutorial == 'no' %}
         <input type="hidden" value="{{ reaction.creator_person.user.email }}" id="js-creator-email">
         <input type="hidden" value="{{ current_user.email }}" id="js-email">
     {% endif %}
     <br>
-    <p><button id="demo-button" type="button" class="btn btn-primary" style="width: 100px;">Example</button></p>
-    <p><button id="action-button-submit" type="button" class="btn btn-primary">Submit</button></p>
+    <p><button id="demo-button" type="button" class="btn btn-primary" style="width: 100px;" onclick="loadExampleSmiles()">Example</button></p>
+    <p><button id="action-button-submit" type="button" class="btn btn-primary" onclick="createReactionTable()">Submit</button></p>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='js/integrated_marvin.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
 
     <!--The loading bar div-->
     <div class="loading-bar"></div>
@@ -59,7 +75,7 @@
     <div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;"></div>
 
     <!--Output of reaction table-->
-    <div id="successAlert1"></div>
+    <div id="reaction-table-div"></div>
     <br>
     <p id="summary-div"><input type="submit" value="Summary" id="action-summary" class="btn btn-primary" onclick="showSummary()" style="display: none; width: 100px;"></p>
 
@@ -83,50 +99,42 @@
         }
     </script>
 
-<div id="file-upload-div" class="mb-2" style="display:none;">
-    <p>Upload Experimental Data</p>
-    <div class="input-group mb-3 w-25">
-        <input id="upload-files" class="form-control" type="file" multiple>
-        <div class="input-group-append">
-            <button id="file-upload" class="btn btn-outline-secondary" onclick="uploadFiles()" type="button">Upload</button>
+    <div id="file-upload-div" class="mb-2" style="display:none;">
+        <p>Upload Experimental Data</p>
+        <div class="input-group mb-3 w-25">
+            <input id="upload-files" class="form-control" type="file" multiple>
+            <div class="input-group-append">
+                <button id="file-upload" class="btn btn-outline-secondary" onclick="uploadFiles()" type="button">Upload</button>
+            </div>
+        </div>
+        <div id="file-list">
+        {% if file_attachments %}
+            {% for file in file_attachments %}
+    <!--            <button onclick="viewFile(this)" value="{{ file.uuid }}">{{ file.display_name }}</button>-->
+                    <div id="file-button-group{{ loop.index }}" class="btn-group btn-group-justified mb-3" role="group" aria-label="">
+                        <div class="btn-group" role="group">
+                            <button id="download-file-button{{ loop.index }}" type="button" class="btn btn-outline-primary" onclick="downloadFile(this)" value="{{ file.uuid }}"><i class="bi bi-download"></i></button>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button id="view-file-button{{ loop.index }}" type="button" class="btn btn-outline-dark" onclick="viewFile(this)" value="{{ file.uuid }}">{{ file.display_name }}</button>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button id="delete-file-button{{ loop.index }}" type="button" onclick="deleteFile(this)" value="{{ file.uuid }}" class="btn btn-outline-danger"><i class="bi bi-x"></i></button>
+                        </div>
+                    </div>
+            {% endfor %}
+        {% endif %}
         </div>
     </div>
-    <div id="file-list">
-    {% if file_attachments %}
-        {% for file in file_attachments %}
-<!--            <button onclick="viewFile(this)" value="{{ file.uuid }}">{{ file.display_name }}</button>-->
-                <div id="file-button-group{{ loop.index }}" class="btn-group btn-group-justified mb-3" role="group" aria-label="">
-                    <div class="btn-group" role="group">
-                        <button id="download-file-button{{ loop.index }}" type="button" class="btn btn-outline-primary" onclick="downloadFile(this)" value="{{ file.uuid }}"><i class="bi bi-download"></i></button>
-                    </div>
-                    <div class="btn-group" role="group">
-                        <button id="view-file-button{{ loop.index }}" type="button" class="btn btn-outline-dark" onclick="viewFile(this)" value="{{ file.uuid }}">{{ file.display_name }}</button>
-                    </div>
-                    <div class="btn-group" role="group">
-                        <button id="delete-file-button{{ loop.index }}" type="button" onclick="deleteFile(this)" value="{{ file.uuid }}" class="btn btn-outline-danger"><i class="bi bi-x"></i></button>
-                    </div>
-                </div>
-        {% endfor %}
-    {% endif %}
+
+
+    <div id="complete-reaction-div" style="display:none;">
+        <button id="complete-reaction-button" onclick="completeReaction()" class="btn btn-primary" style="width: fit-content;">Lock Reaction</button>
     </div>
-</div>
-
-<script>
 
 
-
-
-
-
-</script>
-
-<div id="complete-reaction-div" style="display:none;">
-    <button id="complete-reaction-button" onclick="completeReaction()" class="btn btn-primary" style="width: fit-content;">Lock Reaction</button>
-</div>
-
-
-<br>
-<button id="print-pdf" onclick="printContent()" class="btn btn-primary" style="display: none; width:140px">Print Summary</button>
+    <br>
+    <button id="print-pdf" onclick="window.print()" class="btn btn-primary" style="display: none; width:140px">Print Summary</button>
     <div class="notToPrint" id="printoutput"></div>
     <br>
     <button id="reaction-note-button" data-toggle="modal" data-target="#new-reaction-note-modal" class="btn btn-primary">Add Note</button>
@@ -134,29 +142,29 @@
     <br>
 
     <div id="addenda-content" class="row d-flex justify-content-left">
-      <div class="col-md-8 col-lg-6 mt-5">
-        <div id="addenda-cardholder" class="card shadow-0 border" style="background-color: #f0f2f5;">
-            {% if addenda %}
-            {% for addendum in addenda %}
-            <div id="addendum-card{{ loop.index }}" class="card mb-4">
-                <div class="card-body">
-                    <p id="addendum-text{{ loop.index }}">{{ addendum.text }}</p>
-                    <div class="d-flex justify-content-between">
-                        <div class="d-flex flex-row align-items-center">
-                            <p id="addendum-author{{ loop.index }}" class="small mb-0 ms-2 pt-5">{{ addendum.Author.user.fullname }}</p>
+        <div class="col-md-8 col-lg-6 mt-5">
+            <div id="addenda-cardholder" class="card shadow-0 border" style="background-color: #f0f2f5;">
+                {% if addenda %}
+                    {% for addendum in addenda %}
+                        <div id="addendum-card{{ loop.index }}" class="card mb-4">
+                            <div class="card-body">
+                                <p id="addendum-text{{ loop.index }}">{{ addendum.text }}</p>
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex flex-row align-items-center">
+                                        <p id="addendum-author{{ loop.index }}" class="small mb-0 ms-2 pt-5">{{ addendum.Author.user.fullname }}</p>
+                                    </div>
+                                    <div class="d-flex flex-row align-items-center">
+                                        {% set time = addendum.time_of_creation|string %}
+                                        <p id="addendum-time{{ loop.index }}" class="small mb-0 pt-5">{{ time[:-7] }}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="d-flex flex-row align-items-center">
-                            {% set time = addendum.time_of_creation|string %}
-                            <p id="addendum-time{{ loop.index }}" class="small mb-0 pt-5">{{ time[:-7] }}</p>
-                        </div>
-                    </div>
-                </div>
+                    {% endfor %}
+                {% endif %}
             </div>
-            {% endfor %}
         </div>
-      </div>
     </div>
-    {% endif %}
 <!--    end of addenda-->
 </div>
 <!--end of page contents-->

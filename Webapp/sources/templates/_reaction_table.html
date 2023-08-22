@@ -1,6 +1,6 @@
 <head>
     <script type="text/javascript" src="{{ url_for('static', filename='js/custom_colours.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/form_summary_table.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/form_summary_table.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/reaction_reload.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/reaction_table.js') }}"></script>
@@ -63,7 +63,7 @@
             <td><input id="js-reactant-table-number{{ loop.index }}" style="width: 40px; border-width:0px;" type="number" value="{{ loop.index }}" readonly></td>
             <td style='width: 200px;'><input  id="js-reactant{{ loop.index }}" style="width: 200px; border-width:0px;" value="{{ reactant }}"></td>
             <td><input  type="radio" step="any"
-                    name="reactant-limiting" id="js-reactant-limiting{{ loop.index }}" value={{ loop.index }}  class="js-reactant-limiting">
+                    name="reactant-limiting" id="js-reactant-limiting{{ loop.index }}" value="{{ loop.index }}"  class="js-reactant-limiting">
             </td>
             <td><input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ reactant_mol_weights[loop.index0] }}"
                     id="js-reactant-molecular-weight{{ loop.index }}" readonly>

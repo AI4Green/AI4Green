@@ -647,6 +647,7 @@ function postSolventData(solventName, x){
                 fillData(response, "solvent", solventFieldList, y)
                 let solventID = "#js-solvent" + y;
                 $(solventID).attr('value', solvent)
+                $(solventID).val(solvent);
                 $(solventID).removeClass().addClass((response.flag + " remove-highlight-filled-cell"))
                 setColours();
                 autoChangeRequiredStylingValidCompound("solvent", y)
@@ -776,24 +777,33 @@ function updateRequiredStylingLimited(){
     }
 }
 
-function autoChangeRequiredStyling2(styleParameterID){
+/**
+ * Highlights red/removes red highlights when essential cell is not filled in to draw user attention.
+ * @param {string} styleParameterID - # then element ID, e.g., "#element-1" to be used in JQuery Selector
+ * @param {Array} [excludedNullValues=[]] - Typically null values which should not be treated as null for this parameter
+ */
+function autoChangeRequiredStyling2(styleParameterID, excludedNullValues=[]){
     // doesnt require change parameter
-    const null_values = ['-select-', '0', '', '-', 0]
+    const defaultNulLValues = ['-select-', '0', '', '-', 0]
+    // remove excluded nullValues from the default nullValues
+    let nullValues = defaultNulLValues.filter(item => !excludedNullValues.includes(item));
     let parameterValue = $(styleParameterID).val()
-    if (! isNaN(Number(parameterValue))){
-        parameterValue = Number(parameterValue)
-    }
-    if (null_values.includes(parameterValue)){
+    if (nullValues.includes(parameterValue)){
         $(styleParameterID).removeClass("remove-highlight-filled-cell").addClass("add-highlight-unfilled-cell")
     } else {
         $(styleParameterID).removeClass("add-highlight-unfilled-cell").addClass("remove-highlight-filled-cell");
     }
 }
 
-function autoChangeRequiredStyling(changedParameter) {
+/**
+ * Calls the function to update red highlight when there is an input change to the cell changed parameter
+ * @param {string} changedParameter - # then element ID, e.g., "#element-1" to be used in JQuery Selector
+ * @param {Array} [excludedNullValues=[]] Typically null values which should not be treated as null for this parameter
+ */
+function autoChangeRequiredStyling(changedParameter, excludedNullValues=[]) {
     // requires change parameter
     $(changedParameter).on('input change', function () {
-        autoChangeRequiredStyling2(changedParameter)
+        autoChangeRequiredStyling2(changedParameter, excludedNullValues)
     });
 }
 
@@ -814,26 +824,26 @@ function autoChangeRequiredStylingValidCompound(component, loop_value) {
 }
 function updateStyling(){
     for (let i = 1; i < reactionTable.numberOfReactants + 1; i++){
-        autoChangeRequiredStyling("#js-reactant-physical-form" + i, i);
-        autoChangeRequiredStyling("#js-reactant-rounded-mass" + i, i);
-        autoChangeRequiredStyling("#js-reactant-equivalent" + i, i);
+        autoChangeRequiredStyling("#js-reactant-physical-form" + i);
+        autoChangeRequiredStyling("#js-reactant-rounded-mass" + i);
+        autoChangeRequiredStyling("#js-reactant-equivalent" + i);
     }
     let numberOfReagents = Number($("#js-number-of-reagents").val());
     for (let i = 1; i < numberOfReagents + 1; i++){
-        autoChangeRequiredStyling("#js-reagent-physical-form" + i, i);
-        autoChangeRequiredStyling("#js-reagent-equivalent" + i, i);
-        autoChangeRequiredStyling("js-reagent-hazards" + i, i)
+        autoChangeRequiredStyling("#js-reagent-physical-form" + i);
+        autoChangeRequiredStyling("#js-reagent-equivalent" + i);
+        autoChangeRequiredStyling("js-reagent-hazards" + i)
         autoChangeRequiredStylingValidCompound("reagent", i);
     }
     let numberOfSolvents = Number($("#js-number-of-solvents").val());
     for (let i = 1; i < numberOfSolvents + 1; i++){
-        autoChangeRequiredStyling("#js-solvent-physical-form" + i, i);
-        autoChangeRequiredStyling("#js-solvent-volume" + i, i);
-        autoChangeRequiredStyling("#js-solvent" + i, i);
+        autoChangeRequiredStyling("#js-solvent-physical-form" + i);
+        autoChangeRequiredStyling("#js-solvent-volume" + i);
+        autoChangeRequiredStyling("#js-solvent" + i);
         autoChangeRequiredStylingValidCompound("solvent", i)
     }
     for (let i = 1; i < reactionTable.numberOfProducts + 1; i++){
-        autoChangeRequiredStyling("#js-product-physical-form" + i, i);
+        autoChangeRequiredStyling("#js-product-physical-form" + i);
     }
 }
 
