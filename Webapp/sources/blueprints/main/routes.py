@@ -16,7 +16,7 @@ from . import main_bp  # imports the blueprint of the main route
 @main_bp.route("/", methods=["GET", "POST"])
 @main_bp.route("/home", methods=["GET", "POST"])
 def index() -> Response:
-    # gets jinja variables if user is logged in to populate their homepage, else the non-logged in user homepage is loaded
+    # gets jinja variables if user is logged in to populate the homepage, else the non-logged in user homepage is loaded
     if current_user.is_authenticated:
         # get the users role to determine if they can access the admin dashboard button or not
         user = (
@@ -37,6 +37,7 @@ def index() -> Response:
             db.session.query(models.NewsItem).order_by(models.NewsItem.time.desc()).all()
         )
     else:
+        # user not logged in
         user_role = None
         workgroups = []
         notification_number = 0
@@ -154,7 +155,6 @@ def search() -> Response:
     # must be logged in
     workgroups = get_workgroups()
     notification_number = get_notification_number()
-    print(workgroups)
     return render_template(
         "search.html", workgroups=workgroups, notification_number=notification_number
     )
