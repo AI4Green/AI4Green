@@ -37,23 +37,20 @@
             <a class="nav-link" id="TopNavSketcherButton" href="{{ url_for('main.demo') }}">Demo <span class="sr-only">(current)</span></a>
           </li>
           {% if current_user.is_authenticated %}
-          <li {% if request.path == '/solvent_guide' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
-            <a class="nav-link" id="solvent-guide" href="{{ url_for('solvent_guide.solvent_guide') }}">Solvent Guide<span class="sr-only">(current)</span></a>
-          </li>
-          {% endif %}
-          {% if current_user.is_anonymous %}
-          {% else %}
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Workgroup</a>
-            <div class="dropdown-menu" aria-labelledby="dropdown01">
-              {% for workgroup in workgroups %}
-                  <a class="dropdown-item" href="{{ url_for('workgroup.workgroup', workgroup_selected=workgroup) }}">{{ workgroup }}</a>
-              {% endfor %}
-            </div>
-          </li>
-          <li {% if request.path == '/search' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
-            <a class="nav-link" id="TopNavSearchButton" href="{{ url_for('main.search') }}">Search <span class="sr-only">(current)</span></a>
-          </li>
+              <li {% if request.path == '/solvent_guide' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
+                <a class="nav-link" id="solvent-guide" href="{{ url_for('solvent_guide.solvent_guide') }}">Solvent Guide<span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Workgroup</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown01">
+                  {% for workgroup in workgroups %}
+                      <a class="dropdown-item" href="{{ url_for('workgroup.workgroup', workgroup_selected=workgroup) }}">{{ workgroup }}</a>
+                  {% endfor %}
+                </div>
+              </li>
+              <li {% if request.path == '/search' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
+                <a class="nav-link" id="TopNavSearchButton" href="{{ url_for('main.search') }}">Search <span class="sr-only">(current)</span></a>
+              </li>
           {% endif %}
         </ul>
           <div id="reaction-saved-indicator" class="reaction-save-hidden">
@@ -63,24 +60,24 @@
           <a id="InfoButton" class="btn btn-primary" href="{{ url_for('main.info') }}"><i class="bi bi-question-diamond-fill"></i> Help <span class="sr-only">(current)</span></a>
           <p style="visibility: hidden;">x</p>
           {% if current_user.is_anonymous %}
-          <a class="btn btn-light my-2 my-sm-0" type="submit" id="TopNavLoginButton" href="{{ url_for('auth.login') }}">Log in</a>
+            <a class="btn btn-light my-2 my-sm-0" type="submit" id="TopNavLoginButton" href="{{ url_for('auth.login') }}">Log in</a>
           {% endif %}
 
           {% if current_user.is_authenticated %}
-          <div class="btn-group">
-              <button id="user-dropdown" type="button" class="btn btn-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <sup>{% if notification_number %}<span class="badge badge-pill badge-danger">{{ notification_number }}</span>{% endif %}</sup>{{ current_user.username }}
-              </button>
-              <div class="dropdown-menu" style="right: 0; left: auto;">
-                <a id="notifications" href="{{ url_for('notifications.notifications') }}" class="dropdown-item" type="button">Notifications<sup>{% if notification_number %}<span class="badge badge-pill badge-danger">{{ notification_number }}</span>{% endif %}</sup></a>
-                <a id="manage-account" href="{{ url_for('main.manage_account') }}" class="dropdown-item" type="button">Manage Account</a>
-                <a id="accessibility" href="{{ url_for('main.accessibility') }}" class="dropdown-item" type="button">Accessibility</a>
-                <div class="dropdown-divider"></div>
-                <div class="px-4">
-                    <a id="TopNavLoginButton" href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger" type="button">Logout</a>
-                </div>
+              <div class="btn-group">
+                  <button id="user-dropdown" type="button" class="btn btn-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <sup>{% if notification_number %}<span class="badge badge-pill badge-danger">{{ notification_number }}</span>{% endif %}</sup>{{ current_user.username }}
+                  </button>
+                  <div class="dropdown-menu" style="right: 0; left: auto;">
+                    <a id="notifications" href="{{ url_for('notifications.notifications') }}" class="dropdown-item" type="button">Notifications<sup>{% if notification_number %}<span class="badge badge-pill badge-danger">{{ notification_number }}</span>{% endif %}</sup></a>
+                    <a id="manage-account" href="{{ url_for('main.manage_account') }}" class="dropdown-item" type="button">Manage Account</a>
+                    <a id="accessibility" href="{{ url_for('main.accessibility') }}" class="dropdown-item" type="button">Accessibility</a>
+                    <div class="dropdown-divider"></div>
+                    <div class="px-4">
+                        <a id="TopNavLoginButton" href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger" type="button">Logout</a>
+                    </div>
+                  </div>
               </div>
-          </div>
           {% endif %}
       </div>
     </nav>

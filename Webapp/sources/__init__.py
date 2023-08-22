@@ -72,7 +72,6 @@ def register_extensions(app: Flask) -> None:
 
     login.init_app(app)
     login.login_view = "auth.login"
-    # login.login_view = "main.landing_page"
     @login.user_loader
     def load_user(user_id: int):
         return models.User.query.get(user_id)
