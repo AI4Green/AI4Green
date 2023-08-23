@@ -28,7 +28,7 @@ def delete_profile() -> Response:
 @login_required
 def get_reactions() -> Response:
     # must be logged in
-    sort_crit = request.form["sort_crit"]
+    sort_crit = str(request.form["sort_crit"])
     workbook = str(request.form["workbook"])
     workgroup = str(request.form["workgroup"])
     reactions = get_reaction_list(workbook, workgroup, sort_crit)
@@ -45,6 +45,6 @@ def get_schemata() -> Response:
     workbook = str(request.form["workbook"])
     workgroup = str(request.form["workgroup"])
     size = str(request.form["size"])
-    sort_crit = request.form["sort_crit"]
+    sort_crit = str(request.form["sort_crit"])
     schemes = get_scheme_list(workbook, workgroup, sort_crit, size)
     return {"schemes": schemes, "sort_crit": sort_crit}
