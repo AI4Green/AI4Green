@@ -2,7 +2,7 @@
 name = "ai4green"
 version = "1.5.0"
 description = "AI4Green is an Electronic Laboratory Notebook which combines data storage and sharing while promoting green and sustainable chemistry."
-authors = ["Your Name <you@example.com>"]
+authors = ["<ai4green@nottingham.ac.uk>"]
 license = "AGPL-3.0"
 readme = "README.md"
 
