@@ -24,12 +24,12 @@ from sources.extensions import \
 
 from . import \
     reaction_table_bp  # imports the blueprint of the reaction table route
-#
-# if not current_app.testing:
-#     try:
-#         from STOUT import translate_forward
-#     except:
-#         pass
+
+if not current_app.testing:
+    try:
+        from STOUT import translate_forward
+    except:
+        pass
 
 
 # Processing data from Marvin JS and creating reaction table
