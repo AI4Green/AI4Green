@@ -37,7 +37,6 @@ from .utils import login_not_allowed
 @login_not_allowed
 def login() -> Response:  # the login view function
     # anyone may view
-
     form = LoginForm()  # instantiates an object of LoginForm
     if form.validate_on_submit():
         """The form.validate_on_submit returns True when the browser sends the POST
