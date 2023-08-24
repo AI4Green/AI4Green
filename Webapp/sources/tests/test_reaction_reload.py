@@ -26,7 +26,7 @@ class SketcherReloadTest(flask_testing.LiveServerTestCase, flask_testing.TestCas
     def test_read_marvin_sketch(self):
         """This function tests we can read the contents of the marvin sketcher"""
         select_workgroup(self)
-        select_wb = Select(self.driver.find_element_by_id("WB-select"))
+        select_wb = Select(self.driver.find_element_by_id("active-workbook"))
         select_wb.select_by_index(0)
         time.sleep(1)
         make_new_reaction(self)
@@ -306,7 +306,7 @@ class MultipleReloadTest(flask_testing.LiveServerTestCase, flask_testing.TestCas
             select_wg.select_by_index(1)
             self.driver.find_element_by_id("go-to-workgroup").click()
             time.sleep(1)
-            select_wb = Select(self.driver.find_element_by_id("WB-select"))
+            select_wb = Select(self.driver.find_element_by_id("active-workbook"))
             select_wb.select_by_index(0)
             time.sleep(1)
             self.driver.find_element_by_id('nitro reduction2-reload').click()

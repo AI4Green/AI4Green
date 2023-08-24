@@ -1,4 +1,13 @@
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<script>
+    $(function() {
+        if (window.location.pathname.split("/")[1] !== 'search') {
+            showSavedReactionsSchemes()
+        }
+    });
+</script>
+</head>
 {% if reactions %}
 
 <div class="btn-group btn-group-toggle" data-toggle="buttons">
@@ -40,24 +49,6 @@
 </div>
 {% else %}
 
-
-
-
-<script>
-    // if reactions show option to export data
-    document.getElementById("export-div").style.display = "block";
-</script>
-
-
-<script>
-    // if no reactions don't give option to export reactions
-    document.getElementById("no-reactions").style.display = "block";
-    document.getElementById("export-div").style.display = "none";
-</script>
 {% endif %}
 <input type="hidden" value="{{ reactions|length }}" id="js-number-of-reactions">
 <input type="hidden" value="{{ sort_crit }}" id="js-sort-crit">
-<script>
-
-
-</script>

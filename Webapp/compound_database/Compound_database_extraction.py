@@ -537,6 +537,7 @@ def add_compound(
     :return:
     """
     return model.create(
+        commit=False,
         cas=cas,
         cid=cid,
         name=common_name,
@@ -649,7 +650,7 @@ def seed_solvent_data():
     Seed solvent data to the database.
     """
     # add xylene to compound db
-    models.Compound.create(cid=-1, cas="1330-20-7", name="Xylenes")
+    models.Compound.create(commit=False, cid=-1, cas="1330-20-7", name="Xylenes")
     # get each row of solvent data from solvent csv
     with open(compound_database_dir / "solvents.csv") as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=",")
@@ -692,7 +693,7 @@ def seed_solvent_data():
                     hazard=hazard,
                     time_of_creation=current_time,
                 )
-        db.session.commit()
+        # db.session.commit()
 
 
 def seed_hazard_code_data():
@@ -712,7 +713,7 @@ def seed_hazard_code_data():
         models.HazardCode.create(
             commit=False, code=code, phrase=phrase, category=category
         )
-    db.session.commit()
+    # db.session.commit()
 
 
 def seed_element_sustainability_data():
@@ -735,7 +736,7 @@ def seed_element_sustainability_data():
                 remaining_supply=remaining_supply,
                 colour=colour,
             )
-        db.session.commit()
+        # db.session.commit()
 
 
 def seed_role_types():
@@ -743,10 +744,12 @@ def seed_role_types():
     Seeds role types to the database.
     """
     models.Role.create(
+        commit=False,
         name="Admin",
         role_description="The site administrator with access to the administration tabs",
     )
     models.Role.create(
+        commit=False,
         name="Standard",
         role_description="The role assigned to new users signing up (PIs, SRs, SMs)",
     )
@@ -758,7 +761,7 @@ def seed_predefined_data():
     """
     # Adds an institution then reads the yaml and adds the contents from there
     institution = models.Institution.create(
-        name="Test User Institution", time_of_creation=current_time
+        commit=False, name="Test User Institution", time_of_creation=current_time
     )
 
     # Adding predefined data from the yaml file.
@@ -777,13 +780,14 @@ def seed_predefined_data():
                     "Webapp/configs.yaml and rerun 'pubchem_download.py to setup the application correctly."
                 )
                 exit()
-        p = models.Person.create()
+        p = models.Person.create(commit=False)
 
         role = "Standard"
         if user["admin"] is True:
             role = "Admin"
         role = db.session.query(models.Role).filter(models.Role.name == role).first()
         models.User.create(
+            commit=False,
             username=user["username"],
             email=user["email"],
             fullname=user["fullname"],
@@ -808,6 +812,7 @@ def seed_predefined_data():
                 )
                 workgroup_users[user_type] = persons
             workgroup_obj = models.WorkGroup.create(
+                commit=False,
                 name=workgroup["name"],
                 institution=institution.id,
                 principal_investigator=workgroup_users["principal_investigators"],
@@ -826,8 +831,10 @@ def seed_predefined_data():
                     .all()
                 )
                 models.WorkBook.create(
+                    commit=False,
                     name=workbook["name"],
                     abbreviation=workbook["abbreviation"],
                     users=persons,
                     group=workgroup_obj.id,
                 )
+    db.session.commit()

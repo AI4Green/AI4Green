@@ -15,8 +15,8 @@ $(async function() {
 });
 
 async function structureSearch(){
-    let workgroup = $("#workgroup-select").val()
-    let workbook = $("#workbook-select").val()
+    let workgroup = $("#active-workgroup").val()
+    let workbook = $("#active-workbook").val()
     let searchType = "exact_structure"
     let smiles = await exportSmilesFromActiveEditor()
     $.ajax({
@@ -35,6 +35,7 @@ async function structureSearch(){
             if (response.status === 'success'){
                 showSearchReactions(response)
             } else if (response.status === 'failure'){
+                alert("testing if this still appears")
                 // show failure message
             }
         }
@@ -47,12 +48,12 @@ async function showSearchReactions(response){
         let idx1 = idx + 1
         $(`#image${idx1}`).append($('<div>').html(scheme))
     }
-    document.getElementById("export-div").style.display = "block";
+    document.getElementById("export-div").style.display = "none";
 }
 
 function updateSelectedWorkGroup() {
     // updates the workbook+creator dropdowns after change to selected workgroup
-    let workgroup = $('#workgroup-select').val()
+    let workgroup = $('#active-workgroup').val()
     $.ajax({
         url: '/updated_workgroup_dropdown',
         type: 'post',
@@ -60,7 +61,7 @@ function updateSelectedWorkGroup() {
         data: {workgroup: workgroup},
         success: function(response) {
             // update dropdown with workbook options
-            let dropdownSelect = $("#workbook-select")
+            let dropdownSelect = $("#active-workbook")
             dropdownSelect.empty()
             for (let workbook of response.workbooks){
                 let option = document.createElement('option');

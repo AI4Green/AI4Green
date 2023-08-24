@@ -83,7 +83,7 @@ class TestNovelSolventAboveArrow(flask_testing.LiveServerTestCase, flask_testing
         self.driver.find_element_by_id('submit').click()
         time.sleep(1)
         select_workgroup(self)
-        select_wb = Select(self.driver.find_element_by_id("WB-select"))
+        select_wb = Select(self.driver.find_element_by_id("active-workbook"))
         select_wb.select_by_index(0)
         time.sleep(1)
         make_new_reaction(self)

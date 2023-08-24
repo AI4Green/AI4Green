@@ -61,6 +61,7 @@ def seed_db() -> None:
 
     auxiliary.delete_temp_files()
     click.echo("Database seed completed.")
+    db.session.commit()
 
 
 @click.command("seed-users")
