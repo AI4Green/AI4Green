@@ -9,20 +9,6 @@ from . import reaction_list_bp  # imports the blueprint of route
 from .reaction_list import get_reaction_list, get_scheme_list
 
 
-# Go to the delete profile page
-@reaction_list_bp.route("/delete_profile", methods=["GET", "POST"])
-@login_required
-def delete_profile() -> Response:
-    # must be logged in
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
-    return render_template(
-        "delete_profile.html",
-        workgroups=workgroups,
-        notification_number=notification_number,
-    )
-
-
 # Get reactions
 @reaction_list_bp.route("/get_reactions", methods=["GET", "POST"])
 @login_required
