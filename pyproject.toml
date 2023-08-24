@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "ai4green"
+version = "1.5.0"
+description = "AI4Green is an Electronic Laboratory Notebook which combines data storage and sharing while promoting green and sustainable chemistry."
+authors = ["Your Name <you@example.com>"]
+license = "AGPL-3.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
