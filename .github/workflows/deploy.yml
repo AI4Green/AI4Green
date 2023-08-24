@@ -17,6 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Get git hash
+        run: |
+          git_hash=$(git describe --always)
+          echo "$git_hash" > hash.txt
+
       - name: Set up Python version
         uses: actions/setup-python@v4
         with:
