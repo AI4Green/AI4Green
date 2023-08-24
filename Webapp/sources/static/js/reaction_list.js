@@ -148,7 +148,9 @@ function getSchemata(sortCriteria, workbook, workgroup, size){
  */
 function sortReactionsAlphabetically(){
     let reactionCards = $(".reaction-card")
-    reactionCards.sort((a, b) => a.querySelector(".reaction-name").firstChild.innerHTML.toLowerCase().localeCompare(b.querySelector(".reaction-name").firstChild.innerHTML.toLowerCase()))
+    // sorts by reaction name
+    reactionCards.sort((a, b) => a.querySelector(".reaction-name").firstChild.innerHTML.toLowerCase().
+    localeCompare(b.querySelector(".reaction-name").firstChild.innerHTML.toLowerCase()))
     $("#reaction-list").empty()
     $("#reaction-list").append(reactionCards)
 }

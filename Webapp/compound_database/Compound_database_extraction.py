@@ -693,7 +693,6 @@ def seed_solvent_data():
                     hazard=hazard,
                     time_of_creation=current_time,
                 )
-        # db.session.commit()
 
 
 def seed_hazard_code_data():
@@ -713,7 +712,6 @@ def seed_hazard_code_data():
         models.HazardCode.create(
             commit=False, code=code, phrase=phrase, category=category
         )
-    # db.session.commit()
 
 
 def seed_element_sustainability_data():
@@ -736,7 +734,6 @@ def seed_element_sustainability_data():
                 remaining_supply=remaining_supply,
                 colour=colour,
             )
-        # db.session.commit()
 
 
 def seed_role_types():
