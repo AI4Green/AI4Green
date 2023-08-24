@@ -5,6 +5,10 @@ This is a configuration module for the app
 """
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 class BaseConfig(object):  # class to store configuration variables
     """!!!Change the secret key when deploying the app on a server!!!"""
