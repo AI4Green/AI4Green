@@ -54,7 +54,7 @@ def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response
 @login_required
 def get_reactions() -> Response:
     # must be logged in
-    sort_crit = request.form["sort_crit"]
+    sort_crit = str(request.form["sort_crit"])
     workbook = str(request.form["workbook"])
     workgroup = str(request.form["workgroup"])
     reactions = get_reaction_list(workbook, workgroup, sort_crit)
