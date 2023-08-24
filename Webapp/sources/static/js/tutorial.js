@@ -158,7 +158,7 @@ function tutorial_14(){
 }
 
 function tutorial_15(){
-    document.getElementById("dvContainer").style.display = "none";
+    document.getElementById("print-container").style.display = "none";
     document.getElementById("complete-reaction-div").style.display = "none";
     document.getElementById("file-upload-div").style.display = "none";
     document.getElementById("print-pdf").style.display = "none";
@@ -168,7 +168,7 @@ function tutorial_15(){
 }
 
 function tutorial_16(){
-    document.getElementById("dvContainer").style.display = "block";
+    document.getElementById("print-container").style.display = "block";
     document.getElementById("action-summary").click();
     $('#action-summary').removeClass('highlight');
     setTimeout(() => {
