@@ -154,7 +154,7 @@ An error with Anaconda on Windows 10 has been reported, when using the `conda in
 ### Error Creating Database
 
 It is a known issue that PubChem sometimes change the format of their data between the releases, which causes an error extracting that data.
-A previous version of the PubChem compound data can be obtained by emailing [admin@ai4green.app](mailto:admin@ai4green.app).
+A previous version of the PubChem compound data can be obtained by emailing [ai4green@nottingham.ac.uk](mailto:ai4green@nottingham.ac.uk).
 
 ### Marvin JS Sketcher Error
 

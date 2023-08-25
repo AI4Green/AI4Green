@@ -1,5 +1,5 @@
 from flask import (Response, flash, redirect, render_template, request,
-                   send_file, session, url_for, jsonify, current_app)
+                   send_file, url_for, jsonify, current_app)
 from flask_login import (  # protects a view function against anonymous users
     current_user, login_required)
 
@@ -15,31 +15,36 @@ from . import main_bp  # imports the blueprint of the main route
 # The standard user page is rendered
 @main_bp.route("/", methods=["GET", "POST"])
 @main_bp.route("/home", methods=["GET", "POST"])
-@login_required
 def index() -> Response:
-    # Set the "role" session variable for a user
-    if not session.__contains__("role"):
-        role = (
-            db.session.query(models.Role)
-            .join(models.User)
+    # gets jinja variables if user is logged in to populate the homepage, else the non-logged in user homepage is loaded
+    if current_user.is_authenticated:
+        # get the users role to determine if they can access the admin dashboard button or not
+        user = (
+            db.session.query(models.User)
             .filter(models.User.email == current_user.email)
             .first()
         )
-        session["role"] = role.name
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
-    if request.method == "POST":
-        workgroup_selected = request.form["WG-select"]
-        if workgroup_selected != "-Select Workgroup-":
-            return redirect(
-                url_for("workgroup.workgroup", workgroup_selected=workgroup_selected)
-            )
-    news_items = (
-        db.session.query(models.NewsItem).order_by(models.NewsItem.time.desc()).all()
-    )
+        user_role = user.Role.name
+        workgroups = get_workgroups()
+        notification_number = get_notification_number()
+        if request.method == "POST":
+            workgroup_selected = request.form["WG-select"]
+            if workgroup_selected != "-Select Workgroup-":
+                return redirect(
+                    url_for("workgroup.workgroup", workgroup_selected=workgroup_selected)
+                )
+        news_items = (
+            db.session.query(models.NewsItem).order_by(models.NewsItem.time.desc()).all()
+        )
+    else:
+        # user not logged in
+        user_role = None
+        workgroups = []
+        notification_number = 0
+        news_items = []
     return render_template(
         "home.html",
-        user_role=session["role"],
+        user_role=user_role,
         workgroups=workgroups,
         notification_number=notification_number,
         news_items=news_items,
@@ -49,7 +54,6 @@ def index() -> Response:
 @main_bp.route(
     "/get_marvinjs_key", methods=["POST"]
 )
-@login_required
 def get_marvinjs_key():
     return jsonify({'marvinjs_key': current_app.config["MARVIN_JS_API_KEY"]})
 
@@ -111,8 +115,11 @@ def sketcher(
 # Go to the sketcher tutorial
 @main_bp.route("/sketcher_tutorial/<tutorial>", methods=["GET", "POST"])
 def sketcher_tutorial(tutorial: str) -> Response:
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
+    workgroups = []
+    notification_number = 0
+    if current_user.is_authenticated:
+        workgroups = get_workgroups()
+        notification_number = get_notification_number()
     return render_template(
         "sketcher_reload.html",
         reaction={"name": "Tutorial Reaction", "reaction_id": "TUT-001"},
@@ -127,11 +134,13 @@ def sketcher_tutorial(tutorial: str) -> Response:
 
 # Go to demo
 @main_bp.route("/demo", methods=["GET", "POST"])
-@login_required
 def demo() -> Response:
     # must be logged in
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
+    workgroups = []
+    notification_number = 0
+    if current_user.is_authenticated:
+        workgroups = get_workgroups()
+        notification_number = get_notification_number()
     return render_template(
         "demo_sketcher.html",
         demo="demo",
@@ -146,7 +155,6 @@ def search() -> Response:
     # must be logged in
     workgroups = get_workgroups()
     notification_number = get_notification_number()
-    print(workgroups)
     return render_template(
         "search.html", workgroups=workgroups, notification_number=notification_number
     )
@@ -168,11 +176,12 @@ def manage_account() -> Response:
 
 # info page
 @main_bp.route("/info", methods=["GET", "POST"])
-@login_required
 def info() -> Response:
-    # must be logged in
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
+    workgroups = []
+    notification_number = 0
+    if current_user.is_authenticated:
+        workgroups = get_workgroups()
+        notification_number = get_notification_number()
     return render_template(
         "info.html", workgroups=workgroups, notification_number=notification_number
     )
@@ -180,11 +189,12 @@ def info() -> Response:
 
 # about page
 @main_bp.route("/about", methods=["GET", "POST"])
-@login_required
 def about() -> Response:
-    # must be logged in
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
+    workgroups = []
+    notification_number = 0
+    if current_user.is_authenticated:
+        workgroups = get_workgroups()
+        notification_number = get_notification_number()
     return render_template(
         "about.html", workgroups=workgroups, notification_number=notification_number
     )
@@ -192,7 +202,6 @@ def about() -> Response:
 
 # send guide
 @main_bp.route("/send_guide", methods=["GET", "POST"])
-@login_required
 def send_guide() -> Response:
     # must be logged in
     return send_file("static/AI4Green_User_Manual.pdf", as_attachment=True)
@@ -200,46 +209,9 @@ def send_guide() -> Response:
 
 # send quickstart guide
 @main_bp.route("/send_quickstart_guide", methods=["GET", "POST"])
-@login_required
 def send_quickstart_guide() -> Response:
     # must be logged in
     return send_file("static/AI4Green_quick_guide.pdf", as_attachment=True)
-
-
-# delete reaction
-@main_bp.route(
-    "/delete_reaction/<reaction_name>/<workgroup>/<workbook>", methods=["GET", "POST"]
-)
-@login_required
-def delete_reaction(reaction_name: str, workgroup: str, workbook: str) -> Response:
-    # must be logged in a member of the workgroup and workbook
-    if not security_member_workgroup_workbook(workgroup, workbook):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
-    # find reaction
-    reaction = (
-        db.session.query(models.Reaction)
-        .join(models.WorkBook)
-        .join(models.WorkGroup)
-        .filter(models.WorkBook.name == workbook)
-        .filter(models.WorkGroup.name == workgroup)
-        .filter(models.Reaction.creator_person.user.email == current_user.email)
-        .first()
-    )
-    # check user is creator of reaction
-    if not reaction:
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
-    # change to inactive
-    reaction.status = "inactive"
-    db.session.commit()
-    return redirect(
-        url_for(
-            "workgroup.workgroup",
-            workgroup_selected=workgroup,
-            workbook_selected=workbook,
-        )
-    )
 
 
 # marvin js help page
@@ -271,9 +243,19 @@ def accessibility() -> Response:
 
 
 @main_bp.route("/get_custom_colours", methods=["GET", "POST"])
-@login_required
 def get_custom_colours() -> Response:
-    colours = current_user.hazard_colors
+    if current_user.is_authenticated:
+        colours = current_user.hazard_colors
+    else:
+        # use default colours if user is not logged in
+        colours = {'Recommended': '#00ff00',
+                   'Problematic': '#ffff00',
+                   'Hazardous': '#ff0000',
+                   'HighlyHazardous': '#8b0000',
+                   'Recommended_text': '#000000',
+                   'Problematic_text': '#000000',
+                   'Hazardous_text': '#000000',
+                   'HighlyHazardous_text': '#ffffff'}
     return jsonify({"colours": colours})
 
 
