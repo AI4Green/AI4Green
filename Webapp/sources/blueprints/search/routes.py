@@ -3,7 +3,7 @@ from flask_login import login_required
 
 from sources import models
 from sources.auxiliary import get_workbooks, get_workgroups, smiles_to_inchi
-from sources.blueprints.standard_landing_page.reaction_list import (
+from sources.blueprints.reaction_list.reaction_list import (
     make_scheme_list, process_reactions_to_dict)
 from sources.extensions import db
 
