@@ -38,7 +38,7 @@
             </div>
             <div class="col">
                 <p><b>Choose a Workbook to view or create reactions</b></p>
-                    <select name="workbook-select" id="workbook-select" class="form-select" onchange="updateSelectedWorkbook()">
+                    <select name="workbook-select" id="active-workbook" class="form-select" onchange="updateSelectedWorkbook()">
                         {% if workbooks == "no_workbooks" %}
                             <option value="No Workbooks to Show" selected>No Workbooks to Show</option>
                         {% else %}
@@ -82,7 +82,6 @@
     </div>
 
     <input id="active-workgroup" type="hidden" value="{{ workgroup_selected }}" >
-    <input id="active-workbook" type="hidden" value="{{ workbook_selected }}">
     <input type="hidden" value="{{ sort_crit }}" id="js-sort-crit">
     <input id="workbook_corresponding_next_reaction_ids" type="hidden" value="{{ workbook_next_reaction_ids }}">
 

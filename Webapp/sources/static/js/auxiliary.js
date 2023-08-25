@@ -35,3 +35,13 @@ function getCookie(cname) {
   }
   return "";
 }
+
+/**
+ *  Uses JQuery to get the value from an element and escape special characters to prevent XSS vulnerabilities
+ * @param jquerySelector- The JQuery Selector used to get the value
+ * @returns {String} - The value of HTML element with special characters escaped
+ */
+function getVal (jquerySelector){
+    const unescapedInput = $(jquerySelector).val();
+    return $("<div>").text(unescapedInput).html();
+}

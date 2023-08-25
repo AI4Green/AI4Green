@@ -3,7 +3,9 @@
  * @param sortCriteria {string} - the sort criteria will be either a-z or time
  */
 function getReactions(sortCriteria){
-    if ($('#active-workbook').val() === "No Workbooks to Show" || $('#active-workbook').val() === "None"){
+    let workbook = getVal("#active-workbook")
+    console.log(workbook)
+    if (workbook === "No Workbooks to Show" || workbook === "None"){
         document.getElementById("export-div").style.display = "none";
         document.getElementById("new-reaction").style.display = "none";
     }
@@ -11,8 +13,8 @@ function getReactions(sortCriteria){
         document.getElementById("reaction-content").style.display = "block";
         document.getElementById("reaction-column").style.display = "block";
         document.getElementById("no-reactions").style.display = "none";
-        let workbook = $("#active-workbook").val()
-        let workgroup = $('#active-workgroup').val()
+        let workgroup = getVal("#active-workgroup")
+        let workbook = getVal("#active-workbook")
         $.ajax({
             url: '/get_reactions',
             type: 'post',
@@ -41,9 +43,9 @@ function updateSelectedWorkbook () {
  * and assigns the reaction id corresponding to the active workbook
  */
 function newReactionModalWindow() {
-    let reactionIDs = $("#workbook_corresponding_next_reaction_ids").val()
+    let reactionIDs = getVal("#workbook_corresponding_next_reaction_ids")
     let reactionIDsDic = JSON.parse(reactionIDs)
-    let workbook = $("#active-workbook").val()
+    let workbook = getVal("#active-workbook")
     let activeReactionID = reactionIDsDic[workbook]
     $("#new-reaction-id").val(activeReactionID)
     $("#new-reaction-name").val('')
@@ -56,10 +58,11 @@ function newReactionModalWindow() {
  */
 function newReactionCreate() {
     // creates new reaction if name and ID pass validation in the backend routes.
-    let workgroup = $("#active-workgroup").val()
-    let workbook = $("#active-workbook").val()
-    let reactionName = $("#new-reaction-name").val()
-    let reactionID = $("#new-reaction-id").val()
+    let workgroup = getVal("#active-workgroup")
+    let workbook = getVal("#active-workbook")
+    let reactionName = getVal("#new-reaction-name")
+    let reactionID = getVal("#new-reaction-id")
+
     $.ajax({
         url: "/new_reaction",
         type: 'post',
@@ -90,8 +93,8 @@ function deleteReaction(reaction) {
     if (completeConfirm === false) {
         return;
     }
-    let workgroup = $("#active-workgroup").val();
-    let workbook = $("#active-workbook").val();
+    let workgroup = getVal("#active-workgroup")
+    let workbook = getVal("#active-workbook")
     // id of reaction element is the reaction_id of the reaction
     location.href = `/delete_reaction/${reaction.id}/${workgroup}/${workbook}`;
 }
@@ -101,8 +104,8 @@ function deleteReaction(reaction) {
  * @param reaction {HTMLElement}
  */
 function redirectToReloadReaction(reaction){
-    let workgroup = $("#active-workgroup").val();
-    let workbook = $("#active-workbook").val()
+    let workgroup = getVal("#active-workgroup")
+    let workbook = getVal("#active-workbook")
     // search results open in new tab, otherwise reloaded reactions open in current tab
     if (window.location.pathname.split('/')[1] === 'search'){
         window.open(`/sketcher/${workgroup}/${workbook}/${reaction.id}/no`, '_blank')
@@ -169,18 +172,18 @@ function sortReactionsByTime(){
  * Calls the export_data_pdf routes to open a page where all reactions schemes are in the PDF for the workbook
  */
 function getpdf(){
-    let workbook = $("#active-workbook").val();
-    let workgroup = $('#active-workgroup').val();
-    let sortCriteria = $("#js-sort-crit").val();
-    window.open("/export_data_pdf/" + workgroup + "/" + workbook + "/" + sortCriteria, '_blank').focus();
+    let workgroup = getVal("#active-workgroup")
+    let workbook = getVal("#active-workbook")
+    let sortCriteria = getVal("#js-sort-crit")
+    window.open(`/export_data_pdf/${workgroup}/${workbook}/${sortCriteria}`, '_blank').focus();
 }
 
 /**
  * Calls the export_data_csv routes to prompt download of a csv with all reaction data for the workbook
  */
 function getcsv(){
-    let workbook = $("#active-workbook").val();
-    let workgroup = $('#active-workgroup').val();
+    let workgroup = getVal("#active-workgroup")
+    let workbook = getVal("#active-workbook")
     window.location = `/export_data_csv/${workgroup}/${workbook}`;
 }
 
@@ -189,9 +192,9 @@ function getcsv(){
  * @return {Promise<void>}
  */
 async function showSavedReactionsSchemes() {
-    const sortCriteria = $("#js-sort-crit").val();
-    let workbook = $("#active-workbook").val()
-    let workgroup = $('#active-workgroup').val()
+    let sortCriteria = getVal("#js-sort-crit")
+    let workgroup = getVal("#active-workgroup")
+    let workbook = getVal("#active-workbook")
     let schemes = await getSchemata(sortCriteria, workbook, workgroup, "small")
     for (const [idx, scheme] of schemes.entries()){
         let idx1 = idx + 1
