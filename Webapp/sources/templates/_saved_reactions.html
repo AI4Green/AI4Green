@@ -11,11 +11,11 @@
 {% if reactions %}
 
 <div class="btn-group btn-group-toggle" data-toggle="buttons">
-  <label class="btn btn-secondary btn-sm{% if sort_crit == "AZ" %} active{% else %}{% endif %}" id="AZ">
-    <input onclick="sortReactionsAlphabetically()" value="1" type="radio" name="options" id="Sort-A-Z" autocomplete="off"{% if sort_crit == "AZ" %} checked{% else %}{% endif %} /> A-Z &#8645;
+  <label onclick="sortReactionsAlphabetically()" for="sort-a-z" class="btn btn-secondary btn-sm{% if sort_crit == "AZ" %} active{% else %}{% endif %}" id="AZ">
+    <input value="1" type="radio" name="options" id="sort-a-z" autocomplete="off"{% if sort_crit == "AZ" %} checked{% else %}{% endif %} /> A-Z &#8645;
   </label>
-  <label class="btn btn-secondary btn-sm{% if sort_crit == "time" %} active{% else %}{% endif %}" id="time">
-    <input onclick="sortReactionsByTime()" value="2" type="radio" name="options" id="Sort-Time" autocomplete="off"{% if sort_crit == "time" %} checked{% else %}{% endif %} /> Date Created (Newest First) &#8645;
+  <label onclick="sortReactionsByTime()" for="sort-time" class="btn btn-secondary btn-sm{% if sort_crit == "time" %} active{% else %}{% endif %}" id="time">
+    <input value="2" type="radio" name="options" id="sort-time" autocomplete="off"{% if sort_crit == "time" %} checked{% else %}{% endif %} /> Date Created (Newest First) &#8645;
   </label>
 </div>
 
