@@ -72,10 +72,10 @@ function newReactionCreate() {
         },
         success: function (response) {
             if (response.feedback === 'New reaction made') {
-                window.location.href = "/sketcher/" + workgroup + "/" + workbook + "/" + reactionID + "/no"
+                window.location.href = `/sketcher/${workgroup}/${workbook}/${reactionID}/no`;
             }
             else {
-                $("#error-warning-new-reaction").html(response.feedback)
+                $("#error-warning-new-reaction").html(response.feedback);
             }
         }
     })
@@ -91,9 +91,9 @@ function deleteReaction(reaction) {
         return;
     }
     let workgroup = $("#active-workgroup").val();
-    let workbook = $("#active-workbook").val()
+    let workbook = $("#active-workbook").val();
     // id of reaction element is the reaction_id of the reaction
-    location.href = "/delete_reaction/" + reaction.id + "/" + workgroup + "/" + workbook;
+    location.href = `/delete_reaction/${reaction.id}/${workgroup}/${workbook}`;
 }
 
 /**
@@ -105,10 +105,10 @@ function redirectToReloadReaction(reaction){
     let workbook = $("#active-workbook").val()
     // search results open in new tab, otherwise reloaded reactions open in current tab
     if (window.location.pathname.split('/')[1] === 'search'){
-        window.open("/sketcher/" + workgroup + "/" + workbook + "/" + reaction.id + "/no", '_blank')
+        window.open(`/sketcher/${workgroup}/${workbook}/${reaction.id}/no`, '_blank')
     }
     else {
-        window.location.href = "/sketcher/" + workgroup + "/" + workbook + "/" + reaction.id + "/no"
+        window.location.href = `/sketcher/${workgroup}/${workbook}/${reaction.id}/no`;
     }
 }
 
@@ -181,7 +181,7 @@ function getpdf(){
 function getcsv(){
     let workbook = $("#active-workbook").val();
     let workgroup = $('#active-workgroup').val();
-    window.location ="/export_data_csv/" + workgroup + "/" + workbook;
+    window.location = `/export_data_csv/${workgroup}/${workbook}`;
 }
 
 /**

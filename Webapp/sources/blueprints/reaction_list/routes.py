@@ -1,5 +1,5 @@
 from flask import (Response, jsonify,
-                   render_template, request, flash, redirect, url_for)
+                   render_template, request, flash, redirect, url_for, escape)
 from flask_login import \
     login_required, current_user
 from sources.extensions import db
@@ -59,7 +59,7 @@ def get_reactions() -> Response:
     workgroup = str(request.form["workgroup"])
     reactions = get_reaction_list(workbook, workgroup, sort_crit)
     reaction_details = render_template(
-        "_saved_reactions.html", reactions=reactions, sort_crit=sort_crit
+        "_saved_reactions.html", reactions=reactions, sort_crit=escape(sort_crit)
     )
     return jsonify({"reactionDetails": reaction_details})
 
@@ -73,4 +73,4 @@ def get_schemata() -> Response:
     size = str(request.form["size"])
     sort_crit = str(request.form["sortCriteria"])
     schemes = get_scheme_list(workbook, workgroup, sort_crit, size)
-    return {"schemes": schemes, "sort_crit": sort_crit}
+    return {"schemes": schemes, "sort_crit": escape(sort_crit)}
