@@ -5,11 +5,8 @@ tests:
   - 'Webapp/tests/**/*'
 
 dependencies:
-  - 'pyproject.toml'
-  - 'poetry.lock'
+  - 'requirements.in'
+  - 'requirements.txt'
 
 CI:
   - '.github/**/*'
-
-need-migrations:
-  - 'Webapp/sources/models/**/*'

@@ -122,12 +122,12 @@ For developers running the application locally.
 
 ### Prerequesites
 
-- Poetry
+- Python 3.9 virtual environment
 - Docker
 
 ### Getting Started
 
-1. Install the dependencies: `poetry install`
+1. Install the dependencies: `pip install -r requirements.txt`
 2. Install pre-commit hooks: `pre-commit install`
 3. Start Postgres docker: `docker-compose up -d`
 4. Change directory to Webapp `cd Webapp`
