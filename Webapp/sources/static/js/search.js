@@ -1,6 +1,6 @@
 $(async function() {
     showSketcherLoadingCircle()
-    await setupNewKetcherSketcher("800px");
+    await setupNewKetcherSketcher("100%");
     await setupNewMarvinSketcher();
     // sleep used to allow sketchers to load scripts and make js Objects
     await sleep(1000)
