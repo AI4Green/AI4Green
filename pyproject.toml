@@ -36,6 +36,7 @@ pytz = "^2023.3"
 rdkit = "^2023.3.3"
 requests = "^2.31.0"
 wtforms = "^3.0.1"
+toml = "^0.10.2"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
