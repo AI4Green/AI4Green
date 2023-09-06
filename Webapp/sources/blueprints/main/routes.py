@@ -216,7 +216,6 @@ def send_quickstart_guide() -> Response:
 
 # marvin js help page
 @main_bp.route("/marvin_js_help", methods=["GET", "POST"])
-@login_required
 def marvin_js_help() -> Response:
     # must be logged in
     workgroups = get_workgroups()
