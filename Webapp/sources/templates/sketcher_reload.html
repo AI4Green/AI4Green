@@ -7,6 +7,21 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher_page.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/addendum.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/file_handling.js') }}"></script>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
+
+    <script>
+        // disable complete reaction button once reaction is completed
+        $(function () {
+            console.log($("#js-complete").val())
+            if ($("#js-complete").val() === "not complete") {
+                $("#mark-complete").attr("disabled", false)
+            }
+        })
+    </script>
+
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
@@ -63,10 +78,6 @@
     <p><button id="demo-button" type="button" class="btn btn-primary" style="width: 100px;" onclick="loadExampleSmiles()">Example</button></p>
     <p><button id="action-button-submit" type="button" class="btn btn-primary" onclick="createReactionTable()">Submit</button></p>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
-
     <!--The loading bar div-->
     <div class="loading-bar"></div>
 
@@ -92,12 +103,6 @@
 <!--    end of page buttons-->
     <br>
 
-    <script>
-        // disable complete reaction button once reaction is completed
-        if ($("#js-complete").val() === "not complete"){
-            $("#mark-complete").attr("disabled", false)
-        }
-    </script>
 
     <div id="file-upload-div" class="mb-2" style="display:none;">
         <p>Upload Experimental Data</p>
