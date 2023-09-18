@@ -84,6 +84,7 @@ class SearchHandler:
         for workbook in self.workbook:
             reactions = (
                 db.session.query(models.Reaction)
+                .filter(models.Reaction.status == 'active')
                 .join(models.WorkBook)
                 .filter(models.WorkBook.name == workbook)
                 .join(models.WorkGroup)
