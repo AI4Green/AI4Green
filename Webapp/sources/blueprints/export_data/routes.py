@@ -230,13 +230,9 @@ def export_data_csv(workgroup: str, workbook: str) -> Response:
 @export_data_bp.route(
     "/export_data_pdf/<workgroup>/<workbook>/<sort_crit>", methods=["GET", "POST"]
 )
-@export_data_bp.route(
-    "/export_data_pdf/<workgroup>/<workbook>/<sort_crit>/<reaction_name>",
-    methods=["GET", "POST"],
-)
 @login_required
 def export_data_pdf(
-    workgroup: str, workbook: str, sort_crit: str, reaction_name: Optional[str] = None
+    workgroup: str, workbook: str, sort_crit: str
 ) -> Response:
     # must be logged in and member of workbook and workgroup
     if not security_member_workgroup_workbook(workgroup, workbook):
@@ -260,9 +256,6 @@ def export_data_pdf(
         query = query.filter(models.Reaction.status == "active").order_by(
             models.Reaction.name.asc()
         )
-
-    else:
-        query = query.filter(models.Reaction.name == reaction_name)
 
     reaction_list = query.all()
 
