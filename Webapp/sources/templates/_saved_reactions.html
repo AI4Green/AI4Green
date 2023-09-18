@@ -1,23 +1,26 @@
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-<script type="text/javascript" src="{{ url_for('static', filename='js/workgroup.js') }}"></script>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<script>
+    $(function() {
+        if (window.location.pathname.split("/")[1] !== 'search') {
+            showSavedReactionsSchemes()
+        }
+    });
+</script>
+</head>
 {% if reactions %}
 
 <div class="btn-group btn-group-toggle" data-toggle="buttons">
-  <label class="btn btn-secondary btn-sm{% if sort_crit == "AZ" %} active{% else %}{% endif %}" id="AZ">
-    <input value="1" type="radio" name="options" id="Sort-A-Z" autocomplete="off"{% if sort_crit == "AZ" %} checked{% else %}{% endif %} /> A-Z &#8645;
+  <label onclick="sortReactionsAlphabetically()" for="sort-a-z" class="btn btn-secondary btn-sm{% if sort_crit == "AZ" %} active{% else %}{% endif %}" id="AZ">
+    <input value="1" type="radio" name="options" id="sort-a-z" autocomplete="off"{% if sort_crit == "AZ" %} checked{% else %}{% endif %} /> A-Z &#8645;
   </label>
-  <label class="btn btn-secondary btn-sm{% if sort_crit == "time" %} active{% else %}{% endif %}" id="time">
-    <input value="2" type="radio" name="options" id="Sort-Time" autocomplete="off"{% if sort_crit == "time" %} checked{% else %}{% endif %} /> Date Created (Newest First) &#8645;
+  <label onclick="sortReactionsByTime()" for="sort-time" class="btn btn-secondary btn-sm{% if sort_crit == "time" %} active{% else %}{% endif %}" id="time">
+    <input value="2" type="radio" name="options" id="sort-time" autocomplete="off"{% if sort_crit == "time" %} checked{% else %}{% endif %} /> Date Created (Newest First) &#8645;
   </label>
 </div>
 
 <script>
-  $('#AZ').on("click",function(){
-      sortReactionsAlphabetically()
-  });
-  $('#time').on("click",function(){
-      sortReactionsByTime()
-  });
+
 </script>
 <div id="reaction-list">
     {% for reaction in reactions %}
@@ -27,9 +30,9 @@
             <div class="description">{{ reaction.description }}</div>
             <div id="image{{ loop.index }}"></div>
             <div class="reaction-time">{{ reaction.time_of_creation[:-7] }}</div>
-            <button id="{{ reaction.name }}-reload" class="btn btn-success reload-btn">Reload</button>
+            <button onclick="redirectToReloadReaction(this)" id="{{ reaction.reaction_id }}" class="btn btn-success reload-btn">Reload</button>
             {% if reaction.creator_email == current_user.email %}
-                <button id="{{ reaction.name }}-delete" name="delete-reaction" class="btn btn-danger">Delete</button>
+                <button onclick="deleteReaction(this)" id="{{ reaction.reaction_id }}" name="delete-reaction" class="btn btn-danger">Delete</button>
             {% endif %}
             {% if reaction.completion_status == "complete" %}
                 <i class="fa fa-lock" style="font-size:20px; color:darkgrey;"></i><b style="font-size:12px; color:darkgrey;">  Reaction Locked</b>
@@ -40,74 +43,12 @@
             {% if reaction.addenda %}
                 <i class="bi bi-chat-dots" style="font-size:20px; color:darkgrey;"></i><b style="font-size:12px; color:darkgrey;">  Contains Amendments</b>
             {% endif %}
-            <script>
-                document.getElementById("{{ reaction.name }}-reload").onclick = function () {
-                    // search results open in new tab, otherwise reloaded reactions open in current tab
-                    if (window.location.pathname.split('/')[1] === 'search'){
-                        window.open("/sketcher/{{ reaction.workgroup }}/{{ reaction.workbook }}/{{ reaction.reaction_id }}/no", '_blank')
-                    }
-                    else {
-                        window.location.href = "/sketcher/{{ reaction.workgroup }}/{{ reaction.workbook }}/{{ reaction.reaction_id }}/no"
-                    }
-                };
-            </script>
             <hr class="line">
         </div>
     {% endfor %}
 </div>
 {% else %}
 
-
-
-
-<script>
-    // if reactions show option to export data
-    document.getElementById("export-div").style.display = "block";
-</script>
-
-<script>
-    document.getElementsByName("delete-reaction").onclick = function (reaction) {
-        const completeConfirm = window.confirm("Are you sure you want to permanently delete this reaction?");
-            if (completeConfirm === false) {
-                return;
-            }
-        let reaction_name = reaction.id
-        let workgroup = $("#workgroup_selected").val();
-        let workbook = $("#WB-select").val()
-        location.href = "/delete_reaction/" + reaction_name + "/" + workgroup + "/" + workbook;
-    };
-</script>
-
-<script>
-
-
-
-</script>
-
-<script>
-    // if no reactions don't give option to export reactions
-    document.getElementById("no-reactions").style.display = "block";
-    document.getElementById("export-div").style.display = "none";
-</script>
 {% endif %}
 <input type="hidden" value="{{ reactions|length }}" id="js-number-of-reactions">
 <input type="hidden" value="{{ sort_crit }}" id="js-sort-crit">
-<script>
-    $(function() {
-        if (window.location.pathname.split("/")[1] !== 'search') {
-            showSavedReactions()
-        }
-    });
-
-    async function showSavedReactions() {
-        const sort_crit = $("#js-sort-crit").val();
-        let workbook = $("#WB-select").val()
-        let workgroup = $('#workgroup_selected').val()
-        let schemes = await getSchemata(sort_crit, workbook, workgroup, "small")
-        for (const [idx, scheme] of schemes.entries()){
-            let idx1 = idx + 1
-            $(`#image${idx1}`).append($('<div>').html(scheme))
-        }
-    }
-
-</script>

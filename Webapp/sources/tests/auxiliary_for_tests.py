@@ -57,7 +57,7 @@ def check_notifications(self):
 
 
 def select_workbook(self, idx=1):
-    select_wb = Select(self.driver.find_element_by_id("WB-select"))
+    select_wb = Select(self.driver.find_element_by_id("active-workbook"))
     select_wb.select_by_index(idx)
     time.sleep(1)
 

@@ -2,6 +2,10 @@
 {% block content %}
 <head>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
 </head>
 <div id="page-contents" class="container-fluid">
     <h2>Demo Reaction Constructor</h2>
@@ -32,12 +36,7 @@
     <p><button id="demo-button" type="button" class="btn btn-primary" onclick="loadExampleSmiles()" style="width: 100px;">Example</button></p>
     <p><button id="action-button-submit" type="button" class="btn btn-primary" onclick="createReactionTable()">Submit</button></p>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
-
-    <!--The loading bar div-->
+       <!--The loading bar div-->
     <div class="loading-bar"></div>
 
     <br>
@@ -52,7 +51,7 @@
     <!--Output of reaction image and summary table-->
 
 
-    <div id="dvContainer" class="container-fluid" style="padding-left: 0px">
+    <div id="print-container" class="container-fluid" style="padding-left: 0px">
         <div id="imageContainer" style="display: none;">
             <img id="image" />
         </div>
@@ -73,7 +72,6 @@
     </div>
     <br>
     <button id="print-pdf" onclick="window.print()" class="btn btn-primary" style="display: none; width:140px">Print Summary</button>
-    <!--input type="button" value="Print Form" onclick="PrintElem('#dvContainer')" /-->
     </div>
     <br>
     <div class="notToPrint" id="printoutput"></div>

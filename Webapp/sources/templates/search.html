@@ -4,6 +4,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher_utils.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/search.js') }}"></script>
 </head>
 <div class="container-fluid">
@@ -16,8 +17,8 @@
             <form class="form">
                 <div class="form-group">
                     <!--            workgroups -->
-                    <label for="workgroup-select">Workgroup</label>
-                    <select id="workgroup-select" class="form-control" onchange="updateSelectedWorkGroup()">
+                    <label for="active-workgroup">Workgroup</label>
+                    <select id="active-workgroup" class="form-control" onchange="updateSelectedWorkGroup()">
                         <option value="All">All</option>
                         {% for workgroup in workgroups %}
                         <option value="{{ workgroup }}">{{ workgroup }}</option>
@@ -26,8 +27,8 @@
                 </div>
                 <!--            workbooks -->
                 <div class="form-group">
-                    <label for="workbook-select">Workbook</label>
-                    <select id="workbook-select" class="form-control"></select>
+                    <label for="active-workbook">Workbook</label>
+                    <select id="active-workbook" class="form-control"></select>
                 </div>
 <!--                following inputs require backend support before being made visible-->
 

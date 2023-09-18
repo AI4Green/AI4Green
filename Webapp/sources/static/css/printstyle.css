@@ -2,10 +2,10 @@
   body * {
     visibility: hidden;
   }
-  #dvContainer * {
+  #print-container * {
     visibility: visible;
   }
-  #dvContainer {
+  #print-container {
     position: absolute;
     left: 0;
     top: 0;
