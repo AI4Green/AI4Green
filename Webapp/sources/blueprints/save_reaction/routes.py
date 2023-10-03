@@ -15,12 +15,11 @@ from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobClient, BlobServiceClient, ContainerClient
 from flask import Response, abort, current_app, json, jsonify, request
 from flask_login import current_user, login_required
-from sqlalchemy import func
-from werkzeug.utils import secure_filename
-
 from sources import models
 from sources.auxiliary import get_data, get_smiles, sanitise_user_input
 from sources.extensions import db
+from sqlalchemy import func
+from werkzeug.utils import secure_filename
 
 from . import save_reaction_bp
 
@@ -469,7 +468,7 @@ def check_reaction() -> Response:
     return jsonify({"feedback": feedback})
 
 
-@save_reaction_bp.route("/view_reaction_attachment", methods=["POST"])
+@save_reaction_bp.route("/view_reaction_attachment", methods=["GET"])
 @login_required
 def view_reaction_attachment() -> Response:
     """
@@ -478,9 +477,14 @@ def view_reaction_attachment() -> Response:
     blob_client = get_blob()
     file_attachment = blob_to_file_attachment(blob_client)
     file_uuid = request.form["uuid"]
-    file_db_entity = db.ReactionDataFile[file_uuid]
-    mimetype = file_db_entity.file_details["mimetype"]
-    display_name = file_db_entity.display_name
+    file_entity = (
+        db.session.query(models.ReactionDataFile)
+        .filter(models.ReactionDataFile.uuid == file_uuid)
+        .first()
+    )
+
+    mimetype = file_entity.file_details["mimetype"]
+    display_name = file_entity.display_name
     file_attachment = f"data:{mimetype};base64,{file_attachment}"
     return jsonify(
         {"stream": file_attachment, "mimetype": mimetype, "name": display_name}
@@ -503,9 +507,14 @@ def download_experiment_files():
     stream = stream_storage.readall()
     file_attachment = base64.b64encode(stream).decode()
     file_uuid = request.form["uuid"]
-    file_db_entity = db.ReactionDataFile[file_uuid]
-    mimetype = file_db_entity.file_details["mimetype"]
-    display_name = file_db_entity.display_name
+    file_entity = (
+        db.session.query(models.ReactionDataFile)
+        .filter(models.ReactionDataFile.uuid == file_uuid)
+        .first()
+    )
+
+    mimetype = file_entity.file_details["mimetype"]
+    display_name = file_entity.display_name
     return jsonify(
         {"stream": file_attachment, "mimetype": mimetype, "name": display_name}
     )
@@ -525,7 +534,7 @@ def get_blob():
     return blob_client
 
 
-@save_reaction_bp.route("/_delete_reaction_attachment", methods=["POST"])
+@save_reaction_bp.route("/_delete_reaction_attachment", methods=["DELETE"])
 @login_required
 def delete_reaction_attachment():
     """Delete file attached to reaction"""
@@ -537,9 +546,16 @@ def delete_reaction_attachment():
     # confirm deletion
     if blob_client.exists():
         abort(400)
+
     # reflect changes in the database
     file_uuid = request.form["uuid"]
-    db.ReactionDataFile[file_uuid].delete()
+    file_entity = (
+        db.session.query(models.ReactionDataFile)
+        .filter(models.ReactionDataFile.uuid == file_uuid)
+        .first()
+    )
+    db.session.delete(file_entity)
+    db.session.commit()
     return "success"
 
 
@@ -582,7 +598,7 @@ def upload_experiment_files():
 
 
 def connect_to_azure_blob_service():
-    if current_app.config["TESTING"] is True:
+    if current_app.config["DEBUG"] is True:
         # connect to azurite
         blob_service_client = BlobServiceClient.from_connection_string(
             current_app.config["AZURE_STORAGE_CONNECTION_STRING"]
@@ -601,7 +617,7 @@ def connect_to_azure_blob_service():
 class UploadExperimentDataFiles:
     def __init__(self, ajax_request):
         self.files_to_upload = ajax_request.files
-        self.institution = db.Institution[1].name
+        self.institution = db.session.query(models.Institution).first()
         self.workgroup = ajax_request.form["workgroup"]
         self.workbook = ajax_request.form["workbook"]
         self.reaction_id = ajax_request.form["reactionID"]
@@ -647,8 +663,8 @@ class UploadExperimentDataFiles:
             "size": file_size,
             "extension": file_ext,
         }
-        db.ReactionDataFile(
-            reaction=self.reaction,
+        models.ReactionDataFile.create(
+            reaction=self.reaction.id,
             storage_name=storage_name,
             container_name=container_name,
             uuid=filename,
