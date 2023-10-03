@@ -597,21 +597,10 @@ def upload_experiment_files():
     return jsonify({"uploaded_files": new_upload.uploaded_files})
 
 
-def connect_to_azure_blob_service():
-    if current_app.config["DEBUG"] is True:
-        # connect to azurite
-        blob_service_client = BlobServiceClient.from_connection_string(
-            current_app.config["AZURE_STORAGE_CONNECTION_STRING"]
-        )
-    else:
-        # if in deployment - use default credentials
-        account_url = current_app.config["AZURE_BLOB_SERVICE_URL"]
-        default_credential = DefaultAzureCredential()
-        # Create the BlobServiceClient object
-        blob_service_client = BlobServiceClient(
-            account_url, credential=default_credential
-        )
-    return blob_service_client
+def connect_to_azure_blob_service() -> BlobServiceClient:
+    return BlobServiceClient.from_connection_string(
+        current_app.config["AZURE_STORAGE_CONNECTION_STRING"]
+    )
 
 
 class UploadExperimentDataFiles:
