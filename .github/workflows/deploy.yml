@@ -7,7 +7,7 @@ name: Build and deploy Python app to Azure Web App - ai4green-uat
 on:
   push:
     branches:
-      - main
+      - 125037-fix-bugs
   workflow_dispatch:
 
 jobs:
@@ -71,24 +71,24 @@ jobs:
           slot-name: "Production"
           publish-profile: ${{ secrets.azureWebAppPublishProfile }}
 
-  deploy-prod:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: "Production"
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+  # deploy-prod:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   environment:
+  #     name: "Production"
+  #     url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: python-app
-          path: .
+  #   steps:
+  #     - name: Download artifact from build job
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: python-app
+  #         path: .
 
-      - name: "Deploy to Azure Web App"
-        uses: azure/webapps-deploy@v2
-        id: deploy-to-webapp
-        with:
-          app-name: "ai4green-prod"
-          slot-name: "Production"
-          publish-profile: ${{ secrets.azureWebAppPublishProfile }}
+  #     - name: "Deploy to Azure Web App"
+  #       uses: azure/webapps-deploy@v2
+  #       id: deploy-to-webapp
+  #       with:
+  #         app-name: "ai4green-prod"
+  #         slot-name: "Production"
+  #         publish-profile: ${{ secrets.azureWebAppPublishProfile }}
