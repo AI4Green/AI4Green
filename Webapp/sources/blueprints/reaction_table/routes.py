@@ -12,18 +12,16 @@ from flask import current_app, jsonify, render_template, request
 from flask_login import current_user, login_required
 from rdkit import Chem  # Used for converting smiles to inchi
 from rdkit.Chem import Descriptors
-
 from sources import models
 from sources.auxiliary import smiles_symbols
 from sources.dto import ReactionNoteSchema
+
 # render_template renders html templates
 # request parses incoming request data and gives access to it
 # jsonify is used to send a JSON response to the browser
-from sources.extensions import \
-    db  # imports the module with auxiliary functions
+from sources.extensions import db  # imports the module with auxiliary functions
 
-from . import \
-    reaction_table_bp  # imports the blueprint of the reaction table route
+from . import reaction_table_bp  # imports the blueprint of the reaction table route
 
 if not current_app.testing:
     try:
@@ -280,17 +278,16 @@ def process():
         identifiers = []
         # Solvents - keep solvents that are not novel compounds or are novel compounds within the current workbook
         sol_rows = db.session.query(models.Solvent).all()
-        if demo == 'demo':
-            sol_rows = [
-                x
-                for x in sol_rows
-                if x.novel_compound == []
-            ]
+        if demo == "demo":
+            sol_rows = [x for x in sol_rows if x.novel_compound == []]
         else:
             sol_rows = [
                 x
                 for x in sol_rows
-                if x.novel_compound == [] or x.novel_compound[0].workbook == workbook.id
+                if x.novel_compound == []
+                or (
+                    workbook is not None and x.novel_compound[0].workbook == workbook.id
+                )
             ]
         # Now it renders the reaction table template
         reaction_table = render_template(
