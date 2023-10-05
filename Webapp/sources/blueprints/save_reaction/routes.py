@@ -16,7 +16,7 @@ from azure.storage.blob import BlobClient, BlobServiceClient, ContainerClient
 from flask import Response, abort, current_app, json, jsonify, request
 from flask_login import current_user, login_required
 from sources import models
-from sources.auxiliary import get_data, get_smiles, sanitise_user_input
+from sources.auxiliary import get_data, get_smiles, sanitise_user_input, security_member_workgroup_workbook
 from sources.extensions import db
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
@@ -474,15 +474,22 @@ def view_reaction_attachment() -> Response:
     """
     Authenticate user has permission to view, then use the uuid to find the file on azure and then return the file.
     """
-    blob_client = get_blob()
+    # get the args from the GET request
+    workgroup = request.args.get("workgroup")
+    workbook = request.args.get("workbook")
+    file_uuid = request.args.get("uuid")
+    # validate user belongs to the workbook
+    if not security_member_workgroup_workbook(workgroup, workbook):
+        print(f"user not in workbook {workbook}")
+        abort(400)
+    # get the blob file and send the filestream, display name and mimetype to the frontend to be displayed.
+    blob_client = get_blob(file_uuid, already_authorised=True)
     file_attachment = blob_to_file_attachment(blob_client)
-    file_uuid = request.form["uuid"]
     file_entity = (
         db.session.query(models.ReactionDataFile)
         .filter(models.ReactionDataFile.uuid == file_uuid)
         .first()
     )
-
     mimetype = file_entity.file_details["mimetype"]
     display_name = file_entity.display_name
     file_attachment = f"data:{mimetype};base64,{file_attachment}"
@@ -512,7 +519,6 @@ def download_experiment_files():
         .filter(models.ReactionDataFile.uuid == file_uuid)
         .first()
     )
-
     mimetype = file_entity.file_details["mimetype"]
     display_name = file_entity.display_name
     return jsonify(
@@ -520,14 +526,16 @@ def download_experiment_files():
     )
 
 
-def get_blob():
+def get_blob(file_uuid: str = None, already_authorised: bool = False) -> BlobClient:
     # authenticate user belongs to the workbook of the reaction
-    authenticate_user_to_edit_files()
+    if not already_authorised:
+        authenticate_user_to_edit_files()
     # connect to azure
     blob_service_client = connect_to_azure_blob_service()
     # connect to blob
     container_name = current_app.config["STORAGE_CONTAINER"]
-    file_uuid = request.form["uuid"]
+    if file_uuid is None:
+        file_uuid = request.form["uuid"]
     blob_client = blob_service_client.get_blob_client(
         container=container_name, blob=file_uuid
     )

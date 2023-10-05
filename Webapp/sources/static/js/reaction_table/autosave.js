@@ -239,18 +239,8 @@ function postReactionData(complete='not complete') {
                     autoChangeRequiredStyling2("#js-unreacted-reactant-mass")
                     $("#js-real-product-mass").removeClass("add-highlight-unfilled-cell").addClass("remove-highlight-summary-cell");
                     $("#js-unreacted-reactant-mass").removeClass("add-highlight-unfilled-cell").addClass("remove-highlight-summary-cell");
-                    $("#page-contents :input").prop("disabled", true);
                     $("#js-complete").val('complete')
-                    $("#complete-reaction-button").prop('disabled', true)
-                    // lock editor
-                    if (ifCurrentUserIsNotCreator()){
-                        $("#marvin-test").css("pointer-events", "none");
-                    }
-                    // do not lock print
-                    $("#print-pdf").prop("disabled", false);
-                    // show and enable add note button and reactionNote modal window
-                    $("#reaction-note-button").show().prop("disabled", false);
-                    $("#new-reaction-note-modal").find("*").prop("disabled", false);
+                    controlLockedReactionFunctionality()
                 }
             } else {
                 // if not locking reaction save as normal
@@ -261,6 +251,31 @@ function postReactionData(complete='not complete') {
             flashUserErrorSavingMessage()
         }
     })
+}
+
+/**
+ * Disables page contents and buttons outside of page contents div
+ * Enables specific buttons for locked reactions.
+ * Upload, view, delete files. Print summary. Reaction notes.
+ */
+function controlLockedReactionFunctionality() {
+    // disabling functionality
+    $("#page-contents :input").prop("disabled", true);
+    $("#complete-reaction-button").prop('disabled', true)
+    // restoring specific functionality
+    $("#print-pdf").prop("disabled", false);
+    $("#reaction-note-button").show().prop("disabled", false);
+    $("#new-reaction-note-modal").find("*").prop("disabled", false);
+    $("#file-list").find("*").prop("disabled", false);
+    // only the creator can upload or delete files or add reaction note comments
+    if (ifCurrentUserIsNotCreator()){
+        $(".delete-file-button").prop("disabled", true);
+        $("#file-upload-div").find("*").prop("disabled", true);
+        $("#reaction-note-button").hide()
+    }
+   else {
+        $("#file-upload-div").find("*").prop("disabled", false);
+   }
 }
 
 function getFieldData() {
