@@ -33,7 +33,7 @@ class MarvinInteractionTest(flask_testing.LiveServerTestCase, flask_testing.Test
     def test_marvin_loads(self):
         """This function tests that the marvin window is present in the page source"""
         pg_source = self.driver.page_source
-        self.assertIn('marvin-test', pg_source, "The marvin window must be present")
+        self.assertIn('marvin-sketcher', pg_source, "The marvin window must be present")
 
     def test_marvin_demo_function(self):
         """Here we test that compounds can be loaded into marvin_js by the example demo button by pressing the submit

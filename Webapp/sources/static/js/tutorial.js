@@ -31,19 +31,19 @@ function tutorial_2(){
 function tutorial_3(){
     window.scrollTo(0, 0);
     $('#name-id').addClass('highlight');
-    $('#marvin-test').removeClass('highlight');
+    $('#sketchers-div').removeClass('highlight');
 }
 
 function tutorial_4(){
     window.scrollTo(0, document.body.scrollHeight);
     $('#name-id').removeClass('highlight');
     $('#editor-instructions').removeClass('highlight');
-    $('#marvin-test').addClass('highlight');
+    $('#sketchers-div').addClass('highlight');
 }
 
 function tutorial_5(){
     window.scrollTo(0, 0);
-    $('#marvin-test').removeClass('highlight');
+    $('#sketchers-div').removeClass('highlight');
     $('#editor-instructions').addClass('highlight');
 }
 
@@ -160,7 +160,7 @@ function tutorial_14(){
 function tutorial_15(){
     document.getElementById("print-container").style.display = "none";
     document.getElementById("complete-reaction-div").style.display = "none";
-    document.getElementById("file-upload-div").style.display = "none";
+    document.getElementById("reaction-file-attachments").style.display = "none";
     document.getElementById("print-pdf").style.display = "none";
     window.scrollTo(0, document.body.scrollHeight);
     $('#js-solvent-table-row1').removeClass('highlight');

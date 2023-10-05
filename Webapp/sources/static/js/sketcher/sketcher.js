@@ -174,6 +174,8 @@ function sketcherLockHandler() {
     if (ifCurrentUserIsNotCreator() || $("#js-complete").val() === "complete") {
         $("#marvin-sketcher").css("pointer-events", "none");
         $("#ketcher-sketcher").css("pointer-events", "none");
+        $("#demo-button").prop('disabled', true)
+        $("#action-button-submit").prop('disabled', true)
     }
 }
 
