@@ -15,7 +15,6 @@
     <script>
         // disable complete reaction button once reaction is completed
         $(function () {
-            console.log($("#js-complete").val())
             if ($("#js-complete").val() === "not complete") {
                 $("#mark-complete").attr("disabled", false)
             }
@@ -104,9 +103,9 @@
     <br>
 
 
-    <div id="file-upload-div" class="mb-2" style="display:none;">
+    <div id="reaction-file-attachments" class="mb-2" style="display:none;">
         <p>Upload Experimental Data</p>
-        <div class="input-group mb-3 w-25">
+        <div id="file-upload-div" class="input-group mb-3 w-25">
             <input id="upload-files" class="form-control" type="file" multiple>
             <div class="input-group-append">
                 <button id="file-upload" class="btn btn-outline-secondary" onclick="uploadFiles()" type="button">Upload</button>
@@ -115,16 +114,15 @@
         <div id="file-list">
         {% if file_attachments %}
             {% for file in file_attachments %}
-    <!--            <button onclick="viewFile(this)" value="{{ file.uuid }}">{{ file.display_name }}</button>-->
                     <div id="file-button-group{{ loop.index }}" class="btn-group btn-group-justified mb-3" role="group" aria-label="">
                         <div class="btn-group" role="group">
-                            <button id="download-file-button{{ loop.index }}" type="button" class="btn btn-outline-primary" onclick="downloadFile(this)" value="{{ file.uuid }}"><i class="bi bi-download"></i></button>
+                            <button id="download-file-button{{ loop.index }}" type="button" class="btn btn-outline-primary download-file-button" onclick="downloadFile(this)" value="{{ file.uuid }}" title="Download"><i class="bi bi-download"></i></button>
                         </div>
                         <div class="btn-group" role="group">
-                            <button id="view-file-button{{ loop.index }}" type="button" class="btn btn-outline-dark" onclick="viewFile(this)" value="{{ file.uuid }}">{{ file.display_name }}</button>
+                            <button id="view-file-button{{ loop.index }}" type="button" class="btn btn-outline-dark view-file-button" onclick="viewFile(this)" value="{{ file.uuid }}" title="View">{{ file.display_name }}</button>
                         </div>
                         <div class="btn-group" role="group">
-                            <button id="delete-file-button{{ loop.index }}" type="button" onclick="deleteFile(this)" value="{{ file.uuid }}" class="btn btn-outline-danger"><i class="bi bi-x"></i></button>
+                            <button id="delete-file-button{{ loop.index }}" type="button" onclick="deleteFile(this)" value="{{ file.uuid }}" class="btn btn-outline-danger delete-file-button" title="Delete"><i class="bi bi-x"></i></button>
                         </div>
                     </div>
             {% endfor %}

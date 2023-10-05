@@ -302,16 +302,12 @@ function showSummary() {
                 autoChangeRequiredStyling2(colorRoundedReactantMassID)
                 $('#js-summary-table').html(response.summary).show();
                 $("#print-pdf").show()
-                disableSummaryIfNotCreator()
                 autoSaveCheck()
+                // display buttons for uploading/handling file attachments and locking the reaction
                 $("#complete-reaction-div").show()
-                $("#file-upload-div").show()
+                $("#reaction-file-attachments").show()
                 if ($("#js-complete").val() === "complete"){
-                    $("#page-contents :input").prop("disabled", true);
-                    $("#print-pdf").prop("disabled", false);
-                    $("#reaction-note-button").prop("disabled", false);
-                    // enable element and all its children
-                    $("#new-reaction-note-modal").find("*").prop("disabled", false);
+                    controlLockedReactionFunctionality()
                 }
                 $("#js-load-status").val("loaded")
             }
@@ -327,14 +323,4 @@ function exportImage() {
     $image.attr("src", imgSource);
     $("#imageContainer").css("display", "block");
     sessionStorage.clear();
-}
-
-function disableSummaryIfNotCreator(){
-    // if a user who is not the creator loads the reaction, disable the inputs
-    if (ifCurrentUserIsNotCreator()){
-        $("#page-contents :input").prop("disabled", true);
-        $("#print-pdf").prop("disabled", false);
-        $("#reaction-note-button").hide()
-        // enable button to copy reaction
-    }
 }
