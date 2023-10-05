@@ -109,9 +109,7 @@ async function reactionTableReload(){
     let js_summary_table_data = JSON.parse($("#js-summary-table-data").val());
     //  disable editing of the reaction if not owner
     if (ifCurrentUserIsNotCreator()){
-        $("#page-contents :input").prop("disabled", true);
-        // $("#print-pdf").show()
-        $("#print-pdf").prop("disabled", false);
+        controlNonCreatorFunctionality()
     }
     // load summary table if it has previously been loaded, element sustainability is used because this is autofilled upon load.
     if (js_summary_table_data["element_sustainability"] !== 'undefined'){
@@ -148,4 +146,16 @@ async function reactionTableReload(){
             autoChangeRequiredStyling2(fieldID)
         }
     }
+}
+
+/**
+ * When a user reloads a reaction they are not the creator of we disable inputs to prevent them editing the reaction
+ * We enable the options to print a PDF summary and to download/view file attachments.
+ */
+function controlNonCreatorFunctionality(){
+    $("#page-contents :input").prop("disabled", true);
+    $("#print-pdf").prop("disabled", false);
+    $("#file-list").find("*").prop("disabled", false);
+    $(".delete-file-button").prop("disabled", true);
+    $("#reaction-note-button").hide()
 }
