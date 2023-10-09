@@ -151,13 +151,24 @@ def new_reaction() -> Response:
         return name_check
 
 
+def validate_autosave(reaction: models.Reaction):
+    """
+    In addition to frontend validation, backend validation protects against user edited HTML.
+    Validates the active user is the creator and validates the reaction is not locked.
+    Aborts process with a 400 error if validation is failed
+    """
+    # validate the user is the creator
+    if not reaction.creator_person.user.email == current_user.email:
+        abort(400)
+    # validate the reaction is not locked
+    if reaction.complete == 'complete':
+        abort(400)
+
+
 @save_reaction_bp.route("/_autosave", methods=["POST"])
 @login_required
 def autosave() -> Response:
     """autosave when a field changes in the reaction page"""
-    summary_to_print = str(request.form["summary_to_print"])
-    current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
-    reaction_smiles = str(request.form["reactionSmiles"])
     reaction_name = sanitise_user_input(request.form["reactionName"])
     reaction_id = str(request.form["reactionID"])
     reaction_description = str(request.form["reactionDescription"])
@@ -171,6 +182,21 @@ def autosave() -> Response:
         .filter(models.WorkGroup.name == workgroup)
         .first()
     )
+    reaction = (
+        db.session.query(models.Reaction)
+        .filter(models.Reaction.reaction_id == reaction_id)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.name == workbook_name)
+        .join(models.WorkGroup)
+        .filter(models.WorkGroup.name == workgroup)
+        .first()
+    )
+    validate_autosave(reaction)
+
+    summary_to_print = str(request.form["summary_to_print"])
+    current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
+    reaction_smiles = str(request.form["reactionSmiles"])
+
     # reaction table entries
     # find the table number of the limiting reactant e.g js-reactant1
     limiting_reactant = str(request.form["limitingReactantTableNumber"])
@@ -346,19 +372,11 @@ def autosave() -> Response:
         }
     )
 
-    reaction = (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.reaction_id == reaction_id)
-        .join(models.WorkBook)
-        .filter(models.WorkBook.name == workbook_name)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
-        .first()
-    )
-    # value is 'complete' if user is trying to lock reaction. Entering this if block changes the feedback string
+    # value is 'complete' if user is trying to lock reaction.
     complete = request.form["complete"]
     feedback = "Reaction Updated!"
     if complete == "complete":
+        # check all mandatory fields are complete
         missing_data_fields = [
             reactant_masses,
             reactant_equivalents,

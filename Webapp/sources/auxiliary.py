@@ -228,6 +228,7 @@ def get_workbooks(workgroup: str) -> List[str]:
         .filter(models.User.email == current_user.email)
         .all()
     )
+    workbooks = [x for x in workbooks if current_user.Person in x.users]
     return [i.name for i in workbooks]
 
 

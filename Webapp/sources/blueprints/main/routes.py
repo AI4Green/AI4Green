@@ -66,7 +66,7 @@ def get_marvinjs_key():
 def sketcher(
     workgroup: str, workbook: str, reaction_id: str, tutorial: str
 ) -> Response:
-    # must be logged in and a member of the workgroup and workbook
+    # validates the user is a member of the workgroup and workbook by checking the database
     if not security_member_workgroup_workbook(workgroup, workbook):
         flash("You do not have permission to view this page")
         return redirect(url_for("main.index"))

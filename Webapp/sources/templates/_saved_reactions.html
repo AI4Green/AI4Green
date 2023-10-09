@@ -19,9 +19,6 @@
   </label>
 </div>
 
-<script>
-
-</script>
 <div id="reaction-list">
     {% for reaction in reactions %}
         <div id="reaction-{{ loop.index }}" class="reaction-card">
@@ -29,7 +26,8 @@
             <div id="reaction-id{{ loop.index }}"><h5>{{ reaction.reaction_id }}</h5></div>
             <div class="description">{{ reaction.description }}</div>
             <div id="image{{ loop.index }}"></div>
-            <div class="reaction-time">{{ reaction.time_of_creation[:-7] }}</div>
+            <div class="reaction-time">Created: {{ reaction.time_of_creation[:-7] }}</div>
+            <div class="reaction-time">Edited: {{ reaction.time_of_update[:-7] }}</div>
             <button onclick="redirectToReloadReaction(this)" id="{{ reaction.reaction_id }}" class="btn btn-success reload-btn">Reload</button>
             {% if reaction.creator_email == current_user.email %}
                 <button onclick="deleteReaction(this)" id="{{ reaction.reaction_id }}" name="delete-reaction" class="btn btn-danger">Delete</button>
