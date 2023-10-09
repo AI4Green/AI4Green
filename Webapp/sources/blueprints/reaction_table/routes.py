@@ -23,7 +23,7 @@ from sources.extensions import db  # imports the module with auxiliary functions
 
 from . import reaction_table_bp  # imports the blueprint of the reaction table route
 
-if not current_app.testing:
+if not current_app.config["DEBUG"]:
     try:
         from STOUT import translate_forward
     except:

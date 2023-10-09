@@ -107,15 +107,15 @@ async function reactionTableReload(){
     $("#js-reaction-description").val(js_reaction_table_data["reaction_description"]);
     // get summary table
     let js_summary_table_data = JSON.parse($("#js-summary-table-data").val());
-    //  disable editing of the reaction if not owner
-    if (ifCurrentUserIsNotCreator()){
-        controlNonCreatorFunctionality()
-    }
     // load summary table if it has previously been loaded, element sustainability is used because this is autofilled upon load.
     if (js_summary_table_data["element_sustainability"] !== 'undefined'){
             setTimeout(showSummary(), 1000);
         } else{
         $loadTracker.val("loaded")
+    }
+    //  disable editing of the reaction if not owner
+    if (ifCurrentUserIsNotCreator()){
+        controlNonCreatorFunctionality()
     }
     // auxiliary reload functions that use the reaction table json
     function fillInputField(fieldID, jsonID, i){

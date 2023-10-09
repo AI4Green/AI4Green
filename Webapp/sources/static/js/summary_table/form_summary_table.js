@@ -301,14 +301,19 @@ function showSummary() {
                 let colorRoundedReactantMassID = "#js-reactant-rounded-mass" + Number(limitingReactantTableNumber)
                 autoChangeRequiredStyling2(colorRoundedReactantMassID)
                 $('#js-summary-table').html(response.summary).show();
+                //  disable editing of the reaction if not owner
+                if (ifCurrentUserIsNotCreator()){
+                    controlNonCreatorFunctionality()
+                }
+                // disable editing if reaction is locked
+                if ($("#js-complete").val() === "complete"){
+                    controlLockedReactionFunctionality()
+                }
                 $("#print-pdf").show()
                 autoSaveCheck()
                 // display buttons for uploading/handling file attachments and locking the reaction
                 $("#complete-reaction-div").show()
                 $("#reaction-file-attachments").show()
-                if ($("#js-complete").val() === "complete"){
-                    controlLockedReactionFunctionality()
-                }
                 $("#js-load-status").val("loaded")
             }
         }
