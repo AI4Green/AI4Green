@@ -5,7 +5,7 @@ This module contains auxiliary variables and functions used throughout the app
 """
 import os.path # module for pathname manipulates
 from typing import Dict, List, Optional, Type, Union, Tuple
-from flask import request  # parses incoming request data and gives access to it
+from flask import request, abort
 from sources.extensions import db
 from sources import models
 from flask_login import current_user
@@ -524,3 +524,23 @@ def smiles_to_inchi(smiles: str) -> Optional[str]:
 
 def remove_spaces_and_dashes(name: str) -> str:
     return name.replace(' ', '').replace('-', '')
+
+
+def abort_if_user_not_in_workbook(workgroup_name: str, workbook_name: str, workbook: models.WorkBook):
+    """
+    We abort the current process if the user is not in the workbook
+    Request values come from the frontend
+    """
+    if workbook is not None and not security_member_workgroup_workbook(workgroup_name, workbook_name):
+        abort(400)
+
+
+def get_workbook_from_group_book_name_combination(workgroup_name: str, workbook_name: str) -> models.WorkBook:
+    """Returns the workbook from """
+    return (
+        db.session.query(models.WorkBook)
+        .filter(models.WorkBook.name == workbook_name)
+        .join(models.WorkGroup)
+        .filter(models.WorkGroup.name == workgroup_name)
+        .first()
+    )

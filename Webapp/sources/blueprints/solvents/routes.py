@@ -4,7 +4,9 @@ from flask import Response, jsonify, request
 from flask_login import login_required
 from sqlalchemy import func
 
-from sources import auxiliary, models
+from sources import models
+from sources.auxiliary import abort_if_user_not_in_workbook, sanitise_user_input, \
+    get_workbook_from_group_book_name_combination
 from sources.extensions import db
 
 # request parses incoming request data and gives access to it
@@ -18,18 +20,13 @@ def solvents() -> Response:
     """This function gets a solvent name from browser,
     makes request to the solvent database, and returns
     its data back to show it in the reaction table"""
-    solvent = auxiliary.sanitise_user_input(
+    solvent = sanitise_user_input(
         request.form["solvent"]
     )  # gets the solvent from browser
-    workgroup = request.form["workgroup"]
+    workgroup_name = request.form["workgroup"]
     workbook_name = request.form["workbook"]
-    workbook = (
-        db.session.query(models.WorkBook)
-        .filter(models.WorkBook.name == workbook_name)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
-        .first()
-    )
+    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
 
     number = request.form["number"]  # gets the solvent number from the browser
     flag_rate = {

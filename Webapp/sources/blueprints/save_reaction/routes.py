@@ -11,12 +11,11 @@ from datetime import datetime
 import magic
 import pytz
 from azure.core.exceptions import ResourceExistsError
-from azure.identity import DefaultAzureCredential
-from azure.storage.blob import BlobClient, BlobServiceClient, ContainerClient
+from azure.storage.blob import BlobClient, BlobServiceClient
 from flask import Response, abort, current_app, json, jsonify, request
 from flask_login import current_user, login_required
 from sources import models
-from sources.auxiliary import get_data, get_smiles, sanitise_user_input, security_member_workgroup_workbook
+from sources.auxiliary import get_data, get_smiles, sanitise_user_input, get_workbook_from_group_book_name_combination, abort_if_user_not_in_workbook
 from sources.extensions import db
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
@@ -28,24 +27,25 @@ from . import save_reaction_bp
 @login_required
 def new_reaction() -> Response:
     """Makes a new reaction after user submits modal window"""
-    workbook = request.form["workbook"]
-    workgroup = request.form["workgroup"]
+    workbook_name = request.form["workbook"]
+    workgroup_name = request.form["workgroup"]
 
     # finds workgroup object (needs institution later)
     workgroup_selected_obj = (
         db.session.query(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
+        .filter(models.WorkGroup.name == workgroup_name)
         .first()
     )
     workbook_object = (
         db.session.query(models.WorkBook)
-        .filter(models.WorkBook.name == workbook)
+        .filter(models.WorkBook.name == workbook_name)
         .filter(models.WorkBook.group == workgroup_selected_obj.id)
         .first()
     )
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook_object)
     reaction_name = sanitise_user_input(request.form["reactionName"])
     reaction_id = request.form["reactionID"]
-    name_check = check_reaction()
+
     creator = (
         db.session.query(models.Person)
         .join(models.User)
@@ -64,6 +64,7 @@ def new_reaction() -> Response:
         feedback = "A reaction with this ID already exists. Please refresh the page and try again."
         return jsonify({"feedback": feedback})
 
+    name_check = check_reaction_name()
     # if the name check is passed then proceed with making the new reaction
     if b"This reaction name is unique" in name_check.data:
         # make the reaction table dict with units set to default values
@@ -151,16 +152,23 @@ def new_reaction() -> Response:
         return name_check
 
 
-def validate_autosave(reaction: models.Reaction):
+def authenticate_user_to_edit_reaction(reaction: models.Reaction, file_attachment=False):
     """
     In addition to frontend validation, backend validation protects against user edited HTML.
     Validates the active user is the creator and validates the reaction is not locked.
     Aborts process with a 400 error if validation is failed
     """
-    # validate the user is the creator
-    if not reaction.creator_person.user.email == current_user.email:
+    # validate user is in workbook
+    workbook_persons = reaction.workbook.users
+    workbook_users = [x.user for x in workbook_persons]
+    if current_user not in workbook_users:
         abort(400)
-    # validate the reaction is not locked
+    # validate the user is the creator
+    if reaction.creator_person.user.email != current_user.email:
+        abort(400)
+    if file_attachment:
+        return
+    # validate the reaction is not locked, unless it is a file attachment being edited.
     if reaction.complete == 'complete':
         abort(400)
 
@@ -169,29 +177,11 @@ def validate_autosave(reaction: models.Reaction):
 @login_required
 def autosave() -> Response:
     """autosave when a field changes in the reaction page"""
-    reaction_name = sanitise_user_input(request.form["reactionName"])
-    reaction_id = str(request.form["reactionID"])
     reaction_description = str(request.form["reactionDescription"])
-    # Takes the first workbook the user has access to
-    workgroup = str(request.form["workgroup"])
-    workbook_name = str(request.form["workbook"])
-    workbook = (
-        db.session.query(models.WorkBook)
-        .filter(models.WorkBook.name == workbook_name)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
-        .first()
-    )
-    reaction = (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.reaction_id == reaction_id)
-        .join(models.WorkBook)
-        .filter(models.WorkBook.name == workbook_name)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
-        .first()
-    )
-    validate_autosave(reaction)
+    reaction = get_current_reaction()
+    reaction_name = reaction.name
+
+    authenticate_user_to_edit_reaction(reaction)
 
     summary_to_print = str(request.form["summary_to_print"])
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
@@ -409,7 +399,6 @@ def autosave() -> Response:
     # update the database entry for the reaction
     update_dict = {
         "time_of_update": current_time,
-        "name": reaction_name,
         "complete": complete,
         "reaction_smiles": reaction_smiles,
         "description": reaction_description,
@@ -417,7 +406,6 @@ def autosave() -> Response:
         "products": product_smiles_ls,
         "reagents": reagent_smiles_ls,
         "solvent": solvent_primary_keys_ls,
-        "workbooks": workbook.id,
         "reaction_table_data": reaction_table,
         "summary_table_data": summary_table,
     }
@@ -428,24 +416,15 @@ def autosave() -> Response:
 @save_reaction_bp.route("/_autosave_sketcher", methods=["POST"])
 @login_required
 def autosave_sketcher() -> Response:
+    """Autosave function for saving changes to the sketcher only. Only used before reaction table is generated."""
+
+    reaction = get_current_reaction()
+    authenticate_user_to_edit_reaction(reaction)
+
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
     reaction_smiles = str(request.form["reactionSmiles"])
-    reaction_id = str(request.form["reactionID"])
-    # Takes the first workbook the user has access to
-    workgroup = str(request.form["workgroup"])
-    workbook_name = str(request.form["workbook"])
 
-    reaction = (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.reaction_id == reaction_id)
-        .join(models.WorkBook)
-        .filter(models.WorkBook.name == workbook_name)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
-        .first()
-    )
     update_dict = {"time_of_update": current_time, "reaction_smiles": reaction_smiles}
-
     reaction.update(**update_dict)
     feedback = "Reaction Updated!"
     return jsonify({"feedback": feedback})
@@ -453,8 +432,7 @@ def autosave_sketcher() -> Response:
 
 @save_reaction_bp.route("/_check_reaction", methods=["POST"])
 @login_required
-def check_reaction() -> Response:
-    # user must be loged in
+def check_reaction_name() -> Response:
     """Checks the reaction name is unique"""
     reaction_name = sanitise_user_input(request.form["reactionName"])
     # Tells the user they must give the reaction a name to save it
@@ -486,68 +464,78 @@ def check_reaction() -> Response:
     return jsonify({"feedback": feedback})
 
 
+@save_reaction_bp.route("/_upload_experimental_data", methods=["POST"])
+@login_required
+def upload_experiment_files():
+    """Takes a list of files, and saves upon successful validation. Url added to database, file saved to azure blob"""
+    authenticate_user(permission_level='edit', request_method='POST')
+    new_upload = UploadExperimentDataFiles(request)
+    new_upload.validate_files()
+    new_upload.save_validated_files()
+    return jsonify({"uploaded_files": new_upload.uploaded_files})
+
+
 @save_reaction_bp.route("/view_reaction_attachment", methods=["GET"])
 @login_required
 def view_reaction_attachment() -> Response:
     """
     Authenticate user has permission to view, then use the uuid to find the file on azure and then return the file.
     """
-    # get the args from the GET request
-    workgroup = request.args.get("workgroup")
-    workbook = request.args.get("workbook")
+    authenticate_user(permission_level='view_only', request_method='GET')
     file_uuid = request.args.get("uuid")
-    # validate user belongs to the workbook
-    if not security_member_workgroup_workbook(workgroup, workbook):
-        print(f"user not in workbook {workbook}")
-        abort(400)
     # get the blob file and send the filestream, display name and mimetype to the frontend to be displayed.
-    blob_client = get_blob(file_uuid, already_authorised=True)
+    blob_client = get_blob(file_uuid)
     file_attachment = blob_to_file_attachment(blob_client)
-    file_entity = (
-        db.session.query(models.ReactionDataFile)
-        .filter(models.ReactionDataFile.uuid == file_uuid)
-        .first()
-    )
-    mimetype = file_entity.file_details["mimetype"]
-    display_name = file_entity.display_name
+    file_object = file_from_uuid(file_uuid)
+
+    mimetype = file_object.file_details["mimetype"]
+    display_name = file_object.display_name
     file_attachment = f"data:{mimetype};base64,{file_attachment}"
     return jsonify(
         {"stream": file_attachment, "mimetype": mimetype, "name": display_name}
     )
 
 
-def blob_to_file_attachment(blob_client) -> str:
-    stream = blob_client.download_blob()
-    data = stream.readall()
-    file_attachment = base64.b64encode(data).decode()
-    return file_attachment
-
-
 @save_reaction_bp.route("/_download_reaction_attachment", methods=["POST"])
 @login_required
 def download_experiment_files():
     """Take a file and return as attachment to the user"""
+    authenticate_user(permission_level='view_only', request_method='POST')
     blob_client = get_blob()
     stream_storage = blob_client.download_blob()
     stream = stream_storage.readall()
     file_attachment = base64.b64encode(stream).decode()
     file_uuid = request.form["uuid"]
-    file_entity = (
-        db.session.query(models.ReactionDataFile)
-        .filter(models.ReactionDataFile.uuid == file_uuid)
-        .first()
-    )
-    mimetype = file_entity.file_details["mimetype"]
-    display_name = file_entity.display_name
+    file_object = file_from_uuid(file_uuid)
+
+    mimetype = file_object.file_details["mimetype"]
+    display_name = file_object.display_name
     return jsonify(
         {"stream": file_attachment, "mimetype": mimetype, "name": display_name}
     )
 
 
-def get_blob(file_uuid: str = None, already_authorised: bool = False) -> BlobClient:
-    # authenticate user belongs to the workbook of the reaction
-    if not already_authorised:
-        authenticate_user_to_edit_files()
+@save_reaction_bp.route("/_delete_reaction_attachment", methods=["DELETE"])
+@login_required
+def delete_reaction_attachment():
+    """Delete file attached to reaction"""
+    authenticate_user(permission_level='edit', request_method='DELETE')
+    # connect to blob
+    blob_client = get_blob()
+    # delete blob
+    blob_client.delete_blob()
+    # confirm deletion
+    if blob_client.exists():
+        abort(400)
+    # reflect changes in the database
+    file_uuid = request.form["uuid"]
+    file_object = file_from_uuid(file_uuid)
+    db.session.delete(file_object)
+    db.session.commit()
+    return "success"
+
+
+def get_blob(file_uuid: str = None) -> BlobClient:
     # connect to azure
     blob_service_client = connect_to_azure_blob_service()
     # connect to blob
@@ -560,72 +548,55 @@ def get_blob(file_uuid: str = None, already_authorised: bool = False) -> BlobCli
     return blob_client
 
 
-@save_reaction_bp.route("/_delete_reaction_attachment", methods=["DELETE"])
-@login_required
-def delete_reaction_attachment():
-    """Delete file attached to reaction"""
-    authenticate_user_to_edit_files()
-    # connect to blob
-    blob_client = get_blob()
-    # delete blob
-    blob_client.delete_blob()
-    # confirm deletion
-    if blob_client.exists():
-        abort(400)
-
-    # reflect changes in the database
-    file_uuid = request.form["uuid"]
-    file_entity = (
-        db.session.query(models.ReactionDataFile)
-        .filter(models.ReactionDataFile.uuid == file_uuid)
-        .first()
-    )
-    db.session.delete(file_entity)
-    db.session.commit()
-    return "success"
+def blob_to_file_attachment(blob_client) -> str:
+    stream = blob_client.download_blob()
+    data = stream.readall()
+    file_attachment = base64.b64encode(data).decode()
+    return file_attachment
 
 
-def authenticate_user_to_edit_files():
-    # institution = db.Institution[1]
-    workgroup_name = request.form["workgroup"]
-    workbook_name = request.form["workbook"]
-
-    workbook = (
-        db.session.query(models.WorkBook)
-        .filter(models.WorkBook.name == workbook_name)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_name)
-        .first()
-    )
-    user = (
-        db.session.query(models.User)
-        .filter(models.User.email == current_user.email)
-        .join(models.Person)
-        .join(models.t_Person_WorkBook)
-        .join(models.WorkBook)
-        .filter(models.WorkBook.name == workbook_name)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_name)
-        .first()
-    )
-    if current_user.email not in user.email:
-        print(f"user: {current_user.email} not in workbook {workbook.name}")
-        abort(400)
+def authenticate_user(permission_level: str, request_method: str):
+    """
+    Authenticates user to either view or edit the reaction.
+    permission_level: Takes value of 'edit' or 'view_only'
+    request_method: Value of 'GET' changes behaviour, other strings all have same behaviour (e.g. POST, DELETE)
+    """
+    if permission_level == 'view_only':
+        authenticate_user_to_view_files(request_method)
+    if permission_level == 'edit':
+        reaction = get_current_reaction()
+        authenticate_user_to_edit_reaction(reaction, file_attachment=True)
 
 
-@save_reaction_bp.route("/_upload_experimental_data", methods=["POST"])
-@login_required
-def upload_experiment_files():
-    """Takes a list of files, and saves upon successful validation. Url added to database, file saved to azure blob"""
-    new_upload = UploadExperimentDataFiles(request)
-    new_upload.validate_files()
-    new_upload.save_validated_files()
-    return jsonify({"uploaded_files": new_upload.uploaded_files})
+def authenticate_user_to_view_files(request_method):
+    """ Authenticates user as a workbook member or aborts. Gets the workgroup_name, workbook_name, and workbook."""
+    if request_method == 'GET':
+        workgroup_name = request.args.get("workgroup")
+        workbook_name = request.args.get("workbook")
+    else:
+        workgroup_name = request.form["workgroup"]
+        workbook_name = request.form["workbook"]
+    # validate user belongs to the workbook
+    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
 
 
 def connect_to_azure_blob_service() -> BlobServiceClient:
+    """
+    Returns the Azure blob service client using the connection string from configs.
+    From this object, file attachment contents can be accessed by specifying the container name and file uuid.
+    """
     return BlobServiceClient.from_connection_string(
         current_app.config["AZURE_STORAGE_CONNECTION_STRING"]
+    )
+
+
+def file_from_uuid(file_uuid: str) -> models.ReactionDataFile:
+    """Return database file object from the uuid. (autogenerated unique identifier)"""
+    return (
+        db.session.query(models.ReactionDataFile)
+        .filter(models.ReactionDataFile.uuid == file_uuid)
+        .first()
     )
 
 
@@ -742,22 +713,16 @@ class UploadExperimentDataFiles:
 
 def get_current_reaction():
     reaction_id = str(request.form["reactionID"])
-    # Takes the first workbook the user has access to
-    workgroup = str(request.form["workgroup"])
+    workgroup_name = str(request.form["workgroup"])
     workbook_name = str(request.form["workbook"])
-    workbook = (
-        db.session.query(models.WorkBook)
-        .filter(models.WorkBook.name == workbook_name)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
-        .first()
-    )
+    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
     return (
         db.session.query(models.Reaction)
         .filter(models.Reaction.reaction_id == reaction_id)
         .join(models.WorkBook)
         .filter(models.WorkBook.id == workbook.id)
         .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
+        .filter(models.WorkGroup.name == workgroup_name)
         .first()
     )
