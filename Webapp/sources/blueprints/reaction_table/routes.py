@@ -8,12 +8,13 @@ from datetime import datetime
 from urllib.parse import quote
 from urllib.request import urlopen
 
-from flask import current_app, jsonify, render_template, request
+from flask import current_app, jsonify, render_template, request, abort
 from flask_login import current_user, login_required
 from rdkit import Chem  # Used for converting smiles to inchi
 from rdkit.Chem import Descriptors
 from sources import models
-from sources.auxiliary import smiles_symbols
+from sources.auxiliary import smiles_symbols, abort_if_user_not_in_workbook, \
+    get_workbook_from_group_book_name_combination
 from sources.dto import ReactionNoteSchema
 
 # render_template renders html templates
@@ -23,7 +24,7 @@ from sources.extensions import db  # imports the module with auxiliary functions
 
 from . import reaction_table_bp  # imports the blueprint of the reaction table route
 
-if not current_app.testing:
+if not current_app.config["DEBUG"]:
     try:
         from STOUT import translate_forward
     except:
@@ -55,13 +56,8 @@ def process():
     if demo != "demo":
         workgroup = request.args.get("workgroup")
         workbook_name = request.args.get("workbook")
-        workbook = (
-            db.session.query(models.WorkBook)
-            .filter(models.WorkBook.name == workbook_name)
-            .join(models.WorkGroup)
-            .filter(models.WorkGroup.name == workgroup)
-            .first()
-        )
+        workbook = get_workbook_from_group_book_name_combination(workgroup, workbook_name)
+        abort_if_user_not_in_workbook(workgroup, workbook_name, workbook)
 
         reaction_id = request.args.get("reaction_id")
         reaction = (
@@ -115,7 +111,7 @@ def process():
             if (
                 reactant is None
             ):  # if no match, then check the workbook collection of novel compounds
-                if demo == "demo":  # if in demo mode don't look
+                if demo == "demo":  # if in demo mode don't search novel compounds
                     novel_reactant_html = "Demo"
                     return jsonify(
                         {"reactionTable": novel_reactant_html, "novelCompound": ""}
