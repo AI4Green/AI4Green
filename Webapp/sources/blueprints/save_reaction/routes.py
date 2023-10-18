@@ -15,7 +15,13 @@ from azure.storage.blob import BlobClient, BlobServiceClient
 from flask import Response, abort, current_app, json, jsonify, request
 from flask_login import current_user, login_required
 from sources import models
-from sources.auxiliary import get_data, get_smiles, sanitise_user_input, get_workbook_from_group_book_name_combination, abort_if_user_not_in_workbook
+from sources.auxiliary import (
+    abort_if_user_not_in_workbook,
+    get_data,
+    get_smiles,
+    get_workbook_from_group_book_name_combination,
+    sanitise_user_input,
+)
 from sources.extensions import db
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
@@ -152,7 +158,9 @@ def new_reaction() -> Response:
         return name_check
 
 
-def authenticate_user_to_edit_reaction(reaction: models.Reaction, file_attachment=False):
+def authenticate_user_to_edit_reaction(
+    reaction: models.Reaction, file_attachment=False
+):
     """
     In addition to frontend validation, backend validation protects against user edited HTML.
     Validates the active user is the creator and validates the reaction is not locked.
@@ -162,15 +170,15 @@ def authenticate_user_to_edit_reaction(reaction: models.Reaction, file_attachmen
     workbook_persons = reaction.workbook.users
     workbook_users = [x.user for x in workbook_persons]
     if current_user not in workbook_users:
-        abort(400)
+        abort(401)
     # validate the user is the creator
     if reaction.creator_person.user.email != current_user.email:
-        abort(400)
+        abort(401)
     if file_attachment:
         return
     # validate the reaction is not locked, unless it is a file attachment being edited.
-    if reaction.complete == 'complete':
-        abort(400)
+    if reaction.complete == "complete":
+        abort(401)
 
 
 @save_reaction_bp.route("/_autosave", methods=["POST"])
@@ -468,7 +476,7 @@ def check_reaction_name() -> Response:
 @login_required
 def upload_experiment_files():
     """Takes a list of files, and saves upon successful validation. Url added to database, file saved to azure blob"""
-    authenticate_user(permission_level='edit', request_method='POST')
+    authenticate_user(permission_level="edit", request_method="POST")
     new_upload = UploadExperimentDataFiles(request)
     new_upload.validate_files()
     new_upload.save_validated_files()
@@ -481,7 +489,7 @@ def view_reaction_attachment() -> Response:
     """
     Authenticate user has permission to view, then use the uuid to find the file on azure and then return the file.
     """
-    authenticate_user(permission_level='view_only', request_method='GET')
+    authenticate_user(permission_level="view_only", request_method="GET")
     file_uuid = request.args.get("uuid")
     # get the blob file and send the filestream, display name and mimetype to the frontend to be displayed.
     blob_client = get_blob(file_uuid)
@@ -500,7 +508,7 @@ def view_reaction_attachment() -> Response:
 @login_required
 def download_experiment_files():
     """Take a file and return as attachment to the user"""
-    authenticate_user(permission_level='view_only', request_method='POST')
+    authenticate_user(permission_level="view_only", request_method="POST")
     blob_client = get_blob()
     stream_storage = blob_client.download_blob()
     stream = stream_storage.readall()
@@ -519,14 +527,14 @@ def download_experiment_files():
 @login_required
 def delete_reaction_attachment():
     """Delete file attached to reaction"""
-    authenticate_user(permission_level='edit', request_method='DELETE')
+    authenticate_user(permission_level="edit", request_method="DELETE")
     # connect to blob
     blob_client = get_blob()
     # delete blob
     blob_client.delete_blob()
     # confirm deletion
     if blob_client.exists():
-        abort(400)
+        abort(401)
     # reflect changes in the database
     file_uuid = request.form["uuid"]
     file_object = file_from_uuid(file_uuid)
@@ -561,23 +569,25 @@ def authenticate_user(permission_level: str, request_method: str):
     permission_level: Takes value of 'edit' or 'view_only'
     request_method: Value of 'GET' changes behaviour, other strings all have same behaviour (e.g. POST, DELETE)
     """
-    if permission_level == 'view_only':
+    if permission_level == "view_only":
         authenticate_user_to_view_files(request_method)
-    if permission_level == 'edit':
+    if permission_level == "edit":
         reaction = get_current_reaction()
         authenticate_user_to_edit_reaction(reaction, file_attachment=True)
 
 
 def authenticate_user_to_view_files(request_method):
-    """ Authenticates user as a workbook member or aborts. Gets the workgroup_name, workbook_name, and workbook."""
-    if request_method == 'GET':
+    """Authenticates user as a workbook member or aborts. Gets the workgroup_name, workbook_name, and workbook."""
+    if request_method == "GET":
         workgroup_name = request.args.get("workgroup")
         workbook_name = request.args.get("workbook")
     else:
         workgroup_name = request.form["workgroup"]
         workbook_name = request.form["workbook"]
     # validate user belongs to the workbook
-    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    workbook = get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
 
 
@@ -615,7 +625,7 @@ class UploadExperimentDataFiles:
     def validate_number_of_attachments(self):
         number_of_attachments = len(self.reaction.file_attachments)
         if number_of_attachments >= 10:
-            abort(400)
+            abort(401)
 
     def validate_files(self):
         for file in self.files_to_upload.values():
@@ -623,7 +633,7 @@ class UploadExperimentDataFiles:
             if validation_result == "success":
                 self.validated_files.append(file)
             else:
-                abort(400)
+                abort(401)
 
     def save_validated_files(self):
         for file in self.validated_files:
@@ -682,7 +692,7 @@ class UploadExperimentDataFiles:
         # confirm upload
         if not blob_client.exists():
             print(f"blob {filename} upload failed")
-            abort(400)
+            abort(401)
 
     @staticmethod
     def file_security_validation(file):
@@ -715,7 +725,9 @@ def get_current_reaction():
     reaction_id = str(request.form["reactionID"])
     workgroup_name = str(request.form["workgroup"])
     workbook_name = str(request.form["workbook"])
-    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    workbook = get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
     return (
         db.session.query(models.Reaction)
