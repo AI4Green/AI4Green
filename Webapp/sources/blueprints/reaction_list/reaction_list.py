@@ -161,6 +161,7 @@ def process_reactions_to_dict(reaction_list, sort_crit) -> List[Dict]:
             "name": reaction.name,
             "description": description,
             "time_of_creation": str(reaction.time_of_creation),
+            "time_of_update": str(reaction.time_of_update),
             "reaction_smiles": reaction.reaction_smiles,
             "reaction_table_data": reaction.reaction_table_data,
             "summary_table_data": reaction.summary_table_data,

@@ -1,11 +1,12 @@
 import re
 
-from flask import Response, jsonify, request
+from flask import Response, jsonify, request, abort
 from flask_login import login_required
 from sqlalchemy import func
 
-from sources import (auxiliary,  # imports the module with auxiliary functions
-                     db, models)
+from sources import db, models
+from sources.auxiliary import sanitise_user_input, abort_if_user_not_in_workbook, \
+    get_workbook_from_group_book_name_combination
 
 # request parses incoming request data and gives access to it
 # jsonify is used to send a JSON response to the browser
@@ -19,19 +20,15 @@ def reagents() -> Response:
     """This function gets a reagent name from browser,
     makes request to the reagent database, and returns
     its data back to show it in the reaction table"""
-    reagent = auxiliary.sanitise_user_input(
+    reagent = sanitise_user_input(
         request.form["reagent"]
     )  # gets the reagent from browser
     reagent = reagent.replace("\u00A0", " ")  # add back in space to search database
-    workgroup = str(request.form["workgroup"])
+    workgroup_name = str(request.form["workgroup"])
     workbook_name = str(request.form["workbook"])
-    workbook = (
-        db.session.query(models.WorkBook)
-        .filter(models.WorkBook.name == workbook_name)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
-        .first()
-    )
+    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
+
     number = request.form["number"]  # gets the reagent number from the browser
     cas_regex = r"\b[1-9]{1}[0-9]{1,6}-\d{2}-\d\b"
     cas_number = re.findall(cas_regex, reagent)

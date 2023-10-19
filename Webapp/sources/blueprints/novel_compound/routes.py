@@ -11,8 +11,9 @@ from sqlalchemy import func
 # render_template renders html templates
 # request parses incoming request data and gives access to it
 # jsonify is used to send a JSON response to the browser
-from sources import (auxiliary,  # imports the module with auxiliary functions
-                     db, models)
+from sources import db, models
+from sources.auxiliary import abort_if_user_not_in_workbook, sanitise_user_input, \
+    get_workbook_from_group_book_name_combination
 
 from . import \
     novel_compound_bp  # imports the blueprint of the reaction table route
@@ -21,21 +22,22 @@ from . import \
 @novel_compound_bp.route("/_novel_compound", methods=["GET", "POST"])
 @login_required
 def novel_compound() -> Response:
+    """
+    Adds a novel compound to the database and is linked to the workbook of the current reaction
+    The novel compound data is saved from the data the user enters in the form.
+    This function is triggered either from the 'add new reagent/solvent to database' or when a novel structure is
+    drawn in the sketcher.
+    """
     # must be logged in
     # get user, their workbook, and the chemicals within that workbook to check the name is unique
-    name = auxiliary.sanitise_user_input(request.form["name"])
+    name = sanitise_user_input(request.form["name"])
     if not name:
         feedback = "Compound requires a name"
         return jsonify({"feedback": feedback})
-    workgroup = str(request.form["workgroup"])
+    workgroup_name = str(request.form["workgroup"])
     workbook_name = str(request.form["workbook"])
-    workbook = (
-        db.session.query(models.WorkBook)
-        .filter(models.WorkBook.name == workbook_name)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
-        .first()
-    )
+    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
     # check novel compound db
     name_check = (
         db.session.query(models.NovelCompound)
@@ -72,7 +74,7 @@ def novel_compound() -> Response:
     # unpack list
     density, concentration, mol_weight = expected_num_ls
     # if cas provided, must be valid
-    cas = auxiliary.sanitise_user_input(request.form["cas"])
+    cas = sanitise_user_input(request.form["cas"])
     if cas:
         cas_regex = r"^[0-9]{1,7}-\d{2}-\d$"
         if not re.findall(cas_regex, cas):
@@ -109,7 +111,7 @@ def novel_compound() -> Response:
         inchi = None
         inchi_key = None
     # check hazard codes are in correct format
-    hazards = auxiliary.sanitise_user_input(request.form["hPhrase"])
+    hazards = sanitise_user_input(request.form["hPhrase"])
     if hazards:
         hazards_ls = hazards.split("-")
         for hazard in hazards_ls:

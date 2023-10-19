@@ -4,7 +4,7 @@ from flask_login import \
     login_required, current_user
 from sources.extensions import db
 from sources import models
-from sources.auxiliary import security_member_workgroup_workbook
+from sources.auxiliary import security_member_workgroup_workbook, abort_if_user_not_in_workbook, get_workbook_from_group_book_name_combination
 
 from . import reaction_list_bp  # imports the blueprint of route
 from .reaction_list import get_reaction_list, get_scheme_list
@@ -53,11 +53,13 @@ def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response
 @reaction_list_bp.route("/get_reactions", methods=["GET", "POST"])
 @login_required
 def get_reactions() -> Response:
-    # must be logged in
+    """Gets a list of reactions for the active workbook. Reaction data is sent as a list of dictionaries."""
     sort_crit = str(request.form["sortCriteria"])
-    workbook = str(request.form["workbook"])
-    workgroup = str(request.form["workgroup"])
-    reactions = get_reaction_list(workbook, workgroup, sort_crit)
+    workbook_name = str(request.form["workbook"])
+    workgroup_name = str(request.form["workgroup"])
+    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
+    reactions = get_reaction_list(workbook_name, workgroup_name, sort_crit)
     reaction_details = render_template(
         "_saved_reactions.html", reactions=reactions, sort_crit=escape(sort_crit)
     )
@@ -67,10 +69,15 @@ def get_reactions() -> Response:
 @reaction_list_bp.route("/get_schemata", methods=["GET", "POST"])
 @login_required
 def get_schemata() -> Response:
+    """
+    Gets a list of reaction schemes for the active workbook. Images made from reaction SMILES using rdMolDraw2D (RDKit)
+    """
     # must be logged in
-    workbook = str(request.form["workbook"])
-    workgroup = str(request.form["workgroup"])
+    workbook_name = str(request.form["workbook"])
+    workgroup_name = str(request.form["workgroup"])
+    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
     size = str(request.form["size"])
     sort_crit = str(request.form["sortCriteria"])
-    schemes = get_scheme_list(workbook, workgroup, sort_crit, size)
+    schemes = get_scheme_list(workbook_name, workgroup_name, sort_crit, size)
     return {"schemes": schemes, "sort_crit": escape(sort_crit)}
