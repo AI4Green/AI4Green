@@ -38,7 +38,9 @@ def admin_dashboard(
         flash(new_workgroup_request_message)
 
     # get data to populate the admin dashboard
-    compound_data_error_reports = admin_dashboard.get_compound_data_error_reports()
+    compound_data_error_reports = (
+        services.admin_dashboard.get_compound_data_error_reports()
+    )
     reaction_count = services.admin_dashboard.get_reaction_count()
     compound_count = services.admin_dashboard.get_compound_count()
     new_workgroup_requests = services.admin_dashboard.get_new_workgroup_requests()
