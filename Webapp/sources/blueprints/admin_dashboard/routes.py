@@ -2,13 +2,14 @@ from datetime import datetime
 
 from flask import Response, flash, redirect, render_template, url_for
 from flask_login import login_required
-from sources import models, services
+from sources import models
 from sources.auxiliary import (
     get_notification_number,
     get_workgroups,
     security_admin_only,
 )
 from sources.extensions import db
+from sources.services import email, queries
 
 from . import admin_dashboard_bp
 
@@ -39,15 +40,15 @@ def admin_dashboard(
 
     # get data to populate the admin dashboard
     compound_data_error_reports = (
-        services.admin_dashboard.get_compound_data_error_reports()
+        queries.compound_data_error_report.get_compound_data_error_reports()
     )
-    reaction_count = services.admin_dashboard.get_reaction_count()
-    compound_count = services.admin_dashboard.get_compound_count()
-    new_workgroup_requests = services.admin_dashboard.get_new_workgroup_requests()
-    all_users = services.admin_dashboard.get_all_users()
-    all_workgroups = services.admin_dashboard.get_all_workgroups()
-    recent_reactions = services.admin_dashboard.get_recent_reactions()
-    recent_workbooks = services.admin_dashboard.get_recent_workbooks()
+    reaction_count = queries.reaction.get_reaction_count()
+    compound_count = queries.compound.get_compound_count()
+    new_workgroup_requests = queries.workgroup_request.get_new_workgroup_requests()
+    all_users = queries.user.get_all_users()
+    all_workgroups = queries.workgroup.get_all_workgroups()
+    recent_reactions = queries.reaction.get_recent_reactions()
+    recent_workbooks = queries.workbook.get_recent_workbooks()
 
     return render_template(
         "admin_dashboard.html",
@@ -112,7 +113,7 @@ def handle_new_workgroup_request(
                 wg_request="",
             )
             db.session.add(notification)
-            services.email.send_notification(new_workgroup_request.pi)
+            email.send_notification(new_workgroup_request.pi)
             message = "This request has been denied and workgroup removed"
             db.session.delete(approval_workgroup)
         if decision == "approve":
@@ -147,7 +148,7 @@ def handle_new_workgroup_request(
                     wg_request="",
                 )
                 db.session.add(notification)
-                services.email.send_notification(new_workgroup_request.pi)
+                email.send_notification(new_workgroup_request.pi)
                 # update the workgroup approval status and flash message
                 approval_workgroup.approved = True
                 message = "This request has been approved"
