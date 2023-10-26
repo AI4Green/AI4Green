@@ -35,10 +35,10 @@ def test_send_email_sending(app):
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Local temp files don't work in CI")
 def test_send_email_local_save(app):
     """
-    Test saving an email locally when MAIL_USE_LOCAL is set to True.
+    Test saving an email locally when MAIL_USE_LOCAL is set to 'local'.
 
     This test ensures that the 'send_email' function correctly saves the email locally when the 'MAIL_USE_LOCAL'
-    configuration is set to True. The email content should be stored in a file on the local storage.
+    configuration is set to 'local'. The email content should be stored in a file on the local storage.
 
     Args:
         client: Flask test client.
