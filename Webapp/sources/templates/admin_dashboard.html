@@ -25,10 +25,10 @@
               <a class="nav-link" role="tab" data-toggle="tab" href="#workgroups_tab" aria-selected="false">Workgroups</a>
           </li>
           <li class="nav-item">
-              <a class="nav-link" role="tab" data-toggle="tab" href="#recent-reactions-tab" aria-selected="false">Recent Reactions</a>
+              <a class="nav-link" role="tab" data-toggle="tab" href="#workbooks-tab" aria-selected="false">Workbooks</a>
           </li>
-                    <li class="nav-item">
-              <a class="nav-link" role="tab" data-toggle="tab" href="#recent-workbooks-tab" aria-selected="false">Recent Workbooks</a>
+          <li class="nav-item">
+              <a class="nav-link" role="tab" data-toggle="tab" href="#recent-reactions-tab" aria-selected="false">Recent Reactions</a>
           </li>
           <li class="nav-item">
               <a class="nav-link" role="tab" data-toggle="tab" href="#news_feed_tab" aria-selected="false" id="news-feed-tab">News Feed</a>
@@ -288,6 +288,47 @@
                     {% endfor %}
                 </table>
             </div>
+<!--            Workbooks-->
+            <div class="tab-pane fade in" id="workbooks-tab" role="tabpanel">
+                <table id="workbooks-table" class="table table-striped table-sm">
+                    <tr>
+                        <th>
+                            Workbook Name
+                        </th>
+                        <th>
+                            Workbook Group
+                        </th>
+                        <th>
+                            User Count
+                        </th>
+                        <th>
+                            Reaction Count
+                        </th>
+                        <th>
+                            Date of creation
+                        </th>
+                    </tr>
+                    {% for workbook in workbooks %}
+                    <tr>
+                        <td>
+                            {{ workbook.name }}
+                        </td>
+                        <td>
+                            {{ workbook.WorkGroup.name }}
+                        </td>
+                        <td>
+                            {{ workbook.users|length }}
+                        </td>
+                        <td>
+                            {{ workbook.reactions|length }}
+                        </td>
+                        <td>
+                            {{ (workbook.time_of_creation|string)[:-7] }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
 <!--            Recent Reactions-->
             <div class="tab-pane fade in" id="recent-reactions-tab" role="tabpanel">
                 <table id="recent-reactions-table" class="table table-striped table-sm">
@@ -310,6 +351,9 @@
                         <th>
                             Date of creation
                         </th>
+                        <th>
+                            Status
+                        </th>
                     </tr>
                     {% for reaction in recent_reactions %}
                     <tr>
@@ -331,51 +375,14 @@
                         <td>
                             {{ (reaction.time_of_creation|string)[:-7] }}
                         </td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </div>
-        <!--            Recent Workbooks-->
-            <div class="tab-pane fade in" id="recent-workbooks-tab" role="tabpanel">
-                <table id="recent-workbooks-table" class="table table-striped table-sm">
-                    <tr>
-                        <th>
-                            Workbook Name
-                        </th>
-                        <th>
-                            Workbook Group
-                        </th>
-                        <th>
-                            User Count
-                        </th>
-                        <th>
-                            Reaction Count
-                        </th>
-                        <th>
-                            Date of creation
-                        </th>
-                    </tr>
-                    {% for workbook in recent_workbooks %}
-                    <tr>
                         <td>
-                            {{ workbook.name }}
-                        </td>
-                        <td>
-                            {{ workbook.WorkGroup.name }}
-                        </td>
-                        <td>
-                            {{ workbook.users|length }}
-                        </td>
-                        <td>
-                            {{ workbook.reactions.length }}
-                        </td>
-                        <td>
-                            {{ (workbook.time_of_creation|string)[:-7] }}
+                            {{ reaction.complete }}
                         </td>
                     </tr>
                     {% endfor %}
                 </table>
             </div>
+
 <!--            News feed-->
             <div class="tab-pane fade in" id="news_feed_tab" role="tabpanel">
                 <br>
