@@ -8,16 +8,11 @@ import ast
 import json
 
 import rdkit
-from flask import Response, jsonify, render_template, request
+from flask import Response, abort, jsonify, render_template, request
 from flask_login import login_required
+from sources import auxiliary, db, models
 
-from sources import (auxiliary,  # imports the module with auxiliary functions
-                     db, models)
-
-# render_template renders html templates
-# request parses incoming request data and gives access to it
-# jsonify is used to send a JSON response to the browser
-from . import summary_bp  # imports the blueprint of the summary route
+from . import summary_bp
 
 
 # Processing data from the reaction table and creating summary with H&S report
@@ -26,21 +21,29 @@ def summary() -> Response:
     # must be logged in
     """This function receives the reaction information from browser, calculates
     green metrics, gives hazard information, and renders the summary"""
+    # check user permission
+    workgroup_name = str(request.form["workgroup"])
+    workbook_name = str(request.form["workbook"])
+    if not auxiliary.security_member_workgroup_workbook(workgroup_name, workbook_name):
+        abort(401)
+    # check there is data to get and if so get it
     summary_table_data = str(request.form["js_summary_table_data"])
     if summary_table_data != "no data":
         summary_table_data = ast.literal_eval(summary_table_data)
-    mass_factor = {
-        "g": 1,
-        "mg": 10 ** (-3),
-        "μg": 10 ** (-6),
-    }  # mass factor dictionary to convert mass units
+
+    # define the mass factor to enable conversion between units and hazard categories
+    # mass_factor = {
+    #     "g": 1,
+    #     "mg": 10 ** (-3),
+    #     "μg": 10 ** (-6),
+    # }
     category_rate = {
         "": 0,
         "L": 1,
         "M": 2,
         "H": 3,
         "VH": 4,
-    }  # hazard category rate dictionary
+    }
     # Gets selected units from the reaction table
     amount_unit = str(request.form["amountUnit"])  # mol, mmol   -
     volume_unit = str(
@@ -49,8 +52,8 @@ def summary() -> Response:
     mass_unit = str(request.form["massUnit"])  # g, mg, etc       -
     solvent_volume_unit = str(request.form["solventVolumeUnit"])  # L, ml, etc
     product_mass_unit = str(request.form["productMassUnit"])  # g, mg, etc
-    reactant_mass_factor = mass_factor[mass_unit]
-    product_mass_factor = mass_factor[product_mass_unit]
+    # reactant_mass_factor = mass_factor[mass_unit]
+    # product_mass_factor = mass_factor[product_mass_unit]
 
     # Gets reactant data from the reaction table
     reactants = auxiliary.get_data("reactants")  # reactants='Ethanol;Methanol;...'
@@ -92,7 +95,7 @@ def summary() -> Response:
     rounded_reagent_masses = auxiliary.get_data("roundedReagentMasses")
     reagent_hazards = auxiliary.get_data("reagentHazards")
     reagent_physical_forms = auxiliary.get_data("reagentPhysicalForms")
-    reagent_mass_sum = float(request.form["reagentMassSum"])
+    # reagent_mass_sum = float(request.form["reagentMassSum"])
     reagent_molecular_weight_sum = float(request.form["reagentMolecularWeightSum"])
     reagent_primary_keys_ls = auxiliary.get_data("reagentPrimaryKeys")
     if reagent_primary_keys_ls == [""]:
@@ -134,83 +137,45 @@ def summary() -> Response:
             break
     # check all the requirement information has been typed into the reaction table
     # this is limiting reagent mass, any other reagent equivalents, physical forms and solvent volume
-    for mass in reactant_masses:
-        if mass == "" or 0:
-            print("1")
+
+    # check the necessary reactant data is present
+    for equivalents, mass in zip(reactant_equivalents, reactant_masses):
+        if mass == "" or 0 or equivalents == "":
             return jsonify(
                 {"summary": "Ensure you have entered all the necessary information!"}
             )
-    for equi in reactant_equivalents:
-        if equi == "":
-            print("2")
-            return jsonify(
-                {"summary": "Ensure you have entered all the necessary information!"}
-            )
+
+    #  if reagents are present check the necessary reagent data is present
     if reagent_table_numbers[0]:
-        for equi in reagent_equivalents:
-            if equi == "":
-                print("3")
-                return jsonify(
-                    {
-                        "summary": "Ensure you have entered all the necessary information!"
-                    }
-                )
-    if reagent_table_numbers[0]:
-        for name in reagents:
-            if name == "":
-                print("4")
-                return jsonify(
-                    {
-                        "summary": "Ensure you have entered all the necessary information!"
-                    }
-                )
-        # if name not in database, no hazard code
-        for haz in reagent_hazards:
-            if haz == "":
-                print("5")
+        for equivalents, hazard, name in zip(
+            reagent_equivalents, reagent_hazards, reagents
+        ):
+            if equivalents == "" or name == "" or hazard == "":
                 return jsonify(
                     {
                         "summary": "Ensure you have entered all the necessary information!"
                     }
                 )
 
-    for phys_form in reactant_physical_forms:
-        if phys_form == "-select-":
-            print("6")
-            return jsonify(
-                {"summary": "Ensure you have entered all the necessary information!"}
-            )
-    for phys_form in reagent_physical_forms:
-        if phys_form == "-select-":
-            print("7")
-            return jsonify(
-                {"summary": "Ensure you have entered all the necessary information!"}
-            )
-    for phys_form in solvent_physical_forms:
-        if phys_form == "-select-":
-            print("8")
-            return jsonify(
-                {"summary": "Ensure you have entered all the necessary information!"}
-            )
-    for phys_form in product_physical_forms:
-        if phys_form == "-select-":
-            print("9")
-            return jsonify(
-                {"summary": "Ensure you have entered all the necessary information!"}
-            )
-    if solvent_table_numbers[0]:
-        for vol in solvent_volumes:
-            if vol == "" or 0:
-                print("10")
+    # check the necessary physical form data is present
+    for component_physical_form in [
+        reactant_physical_forms,
+        reagent_physical_forms,
+        solvent_physical_forms,
+        product_physical_forms,
+    ]:
+        for phys_form in component_physical_form:
+            if phys_form == "-select-":
                 return jsonify(
                     {
                         "summary": "Ensure you have entered all the necessary information!"
                     }
                 )
+
+    # is solvents are present check the necessary solvent data is present
     if solvent_table_numbers[0]:
-        for sol in solvents:
-            if sol == "" or 0:
-                print("11")
+        for sol, vol in zip(solvents, solvent_volumes):
+            if vol == "" or 0 or sol == "" or 0:
                 return jsonify(
                     {
                         "summary": "Ensure you have entered all the necessary information!"
@@ -218,16 +183,16 @@ def summary() -> Response:
                 )
 
     # Calculates green metrics
-    pmi = (
-        round(
-            (reactant_mass_sum + reagent_mass_sum)
-            * reactant_mass_factor
-            / (float(product_masses[main_prod_idx]) * product_mass_factor),
-            1,
-        )
-        if float(product_masses[main_prod_idx]) > 0
-        else 0
-    )  # product mass intensity
+    # pmi = (
+    #     round(
+    #         (reactant_mass_sum + reagent_mass_sum)
+    #         * reactant_mass_factor
+    #         / (float(product_masses[main_prod_idx]) * product_mass_factor),
+    #         1,
+    #     )
+    #     if float(product_masses[main_prod_idx]) > 0
+    #     else 0
+    # )  # product mass intensity
     ae = (
         round(
             100
@@ -239,12 +204,6 @@ def summary() -> Response:
         else 0
     )  # atom economy
     ae_flag = auxiliary.metric_flag(ae)  # atom economy color flag
-    # rme = round(100 * (float(product_masses[main_prod_idx]) * product_mass_factor) / ((reactant_mass_sum + reagent_mass_sum) * reactant_mass_factor), 1) \
-    #    if (reactant_mass_sum + reagent_mass_sum) > 0 else 0  # reaction mass efficiency
-    # rme_flag = auxiliary.metric_flag(rme)  # reaction mass efficiency color flag
-    # oe = round(100 * rme / ae, 1) if ae > 0 else 0  # optimum efficiency
-    # ef = round(pmi - 1, 1) if pmi > 1 else 0  # environmental factor (E-factor)
-    # mp = round(100 / pmi, 1) if pmi > 0 else 0  # mass productivity
     # get reaction smiles and convert to a list of smiles involved in reaction
     reaction_smiles = str(request.form["reactionSmiles"]).split(" |")[0]
     reaction_smiles_ls = reaction_smiles.replace(">>", ".").split(".")
