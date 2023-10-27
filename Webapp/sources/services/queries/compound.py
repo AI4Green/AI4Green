@@ -10,3 +10,10 @@ def get_compound_count() -> int:
         The number of compounds in the database
     """
     return db.session.query(models.Compound).count()
+
+
+def get_smiles_from_pk(int) -> str:
+    """
+    Gets the smiles from the compound primary key
+
+    """

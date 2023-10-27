@@ -63,7 +63,7 @@ def metric_flag(metric: int) -> str:
 
 def get_data(field) -> List[str]:
     """
-    Get reactant data.
+    Get compound data which is sent with a semi colon delimiter
     """
     data0 = str(request.form[field])
     return data0.split(";")
