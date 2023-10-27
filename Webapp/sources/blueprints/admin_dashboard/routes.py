@@ -47,8 +47,8 @@ def admin_dashboard(
     new_workgroup_requests = queries.workgroup_request.get_new_workgroup_requests()
     all_users = queries.user.get_all_users()
     all_workgroups = queries.workgroup.get_all_workgroups()
+    all_workbooks = queries.workbook.get_all_workbooks()
     recent_reactions = queries.reaction.get_recent_reactions()
-    recent_workbooks = queries.workbook.get_recent_workbooks()
 
     return render_template(
         "admin_dashboard.html",
@@ -60,8 +60,8 @@ def admin_dashboard(
         notification_number=notification_number,
         users=all_users,
         wgs=all_workgroups,
+        workbooks=all_workbooks,
         recent_reactions=recent_reactions,
-        recent_workbooks=recent_workbooks,
     )
 
 
