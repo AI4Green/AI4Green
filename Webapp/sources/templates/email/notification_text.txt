@@ -1,10 +1,10 @@
 Dear {{ user.username }},
 
-You have a new AI4Green notification. To view this notification <a href="{{ url_for('notifications.notifications', _external=True) }}">click here.</a>
+You have a new AI4Green notification. To view this notification <a href="{{ url_for('notifications.notifications', _external=True, _scheme='protocol') }}">click here.</a>
 
 Alternatively, you can paste the following link in your browser's address bar:
 
-{{ url_for('notifications.notifications', _external=True) }}
+{{ url_for('notifications.notifications', _external=True, _scheme='protocol') }}
 
 You are receiving this message because you are signed up to AI4Green with this email address.
 
