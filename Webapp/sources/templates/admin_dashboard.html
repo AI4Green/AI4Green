@@ -252,6 +252,9 @@
                         <th>
                             Workbooks
                         </th>
+                        <th>
+                            Date of Creation
+                        </th>
                     </tr>
                     {% for wg in wgs %}
                     <tr>
@@ -284,8 +287,12 @@
                                 {{ wb.name }}{% if not loop.last %},{% endif %}
                             {% endfor %}
                         </td>
+                        <td>
+                            {{ wg.time_of_creation }}
+                        </td>
                     </tr>
                     {% endfor %}
+
                 </table>
             </div>
 <!--            Workbooks-->
