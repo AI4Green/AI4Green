@@ -11,6 +11,7 @@ import rdkit
 from flask import Response, abort, jsonify, render_template, request
 from flask_login import login_required
 from sources import auxiliary, db, models
+from sources.services import queries
 
 from . import summary_bp
 
@@ -209,26 +210,14 @@ def summary() -> Response:
     reaction_smiles_ls = reaction_smiles.replace(">>", ".").split(".")
 
     # get reagent and solvent smiles
-    reagent_smiles_ls = []
-    for reagent_pk in reagent_primary_keys_ls:
-        reagent_smiles = (
-            db.session.query(models.Compound.smiles)
-            .filter(models.Compound.id == reagent_pk)
-            .first()
-        )
-        reagent_smiles = reagent_smiles[0] if reagent_smiles else None
-        reagent_smiles_ls.append(reagent_smiles)
+    reagent_smiles_ls = queries.all_compounds.get_smiles_from_primary_keys(
+        reagent_primary_keys_ls
+    )
+    solvent_smiles_ls = queries.all_compounds.get_smiles_from_primary_keys(
+        solvent_primary_keys_ls
+    )
 
-    solvent_smiles_ls = []
-    for solvent_pk in solvent_primary_keys_ls:
-        solvent_smiles = (
-            db.session.query(models.Compound.smiles)
-            .filter(models.Compound.id == solvent_pk)
-            .first()
-        )
-        solvent_smiles = solvent_smiles[0] if solvent_smiles else None
-        solvent_smiles_ls.append(solvent_smiles)
-
+    # reaction smiles already has reactant and product smiles
     full_reaction_smiles_ls = reaction_smiles_ls + reagent_smiles_ls + solvent_smiles_ls
     full_reaction_smiles_ls1 = [x for x in full_reaction_smiles_ls if x is not None]
     # get list of elements in reaction from the smiles list by converting to atoms and then chemical symbols

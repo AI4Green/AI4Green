@@ -12,8 +12,12 @@ def get_compound_count() -> int:
     return db.session.query(models.Compound).count()
 
 
-def get_smiles_from_pk(int) -> str:
+def get_smiles_from_primary_key(primary_key: int) -> str:
     """
     Gets the smiles from the compound primary key
-
     """
+    return (
+        db.session.query(models.Compound.smiles)
+        .filter(models.Compound.id == primary_key)
+        .first()
+    )
