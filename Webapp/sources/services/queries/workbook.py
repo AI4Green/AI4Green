@@ -14,3 +14,14 @@ def get_all_workbooks() -> List[models.WorkBook]:
          List of all workbooks from past 28 days
     """
     return (db.session.query(models.WorkBook)).all()
+
+
+def get_workbook_from_primary_key(primary_key: int) -> models.WorkBook:
+    """
+    Gets the workbook object from the primary key
+    """
+    return (
+        db.session.query(models.WorkBook)
+        .filter(models.WorkBook.id == primary_key)
+        .first()
+    )
