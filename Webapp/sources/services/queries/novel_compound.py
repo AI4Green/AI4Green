@@ -1,20 +1,22 @@
 from typing import Tuple
 
-from flask import abort
+from flask import abort, request
 from flask_login import current_user
 from sources import models
+from sources.auxiliary import security_member_workgroup_workbook
 from sources.extensions import db
 from sources.services import queries
 
 
-def get_smiles_from_primary_key(primary_key: Tuple[str, int]) -> int:
+def get_smiles_from_primary_key(primary_key: Tuple[str, int]) -> str:
     """
     Gets the novel compound's SMILES string from the primary key if the entry has the SMILES attribute
 
     Returns:
         The SMILES string corresponding to the primary key or None
     """
-    workbook = queries.workbook.get_workbook_from_primary_key(primary_key[0])
+    primary_key = (primary_key[0], int(primary_key[1]))
+    workbook = queries.workbook.get_workbook_from_primary_key(primary_key[1])
     if current_user.email not in workbook.users:
         abort(401)
 

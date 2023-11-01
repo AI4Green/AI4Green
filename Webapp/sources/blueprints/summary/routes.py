@@ -111,9 +111,22 @@ def summary() -> Response:
     solvent_physical_forms = auxiliary.get_data("solventPhysicalForms")
     number_of_solvents = request.form["numberOfSolvents"]
     solvent_primary_keys_ls = auxiliary.get_data("solventPrimaryKeys")
-    if solvent_primary_keys_ls == [""]:
-        solvent_primary_keys_ls = ["0"]
-    solvent_primary_keys = ", ".join(solvent_primary_keys_ls)
+    # if solvent_primary_keys_ls == [""]:
+    #     solvent_primary_keys_ls = ["0"]
+    # else:
+    #     # process from str to tuple
+    #     for solvent_primary_key in solvent_primary_keys_ls:
+    #         if solvent_primary_key.isdigit():
+    #             solvent_primary_key = int(solvent_primary_key)
+    #         else:
+    #             compound_name, workbook_id = solvent_primary_key.split(',')
+    #             solvent_primary_key = (compound_name, workbook_id)
+
+    # result = [(x if x.isdigit() else (x.split(',')[0], int(x.split(', ')[1]))) for x in solvent_primary_keys_ls]
+
+    print(solvent_primary_keys_ls)
+
+    solvent_primary_keys_str = ", ".join(solvent_primary_keys_ls)
 
     # Gets product data from the reaction table
     product_table_numbers = list(
@@ -405,7 +418,7 @@ def summary() -> Response:
             reagent_risk_colors=reagent_risk_colors,
             reagent_exposure_potentials=reagent_exposure_potentials,
             reagent_risk_ratings=reagent_risk_ratings,
-            solvent_primary_keys=solvent_primary_keys,
+            solvent_primary_keys=solvent_primary_keys_str,
             solvent_hazard_sentences=solvent_hazard_sentences,
             solvent_hazard_ratings=solvent_hazard_ratings,
             solvent_exposure_potentials=solvent_exposure_potentials,
