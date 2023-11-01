@@ -6,11 +6,11 @@ from sources import models
 from sources.extensions import db
 
 
-def get_all_workbooks() -> List[models.WorkBook]:
+def list_all() -> List[models.WorkBook]:
     """
-    Gets a list of workbooks created in the past 28 days
+    Gets a list of all workbooks
 
     Returns:
-         List of all workbooks from past 28 days
+         List of all workbooks
     """
     return (db.session.query(models.WorkBook)).all()

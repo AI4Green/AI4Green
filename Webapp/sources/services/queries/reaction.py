@@ -6,7 +6,7 @@ from sources import models
 from sources.extensions import db
 
 
-def get_recent_reactions() -> List[models.Reaction]:
+def list_recent() -> List[models.Reaction]:
     """
     Gets a list of reactions created in the past 28 days
 
@@ -23,7 +23,7 @@ def get_recent_reactions() -> List[models.Reaction]:
     ).all()
 
 
-def get_reaction_count() -> int:
+def count() -> int:
     """
     Gets the number of reactions in the database
 
