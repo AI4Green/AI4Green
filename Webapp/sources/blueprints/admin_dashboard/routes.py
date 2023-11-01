@@ -39,16 +39,14 @@ def admin_dashboard(
         flash(new_workgroup_request_message)
 
     # get data to populate the admin dashboard
-    compound_data_error_reports = (
-        queries.compound_data_error_report.get_compound_data_error_reports()
-    )
-    reaction_count = queries.reaction.get_reaction_count()
-    compound_count = queries.compound.get_compound_count()
-    new_workgroup_requests = queries.workgroup_request.get_new_workgroup_requests()
-    all_users = queries.user.get_all_users()
-    all_workgroups = queries.workgroup.get_all_workgroups()
-    all_workbooks = queries.workbook.get_all_workbooks()
-    recent_reactions = queries.reaction.get_recent_reactions()
+    compound_data_error_reports = queries.compound.get_compound_data_error_reports()
+    reaction_count = queries.reaction.count()
+    compound_count = queries.compound.count()
+    new_workgroup_requests = queries.workgroup.get_new_workgroup_requests()
+    all_users = queries.user.list_all()
+    all_workgroups = queries.workgroup.list_all()
+    all_workbooks = queries.workbook.list_all()
+    recent_reactions = queries.reaction.list_recent()
 
     return render_template(
         "admin_dashboard.html",

@@ -1,8 +1,10 @@
+from typing import List
+
 from sources import models
 from sources.extensions import db
 
 
-def get_compound_count() -> int:
+def count() -> int:
     """
     Gets the number of compounds in the database
 
@@ -10,6 +12,17 @@ def get_compound_count() -> int:
         The number of compounds in the database
     """
     return db.session.query(models.Compound).count()
+
+
+def get_compound_data_error_reports() -> List[models.CompoundDataErrorReport]:
+    """
+    Gets a list of compound database error reports in the database
+
+    Returns:
+         List of all compound database error reports
+    """
+    # Add time cut off if list grows too large
+    return db.session.query(models.CompoundDataErrorReport).all()
 
 
 def get_smiles_from_primary_key(primary_key: int) -> str:

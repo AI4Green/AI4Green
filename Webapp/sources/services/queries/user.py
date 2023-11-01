@@ -4,7 +4,7 @@ from sources import models
 from sources.extensions import db
 
 
-def get_all_users() -> List[models.User]:
+def list_all() -> List[models.User]:
     """
     Gets a list of all users in the database
 
