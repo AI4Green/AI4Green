@@ -1,1 +1,1 @@
-from . import email
+from . import email, queries
