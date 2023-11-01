@@ -2,12 +2,14 @@ import re
 
 from flask import Response, jsonify, request
 from flask_login import login_required
-from sqlalchemy import func
-
 from sources import models
-from sources.auxiliary import abort_if_user_not_in_workbook, sanitise_user_input, \
-    get_workbook_from_group_book_name_combination
+from sources.auxiliary import (
+    abort_if_user_not_in_workbook,
+    get_workbook_from_group_book_name_combination,
+    sanitise_user_input,
+)
 from sources.extensions import db
+from sqlalchemy import func
 
 # request parses incoming request data and gives access to it
 # jsonify is used to send a JSON response to the browser
@@ -25,7 +27,9 @@ def solvents() -> Response:
     )  # gets the solvent from browser
     workgroup_name = request.form["workgroup"]
     workbook_name = request.form["workbook"]
-    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    workbook = get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
 
     number = request.form["number"]  # gets the solvent number from the browser
@@ -130,10 +134,7 @@ def solvents() -> Response:
                 else:
                     primary_key = 0
             else:
-                primary_key = (
-                    solvent_dropdown_match.novel_compound[0].name,
-                    workbook.name,
-                )
+                primary_key = f"('{solvent_dropdown_match.novel_compound[0].name}', {workbook.id})"
         if (
             solvent_dropdown_match is None
         ):  # if not in the solvent dropdown then check the compound database for the name
@@ -159,7 +160,7 @@ def solvents() -> Response:
             "solvent": solvent,
             "flag": flag_color,
             "hazards": hazards,
-            "primary_key": primary_key,
+            "primary_key": [primary_key],
             "alert_message": alert_message,
             "new_solvent": new_solvent,
         }
