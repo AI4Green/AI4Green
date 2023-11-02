@@ -1,4 +1,5 @@
 from sources.extensions import db
+
 from .base import Model
 
 
@@ -14,10 +15,7 @@ class WorkBook(Model):
     __tablename__ = "WorkBook"
     __table_args__ = (db.UniqueConstraint("name", "group"),)
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     abbreviation = db.Column(db.Text, nullable=False)
     group = db.Column(
@@ -26,5 +24,9 @@ class WorkBook(Model):
     time_of_creation = db.Column(db.DateTime)
 
     WorkGroup = db.relationship("WorkGroup", backref="WorkBook")
-    reactions = db.relationship("Reaction", backref="WorkBook")
+    reactions = db.relationship(
+        "Reaction",
+        backref="WorkBook",
+        cascade="all, delete",
+    )
     users = db.relationship("Person", secondary="Person_WorkBook")

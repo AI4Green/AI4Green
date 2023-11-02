@@ -33,15 +33,16 @@ def send_password_reset(user: models.User) -> None:
         user: User to send to.
     """
     token = get_reset_password_token(user)
+    protocol = get_protocol_type()
     mail.send_email(
         "AI4Chem Reset Your Password",
         sender=current_app.config["MAIL_ADMIN_SENDER"],
         recipients=[user.email],
         text_body=render_template(
-            "email/reset_password_text.txt", user=user, token=token
+            "email/reset_password_text.txt", user=user, token=token, protocol=protocol
         ),
         html_body=render_template(
-            "email/reset_password_text.html", user=user, token=token
+            "email/reset_password_text.html", user=user, token=token, protocol=protocol
         ),
     )
 
@@ -51,15 +52,20 @@ def send_notification(person: models.Person):
     Send notifications email to a user.
 
     Args:
-        Person: Person to send to.
+        person: Person to send to.
 
     """
+    protocol = get_protocol_type()
     mail.send_email(
         "You have a new AI4Green notification",
         sender=current_app.config["MAIL_ADMIN_SENDER"],
         recipients=[person.user.email],
-        text_body=render_template("email/notification_text.txt", user=person.user),
-        html_body=render_template("email/notification_text.html", user=person.user),
+        text_body=render_template(
+            "email/notification_text.txt", user=person.user, protocol=protocol
+        ),
+        html_body=render_template(
+            "email/notification_text.html", user=person.user, protocol=protocol
+        ),
     )
 
 
@@ -111,3 +117,14 @@ def verify_reset_password_token(token: str) -> models.User:
     except Exception:
         return
     return models.User.query.get(user_id)
+
+
+def get_protocol_type() -> str:
+    """
+    The desired protocol type depends on the current deployment environment.
+    http for local and https if the app is deployed on a remote server
+
+    Returns:
+          the active protocol type
+    """
+    return "http" if current_app.config["MAIL_USE_LOCAL"] == "local" else "https"

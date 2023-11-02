@@ -1,11 +1,11 @@
 <p>Dear {{ user.username }},</p>
 <p>
     You have a new AI4Green notification. To view this notification
-    <a href="{{ url_for('notifications.notifications', _external=True) }}">
+    <a href="{{ url_for('notifications.notifications', _external=True, _scheme='protocol') }}">
         click here.</a>
 </p>
 <p>Alternatively, you can paste the following link in your browser's address bar:</p>
-<p>{{ url_for('notifications.notifications', _external=True) }} </p>
+<p>{{ url_for('notifications.notifications', _external=True, _scheme='protocol') }} </p>
 <p>You are receiving this message because you are signed up to AI4Green with this email address.</p>
 <p>Sincerely,</p>
 <p>The AI4Green Team</p>
