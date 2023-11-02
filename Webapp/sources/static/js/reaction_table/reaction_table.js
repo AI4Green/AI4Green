@@ -1150,7 +1150,6 @@ function fillData(response, component, fieldList, y) {
     if (field === "molecular-weight") {
       $(fieldID).val(response["molWeight"]);
     } else if (field === "primary-key") {
-      console.log(response["primary_key"], "fill data");
       $(fieldID).val(response["primary_key"]);
     } else {
       $(fieldID).val(response[field]);

@@ -17,13 +17,13 @@ def get_smiles_from_primary_key(primary_key: Tuple[str, int]) -> str:
     """
     primary_key = (primary_key[0], int(primary_key[1]))
     workbook = queries.workbook.get_workbook_from_primary_key(primary_key[1])
-    if current_user.email not in workbook.users:
+    if current_user.Person not in workbook.users:
         abort(401)
 
     return (
         db.session.query(models.NovelCompound.smiles)
-        .filter(models.NovelCompound.id == primary_key[0])
+        .filter(models.NovelCompound.name == primary_key[0])
         .join(models.WorkBook)
         .filter(models.WorkBook.id == primary_key[1])
         .first()
-    )
+    )[0]
