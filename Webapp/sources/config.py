@@ -34,7 +34,7 @@ class BaseConfig(object):  # class to store configuration variables
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "None")
     MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", False)
     MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", True)
-    MAIL_USE_LOCAL = os.getenv("MAIL_USE_LOCAL", True)
+    MAIL_USE_LOCAL = os.getenv("MAIL_USE_LOCAL", "local")
     MAIL_ADMIN_SENDER = os.getenv("MAIL_ADMIN_SENDER", "admin@ai4green.app")
     MAIL_SAVE_DIR = os.getenv("MAIL_SAVE_DIR", "temp")
 

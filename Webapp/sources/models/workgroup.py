@@ -1,4 +1,5 @@
 from sources.extensions import db
+
 from .base import Model
 
 
@@ -14,10 +15,7 @@ class WorkGroup(Model):
     __tablename__ = "WorkGroup"
     __table_args__ = (db.UniqueConstraint("name", "institution"),)
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     institution = db.Column(
         db.ForeignKey("Institution.id", ondelete="CASCADE"), nullable=False, index=True
@@ -26,8 +24,8 @@ class WorkGroup(Model):
     time_of_creation = db.Column(db.DateTime)
 
     WorkGroup_Status_Request = db.relationship("WGStatusRequest")
-    workbooks = db.relationship("WorkBook")
-    request = db.relationship("WorkGroupRequest")
+    workbooks = db.relationship("WorkBook", cascade="all, delete")
+    request = db.relationship("WorkGroupRequest", cascade="all, delete")
     principal_investigator = db.relationship(
         "Person",
         secondary="Person_WorkGroup",

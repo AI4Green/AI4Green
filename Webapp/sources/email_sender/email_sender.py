@@ -48,7 +48,7 @@ class EmailSender:
         """
         Send an email based on the parameters.
 
-        If config setting MAIL_USE_LOCAL is true, the email is saved locally instead.
+        If config setting MAIL_USE_LOCAL is 'local', the email is saved locally instead.
 
         Args:
             subject: Subject of the email.
@@ -57,7 +57,7 @@ class EmailSender:
             text_body: Text body of the email.
             html_body: HTML body of the email.
         """
-        if current_app.config["MAIL_USE_LOCAL"]:
+        if current_app.config["MAIL_USE_LOCAL"] == "local":
             self._save_local(subject, sender, recipients, text_body, html_body)
         else:
             msg = Message(subject, sender=sender, recipients=recipients)
