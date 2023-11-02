@@ -10,6 +10,7 @@ import re
 from typing import Tuple
 
 import rdkit
+import sources.services.queries.hazards
 from flask import Response, abort, jsonify, render_template, request
 from flask_login import login_required
 from sources import auxiliary, db, models
@@ -266,7 +267,7 @@ def summary() -> Response:
         reactant_exposure_potentials,
         reactant_risk_ratings,
         reactant_total_rate,
-    ) = auxiliary.compound_hazard_data(
+    ) = sources.services.queries.hazards.compound_hazard_data(
         reactants, reactant_hazards, reactant_physical_forms
     )
 
@@ -279,7 +280,7 @@ def summary() -> Response:
         reagent_exposure_potentials,
         reagent_risk_ratings,
         reagent_total_rate,
-    ) = auxiliary.compound_hazard_data(
+    ) = sources.services.queries.hazards.compound_hazard_data(
         reagents, reagent_hazards, reagent_physical_forms
     )
     # solvent hazards
@@ -291,7 +292,7 @@ def summary() -> Response:
         solvent_exposure_potentials,
         solvent_risk_ratings,
         solvent_total_rate,
-    ) = auxiliary.compound_hazard_data(
+    ) = sources.services.queries.hazards.compound_hazard_data(
         solvents, solvent_hazards, solvent_physical_forms
     )
 
@@ -304,7 +305,7 @@ def summary() -> Response:
         product_exposure_potentials,
         product_risk_ratings,
         product_total_rate,
-    ) = auxiliary.compound_hazard_data(
+    ) = sources.services.queries.hazards.compound_hazard_data(
         products, product_hazards, product_physical_forms
     )
     """"""
