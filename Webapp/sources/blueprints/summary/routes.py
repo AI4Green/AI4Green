@@ -6,6 +6,8 @@ via POST request and renders the summary template
 """
 import ast
 import json
+import re
+from typing import Tuple
 
 import rdkit
 from flask import Response, abort, jsonify, render_template, request
@@ -101,7 +103,11 @@ def summary() -> Response:
     reagent_primary_keys_ls = auxiliary.get_data("reagentPrimaryKeys")
     if reagent_primary_keys_ls == [""]:
         reagent_primary_keys_ls = ["0"]
-    reagent_primary_keys = ", ".join(reagent_primary_keys_ls)
+    reagent_primary_keys_str = ", ".join(reagent_primary_keys_ls)
+    reagent_primary_keys_ls = [
+        int(x) if x.isdigit() else reform_novel_compound_primary_key(x)
+        for x in reagent_primary_keys_ls
+    ]
 
     # Gets solvent data from the reaction table
     solvent_table_numbers = auxiliary.get_data("solventTableNumbers")
@@ -111,22 +117,11 @@ def summary() -> Response:
     solvent_physical_forms = auxiliary.get_data("solventPhysicalForms")
     number_of_solvents = request.form["numberOfSolvents"]
     solvent_primary_keys_ls = auxiliary.get_data("solventPrimaryKeys")
-    # if solvent_primary_keys_ls == [""]:
-    #     solvent_primary_keys_ls = ["0"]
-    # else:
-    #     # process from str to tuple
-    #     for solvent_primary_key in solvent_primary_keys_ls:
-    #         if solvent_primary_key.isdigit():
-    #             solvent_primary_key = int(solvent_primary_key)
-    #         else:
-    #             compound_name, workbook_id = solvent_primary_key.split(',')
-    #             solvent_primary_key = (compound_name, workbook_id)
-
-    # result = [(x if x.isdigit() else (x.split(',')[0], int(x.split(', ')[1]))) for x in solvent_primary_keys_ls]
-
-    print(solvent_primary_keys_ls)
-
     solvent_primary_keys_str = ", ".join(solvent_primary_keys_ls)
+    solvent_primary_keys_ls = [
+        int(x) if x.isdigit() else reform_novel_compound_primary_key(x)
+        for x in solvent_primary_keys_ls
+    ]
 
     # Gets product data from the reaction table
     product_table_numbers = list(
@@ -232,7 +227,7 @@ def summary() -> Response:
 
     # reaction smiles already has reactant and product smiles
     full_reaction_smiles_ls = reaction_smiles_ls + reagent_smiles_ls + solvent_smiles_ls
-    full_reaction_smiles_ls1 = [x for x in full_reaction_smiles_ls if x is not None]
+    full_reaction_smiles_ls1 = [x for x in full_reaction_smiles_ls if x]
     # get list of elements in reaction from the smiles list by converting to atoms and then chemical symbols
     element_symbols = set()
     for component in full_reaction_smiles_ls1:
@@ -365,7 +360,7 @@ def summary() -> Response:
             product_mass_unit=product_mass_unit,
             reactants=reactants,
             reactant_primary_keys=reactant_primary_keys,
-            reagent_primary_keys=reagent_primary_keys,
+            reagent_primary_keys=reagent_primary_keys_str,
             reagents=reagents,
             reagent_table_numbers=reagent_table_numbers,
             reagent_molecular_weights=reagent_molecular_weights,
@@ -449,3 +444,19 @@ def summary() -> Response:
 def element_sustainability() -> Response:
     # must be logged in
     return render_template("element_sustainability.html")
+
+
+def reform_novel_compound_primary_key(primary_key: str) -> Tuple:
+    """
+    Converts a novel primary key to a tuple from the string returned from the frontend HTML
+
+    Args:
+        primary_key - the primary key as a string. e.g., ('pixie dust', 1)
+
+    Returns:
+        A tuple of (compound_name, workbook_id)
+    """
+    print(primary_key)
+    compound_name = re.search(r"\('(.*)'", primary_key).group(1)
+    workbook_id = int(re.search(r", (.*)\)", primary_key).group(1))
+    return compound_name, workbook_id

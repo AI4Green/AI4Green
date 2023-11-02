@@ -124,7 +124,7 @@ def compound_hazard_data(compounds, compound_hazards, compound_physical_forms):
         compound_hazard_ratings = []  # the list of compound hazard ratings
         compound_hazard_colors = []  # list of compound hazard colors
         for compound_hazard in compound_hazards:
-            compound_rates = [0]
+            compound_hazard_categories = [0]
             if compound_hazard not in {"Not Hazardous", "No hazard codes found"}:
                 """First, we separate hazard codes from each other in the hazard string"""
                 compound_hazard1 = compound_hazard.replace("   ", ",")
@@ -134,27 +134,30 @@ def compound_hazard_data(compounds, compound_hazards, compound_physical_forms):
                 compound_codes = sorted(list(set(compound_hazard3.split(","))))
                 """"""
                 compound_hazard_sentence = ""  # joins hazard codes and phrases
-                for compound_code in compound_codes:
+                for hazard_code in compound_codes:
                     """We use a hazard code to query the hazard database
                     and return a corresponding hazard phrase and risk category"""
-                    compound = (
+                    hazard_code_object = (
                         db.session.query(models.HazardCode)
-                        .filter(models.HazardCode.code == compound_code)
+                        .filter(models.HazardCode.code == hazard_code)
                         .first()
                     )
-                    compound_phrase = (
-                        compound.phrase
+                    print(hazard_code, hazard_code_object)
+                    hazard_phrase = (
+                        hazard_code_object.phrase
                     )  # appends the risk rate to its list
                     compound_hazard_sentence += (
-                        compound_code + " " + compound_phrase + ", "
+                        hazard_code + " " + hazard_phrase + ", "
                     )  # the hazard sentence
-                    compound_rate = category_rate.get(compound.category)
-                    if compound_rate is not None:
-                        compound_rates.append(compound_rate)
+                    hazard_category = category_rate.get(hazard_code_object.category)
+                    if hazard_category is not None:
+                        compound_hazard_categories.append(hazard_category)
                 compound_hazard_sentence = compound_hazard_sentence[
                     :-2
                 ]  # removes the comma and space at the end
-                max_compound_rate = int(max(compound_rates))  # maximum risk rate
+                max_compound_rate = int(
+                    max(compound_hazard_categories)
+                )  # maximum risk rate
                 total_rate.append(
                     max_compound_rate
                 )  # appends the maximum risk rate to their list

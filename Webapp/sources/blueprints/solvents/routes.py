@@ -149,8 +149,22 @@ def solvents() -> Response:
                 primary_key = compound_db_match.id
             if (
                 compound_db_match is None
-            ):  # if no match in the compound database then return nothing
-                return "", 204
+            ):  # if no match in the compound database then check the novel compound database
+                novel_compound_db_match = (
+                    db.session.query(models.NovelCompound)
+                    .filter(func.lower(models.NovelCompound.name) == solvent.lower())
+                    .join(models.WorkBook)
+                    .filter(models.WorkBook.id == workbook.id)
+                    .first()
+                )
+                # if still no match then return empty response
+                if novel_compound_db_match is None:
+                    return "", 204
+                else:
+                    flag_color = "non-chem21"
+                    hazards = novel_compound_db_match.hphrase
+                    primary_key = f"('{novel_compound_db_match.name}', {workbook.id})"
+
     # set pk to 0 if solvent does not have a pk.
     primary_key = 0 if primary_key is None else primary_key
     # sends the JSON with the solvent data back to the browser
