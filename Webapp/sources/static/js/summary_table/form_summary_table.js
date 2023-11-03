@@ -267,6 +267,7 @@ function showSummary() {
   let reactionSmiles = $("#js-reaction-smiles").val();
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
+  let demo = $("#js-demo").val();
   $.ajax({
     url: "/_summary",
     type: "post",
@@ -330,6 +331,7 @@ function showSummary() {
       print: "not to print",
       workgroup: workgroup,
       workbook: workbook,
+      demo: demo,
     },
     dataType: "json",
     success: function (response) {
