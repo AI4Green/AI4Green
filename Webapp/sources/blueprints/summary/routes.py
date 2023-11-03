@@ -102,12 +102,13 @@ def summary() -> Response:
     # reagent_mass_sum = float(request.form["reagentMassSum"])
     reagent_molecular_weight_sum = float(request.form["reagentMolecularWeightSum"])
     reagent_primary_keys_ls = auxiliary.get_data("reagentPrimaryKeys")
-    if reagent_primary_keys_ls == [""]:
-        reagent_primary_keys_ls = ["0"]
+    # if reagent_primary_keys_ls == [""]:
+    #     reagent_primary_keys_ls = ["0"]
     reagent_primary_keys_str = ", ".join(reagent_primary_keys_ls)
     reagent_primary_keys_ls = [
         int(x) if x.isdigit() else reform_novel_compound_primary_key(x)
         for x in reagent_primary_keys_ls
+        if x
     ]
 
     # Gets solvent data from the reaction table
@@ -227,11 +228,13 @@ def summary() -> Response:
     )
 
     # reaction smiles already has reactant and product smiles
-    full_reaction_smiles_ls = reaction_smiles_ls + reagent_smiles_ls + solvent_smiles_ls
-    full_reaction_smiles_ls1 = [x for x in full_reaction_smiles_ls if x]
+    full_reaction_smiles_ls = [
+        x for x in reaction_smiles_ls + reagent_smiles_ls + solvent_smiles_ls if x
+    ]
+    full_reaction_smiles_ls = [x for x in full_reaction_smiles_ls if x]
     # get list of elements in reaction from the smiles list by converting to atoms and then chemical symbols
     element_symbols = set()
-    for component in full_reaction_smiles_ls1:
+    for component in full_reaction_smiles_ls:
         mol = rdkit.Chem.MolFromSmiles(component)
         for atom in mol.GetAtoms():
             symbol = atom.GetSymbol()
@@ -267,8 +270,8 @@ def summary() -> Response:
         reactant_exposure_potentials,
         reactant_risk_ratings,
         reactant_total_rate,
-    ) = sources.services.queries.hazards.compound_hazard_data(
-        reactants, reactant_hazards, reactant_physical_forms
+    ) = sources.services.queries.hazards.get_compound_hazard_data(
+        reactant_hazards, reactant_physical_forms
     )
 
     # Reagent hazards
@@ -280,8 +283,8 @@ def summary() -> Response:
         reagent_exposure_potentials,
         reagent_risk_ratings,
         reagent_total_rate,
-    ) = sources.services.queries.hazards.compound_hazard_data(
-        reagents, reagent_hazards, reagent_physical_forms
+    ) = sources.services.queries.hazards.get_compound_hazard_data(
+        reagent_hazards, reagent_physical_forms
     )
     # solvent hazards
     (
@@ -292,8 +295,8 @@ def summary() -> Response:
         solvent_exposure_potentials,
         solvent_risk_ratings,
         solvent_total_rate,
-    ) = sources.services.queries.hazards.compound_hazard_data(
-        solvents, solvent_hazards, solvent_physical_forms
+    ) = sources.services.queries.hazards.get_compound_hazard_data(
+        solvent_hazards, solvent_physical_forms
     )
 
     # Product hazard
@@ -305,8 +308,8 @@ def summary() -> Response:
         product_exposure_potentials,
         product_risk_ratings,
         product_total_rate,
-    ) = sources.services.queries.hazards.compound_hazard_data(
-        products, product_hazards, product_physical_forms
+    ) = sources.services.queries.hazards.get_compound_hazard_data(
+        product_hazards, product_physical_forms
     )
     """"""
 

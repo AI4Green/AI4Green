@@ -33,4 +33,4 @@ def get_smiles_from_primary_key(primary_key: int) -> str:
         db.session.query(models.Compound.smiles)
         .filter(models.Compound.id == primary_key)
         .first()
-    )
+    )[0]
