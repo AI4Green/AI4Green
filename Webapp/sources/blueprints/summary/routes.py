@@ -25,11 +25,14 @@ def summary() -> Response:
     # must be logged in
     """This function receives the reaction information from browser, calculates
     green metrics, gives hazard information, and renders the summary"""
-    # check user permission
-    workgroup_name = str(request.form["workgroup"])
-    workbook_name = str(request.form["workbook"])
-    if not auxiliary.security_member_workgroup_workbook(workgroup_name, workbook_name):
-        abort(401)
+    if not str(request.form["demo"]) == "demo":
+        # check user permission
+        workgroup_name = str(request.form["workgroup"])
+        workbook_name = str(request.form["workbook"])
+        if not auxiliary.security_member_workgroup_workbook(
+            workgroup_name, workbook_name
+        ):
+            abort(401)
     # check there is data to get and if so get it
     summary_table_data = str(request.form["js_summary_table_data"])
     if summary_table_data != "no data":
@@ -270,7 +273,7 @@ def summary() -> Response:
         reactant_exposure_potentials,
         reactant_risk_ratings,
         reactant_total_rate,
-    ) = sources.services.queries.hazards.get_compound_hazard_data(
+    ) = sources.services.queries.hazards.get_multiple_compound_hazard_data(
         reactant_hazards, reactant_physical_forms
     )
 
@@ -283,7 +286,7 @@ def summary() -> Response:
         reagent_exposure_potentials,
         reagent_risk_ratings,
         reagent_total_rate,
-    ) = sources.services.queries.hazards.get_compound_hazard_data(
+    ) = sources.services.queries.hazards.get_multiple_compound_hazard_data(
         reagent_hazards, reagent_physical_forms
     )
     # solvent hazards
@@ -295,7 +298,7 @@ def summary() -> Response:
         solvent_exposure_potentials,
         solvent_risk_ratings,
         solvent_total_rate,
-    ) = sources.services.queries.hazards.get_compound_hazard_data(
+    ) = sources.services.queries.hazards.get_multiple_compound_hazard_data(
         solvent_hazards, solvent_physical_forms
     )
 
@@ -308,7 +311,7 @@ def summary() -> Response:
         product_exposure_potentials,
         product_risk_ratings,
         product_total_rate,
-    ) = sources.services.queries.hazards.get_compound_hazard_data(
+    ) = sources.services.queries.hazards.get_multiple_compound_hazard_data(
         product_hazards, product_physical_forms
     )
     """"""
