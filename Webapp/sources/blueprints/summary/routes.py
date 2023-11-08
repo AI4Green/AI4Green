@@ -466,9 +466,8 @@ def reform_novel_compound_primary_key(primary_key: str) -> Tuple:
     Returns:
         A tuple of (compound_name, workbook_id)
     """
-    print(primary_key)
-    compound_name = re.search(r"\('(.*)'", primary_key).group(
-        1
-    )  # TODO update these to use the maximum str length for compound names
-    workbook_id = int(re.search(r", (.*)\)", primary_key).group(1))
+
+    # find and keep string inside single quotation amrks
+    compound_name = re.search(r"\('(.*)', \d", primary_key).group(1)
+    workbook_id = int(re.search(r"', (.*)\)", primary_key).group(1))
     return compound_name, workbook_id
