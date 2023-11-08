@@ -191,9 +191,9 @@ function autofillLimitingReactantMass(changedParameter) {
 function autofillAmount(component, changedParameter, loopValue) {
   // autofills the amount for reactant, reagent, or product
   $(changedParameter).on("input change", function () {
-    const limitingReactantTableNumber = $(
-      "input[name='reactant-limiting']:checked",
-    ).val();
+    const limitingReactantTableNumber = getVal(
+      $("input[name='reactant-limiting']:checked"),
+    );
     const firstReactantAmount = $(
       "#js-reactant-amount" + limitingReactantTableNumber,
     ).val();
@@ -217,7 +217,7 @@ function autofillAmount(component, changedParameter, loopValue) {
 function autofillRoundedAmount(component, changedParameter, loopValue) {
   // autofills the rounded amount for reactant, reagent, or product
   $(changedParameter).on("input change", function () {
-    let amount = Number($("#js-" + component + "-amount" + loopValue).val());
+    let amount = Number(getVal($("#js-" + component + "-amount" + loopValue)));
     let roundedAmount = roundedNumber(amount);
     $("#js-" + component + "-rounded-amount" + loopValue).val(roundedAmount);
   });
@@ -227,12 +227,12 @@ function autofillRoundedAmount(component, changedParameter, loopValue) {
 function autofillVolume(component, changedParameter, loopValue) {
   // autofills the volume for reactant or reagent
   $(changedParameter).on("input change", function () {
-    const mass = $("#js-" + component + "-rounded-mass" + loopValue).val();
-    let amount = $("#js-" + component + "-amount" + loopValue).val();
-    let density = $("#js-" + component + "-density" + loopValue).val();
-    let concentration = $(
-      "#js-" + component + "-concentration" + loopValue,
-    ).val();
+    const mass = getVal($("#js-" + component + "-rounded-mass" + loopValue));
+    let amount = getVal($("#js-" + component + "-amount" + loopValue));
+    let density = getVal($("#js-" + component + "-density" + loopValue));
+    let concentration = getVal(
+      $("#js-" + component + "-concentration" + loopValue),
+    );
     const volume = calcVolume(density, mass, concentration, amount);
     $("#js-" + component + "-volume" + loopValue).val(volume);
   });
@@ -241,7 +241,7 @@ function autofillVolume(component, changedParameter, loopValue) {
 function autofillRoundedVolume(component, changedParameter, loopValue) {
   // autofills the rounded volume for reactant, reagent, or product
   $(changedParameter).on("input change", function () {
-    let volume = Number($("#js-" + component + "-volume" + loopValue).val());
+    let volume = Number(getVal($("#js-" + component + "-volume" + loopValue)));
     let roundedVolume = roundedNumber(volume);
     $("#js-" + component + "-rounded-volume" + loopValue).val(roundedVolume);
   });
@@ -250,29 +250,31 @@ function autofillRoundedVolume(component, changedParameter, loopValue) {
 function autofillMass(component, changedParameter, loopValue) {
   // autofills the mass for reactant, reagent, or product
   $(changedParameter).on("input change", function () {
-    let molecularWeight = $(
-      "#js-" + component + "-molecular-weight" + loopValue,
-    ).val();
+    let molecularWeight = getVal(
+      $("#js-" + component + "-molecular-weight" + loopValue),
+    );
     let mass;
     if (component === "product") {
       // product has different mass and amount units, hence need to include these in calculation
-      let productAmountUnit = $("#js-product-amount-unit").val();
-      let productMassUnit = $("#js-product-mass-unit").val();
-      let productAmount = $("#js-product-amount" + loopValue).val();
+      let productAmountUnit = getVal($("#js-product-amount-unit"));
+      let productMassUnit = getVal($("#js-product-mass-unit"));
+      let productAmount = getVal($("#js-product-amount" + loopValue));
       mass =
         (molecularWeight * productAmount * amountFactor[productAmountUnit]) /
         massFactor[productMassUnit];
     } else {
-      const limitingReactantTableNumber = $(
-        "input[name='reactant-limiting']:checked",
-      ).val();
-      let firstReactantMolecularWeight = $(
-        "#js-reactant-molecular-weight" + limitingReactantTableNumber,
-      ).val();
-      let firstReactantMass = $(
-        "#js-reactant-rounded-mass" + limitingReactantTableNumber,
-      ).val();
-      let equivalent = $("#js-" + component + "-equivalent" + loopValue).val();
+      const limitingReactantTableNumber = getVal(
+        $("input[name='reactant-limiting']:checked"),
+      );
+      let firstReactantMolecularWeight = getVal(
+        $("#js-reactant-molecular-weight" + limitingReactantTableNumber),
+      );
+      let firstReactantMass = getVal(
+        $("#js-reactant-rounded-mass" + limitingReactantTableNumber),
+      );
+      let equivalent = getVal(
+        $("#js-" + component + "-equivalent" + loopValue),
+      );
       mass =
         (molecularWeight * equivalent * firstReactantMass) /
         firstReactantMolecularWeight;
@@ -284,7 +286,7 @@ function autofillMass(component, changedParameter, loopValue) {
 function autofillRoundedMass(component, changedParameter, loopValue) {
   // autofills the rounded mass for reactant, reagent, or product
   $(changedParameter).on("input change", function () {
-    let mass = Number($("#js-" + component + "-mass" + loopValue).val());
+    let mass = Number(getVal($("#js-" + component + "-mass" + loopValue)));
     let roundedMass = roundedNumber(mass);
     $("#js-" + component + "-rounded-mass" + loopValue).val(roundedMass);
   });
@@ -293,10 +295,10 @@ function autofillRoundedMass(component, changedParameter, loopValue) {
 function autoRemoveVolume(component, changedParameter, loopValue) {
   $(changedParameter).on("input change", function () {
     // if reactant density + mol conc are both empty then set volume to also be empty not just '0'
-    let density = $("#js-" + component + "-density" + loopValue).val();
-    let concentration = $(
-      "#js-" + component + "-concentration" + loopValue,
-    ).val();
+    let density = getVal($("#js-" + component + "-density" + loopValue));
+    let concentration = getVall(
+      $("#js-" + component + "-concentration" + loopValue),
+    );
     if (concentration === "" && density === "") {
       $("#js-" + component + "-rounded-volume" + loopValue).val("");
     }
@@ -307,9 +309,9 @@ function autofillReactantFields2() {
   // autofills each reactant field depending on number of reactants
   const component = "reactant";
   for (let i = 1; i < reactionTable.numberOfReactants + 1; i++) {
-    let limitingReactantTableNumber = $(
-      "input[name='reactant-limiting']:checked",
-    ).val();
+    let limitingReactantTableNumber = getVal(
+      $("input[name='reactant-limiting']:checked"),
+    );
     let limitingReactantMassID =
       "#js-reactant-rounded-mass" + limitingReactantTableNumber;
     let reactantDensityID = "#js-reactant-density" + i;
@@ -352,15 +354,15 @@ function autofillReactantFields2() {
 function autofillReagentData(x) {
   let reagentID = "#js-reagent" + x;
   $(reagentID).on("keyup change", function () {
-    let reagentName = $(this).val();
+    let reagentName = getVal($(this));
     postReagentData(reagentName, x);
   });
 }
 
 function postReagentData(reagentName, x) {
   return new Promise(function (resolve) {
-    let workbook = $("#js-active-workbook").val();
-    let workgroup = $("#js-active-workgroup").val();
+    let workbook = getVal($("#js-active-workbook"));
+    let workgroup = getVal($("#js-active-workgroup"));
     $.ajax({
       url: "/_reagents",
       type: "post",
@@ -423,9 +425,9 @@ function postReagentData(reagentName, x) {
 
 function autofillReagentFields2(i) {
   const component = "reagent";
-  let limitingReactantTableNumber = $(
-    "input[name='reactant-limiting']:checked",
-  ).val();
+  let limitingReactantTableNumber = getVal(
+    $("input[name='reactant-limiting']:checked"),
+  );
   let limitingReactantMassID =
     "#js-reactant-rounded-mass" + limitingReactantTableNumber;
   let reagentEquivalentID = "#js-reagent-equivalent" + i;
@@ -462,7 +464,7 @@ function autofillReagentFields2(i) {
 function addNewReagent() {
   // get current number of reagents and plus one
   let $reagentNumber = $("#js-number-of-reagents");
-  let reagentNumber = Number($reagentNumber.val());
+  let reagentNumber = Number(getVal($reagentNumber));
   reagentNumber++;
   let reagentTableNumber = reactionTable.numberOfReactants + reagentNumber;
   // updates reagent number html hidden input
@@ -808,8 +810,8 @@ function autofillSolventData(x) {
 }
 function postSolventData(solventName, x) {
   return new Promise(function (resolve) {
-    let workbook = $("#js-active-workbook").val();
-    let workgroup = $("#js-active-workgroup").val();
+    let workbook = getVal($("#js-active-workbook"));
+    let workgroup = getVal($("#js-active-workgroup"));
     $.ajax({
       url: "/_solvents",
       type: "post",
@@ -873,14 +875,14 @@ function autofillSolventConcentration(
   limitingReactantTableNumber,
 ) {
   $(changedParameter).on("input change", function () {
-    let firstReactantAmount = $(
-      "#js-reactant-amount" + limitingReactantTableNumber,
-    ).val();
+    let firstReactantAmount = getVal(
+      $("#js-reactant-amount" + limitingReactantTableNumber),
+    );
     let solventVolumeID = "#js-solvent-volume" + x;
-    let solventVolume = $(solventVolumeID).val();
+    let solventVolume = getVal($(solventVolumeID));
     let solventConcentration = 0;
-    const reactantAmountUnit = $("#js-amount-unit").val();
-    const solventVolumeUnit = $("#js-solvent-volume-unit").val();
+    const reactantAmountUnit = getVal($("#js-amount-unit"));
+    const solventVolumeUnit = getVal($("#js-solvent-volume-unit"));
     if (solventVolume > 0) {
       // multiply by 1000 to go from concentration in mL to L / decimetres
       solventConcentration =
@@ -1019,7 +1021,7 @@ function autoChangeRequiredStyling2(styleParameterID, excludedNullValues = []) {
   let nullValues = defaultNulLValues.filter(
     (item) => !excludedNullValues.includes(item),
   );
-  let parameterValue = $(styleParameterID).val();
+  let parameterValue = getVal($(styleParameterID));
   if (nullValues.includes(parameterValue)) {
     $(styleParameterID)
       .removeClass("remove-highlight-filled-cell")
@@ -1050,7 +1052,7 @@ function autoChangeRequiredStylingValidCompound(component, loop_value) {
   let changedStyling = "#js-" + component;
   changedStyling = changedStyling.concat(String(loop_value));
   $(changedStyling).on("input change", function () {
-    if ($(changedParameter).val() === "") {
+    if (getVal($(changedParameter)) === "") {
       $(changedStyling)
         .removeClass("remove-highlight-filled-cell")
         .addClass("add-highlight-unfilled-cell");
