@@ -3,13 +3,7 @@ from typing import Dict, List, Tuple
 from sources import models
 from sources.extensions import db
 
-numerical_rating_from_str = {
-    "": 0,
-    "L": 1,
-    "M": 2,
-    "H": 3,
-    "VH": 4,
-}
+numerical_rating_from_str = {"": 0, "L": 1, "M": 2, "H": 3, "VH": 4}
 
 str_rating_from_number = {0: "", 1: "L", 2: "M", 3: "H", 4: "VH"}
 
@@ -41,31 +35,25 @@ hazard_exposure_risk = {  # combination of risks - risk category dictionary
     "LH": "M",
 }
 
-# #         compound_hazard_sentences,
-# #         compound_hazard_ratings,
-# #         compound_hazard_colors,
-# #         compound_risk_colors,
-# #         compound_exposure_potentials,
-# #         compound_risk_ratings,
-# #         total_rate,
-
 
 def get_multiple_compounds_data(
     compounds_hazard_codes_list: List[str], physical_forms_list: List[str]
-) -> Tuple[
-    List[int], List[str], List[List[str]], List[str], List[str], List[str], List[str]
-]:
+) -> Tuple[List[int], List[str], List[str], List[str], List[str], List[str], List[str]]:
     """
-    For a list of compounds (e.g., products) this returns all their hazard data.
+    For a list of compounds (e.g., products) this returns all their hazard data. Each array has one item per compound
 
     Args:
         compounds_hazard_codes_list - example: ['H201-H302', 'H401-H310']
         physical_forms_list - example: ['Volatile liquid', 'Dense solid']
 
     Returns:
-        compounds_haz
-
-
+        compounds_most_severe_hazard_numerical_ratings - how hazardous each compound is. 4 most hazardous
+        compounds_hazard_sentences - each string item is all the h codes and phrases for a compound in a sentence
+        compound_hazard_ratings - how hazardous each compound is. VH most hazardous
+        compound_hazard_colours - should hazard table cell be white background (hazard-reset) or red (hazard-hazardous)
+        compounds_exposure_potentials - the exposure potential of each compound. VH is the highest exposure potential
+        compounds_risk_ratings - the risk from a compound. VH is the highest risk
+        compounds_risk_colours - should risk table cell be white background(hazard-reset) or red (hazard-hazardous)
     """
 
     # initiate the list variables to be returned
@@ -149,7 +137,7 @@ def get_single_compound_data(compound_hazard_codes: str, physical_form: str) -> 
     )
     return {
         "hazard_sentence": hazard_sentence,
-        "hazard_ratings": hazard_ratings,
+        "hazard_ratings": most_severe_hazard_rating,
         "most_severe_hazard_numerical_rating": most_severe_hazard_numerical_rating,
         "hazard_colour_code": hazard_colour_code,
         "exposure_potential": exposure_potential,
@@ -172,8 +160,9 @@ def get_single_compound_hazard(compound_hazard_codes: str) -> Tuple[str, List[st
     """
 
     if (
-        compound_hazard_codes == "Not Hazardous"
-        or compound_hazard_codes == "No hazard codes found"
+        compound_hazard_codes == "Not Hazardous"  # solvent table value from chem21
+        or compound_hazard_codes
+        == "No hazard codes found"  # compound table value from pubchem
     ):
         # if there is no hazard data for the compound return these null values
         return compound_hazard_codes, ["L"]
@@ -184,6 +173,7 @@ def get_single_compound_hazard(compound_hazard_codes: str) -> Tuple[str, List[st
     compound_hazard_ratings = []
     for hazard_code in hazard_code_list:
         phrase, rating = get_data_from_h_code(hazard_code)
+        rating = "M" if rating == "L" or rating == "" else rating
         compound_hazard_sentence += f"{hazard_code} {phrase}, "
         compound_hazard_ratings.append(rating)
     # post processing to remove delimiter from sentence string
@@ -213,10 +203,10 @@ def get_data_from_h_code(h_code: str) -> Tuple[str, str]:
     """
     Gets the hazard data for a specific h_code e.g., H301 or H201
 
-    Args
+    Args:
         h_code
 
-    Returns
+    Returns:
         the H-codes associated phrase
         the string rating of the hazard level
     """

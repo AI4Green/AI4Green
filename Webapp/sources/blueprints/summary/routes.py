@@ -271,8 +271,8 @@ def summary() -> Response:
         reactant_hazard_ratings,
         reactant_hazard_colors,
         reactant_exposure_potentials,
-        reactant_risk_colors,
         reactant_risk_ratings,
+        reactant_risk_colors,
     ) = sources.services.queries.hazards.get_multiple_compounds_data(
         reactant_hazards, reactant_physical_forms
     )
@@ -284,8 +284,8 @@ def summary() -> Response:
         reagent_hazard_ratings,
         reagent_hazard_colors,
         reagent_exposure_potentials,
-        reagent_risk_colors,
         reagent_risk_ratings,
+        reagent_risk_colors,
     ) = sources.services.queries.hazards.get_multiple_compounds_data(
         reagent_hazards, reagent_physical_forms
     )
@@ -296,8 +296,8 @@ def summary() -> Response:
         solvent_hazard_ratings,
         solvent_hazard_colors,
         solvent_exposure_potentials,
-        solvent_risk_colors,
         solvent_risk_ratings,
+        solvent_risk_colors,
     ) = sources.services.queries.hazards.get_multiple_compounds_data(
         solvent_hazards, solvent_physical_forms
     )
@@ -309,12 +309,11 @@ def summary() -> Response:
         product_hazard_ratings,
         product_hazard_colors,
         product_exposure_potentials,
-        product_risk_colors,
         product_risk_ratings,
+        product_risk_colors,
     ) = sources.services.queries.hazards.get_multiple_compounds_data(
         product_hazards, product_physical_forms
     )
-    """"""
 
     most_severe_hazard_numerical_rating = (
         reactant_most_severe_hazard_numerical_rating
