@@ -266,64 +266,68 @@ def summary() -> Response:
     # Hazard summary
     # Reactant hazards
     (
+        reactant_most_severe_hazard_numerical_rating,
         reactant_hazard_sentences,
         reactant_hazard_ratings,
         reactant_hazard_colors,
-        reactant_risk_colors,
         reactant_exposure_potentials,
+        reactant_risk_colors,
         reactant_risk_ratings,
-        reactant_total_rate,
-    ) = sources.services.queries.hazards.get_multiple_compound_hazard_data(
+    ) = sources.services.queries.hazards.get_multiple_compounds_data(
         reactant_hazards, reactant_physical_forms
     )
 
     # Reagent hazards
     (
+        reagent_most_severe_hazard_numerical_rating,
         reagent_hazard_sentences,
         reagent_hazard_ratings,
         reagent_hazard_colors,
-        reagent_risk_colors,
         reagent_exposure_potentials,
+        reagent_risk_colors,
         reagent_risk_ratings,
-        reagent_total_rate,
-    ) = sources.services.queries.hazards.get_multiple_compound_hazard_data(
+    ) = sources.services.queries.hazards.get_multiple_compounds_data(
         reagent_hazards, reagent_physical_forms
     )
     # solvent hazards
     (
+        solvent_most_severe_hazard_numerical_rating,
         solvent_hazard_sentences,
         solvent_hazard_ratings,
         solvent_hazard_colors,
-        solvent_risk_colors,
         solvent_exposure_potentials,
+        solvent_risk_colors,
         solvent_risk_ratings,
-        solvent_total_rate,
-    ) = sources.services.queries.hazards.get_multiple_compound_hazard_data(
+    ) = sources.services.queries.hazards.get_multiple_compounds_data(
         solvent_hazards, solvent_physical_forms
     )
 
     # Product hazard
     (
+        product_most_severe_hazard_numerical_rating,
         product_hazard_sentences,
         product_hazard_ratings,
         product_hazard_colors,
-        product_risk_colors,
         product_exposure_potentials,
+        product_risk_colors,
         product_risk_ratings,
-        product_total_rate,
-    ) = sources.services.queries.hazards.get_multiple_compound_hazard_data(
+    ) = sources.services.queries.hazards.get_multiple_compounds_data(
         product_hazards, product_physical_forms
     )
     """"""
 
-    total_rate = (
-        reactant_total_rate
-        + reagent_total_rate
-        + solvent_total_rate
-        + product_total_rate
+    most_severe_hazard_numerical_rating = (
+        reactant_most_severe_hazard_numerical_rating
+        + reagent_most_severe_hazard_numerical_rating
+        + solvent_most_severe_hazard_numerical_rating
+        + product_most_severe_hazard_numerical_rating
     )
-    max_total_rate = int(max(total_rate))  # max total hazard rate
-    risk_rating = list(category_rate.keys())[max_total_rate]  # resulting hazard rating
+    max_most_severe_hazard_numerical_rating = int(
+        max(most_severe_hazard_numerical_rating)
+    )  # max total hazard rate
+    risk_rating = list(category_rate.keys())[
+        max_most_severe_hazard_numerical_rating
+    ]  # resulting hazard rating
     risk_color = (
         "hazard-hazardous" if risk_rating == "VH" else "hazard-reset-hazard"
     )  # color code for the hazard rating
@@ -464,6 +468,8 @@ def reform_novel_compound_primary_key(primary_key: str) -> Tuple:
         A tuple of (compound_name, workbook_id)
     """
     print(primary_key)
-    compound_name = re.search(r"\('(.*)'", primary_key).group(1)
+    compound_name = re.search(r"\('(.*)'", primary_key).group(
+        1
+    )  # TODO update these to use the maximum str length for compound names
     workbook_id = int(re.search(r", (.*)\)", primary_key).group(1))
     return compound_name, workbook_id
