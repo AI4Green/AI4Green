@@ -108,11 +108,11 @@ function updateEquivalentsRelativeToNewLimitingReactant(x) {
 function updateMainProduct() {
   $(".js-main-product").click(function () {
     // updates the hidden variable main product table number
-    let mainProductTableNumber = Number(
-      $("input[name='js-main-product']:checked").val(),
+    let mainProductTableNumber = getNum(
+      $("input[name='js-main-product']:checked"),
     );
-    let numberOfReagents = Number($("#js-number-of-reagents").val());
-    let numberOfSolvents = Number($("#js-number-of-solvents").val());
+    let numberOfReagents = getNum($("#js-number-of-reagents"));
+    let numberOfSolvents = getNum($("#js-number-of-solvents"));
     $("#js-main-product-table-number").val(
       mainProductTableNumber -
         reactionTable.numberOfReactants -
@@ -217,7 +217,7 @@ function autofillAmount(component, changedParameter, loopValue) {
 function autofillRoundedAmount(component, changedParameter, loopValue) {
   // autofills the rounded amount for reactant, reagent, or product
   $(changedParameter).on("input change", function () {
-    let amount = Number(getVal($("#js-" + component + "-amount" + loopValue)));
+    let amount = getNum($("#js-" + component + "-amount" + loopValue));
     let roundedAmount = roundedNumber(amount);
     $("#js-" + component + "-rounded-amount" + loopValue).val(roundedAmount);
   });
@@ -241,7 +241,7 @@ function autofillVolume(component, changedParameter, loopValue) {
 function autofillRoundedVolume(component, changedParameter, loopValue) {
   // autofills the rounded volume for reactant, reagent, or product
   $(changedParameter).on("input change", function () {
-    let volume = Number(getVal($("#js-" + component + "-volume" + loopValue)));
+    let volume = getNum($("#js-" + component + "-volume" + loopValue));
     let roundedVolume = roundedNumber(volume);
     $("#js-" + component + "-rounded-volume" + loopValue).val(roundedVolume);
   });
@@ -286,7 +286,7 @@ function autofillMass(component, changedParameter, loopValue) {
 function autofillRoundedMass(component, changedParameter, loopValue) {
   // autofills the rounded mass for reactant, reagent, or product
   $(changedParameter).on("input change", function () {
-    let mass = Number(getVal($("#js-" + component + "-mass" + loopValue)));
+    let mass = getNum($("#js-" + component + "-mass" + loopValue));
     let roundedMass = roundedNumber(mass);
     $("#js-" + component + "-rounded-mass" + loopValue).val(roundedMass);
   });
@@ -464,7 +464,7 @@ function autofillReagentFields2(i) {
 function addNewReagent() {
   // get current number of reagents and plus one
   let $reagentNumber = $("#js-number-of-reagents");
-  let reagentNumber = Number(getVal($reagentNumber));
+  let reagentNumber = getNum($reagentNumber);
   reagentNumber++;
   let reagentTableNumber = reactionTable.numberOfReactants + reagentNumber;
   // updates reagent number html hidden input
@@ -491,10 +491,9 @@ function addNewReagent() {
 
 async function removeReagent(removedReagentNumber) {
   // called from remove reagent button
-  removedReagentNumber = Number(removedReagentNumber);
-  let solventNumber = Number($("#js-number-of-solvents").val());
-  let reactantNumber = Number($("#js-number-of-reactants").val());
-  let reagentNumber = Number($("#js-number-of-reagents").val());
+  removedReagentNumber = getNum(removedReagentNumber);
+  let reactantNumber = getNum("#js-number-of-reactants");
+  let reagentNumber = getNum("#js-number-of-reagents");
   // remove the reagent table row from the html
   let reagentTableRowID = "#js-reagent-table-row" + removedReagentNumber;
   $(reagentTableRowID).remove();
@@ -553,9 +552,9 @@ async function removeReagent(removedReagentNumber) {
 }
 
 function updateSolventTableNumbers() {
-  let reactantNumber = Number($("#js-number-of-reactants").val());
-  let reagentNumber = Number($("#js-number-of-reagents").val());
-  let solventNumber = Number($("#js-number-of-solvents").val());
+  let reactantNumber = getNum($("#js-number-of-reactants"));
+  let reagentNumber = getNum($("#js-number-of-reagents"));
+  let solventNumber = getNum($("#js-number-of-solvents"));
   if (solventNumber !== 0) {
     for (let loopValue = 1; loopValue < solventNumber + 1; loopValue++) {
       let solventTableNumber = reactantNumber + reagentNumber + loopValue;
@@ -574,9 +573,9 @@ function updateTableNumber(compoundNumber, idToUpdate) {
 }
 
 function updateProductTableNumber() {
-  let numberOfProducts = Number($("#js-number-of-products").val());
-  let reagentNumber = Number($("#js-number-of-reagents").val());
-  let solventNumber = Number($("#js-number-of-solvents").val());
+  let numberOfProducts = getNum($("#js-number-of-products"));
+  let reagentNumber = getNum($("#js-number-of-reagents"));
+  let solventNumber = getNum($("#js-number-of-solvents"));
   for (let loopValue = 1; loopValue < numberOfProducts + 1; loopValue++) {
     let productTableNumber =
       reactionTable.numberOfReactants +
@@ -721,8 +720,8 @@ function addNewSolvent() {
   datalist_initiate(solventInputID, solventDatalistID, solventNumber);
   // update table number
   let solventTableNumber =
-    Number($("#js-number-of-reactants").val()) +
-    Number($("#js-number-of-reagents").val()) +
+    getNum($("#js-number-of-reactants")) +
+    getNum($("#js-number-of-reagents")) +
     Number(solventNumber);
   $("#js-solvent-table-number" + solventNumber).val(solventTableNumber);
   updateProductTableNumber();
@@ -730,8 +729,8 @@ function addNewSolvent() {
 
 async function removeSolvent(removedSolventNumber) {
   let solventNumber = $("#js-number-of-solvents").val();
-  let reactantNumber = Number($("#js-number-of-reactants").val());
-  let reagentNumber = Number($("#js-number-of-reagents").val());
+  let reactantNumber = getNum($("#js-number-of-reactants"));
+  let reagentNumber = getNum($("#js-number-of-reagents"));
   let solventTableRowID = "#js-solvent-table-row" + removedSolventNumber;
   $(solventTableRowID).remove();
   // list of reagent ids that need to be updated
@@ -859,7 +858,7 @@ function postSolventData(solventName, x) {
 //Autofill solvent table number depending on number of reagents
 function autofillSolventTableNumber(x, changedParameter) {
   $(changedParameter).click(function () {
-    let numberOfReagents = Number($("#js-number-of-reagents").val());
+    let numberOfReagents = getNum($("#js-number-of-reagents"));
     let solventTableNumberID = "#js-solvent-table-number" + x;
     let solventTableNumber =
       reactionTable.numberOfReactants + numberOfReagents + x;
@@ -898,7 +897,7 @@ function autofillSolventConcentration(
 function autofillRoundedSolventConcentration(x, changedParameter) {
   $(changedParameter).on("input change", function () {
     let solventConcentrationID = "#js-solvent-concentration" + x;
-    let solventConcentration = Number($(solventConcentrationID).val());
+    let solventConcentration = getNum($(solventConcentrationID));
     let roundedSolventConcentration = roundedNumber(solventConcentration);
     let roundedSolventConcentrationID = "#js-solvent-rounded-concentration" + x;
     $(roundedSolventConcentrationID).val(roundedSolventConcentration);
@@ -947,8 +946,8 @@ function goToSolventGuide(sol_x) {
 //Autofill product table number
 function autofillProductTableNumber(changedParameter, loopValue) {
   $(changedParameter).click(function () {
-    let numberOfReagents = Number($("#js-number-of-reagents").val());
-    let numberOfSolvents = Number($("#js-number-of-solvents").val());
+    let numberOfReagents = getNum($("#js-number-of-reagents"));
+    let numberOfSolvents = getNum($("#js-number-of-solvents"));
     let productTableNumber =
       reactionTable.numberOfReactants +
       numberOfReagents +
@@ -965,7 +964,7 @@ function autofillProductTableNumber(changedParameter, loopValue) {
 }
 
 function autofillProductFields2() {
-  let productNumber = Number($("#js-number-of-products").val());
+  let productNumber = getNum($("#js-number-of-products"));
   let limitingReactantTableNumber = $(
     "input[name='reactant-limiting']:checked",
   ).val();
@@ -1069,14 +1068,14 @@ function updateStyling() {
     autoChangeRequiredStyling("#js-reactant-rounded-mass" + i);
     autoChangeRequiredStyling("#js-reactant-equivalent" + i);
   }
-  let numberOfReagents = Number($("#js-number-of-reagents").val());
+  let numberOfReagents = getNum($("#js-number-of-reagents"));
   for (let i = 1; i < numberOfReagents + 1; i++) {
     autoChangeRequiredStyling("#js-reagent-physical-form" + i);
     autoChangeRequiredStyling("#js-reagent-equivalent" + i);
     autoChangeRequiredStyling("js-reagent-hazards" + i);
     autoChangeRequiredStylingValidCompound("reagent", i);
   }
-  let numberOfSolvents = Number($("#js-number-of-solvents").val());
+  let numberOfSolvents = getNum($("#js-number-of-solvents"));
   for (let i = 1; i < numberOfSolvents + 1; i++) {
     autoChangeRequiredStyling("#js-solvent-physical-form" + i);
     autoChangeRequiredStyling("#js-solvent-volume" + i);
@@ -1094,8 +1093,8 @@ function commonGlobalVariables() {
   return [
     {
       // ReactionTable object
-      numberOfReactants: Number($("#js-number-of-reactants").val()),
-      numberOfProducts: Number($("#js-number-of-products").val()),
+      numberOfReactants: getNum($("#js-number-of-reactants")),
+      numberOfProducts: getNum($("#js-number-of-products")),
     },
     // Unit factors objects- amount, mass, volume
     { mol: 1, mmol: 10 ** -3, μmol: 10 ** -6 },

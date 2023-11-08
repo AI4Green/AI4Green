@@ -56,3 +56,13 @@ function getData(jquerySelector, dataAttribute) {
   const unescapedInput = $(jquerySelector).data(dataAttribute);
   return $("<div>").text(unescapedInput).html();
 }
+
+/**
+ *  Uses JQuery to get the numerical value from an element and escape special characters to prevent XSS vulnerabilities
+ * @param jquerySelector {jQuery | HTMLElement | String}- The JQuery Selector used to get the value
+ * @returns {Number} - The numerical value of the HTML element with special characters escaped
+ */
+function getNum(jquerySelector) {
+  const unescapedInput = $(jquerySelector).val();
+  return Number($("<div>").text(unescapedInput).html());
+}
