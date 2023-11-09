@@ -256,14 +256,6 @@ function showSummary() {
   productPhysicalForms = productPhysicalForms.slice(0, -1);
   productPrimaryKeys = productPrimaryKeys.slice(0, -1);
 
-  console.log(
-    solventPrimaryKeys,
-    reagentPrimaryKeys,
-    productPrimaryKeys,
-    reactantPrimaryKeys,
-    "summary form table",
-  );
-
   let reactionSmiles = $("#js-reaction-smiles").val();
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();

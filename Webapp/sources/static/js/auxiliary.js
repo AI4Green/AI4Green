@@ -63,6 +63,13 @@ function getData(jquerySelector, dataAttribute) {
  * @returns {Number} - The numerical value of the HTML element with special characters escaped
  */
 function getNum(jquerySelector) {
-  const unescapedInput = $(jquerySelector).val();
-  return Number($("<div>").text(unescapedInput).html());
+  return Number(getVal(jquerySelector));
+}
+
+/**
+ * Returns the limiting reactant table number. The user changes this by clicking a radio button
+ * @returns {string} - The string of the number, used to form HTML element IDs.
+ */
+function getLimitingReactantTableNumber() {
+  return getVal($("input[name='reactant-limiting']:checked"));
 }
