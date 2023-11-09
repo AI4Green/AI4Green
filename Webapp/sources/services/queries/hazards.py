@@ -55,6 +55,7 @@ def get_multiple_compounds_data(
         compounds_risk_ratings - the risk from a compound. VH is the highest risk
         compounds_risk_colours - should risk table cell be white background(hazard-reset) or red (hazard-hazardous)
     """
+    # check data
 
     # initiate the list variables to be returned
     compounds_most_severe_hazard_numerical_ratings = []
@@ -68,6 +69,9 @@ def get_multiple_compounds_data(
     for compound_hazard_codes, physical_form in zip(
         compounds_hazard_codes_list, physical_forms_list
     ):
+        # get all the data for the compound or skip if we don't have hazard codes and physical form data to use
+        if not compound_hazard_codes or not physical_form:
+            continue
         compound_data = get_single_compound_data(compound_hazard_codes, physical_form)
         # append the data to the relevant lists
         compounds_most_severe_hazard_numerical_ratings.append(

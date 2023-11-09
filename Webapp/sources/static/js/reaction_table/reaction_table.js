@@ -20,12 +20,12 @@ function initialiseReactionTable() {
   updateStyling();
   setColours();
   $("#js-load-status").on("change", function () {
-    autoSaveCheck(null, "rxn table");
+    autoSaveCheck(null);
   });
 }
 
 function hideButtonsInDemoMode() {
-  if ($("#js-demo").val() === "demo") {
+  if (getVal($("#js-demo")) === "demo") {
     document.getElementById("reaction-name-description").style.display = "none";
     document.getElementById("js-add-new-reagent-by-table").style.display =
       "none";
@@ -37,9 +37,7 @@ function hideButtonsInDemoMode() {
 function updateTableAfterLimitingReactantChange() {
   $(".js-reactant-limiting").click(function () {
     // update the limiting reactant table number in the html
-    let limitingReactantTableNumber = $(
-      "input[name='reactant-limiting']:checked",
-    ).val();
+    let limitingReactantTableNumber = getLimitingReactantTableNumber();
     $("#js-limiting-reactant-table-number").val(limitingReactantTableNumber);
     updateReactantsAfterLimitingReactantChange();
     // when the limiting reactant is changed, the autofill functions need to be reran
@@ -78,19 +76,19 @@ function updateEquivalentsRelativeToNewLimitingReactant(x) {
   // updates the classes of reactants - controls readonly and style properties when limiting reactant changes
   // Gets the change factor required to change the new limiting reactant equivalents to 1 and update other equivalents
   let $limitingReactantEquivalent = $("#js-reactant-equivalent" + x);
-  let oldEquiv = $limitingReactantEquivalent.val();
+  let oldEquiv = getVal($limitingReactantEquivalent);
   let changeFactor = oldEquiv / 1;
   // Scales the equivalents of all reactants by this change factor
   for (let i = 1; i < reactionTable.numberOfReactants + 1; i++) {
     let $reactantEquivalent = $("#js-reactant-equivalent" + i);
-    let newEquivalentValue = $reactantEquivalent.val() / changeFactor;
+    let newEquivalentValue = getVal($reactantEquivalent) / changeFactor;
     $reactantEquivalent.val(newEquivalentValue);
   }
   // Scales and updates equivalents for reagents
-  let reagentNumber = $("#js-number-of-reagents").val();
+  let reagentNumber = getVal($("#js-number-of-reagents"));
   for (let i = 1; i < reagentNumber + 1; i++) {
     let $reagentEquivalent = $("#js-reagent-equivalent" + i);
-    let newEquivalentValue = $reagentEquivalent.val() / changeFactor;
+    let newEquivalentValue = getVal($reagentEquivalent) / changeFactor;
     $reagentEquivalent.val(newEquivalentValue);
   }
   // updates the limiting reactant equivalent and mass fields
@@ -136,20 +134,21 @@ function autoFillLimitingReactant() {
 }
 
 // Functions for autofilling the limiting reactant
-//Autofill the limiting reactant amount when the mass or units change
+/**
+ * Recalculates and auto fills the limiting reactant amount when the mass changes or mass/amount units change
+ * @param changedParameter{string} as a jquery selector either #id or .class
+ */
 function autofillLimitingReactantAmount(changedParameter) {
   $(changedParameter).on("input change", function () {
-    const limitingReactantTableNumber = $(
-      "input[name='reactant-limiting']:checked",
-    ).val();
-    let reactantMass = $(
-      "#js-reactant-rounded-mass" + limitingReactantTableNumber,
-    ).val();
-    let reactantMolecularWeight = $(
-      "#js-reactant-molecular-weight" + limitingReactantTableNumber,
-    ).val();
-    const reactantMassUnit = $("#js-mass-unit").val();
-    const reactantAmountUnit = $("#js-amount-unit").val();
+    const limitingReactantTableNumber = getLimitingReactantTableNumber();
+    let reactantMass = getVal(
+      $("#js-reactant-rounded-mass" + limitingReactantTableNumber),
+    );
+    let reactantMolecularWeight = getVal(
+      $("#js-reactant-molecular-weight" + limitingReactantTableNumber),
+    );
+    const reactantMassUnit = getVal($("#js-mass-unit"));
+    const reactantAmountUnit = getVal($("#js-amount-unit"));
     let reactantAmount =
       (reactantMass * massFactor[reactantMassUnit]) /
       (reactantMolecularWeight * amountFactor[reactantAmountUnit]);
@@ -157,14 +156,15 @@ function autofillLimitingReactantAmount(changedParameter) {
   });
 }
 
-//Autofill the rounded first reactant amount
+/**
+ * Rounds and auto fills the new limiting reactant amount when the mass changes or mass/amount units change
+ * @param changedParameter{string} as a jquery selector either #id or .class
+ */
 function autofillRoundedLimitingReactantAmount(changedParameter) {
   $(changedParameter).on("input change", function () {
-    const limitingReactantTableNumber = $(
-      "input[name='reactant-limiting']:checked",
-    ).val();
-    let reactantAmount = Number(
-      $("#js-reactant-amount" + limitingReactantTableNumber).val(),
+    const limitingReactantTableNumber = getLimitingReactantTableNumber();
+    let reactantAmount = getNum(
+      $("#js-reactant-amount" + limitingReactantTableNumber),
     );
     let roundedReactantAmount = roundedNumber(reactantAmount);
     $("#js-reactant-rounded-amount" + limitingReactantTableNumber).val(
@@ -173,36 +173,44 @@ function autofillRoundedLimitingReactantAmount(changedParameter) {
   });
 }
 
-// Updates the hidden input reactant mass for the limiting reactant
+/**
+ * Recalculates and auto fills the hidden input reactant mass when the mass changes or mass/amount units change
+ * @param changedParameter{string} as a jquery selector either #id or .class
+ */
 function autofillLimitingReactantMass(changedParameter) {
   $(changedParameter).on("input change", function () {
-    let limitingReactantTableNumber = $(
-      "input[name='reactant-limiting']:checked",
-    ).val();
-    let limitingReactantMass = $(
-      "#js-reactant-rounded-mass" + limitingReactantTableNumber,
-    ).val();
+    let limitingReactantTableNumber = getLimitingReactantTableNumber();
+    let limitingReactantMass = getVal(
+      $("#js-reactant-rounded-mass" + limitingReactantTableNumber),
+    );
     $("#js-reactant-mass" + limitingReactantTableNumber).val(
       limitingReactantMass,
     );
   });
 }
 
+/**
+ * Calculates and auto fills the amount for reactant, reagent, or product when the limiting reactant mass, equivalents,
+ * or mass/amount units are changed
+ *
+ * @param component {string} reactant/solvent/product/reagent
+ * @param changedParameter {string} the parameter that has triggered the change
+ * @param loopValue {string} the number combined with the component to make the HTML element ID. e.g, reactant1
+ */
 function autofillAmount(component, changedParameter, loopValue) {
-  // autofills the amount for reactant, reagent, or product
   $(changedParameter).on("input change", function () {
-    const limitingReactantTableNumber = getVal(
-      $("input[name='reactant-limiting']:checked"),
+    const limitingReactantTableNumber = getLimitingReactantTableNumber();
+    const firstReactantAmount = getVal(
+      $("#js-reactant-amount" + limitingReactantTableNumber),
     );
-    const firstReactantAmount = $(
-      "#js-reactant-amount" + limitingReactantTableNumber,
-    ).val();
-    const equivalent = $("#js-" + component + "-equivalent" + loopValue).val();
+    const equivalent = getVal(
+      $("#js-" + component + "-equivalent" + loopValue),
+    );
     let amount;
     // product can have different units to reactant, hence different equation
     if (component === "product") {
-      let reactantAmountUnit = $("#js-amount-unit").val();
-      let productAmountUnit = $("#js-product-amount-unit").val();
+      let reactantAmountUnit = getVal($("#js-amount-unit"));
+      let productAmountUnit = getVal($("#js-product-amount-unit"));
       amount =
         (firstReactantAmount * amountFactor[reactantAmountUnit]) /
         amountFactor[productAmountUnit];
@@ -263,9 +271,7 @@ function autofillMass(component, changedParameter, loopValue) {
         (molecularWeight * productAmount * amountFactor[productAmountUnit]) /
         massFactor[productMassUnit];
     } else {
-      const limitingReactantTableNumber = getVal(
-        $("input[name='reactant-limiting']:checked"),
-      );
+      const limitingReactantTableNumber = getLimitingReactantTableNumber();
       let firstReactantMolecularWeight = getVal(
         $("#js-reactant-molecular-weight" + limitingReactantTableNumber),
       );
@@ -296,7 +302,7 @@ function autoRemoveVolume(component, changedParameter, loopValue) {
   $(changedParameter).on("input change", function () {
     // if reactant density + mol conc are both empty then set volume to also be empty not just '0'
     let density = getVal($("#js-" + component + "-density" + loopValue));
-    let concentration = getVall(
+    let concentration = getVal(
       $("#js-" + component + "-concentration" + loopValue),
     );
     if (concentration === "" && density === "") {
@@ -309,9 +315,7 @@ function autofillReactantFields2() {
   // autofills each reactant field depending on number of reactants
   const component = "reactant";
   for (let i = 1; i < reactionTable.numberOfReactants + 1; i++) {
-    let limitingReactantTableNumber = getVal(
-      $("input[name='reactant-limiting']:checked"),
-    );
+    let limitingReactantTableNumber = getLimitingReactantTableNumber();
     let limitingReactantMassID =
       "#js-reactant-rounded-mass" + limitingReactantTableNumber;
     let reactantDensityID = "#js-reactant-density" + i;
@@ -425,9 +429,7 @@ function postReagentData(reagentName, x) {
 
 function autofillReagentFields2(i) {
   const component = "reagent";
-  let limitingReactantTableNumber = getVal(
-    $("input[name='reactant-limiting']:checked"),
-  );
+  let limitingReactantTableNumber = getLimitingReactantTableNumber();
   let limitingReactantMassID =
     "#js-reactant-rounded-mass" + limitingReactantTableNumber;
   let reagentEquivalentID = "#js-reagent-equivalent" + i;
@@ -609,7 +611,7 @@ function datalist_initiate(solventInputID, solventDatalistID, solventNumber) {
   // hide the solvent dropdown if clicking on non-dropdown/input element
   let $solventInputID = "#" + solventInputID;
   $(document).on("click", function (event) {
-    var $target = $(event.target);
+    let $target = $(event.target);
     let $solventDatalistID = "#" + solventDatalistID;
     if (
       !$target.closest($solventDatalistID).length &&
@@ -693,7 +695,7 @@ function datalist_initiate(solventInputID, solventDatalistID, solventNumber) {
 function addNewSolvent() {
   // Get current number of solvents and plus one
   let solventNumberID = $("#js-number-of-solvents");
-  let solventNumber = solventNumberID.val();
+  let solventNumber = getVal(solventNumberID);
   solventNumber++;
   solventNumberID.val(solventNumber);
   // new row stored as the variable markup and replaced/sliced, and then appended to the solvent table
@@ -728,7 +730,7 @@ function addNewSolvent() {
 }
 
 async function removeSolvent(removedSolventNumber) {
-  let solventNumber = $("#js-number-of-solvents").val();
+  let solventNumber = getVal($("#js-number-of-solvents"));
   let reactantNumber = getNum($("#js-number-of-reactants"));
   let reagentNumber = getNum($("#js-number-of-reagents"));
   let solventTableRowID = "#js-solvent-table-row" + removedSolventNumber;
@@ -798,7 +800,7 @@ function autofillSolventData(x) {
   setColours();
   let solventID = "#js-solvent" + x;
   $(solventID).on("keyup change", function () {
-    let solventName = $(this).val();
+    let solventName = getVal($(this));
     let oldValue = $(this).attr("oldValue");
     $(this).attr("oldValue", solventName);
     // post data if new value is different to previous value to prevent duplicate ajax calls
@@ -905,12 +907,10 @@ function autofillRoundedSolventConcentration(x, changedParameter) {
 }
 
 function autofillSolventFields2() {
-  let numberOfSolvents = $("#js-number-of-solvents").val();
+  let numberOfSolvents = getVal($("#js-number-of-solvents"));
   if (numberOfSolvents > 0) {
     for (let i = 1; i < numberOfSolvents + 1; i++) {
-      let limitingReactantTableNumber = $(
-        "input[name='reactant-limiting']:checked",
-      ).val();
+      let limitingReactantTableNumber = getLimitingReactantTableNumber();
       let limitingReactantMass =
         "#js-reactant-rounded-mass" + limitingReactantTableNumber;
       let solventVolumeID = "#js-solvent-volume" + i;
@@ -934,7 +934,7 @@ function autofillSolventFields2() {
 }
 
 function goToSolventGuide(sol_x) {
-  let solventName = $("#js-solvent" + sol_x).val();
+  let solventName = getVal($("#js-solvent" + sol_x));
   if (solventName) {
     window.open("/solvent_guide/" + solventName, "_blank").focus();
   } else {
@@ -965,9 +965,7 @@ function autofillProductTableNumber(changedParameter, loopValue) {
 
 function autofillProductFields2() {
   let productNumber = getNum($("#js-number-of-products"));
-  let limitingReactantTableNumber = $(
-    "input[name='reactant-limiting']:checked",
-  ).val();
+  let limitingReactantTableNumber = getLimitingReactantTableNumber();
   let limitingReactantMassID =
     "#js-reactant-rounded-mass" + limitingReactantTableNumber;
   let limitingReactantEquivalentID =
@@ -996,9 +994,7 @@ function autofillProductFields2() {
 }
 
 function updateRequiredStylingLimited() {
-  let limitingReactantTableNumber = $(
-    "input[name='reactant-limiting']:checked",
-  ).val();
+  let limitingReactantTableNumber = getLimitingReactantTableNumber();
   let RoundedReactantMassID =
     "#js-reactant-rounded-mass" + limitingReactantTableNumber;
   autoChangeRequiredStyling2(RoundedReactantMassID);
@@ -1062,6 +1058,7 @@ function autoChangeRequiredStylingValidCompound(component, loop_value) {
     }
   });
 }
+
 function updateStyling() {
   for (let i = 1; i < reactionTable.numberOfReactants + 1; i++) {
     autoChangeRequiredStyling("#js-reactant-physical-form" + i);
@@ -1103,6 +1100,12 @@ function commonGlobalVariables() {
   ];
 }
 
+/**
+ * Rounds a number to a useful number of decimal places
+ *
+ * @param x {number|string} the number being rounded can be type number or type string. returns original string if NaN
+ * @returns {number} the rounded number
+ */
 function roundedNumber(x) {
   // rounds numbers depending on magnitude and returns the original variable if not a number
   x = Number(x);
@@ -1120,11 +1123,21 @@ function roundedNumber(x) {
   return roundedX;
 }
 
+/**
+ * We take the mass of compound we need and calculate and return volume of compound that is needed to get this mass
+ * Either density or concentration of the compound is used with preference to density if both are used.
+ *
+ * @param density {number}
+ * @param mass {Number}
+ * @param concentration {Number}
+ * @param amount {number} in moles
+ * @returns {number}
+ */
 function calcVolume(density, mass, concentration, amount) {
   // calculates volume for reactant or reagent
-  const reactantMassUnit = $("#js-mass-unit").val();
-  const reactantVolumeUnit = $("#js-volume-unit").val();
-  const reactantAmountUnit = $("#js-amount-unit").val();
+  const reactantMassUnit = getVal($("#js-mass-unit"));
+  const reactantVolumeUnit = getVal($("#js-volume-unit"));
+  const reactantAmountUnit = getVal($("#js-amount-unit"));
   let volume;
   if (density > 0 && concentration == 0) {
     // divide by volumefactor
@@ -1143,6 +1156,16 @@ function calcVolume(density, mass, concentration, amount) {
   return volume;
 }
 
+/**
+ * For a particular compound this function fills in data. The compound is identified by component+y e.g., js-solvent1
+ * We create the HTML element ID for each element by adding a field to the compound id. e.g., js-solvent-hazards1
+ * We then use the field as the key (with some exceptions covered by IF statements) to get the value from the response.
+ *
+ * @param response {JSON} the response json from reagents or solvents/routes.py
+ * @param component {string} the component type. e.g., reagent or product, etc.
+ * @param fieldList {Array<string>} the properties such as hazards, molecular weight to be filled in
+ * @param y {string} the number of the current component. as a string to be concatenated with component+field
+ */
 function fillData(response, component, fieldList, y) {
   // fill fields with response data for solvents or reagents added to the reaction table
   for (let field of fieldList) {

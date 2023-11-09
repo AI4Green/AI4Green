@@ -102,11 +102,8 @@ def summary() -> Response:
     rounded_reagent_masses = auxiliary.get_data("roundedReagentMasses")
     reagent_hazards = auxiliary.get_data("reagentHazards")
     reagent_physical_forms = auxiliary.get_data("reagentPhysicalForms")
-    # reagent_mass_sum = float(request.form["reagentMassSum"])
     reagent_molecular_weight_sum = float(request.form["reagentMolecularWeightSum"])
     reagent_primary_keys_ls = auxiliary.get_data("reagentPrimaryKeys")
-    # if reagent_primary_keys_ls == [""]:
-    #     reagent_primary_keys_ls = ["0"]
     reagent_primary_keys_str = ", ".join(reagent_primary_keys_ls)
     reagent_primary_keys_ls = [
         int(x) if x.isdigit() else reform_novel_compound_primary_key(x)
@@ -126,6 +123,7 @@ def summary() -> Response:
     solvent_primary_keys_ls = [
         int(x) if x.isdigit() else reform_novel_compound_primary_key(x)
         for x in solvent_primary_keys_ls
+        if x
     ]
 
     # Gets product data from the reaction table
@@ -468,6 +466,6 @@ def reform_novel_compound_primary_key(primary_key: str) -> Tuple:
     """
 
     # find and keep string inside single quotation amrks
-    compound_name = re.search(r"\('(.*)', \d", primary_key).group(1)
-    workbook_id = int(re.search(r"', (.*)\)", primary_key).group(1))
+    compound_name = re.search(r"\('([^']*)', \d", primary_key).group(1)
+    workbook_id = int(re.search(r"', (.*?)\)", primary_key).group(1))
     return compound_name, workbook_id
