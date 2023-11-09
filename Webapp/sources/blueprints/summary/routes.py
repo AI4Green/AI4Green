@@ -469,5 +469,5 @@ def reform_novel_compound_primary_key(primary_key: str) -> Tuple:
             413
         )  # content too large. Exceeds max workbook name length + max novel compound name length
     compound_name = re.search(r"\('([^']*)', \d", primary_key).group(1)
-    workbook_id = int(re.search(r"', (.*?)\)", primary_key).group(1))
+    workbook_id = int(re.search(r"', (\d+)", primary_key).group(1))
     return compound_name, workbook_id
