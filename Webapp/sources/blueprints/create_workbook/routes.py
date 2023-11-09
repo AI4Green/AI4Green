@@ -4,17 +4,21 @@ import pytz
 from flask import redirect  # renders html templates
 from flask import Response, flash, render_template, request, url_for
 from flask_login import (  # protects a view function against anonymous users
-    current_user, login_required)
+    current_user,
+    login_required,
+)
 from flask_wtf import FlaskForm
+from sources import auxiliary, models
+from sources.auxiliary import (
+    get_notification_number,
+    get_workgroups,
+    remove_spaces_and_dashes,
+    security_pi_sr_workgroup,
+)
+from sources.extensions import db
 from sqlalchemy import func
 from wtforms import StringField, SubmitField
 from wtforms.validators import Length
-
-from sources import auxiliary, models
-from sources.auxiliary import (get_notification_number, get_workgroups,
-                               remove_spaces_and_dashes,
-                               security_pi_sr_workgroup)
-from sources.extensions import db
 
 from . import create_workbook_bp  # imports the blueprint of the dummy route
 
@@ -22,7 +26,7 @@ from . import create_workbook_bp  # imports the blueprint of the dummy route
 class CreateWorkbookForm(FlaskForm):
     """This form is used for creating a workbook"""
 
-    workbook = StringField("Workbook", validators=[Length(min=4, max=320)])
+    workbook = StringField("Workbook", validators=[Length(min=4, max=140)])
     abbreviation = StringField(
         "3 letter abbreviation", validators=[Length(min=3, max=3)]
     )
