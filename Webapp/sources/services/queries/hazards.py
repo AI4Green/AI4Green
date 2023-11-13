@@ -203,7 +203,7 @@ def replace_substrings(input_string: str, replace_dict: dict) -> str:
     return input_string
 
 
-def get_data_from_h_code(h_code: str) -> Tuple[str, str]:
+def get_data(h_code: str) -> Tuple[str, str]:
     """
     Gets the hazard data for a specific h_code e.g., H301 or H201
 
