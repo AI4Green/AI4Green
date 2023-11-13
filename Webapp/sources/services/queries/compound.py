@@ -25,7 +25,7 @@ def get_compound_data_error_reports() -> List[models.CompoundDataErrorReport]:
     return db.session.query(models.CompoundDataErrorReport).all()
 
 
-def get_smiles_from_primary_key(primary_key: int) -> str:
+def get_smiles(primary_key: int) -> str:
     """
     Gets the smiles from the compound primary key
     """
