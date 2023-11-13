@@ -8,7 +8,7 @@ from sources.extensions import db
 from sources.services import queries
 
 
-def get_smiles_from_primary_key(primary_key: Tuple[str, int]) -> str:
+def get_smiles(primary_key: Tuple[str, int]) -> str:
     """
     Gets the novel compound's SMILES string from the primary key if the entry has the SMILES attribute
 
