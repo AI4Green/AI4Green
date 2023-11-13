@@ -16,7 +16,7 @@ def list_all() -> List[models.WorkBook]:
     return (db.session.query(models.WorkBook)).all()
 
 
-def get_workbook_from_primary_key(primary_key: int) -> models.WorkBook:
+def get(primary_key: int) -> models.WorkBook:
     """
     Gets the workbook object from the primary key
     """
