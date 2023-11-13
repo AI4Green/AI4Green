@@ -239,7 +239,7 @@ def string_to_list(compound_hazard_codes: str) -> List[str]:
     return sorted(list(set(compound_hazard_codes.split(","))))
 
 
-def get_hazardcode_database_object(h_code: str) -> models.HazardCode:
+def get(h_code: str) -> models.HazardCode:
     """
     Finds the database entry for a specific H-code
 
