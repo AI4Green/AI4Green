@@ -176,7 +176,7 @@ def get_single_compound_hazard(compound_hazard_codes: str) -> Tuple[str, List[st
     compound_hazard_sentence = ""
     compound_hazard_ratings = []
     for hazard_code in hazard_code_list:
-        phrase, rating = get_data_from_h_code(hazard_code)
+        phrase, rating = get_data(hazard_code)
         rating = "M" if rating == "L" or rating == "" else rating
         compound_hazard_sentence += f"{hazard_code} {phrase}, "
         compound_hazard_ratings.append(rating)
@@ -214,7 +214,7 @@ def get_data(h_code: str) -> Tuple[str, str]:
         the H-codes associated phrase
         the string rating of the hazard level
     """
-    hazard_object = get_hazardcode_database_object(h_code)
+    hazard_object = get(h_code)
     return (
         hazard_object.phrase,
         hazard_object.category if hazard_object.category is not None else "L",
