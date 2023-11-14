@@ -221,12 +221,8 @@ def summary() -> Response:
     reaction_smiles_ls = reaction_smiles.replace(">>", ".").split(".")
 
     # get reagent and solvent smiles
-    reagent_smiles_ls = queries.all_compounds.get_smiles_from_primary_keys(
-        reagent_primary_keys_ls
-    )
-    solvent_smiles_ls = queries.all_compounds.get_smiles_from_primary_keys(
-        solvent_primary_keys_ls
-    )
+    reagent_smiles_ls = queries.all_compounds.get_smiles_list(reagent_primary_keys_ls)
+    solvent_smiles_ls = queries.all_compounds.get_smiles_list(solvent_primary_keys_ls)
 
     # reaction smiles already has reactant and product smiles
     full_reaction_smiles_ls = [
