@@ -8,26 +8,26 @@ from datetime import datetime
 from urllib.parse import quote
 from urllib.request import urlopen
 
-from flask import current_app, jsonify, render_template, request, abort
+from flask import abort, current_app, jsonify, render_template, request
 from flask_login import current_user, login_required
 from rdkit import Chem  # Used for converting smiles to inchi
 from rdkit.Chem import Descriptors
 from sources import models
-from sources.auxiliary import smiles_symbols, abort_if_user_not_in_workbook, \
-    get_workbook_from_group_book_name_combination
+from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
 from sources.dto import ReactionNoteSchema
 
 # render_template renders html templates
 # request parses incoming request data and gives access to it
 # jsonify is used to send a JSON response to the browser
 from sources.extensions import db  # imports the module with auxiliary functions
+from sources.services import queries
 
 from . import reaction_table_bp  # imports the blueprint of the reaction table route
 
 if not current_app.config["DEBUG"]:
     try:
         from STOUT import translate_forward
-    except:
+    except Exception:
         pass
 
 
@@ -56,7 +56,9 @@ def process():
     if demo != "demo":
         workgroup = request.args.get("workgroup")
         workbook_name = request.args.get("workbook")
-        workbook = get_workbook_from_group_book_name_combination(workgroup, workbook_name)
+        workbook = queries.workbook.get_workbook_from_group_book_name_combination(
+            workgroup, workbook_name
+        )
         abort_if_user_not_in_workbook(workgroup, workbook_name, workbook)
 
         reaction_id = request.args.get("reaction_id")
@@ -101,7 +103,7 @@ def process():
             mol = Chem.MolFromSmiles(reactant_smiles)  # convert smiles to mol
             try:
                 reactant_inchi = Chem.MolToInchi(mol)  # convert mol to inchi
-            except:
+            except Exception:
                 return jsonify({"error": f"Cannot process Reactant {i+1} structure"})
             reactant = (
                 db.session.query(models.Compound)
@@ -192,7 +194,7 @@ def process():
             mol = Chem.MolFromSmiles(product_smiles)  # convert smiles to mol
             try:
                 product_inchi = Chem.MolToInchi(mol)  # convert mol to inchi
-            except:
+            except Exception:
                 return jsonify({"error": f"Cannot process Product {k + 1} structure"})
             product = (
                 db.session.query(models.Compound)
@@ -363,13 +365,13 @@ def iupac_convert(ids):
         )  # https://opsin.ch.cam.ac.uk/opsin/cyclopropane.png
         ans = urlopen(url, [5]).read().decode("utf8")
         return ans
-    except:
+    except Exception:
         print("failed CIR")
     print("trying STOUT")
     try:
         ans = translate_forward(ids)
         return ans
-    except:
+    except Exception:
         print("STOUT failed")
     return ""
 

@@ -2,6 +2,7 @@ from typing import List
 
 from sources import models
 from sources.extensions import db
+from sqlalchemy import func
 
 
 def count() -> int:
@@ -34,3 +35,33 @@ def get_smiles(primary_key: int) -> str:
         .filter(models.Compound.id == primary_key)
         .first()
     )[0]
+
+
+def get_compound_by_name(name: str) -> models.Compound:
+    """
+    Retrieves a compound by name.
+
+    Args:
+        name: Compound name.
+
+    Returns:
+        Compound model.
+    """
+    return (
+        db.session.query(models.Compound)
+        .filter(func.lower(models.Compound.name) == name.lower())
+        .first()
+    )
+
+
+def get_compound_by_cas(cas: str) -> models.Compound:
+    """
+    Retrieves a compound by CAS.
+
+    Args:
+        cas: CAS number.
+
+    Returns:
+        Compound model.
+    """
+    return db.session.query(models.Compound).filter(models.Compound.cas == cas).first()

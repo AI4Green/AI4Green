@@ -19,10 +19,10 @@ from sources.auxiliary import (
     abort_if_user_not_in_workbook,
     get_data,
     get_smiles,
-    get_workbook_from_group_book_name_combination,
     sanitise_user_input,
 )
 from sources.extensions import db
+from sources.services import queries
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
 
@@ -585,7 +585,7 @@ def authenticate_user_to_view_files(request_method):
         workgroup_name = request.form["workgroup"]
         workbook_name = request.form["workbook"]
     # validate user belongs to the workbook
-    workbook = get_workbook_from_group_book_name_combination(
+    workbook = queries.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
@@ -725,7 +725,7 @@ def get_current_reaction():
     reaction_id = str(request.form["reactionID"])
     workgroup_name = str(request.form["workgroup"])
     workbook_name = str(request.form["workbook"])
-    workbook = get_workbook_from_group_book_name_combination(
+    workbook = queries.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)

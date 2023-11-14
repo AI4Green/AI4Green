@@ -10,7 +10,7 @@ import re
 from typing import Tuple
 
 import rdkit
-import sources.services.queries.hazards
+import sources.services.queries.hazard_code
 from flask import Response, abort, jsonify, render_template, request
 from flask_login import login_required
 from sources import auxiliary, db, models
@@ -267,7 +267,7 @@ def summary() -> Response:
         reactant_exposure_potentials,
         reactant_risk_ratings,
         reactant_risk_colors,
-    ) = sources.services.queries.hazards.get_multiple_compounds_data(
+    ) = sources.services.queries.hazard_code.get_multiple_compounds_data(
         reactant_hazards, reactant_physical_forms
     )
 
@@ -280,7 +280,7 @@ def summary() -> Response:
         reagent_exposure_potentials,
         reagent_risk_ratings,
         reagent_risk_colors,
-    ) = sources.services.queries.hazards.get_multiple_compounds_data(
+    ) = sources.services.queries.hazard_code.get_multiple_compounds_data(
         reagent_hazards, reagent_physical_forms
     )
     # solvent hazards
@@ -292,7 +292,7 @@ def summary() -> Response:
         solvent_exposure_potentials,
         solvent_risk_ratings,
         solvent_risk_colors,
-    ) = sources.services.queries.hazards.get_multiple_compounds_data(
+    ) = sources.services.queries.hazard_code.get_multiple_compounds_data(
         solvent_hazards, solvent_physical_forms
     )
 
@@ -305,7 +305,7 @@ def summary() -> Response:
         product_exposure_potentials,
         product_risk_ratings,
         product_risk_colors,
-    ) = sources.services.queries.hazards.get_multiple_compounds_data(
+    ) = sources.services.queries.hazard_code.get_multiple_compounds_data(
         product_hazards, product_physical_forms
     )
 

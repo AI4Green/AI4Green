@@ -1,19 +1,13 @@
 import re
-from datetime import datetime
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
-import pytz
 from flask import Response, jsonify, request
-from flask_login import current_user, login_required
+from flask_login import login_required
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
 from sources import db, models
-from sources.auxiliary import (
-    abort_if_user_not_in_workbook,
-    get_workbook_from_group_book_name_combination,
-    sanitise_user_input,
-)
-from sqlalchemy import func
+from sources.auxiliary import abort_if_user_not_in_workbook, sanitise_user_input
+from sources.services import queries
 
 from . import novel_compound_bp
 
@@ -30,41 +24,44 @@ def novel_compound() -> Response:
     Returns:
         Flask Response with feedback about the operation.
     """
-    name, feedback = validate_name(request)
-    if feedback:
-        return jsonify({"feedback": feedback})
-
+    # get the active workbook and verify user belongs
     workgroup_name = str(request.form["workgroup"])
     workbook_name = str(request.form["workbook"])
-    workbook = get_workbook_from_group_book_name_combination(
+    workbook = queries.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
 
+    # validate the name is allowed and unique
+    name, feedback = validate_name()
+    if feedback:
+        return jsonify({"feedback": feedback})
     if not is_name_unique(name, workbook):
         feedback = "A compound with this name is already in the database"
         return jsonify({"feedback": feedback})
 
-    expected_num_ls = validate_numbers(request)
+    # validate numerical inputs
+    expected_num_ls = validate_numbers()
     if expected_num_ls is None:
         return jsonify(
             {
                 "feedback": "Molecular weight, density, and concentration must be empty or a positive number"
             }
         )
-
     density, concentration, mol_weight = expected_num_ls
 
-    cas_feedback = validate_cas(request, workbook)
+    # validate the cas and check is unique
+    cas_feedback = validate_cas(workbook)
     if cas_feedback:
         return jsonify({"feedback": cas_feedback})
 
-    mol_formula, inchi, inchi_key = calculate_molecule_identifiers(request)
+    # If we have a SMILES, we use it to get additional representations.
+    mol_formula, inchi, inchi_key = calculate_molecule_identifiers()
 
-    hazards = validate_hazards(request)
+    # validate the hazards
+    hazards = validate_hazards()
 
-    current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
-
+    # create novel compound
     nc = create_novel_compound(
         name,
         cas_feedback,
@@ -77,57 +74,53 @@ def novel_compound() -> Response:
         inchi,
         inchi_key,
         workbook.id,
-        current_time,
     )
 
+    # if the user has added the compound as a novel solvent, we add this to the solvent table too
     component_type = request.form["component"]
     if component_type == "solvent":
-        create_solvent_model(name, hazards, nc, current_time)
+        create_solvent_model(name, hazards, nc)
 
     feedback = "Compound added to the database"
     return jsonify({"feedback": feedback})
 
 
-def validate_name(request: request) -> Tuple[Optional[str], Optional[str]]:
+def validate_name() -> Optional[str]:
     """
     Validates and sanitizes the compound name from the request.
 
-    Args:
-        request: Flask request object.
-
     Returns:
-        Tuple of (validated_name, feedback) where feedback is None if validation is successful.
+        Validated name or error message if validation fails.
     """
     name = sanitise_user_input(request.form["name"])
     if len(name) > 200:
-        return None, "Name must be under 200 characters long"
+        return "Name must be under 200 characters long"
     if not name:
-        return None, "Compound requires a name"
-    return name, None
+        return "Compound requires a name"
+    return name
 
 
 def is_name_unique(name: str, workbook: models.WorkBook) -> bool:
     """
-    Checks if the compound name is unique within the specified workbook.
+    Checks if the compound name is unique within the given workbook.
 
     Args:
-        name: Compound name.
+        name: The compound name to check.
         workbook: Workbook model.
 
     Returns:
         True if the name is unique, False otherwise.
     """
-    name_check = get_novel_compound_by_name_and_workbook(name, workbook)
-    second_name_check = get_compound_by_name(name)
-    return not (name_check or second_name_check)
+    name_check = queries.novel_compound.get_novel_compound_by_name_and_workbook(
+        name, workbook
+    )
+    second_name_check = queries.compound.get_compound_by_name(name)
+    return name_check is None and second_name_check is None
 
 
-def validate_numbers(request: request) -> Union[List[Optional[float]]]:
+def validate_numbers() -> Optional[List[float]]:
     """
     Validates and extracts numerical values from the request.
-
-    Args:
-        request: Flask request object.
 
     Returns:
         List of validated numerical values or None if validation fails.
@@ -140,17 +133,17 @@ def validate_numbers(request: request) -> Union[List[Optional[float]]]:
     expected_num_ls = [float(x) if x != "" else None for x in expected_num_ls]
     for entry in expected_num_ls:
         if entry is not None and not check_positive_number(entry):
-            return
+            return None
     return expected_num_ls
 
 
-def validate_cas(request: request, workbook: models.WorkBook) -> Optional[str]:
+def validate_cas(workbook: models.WorkBook) -> Optional[str]:
     """
-    Validates the CAS number from the request.
+    Validates the CAS number from the request. Checks it fits the expected CAS pattern with a regular expression
+    and checks it is unique within the compound database and the workbook's novel compound collection
 
     Args:
-        request: Flask request object.
-        workbook: Workbook model.
+        workbook: Workbook we are checking to see if a compound with this cas is present in
 
     Returns:
         Error message if validation fails, None otherwise.
@@ -160,8 +153,10 @@ def validate_cas(request: request, workbook: models.WorkBook) -> Optional[str]:
         cas_regex = r"^[0-9]{1,7}-\d{2}-\d$"
         if not re.findall(cas_regex, cas):
             return "CAS invalid."
-        cas_duplicate_check1 = get_compound_by_cas(cas)
-        cas_duplicate_check2 = get_novel_compound_by_cas_and_workbook(cas, workbook)
+        cas_duplicate_check1 = queries.compound.get_compound_by_cas(cas)
+        cas_duplicate_check2 = (
+            queries.novel_compound.get_novel_compound_by_cas_and_workbook(cas, workbook)
+        )
         if cas_duplicate_check1 or cas_duplicate_check2:
             return (
                 "CAS already in database. Please add this compound to the reaction table"
@@ -170,53 +165,54 @@ def validate_cas(request: request, workbook: models.WorkBook) -> Optional[str]:
     return None
 
 
-def calculate_molecule_identifiers(
-    request: request,
-) -> Tuple[str, Optional[str], Optional[str]]:
-    """
-    Calculates molecule identifiers from the SMILES provided in the request.
+def check_positive_number(s: float) -> bool:
+    """Checks the entry is a positive number."""
+    try:
+        return s >= 0
+    except ValueError:
+        return False
 
-    Args:
-        request: Flask request object.
+
+def calculate_molecule_identifiers() -> Tuple[str, Optional[str], Optional[str]]:
+    """
+    Calculate additional molecule identifiers if SMILES is present.
 
     Returns:
-        Tuple of molecule formula, InChI, and InChIKey.
+        Tuple containing molecule formula, InChI notation, and InChIKey.
     """
     smiles = request.form["smiles"]
     if smiles:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
-            return "Invalid smiles", None, None
+            return "", None, None
         mol_formula = rdMolDescriptors.CalcMolFormula(mol)
         inchi = Chem.MolToInchi(mol)
         inchi_key = Chem.MolToInchiKey(mol)
     else:
-        mol_formula, inchi, inchi_key = "", None, None
+        mol_formula = ""
+        inchi = None
+        inchi_key = None
     return mol_formula, inchi, inchi_key
 
 
-def validate_hazards(request: request) -> str:
+def validate_hazards() -> str:
     """
-    Validates hazard codes from the request.
-
-    Args:
-        request: Flask request object.
+    Check hazard codes are in the correct format.
 
     Returns:
-        Validated hazard codes or a default value if hazards are not provided.
+        Hazard codes or "Unknown" if not provided or feedback for error message if invalid
     """
     hazards = sanitise_user_input(request.form["hPhrase"])
     if hazards:
-        hazards_ls = hazards.split("-")
-        for hazard in hazards_ls:
-            hazard_match = (
-                db.session.query(models.HazardCode)
-                .filter(models.HazardCode.code == hazard)
-                .first()
-            )
+        hazard_codes_ls = hazards.split("-")
+        for hazard_code in hazard_codes_ls:
+            hazard_match = queries.hazard_code.get(hazard_code)
             if hazard_match is None:
-                return f'Hazard code "{hazard}" is invalid. Must be a valid hazard code and formatted correctly. e.g., H200-H301.'
-    return "Unknown"
+                feedback = f'Hazard code "{hazard_code}" is invalid. Must be valid hazard code and formatted correctly. e.g., H200-H301.'
+                return feedback
+    else:
+        hazards = "Unknown"
+    return hazards
 
 
 def create_novel_compound(
@@ -231,24 +227,9 @@ def create_novel_compound(
     inchi: Optional[str],
     inchi_key: Optional[str],
     workbook_id: int,
-    current_time: datetime,
 ) -> models.NovelCompound:
     """
     Creates a novel compound in the database.
-
-    Args:
-        name: Compound name.
-        cas: CAS number.
-        mol_formula: Molecule formula.
-        mol_weight: Molecular weight.
-        density: Density.
-        concentration: Concentration.
-        hazards: Hazard codes.
-        smiles: SMILES notation.
-        inchi: InChI notation.
-        inchi_key: InChIKey.
-        workbook_id: Workbook ID.
-        current_time: Current timestamp.
 
     Returns:
         NovelCompound model.
@@ -265,7 +246,6 @@ def create_novel_compound(
         inchi=inchi,
         inchikey=inchi_key,
         workbook=workbook_id,
-        time_of_creation=current_time,
     )
     db.session.add(nc)
     db.session.commit()
@@ -273,80 +253,20 @@ def create_novel_compound(
 
 
 def create_solvent_model(
-    name: str, hazards: str, nc: models.NovelCompound, current_time: datetime
+    name: str, hazards: str, nc: models.NovelCompound
 ) -> models.Solvent:
     """
     Creates a solvent model in the database.
 
-    Args:
-        name: Solvent name.
-        hazards: Hazard codes.
-        nc: NovelCompound model.
-        current_time: Current timestamp.
-
     Returns:
         Solvent model.
     """
-    model = models.Solvent(
+    solvent = models.Solvent(
         name=name,
         flag=5,
         hazard=hazards,
         novel_compound=[nc],
-        time_of_creation=current_time,
     )
-    db.session.add(model)
+    db.session.add(solvent)
     db.session.commit()
-    return model
-
-
-def check_positive_number(s: str) -> bool:
-    """
-    Checks if the entry is a positive number.
-
-    Args:
-        s: Input string.
-
-    Returns:
-        True if the entry is a positive number, False otherwise.
-    """
-    try:
-        return float(s) >= 0
-    except ValueError:
-        return False
-
-
-# SQLAlchemy queries
-def get_novel_compound_by_name_and_workbook(
-    name: str, workbook: models.WorkBook
-) -> models.NovelCompound:
-    return (
-        db.session.query(models.NovelCompound)
-        .filter(func.lower(models.NovelCompound.name) == name.lower())
-        .join(models.WorkBook)
-        .filter(models.WorkBook.id == workbook.id)
-        .first()
-    )
-
-
-def get_compound_by_name(name: str) -> models.Compound:
-    return (
-        db.session.query(models.Compound)
-        .filter(func.lower(models.Compound.name) == name.lower())
-        .first()
-    )
-
-
-def get_compound_by_cas(cas: str) -> models.Compound:
-    return db.session.query(models.Compound).filter(models.Compound.cas == cas).first()
-
-
-def get_novel_compound_by_cas_and_workbook(
-    cas: str, workbook: models.WorkBook
-) -> models.NovelCompound:
-    return (
-        db.session.query(models.NovelCompound)
-        .filter(models.NovelCompound.cas == cas)
-        .join(models.WorkBook)
-        .filter(models.WorkBook.id == workbook.id)
-        .first()
-    )
+    return solvent

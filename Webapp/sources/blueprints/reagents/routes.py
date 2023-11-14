@@ -3,11 +3,8 @@ import re
 from flask import Response, abort, jsonify, request
 from flask_login import login_required
 from sources import db, models
-from sources.auxiliary import (
-    abort_if_user_not_in_workbook,
-    get_workbook_from_group_book_name_combination,
-    sanitise_user_input,
-)
+from sources.auxiliary import abort_if_user_not_in_workbook, sanitise_user_input
+from sources.services import queries
 from sqlalchemy import func
 
 # request parses incoming request data and gives access to it
@@ -28,7 +25,7 @@ def reagents() -> Response:
     reagent = reagent.replace("\u00A0", " ")  # add back in space to search database
     workgroup_name = str(request.form["workgroup"])
     workbook_name = str(request.form["workbook"])
-    workbook = get_workbook_from_group_book_name_combination(
+    workbook = queries.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)

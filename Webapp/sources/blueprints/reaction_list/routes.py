@@ -1,10 +1,21 @@
-from flask import (Response, jsonify,
-                   render_template, request, flash, redirect, url_for, escape)
-from flask_login import \
-    login_required, current_user
-from sources.extensions import db
+from flask import (
+    Response,
+    escape,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
+from flask_login import current_user, login_required
 from sources import models
-from sources.auxiliary import security_member_workgroup_workbook, abort_if_user_not_in_workbook, get_workbook_from_group_book_name_combination
+from sources.auxiliary import (
+    abort_if_user_not_in_workbook,
+    security_member_workgroup_workbook,
+)
+from sources.extensions import db
+from sources.services import queries
 
 from . import reaction_list_bp  # imports the blueprint of route
 from .reaction_list import get_reaction_list, get_scheme_list
@@ -57,7 +68,9 @@ def get_reactions() -> Response:
     sort_crit = str(request.form["sortCriteria"])
     workbook_name = str(request.form["workbook"])
     workgroup_name = str(request.form["workgroup"])
-    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    workbook = queries.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
     reactions = get_reaction_list(workbook_name, workgroup_name, sort_crit)
     reaction_details = render_template(
@@ -75,7 +88,9 @@ def get_schemata() -> Response:
     # must be logged in
     workbook_name = str(request.form["workbook"])
     workgroup_name = str(request.form["workgroup"])
-    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    workbook = queries.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
     size = str(request.form["size"])
     sort_crit = str(request.form["sortCriteria"])
