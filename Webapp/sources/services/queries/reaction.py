@@ -17,10 +17,14 @@ def list_recent() -> List[models.Reaction]:
         tzinfo=None
     ) - timedelta(days=28)
     return (
-        db.session.query(models.Reaction).filter(
-            models.Reaction.time_of_creation > cut_off_date
+        (
+            db.session.query(models.Reaction).filter(
+                models.Reaction.time_of_creation > cut_off_date
+            )
         )
-    ).all()
+        .order_by(models.Reaction.time_of_creation.desc())
+        .all()
+    )
 
 
 def count() -> int:
