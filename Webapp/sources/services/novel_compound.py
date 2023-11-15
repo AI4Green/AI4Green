@@ -1,11 +1,10 @@
 from datetime import datetime
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Tuple
 
 from flask import abort
 from flask_login import current_user
-from sources import models
+from sources import models, services
 from sources.extensions import db
-from sources.services import queries
 from sqlalchemy import func
 
 
@@ -17,7 +16,7 @@ def get_smiles(primary_key: Tuple[str, int]) -> str:
         The SMILES string corresponding to the primary key or None
     """
     primary_key = (primary_key[0], int(primary_key[1]))
-    workbook = queries.workbook.get(primary_key[1])
+    workbook = services.workbook.get(primary_key[1])
     if current_user.Person not in workbook.users:
         abort(401)
 
@@ -30,7 +29,7 @@ def get_smiles(primary_key: Tuple[str, int]) -> str:
     )[0]
 
 
-def get_novel_compound_by_name_and_workbook(
+def get_novel_compound_from_name_and_workbook(
     name: str, workbook: models.WorkBook
 ) -> models.NovelCompound:
     """
@@ -52,7 +51,7 @@ def get_novel_compound_by_name_and_workbook(
     )
 
 
-def get_novel_compound_by_cas_and_workbook(
+def get_novel_compound_from_cas_and_workbook(
     cas: str, workbook: models.WorkBook
 ) -> models.NovelCompound:
     """
@@ -74,7 +73,7 @@ def get_novel_compound_by_cas_and_workbook(
     )
 
 
-def create_novel_compound(
+def add(
     name: str,
     cas: Optional[str],
     mol_formula: str,
@@ -86,7 +85,6 @@ def create_novel_compound(
     inchi: Optional[str],
     inchi_key: Optional[str],
     workbook_id: int,
-    current_time: datetime,
 ) -> models.NovelCompound:
     """
     Creates a novel compound in the database.
@@ -120,7 +118,6 @@ def create_novel_compound(
         inchi=inchi,
         inchikey=inchi_key,
         workbook=workbook_id,
-        time_of_creation=current_time,
     )
     db.session.add(nc)
     db.session.commit()

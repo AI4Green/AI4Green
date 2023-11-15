@@ -37,7 +37,7 @@ def get_smiles(primary_key: int) -> str:
     )[0]
 
 
-def get_compound_by_name(name: str) -> models.Compound:
+def get_compound_from_name(name: str) -> models.Compound:
     """
     Retrieves a compound by name.
 
@@ -54,7 +54,7 @@ def get_compound_by_name(name: str) -> models.Compound:
     )
 
 
-def get_compound_by_cas(cas: str) -> models.Compound:
+def get_compound_from_cas(cas: str) -> models.Compound:
     """
     Retrieves a compound by CAS.
 

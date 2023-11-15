@@ -5,9 +5,8 @@ from flask import Response, jsonify, request
 from flask_login import login_required
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
-from sources import db, models
+from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook, sanitise_user_input
-from sources.services import queries
 
 from . import novel_compound_bp
 
@@ -27,7 +26,7 @@ def novel_compound() -> Response:
     # get the active workbook and verify user belongs
     workgroup_name = str(request.form["workgroup"])
     workbook_name = str(request.form["workbook"])
-    workbook = queries.workbook.get_workbook_from_group_book_name_combination(
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
@@ -62,7 +61,7 @@ def novel_compound() -> Response:
     hazards = validate_hazards()
 
     # create novel compound
-    nc = create_novel_compound(
+    nc = services.novel_compound.add(
         name,
         cas_feedback,
         mol_formula,
@@ -79,7 +78,7 @@ def novel_compound() -> Response:
     # if the user has added the compound as a novel solvent, we add this to the solvent table too
     component_type = request.form["component"]
     if component_type == "solvent":
-        create_solvent_model(name, hazards, nc)
+        services.solvent.add(name, hazards, nc)
 
     feedback = "Compound added to the database"
     return jsonify({"feedback": feedback})
@@ -111,10 +110,10 @@ def is_name_unique(name: str, workbook: models.WorkBook) -> bool:
     Returns:
         True if the name is unique, False otherwise.
     """
-    name_check = queries.novel_compound.get_novel_compound_by_name_and_workbook(
+    name_check = services.novel_compound.get_novel_compound_from_name_and_workbook(
         name, workbook
     )
-    second_name_check = queries.compound.get_compound_by_name(name)
+    second_name_check = services.compound.get_compound_from_name(name)
     return name_check is None and second_name_check is None
 
 
@@ -153,9 +152,11 @@ def validate_cas(workbook: models.WorkBook) -> Optional[str]:
         cas_regex = r"^[0-9]{1,7}-\d{2}-\d$"
         if not re.findall(cas_regex, cas):
             return "CAS invalid."
-        cas_duplicate_check1 = queries.compound.get_compound_by_cas(cas)
+        cas_duplicate_check1 = services.compound.get_compound_from_cas(cas)
         cas_duplicate_check2 = (
-            queries.novel_compound.get_novel_compound_by_cas_and_workbook(cas, workbook)
+            services.novel_compound.get_novel_compound_from_cas_and_workbook(
+                cas, workbook
+            )
         )
         if cas_duplicate_check1 or cas_duplicate_check2:
             return (
@@ -206,67 +207,10 @@ def validate_hazards() -> str:
     if hazards:
         hazard_codes_ls = hazards.split("-")
         for hazard_code in hazard_codes_ls:
-            hazard_match = queries.hazard_code.get(hazard_code)
+            hazard_match = services.hazard_code.get(hazard_code)
             if hazard_match is None:
                 feedback = f'Hazard code "{hazard_code}" is invalid. Must be valid hazard code and formatted correctly. e.g., H200-H301.'
                 return feedback
     else:
         hazards = "Unknown"
     return hazards
-
-
-def create_novel_compound(
-    name: str,
-    cas: Optional[str],
-    mol_formula: str,
-    mol_weight: float,
-    density: float,
-    concentration: float,
-    hazards: str,
-    smiles: str,
-    inchi: Optional[str],
-    inchi_key: Optional[str],
-    workbook_id: int,
-) -> models.NovelCompound:
-    """
-    Creates a novel compound in the database.
-
-    Returns:
-        NovelCompound model.
-    """
-    nc = models.NovelCompound(
-        name=name,
-        cas=cas,
-        molec_formula=mol_formula,
-        molec_weight=mol_weight,
-        density=density,
-        concentration=concentration,
-        hphrase=hazards,
-        smiles=smiles,
-        inchi=inchi,
-        inchikey=inchi_key,
-        workbook=workbook_id,
-    )
-    db.session.add(nc)
-    db.session.commit()
-    return nc
-
-
-def create_solvent_model(
-    name: str, hazards: str, nc: models.NovelCompound
-) -> models.Solvent:
-    """
-    Creates a solvent model in the database.
-
-    Returns:
-        Solvent model.
-    """
-    solvent = models.Solvent(
-        name=name,
-        flag=5,
-        hazard=hazards,
-        novel_compound=[nc],
-    )
-    db.session.add(solvent)
-    db.session.commit()
-    return solvent

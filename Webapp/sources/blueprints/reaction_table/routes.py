@@ -12,7 +12,7 @@ from flask import abort, current_app, jsonify, render_template, request
 from flask_login import current_user, login_required
 from rdkit import Chem  # Used for converting smiles to inchi
 from rdkit.Chem import Descriptors
-from sources import models
+from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
 from sources.dto import ReactionNoteSchema
 
@@ -20,7 +20,6 @@ from sources.dto import ReactionNoteSchema
 # request parses incoming request data and gives access to it
 # jsonify is used to send a JSON response to the browser
 from sources.extensions import db  # imports the module with auxiliary functions
-from sources.services import queries
 
 from . import reaction_table_bp  # imports the blueprint of the reaction table route
 
@@ -56,7 +55,7 @@ def process():
     if demo != "demo":
         workgroup = request.args.get("workgroup")
         workbook_name = request.args.get("workbook")
-        workbook = queries.workbook.get_workbook_from_group_book_name_combination(
+        workbook = services.workbook.get_workbook_from_group_book_name_combination(
             workgroup, workbook_name
         )
         abort_if_user_not_in_workbook(workgroup, workbook_name, workbook)
