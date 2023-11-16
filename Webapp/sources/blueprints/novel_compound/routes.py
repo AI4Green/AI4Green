@@ -84,7 +84,7 @@ def novel_compound() -> Response:
     return jsonify({"feedback": feedback})
 
 
-def validate_name() -> Optional[str]:
+def validate_name() -> Tuple[str, str]:
     """
     Validates and sanitizes the compound name from the request.
 
@@ -92,11 +92,12 @@ def validate_name() -> Optional[str]:
         Validated name or error message if validation fails.
     """
     name = sanitise_user_input(request.form["name"])
+    feedback = None
     if len(name) > 200:
-        return "Name must be under 200 characters long"
+        feedback = "Name must be under 200 characters long"
     if not name:
-        return "Compound requires a name"
-    return name
+        feedback = "Compound requires a name"
+    return name, feedback
 
 
 def is_name_unique(name: str, workbook: models.WorkBook) -> bool:

@@ -375,5 +375,15 @@ def iupac_convert(ids):
     return ""
 
 
-def mol_weight_generate(smiles):
-    return Descriptors.ExactMolWt(Chem.MolFromSmiles(smiles))
+def mol_weight_generate(smiles: str) -> float:
+    """
+    Uses RDKit to calculate the molecular weight for a compound from its SMILES string
+
+    Args:
+        smiles - the SMILES of the compound of interest
+
+    Returns:
+        The molecular weight of the compound.
+    """
+    # MolWt accounts for the average across isotopes but ExactMolWt only takes the most abundant isotope.
+    return Descriptors.MolWt(Chem.MolFromSmiles(smiles))
