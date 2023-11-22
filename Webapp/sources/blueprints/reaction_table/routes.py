@@ -77,12 +77,23 @@ def process():
     products0 = request.args.get(
         "products", 0, type=str
     )  # gets the SMILES string of products
+
+    # if reactants is cx smiles with ion - > return reformed compound
+    # if reactants is smiles with ion -> return reformed compound
+    # else carry on
+
+    # repeat for products
+
+    # refactor
+
     reactant_mol_weights = []  # the list of reactant molar weights
     reactant_hazards = []  # the list of reactant hazard codes
     reactant_densities = []
     reactant_primary_keys = []
     reactant_table_numbers = []  # the list of reactant numbers in the reaction table
+
     reagent_table_numbers = []
+
     product_mol_weights = []  # the list of product molar weights
     product_hazards = []  # the list of product hazards
     product_primary_keys = []

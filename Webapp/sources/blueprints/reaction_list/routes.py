@@ -16,8 +16,7 @@ from sources.auxiliary import (
 )
 from sources.extensions import db
 
-from . import reaction_list_bp  # imports the blueprint of route
-from .reaction_list import get_reaction_list, get_scheme_list
+from . import reaction_list_bp
 
 
 # delete reaction
@@ -59,7 +58,6 @@ def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response
     )
 
 
-# Get reactions
 @reaction_list_bp.route("/get_reactions", methods=["GET", "POST"])
 @login_required
 def get_reactions() -> Response:
@@ -71,7 +69,10 @@ def get_reactions() -> Response:
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
-    reactions = get_reaction_list(workbook_name, workgroup_name, sort_crit)
+    reactions = services.reaction.list_active_in_workbook(
+        workbook_name, workgroup_name, sort_crit
+    )
+    reactions = services.reaction.to_dict(reactions)
     reaction_details = render_template(
         "_saved_reactions.html", reactions=reactions, sort_crit=escape(sort_crit)
     )
@@ -84,7 +85,6 @@ def get_schemata() -> Response:
     """
     Gets a list of reaction schemes for the active workbook. Images made from reaction SMILES using rdMolDraw2D (RDKit)
     """
-    # must be logged in
     workbook_name = str(request.form["workbook"])
     workgroup_name = str(request.form["workgroup"])
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
@@ -93,5 +93,8 @@ def get_schemata() -> Response:
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
     size = str(request.form["size"])
     sort_crit = str(request.form["sortCriteria"])
-    schemes = get_scheme_list(workbook_name, workgroup_name, sort_crit, size)
+    reaction_list = services.reaction.list_active_in_workbook(
+        workbook_name, workgroup_name, sort_crit
+    )
+    schemes = services.reaction.make_scheme_list(reaction_list, size)
     return {"schemes": schemes, "sort_crit": escape(sort_crit)}

@@ -1,133 +1,11 @@
 import re
-from operator import itemgetter
 from typing import Callable, Dict, List, Tuple
 
 from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem.Draw import rdMolDraw2D
-from sources import models
-from sources.extensions import db
+from rdkit.Chem.rdChemReactions import ChemicalReaction
 
 
-def get_scheme_list(
-    workbook_name: str, workgroup_name: str, sort_crit: str, size: str
-) -> List[str]:
-    """
-    Gets the list of reaction scheme images as a list of strings for a particular workbook
-
-    Args:
-        workbook_name: the name of the active workbook
-        workgroup_name: the name of the active workgroup
-        sort_crit: the criteria we are using to sort the reaction schemes
-        size: the size of the image we are generating, small or other
-    Returns:
-        the list of reaction scheme images
-    """
-    reaction_list = []
-    query = (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.status == "active")
-        .join(models.WorkBook)
-        .filter(models.WorkBook.name == workbook_name)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_name)
-    )
-    if sort_crit == "time":
-        reaction_list = query.order_by(models.Reaction.time_of_creation.desc()).all()
-    elif sort_crit == "AZ":
-        reaction_list = query.order_by(models.Reaction.name.asc()).all()
-    return make_scheme_list(reaction_list, size)
-
-
-def make_scheme_list(reaction_list: List[models.Reaction], size: str) -> List[str]:
-    """
-    Makes a list of reaction schemes from a list of reactions using the reaction SMILES
-    Args:
-        reaction_list: list of Reactions objects that we are making scheme images for
-        size: the size of scheme image we are making.
-    """
-    scheme_list = []
-    # get rxn schemes
-    for j in range(len(reaction_list)):
-        rxn_string = reaction_list[j].reaction_smiles
-        # if the reaction string contains any letters - required for SMILES. Prevents '>>' breaking rdkit
-        if re.search("[a-zA-Z]", rxn_string):
-            # we test to see if ions are present in which case further logic is needed
-            # first we see if it is from marvin js and contains ions
-            if len(rxn_string.split(" |")) > 1:
-                rxn = ion_containing_cx_smiles(rxn_string)
-            elif "+" in rxn_string or "-" in rxn_string:
-                rxn = ion_containing_smiles(rxn_string)
-            # reactions with no ions - make rxn object directly from string
-            else:
-                rxn = AllChem.ReactionFromSmarts(rxn_string, useSmiles=True)
-            # draw reaction scheme
-            if size == "small":
-                d2d = rdMolDraw2D.MolDraw2DSVG(400, 150)
-            else:
-                d2d = rdMolDraw2D.MolDraw2DSVG(600, 225)
-            d2d.DrawReaction(rxn)
-            # return drawing text
-            scheme = d2d.GetDrawingText()
-            scheme_list.append(scheme)
-        else:
-            scheme_list.append("")
-    return scheme_list
-
-
-def get_reaction_list(workbook, workgroup, sort_crit) -> List[Dict]:
-    reaction_list = (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.status == "active")
-        .join(models.WorkBook)
-        .filter(models.WorkBook.name == workbook)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
-        .all()
-    )
-    return process_reactions_to_dict(reaction_list, sort_crit)
-
-
-def process_reactions_to_dict(reaction_list, sort_crit) -> List[Dict]:
-    reactions = []
-    for idx, reaction in enumerate(reaction_list):
-        # for each reaction get the relevant info and shorten description if it's long
-        description = reaction.description
-        if reaction.creator_person.user:
-            creator_email = reaction.creator_person.user.email
-            creator_username = reaction.creator_person.user.username
-        else:
-            creator_email = "unknown"
-            creator_username = "a deleted profile"
-        if len(description) > 250:
-            description = description[0:249] + "..."
-        reaction_details = {
-            "html_id": idx + 1,
-            "name": reaction.name,
-            "description": description,
-            "time_of_creation": str(reaction.time_of_creation),
-            "time_of_update": str(reaction.time_of_update),
-            "reaction_smiles": reaction.reaction_smiles,
-            "reaction_table_data": reaction.reaction_table_data,
-            "summary_table_data": reaction.summary_table_data,
-            "workgroup": reaction.WorkBook.WorkGroup.name,
-            "workbook": reaction.WorkBook.name,
-            "completion_status": reaction.complete,
-            "reaction_id": reaction.reaction_id,
-            "creator_email": creator_email,
-            "creator_username": creator_username,
-            "addenda": reaction.addenda,
-        }
-        reactions.append(reaction_details)
-
-    return (
-        sorted(reactions, key=itemgetter("time_of_creation"), reverse=True)
-        if sort_crit == "time"
-        else sorted(reactions, key=itemgetter("name"))
-    )
-
-
-def ion_containing_smiles(smiles: str) -> Chem.rdChemReactions.ChemicalReaction:
+def ion_containing_smiles(smiles: str) -> ChemicalReaction:
     """
     Process reaction smiles exported from ketcher that contain ions to a rdkit ChemicalReaction to make an image from
 
@@ -145,29 +23,14 @@ def ion_containing_smiles(smiles: str) -> Chem.rdChemReactions.ChemicalReaction:
     products_mols_ls = [Chem.MolFromSmiles(x) for x in products_list]
 
     if None in reactants_mols_ls or None in products_mols_ls:
-        print("STOP")
+        # stop process crashing
+        print("None in reactants or mol list when trying to make smiles ")
 
-    rxn = Chem.rdChemReactions.ChemicalReaction()
+    rxn = ChemicalReaction()
     add_mols_to_reaction(reactants_mols_ls, rxn.AddReactantTemplate)
     add_mols_to_reaction(products_mols_ls, rxn.AddProductTemplate)
 
     return rxn
-
-
-def add_mols_to_reaction(mols: List[Chem.Mol], add_function: Callable) -> None:
-    """
-    Add molecules to a ChemicalReaction object.
-
-    Args:
-        mols (List[Union[Chem.Mol, None]]): List of rdkit Mol objects.
-        add_function
-
-    Returns:
-        None
-    """
-    for mol in mols:
-        if mol is not None:
-            add_function(mol)
 
 
 def update_ion_containing_list(compounds_list: List[str]) -> List[str]:
@@ -371,3 +234,16 @@ def ion_containing_cx_smiles(cx_smiles: str) -> Chem.rdChemReactions.ChemicalRea
     for product in products_mols_ls:
         rxn.AddProductTemplate(product)
     return rxn
+
+
+def add_mols_to_reaction(mols: List[Chem.Mol], add_function: Callable) -> None:
+    """
+    Add molecules to a ChemicalReaction object
+
+    Args:
+        mols - List of rdkit Mol objects.
+        add_function - either add reactants or products to Rdkit rxn object
+    """
+    for mol in mols:
+        if mol is not None:
+            add_function(mol)
