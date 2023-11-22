@@ -6,17 +6,19 @@ from flask import Response, jsonify, request
 from flask_login import current_user, login_required
 from rdkit import Chem  # Used for converting smiles to inchi
 from rdkit.Chem import rdMolDescriptors
-from sqlalchemy import func
 
 # render_template renders html templates
 # request parses incoming request data and gives access to it
 # jsonify is used to send a JSON response to the browser
 from sources import db, models
-from sources.auxiliary import abort_if_user_not_in_workbook, sanitise_user_input, \
-    get_workbook_from_group_book_name_combination
+from sources.auxiliary import (
+    abort_if_user_not_in_workbook,
+    get_workbook_from_group_book_name_combination,
+    sanitise_user_input,
+)
+from sqlalchemy import func
 
-from . import \
-    novel_compound_bp  # imports the blueprint of the reaction table route
+from . import novel_compound_bp  # imports the blueprint of the reaction table route
 
 
 @novel_compound_bp.route("/_novel_compound", methods=["GET", "POST"])
@@ -31,12 +33,16 @@ def novel_compound() -> Response:
     # must be logged in
     # get user, their workbook, and the chemicals within that workbook to check the name is unique
     name = sanitise_user_input(request.form["name"])
+    if len(name) > 200:
+        return jsonify({"feedback": "Name must be under 200 characters long"})
     if not name:
         feedback = "Compound requires a name"
         return jsonify({"feedback": feedback})
     workgroup_name = str(request.form["workgroup"])
     workbook_name = str(request.form["workbook"])
-    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    workbook = get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
     # check novel compound db
     name_check = (
