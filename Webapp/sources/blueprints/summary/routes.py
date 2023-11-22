@@ -23,7 +23,9 @@ def summary() -> Response:
     # must be logged in
     """This function receives the reaction information from browser, calculates
     green metrics, gives hazard information, and renders the summary"""
-    if not str(request.form["demo"]) == "demo":
+    if not str(request.form["demo"]) == "demo" or not str(
+        request.form["tutorial"] == "yes"
+    ):
         # check user permission
         workgroup_name = str(request.form["workgroup"])
         workbook_name = str(request.form["workbook"])

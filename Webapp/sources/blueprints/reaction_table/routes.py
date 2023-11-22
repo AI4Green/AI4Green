@@ -41,11 +41,13 @@ def process():
     reaction_table_data = request.args.get("reaction_table")
     if reaction_table_data:
         reaction_table_data = ast.literal_eval(reaction_table_data)
+        print("here1")
     else:
         reaction_table_data = "no data"
     summary_table_data = request.args.get("summary_table")
     if summary_table_data and summary_table_data != "{}":
         summary_table_data = ast.literal_eval(summary_table_data)
+        print("here2")
     else:
         summary_table_data = "no data"
     # get user workbook
@@ -81,7 +83,7 @@ def process():
     # if reactants is cx smiles with ion - > return reformed compound
     # if reactants is smiles with ion -> return reformed compound
     # else carry on
-
+    # TODO move all ion logic to here for consistency and to include SMILES. JS is only handling cxsmiles
     # repeat for products
 
     # refactor
