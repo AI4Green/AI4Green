@@ -16,7 +16,7 @@ def get_smiles(primary_key: Tuple[str, int]) -> str:
         The SMILES string corresponding to the primary key or None
     """
     primary_key = (primary_key[0], int(primary_key[1]))
-    workbook = queries.workbook.get_workbook_from_primary_key(primary_key[1])
+    workbook = queries.workbook.get(primary_key[1])
     if current_user.Person not in workbook.users:
         abort(401)
 
