@@ -2,7 +2,6 @@ import re
 from operator import itemgetter
 from typing import Callable, Dict, List, Tuple
 
-from flask import Response
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
@@ -13,6 +12,17 @@ from sources.extensions import db
 def get_scheme_list(
     workbook_name: str, workgroup_name: str, sort_crit: str, size: str
 ) -> List[str]:
+    """
+    Gets the list of reaction scheme images as a list of strings for a particular workbook
+
+    Args:
+        workbook_name: the name of the active workbook
+        workgroup_name: the name of the active workgroup
+        sort_crit: the criteria we are using to sort the reaction schemes
+        size: the size of the image we are generating, small or other
+    Returns:
+        the list of reaction scheme images
+    """
     reaction_list = []
     query = (
         db.session.query(models.Reaction)
@@ -30,6 +40,12 @@ def get_scheme_list(
 
 
 def make_scheme_list(reaction_list: List[models.Reaction], size: str) -> List[str]:
+    """
+    Makes a list of reaction schemes from a list of reactions using the reaction SMILES
+    Args:
+        reaction_list: list of Reactions objects that we are making scheme images for
+        size: the size of scheme image we are making.
+    """
     scheme_list = []
     # get rxn schemes
     for j in range(len(reaction_list)):
