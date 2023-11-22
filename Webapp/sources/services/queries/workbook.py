@@ -14,3 +14,14 @@ def list_all() -> List[models.WorkBook]:
          List of all workbooks
     """
     return (db.session.query(models.WorkBook)).all()
+
+
+def get(primary_key: int) -> models.WorkBook:
+    """
+    Gets the workbook object from the primary key
+    """
+    return (
+        db.session.query(models.WorkBook)
+        .filter(models.WorkBook.id == primary_key)
+        .first()
+    )
