@@ -38,18 +38,6 @@ def process():
     their IUPAC names and molar weights in PubChem, forms the lists of
     reagents and solvents. and renders the reaction table"""
 
-    reaction_table_data = request.args.get("reaction_table")
-    if reaction_table_data:
-        reaction_table_data = ast.literal_eval(reaction_table_data)
-        print("here1")
-    else:
-        reaction_table_data = "no data"
-    summary_table_data = request.args.get("summary_table")
-    if summary_table_data and summary_table_data != "{}":
-        summary_table_data = ast.literal_eval(summary_table_data)
-        print("here2")
-    else:
-        summary_table_data = "no data"
     # get user workbook
     demo = request.args.get("demo")
     reaction = None
@@ -61,17 +49,10 @@ def process():
             workgroup, workbook_name
         )
         abort_if_user_not_in_workbook(workgroup, workbook_name, workbook)
-
         reaction_id = request.args.get("reaction_id")
-        reaction = (
-            db.session.query(models.Reaction)
-            .filter(models.Reaction.reaction_id == reaction_id)
-            .join(models.WorkBook)
-            .join(models.WorkGroup)
-            .filter(models.WorkGroup.name == workgroup)
-            .first()
+        reaction = services.reaction.get_from_reaction_id_and_workbook(
+            reaction_id, workbook.id
         )
-
     # Reactants, reagents, and product
     reactants0 = request.args.get(
         "reactants", 0, type=str
@@ -79,6 +60,28 @@ def process():
     products0 = request.args.get(
         "products", 0, type=str
     )  # gets the SMILES string of products
+    reactants_smiles = smiles_symbols(reactants0)
+    products_smiles = smiles_symbols(products0)
+    reaction_smiles = (reactants_smiles + ">>" + products_smiles).replace(",", ".")
+    print(reaction_smiles)
+
+    if "|" in reaction_smiles:
+        (
+            reactants_smiles_list,
+            products_smiles_list,
+        ) = services.ions.reactants_and_products_from_ionic_cx_smiles(reaction_smiles)
+    elif "+" in reaction_smiles or "-" in reaction_smiles:
+        (
+            reactants_smiles_list,
+            products_smiles_list,
+        ) = services.ions.reactants_and_products_from_ionic_smiles(reaction_smiles)
+        # reactions with no ions - make rxn object directly from string
+    else:
+        reactants_smiles_list, products_smiles_list = reactants_smiles.split(
+            ","
+        ), products_smiles.split(",")
+
+    print(reaction_smiles)
 
     # if reactants is cx smiles with ion - > return reformed compound
     # if reactants is smiles with ion -> return reformed compound
@@ -103,11 +106,8 @@ def process():
 
     if reactants0 and products0:  # if reactants and products are received,
         # Reactants
-        reactants = reactants0.split(
-            ","
-        )  # then the SMILES string is split into separate reactants
         i = 0  # index of the reactant list and their counter
-        for reactant_smiles in reactants:  # goes through the reactant list
+        for reactant_smiles in reactants_smiles_list:  # goes through the reactant list
             # replaces 'minus/plus/sharp' with the desired symbol
             reactant_smiles = smiles_symbols(reactant_smiles)
             novel_compound = False  # false but change later if true
@@ -168,7 +168,7 @@ def process():
             reactant_name = reactant.name  # the reactant name
             if reactant_name == "":  # if the reactants name is empty,
                 reactant_name = "Not found"  # then "Not found" is assigned
-            reactants[i] = reactant_name  # otherwise, it's added to the reactant list
+            # reactants[i] = reactant_name  # otherwise, it's added to the reactant list TODO
 
             reactant_hazard = reactant.hphrase
             if (
@@ -199,7 +199,7 @@ def process():
             ","
         )  # splits the SMILEs string into separate products
         k = 0  # index of the product list and their counter
-        for product_smiles in products:  # goes through the product list
+        for product_smiles in products_smiles_list:  # goes through the product list
             novel_compound = False
             # replaces 'minus/plus/sharp' with the desired symbol
             product_smiles = smiles_symbols(product_smiles)
@@ -302,7 +302,7 @@ def process():
         # Now it renders the reaction table template
         reaction_table = render_template(
             "_reaction_table.html",
-            reactants=reactants,
+            # reactants=reactants, # TODO
             reactant_mol_weights=reactant_mol_weights,
             reactant_densities=reactant_densities,
             reactant_hazards=reactant_hazards,
@@ -317,8 +317,8 @@ def process():
             product_primary_keys=product_primary_keys,
             product_table_numbers=product_table_numbers,
             reagent_table_numbers=reagent_table_numbers,
-            reaction_table_data=json.dumps(reaction_table_data),
-            summary_table_data=json.dumps(summary_table_data),
+            # reaction_table_data=json.dumps(reaction_table_data),
+            # summary_table_data=json.dumps(summary_table_data),
             sol_rows=sol_rows,
             reaction=reaction,
         )

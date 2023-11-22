@@ -5,7 +5,7 @@ from rdkit import Chem
 from rdkit.Chem.rdChemReactions import ChemicalReaction
 
 
-def ion_containing_smiles(smiles: str) -> ChemicalReaction:
+def reaction_from_ionic_smiles(smiles: str) -> ChemicalReaction:
     """
     Process reaction smiles exported from ketcher that contain ions to a rdkit ChemicalReaction to make an image from
 
@@ -15,9 +15,7 @@ def ion_containing_smiles(smiles: str) -> ChemicalReaction:
     Returns:
         rdChemReactions.ChemicalReaction: rdkit ChemicalReaction object.
     """
-    reactants, products = smiles.split(">>")
-    reactants_list = update_ion_containing_list(reactants.split("."))
-    products_list = update_ion_containing_list(products.split("."))
+    reactants_list, products_list = reactants_and_products_from_ionic_smiles(smiles)
 
     reactants_mols_ls = [Chem.MolFromSmiles(x) for x in reactants_list]
     products_mols_ls = [Chem.MolFromSmiles(x) for x in products_list]
@@ -31,6 +29,25 @@ def ion_containing_smiles(smiles: str) -> ChemicalReaction:
     add_mols_to_reaction(products_mols_ls, rxn.AddProductTemplate)
 
     return rxn
+
+
+def reactants_and_products_from_ionic_smiles(
+    smiles: str,
+) -> Tuple[List[str], List[str]]:
+    """
+    gets the reactants and products SMILES with ionic compounds from reaction SMILES with ions present
+
+    Args:
+        smiles -  the smiles with a charged chemical species present
+    Returns:
+        reactants_ls - the list of reactants as SMILES strings with ions combined to ionic compounds
+        products_ls - the list of products as SMILES strings with ions combined to ionic compounds
+
+    """
+    reactants, products = smiles.split(">>")
+    reactants_list = update_ion_containing_list(reactants.split("."))
+    products_list = update_ion_containing_list(products.split("."))
+    return reactants_list, products_list
 
 
 def update_ion_containing_list(compounds_list: List[str]) -> List[str]:
@@ -160,10 +177,38 @@ def assess_neutrality(ion_string: str) -> str:
     return "neutral" if charge_balance == 0 else "not neutral"
 
 
-def ion_containing_cx_smiles(cx_smiles: str) -> Chem.rdChemReactions.ChemicalReaction:
-    """ "
+def reaction_from_ionic_cx_smiles(cx_smiles: str) -> ChemicalReaction:
+    """
     Process reaction smiles from marivn js that contain ions to a rdkit ChemicalReaction to make an image from
-    These use CXSMILES to indicate any ions and their posiitons f:idx,idx2|SMILES
+    These use CXSMILES to indicate any ions and their positions f:idx,idx2|SMILES
+    """
+    reactants_ls, products_ls = reactants_and_products_from_ionic_cx_smiles(cx_smiles)
+    # convert to mol objects
+    reactants_mols_ls = [Chem.MolFromSmiles(x) for x in reactants_ls]
+    products_mols_ls = [Chem.MolFromSmiles(x) for x in products_ls]
+    # reagents
+    # make a rdkit Reaction object.
+    rxn = Chem.rdChemReactions.ChemicalReaction()
+    # add reactants, reagents, and products to the Reaction object
+    for reactant in reactants_mols_ls:
+        rxn.AddReactantTemplate(reactant)
+    for product in products_mols_ls:
+        rxn.AddProductTemplate(product)
+    return rxn
+
+
+def reactants_and_products_from_ionic_cx_smiles(
+    cx_smiles: str,
+) -> Tuple[List[str], List[str]]:
+    """
+    Gets the reactants and products SMILES with ionic compounds from reaction CXSMILES with ions present
+
+    Args:
+        cx_smiles -  the cx_smiles with a charged chemical species present
+    Returns:
+        reactants_ls - the list of reactants as SMILES strings with ions combined to ionic compounds
+        products_ls - the list of products as SMILES strings with ions combined to ionic compounds
+
     """
     # get list of ion positions
     ion_list = cx_smiles.split("f:")[1].split("|")[0].split(",")
@@ -222,18 +267,8 @@ def ion_containing_cx_smiles(cx_smiles: str) -> Chem.rdChemReactions.ChemicalRea
     for salt_dict in product_salt_dict_list:
         del products_ls[salt_dict["insert_index"] : salt_dict["end_index"]]
         products_ls.insert(salt_dict["insert_index"], salt_dict["salt_smiles"])
-    # convert to mol objects
-    reactants_mols_ls = [Chem.MolFromSmiles(x) for x in reactants_ls]
-    products_mols_ls = [Chem.MolFromSmiles(x) for x in products_ls]
-    # reagents
-    # make a rdkit Reaction object.
-    rxn = Chem.rdChemReactions.ChemicalReaction()
-    # add reactants, reagents, and products to the Reaction object
-    for reactant in reactants_mols_ls:
-        rxn.AddReactantTemplate(reactant)
-    for product in products_mols_ls:
-        rxn.AddProductTemplate(product)
-    return rxn
+
+    return reactants_ls, products_ls
 
 
 def add_mols_to_reaction(mols: List[Chem.Mol], add_function: Callable) -> None:

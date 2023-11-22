@@ -7,7 +7,10 @@ from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
 from sources import models
 from sources.extensions import db
-from sources.services.ions import ion_containing_cx_smiles, ion_containing_smiles
+from sources.services.ions import (
+    reaction_from_ionic_cx_smiles,
+    reaction_from_ionic_smiles,
+)
 
 
 def list_recent() -> List[models.Reaction]:
@@ -39,6 +42,25 @@ def count() -> int:
         The number of reactions in the database
     """
     return db.session.query(models.Reaction).count()
+
+
+def get_from_reaction_id_and_workbook(
+    reaction_id: str, workbook_id: int
+) -> models.Reaction:
+    """
+    Gets the reaction from the reaction_id and workbook id
+
+    Args:
+        reaction_id - in format WB1-001
+        workbook_id - the primary key integer id for the workbook the reaction belongs to
+    """
+    return (
+        db.session.query(models.Reaction)
+        .filter(models.Reaction.reaction_id == reaction_id)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook_id)
+        .first()
+    )
 
 
 def list_active_in_workbook(
@@ -92,9 +114,9 @@ def make_scheme_list(reaction_list: List[models.Reaction], size: str) -> List[st
             # we test to see if ions are present in which case further logic is needed
             # first we see if it is from marvin js and contains ions
             if len(reaction_smiles.split(" |")) > 1:
-                rxn = ion_containing_cx_smiles(reaction_smiles)
+                rxn = reaction_from_ionic_cx_smiles(reaction_smiles)
             elif "+" in reaction_smiles or "-" in reaction_smiles:
-                rxn = ion_containing_smiles(reaction_smiles)
+                rxn = reaction_from_ionic_smiles(reaction_smiles)
                 # reactions with no ions - make rxn object directly from string
             else:
                 rxn = AllChem.ReactionFromSmarts(reaction_smiles, useSmiles=True)

@@ -71,87 +71,9 @@ function reactionSmilesToReactantsAndProductsSmiles(smiles) {
   let array = reaction.split(">");
   let reactants = array[0].split(".");
   let products = array[2].split(".");
-  // if "f:" is at the end of the smiles string, it contains an ionic compound and needs further processing
-  if (smiles.includes("f:") === true) {
-    [reactants, products] = processSalts(smiles, reactants, products);
-  }
   return [reactants, products];
 }
 
-/**
- * Processes cxsmiles (Chemaxon SMILES from marvin JS) that contain an ionic compound.
- * @param {string} smiles - Reaction SMILES string
- * @param {Array} reactants - Reactants SMILES array
- * @param {Array} products - Products SMILES array
- * @returns {Array} Array containing reactants and products, each as an array
- */
-function processSalts(smiles, reactants, products) {
-  // split after the comma to see how many ionic compounds in reaction smiles
-  let ionList = smiles.split("f:")[1].split("|")[0].split(",");
-  // for each ionic compound, join all ions to make the full salt and replace ions in reactant/product list
-  let productSaltDictList = [];
-  let reactantSaltDictList = [];
-  for (let adjacentIons of ionList) {
-    // make list of index, and smiles, then join to make a string of the full salt from the ions
-    let ionIndexList = adjacentIons.split(".").map(Number);
-    let ionCompoundsSmiles = []; // [Pd+, OAc-, OAc-]
-    for (let idx of ionIndexList) {
-      ionCompoundsSmiles.push(compounds[idx]);
-    }
-    let saltSmiles = ionCompoundsSmiles.join(".");
-    // determine if reactant or product
-    let rxnComponent;
-    if (rl > ionIndexList[0]) {
-      rxnComponent = "reactant";
-    } else {
-      rxnComponent = "product";
-    }
-    // ions in previous salts for only same rxn component (reactant or product) - to determine insert position
-    // when splicing into reactant/product list.
-    let ionsInPreviousSalts = 0;
-    let insertPosition;
-    if (rxnComponent === "reactant") {
-      for (let previousSaltDict of reactantSaltDictList) {
-        ionsInPreviousSalts += previousSaltDict["numberOfIons"];
-      }
-      insertPosition =
-        ionIndexList[0] - ionsInPreviousSalts + reactantSaltDictList.length;
-      reactantSaltDictList.push({
-        saltSmiles: saltSmiles,
-        numberOfIons: ionCompoundsSmiles.length,
-        insertPosition: insertPosition,
-      });
-    }
-    if (rxnComponent === "product") {
-      for (let previousSaltDict of productSaltDictList) {
-        ionsInPreviousSalts += previousSaltDict["numberOfIons"];
-      }
-      insertPosition =
-        ionIndexList[0] - ionsInPreviousSalts + productSaltDictList.length - rl;
-      productSaltDictList.push({
-        saltSmiles: saltSmiles,
-        numberOfIons: ionCompoundsSmiles.length,
-        insertPosition: insertPosition,
-      });
-    }
-  }
-  // splice the salts into the lists replacing the ions that they contain
-  for (let saltDict of reactantSaltDictList) {
-    reactants.splice(
-      saltDict["insertPosition"],
-      saltDict["numberOfIons"],
-      saltDict["saltSmiles"],
-    );
-  }
-  for (let saltDict of productSaltDictList) {
-    products.splice(
-      saltDict["insertPosition"],
-      saltDict["numberOfIons"],
-      saltDict["saltSmiles"],
-    );
-  }
-  return [reactants, products];
-}
 /**
  * Removes reagents between the two '>' symbols from the reaction SMILES
  * @param {string} smiles - Reaction SMILES string
