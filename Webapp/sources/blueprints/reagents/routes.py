@@ -1,12 +1,9 @@
 import re
 
-from flask import Response, jsonify, request, abort
-from flask_login import login_required
+from flask import Response, jsonify, request
+from sources import db, models, services
+from sources.auxiliary import abort_if_user_not_in_workbook, sanitise_user_input
 from sqlalchemy import func
-
-from sources import db, models
-from sources.auxiliary import sanitise_user_input, abort_if_user_not_in_workbook, \
-    get_workbook_from_group_book_name_combination
 
 # request parses incoming request data and gives access to it
 # jsonify is used to send a JSON response to the browser
@@ -26,9 +23,12 @@ def reagents() -> Response:
     reagent = reagent.replace("\u00A0", " ")  # add back in space to search database
     workgroup_name = str(request.form["workgroup"])
     workbook_name = str(request.form["workbook"])
-    workbook = get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
 
+    novel_compound = False
     number = request.form["number"]  # gets the reagent number from the browser
     cas_regex = r"\b[1-9]{1}[0-9]{1,6}-\d{2}-\d\b"
     cas_number = re.findall(cas_regex, reagent)
@@ -39,7 +39,9 @@ def reagents() -> Response:
             .filter(models.Compound.cas == reagent)
             .first()
         )
-        if found_reagent is None and workbook:  # check the novel compound db for the cas number
+        if (
+            found_reagent is None and workbook
+        ):  # check the novel compound db for the cas number
             found_reagent = (
                 db.session.query(models.NovelCompound)
                 .filter(models.NovelCompound.cas == reagent)
@@ -64,6 +66,8 @@ def reagents() -> Response:
                 .filter(models.WorkBook.id == workbook.id)
                 .first()
             )
+            if found_reagent:
+                novel_compound = True
         if (
             found_reagent is None
         ):  # If still no match find a list of partial matches and send to the frontend
@@ -94,7 +98,11 @@ def reagents() -> Response:
         concentration = 0 if concentration == "-" else concentration
         # assigns 0 if the reagent density is not found in the database
         hazards = found_reagent.hphrase  # reagent hazards
-        primary_key = found_reagent.id
+        if novel_compound is True:
+            primary_key = f"('{found_reagent.name}', {found_reagent.workbook})"
+        else:
+            primary_key = found_reagent.id
+
         smiles = found_reagent.smiles
         # sends the JSON with the reagent data back to the browser
         return jsonify(
