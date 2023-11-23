@@ -5,6 +5,7 @@ from . import (
     hazard_code,
     ions,
     novel_compound,
+    person,
     reaction,
     solvent,
     user,

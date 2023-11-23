@@ -59,6 +59,8 @@ async function createReactionTable() {
   let workbook = $("#js-active-workbook").val();
   let reaction_id = $("#js-reaction-id").val();
   let demo_mode = $("#js-demo").val();
+  smilesNew = replaceSmilesSymbols(smilesNew);
+
   // Asynchronous request to _process in routes.py
   $.ajax({
     type: "GET",
@@ -69,6 +71,8 @@ async function createReactionTable() {
       reactants +
       "&products=" +
       products +
+      "&reactionSmiles=" +
+      smilesNew +
       "&demo=" +
       demo_mode +
       "&workgroup=" +

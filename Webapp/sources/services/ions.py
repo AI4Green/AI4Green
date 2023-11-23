@@ -211,6 +211,7 @@ def reactants_and_products_from_ionic_cx_smiles(
 
     """
     # get list of ion positions
+    # TODO fix this function. Fails on Zinc Chloride
     ion_list = cx_smiles.split("f:")[1].split("|")[0].split(",")
     # reagents to be added too.
     reactant_salt_dict_list, product_salt_dict_list = [], []

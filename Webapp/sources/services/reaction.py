@@ -45,20 +45,20 @@ def count() -> int:
 
 
 def get_from_reaction_id_and_workbook(
-    reaction_id: str, workbook_id: int
+    reaction_id: str, workbook: models.WorkBook
 ) -> models.Reaction:
     """
     Gets the reaction from the reaction_id and workbook id
 
     Args:
         reaction_id - in format WB1-001
-        workbook_id - the primary key integer id for the workbook the reaction belongs to
+        workbook - The workbook the reaction belongs to
     """
     return (
         db.session.query(models.Reaction)
         .filter(models.Reaction.reaction_id == reaction_id)
         .join(models.WorkBook)
-        .filter(models.WorkBook.id == workbook_id)
+        .filter(models.WorkBook.id == workbook.id)
         .first()
     )
 
@@ -177,3 +177,29 @@ def to_dict(reaction_list: List[models.Reaction]) -> List[Dict]:
         }
         reactions.append(reaction_details)
     return reactions
+
+
+def add_addendum(
+    reaction: models.Reaction, reaction_note_text: str, author: models.Person
+) -> models.ReactionNote:
+    """
+    Add a new addendum to a reaction.
+
+    Args:
+        reaction - The reaction object to which the addendum is added.
+        reaction_note_text - The text content of the addendum.
+        author - The Person object for the author of the addendum
+
+    Returns:
+        The newly created reactionNote
+
+    """
+    new_addendum = models.ReactionNote(
+        text=reaction_note_text,
+        time_of_creation=datetime.now(),
+        author=author.id,
+        reaction=reaction.id,
+    )
+    db.session.add(new_addendum)
+    db.session.commit()
+    return new_addendum
