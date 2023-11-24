@@ -1145,11 +1145,10 @@ function calcVolume(density, mass, concentration, amount) {
       (mass * massFactor[reactantMassUnit]) /
       (density * volumeFactor[reactantVolumeUnit]);
   } else if (density == 0 && concentration > 0) {
+    // divide by 1000 because mL is 1 not 0.001
     volume =
-      (volumeFactor[reactantVolumeUnit] *
-        amountFactor[reactantAmountUnit] *
-        amount) /
-      concentration;
+      (amountFactor[reactantAmountUnit] * amount) /
+      ((concentration * volumeFactor[reactantVolumeUnit]) / 1000);
   } else {
     volume = 0;
   }
