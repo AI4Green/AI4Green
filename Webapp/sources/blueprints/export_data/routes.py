@@ -5,10 +5,12 @@ from typing import Optional
 import pandas as pd
 from flask import Response, flash, redirect, render_template, url_for
 from flask_login import login_required
-
 from sources import models
-from sources.auxiliary import (get_notification_number, get_workgroups,
-                               security_member_workgroup_workbook)
+from sources.auxiliary import (
+    get_notification_number,
+    get_workgroups,
+    security_member_workgroup_workbook,
+)
 from sources.dto import ReactionSchema
 from sources.extensions import db
 
@@ -33,10 +35,10 @@ def export_data_csv(workgroup: str, workbook: str) -> Response:
 
     # convert to list of dictionaries
     reaction_schema = ReactionSchema()
-    reaction_list = [reaction_schema.dump(i) for i in reaction_list]
+    reaction_dict_list = [reaction_schema.dump(i) for i in reaction_list]
 
     # convert reaction table and summary table to dictionaries and remove summary to print
-    for reaction in reaction_list:
+    for reaction in reaction_dict_list:
         reaction["reaction_table_data"] = ast.literal_eval(
             str(reaction["reaction_table_data"])
         )
@@ -51,7 +53,7 @@ def export_data_csv(workgroup: str, workbook: str) -> Response:
             pass
 
     # make data frame
-    df = pd.DataFrame(reaction_list)
+    df = pd.DataFrame(reaction_dict_list)
 
     # get creator usernames
     # TODO: Could serialize this on the DTO in future.
@@ -67,18 +69,10 @@ def export_data_csv(workgroup: str, workbook: str) -> Response:
             creators.append(person.user.username)
     df["creator"] = creators
 
-    # reactants, reagents, products, or solvents change to empty
-    def clear_empty(column):
-        ls_column = df[column].to_list()
-        ls_column = [str(x).replace(", ''", "") for x in ls_column]
-        ls_column = [str(x).replace("''", "") for x in ls_column]
-        ls_column = [str(x).replace("[]", "") for x in ls_column]
-        return ls_column
-
-    df["reactants"] = clear_empty("reactants")
-    df["products"] = clear_empty("products")
-    df["reagents"] = clear_empty("reagents")
-    df["solvent"] = clear_empty("solvent")
+    df["reactants"] = clear_empty("reactants", df)
+    df["products"] = clear_empty("products", df)
+    df["reagents"] = clear_empty("reagents", df)
+    df["solvent"] = clear_empty("solvent", df)
     # make selects empty
     df = df.replace(to_replace='"-select-"', value='""', regex=True)
 
@@ -97,6 +91,7 @@ def export_data_csv(workgroup: str, workbook: str) -> Response:
     }
     solvent_hazards = []
     for sol_list in df["solvent"].tolist():
+        reaction_solvent_hazards_list = []
         if sol_list:
             for n in sol_list:
                 flag = (
@@ -104,8 +99,9 @@ def export_data_csv(workgroup: str, workbook: str) -> Response:
                     .filter(models.Solvent.name == n)
                     .first()
                 )
-                flag = flag[0] if flag else None
-                solvent_hazards.append(flags[flag])
+                flag = flag[0] if flag else 5
+                reaction_solvent_hazards_list.append(flags[flag])
+            solvent_hazards.append(reaction_solvent_hazards_list)
         else:
             solvent_hazards.append("")
     df.insert(11, "solvent sustainability", solvent_hazards)
@@ -202,7 +198,7 @@ def export_data_csv(workgroup: str, workbook: str) -> Response:
             x + "}" for x in df["summary_table_data_supplementary"].tolist()
         ]
         # remove to_export raw data
-        for reaction in reaction_list:
+        for reaction in reaction_dict_list:
             del reaction["summary_table_data"]["to_export"]
         # put summary table data together in the same column
         df["summary_table_data"] = [
@@ -217,6 +213,7 @@ def export_data_csv(workgroup: str, workbook: str) -> Response:
             x.replace('"', "'") for x in df["summary_table_data"].tolist()
         ]
         df = df.drop(columns=["summary_table_data_supplementary"])
+
     except KeyError:
         pass
 
@@ -231,9 +228,7 @@ def export_data_csv(workgroup: str, workbook: str) -> Response:
     "/export_data_pdf/<workgroup>/<workbook>/<sort_crit>", methods=["GET", "POST"]
 )
 @login_required
-def export_data_pdf(
-    workgroup: str, workbook: str, sort_crit: str
-) -> Response:
+def export_data_pdf(workgroup: str, workbook: str, sort_crit: str) -> Response:
     # must be logged in and member of workbook and workgroup
     if not security_member_workgroup_workbook(workgroup, workbook):
         flash("You do not have permission to view this page")
@@ -273,3 +268,12 @@ def export_data_pdf(
         workgroups=workgroups,
         notification_number=notification_number,
     )
+
+
+# reactants, reagents, products, or solvents change to empty
+def clear_empty(column, df):
+    ls_column = df[column].to_list()
+    ls_column = [str(x).replace(", ''", "") for x in ls_column]
+    ls_column = [str(x).replace("''", "") for x in ls_column]
+    ls_column = [str(x).replace("[]", "") for x in ls_column]
+    return ls_column
