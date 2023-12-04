@@ -5,7 +5,7 @@ from typing import Optional
 import pandas as pd
 from flask import Response, flash, redirect, render_template, url_for
 from flask_login import login_required
-from sources import models
+from sources import models, services
 from sources.auxiliary import (
     get_notification_number,
     get_workgroups,
@@ -16,27 +16,20 @@ from sources.extensions import db
 
 from . import export_data_bp
 
+# ### structure - 1 route per format
+
 
 @export_data_bp.route(
-    "/export_data_csv/<workgroup>/<workbook>", methods=["GET", "POST"]
+    "export_data/csv/<workgroup-name>/<workbook_name>", methods=["GET", "POST"]
 )
 @login_required
 def export_data_csv(workgroup: str, workbook: str) -> Response:
-    # get all reaction data for user
-    reaction_list = (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.status == "active")
-        .join(models.WorkBook)
-        .filter(models.WorkBook.name == workbook)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
-        .all()
+    reaction_list = services.reaction.list_active_in_workbook(
+        workbook, workgroup, sort_crit="time"
     )
-
     # convert to list of dictionaries
     reaction_schema = ReactionSchema()
     reaction_dict_list = [reaction_schema.dump(i) for i in reaction_list]
-
     # convert reaction table and summary table to dictionaries and remove summary to print
     for reaction in reaction_dict_list:
         reaction["reaction_table_data"] = ast.literal_eval(
@@ -185,7 +178,6 @@ def export_data_csv(workgroup: str, workbook: str) -> Response:
         df["summary_table_data_supplementary"] = [
             x["to_export"] for x in df["summary_table_data"].tolist()
         ]
-        print(df["summary_table_data_supplementary"].tolist())
         for t_r in to_replace_replace:
             df["summary_table_data_supplementary"] = [
                 x.replace(t_r[0], t_r[1])

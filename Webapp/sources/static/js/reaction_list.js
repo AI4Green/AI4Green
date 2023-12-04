@@ -198,7 +198,7 @@ function getpdf() {
 function getcsv() {
   let workgroup = getVal("#active-workgroup");
   let workbook = getVal("#active-workbook");
-  window.location = `/export_data_csv/${workgroup}/${workbook}`;
+  window.location = `/export_data/csv/${workgroup}/${workbook}`;
 }
 
 /**
