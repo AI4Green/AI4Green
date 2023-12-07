@@ -1,0 +1,86 @@
+<div class="div_before_table">
+    <br>
+    <h3>S<sub>N</sub>Ar & S<sub>N</sub>2</h3>
+    <p> Nucleophilic substitution is a reaction mechanism whereby a nucleophile replaces a functional group
+    in an electrophilic molecule, usually in the presence of a base. Nucleophilic aromatic substitution (S<sub>N</sub>Ar) and bimolecular nucleophilic substitution (S<sub>N</sub>2)
+        are sub-categories of nucleophilic substitution.
+    </p>
+    <br><br>
+    <div style="text-align: center;">
+    <img alt="SNar and SN2 reaction scheme" style="width: 90%" src="{{url_for('static', filename='img/solvent_PCA_reactions/snar_reaction_scheme.svg')}}">
+    </div>
+    <br><br>
+    S<sub>N</sub>Ar and S<sub>N</sub>2 reactions proceed <i>via</i> charged intermediates or transition states which can be stabilised by basic, polar aprotic solvents. These reactions are also accelerated
+    by poorly solvated nucleophiles, so solvents with fewer hydrogen bonding groups are favoured. To capture these parameters, the descriptors below were included in the PCA map.
+
+    <br><br>
+    <table class="table table-sm table-bordered">
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Measured Dipole Moment (DeBye)'>Dipole Moment</a>
+            </td>
+
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Measured Dielectric Constant'>Dielectric Constant</a>
+            </td>
+
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hydrogen Bond Donor Ability'>Kamlet-Taft &alpha;</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hydrogen Bond Acceptor Ability'>Kamlet-Taft &beta;</a>
+            </td>
+
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Polarizability'>Kamlet-Taft &pi;<sup>*</sup></a>
+            </td>
+
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Dipolar Interactions'>Polarity <i>&delta;<sub>p</sub></i></a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Hydrogen Bonding'>Hydrogen Bonding <i>&delta;<sub>h</sub></i></a>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <h4>Experimental Data</h4>
+    <h5>S<sub>N</sub>Ar</h5>
+    A report by <a href="https://pubs.rsc.org/en/content/articlelanding/2009/gc/b808364a" target="_blank">Cseri <i>et al</i>.</a>,<sup>1</sup> investigated a brief solvent screen
+    for the S<sub>N</sub>Ar reaction of bis(4-fluorophenyl) sulfone with phenol. The data for this screen can be viewed by selecting "SNAr" in the Change Colour dropdown.
+    <br><br>
+
+    <div style="text-align: center;">
+        <img alt="SNAr reaction data" style="width: 95%" src="{{url_for('static', filename='img/solvent_PCA_reactions/snar.svg')}}">
+    </div>
+    <br><br>
+    <h5>S<sub>N</sub>2</h5>
+    Similar solvent effects have been seen for S<sub>N</sub>2 reactions. Work by <a href="https://pubs.rsc.org/en/content/articlelanding/2009/gc/b808364a" target="_blank">Schleicher <i>et al</i>.</a>,<sup>2</sup>
+    demonstrated that for the synthesis of ionic liquids, solvents with higher Kamlet-Taft &pi;<sup>*</sup> and  &alpha; parameters enhanced the reaction rates, while solvent with higher Kamlet-Taft &beta; parameters were detrimental.
+    <br><br>
+    <div style="text-align: center;">
+        <img alt="SN2 reaction data" style="width: 95%" src="{{url_for('static', filename='img/solvent_PCA_reactions/sn2.svg')}}">
+    </div>
+    <br><br>
+    <h4>References</h4>
+    <p style="font-size: 11px">
+        1. Miller J, Parker AJ, Dipolar Aprotic Solvents in Bimolecular Aromatic Nucleophilic Substitution Reactions,
+        J. Am. Chem. Soc. 1961;83:117-123.
+        <a href="https://doi.org/10.1021/ja01462a023" target="_blank">https://doi.org/10.1021/ja01462a023</a>.<br>
+        2. Schleicher JC, Scurto AM, Study of 1, 3, Kinetics and solvent effects in the synthesis of ionic liquids: imidazolium. Green Chem.
+        2009;11(8):882-886. <a href="https://doi.org/10.1039/B808364A" target="_blank">https://doi.org/10.1039/B808364A</a>.<br>
+    </p>
+    <h4>Further Reading</h4>
+    <p style="font-size: 11px">
+        fill in further reading
+    </p>
+</div>
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>

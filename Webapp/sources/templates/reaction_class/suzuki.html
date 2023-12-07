@@ -1,0 +1,123 @@
+<div class="div_before_table">
+    <br>
+    <h3>Suzuki-Miyaura coupling</h3>
+    <p> The Suzuki-Miyaura reaction is a type of transition metal-catalysed cross-coupling that forms a carbon-carbon bond between a boronic ester and
+        an aryl halide. Productivity in these reactions often depends on the choice of pre-catalyst, ligand, base, solvent, temperature and additives.
+    </p>
+    <br><br>
+    <div style="text-align: center;">
+    <img alt="Suzuki Reaction Scheme" style="width: 90%" src="{{url_for('static', filename='img/solvent_PCA_reactions/suzuki_general.svg')}}">
+    </div>
+    <br><br>
+    Suzuki-Miyaura reactions can be run in a wide range of solvents. Dipolar aprotics are the dominant choice due to
+    their ability to dissolve lipophilic and organometalic compounds alike. However, a study conducted by
+    <a href="https://www.beilstein-journals.org/bjoc/articles/16/89" target="_blank">Sherwood</a>,<sup>1</sup> demonstrated
+    that solvent effects depend heavily on the specific conditions used, making it difficult to understand which solvent
+    properties are important for high conversion. To capture this, a range of descriptors were used to generate the PCA map.
+
+    <br><br>
+    <table class="table table-sm table-bordered">
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Molecular Weight (g/mol)'>Molecular Weight</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Experimental Density (g/cm<sup>3</sup>)'>Density</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Calculated Molar Volume (cm<sup>3</sup>/mol)'>Molar Volume</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Experimental Boiling Point (&#8451;)'>Boiling Point</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Experimental Refractive Index'>Refractive Index</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Experimental Dynamic Viscosity (cP)'>Viscosity</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Experimental Vapour Pressure (mmHg)'>Vapour Pressure</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Experimental Octanol-Water Partition Coefficient'>LogP</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Measured Dipole Moment (DeBye)'>Dipole Moment</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Measured Dielectric Constant'>Dielectric Constant</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hydrogen Bond Donor Ability'>Kamlet-Taft &alpha;</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hydrogen Bond Acceptor Ability'>Kamlet-Taft &beta;</a>
+            </td>
+        <tr>
+        <td>
+            <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Polarizability'>Kamlet-Taft &pi;<sup>*</sup></a>
+        </td>
+        <td>
+            <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Dispersion'>Dispersion <i>&delta;<sub>d</sub></i></a>
+        </td>
+        <td>
+            <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Dipolar Interactions'>Polarity <i>&delta;<sub>p</sub></i></a>
+        </td>
+    </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Hydrogen Bonding'>Hydrogen Bonding <i>&delta;<sub>h</sub></i></a>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <h4>Experimental Data</h4>
+    <h5>Pd-catalysed Suzuki-Miyaura Coupling</h5>
+    A study by <a href="https://doi.org/10.1039/C2GC36900A" target="_blank">Lei <i>et al.</i></a><sup>2</sup> investigated the use of green solvents for the Suzuki-Miyaura coupling of
+    Boc-protected amides with aryl boronic acids. The yield data for this investigation can be viewed by selecting "Suzuki-Miyaura Pd" in the Change Colour dropdown.
+
+    <div style="text-align: center;">
+    <img alt="Pd-catalysed Suzuki Reaction Scheme" style="width: 90%" src="{{url_for('static', filename='img/solvent_PCA_reactions/Pd_suzuki.svg')}}">
+    </div>
+    <br><br>
+    <h5>Ni-catalysed Suzuki-Miyaura Coupling</h5>
+    A separate investigation by <a href="https://pubs.acs.org/doi/10.1021/ol401727y" target="_blank">Ramgren <i>et al.</i></a><sup>3</sup> undertook a solvent screen
+    for the optimisation of a Ni-catalysed Suzuki-Miyaura cross coupling of napthyl sulphamate with phenyl bornic acid. The yield data for this investigation can be viewed by selecting
+    "Suzuki-Miyaura Ni" in the Change Colour dropdown.
+
+    <div style="text-align: center;">
+    <img alt="Pd-catalysed Suzuki Reaction Scheme" style="width: 75%" src="{{url_for('static', filename='img/solvent_PCA_reactions/Ni_suzuki.svg')}}">
+    </div>
+    <br><br>
+
+    <h4>References</h4>
+    <p style="font-size: 11px">
+        1. Sherwood J. Suzuki–Miyaura cross coupling is not an informative reaction to demonstrate the performance of new solvents.
+        Beilstein J. Org. Chem. 2020;16:1001-1005.
+        <a href="https://doi.org/10.3762/bjoc.16.89" target="_blank">https://doi.org/10.3762/bjoc.16.89</a>.
+        <br>
+        2.Lei P, Mu Y, Wang Y, Wang Y, ma Z, Feng J, Liu X, Szostak M. Green Solvent Selection for Suzuki–Miyaura
+        Coupling of Amides. ACS Sustainable Chem. Eng. 2021;9:552-559.
+        <a href="https://doi.org/10.1021/acssuschemeng.0c08044" target="_blank">https://doi.org/10.1021/acssuschemeng.0c08044</a>.
+        <br>
+        3. Ramgren SD, Hie L, Ye Y, Garg MK. Nickel-Catalyzed Suzuki–Miyaura Couplings in Green Solvents. Org. Lett.
+        2013;15:3950-3953
+        <a href="https://doi.org/10.1021/ol401727y" target="_blank">https://doi.org/10.1021/ol401727y</a>.
+    </p>
+    <h4>Further Reading</h4>
+    <p style="font-size: 11px">
+        fill in further reading
+    </p>
+</div>
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>

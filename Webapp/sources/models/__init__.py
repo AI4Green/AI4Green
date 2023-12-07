@@ -15,6 +15,7 @@ from .institution import Institution
 from .news_item import NewsItem
 from .notification import Notification
 from .novel_compound import NovelCompound
+from .PCA_graph import PCAGraph
 from .person import (
     Person,
     t_Person_WorkBook,

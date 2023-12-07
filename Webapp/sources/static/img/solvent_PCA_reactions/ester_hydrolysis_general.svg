@@ -1,0 +1,50 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="469px" height="75px" viewBox="0 0 469 75" style="background-color: #ffffff00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" >
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 4.62832 70.8)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+R</text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 19.0717 63)" font-style="normal" font-weight="normal" font-size="150px" font-family="Arial" >
+1</text>
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 1109.32,4271.36 L 1103.56,4260.83 L 1234.44,4188.82 L 1234.27,4202.61 L 1109.32,4271.36 Z " />
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 58.9547 68.8)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+OR</text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 88.9547 61)" font-style="normal" font-weight="normal" font-size="150px" font-family="Arial" >
+2</text>
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 1234.27,4202.61 L 1234.44,4188.82 L 1401.37,4285.47 L 1395.37,4295.86 L 1234.27,4202.61 Z " />
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 34.0132 25.6)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+O</text>
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 1214.5,4210.2 L 1202.5,4210.2 L 1202.5,4019.67 L 1214.5,4019.67 L 1214.5,4210.2 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 1266.34,4210.96 L 1254.34,4210.96 L 1254.34,4019.67 L 1266.34,4019.67 L 1266.34,4210.96 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 3139.75,4256 L 2015,4256 L 2015,4244 L 3139.75,4244 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 3375,4250 C 3375,4250 3105,4318.5 3105,4318.5 C 3105,4318.5 3138.75,4279.97 3138.75,4250 C 3138.75,4219.59 3105,4180.5 3105,4180.5 C 3105,4180.5 3375,4250 3375,4250 C 3375,4250 3375,4250 3375,4250 " />
+<path stroke="#000000" stroke-width="1" fill="none" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 3375,4250 C 3375,4250 3105,4318.5 3105,4318.5 C 3105,4318.5 3138.75,4279.97 3138.75,4250 C 3138.75,4219.59 3105,4180.5 3105,4180.5 C 3105,4180.5 3375,4250 3375,4250 C 3375,4250 3375,4250 3375,4250 " />
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 130.85 47)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+OH</text>
+<path stroke="#000000" stroke-width="10" fill="none" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 2003.52,3976.15 A 71.7999,71.7999 0 1 0 2147.12,3976.15A 71.7999,71.7999 0 1 0 2003.52,3976.15Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 2035.66,3970.82 L 2114.32,3970.82 L 2114.32,3980.82 L 2035.66,3980.82 Z " />
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 168.85 48)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+or</text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 196.85 48)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+H</text>
+<path stroke="#000000" stroke-width="10" fill="none" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 2950.68,4029.86 A 71.7999,71.7999 0 1 0 3094.28,4029.86A 71.7999,71.7999 0 1 0 2950.68,4029.86Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 2982.81,4024.53 L 3061.48,4024.53 L 3061.48,4034.53 L 2982.81,4034.53 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 3027.14,3990.2 L 3027.14,4068.86 L 3017.14,4068.86 L 3017.14,3990.2 Z " />
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 273.628 66.8)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+R</text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 288.072 59)" font-style="normal" font-weight="normal" font-size="150px" font-family="Arial" >
+1</text>
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 3799.32,4231.36 L 3793.56,4220.83 L 3924.44,4148.82 L 3924.27,4162.61 L 3799.32,4231.36 Z " />
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 327.955 64.8)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+OH</text>
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 3924.27,4162.61 L 3924.44,4148.82 L 4091.35,4245.45 L 4085.35,4255.84 L 3924.27,4162.61 Z " />
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 303.013 21.6)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+O</text>
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 3904.49,4170.2 L 3892.5,4170.2 L 3892.5,3979.67 L 3904.49,3979.67 L 3904.49,4170.2 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -81.65 -373)" d="M 3956.33,4170.96 L 3944.34,4170.96 L 3944.34,3979.67 L 3956.33,3979.67 L 3956.33,4170.96 Z " />
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 381.85 51)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
++</text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 411.85 55)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+HOR</text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 456.293 47.2)" font-style="normal" font-weight="normal" font-size="150px" font-family="Arial" >
+2</text>
+</svg>
