@@ -23,6 +23,7 @@ from .javascript_callbacks import (
     get_reset_interactive_callback,
     get_save_callback,
 )
+from ..main.routes import get_custom_colours
 
 
 def get_html_dict() -> Dict:
@@ -127,6 +128,9 @@ def CHEM21_colours() -> Dict:
     Returns:
         Dict, contains field name and colour map for plotting datapoints
     """
+    # Get custom colours for accessibility
+    colour_dict = get_custom_colours().get_json()['colours']
+
     mapper = CategoricalColorMapper(
         factors=[
             "No Ranking",
@@ -135,7 +139,7 @@ def CHEM21_colours() -> Dict:
             "Hazardous",
             "Highly Hazardous",
         ],
-        palette=["#808080", "#008000", "#ffd700", "#FF0000", "#8b0000"],
+        palette=["#808080", colour_dict['Recommended'], colour_dict['Problematic'], colour_dict['Hazardous'], colour_dict['HighlyHazardous']],
     )
 
     return {"field": "CHEM21", "transform": mapper}
