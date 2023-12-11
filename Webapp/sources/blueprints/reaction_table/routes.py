@@ -8,12 +8,13 @@ from datetime import datetime
 from urllib.parse import quote
 from urllib.request import urlopen
 
-from flask import current_app, jsonify, render_template, request
+from flask import current_app, jsonify, render_template, request, abort
 from flask_login import current_user, login_required
 from rdkit import Chem  # Used for converting smiles to inchi
 from rdkit.Chem import Descriptors
 from sources import models
-from sources.auxiliary import smiles_symbols
+from sources.auxiliary import smiles_symbols, abort_if_user_not_in_workbook, \
+    get_workbook_from_group_book_name_combination
 from sources.dto import ReactionNoteSchema
 
 # render_template renders html templates
@@ -24,7 +25,7 @@ from sources.extensions import db  # imports the module with auxiliary functions
 from . import reaction_table_bp  # imports the blueprint of the reaction table route
 from .reaction_classification import classify_reaction
 
-if not current_app.testing:
+if not current_app.config["DEBUG"]:
     try:
         from STOUT import translate_forward
     except:
@@ -33,7 +34,6 @@ if not current_app.testing:
 
 # Processing data from Marvin JS and creating reaction table
 @reaction_table_bp.route("/_process", methods=["GET"])
-@login_required
 def process():
     # must be logged in
     """This function receives reagents and product from browser, finds
@@ -57,13 +57,8 @@ def process():
     if demo != "demo":
         workgroup = request.args.get("workgroup")
         workbook_name = request.args.get("workbook")
-        workbook = (
-            db.session.query(models.WorkBook)
-            .filter(models.WorkBook.name == workbook_name)
-            .join(models.WorkGroup)
-            .filter(models.WorkGroup.name == workgroup)
-            .first()
-        )
+        workbook = get_workbook_from_group_book_name_combination(workgroup, workbook_name)
+        abort_if_user_not_in_workbook(workgroup, workbook_name, workbook)
 
         reaction_id = request.args.get("reaction_id")
         reaction = (
@@ -97,7 +92,6 @@ def process():
 
     if reactants0 and products0:  # if reactants and products are received,
         # Reactants
-
         reactants = reactants0.split(
             ","
         )  # then the SMILES string is split into separate reactants
@@ -121,7 +115,7 @@ def process():
             if (
                 reactant is None
             ):  # if no match, then check the workbook collection of novel compounds
-                if demo == "demo":  # if in demo mode don't look
+                if demo == "demo":  # if in demo mode don't search novel compounds
                     novel_reactant_html = "Demo"
                     return jsonify(
                         {"reactionTable": novel_reactant_html, "novelCompound": ""}
@@ -285,11 +279,17 @@ def process():
         identifiers = []
         # Solvents - keep solvents that are not novel compounds or are novel compounds within the current workbook
         sol_rows = db.session.query(models.Solvent).all()
-        sol_rows = [
-            x
-            for x in sol_rows
-            if x.novel_compound == [] or x.novel_compound[0].workbook == workbook.id
-        ]
+        if demo == "demo":
+            sol_rows = [x for x in sol_rows if x.novel_compound == []]
+        else:
+            sol_rows = [
+                x
+                for x in sol_rows
+                if x.novel_compound == []
+                   or (
+                           workbook is not None and x.novel_compound[0].workbook == workbook.id
+                   )
+            ]
         r_class, r_classes = classify_reaction(reactant_rdmols, product_rdmols)
         # Now it renders the reaction table template
         reaction_table = render_template(
