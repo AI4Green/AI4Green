@@ -286,9 +286,9 @@ def process():
                 x
                 for x in sol_rows
                 if x.novel_compound == []
-                   or (
+                or (
                            workbook is not None and x.novel_compound[0].workbook == workbook.id
-                   )
+                )
             ]
         r_class, r_classes = classify_reaction(reactant_rdmols, product_rdmols)
         # Now it renders the reaction table template
