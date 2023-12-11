@@ -73,7 +73,7 @@ def define_reaction_criteria() -> Dict:
             "Agents": ["palladium"],
         },
         "SNAr/SN2": {
-            "Reactants": ["aryl_halide"],
+            "Reactants": ["aryl_halide", "alkyl_halide"],
             "Products": ["ether", "amine"],
             "Agents": [],
         },
