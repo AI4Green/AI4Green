@@ -116,7 +116,7 @@ def prepare_data(
     # get data from file
     data = pd.read_csv(
         os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "data", "solvent_data.csv"
+            os.path.dirname(os.path.abspath(__file__)), "data", "solvent_data_PCA.csv"
         )
     )
     # descriptors to include in PCA

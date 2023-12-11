@@ -35,7 +35,7 @@ def get_surfer_names() -> (List, List, List):
     # get names and alternative names from the solvent surfer .csv file
     solvent_data = pd.read_csv(
         os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "data", "solvent_data.csv"
+            os.path.dirname(os.path.abspath(__file__)), "data", "solvent_data_PCA.csv"
         )
     )
 
