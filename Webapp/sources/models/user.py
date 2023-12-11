@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import pytz
 from flask_login import UserMixin
 from sources.extensions import db
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -17,7 +18,9 @@ class User(Model, UserMixin):
     __tablename__ = "User"
 
     def __init__(self, **kwargs) -> None:
-        self.time_of_creation = datetime.now()
+        self.time_of_creation = datetime.now(pytz.timezone("Europe/London")).replace(
+            tzinfo=None
+        )
         super().__init__(**kwargs)
 
     id = db.Column(db.Integer, primary_key=True)

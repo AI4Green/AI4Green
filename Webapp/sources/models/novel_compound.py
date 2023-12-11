@@ -1,4 +1,8 @@
+from datetime import datetime
+
+import pytz
 from sources.extensions import db
+
 from .base import Model
 
 
@@ -9,10 +13,13 @@ class NovelCompound(Model):
         db.UniqueConstraint("name", "workbook"),
     )
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
+    def __init__(self, **kwargs) -> None:
+        self.time_of_creation = datetime.now(pytz.timezone("Europe/London")).replace(
+            tzinfo=None
+        )
+        super().__init__(**kwargs)
+
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     cas = db.Column(db.Text)
     smiles = db.Column(db.Text, nullable=False)
