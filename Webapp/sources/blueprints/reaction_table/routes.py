@@ -287,7 +287,7 @@ def process():
                 for x in sol_rows
                 if x.novel_compound == []
                 or (
-                           workbook is not None and x.novel_compound[0].workbook == workbook.id
+                    workbook is not None and x.novel_compound[0].workbook == workbook.id
                 )
             ]
         r_class, r_classes = classify_reaction(reactant_rdmols, product_rdmols)
