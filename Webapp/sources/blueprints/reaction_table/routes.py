@@ -45,8 +45,8 @@ def process():
         )
         abort_if_user_not_in_workbook(workgroup, workbook_name, workbook)
         reaction_id = request.args.get("reaction_id")
-        reaction = services.reaction.get_from_reaction_id_and_workbook(
-            reaction_id, workbook
+        reaction = services.reaction.get_from_reaction_id_and_workbook_id(
+            reaction_id, workbook.id
         )
     # get the SMILES string of reactants and products from the args and then replace the symbols
     reactants0 = request.args.get("reactants", 0, type=str)
@@ -287,8 +287,8 @@ def save_reaction_note():
         workgroup_name, workbook_name
     )
     reaction_id = request.form["reactionID"]
-    reaction = services.reaction.get_from_reaction_id_and_workbook(
-        reaction_id, workbook_object
+    reaction = services.reaction.get_from_reaction_id_and_workbook_id(
+        reaction_id, workbook_object.id
     )
     reaction_note_text = request.form["reactionNoteText"]
     author = services.person.from_current_user_email()
