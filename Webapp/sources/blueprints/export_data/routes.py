@@ -1,8 +1,11 @@
 import ast
 import json
+import time
+from datetime import datetime
 from typing import Optional
 
 import pandas as pd
+import pytz
 from flask import Response, flash, redirect, render_template, url_for
 from flask_login import login_required
 from sources import models, services
@@ -15,13 +18,28 @@ from sources.dto import ReactionSchema
 from sources.extensions import db
 
 from . import export_data_bp
+from .ro_crate import get_meta_data_json
 
 # ### structure - 1 route per format
 
 
 @export_data_bp.route(
-    "export_data/csv/<workgroup-name>/<workbook_name>", methods=["GET", "POST"]
+    "export_data/eln_file/<workgroup>/<workbook>", methods=["GET", "POST"]
 )
+@login_required
+def export_data_eln_file(workgroup: str, workbook: str) -> Response:
+    pass
+    # reaction_list = services.reaction.list_active_in_workbook(
+    #     workbook, workgroup, sort_crit="time"
+    # )
+    # make a ro-crate-metadata.json
+    # ro_crate_metadata_json_contents = get_meta_data_json()
+    # now for each reaction we want to make a research object crate
+    # for idx, reaction in enumerate(reaction_list):
+    # make a folder per experiment.
+
+
+@export_data_bp.route("export_data/csv/<workgroup>/<workbook>", methods=["GET", "POST"])
 @login_required
 def export_data_csv(workgroup: str, workbook: str) -> Response:
     reaction_list = services.reaction.list_active_in_workbook(
