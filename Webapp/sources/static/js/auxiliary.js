@@ -73,3 +73,25 @@ function getNum(jquerySelector) {
 function getLimitingReactantTableNumber() {
   return getVal($("input[name='reactant-limiting']:checked"));
 }
+
+function updateSelectedWorkGroup(origin_page = "") {
+  // updates the workbook+creator dropdowns after change to selected workgroup
+  let workgroup = $("#active-workgroup").val();
+  $.ajax({
+    url: "/updated_workgroup_dropdown",
+    type: "post",
+    datatype: "json",
+    data: { workgroup: workgroup, origin_page: origin_page },
+    success: function (response) {
+      // update dropdown with workbook options
+      let dropdownSelect = $("#active-workbook");
+      dropdownSelect.empty();
+      for (let workbook of response.workbooks) {
+        let option = document.createElement("option");
+        option.text = workbook;
+        option.value = workbook;
+        dropdownSelect.append(option);
+      }
+    },
+  });
+}

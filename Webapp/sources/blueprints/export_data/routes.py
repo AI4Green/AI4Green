@@ -6,7 +6,7 @@ from typing import Optional
 
 import pandas as pd
 import pytz
-from flask import Response, flash, redirect, render_template, url_for
+from flask import Response, flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from sources import models, services
 from sources.auxiliary import (
@@ -18,28 +18,50 @@ from sources.dto import ReactionSchema
 from sources.extensions import db
 
 from . import export_data_bp
-from .ro_crate import get_meta_data_json
+from .ro_crate import DataExport, ELNFile
+
 
 # ### structure - 1 route per format
-
-
-@export_data_bp.route(
-    "export_data/eln_file/<workgroup>/<workbook>", methods=["GET", "POST"]
-)
+@export_data_bp.route("/export_data", methods=["GET", "POST"])
 @login_required
-def export_data_eln_file(workgroup: str, workbook: str) -> Response:
-    pass
+def export_data_home():
+    workgroups = get_workgroups()
+    notification_number = get_notification_number()
+    return render_template(
+        "export_data.html",
+        workgroups=workgroups,
+        notification_number=notification_number,
+    )
+
+
+@export_data_bp.route("/export_data_eln_file", methods=["GET", "POST"])
+@login_required
+def export_data_eln_file() -> Response:
+    """
+    We are making a .eln file for a specific workbook. This is a zipped directory containing a ro-crate-metadata.json
+    to describe the contents.
+    """
+
     # reaction_list = services.reaction.list_active_in_workbook(
     #     workbook, workgroup, sort_crit="time"
     # )
-    # make a ro-crate-metadata.json
-    # ro_crate_metadata_json_contents = get_meta_data_json()
+    workgroup_name = request.form["workgroup"]
+    workbook_name = request.form["workbook"]
+    eln_file = ELNFile(workgroup_name, workbook_name)
+    # eln_file = DataExport(workgroup_name, workbook_name).to_eln_file()
+    return eln_file
+
+    # made according to this specification https://github.com/TheELNConsortium/TheELNFileFormat
+    # first we describe the ro-crate metadata_json
+    # ro_crate_metadata_json_contents = describe_ro_crate_metadata_json()
     # now for each reaction we want to make a research object crate
     # for idx, reaction in enumerate(reaction_list):
     # make a folder per experiment.
 
 
-@export_data_bp.route("export_data/csv/<workgroup>/<workbook>", methods=["GET", "POST"])
+@export_data_bp.route(
+    "/export_data/csv/<workgroup>/<workbook>", methods=["GET", "POST"]
+)
 @login_required
 def export_data_csv(workgroup: str, workbook: str) -> Response:
     reaction_list = services.reaction.list_active_in_workbook(

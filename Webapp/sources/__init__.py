@@ -72,6 +72,7 @@ def register_extensions(app: Flask) -> None:
 
     login.init_app(app)
     login.login_view = "auth.login"
+
     @login.user_loader
     def load_user(user_id: int):
         return models.User.query.get(user_id)
@@ -215,6 +216,10 @@ def register_blueprints(app: Flask) -> None:
     from sources.blueprints.version import version_bp
 
     app.register_blueprint(version_bp)
+
+    from sources.blueprints.utils import utils_bp
+
+    app.register_blueprint(utils_bp)
 
 
 def inject_session_context(app: Flask) -> Dict[str, str]:

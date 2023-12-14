@@ -3,6 +3,7 @@ from . import (
     compound,
     email,
     hazard_code,
+    interactive,
     ions,
     novel_compound,
     person,
