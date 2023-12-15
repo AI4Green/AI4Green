@@ -8,30 +8,13 @@ import heapq
 import logging
 import multiprocessing as mproc
 
-# import matplotlib
 import warnings
 from logging import handlers
 
-# import time
-# import os
-# matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.spatial.distance as dist
-
-# import pickle
-
-
-# def async_min_spanning_tree(*args):
-#    mm_g = None
-#    while mm_g == None:
-#        try:
-#            f = open('tmp.dat', 'rb')
-#            mm_g = pickle.load(f)
-#            f.close()
-#        except:
-#            time.sleep(1)
-#    return min_spanning_tree(mm_g, args[0])
 
 
 def get_log_file_handler(fileName, maxCapacity, backups, level):

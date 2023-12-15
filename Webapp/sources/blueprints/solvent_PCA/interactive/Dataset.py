@@ -61,7 +61,6 @@ class Dataset:
                 self.mask.append(i)
         self.update_data()
         self.normalize()
-        # self.update_data()
 
     def normalize_max(self, X=[]):
         if X == []:

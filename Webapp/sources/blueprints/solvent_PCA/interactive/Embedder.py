@@ -4,17 +4,6 @@ from copy import copy
 
 import numpy as np
 
-# from PCA import PCA
-from sklearn import decomposition, manifold
-
-# from scipy.spatial import distance
-# from PyQt4.QtCore import *
-# from PyQt4.QtGui import *
-# from PyQt4.Qt import *
-# explicitly imported "hidden imports" for pyinstaller
-# from sklearn.utils import weight_vector, lgamma
-from sklearn.metrics.pairwise import euclidean_distances, pairwise_distances
-
 # Dinos solver
 from .cpca import kernel_gen as kernel_gen
 from .cpca import solvers as solvers
@@ -134,11 +123,9 @@ class cPCA(Embedding):
         self.params["orth_nu"] = 5e3
         self.params["sigma"] = utils.median_pairwise_distances(data)
         gk = kernel_gen.gaussian_kernel()
-        # gk = kernel_gen.polynomial_kernel()
         K = gk.compute_matrix(data, self.params)
         self.embedder = solvers.embedder(2.56e-16, 800, False)
         self.kernel_sys = self.embedder.kernel_sys(K)
-        # self.parent.status_text.setText("Done, calculating Gaussean kernel.")
 
         label_mask = np.array([0])
         self.quad_eig_sys = self.embedder.sph_cl_var_term_eig_sys(self.kernel_sys)
