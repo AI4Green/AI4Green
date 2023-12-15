@@ -8,7 +8,7 @@ import os
 import uuid
 from datetime import datetime
 
-#import magic
+import magic
 import pytz
 from azure.core.exceptions import ResourceExistsError
 from azure.storage.blob import BlobClient, BlobServiceClient

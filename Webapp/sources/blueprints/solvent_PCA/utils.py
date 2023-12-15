@@ -14,7 +14,7 @@ from .interactive.interactive_embeddings import GetEmbedding, cPCA
 
 def extract_names(name_list: List) -> List:
     """
-    capitalises names in name_list and adds blank string to match name_dropdown in solvent surfer
+    adds blank string to match name_dropdown in solvent surfer
     """
     names = [""]
     names.extend(name_list)
@@ -295,7 +295,7 @@ def search_suggest_solvent_table(best_solvents: List) -> (List, bool):
 
     Returns:
         alternatives: List, more sustainable solvents close by to selected solvent (if any)
-        substitutions: bool, sets to True is sustainable solvent switch is found
+        substitutions: bool, sets to True if sustainable solvent switch is found
     """
     # searches suggested solvent table for sustainable switches and returns suggested substitutions
 
