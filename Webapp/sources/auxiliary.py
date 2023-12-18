@@ -487,16 +487,3 @@ def abort_if_user_not_in_workbook(
         workgroup_name, workbook_name
     ):
         abort(401)
-
-
-def get_workbook_from_group_book_name_combination(
-    workgroup_name: str, workbook_name: str
-) -> models.WorkBook:
-    """Returns the workbook from"""
-    return (
-        db.session.query(models.WorkBook)
-        .filter(models.WorkBook.name == workbook_name)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_name)
-        .first()
-    )
