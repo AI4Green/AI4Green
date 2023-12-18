@@ -1,6 +1,6 @@
 from typing import List, Tuple, Union
 
-from sources.services import queries
+from sources import services
 
 """
 Contains functions for when it is unknown if a compound is from the Compound table and from PubChem or a Novel compound
@@ -21,8 +21,8 @@ def get_smiles_list(primary_key_ls: List[Union[Tuple[str, int], int]]) -> List[s
     smiles_ls = []
     for primary_key in primary_key_ls:
         if isinstance(primary_key, int):
-            smiles = queries.compound.get_smiles(primary_key)
+            smiles = services.compound.get_smiles(primary_key)
         else:
-            smiles = queries.novel_compound.get_smiles(primary_key)
+            smiles = services.novel_compound.get_smiles(primary_key)
         smiles_ls.append(smiles)
     return smiles_ls

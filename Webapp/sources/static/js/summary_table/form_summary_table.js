@@ -260,6 +260,7 @@ function showSummary() {
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
   let demo = $("#js-demo").val();
+  let tutorial = getVal("#js-tutorial");
   $.ajax({
     url: "/_summary",
     type: "post",
@@ -324,6 +325,7 @@ function showSummary() {
       workgroup: workgroup,
       workbook: workbook,
       demo: demo,
+      tutorial: tutorial,
     },
     dataType: "json",
     success: function (response) {

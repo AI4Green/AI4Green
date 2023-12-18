@@ -1,13 +1,8 @@
 import re
 
 from flask import Response, jsonify, request
-from flask_login import login_required
-from sources import models
-from sources.auxiliary import (
-    abort_if_user_not_in_workbook,
-    get_workbook_from_group_book_name_combination,
-    sanitise_user_input,
-)
+from sources import models, services
+from sources.auxiliary import abort_if_user_not_in_workbook, sanitise_user_input
 from sources.extensions import db
 from sqlalchemy import func
 
@@ -27,7 +22,7 @@ def solvents() -> Response:
     )  # gets the solvent from browser
     workgroup_name = request.form["workgroup"]
     workbook_name = request.form["workbook"]
-    workbook = get_workbook_from_group_book_name_combination(
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
