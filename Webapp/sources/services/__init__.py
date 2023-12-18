@@ -2,6 +2,7 @@ from . import (
     all_compounds,
     compound,
     email,
+    file_attachments,
     hazard_code,
     interactive,
     ions,
