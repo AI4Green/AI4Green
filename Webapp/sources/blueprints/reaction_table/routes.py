@@ -65,8 +65,7 @@ def process():
         "name_list": [],
         "hazard_list": [],
         "density_list": [],
-        "primary_key_list": [],
-        "rdmols": []
+        "primary_key_list": []
     }
     product_data = {
         "molecular_weight_list": [],
@@ -74,15 +73,13 @@ def process():
         "hazard_list": [],
         "density_list": [],
         "primary_key_list": [],
-        "table_numbers": [],
-        "rdmols": []
+        "table_numbers": []
     }
 
     # Find reactants in database then add data to the dictionary
     for idx, reactant_smiles in enumerate(reactants_smiles_list):
         novel_compound = False  # false but change later if true
         mol = Chem.MolFromSmiles(reactant_smiles)
-        reactant_data["rdmols"] = mol
         if mol is None:
             return jsonify({"error": f"Cannot process Reactant {idx + 1} structure"})
         inchi = Chem.MolToInchi(mol)
@@ -125,7 +122,6 @@ def process():
     for idx, product_smiles in enumerate(products_smiles_list):
         novel_compound = False  # false but change later if true
         mol = Chem.MolFromSmiles(product_smiles)
-        product_data["rdmols"] = mol
         if mol is None:
             return jsonify({"error": f"Cannot process product {idx + 1} structure"})
         inchi = Chem.MolToInchi(mol)
@@ -175,7 +171,7 @@ def process():
     else:
         sol_rows = services.solvent.get_workbook_list(workbook)
 
-    r_class, r_classes = classify_reaction(reactant_data["rdmols"], product_data["rdmols"])
+    r_class, r_classes = classify_reaction(reactants_smiles_list, products_smiles_list)
 
     # Now it renders the reaction table template
     reaction_table = render_template(

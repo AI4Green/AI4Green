@@ -92,8 +92,8 @@ def classify_reaction(reactants: List, products: List) -> (str, List):
         Only checks for reaction classes included in the solvent surfer
 
         Args:
-            reactants: List, List of reactants as RDKit molecules
-            products: List, List of products as RDKit molecules
+            reactants: List, List of reactants as SMILES strings
+            products: List, List of products as SMILES strings
 
         Returns:
             reaction_class: Str, class of reaction identified to functional groups. Returns 'Other' if class not recognised.
@@ -107,12 +107,15 @@ def classify_reaction(reactants: List, products: List) -> (str, List):
     # define reactive groups for each class
     reaction_groups = define_reaction_criteria()
 
+    reactant_mols = [Chem.MolFromSmiles(x) for x in reactants]
+    product_mols = [Chem.MolFromSmiles(y) for y in products]
+
     reactant_groups = []
     product_groups = []
     reaction_class = "Other"
 
     # match functional groups in reactants and products to dict above
-    for num, mols in enumerate([reactants, products]):
+    for num, mols in enumerate([reactant_mols, product_mols]):
         for mol in mols:
             mol.UpdatePropertyCache()
             Chem.GetSymmSSSR(mol)
