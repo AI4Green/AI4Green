@@ -51,6 +51,28 @@ def get_novel_compound_from_name_and_workbook(
     )
 
 
+def get_novel_compound_from_inchi_and_workbook(
+    inchi: str, workbook: models.WorkBook
+) -> models.NovelCompound:
+    """
+    Retrieves a novel compound by name and workbook.
+
+    Args:
+        inchi: Compound inchi.
+        workbook: Workbook model.
+
+    Returns:
+        NovelCompound model.
+    """
+    return (
+        db.session.query(models.NovelCompound)
+        .filter(models.NovelCompound.inchi == inchi)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook.id)
+        .first()
+    )
+
+
 def get_novel_compound_from_cas_and_workbook(
     cas: str, workbook: models.WorkBook
 ) -> models.NovelCompound:

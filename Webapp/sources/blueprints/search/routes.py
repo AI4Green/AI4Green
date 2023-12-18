@@ -1,10 +1,7 @@
 from flask import Response, jsonify, render_template, request
 from flask_login import login_required
-
-from sources import models
+from sources import models, services
 from sources.auxiliary import get_workbooks, get_workgroups, smiles_to_inchi
-from sources.blueprints.reaction_list.reaction_list import (
-    make_scheme_list, process_reactions_to_dict)
 from sources.extensions import db
 
 from . import search_bp
@@ -21,14 +18,14 @@ def updated_workgroup_dropdown() -> Response:
     return jsonify({"workbooks": workbooks})
 
 
-@search_bp.route("/text_search_handler", methods=["POST"])
-@login_required
-def text_search_handler() -> Response:
-    """Gets search options for text.
-    **not yet implemented**
-    """
-    workgroup = request.form["workgroup"]
-    workbook = request.form["workbook"]
+# @search_bp.route("/text_search_handler", methods=["POST"])
+# @login_required
+# def text_search_handler() -> Response:
+#     """Gets search options for text.
+#     **not yet implemented**
+#     """
+#     workgroup = request.form["workgroup"]
+#     workbook = request.form["workbook"]
 
 
 @search_bp.route("/structure_search_handler", methods=["POST"])
@@ -84,7 +81,7 @@ class SearchHandler:
         for workbook in self.workbook:
             reactions = (
                 db.session.query(models.Reaction)
-                .filter(models.Reaction.status == 'active')
+                .filter(models.Reaction.status == "active")
                 .join(models.WorkBook)
                 .filter(models.WorkBook.name == workbook)
                 .join(models.WorkGroup)
@@ -143,8 +140,8 @@ class SearchHandler:
 
     def render_results_template(self) -> None:
         """Makes the results list"""
-        reactions = process_reactions_to_dict(self.matches, "AZ")
-        self.schemes = make_scheme_list(self.matches, "small")
+        reactions = services.reaction.to_dict(self.matches, "AZ")
+        self.schemes = services.reaction.make_scheme_list(self.matches, "small")
         self.search_results = render_template(
             "_saved_reactions.html", reactions=reactions, sort_crit="AZ"
         )
