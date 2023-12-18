@@ -12,6 +12,7 @@ from urllib.request import urlopen
 from flask import current_app, jsonify, render_template, request
 from flask_login import login_required
 from rdkit import Chem
+from rdkit.Chem import Descriptors
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
 from sources.dto import ReactionNoteSchema
@@ -45,8 +46,8 @@ def process():
         )
         abort_if_user_not_in_workbook(workgroup, workbook_name, workbook)
         reaction_id = request.args.get("reaction_id")
-        reaction = services.reaction.get_from_reaction_id_and_workbook(
-            reaction_id, workbook
+        reaction = services.reaction.get_from_reaction_id_and_workbook_id(
+            reaction_id, workbook.id
         )
     # get the SMILES string of reactants and products from the args and then replace the symbols
     reactants0 = request.args.get("reactants", 0, type=str)
@@ -287,8 +288,8 @@ def save_reaction_note():
         workgroup_name, workbook_name
     )
     reaction_id = request.form["reactionID"]
-    reaction = services.reaction.get_from_reaction_id_and_workbook(
-        reaction_id, workbook_object
+    reaction = services.reaction.get_from_reaction_id_and_workbook_id(
+        reaction_id, workbook_object.id
     )
     reaction_note_text = request.form["reactionNoteText"]
     author = services.person.from_current_user_email()
@@ -327,4 +328,4 @@ def mol_weight_generate(smiles: str) -> float:
         The molecular weight of the compound.
     """
     # MolWt accounts for the average across isotopes but ExactMolWt only takes the most abundant isotope.
-    return Chem.Descriptors.MolWt(Chem.MolFromSmiles(smiles))
+    return Descriptors.MolWt(Chem.MolFromSmiles(smiles))

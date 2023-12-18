@@ -44,8 +44,8 @@ def count() -> int:
     return db.session.query(models.Reaction).count()
 
 
-def get_from_reaction_id_and_workbook(
-    reaction_id: str, workbook: models.WorkBook
+def get_from_reaction_id_and_workbook_id(
+    reaction_id: str, workbook_id: int
 ) -> models.Reaction:
     """
     Gets the reaction from the reaction_id and workbook id
@@ -58,7 +58,7 @@ def get_from_reaction_id_and_workbook(
         db.session.query(models.Reaction)
         .filter(models.Reaction.reaction_id == reaction_id)
         .join(models.WorkBook)
-        .filter(models.WorkBook.id == workbook.id)
+        .filter(models.WorkBook.id == workbook_id)
         .first()
     )
 
