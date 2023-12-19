@@ -496,9 +496,6 @@ def view_reaction_attachment() -> Response:
     )
     file_object = services.file_attachments.database_object_from_uuid(file_uuid)
 
-    checksum = services.file_attachments.sha256_from_file_contents()
-    assert checksum == file_object.sha256_checksum
-
     mimetype = file_object.file_details["mimetype"]
     display_name = file_object.display_name
     file_attachment = f"data:{mimetype};base64,{file_attachment}"
@@ -650,8 +647,9 @@ class UploadExperimentDataFiles:
             container=container_name, blob=filename
         )
         print("uploading blob")
+        file.stream.seek(0)
         self.file_hash = services.file_attachments.sha256_from_file_contents(
-            file.stream.seek(0).stream.read()
+            file.stream.read()
         )
         if not self.file_hash:
             print("Failed to generate hash")
