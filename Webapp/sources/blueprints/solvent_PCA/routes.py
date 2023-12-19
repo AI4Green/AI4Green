@@ -8,6 +8,8 @@ import pandas as pd
 from flask import Response, jsonify, render_template, request
 from flask_login import current_user, login_required
 from sources import models
+from sources.services.person import from_current_user_email
+from sources.services.PCA_graph import list_user_graphs, PCAgraph_from_id
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db
 
@@ -323,12 +325,7 @@ def save_graph() -> Response:
     """
     graph_data = request.get_json()
 
-    author = (
-        db.session.query(models.Person)
-        .join(models.User)
-        .filter(models.User.email == current_user.email)
-        .first()
-    )
+    author = from_current_user_email()
 
     saved_graph = models.PCAGraph(
         graph_name=graph_data["graph_name"],
@@ -357,20 +354,9 @@ def get_saved_graphs() -> Response:
     """
     Extracts saved graphs from the database by user id for 'Saved Graphs' tab.
     """
-    user = (
-        db.session.query(models.Person)
-        .join(models.User)
-        .filter(models.User.email == current_user.email)
-        .first()
-    )
+    user = from_current_user_email()
 
-    graph_query = (
-        db.session.query(models.PCAGraph)
-        .filter(models.PCAGraph.creator_person == user)
-        .filter(models.PCAGraph.status == "active")
-    )
-
-    graphs = graph_query.order_by(models.PCAGraph.time_of_creation.desc()).all()
+    graphs = list_user_graphs(user)
 
     graph_list = []
 
@@ -402,19 +388,9 @@ def delete_graph(graph_id) -> Response:
     Sets a graph's status to inactive, so it doesn't show up in saved graphs.
     Graphs are not deleted from the database in case they need to be restored.
     """
-    user = (
-        db.session.query(models.Person)
-        .join(models.User)
-        .filter(models.User.email == current_user.email)
-        .first()
-    )
+    user = from_current_user_email()
 
-    query = (
-        db.session.query(models.PCAGraph)
-        .filter(models.PCAGraph.creator_person == user)
-        .filter(models.PCAGraph.id == graph_id)
-        .first()
-    )
+    query = PCAgraph_from_id(graph_id, user)
 
     query.status = "inactive"
     db.session.commit()
