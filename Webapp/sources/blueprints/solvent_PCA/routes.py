@@ -1,12 +1,10 @@
-import ast
 import json
-import os
 from datetime import date, datetime
 
 import numpy as np
 import pandas as pd
 from flask import Response, jsonify, render_template, request
-from flask_login import current_user, login_required
+from flask_login import login_required
 from sources import models
 from sources.services.person import from_current_user_email
 from sources.services.PCA_graph import list_user_graphs, PCAgraph_from_id
@@ -14,11 +12,11 @@ from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db
 
 from . import solvent_PCA_bp
-from .embedding import get_PCA, get_r_class_descriptors
-from .graph import editable_bokeh_graph
-from .graph_utils import get_html_dict
-from .interactive.data_analysis import getPointChanged
-from .utils import (
+from Webapp.sources.services.solvent_PCA.embedding import get_PCA, get_r_class_descriptors
+from Webapp.sources.services.solvent_PCA.graph import editable_bokeh_graph
+from Webapp.sources.services.solvent_PCA.graph_utils import get_html_dict
+from Webapp.sources.services.solvent_PCA.interactive.data_analysis import getPointChanged
+from Webapp.sources.services.solvent_PCA.utils import (
     bokeh_to_pandas,
     control_points_for_df,
     get_mode,

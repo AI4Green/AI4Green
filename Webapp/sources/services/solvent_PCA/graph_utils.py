@@ -23,7 +23,7 @@ from .javascript_callbacks import (
     get_reset_interactive_callback,
     get_save_callback,
 )
-from ..main.routes import get_custom_colours
+from Webapp.sources.blueprints.main.routes import get_custom_colours
 
 
 def get_html_dict() -> Dict:
