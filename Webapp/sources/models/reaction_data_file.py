@@ -15,4 +15,4 @@ class ReactionDataFile(Model):
     display_name = db.Column(db.Text, nullable=False)
     time_of_upload = db.Column(db.DateTime, nullable=False)
     file_details = db.Column(db.JSON, nullable=False)
-    sha256_checksum = db.Column(db.Text, nullable=False)
+    sha256_checksum = db.Column(db.Text, nullable=False, default="not_available")
