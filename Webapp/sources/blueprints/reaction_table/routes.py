@@ -4,7 +4,6 @@ GET request and renders the reaction table template
 """
 
 import re
-from datetime import datetime
 from typing import Dict, List, Tuple, Union
 from urllib.parse import quote
 from urllib.request import urlopen
@@ -18,7 +17,7 @@ from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
 from sources.dto import ReactionNoteSchema
 
 from . import reaction_table_bp
-from .reaction_classification import classify_reaction
+from Webapp.sources.services.reaction_classification import classify_reaction
 
 if not current_app.config["DEBUG"]:
     try:
