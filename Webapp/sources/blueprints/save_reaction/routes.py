@@ -157,29 +157,6 @@ def new_reaction() -> Response:
         return name_check
 
 
-def authenticate_user_to_edit_reaction(
-    reaction: models.Reaction, file_attachment=False
-):
-    """
-    In addition to frontend validation, backend validation protects against user edited HTML.
-    Validates the active user is the creator and validates the reaction is not locked.
-    Aborts process with a 400 error if validation is failed
-    """
-    # validate user is in workbook
-    workbook_persons = reaction.workbook.users
-    workbook_users = [x.user for x in workbook_persons]
-    if current_user not in workbook_users:
-        abort(401)
-    # validate the user is the creator
-    if reaction.creator_person.user.email != current_user.email:
-        abort(401)
-    if file_attachment:
-        return
-    # validate the reaction is not locked, unless it is a file attachment being edited.
-    if reaction.complete == "complete":
-        abort(401)
-
-
 @save_reaction_bp.route("/_autosave", methods=["POST"])
 @login_required
 def autosave() -> Response:
@@ -188,7 +165,7 @@ def autosave() -> Response:
     reaction = get_current_reaction()
     reaction_name = reaction.name
 
-    authenticate_user_to_edit_reaction(reaction)
+    services.auth.edit_reaction(reaction)
 
     summary_to_print = str(request.form["summary_to_print"])
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
@@ -426,7 +403,7 @@ def autosave_sketcher() -> Response:
     """Autosave function for saving changes to the sketcher only. Only used before reaction table is generated."""
 
     reaction = get_current_reaction()
-    authenticate_user_to_edit_reaction(reaction)
+    services.auth.edit_reaction(reaction)
 
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
     reaction_smiles = str(request.form["reactionSmiles"])
@@ -572,7 +549,7 @@ def authenticate_user(permission_level: str, request_method: str):
         authenticate_user_to_view_files(request_method)
     if permission_level == "edit":
         reaction = get_current_reaction()
-        authenticate_user_to_edit_reaction(reaction, file_attachment=True)
+        services.auth.edit_reaction(reaction, file_attachment=True)
 
 
 def authenticate_user_to_view_files(request_method):

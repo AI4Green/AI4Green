@@ -450,6 +450,20 @@ def element_sustainability() -> Response:
     return render_template("element_sustainability.html")
 
 
+# @summary_bp.route("/pdf", methods=["POST", "GET"])
+# @login_required
+# def pdf():
+#     print("PDFFFFFFF")
+#     x = request
+#     print(request)
+#     print(request.files)
+#     authenticate_user(permission_level="edit", request_method="POST")
+#     new_upload = UploadExperimentDataFiles(request)
+#     new_upload.validate_files()
+#     new_upload.save_validated_files()
+#     return "", 204
+
+
 def reform_novel_compound_primary_key(primary_key: str) -> Tuple:
     """
     Converts a novel primary key to a tuple from the string returned from the frontend HTML

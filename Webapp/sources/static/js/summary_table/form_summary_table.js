@@ -356,10 +356,142 @@ function showSummary() {
         $("#complete-reaction-div").show();
         $("#reaction-file-attachments").show();
         $("#js-load-status").val("loaded");
+
+        const { jsPDF } = window.jspdf;
+        let doc = new jsPDF();
+        let elementHandler = {
+          "#ignorePDF": function (element, renderer) {
+            return true;
+          },
+        };
+        let source = window.document.getElementsByTagName("body")[0];
+        doc.html(source, {
+          callback: function (doc) {
+            // doc.save();
+            console.log(doc);
+          },
+        });
+
+        let blob = doc.output("blob");
+        const formData = new FormData();
+        formData.append("pdfFile", blob, "printed-document.pdf");
+
+        fetch("/pdf", {
+          method: "POST",
+          body: formData,
+        });
+
+        //import printJS from 'print-js'
+
+        // printJS('printJS-form', 'html')
+
+        // printAndSendPdf()
+
+        // const printPdf = async downloadUrl  => {
+        //   const res = await window.fetch(downloadUrl)
+        //   const blob = await res.blob()
+        //   const blobURL = URL.createObjectURL(blob)
+        //   console.log(blobURL)
+        //   console.log(blob)
+        //   console.log(res)
+        //   console.log(downloadUrl)
+        //   console.log(printPdf())
+        //   printJS(blobURL)
+        // }
       }
     },
   });
 }
+
+const printAndSendPdf = async () => {
+  try {
+    // Trigger printing
+    window.print();
+
+    // Wait for the print job to finish (you might need to adjust the delay)
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Create a Blob URL for the generated PDF
+    const blobURL = await capturePrintedDocument();
+
+    // Print the PDF using printJS
+    printJS(blobURL);
+
+    // Send the PDF to the Flask endpoint
+    const formData = new FormData();
+    formData.append("pdfFile", blobURL, "printed-document.pdf");
+
+    await fetch("/pdf", {
+      method: "POST",
+      body: formData,
+    });
+
+    console.log("PDF sent to Flask endpoint successfully");
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
+const capturePrintedDocument = async () => {
+  return new Promise((resolve) => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    // Set the canvas size to the printed document size
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Capture the content of the printed window onto the canvas
+    window.onafterprint = () => {
+      context.drawImage(window, 0, 0, window.innerWidth, window.innerHeight);
+
+      // Convert the canvas content to a Blob URL
+      canvas.toBlob((blob) => {
+        const blobURL = URL.createObjectURL(blob);
+        resolve(blobURL);
+      }, "application/pdf");
+    };
+
+    // Force a second print to capture the content
+    window.print();
+  });
+};
+
+// Example usage
+
+const printPdf = async (downloadUrl) => {
+  try {
+    // Fetch the PDF file
+    const res = await window.fetch(downloadUrl);
+
+    // Check if the fetch was successful (status code 200)
+    if (!res.ok) {
+      throw new Error(`Failed to fetch PDF: ${res.status} ${res.statusText}`);
+    }
+
+    // Get the blob from the response
+    const blob = await res.blob();
+
+    // Create a Blob URL for the downloaded file
+    const blobURL = URL.createObjectURL(blob);
+
+    // Print the PDF using printJS
+    printJS(blobURL);
+
+    // Send the PDF to the Flask endpoint
+    const formData = new FormData();
+    formData.append("pdfFile", blob, "printed-document.pdf");
+
+    await fetch("/pdf", {
+      method: "POST",
+      body: formData,
+    });
+
+    console.log("PDF sent to Flask endpoint successfully");
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
 
 function exportImage() {
   // make reaction image above summary table

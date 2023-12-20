@@ -1,5 +1,6 @@
 from . import (
     all_compounds,
+    auth,
     compound,
     email,
     hazard_code,
