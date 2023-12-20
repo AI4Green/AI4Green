@@ -450,18 +450,19 @@ def element_sustainability() -> Response:
     return render_template("element_sustainability.html")
 
 
-# @summary_bp.route("/pdf", methods=["POST", "GET"])
-# @login_required
-# def pdf():
-#     print("PDFFFFFFF")
-#     x = request
-#     print(request)
-#     print(request.files)
-#     authenticate_user(permission_level="edit", request_method="POST")
-#     new_upload = UploadExperimentDataFiles(request)
-#     new_upload.validate_files()
-#     new_upload.save_validated_files()
-#     return "", 204
+@summary_bp.route("/pdf", methods=["POST", "GET"])
+@login_required
+def pdf():
+    print("PDFFFFFFF")
+
+    print(request)
+    print(request.files)
+    # services.auth.edit_reaction()
+    services.auth.reaction(permission_level="edit", request_method="POST")
+    new_upload = services.file_attachments.UploadExperimentDataFiles(request)
+    new_upload.validate_files()
+    new_upload.save_validated_files()
+    return "", 204
 
 
 def reform_novel_compound_primary_key(primary_key: str) -> Tuple:

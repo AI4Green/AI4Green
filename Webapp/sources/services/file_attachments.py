@@ -1,9 +1,17 @@
 import base64
 import hashlib
+import io
+import os
+import uuid
+from datetime import datetime
 
+import magic
+import pytz
+from azure.core.exceptions import ResourceExistsError
 from azure.storage.blob import BlobClient, BlobServiceClient
 from flask import abort, current_app, request
 from sources import db, models, services
+from werkzeug.utils import secure_filename
 
 
 def sha256_sum_from_file_uuid(file_uuid: str) -> str:
@@ -125,3 +133,122 @@ def verify_integrity(file_contents: bytes, file_uuid: str):
     if file_db_object.sha256_checksum != checksum:
         print("invalid checksum. could not verify file integrity")
         abort(500)
+
+
+class UploadExperimentDataFiles:
+    def __init__(self, ajax_request):
+        self.files_to_upload = ajax_request.files
+        self.institution = db.session.query(models.Institution).first()
+        self.workgroup = ajax_request.form["workgroup"]
+        self.workbook = ajax_request.form["workbook"]
+        self.reaction_id = ajax_request.form["reactionID"]
+        self.validated_files = []
+        self.container_client = None
+        self.reaction = services.reaction.get_current()
+        self.uploaded_files = []
+        self.file_hash = ""
+
+    def validate_number_of_attachments(self):
+        number_of_attachments = len(self.reaction.file_attachments)
+        if number_of_attachments >= 10:
+            abort(401)
+
+    def validate_files(self):
+        for file in self.files_to_upload.values():
+            validation_result = self.file_security_validation(file)
+            if validation_result == "success":
+                self.validated_files.append(file)
+            else:
+                abort(401)
+
+    def save_validated_files(self):
+        for file in self.validated_files:
+            # file name must be unique - needs workgroup/book/reaction_id/filename. Check for uniqueness of filename.
+            filename = str(uuid.uuid4())
+            self.save_blob(file, filename)
+            print("blob uploaded")
+            # save file details to database, and shorten filename if too long.
+            name, extension = os.path.splitext(file.filename)
+            if len(name) > 21:
+                file.filename = name[0:10] + "..." + name[-10:-1] + extension
+            self.save_file_details_to_database(file, filename)
+            self.uploaded_files.append({"uuid": filename, "name": file.filename})
+
+    def save_file_details_to_database(self, file, filename):
+        current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
+        storage_name = self.container_client.account_name
+        container_name = self.container_client.container_name
+        file_size = os.fstat(file.fileno()).st_size
+        file_ext = os.path.splitext(file.filename)[1]
+        file_details = {
+            "mimetype": file.mimetype,
+            "size": file_size,
+            "extension": file_ext,
+        }
+        models.ReactionDataFile.create(
+            reaction=self.reaction.id,
+            storage_name=storage_name,
+            container_name=container_name,
+            uuid=filename,
+            display_name=file.filename,
+            time_of_upload=current_time,
+            file_details=file_details,
+            sha256_checksum=self.file_hash,
+        )
+
+    def save_blob(self, file, filename):
+        # connect to storage account
+        blob_service_client = services.file_attachments.connect_to_azure_blob_service()
+        # connect to container
+        container_name = current_app.config["STORAGE_CONTAINER"]
+        try:
+            self.container_client = blob_service_client.create_container(container_name)
+        except ResourceExistsError:
+            self.container_client = blob_service_client.get_container_client(
+                container_name
+            )
+
+        blob_client = blob_service_client.get_blob_client(
+            container=container_name, blob=filename
+        )
+        print("uploading blob")
+        self.file_hash = services.file_attachments.sha256_from_file_contents(
+            file.stream.seek(0).stream.read()
+        )
+        if not self.file_hash:
+            print("Failed to generate hash")
+            abort(500)
+        # Upload the blob data - default blob type is BlockBlob
+        file.stream.seek(0)
+        upload2 = io.BytesIO(file.stream.read())
+        blob_client.upload_blob(upload2, blob_type="BlockBlob")
+        # confirm upload
+        if not blob_client.exists():
+            print(f"blob {filename} upload failed")
+            abort(401)
+
+    @staticmethod
+    def file_security_validation(file):
+        """Validates the filesize, name, extension, and mimetype"""
+        filename = file.filename
+        secure_filename(filename)
+        if filename != "":
+            # size under 1 mb
+            filesize = os.fstat(file.fileno()).st_size
+            if filesize > 1000000:
+                print("file too large")
+                return "failure"
+            # acceptable file extension
+            file_ext = os.path.splitext(filename)[1]
+            if file_ext not in current_app.config["UPLOAD_EXTENSIONS"]:
+                print("incorrect extension")
+                return "failure"
+            # acceptable mimetype
+            mime = magic.Magic(mime=True)
+            mime_type = mime.from_buffer(file.read(2048))
+            if mime_type not in current_app.config["UPLOAD_MIME_TYPES"]:
+                print("incorrect mimetype")
+                return "failure"
+        else:
+            return "failure"
+        return "success"

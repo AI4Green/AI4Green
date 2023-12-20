@@ -1,6 +1,35 @@
-from flask import abort
+from flask import abort, request
 from flask_login import current_user
-from sources import models
+from sources import models, services
+from sources.auxiliary import abort_if_user_not_in_workbook
+
+
+def reaction(permission_level: str, request_method: str):
+    """
+    Authenticates user to either view or edit the reaction.
+    permission_level: Takes value of 'edit' or 'view_only'
+    request_method: Value of 'GET' changes behaviour, other strings all have same behaviour (e.g. POST, DELETE)
+    """
+    if permission_level == "view_only":
+        view_files(request_method)
+    if permission_level == "edit":
+        reaction = services.reaction.get_current()
+        edit_reaction(reaction, file_attachment=True)
+
+
+def view_files(request_method):
+    """Authenticates user as a workbook member or aborts. Gets the workgroup_name, workbook_name, and workbook."""
+    if request_method == "GET":
+        workgroup_name = request.args.get("workgroup")
+        workbook_name = request.args.get("workbook")
+    else:
+        workgroup_name = request.form["workgroup"]
+        workbook_name = request.form["workbook"]
+    # validate user belongs to the workbook
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
 
 
 def edit_reaction(reaction: models.Reaction, file_attachment=False):
