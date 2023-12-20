@@ -3,6 +3,7 @@ from . import (
     auth,
     compound,
     email,
+    file_attachments,
     hazard_code,
     ions,
     novel_compound,
