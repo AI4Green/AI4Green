@@ -23,10 +23,9 @@ class PCAGraph(Model):
     r_class = db.Column(db.Text, nullable=False, default="")
     colour_selected = db.Column(db.Text, nullable=False, default="CHEM21")
     descriptors = db.Column(db.Text, nullable=False, default="[]")
-    control_points = db.Column(db.Text, nullable=False, default="{}")
-    control_points_pkl = db.Column(db.PickleType(), nullable=False, default="{}")
-    graph_data = db.Column(db.PickleType(), nullable=False, default="{}")
-    kpca_object = db.Column(db.PickleType(), nullable=False, default="[]")
+    control_points = db.Column(db.JSON, nullable=False, default="{}")
+    graph_data = db.Column(db.JSON, nullable=False, default="{}")
+    embedding_algorithm = db.Column(db.JSON, nullable=False, default="{}")
 
     time_of_creation = db.Column(db.DateTime, nullable=False)
     time_of_update = db.Column(db.DateTime)

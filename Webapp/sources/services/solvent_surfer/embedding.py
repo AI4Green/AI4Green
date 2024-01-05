@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Dict
 
 import numpy as np
 import pandas as pd
@@ -169,6 +169,7 @@ def get_PCA(r_class: str) -> (pd.DataFrame, List, pd.Series, cPCA):
 
     Args:
         r_class: str, reaction class to generate kPCA for
+        control_points: Dict, dictionary of control points to include, defaults to {}
 
     Returns:
         df: pd.DataFrame, dataframe of kPCA data for plotting
@@ -193,7 +194,7 @@ def get_PCA(r_class: str) -> (pd.DataFrame, List, pd.Series, cPCA):
     ) = prepare_data(r_class)
 
     # set up kPCA
-    PCA_df, kPCA = getkPCA(data_raw, {})
+    PCA_df, kPCA = getkPCA(data_raw, "none")
 
     df = pd.concat(
         [PCA_df, data_all, CHEM21, CHEM21_numerical, names, cost, exp_data], axis=1

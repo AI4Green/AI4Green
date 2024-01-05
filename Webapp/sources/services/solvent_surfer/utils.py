@@ -4,12 +4,14 @@ from typing import Dict, List
 
 import numpy as np
 import pandas as pd
+import json
 from flask import Response, render_template, request
 from sources import models
 from sources.extensions import db
 
 from .best_closest import get_closest
-from .interactive.interactive_embeddings import GetEmbedding, cPCA
+from .interactive.interactive_embeddings import GetEmbedding
+from .interactive.Embedder import cPCA
 
 
 def extract_names(name_list: List) -> List:
@@ -223,6 +225,7 @@ def get_update_interactive_mode(
 
     control_points = {}
     interactive_data = []
+    embedding_dict = {}
 
     if mode == "on_load":
         query = db.session.query(models.PCAGraph).filter(
@@ -231,9 +234,14 @@ def get_update_interactive_mode(
         r_class = query[0].r_class
         colour = query[0].colour_selected
 
-        control_points = query[0].control_points_pkl
-        interactive_data = query[0].kpca_object
-        new_data = query[0].graph_data
+        cp = json.loads(query[0].control_points)
+
+        embedding_dict = json_decoder(json.loads(query[0].embedding_algorithm))
+
+        # convert strings to int after reading json
+        control_points = {int(k): v for k, v in cp.items()}
+
+        new_data = json.loads(query[0].graph_data)
         descriptors = ast.literal_eval(query[0].descriptors)
 
         return_json = False
@@ -252,6 +260,7 @@ def get_update_interactive_mode(
         descriptors,
         control_points,
         interactive_data,
+        embedding_dict,
         return_json,
     )
 
@@ -376,3 +385,72 @@ def control_points_for_df(control_points: Dict, names: List) -> np.array:
         c_points[keys] = 1
 
     return c_points
+
+class NumpyEncoder(json.JSONEncoder):
+    """
+    Class for converting np.arrays to lists for JSON sterilization.
+    Used only in jsonify_embedding_params
+    """
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, set):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)
+
+
+def json_decoder(embedding_dict: Dict) -> Dict:
+
+    """
+    Converts the embedding params from the database (which are saved as JSON)
+    to the appropriate types.
+    Args:
+        embedding_dict: Dict, JSON dict that is saved to the database as part of PCA_graph model
+
+    Returns:
+        decoded_dict: Dict, dictionary containing information to set up embedding with appropriate types
+    """
+
+    decoded_dict = {}
+
+    array_keys = ["data", "X", "Y", "projection_matrix", "projection", "pca_projection"]
+    tuple_keys = ["kernel_sys", "quad_eig_sys", "quad_eig_sys_original"]
+
+    for key, val in embedding_dict.items():
+        if key in array_keys:
+            decoded_dict[key] = np.array(val)
+
+        elif key in tuple_keys:
+            if key != "quad_eig_sys":
+                bro = tuple(np.array(x) for x in val)
+
+            else:
+                bro = (np.array(val[0]), [np.array(x) for x in val[1]])
+
+            decoded_dict[key] = bro
+
+        else:
+            decoded_dict[key] = val
+
+    return decoded_dict
+
+
+def jsonify_embedding_params(embedding_algorithm: cPCA) -> json.dumps:
+    """
+    Extracts params from cPCA object used to generate the embedding and
+    converts to JSON to save to the database
+
+    Args:
+        embedding_algorithm: cPCA object, the object used to generate the PCA embedding
+
+    Returns:
+         JSON object, embedding parameters sterilized as JSON. This is saved to the database
+    """
+
+    embedding_algorithm_dict = embedding_algorithm.__dict__
+
+    # remove python classes from dict (these can't be converted to JSON)
+    del embedding_algorithm_dict['parent']
+    del embedding_algorithm_dict['embedder']
+
+    return json.dumps(embedding_algorithm_dict, cls=NumpyEncoder)

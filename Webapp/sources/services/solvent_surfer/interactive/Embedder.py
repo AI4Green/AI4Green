@@ -270,3 +270,7 @@ class cPCA(Embedding):
                     self.const_mu,
                 )
                 self.pca_projection = self.kernel_sys[0].dot(pca_dirs)
+
+    def load_attrs(self, attr_dict):
+        for k, v in attr_dict.items():
+            setattr(self, k, v)

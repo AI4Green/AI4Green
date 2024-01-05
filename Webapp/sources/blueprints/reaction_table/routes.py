@@ -17,7 +17,7 @@ from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
 from sources.dto import ReactionNoteSchema
 
 from . import reaction_table_bp
-from Webapp.sources.services.reaction_classification import classify_reaction
+from sources import services
 
 if not current_app.config["DEBUG"]:
     try:
@@ -170,7 +170,7 @@ def process():
     else:
         sol_rows = services.solvent.get_workbook_list(workbook)
 
-    r_class, r_classes = classify_reaction(reactants_smiles_list, products_smiles_list)
+    r_class, r_classes = services.reaction_classification.classify_reaction(reactants_smiles_list, products_smiles_list)
 
     # Now it renders the reaction table template
     reaction_table = render_template(

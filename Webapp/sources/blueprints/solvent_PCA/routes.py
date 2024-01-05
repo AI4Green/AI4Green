@@ -5,27 +5,12 @@ import numpy as np
 import pandas as pd
 from flask import Response, jsonify, render_template, request
 from flask_login import login_required
-from sources import models
-from sources.services.person import from_current_user_email
-from sources.services.PCA_graph import list_user_graphs, PCAgraph_from_id
+from sources import models, services
+from sources.services import solvent_surfer as sfr
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db
 
 from . import solvent_PCA_bp
-from Webapp.sources.services.solvent_PCA.embedding import get_PCA, get_r_class_descriptors
-from Webapp.sources.services.solvent_PCA.graph import editable_bokeh_graph
-from Webapp.sources.services.solvent_PCA.graph_utils import get_html_dict
-from Webapp.sources.services.solvent_PCA.interactive.data_analysis import getPointChanged
-from Webapp.sources.services.solvent_PCA.utils import (
-    bokeh_to_pandas,
-    control_points_for_df,
-    get_mode,
-    get_suggest_solvent_table,
-    get_surfer_names,
-    get_update_interactive_mode,
-    search_suggest_solvent_table,
-    update_kPCA,
-)
 
 
 @solvent_PCA_bp.route("/solvent_PCA", methods=["GET", "POST"])
@@ -63,22 +48,16 @@ def get_graph(mode="start_up") -> Response:
         Response, Json object containing plotted graph (chart) and suggested_solvent_table (if applicable)
     """
     # Deal with graph variables depending on mode
-    colour_name, point, r_class, name, names, mode, mode_df, control_points = get_mode(
+    colour_name, point, r_class, name, names, mode, mode_df, control_points = sfr.utils.get_mode(
         mode
     )
 
     # get the PC dataframe to plot the graph
-    pca_df, descriptors, names, kPCA = get_PCA(r_class)
+    pca_df, descriptors, names, kPCA = sfr.embedding.get_PCA(r_class)
 
     if mode == "reset_interactive":
         control_points_kPCA.clear()
         interactive_data_kPCA.clear()
-
-    elif mode == "on_load":
-        control_points_kPCA.clear()
-        interactive_data_kPCA.clear()
-
-        control_points_kPCA.update(control_points)
 
     interactive_data_kPCA.append(pca_df)
     interactive_data_kPCA.append(kPCA)
@@ -97,10 +76,10 @@ def get_graph(mode="start_up") -> Response:
 
     # get the suggested solvent table if a point has been selected
     if len(point) > 0:
-        suggest_solvent_table, best_solvents = get_suggest_solvent_table(point, df)
+        suggest_solvent_table, best_solvents = sfr.utils.get_suggest_solvent_table(point, df)
 
     # plot the graph and send
-    chart = editable_bokeh_graph(
+    chart = sfr.graph.editable_bokeh_graph(
         df,
         names,
         descriptors,
@@ -123,13 +102,13 @@ def on_point_click(mode="point_change") -> Response:
     renders suggested solvent table upon point click
     """
     # get graph variables depending on mode
-    colour_name, point, r_class, name, names, mode, mode_df, _ = get_mode(mode)
+    colour_name, point, r_class, name, names, mode, mode_df, _ = sfr.utils.get_mode(mode)
 
     suggest_solvent_table = ""
 
     # get suggested solvent table and render template
     if len(point) > 0:
-        suggest_solvent_table, best_solvents = get_suggest_solvent_table(point, mode_df)
+        suggest_solvent_table, best_solvents = sfr.utils.get_suggest_solvent_table(point, mode_df)
 
     return jsonify({"suggestSolventTable": suggest_solvent_table})
 
@@ -146,7 +125,7 @@ def on_class_change() -> Response:
     interactive_data_kPCA.clear()
 
     # get reaction class html templates
-    class_html = get_html_dict()
+    class_html = sfr.graph_utils.get_html_dict()
 
     if r_class == "":
         return jsonify({"aboutSolventClass": ""})
@@ -165,27 +144,27 @@ def from_reaction_table(mode="from_reaction_table") -> Response:
     Also searches suggest solvent table if mode == 'check_solvents'
     """
     # get graph variables depending on mode
-    colour_name, point, r_class, name, names, _, df, _ = get_mode(
+    colour_name, point, r_class, name, names, _, df, _ = sfr.utils.get_mode(
         mode="from_reaction_table"
     )
 
     # get PCA dataframe
-    df, descriptors, pca_names, kPCA = get_PCA(r_class)
+    df, descriptors, pca_names, kPCA = sfr.embedding.get_PCA(r_class)
 
     # get reaction class html templates
-    class_html = get_html_dict()
+    class_html = sfr.graph_utils.get_html_dict()
 
     # get all solvent names included in solvent surfer
-    names, alt_names, all_names = get_surfer_names()
+    names, alt_names, all_names = sfr.utils.get_surfer_names()
 
     # get suggested solvent table
     suggest_solvent_table = ""
 
     if name != "":
-        suggest_solvent_table, best_solvents = get_suggest_solvent_table(point, df)
+        suggest_solvent_table, best_solvents = sfr.utils.get_suggest_solvent_table(point, df)
 
     # plot graph
-    editable_chart = editable_bokeh_graph(
+    editable_chart = sfr.graph.editable_bokeh_graph(
         df,
         pca_names,
         descriptors,
@@ -213,7 +192,7 @@ def from_reaction_table(mode="from_reaction_table") -> Response:
 
     # else return possible sustainable substitutions for alert in rxn table
     else:
-        alternatives, substitutions = search_suggest_solvent_table(best_solvents)
+        alternatives, substitutions = sfr.utils.search_suggest_solvent_table(best_solvents)
 
         return jsonify(
             {
@@ -239,51 +218,60 @@ def update_interactive_graph(mode="interactive") -> Response:
         descriptors,
         control_points,
         interactive_data,
+        embedding_dict,
         return_json,
-    ) = get_update_interactive_mode(mode)
+    ) = sfr.utils.get_update_interactive_mode(mode)
+
+    # convert data from bokeh data to pandas dataframe
+    full_data = sfr.utils.bokeh_to_pandas(new_data)
 
     # get descriptors for reaction class
-    class_descriptors, _ = get_r_class_descriptors(r_class)
+    class_descriptors, _ = sfr.embedding.get_r_class_descriptors(r_class)
 
     if mode == "on_load":
         # reset control points and PCA if graph is loaded
         control_points_kPCA.clear()
         interactive_data_kPCA.clear()
 
-        # update control_points and kpca with loaded data
+        raw_data = full_data[class_descriptors]
+
+        df, kPCA = sfr.interactive.interactive_embeddings.getkPCA(
+            raw_data, "on_load", embedding_dict
+        )
+
+        #update control_points and kpca with loaded data
         control_points_kPCA.update(control_points)
-        interactive_data_kPCA.extend(interactive_data)
+        interactive_data_kPCA.append(full_data)
+        interactive_data_kPCA.append(kPCA)
 
         # render about solvent class html for solvent class tab
-        class_html = get_html_dict()
+        class_html = sfr.graph_utils.get_html_dict()
         about_solvent_class = render_template(class_html[r_class])
 
     previous = interactive_data_kPCA[0]
     names = pd.Series(new_data["names"])
-
-    # convert data from bokeh data to pandas dataframe
-    full_data = bokeh_to_pandas(new_data)
 
     # extract first two PCs to detect dragged points
     PCs = full_data[["PC1", "PC2"]]
     PCs = PCs.dropna()
 
     # compare PCs of new data with old data to get control points
-    point_changed = getPointChanged(PCs, previous[["PC1", "PC2"]])
+
+    point_changed = sfr.interactive.data_analysis.getPointChanged(PCs, previous[["PC1", "PC2"]])
 
     # if control_points have changed, update kPCA object and control_points
     if point_changed:
         control_points_kPCA[point_changed[0]] = point_changed[1]
 
-        kPCA, points = update_kPCA(interactive_data_kPCA[1], control_points_kPCA)
+        kPCA, points = sfr.utils.update_kPCA(interactive_data_kPCA[1], control_points_kPCA)
 
         interactive_data_kPCA[1] = kPCA
 
     else:
-        points = interactive_data_kPCA[1].update()
+        points = interactive_data_kPCA[1].embedding
 
     # get list with 1 if control point, 0 if not
-    c_points = control_points_for_df(control_points_kPCA, names)
+    c_points = sfr.utils.control_points_for_df(control_points_kPCA, names)
 
     # create dataframe with updated kpca data points
     df = pd.DataFrame(data=points.T, columns=["PC1", "PC2"])
@@ -294,7 +282,7 @@ def update_interactive_graph(mode="interactive") -> Response:
     # replace data with new data
     interactive_data_kPCA[0] = df
 
-    editable_chart = editable_bokeh_graph(
+    editable_chart = sfr.graph.editable_bokeh_graph(
         df,
         names,
         descriptors,
@@ -323,16 +311,18 @@ def save_graph() -> Response:
     """
     graph_data = request.get_json()
 
-    author = from_current_user_email()
+    author = services.person.from_current_user_email()
+
+    embedding_algorithm_dict = sfr.utils.jsonify_embedding_params(interactive_data_kPCA[1].embedding_algorithm)
 
     saved_graph = models.PCAGraph(
         graph_name=graph_data["graph_name"],
         r_class=graph_data["class_selected"],
         colour_selected=graph_data["colour_selected"],
-        control_points_pkl=control_points_kPCA,
-        graph_data=graph_data["graph_data"],
+        control_points=json.dumps(control_points_kPCA),
+        graph_data=json.dumps(graph_data["graph_data"]),
+        embedding_algorithm=embedding_algorithm_dict,
         descriptors=str(graph_data["descriptors"]),
-        kpca_object=interactive_data_kPCA,
         time_of_creation=datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-7],
         date_of_creation=date.today(),
         creator_person=author,
@@ -352,9 +342,9 @@ def get_saved_graphs() -> Response:
     """
     Extracts saved graphs from the database by user id for 'Saved Graphs' tab.
     """
-    user = from_current_user_email()
+    user = services.person.from_current_user_email()
 
-    graphs = list_user_graphs(user)
+    graphs = services.PCA_graph.list_user_graphs(user)
 
     graph_list = []
 
@@ -365,7 +355,7 @@ def get_saved_graphs() -> Response:
             "name": graph.graph_name,
             "r_class": graph.r_class,
             "colour": graph.colour_selected,
-            "control_points": graph.control_points_pkl,
+            "control_points": graph.control_points,
             "time_of_creation": graph.time_of_creation,
         }
 
@@ -386,9 +376,9 @@ def delete_graph(graph_id) -> Response:
     Sets a graph's status to inactive, so it doesn't show up in saved graphs.
     Graphs are not deleted from the database in case they need to be restored.
     """
-    user = from_current_user_email()
+    user = services.person.from_current_user_email()
 
-    query = PCAgraph_from_id(graph_id, user)
+    query = services.PCA_graph.PCAgraph_from_id(graph_id, user)
 
     query.status = "inactive"
     db.session.commit()

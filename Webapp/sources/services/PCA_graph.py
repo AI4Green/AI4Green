@@ -17,7 +17,10 @@ def list_user_graphs(user: models.Person) -> List[models.PCAGraph]:
         .filter(models.PCAGraph.status == "active")
     )
 
-    return graph_query.order_by(models.PCAGraph.time_of_creation.desc()).all()
+    return (
+        graph_query.order_by(models.PCAGraph.time_of_creation.desc())
+        .all()
+    )
 
 
 def PCAgraph_from_id(graph_id: str, user: models.Person) -> models.PCAGraph:
