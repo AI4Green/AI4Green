@@ -29,7 +29,6 @@ class PCAGraph(Model):
 
     time_of_creation = db.Column(db.DateTime, nullable=False)
     time_of_update = db.Column(db.DateTime)
-    date_of_creation = db.Column(db.DateTime)
 
     creator = db.Column(
         db.ForeignKey("Person.id", ondelete="CASCADE"), nullable=False, index=True
