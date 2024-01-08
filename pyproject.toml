@@ -2,7 +2,7 @@
 name = "ai4green"
 version = "1.5.1"
 description = "AI4Green is an Electronic Laboratory Notebook which combines data storage and sharing while promoting green and sustainable chemistry."
-authors = ["<ai4green@nottingham.ac.uk>"]
+authors = ["ai4green", "<ai4green@nottingham.ac.uk>"]
 license = "AGPL-3.0"
 readme = "README.md"
 
@@ -37,6 +37,10 @@ rdkit = "^2023.3.3"
 requests = "^2.31.0"
 wtforms = "^3.0.1"
 toml = "^0.10.2"
+bokeh = "^3.2.1"
+matplotlib = "^3.8.2"
+scikit-learn = "^1.3.2"
+
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
