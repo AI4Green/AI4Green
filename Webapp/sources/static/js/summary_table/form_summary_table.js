@@ -1,5 +1,5 @@
 //Functions to form summary table + image of reaction scheme
-function showSummary() {
+async function showSummary() {
   // check if summary table already populated if so warn user
   const reactionDiv = document.getElementById("js-summary-table");
   let tutorial_mode = $("#js-tutorial").val();
@@ -220,7 +220,12 @@ function showSummary() {
   //Product data from reaction table
   let products = "";
   let productTableNumbers = "";
-  let mainProductTableNumber = $("input[name='js-main-product']:checked").val();
+  //let mainProductTableNumber = $("input[name='js-main-product']:checked").val();
+  let mainProductTableNumber = getNum(
+    $("input[name='js-main-product']:checked"),
+  );
+  console.log(mainProductTableNumber);
+
   let productMasses = "";
   let roundedProductMasses = "";
   let productMolecularWeights = "";
@@ -261,6 +266,12 @@ function showSummary() {
   let workbook = $("#js-active-workbook").val();
   let demo = $("#js-demo").val();
   let tutorial = getVal("#js-tutorial");
+  let reactionID;
+  if (demo === "not demo" && tutorial === "no") {
+    reactionID = getVal("#js-reaction-id");
+  } else {
+    reactionID = null;
+  }
   $.ajax({
     url: "/_summary",
     type: "post",
@@ -326,9 +337,10 @@ function showSummary() {
       workbook: workbook,
       demo: demo,
       tutorial: tutorial,
+      reactionID: reactionID,
     },
     dataType: "json",
-    success: function (response) {
+    success: async function (response) {
       if (
         response.summary ===
         "Ensure you have entered all the necessary information!"
@@ -357,50 +369,115 @@ function showSummary() {
         $("#reaction-file-attachments").show();
         $("#js-load-status").val("loaded");
 
-        const { jsPDF } = window.jspdf;
-        let doc = new jsPDF();
-        let elementHandler = {
-          "#ignorePDF": function (element, renderer) {
-            return true;
-          },
-        };
-        let source = window.document.getElementsByTagName("body")[0];
-        doc.html(source, {
-          callback: function (doc) {
-            // doc.save();
-            console.log(doc);
-          },
-        });
+        if (demo === "not demo" && tutorial === "no") {
+          // var element = document.getElementById('print-container');
+          // let pdf = html2pdf(element);
+          // await sleep(3000)
+          //
+          //
+          // const element = document.getElementById("print-container");
+          // const options = { /* your options here */};
+          // const pdf = await html2pdf().set(options).from(element).toPdf().output('blob');
+          //
 
-        let blob = doc.output("blob");
-        const formData = new FormData();
-        formData.append("pdfFile", blob, "printed-document.pdf");
+          // const {jsPDF} = window.jspdf;
+          // let doc = new jsPDF();
+          // let elementHandler = {
+          //   "#ignorePDF": function (element, renderer) {
+          //     return true;
+          //   },
+          // };
+          // let source = window.document.getElementsByTagName("html")[0];
+          // doc.html(source, {
+          //   callback: function (doc) {
+          //     // doc.save();
+          //     console.log(doc);
+          //   },
+          // });
+          //   const pdf = new jsPDF();
+          //   console.log(pdf)
+          // Save the PDF or open it in a new tab
+          //pdf.html(document.getElementById('content'))
+          // var options = {
+          //   html2canvas: {
+          //     scale: 0.2
+          //   },
+          //   x: 0,
+          //   y: 0,
+          //   width: 210,
+          //   windowWidth: 1000
+          // }
 
-        fetch("/pdf", {
-          method: "POST",
-          body: formData,
-        });
+          // var PDF_Heighti   = document.querySelector('#'+canvasSelector).offsetWidth;
+          // var HTML_Width    = 790;
+          // var HTML_Height   = $('#'+canvasSelector).height();
+          // var top_left_margin = 5;
+          // var PDF_Width = HTML_Width+(top_left_margin*2);
+          // var PDF_Height = HTML_Height+(top_left_margin*2);
 
-        //import printJS from 'print-js'
+          //   let pdf = new jsPDF('p', 'pt');
+          //   //pdf.text('Hello world!', 10, 10)
+          // let x = $("<div>").text("Hello Joe").html()
+          //
+          //   // pdf.html("<b>Hello Joe</b>", options)
+          //   pdf.html(x)
+          //
+          //
+          // pdf.save('a4.pdf')
 
-        // printJS('printJS-form', 'html')
+          // pdf.html("<b>Hello Joe</b>")
+          // console.log(pdf)
+          // pdf.save("blank_pdf.pdf");
 
-        // printAndSendPdf()
+          //let blob = pdf.output("blob");
 
-        // const printPdf = async downloadUrl  => {
-        //   const res = await window.fetch(downloadUrl)
-        //   const blob = await res.blob()
-        //   const blobURL = URL.createObjectURL(blob)
-        //   console.log(blobURL)
-        //   console.log(blob)
-        //   console.log(res)
-        //   console.log(downloadUrl)
-        //   console.log(printPdf())
-        //   printJS(blobURL)
-        // }
+          let blob = await printPDF();
+
+          const formData = new FormData();
+          formData.append("pdfFile", blob, "printed-document.pdf");
+          formData.append("workgroup", workgroup);
+          formData.append("workbook", workbook);
+          formData.append("reactionID", reactionID);
+          console.log("before fetch");
+          fetch("/pdf", {
+            method: "POST",
+            body: formData,
+          });
+        }
       }
+
+      //import printJS from 'print-js'
+
+      // printJS('printJS-form', 'html')
+
+      // printAndSendPdf()
+
+      // const printPdf = async downloadUrl  => {
+      //   const res = await window.fetch(downloadUrl)
+      //   const blob = await res.blob()
+      //   const blobURL = URL.createObjectURL(blob)
+      //   console.log(blobURL)
+      //   console.log(blob)
+      //   console.log(res)
+      //   console.log(downloadUrl)
+      //   console.log(printPdf())
+      //   printJS(blobURL)
+      // }
     },
   });
+}
+
+async function printPDF() {
+  let worker = await html2pdf()
+    .from("print-container")
+    .save()
+    .toPdf()
+    .output("blob")
+    .then((data) => {
+      return data;
+      // let worker = await html2pdf().set().from('print-container').toPdf().output('blob').then((data) => {
+      //   return data;
+    });
 }
 
 const printAndSendPdf = async () => {

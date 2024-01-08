@@ -144,7 +144,7 @@ class UploadExperimentDataFiles:
         self.reaction_id = ajax_request.form["reactionID"]
         self.validated_files = []
         self.container_client = None
-        self.reaction = services.reaction.get_current()
+        self.reaction = services.reaction.get_current_from_request()
         self.uploaded_files = []
         self.file_hash = ""
 
@@ -212,8 +212,9 @@ class UploadExperimentDataFiles:
             container=container_name, blob=filename
         )
         print("uploading blob")
+        file.stream.seek(0)
         self.file_hash = services.file_attachments.sha256_from_file_contents(
-            file.stream.seek(0).stream.read()
+            file.stream.read()
         )
         if not self.file_hash:
             print("Failed to generate hash")

@@ -2,7 +2,7 @@
 This module receives a reaction name from the reaction
 table and saves it in the reaction database
 """
-
+import base64
 from datetime import datetime
 
 import pytz
@@ -155,7 +155,7 @@ def new_reaction() -> Response:
 def autosave() -> Response:
     """autosave when a field changes in the reaction page"""
     reaction_description = str(request.form["reactionDescription"])
-    reaction = services.reaction.get_current()
+    reaction = services.reaction.get_current_from_request()
     reaction_name = reaction.name
 
     services.auth.edit_reaction(reaction)
@@ -395,7 +395,7 @@ def autosave() -> Response:
 def autosave_sketcher() -> Response:
     """Autosave function for saving changes to the sketcher only. Only used before reaction table is generated."""
 
-    reaction = services.reaction.get_current()
+    reaction = services.reaction.get_current_from_request()
     services.auth.edit_reaction(reaction)
 
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
@@ -466,9 +466,6 @@ def view_reaction_attachment() -> Response:
         blob_client, file_uuid
     )
     file_object = services.file_attachments.database_object_from_uuid(file_uuid)
-
-    checksum = services.file_attachments.sha256_from_file_contents()
-    assert checksum == file_object.sha256_checksum
 
     mimetype = file_object.file_details["mimetype"]
     display_name = file_object.display_name

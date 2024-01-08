@@ -9,7 +9,23 @@ $(async function () {
      */
   showSketcherLoadingCircle();
   await setupNewKetcherSketcher();
-  await setupNewMarvinSketcher();
+  // Use Promise.race to give setupNewMarvinSketcher() a maximum of 5 seconds
+  try {
+    await Promise.race([
+      setupNewMarvinSketcher(),
+      new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("Timeout after 5 seconds"));
+        }, 5000);
+      }),
+    ]);
+    console.log("hello 3 joe");
+  } catch (error) {
+    abortMarvinSketcherCreation();
+    console.error(error);
+    // Handle errors or take appropriate action
+  }
+  console.log("hello 3 joe");
   // sleep used to allow sketchers to load scripts and make js Objects
   await sleep(1000);
   // sketcher changes when user clicks radio button

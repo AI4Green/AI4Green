@@ -13,7 +13,7 @@ def reaction(permission_level: str, request_method: str):
     if permission_level == "view_only":
         view_files(request_method)
     if permission_level == "edit":
-        reaction = services.reaction.get_current()
+        reaction = services.reaction.get_current_from_request()
         edit_reaction(reaction, file_attachment=True)
 
 

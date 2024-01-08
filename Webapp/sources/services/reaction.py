@@ -11,7 +11,7 @@ from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
 
 
-def get_current():
+def get_current_from_request():
     reaction_id = str(request.form["reactionID"])
     workgroup_name = str(request.form["workgroup"])
     workbook_name = str(request.form["workbook"])
