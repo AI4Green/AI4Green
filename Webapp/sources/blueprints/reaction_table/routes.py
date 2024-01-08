@@ -12,6 +12,7 @@ from urllib.request import urlopen
 from flask import current_app, jsonify, render_template, request
 from flask_login import login_required
 from rdkit import Chem
+from rdkit.Chem import Descriptors
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
 from sources.dto import ReactionNoteSchema
@@ -327,4 +328,4 @@ def mol_weight_generate(smiles: str) -> float:
         The molecular weight of the compound.
     """
     # MolWt accounts for the average across isotopes but ExactMolWt only takes the most abundant isotope.
-    return Chem.Descriptors.MolWt(Chem.MolFromSmiles(smiles))
+    return Descriptors.MolWt(Chem.MolFromSmiles(smiles))
