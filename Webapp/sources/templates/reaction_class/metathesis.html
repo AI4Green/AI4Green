@@ -1,0 +1,74 @@
+<div class="div_before_table">
+    <br>
+    <h3>Alkene Metathesis</h3>
+    <p> Alkene Metathesis is a reaction that leads to transfer of substituents between two alkenes. This reaction can be reliably facilitated using
+        the Hoveyda-Grubbs catalyst, which proceeds <i>via</i> a
+        <a href="https://doi.org/10.1021/ja963136z" target="_blank">dissociative pathway</a>.<sup>1</sup>
+
+    </p>
+    <br><br>
+    <div style="text-align: center;">
+    <img alt="Alkene Metathesis Reaction Scheme" style="width: 80%" src="{{url_for('static', filename='img/solvent_PCA_reactions/metathesis_general.svg')}}">
+    </div>
+    <br>
+    Solvents with high nucleophilic character can poison the active catalyst and non-electrostatic interactions (such as dispersion) can
+    stabilise the starting alkenes, both of which lead to a
+    <a href="https://doi.org/10.1016/S1452-3981(23)13151-8" target="_blank">reduction in reactivity</a>.<sup>2</sup>
+    To encapsulate these effects, H-bonding and dispersion descriptors were chosen for the PCA.
+
+    <br><br>
+    <table class="table table-sm table-bordered">
+
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hydrogen Bond Donor Ability'>Kamlet-Taft &alpha;</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hydrogen Bond Acceptor Ability'>Kamlet-Taft &beta;</a>
+            </td>
+
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Dispersion'>Dispersion <i>&delta;<sub>d</sub></i></a>
+            </td>
+
+        </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Hydrogen Bonding'>Hydrogen Bonding <i>&delta;<sub>h</sub></i></a>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <h4>Experimental Data</h4>
+    A report by
+    <a href="https://doi.org/10.1039/C3GC41943F" target="_blank">Skowerski<i> et al.</i></a><sup>3</sup>
+    investigated the use of greener solvents in the ring-closing metathesis for the formation of protected
+    dihydropyrroles. This experimental data can be viewed by selecting "Alkene Metathesis" from the Change Colour dropdown.
+    <br><br>
+    <div style="text-align: center;">
+    <img alt="Experimental Metathesis Reaction Scheme" style="width: 80%" src="{{url_for('static', filename='img/solvent_PCA_reactions/metathesis_experimental.svg')}}">
+    </div>
+    <br><br>
+
+    <h4>References</h4>
+    <p style="font-size: 11px">
+        1. Dias EL, Nguyen SBT, Grubbs RH. Well-Defined Ruthenium Olefin Metathesis Catalysts: Mechanism and Activity.
+        J. Am. Chem. Soc. 1997;119:3887-3897
+         <a href="https://doi.org/10.1021/ja963136z" target="_blank">https://doi.org/10.1021/ja963136z</a>.
+        <br>
+        2. Thomas PA, Kabanda MM, Ebenso EE. DFT Investigation into the Role of Conventional and Ionic Liquids as Solvents in Olefin Metathesis.
+        International Journal of Electrochemical Science. 2013;8:10827-10838
+        <a href="https://doi.org/10.1016/S1452-3981(23)13151-8" target="_blank">https://doi.org/10.1016/S1452-3981(23)13151-8</a>.
+        <br>
+        3. Skowerski K, Białecki J, Tracza A, Olszewski TK. An attempt to provide an environmentally friendly solvent
+        selection guide for olefin metathesis. Green Chem. 2014;16:1125-1130
+        <a href="https://doi.org/10.1039/C3GC41943F" target="_blank">https://doi.org/10.1039/C3GC41943F</a>
+
+    </p>
+
+</div>
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>

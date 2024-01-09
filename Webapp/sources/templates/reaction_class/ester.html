@@ -1,0 +1,105 @@
+<div class="div_before_table">
+    <br>
+    <h3>Ester Hydrolysis</h3>
+    <p> Ester hydrolysis can be facilitated under basic or acidic conditions, breaking the ester
+        bond and forming the corresponding carboxylic acid and alcohol as products. It is a widely used reaction and so
+        there are many reported procedures in the literature.
+
+    </p>
+    <br><br>
+    <div style="text-align: center;">
+    <img alt="Ester Hydrolysis Reaction Scheme" style="width: 70%" src="{{url_for('static', filename='img/solvent_PCA_reactions/ester_hydrolysis_general.svg')}}">
+
+    </div>
+    <br><br>
+    A range of solvents can be used for ester hydrolysis. Though polar protic solvents are
+    <a href="https://pubs.acs.org/doi/10.1021/acs.chemrev.0c00709" target="_blank"> often chosen</a><sup>1</sup> for their favourable solubilising effects,
+    <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/qsar.200330836" target="_blank"> other reports</a><sup>2</sup>
+     have proven that the rate of hydrolysis can be enhanced by solvents with lower dielectric constants. To capture these effects, the full range
+    of solvent descriptors was employed to build the PCA map.
+
+    <br><br>
+
+    <table class="table table-sm table-bordered">
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Molecular Weight (g/mol)'>Molecular Weight</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Experimental Density (g/cm<sup>3</sup>)'>Density</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Calculated Molar Volume (cm<sup>3</sup>/mol)'>Molar Volume</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Experimental Boiling Point (&#8451;)'>Boiling Point</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Experimental Refractive Index'>Refractive Index</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Experimental Dynamic Viscosity (cP)'>Viscosity</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Experimental Vapour Pressure (mmHg)'>Vapour Pressure</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Experimental Octanol-Water Partition Coefficient'>LogP</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Measured Dipole Moment (DeBye)'>Dipole Moment</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Measured Dielectric Constant'>Dielectric Constant</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hydrogen Bond Donor Ability'>Kamlet-Taft &alpha;</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hydrogen Bond Acceptor Ability'>Kamlet-Taft &beta;</a>
+            </td>
+        <tr>
+        <td>
+            <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Polarizability'>Kamlet-Taft &pi;<sup>*</sup></a>
+        </td>
+        <td>
+            <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Dispersion'>Dispersion <i>&delta;<sub>d</sub></i></a>
+        </td>
+        <td>
+            <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Dipolar Interactions'>Polarity <i>&delta;<sub>p</sub></i></a>
+        </td>
+    </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Hydrogen Bonding'>Hydrogen Bonding <i>&delta;<sub>h</sub></i></a>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <h4>Experimental Data</h4>
+    Due to the variability of conditions in the literature it was not possible to assemble a comprehensive list of solvent performances
+    with the same set of conditions.
+    <br><br>
+
+    <h4>References</h4>
+    <p style="font-size: 11px">
+        1. Jordan A, Stoy P, Sneddon HF, Chlorinated Solvents: Their Advantages, Disadvantages, and Alternatives in Organic and Medicinal Chemistry.
+        Chem. Rev. 2021;121:1582-1622
+        <a href="https://doi.org/10.1021/acs.chemrev.0c00709" target="_blank"> https://doi.org/10.1021/acs.chemrev.0c00709</a>.<br>
+        2. Hilal SH, Karickhoff SW, Carreira LA, Shrestha BP. Estimation of Carboxylic Acid Ester Hydrolysis Rate Constants.
+        QSAR Comb. Sci. 2003;22:917-925
+        <a href="https://doi.org/10.1002/qsar.200330836" target="_blank"> https://doi.org/10.1002/qsar.200330836</a>.
+    </p>
+
+</div>
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>

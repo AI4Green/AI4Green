@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-3.2.1.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.2.1.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.2.1.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.2.1.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.2.1.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/solvent_PCA.js') }}"></script>
+    <script type="text/javascript"> Bokeh.set_log_level("info"); </script>
+
+</head>
+<body id="main-page" onload ="get_graph()" >
+<div class="container-fluid" style="padding-left: 10px">
+    <h2>Solvent Surfer</h2>
+    <br>
+    <div class="row">
+        <div class="col-6">
+            <div id='editable_chart'></div>
+
+        </div>
+        <div class="col-6" id="right-panel">
+            <br>
+            <ul id="myTab" class="nav nav-tabs" role="tablist">
+              <li class="nav-item">
+                  <a class="nav-link active" role="tab" data-toggle="tab" href="#solvent_suggestions" aria-selected="true">Suggested Solvents</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" role="tab" data-toggle="tab" href="#about_r_class" aria-selected="false">Reaction Class</a>
+              </li>
+            <li class="nav-item">
+                  <a class="nav-link" role="tab" data-toggle="tab" href="#saved-graphs" aria-selected="false">Saved Graphs</a>
+              </li>
+                <li class="nav-item">
+                  <a class="nav-link" role="tab" data-toggle="tab" href="#about_surfer" aria-selected="false">About</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="solvent_suggestions" role="tabpanel" style="overflow-y:auto; max-height:550px">
+                    <br>
+                    <div id="pre-target"><b>Click or choose a substitution target to view suggestions!</b></div>
+                    <div id='suggested_table'></div>
+                </div>
+                <div id="about_r_class" class="tab-pane fade in" role="tabpanel" style="overflow-y:auto; max-height:550px">
+                    <div id="pre-class"><br><b>Select a reaction class to begin!</b></div>
+                    <div id="about_class"></div>
+                </div>
+                <div id="saved-graphs" class="tab-pane fade in" role="tabpanel" style="overflow-y:auto; max-height:550px">
+                    <br>
+                    <div id="no-graphs"><b>Edited solvent surfers can be viewed here!</b></div>
+                    <div class="scrollClass" id="saved-graph-list">
+                        <div id="graph-details"></div>
+                        </div>
+                </div>
+                <div id="about_surfer" class="tab-pane fade in" role="tabpanel" style="overflow-y:auto; max-height:550px">
+                    <br>
+                    <div id="surfer-text">
+                    <h3>About the Solvent Surfer</h3>
+                    <p>
+                    The Solvent Surfer is a selection tool that aims to promote the use of greener alternatives to common laboratory
+                    solvents. Selecting a Substitution Target from the dropdown menu will highlight the selected solvent
+                    on the map and suggest the closest solvents as alternatives. Points can also be selected by clicking. Each solvent is colour-coded according to its CHEM21 SHE
+                    ranking, but the colour can be changed using the Change Colour dropdown. Reaction specific solvent maps
+                    can be viewed using the Reaction Class dropdown, and a brief explanation of each class is available
+                    under the Reaction Class tab.
+                    Information about how the maps were generated is available below.
+                    </p>
+                    <br>
+                    <h4> Principal Component Analysis</h4>
+                    <p>
+                        The Solvent Surfer is based on Principal Component Analysis (PCA) which is a statistical technique that
+                        reduces the dimensionality of large datasets. This is done by transforming input
+                        variables into Principal Components (PC's) that describe the variance of the data, often with the
+                        first two PC's describing the majority of this variance. This allows the data to be described in
+                        fewer dimensions without losing important information.
+
+                        These maps are generated using a variation of this technique called <i>kernel</i> PCA, which performs PCA analysis
+                        in a non-linear multidimensional space. The maps shown here were generated using a Gaussian kernel.
+                        <br>
+                        <br>
+
+                        <h4>Solvent Dataset</h4>
+                        The solvent maps are plots of PC2 vs PC1, which are generated through a PCA of a solvent descriptor dataset.
+                        This dataset describes 57 common laboratory solvents in terms of 16 descriptors that capture their physical and chemical properties.
+                        Of these solvents, 40 were included in the CHEM21 Solvent Selection Guide and are
+                        assigned their respective CHEM21 sustainability ranking. The remaining 17 solvents are unranked,
+                        but were included to show yield data for each reaction class. Reaction specific maps are generated by
+                        excluding redundant descriptors from the original dataset. Details on how this was done is given in
+                        the Reaction Class tab.
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+</div>
+</body>
+<script>
+    $(document).ready(function() {
+        // when page loads get saved graphs
+        loadSavedGraphs()
+    })
+</script>
+
+{% endblock %}

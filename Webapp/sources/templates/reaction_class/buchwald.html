@@ -1,0 +1,73 @@
+<div class="div_before_table">
+    <br>
+    <h3>Buchwald-Hartwig</h3>
+    <p> The Buchwald-Hartwig reaction is a type of transition metal-catalysed cross-coupling that forms a carbon-nitrogen
+        bond between a non-tertiary amine and an aryl halide.
+    </p>
+    <br><br>
+    <div style="text-align: center;">
+    <img alt="Buchwald Reaction Scheme" style="width: 75%" src="{{url_for('static', filename='img/solvent_PCA_reactions/buchwald_general.svg')}}">
+    </div>
+    <br><br>
+    Nonpolar aprotic solvents are commonly chosen for Buchwald-Hartwig amination reactions, and catalyst performance has been observed to be inversely proportional
+    to the dielectric constant in the
+    <a href="https://www.sciencedirect.com/science/article/pii/S0021951716300914?via%3Dihub" target="_blank"> heterogeneous Cu-catalysed Buchwald-Hartwig reaction</a>.<sup>1</sup>
+    To capture this in the PCA map, the following descriptors were used.
+
+    <br><br>
+    <table class="table table-sm table-bordered">
+
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Measured Dipole Moment (DeBye)'>Dipole Moment</a>
+            </td>
+
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Measured Dielectric Constant'>Dielectric Constant</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hydrogen Bond Donor Ability'>Kamlet-Taft &alpha;</a>
+            </td>
+        </tr>
+
+        <tr>
+        <td>
+            <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Polarizability'>Kamlet-Taft &pi;<sup>*</sup></a>
+        </td>
+
+        <td>
+            <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Dipolar Interactions'>Polarity <i>&delta;<sub>p</sub></i></a>
+        </td>
+
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Hydrogen Bonding'>Hydrogen Bonding <i>&delta;<sub>h</sub></i></a>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <h4>Experimental Data</h4>
+     A study by <a href="https://pubs.acs.org/doi/10.1021/acssuschemeng.1c05307?fig=fig2&ref=pdf" target="_blank"> Lei <i>et al.</i></a><sup>2</sup>
+    investigated the use of green solvents for the Buchwald-Hartwig coupling of
+    Boc-protected amides with aryl amines. The yield data for this investigation can be viewed by selecting "Buchwald-Hartwig" in the Change Colour dropdown.
+    <div style="text-align: center;">
+    <img alt="Buchwald Hartwig Reaction Scheme" style="width: 90%" src="{{url_for('static', filename='img/solvent_PCA_reactions/buchwald_experimental.svg')}}">
+    </div>
+    <br><br>
+
+    <h4>References</h4>
+    <p style="font-size: 11px">
+        1. Tirsoaga A, Cojocaru B, Teodorescu C, Vasiliu F, Grecu MN, Ghica D, Parvulescu VI, Garcia H. C–N cross-coupling
+        on supported copper catalysts: The effect of the support, oxidation state, base and solvent. Journal of Catalysis
+        2016;341:205-220
+        <a href="https://doi.org/10.1016/j.jcat.2016.06.011" target="_blank"> https://doi.org/10.1016/j.jcat.2016.06.011</a><br>
+        2. Lei P, Wang P, Mu Y, Wang Y, Ma Z, Feng J, Liu X, Szostak M. Green-Solvent Selection for Acyl Buchwald–Hartwig
+        Cross-Coupling of Amides (Transamidation). ACS Sustainable Chem. Eng 2021;9:14937-14945
+        <a href="https://doi.org/10.1021/acssuschemeng.1c05307" target="_blank"> https://doi.org/10.1021/acssuschemeng.1c05307</a><br>
+    </p>
+
+</div>
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
