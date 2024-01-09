@@ -11,4 +11,7 @@ from . import (
     user,
     workbook,
     workgroup,
+    reaction_classification,
+    PCA_graph,
+    solvent_surfer
 )
