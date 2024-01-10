@@ -1,6 +1,5 @@
-//Functions to form summary table + image of reaction scheme
 /**
- *
+ * Forms summary table + image of reaction scheme
  * @param mode - either undefined or 'reload' to indicate the function is running to reload an existing reaction
  * @return {Promise<void>}
  */
@@ -383,65 +382,6 @@ async function showSummary(mode) {
   });
 }
 
-/**
- * Sends a blob of a PDF summary of the reaction to the backend to be saved
- */
-async function makePDF() {
-  await sleep(7000);
-  // clone variables to add to PDF summary
-  let element = document.getElementById("print-container").cloneNode(true);
-  let elementTitle = document.getElementById("name-id").cloneNode(true);
-
-  // Create a new div element and put content from experimental textarea in to it because textarea does not work in html2pdf
-  let textareaElement = document.getElementById("js-reaction-description");
-  let elementExperimental = document.createElement("div");
-  elementExperimental.innerHTML = textareaElement.value;
-  elementExperimental.classList.add("break-word");
-  let dateTime = getDateTime();
-  let elementDateTime = document.createElement("div");
-  elementDateTime.innerHTML = `<br><br><b>PDF Summary generated on: ${dateTime}</b>`;
-
-  // make new element to append all desired elements for pdf summary
-  let elementToPrint = document.createElement("div");
-  elementToPrint.id = "outer-print-div";
-  elementToPrint.appendChild(elementTitle);
-  elementToPrint.appendChild(element);
-  elementToPrint.appendChild(elementExperimental);
-  elementToPrint.appendChild(elementDateTime);
-  elementToPrint.classList.add("pdf-print");
-
-  // options for html2pdf
-  const opt = {
-    margin: 10,
-    filename: "myfile.pdf",
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 1.2, scrollY: 0 },
-    jsPDF: {
-      orientation: "landscape",
-      format: [420, 594],
-    },
-  };
-
-  // make blob from html element, append to formData and send to backend
-  let blob = await html2pdf().set(opt).from(elementToPrint).output("blob");
-
-  // get other variables to send to backend
-  let workgroup = $("#js-active-workgroup").val();
-  let workbook = $("#js-active-workbook").val();
-  let reactionID = getVal("#js-reaction-id");
-
-  // make formData and append the file and others variables to it.
-  const formData = new FormData();
-  formData.append("pdfFile", blob, `${reactionID}-summary.pdf`);
-  formData.append("workgroup", workgroup);
-  formData.append("workbook", workbook);
-  formData.append("reactionID", reactionID);
-  await fetch("/pdf", {
-    method: "POST",
-    body: formData,
-  });
-}
-
 function exportImage() {
   // make reaction image above summary table
   let $image = $("#image");
@@ -450,23 +390,4 @@ function exportImage() {
   $image.attr("src", imgSource);
   $("#imageContainer").css("display", "block");
   sessionStorage.clear();
-}
-
-/**
- * Gets the current datetime for UK timezone and formats.
- * @return {string} - formatted datetime string.
- */
-function getDateTime() {
-  // Get the current date and time in UTC
-  const currentUtcDate = new Date();
-  // Specify the target timezone (e.g., 'Europe/London' for UK)
-  const targetTimeZone = "Europe/London";
-  // Create an Intl.DateTimeFormat object with the specified timezone
-  const dateTimeFormat = new Intl.DateTimeFormat("en-GB", {
-    dateStyle: "full",
-    timeStyle: "long",
-    timeZone: targetTimeZone,
-  });
-  // Format the current date and time in the UK timezone
-  return dateTimeFormat.format(currentUtcDate);
 }

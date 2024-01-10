@@ -3,7 +3,6 @@ let marvin;
  * Assigns the global variable 'marvin' to the marvin sketcher object and prepares the sketcher ready for use
  */
 async function setupNewMarvinSketcher() {
-  console.log("hello 1 joe");
   let marvinKey = $("#marvin-js-key").val();
   marvin = await newMarvinSketcher("#marvin-sketcher", marvinKey);
   if (marvin) {
