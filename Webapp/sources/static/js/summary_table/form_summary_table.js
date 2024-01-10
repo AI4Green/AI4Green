@@ -1,5 +1,10 @@
 //Functions to form summary table + image of reaction scheme
-async function showSummary() {
+/**
+ *
+ * @param mode - either undefined or 'reload' to indicate the function is running to reload an existing reaction
+ * @return {Promise<void>}
+ */
+async function showSummary(mode) {
   // check if summary table already populated if so warn user
   const reactionDiv = document.getElementById("js-summary-table");
   let tutorial_mode = $("#js-tutorial").val();
@@ -340,7 +345,7 @@ async function showSummary() {
       reactionID: reactionID,
     },
     dataType: "json",
-    success: async function (response) {
+    success: function (response) {
       if (
         response.summary ===
         "Ensure you have entered all the necessary information!"
@@ -369,206 +374,73 @@ async function showSummary() {
         $("#reaction-file-attachments").show();
         $("#js-load-status").val("loaded");
 
-        if (demo === "not demo" && tutorial === "no") {
-          // var element = document.getElementById('print-container');
-          // let pdf = html2pdf(element);
-          // await sleep(3000)
-          //
-          //
-          // const element = document.getElementById("print-container");
-          // const options = { /* your options here */};
-          // const pdf = await html2pdf().set(options).from(element).toPdf().output('blob');
-          //
-
-          // const {jsPDF} = window.jspdf;
-          // let doc = new jsPDF();
-          // let elementHandler = {
-          //   "#ignorePDF": function (element, renderer) {
-          //     return true;
-          //   },
-          // };
-          // let source = window.document.getElementsByTagName("html")[0];
-          // doc.html(source, {
-          //   callback: function (doc) {
-          //     // doc.save();
-          //     console.log(doc);
-          //   },
-          // });
-          //   const pdf = new jsPDF();
-          //   console.log(pdf)
-          // Save the PDF or open it in a new tab
-          //pdf.html(document.getElementById('content'))
-          // var options = {
-          //   html2canvas: {
-          //     scale: 0.2
-          //   },
-          //   x: 0,
-          //   y: 0,
-          //   width: 210,
-          //   windowWidth: 1000
-          // }
-
-          // var PDF_Heighti   = document.querySelector('#'+canvasSelector).offsetWidth;
-          // var HTML_Width    = 790;
-          // var HTML_Height   = $('#'+canvasSelector).height();
-          // var top_left_margin = 5;
-          // var PDF_Width = HTML_Width+(top_left_margin*2);
-          // var PDF_Height = HTML_Height+(top_left_margin*2);
-
-          //   let pdf = new jsPDF('p', 'pt');
-          //   //pdf.text('Hello world!', 10, 10)
-          // let x = $("<div>").text("Hello Joe").html()
-          //
-          //   // pdf.html("<b>Hello Joe</b>", options)
-          //   pdf.html(x)
-          //
-          //
-          // pdf.save('a4.pdf')
-
-          // pdf.html("<b>Hello Joe</b>")
-          // console.log(pdf)
-          // pdf.save("blank_pdf.pdf");
-
-          //let blob = pdf.output("blob");
-
-          let blob = await printPDF();
-
-          const formData = new FormData();
-          formData.append("pdfFile", blob, "printed-document.pdf");
-          formData.append("workgroup", workgroup);
-          formData.append("workbook", workbook);
-          formData.append("reactionID", reactionID);
-          console.log("before fetch");
-          fetch("/pdf", {
-            method: "POST",
-            body: formData,
-          });
+        // make and save pdf summary if not in demo/tutorial mode, and we are generating summary from the button not a reload
+        if (demo === "not demo" && tutorial === "no" && mode !== "reload") {
+          makePDF();
         }
       }
-
-      //import printJS from 'print-js'
-
-      // printJS('printJS-form', 'html')
-
-      // printAndSendPdf()
-
-      // const printPdf = async downloadUrl  => {
-      //   const res = await window.fetch(downloadUrl)
-      //   const blob = await res.blob()
-      //   const blobURL = URL.createObjectURL(blob)
-      //   console.log(blobURL)
-      //   console.log(blob)
-      //   console.log(res)
-      //   console.log(downloadUrl)
-      //   console.log(printPdf())
-      //   printJS(blobURL)
-      // }
     },
   });
 }
 
-async function printPDF() {
-  let worker = await html2pdf()
-    .from("print-container")
-    .save()
-    .toPdf()
-    .output("blob")
-    .then((data) => {
-      return data;
-      // let worker = await html2pdf().set().from('print-container').toPdf().output('blob').then((data) => {
-      //   return data;
-    });
-}
+/**
+ * Sends a blob of a PDF summary of the reaction to the backend to be saved
+ */
+async function makePDF() {
+  await sleep(7000);
+  // clone variables to add to PDF summary
+  let element = document.getElementById("print-container").cloneNode(true);
+  let elementTitle = document.getElementById("name-id").cloneNode(true);
 
-const printAndSendPdf = async () => {
-  try {
-    // Trigger printing
-    window.print();
+  // Create a new div element and put content from experimental textarea in to it because textarea does not work in html2pdf
+  let textareaElement = document.getElementById("js-reaction-description");
+  let elementExperimental = document.createElement("div");
+  elementExperimental.innerHTML = textareaElement.value;
+  elementExperimental.classList.add("break-word");
+  let dateTime = getDateTime();
+  let elementDateTime = document.createElement("div");
+  elementDateTime.innerHTML = `<br><br><b>PDF Summary generated on: ${dateTime}</b>`;
 
-    // Wait for the print job to finish (you might need to adjust the delay)
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+  // make new element to append all desired elements for pdf summary
+  let elementToPrint = document.createElement("div");
+  elementToPrint.id = "outer-print-div";
+  elementToPrint.appendChild(elementTitle);
+  elementToPrint.appendChild(element);
+  elementToPrint.appendChild(elementExperimental);
+  elementToPrint.appendChild(elementDateTime);
+  elementToPrint.classList.add("pdf-print");
 
-    // Create a Blob URL for the generated PDF
-    const blobURL = await capturePrintedDocument();
+  // options for html2pdf
+  const opt = {
+    margin: 10,
+    filename: "myfile.pdf",
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 1.2, scrollY: 0 },
+    jsPDF: {
+      orientation: "landscape",
+      format: [420, 594],
+    },
+  };
 
-    // Print the PDF using printJS
-    printJS(blobURL);
+  // make blob from html element, append to formData and send to backend
+  let blob = await html2pdf().set(opt).from(elementToPrint).output("blob");
 
-    // Send the PDF to the Flask endpoint
-    const formData = new FormData();
-    formData.append("pdfFile", blobURL, "printed-document.pdf");
+  // get other variables to send to backend
+  let workgroup = $("#js-active-workgroup").val();
+  let workbook = $("#js-active-workbook").val();
+  let reactionID = getVal("#js-reaction-id");
 
-    await fetch("/pdf", {
-      method: "POST",
-      body: formData,
-    });
-
-    console.log("PDF sent to Flask endpoint successfully");
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
-
-const capturePrintedDocument = async () => {
-  return new Promise((resolve) => {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-
-    // Set the canvas size to the printed document size
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    // Capture the content of the printed window onto the canvas
-    window.onafterprint = () => {
-      context.drawImage(window, 0, 0, window.innerWidth, window.innerHeight);
-
-      // Convert the canvas content to a Blob URL
-      canvas.toBlob((blob) => {
-        const blobURL = URL.createObjectURL(blob);
-        resolve(blobURL);
-      }, "application/pdf");
-    };
-
-    // Force a second print to capture the content
-    window.print();
+  // make formData and append the file and others variables to it.
+  const formData = new FormData();
+  formData.append("pdfFile", blob, `${reactionID}-summary.pdf`);
+  formData.append("workgroup", workgroup);
+  formData.append("workbook", workbook);
+  formData.append("reactionID", reactionID);
+  await fetch("/pdf", {
+    method: "POST",
+    body: formData,
   });
-};
-
-// Example usage
-
-const printPdf = async (downloadUrl) => {
-  try {
-    // Fetch the PDF file
-    const res = await window.fetch(downloadUrl);
-
-    // Check if the fetch was successful (status code 200)
-    if (!res.ok) {
-      throw new Error(`Failed to fetch PDF: ${res.status} ${res.statusText}`);
-    }
-
-    // Get the blob from the response
-    const blob = await res.blob();
-
-    // Create a Blob URL for the downloaded file
-    const blobURL = URL.createObjectURL(blob);
-
-    // Print the PDF using printJS
-    printJS(blobURL);
-
-    // Send the PDF to the Flask endpoint
-    const formData = new FormData();
-    formData.append("pdfFile", blob, "printed-document.pdf");
-
-    await fetch("/pdf", {
-      method: "POST",
-      body: formData,
-    });
-
-    console.log("PDF sent to Flask endpoint successfully");
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
+}
 
 function exportImage() {
   // make reaction image above summary table
@@ -578,4 +450,23 @@ function exportImage() {
   $image.attr("src", imgSource);
   $("#imageContainer").css("display", "block");
   sessionStorage.clear();
+}
+
+/**
+ * Gets the current datetime for UK timezone and formats.
+ * @return {string} - formatted datetime string.
+ */
+function getDateTime() {
+  // Get the current date and time in UTC
+  const currentUtcDate = new Date();
+  // Specify the target timezone (e.g., 'Europe/London' for UK)
+  const targetTimeZone = "Europe/London";
+  // Create an Intl.DateTimeFormat object with the specified timezone
+  const dateTimeFormat = new Intl.DateTimeFormat("en-GB", {
+    dateStyle: "full",
+    timeStyle: "long",
+    timeZone: targetTimeZone,
+  });
+  // Format the current date and time in the UK timezone
+  return dateTimeFormat.format(currentUtcDate);
 }
