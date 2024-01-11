@@ -344,7 +344,7 @@ async function showSummary(mode) {
       reactionID: reactionID,
     },
     dataType: "json",
-    success: function (response) {
+    success: async function (response) {
       if (
         response.summary ===
         "Ensure you have entered all the necessary information!"
@@ -375,7 +375,19 @@ async function showSummary(mode) {
 
         // make and save pdf summary if not in demo/tutorial mode, and we are generating summary from the button not a reload
         if (demo === "not demo" && tutorial === "no" && mode !== "reload") {
-          makePDF();
+          showLoadingOverlay("Creating Summary");
+          setTimeout(() => {
+            makePDF()
+              .then(() => {
+                // PDF creation is complete, hide loading circle
+                hideLoadingOverlay();
+              })
+              .catch((error) => {
+                // Handle any errors that occurred during PDF creation
+                console.error("Error making PDF:", error);
+                hideLoadingOverlay(); // Ensure loading circle is hidden even on error
+              });
+          }, 5000);
         }
       }
     },

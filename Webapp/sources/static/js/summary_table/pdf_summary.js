@@ -1,68 +1,7 @@
-// /**
-//  * Sends a blob of a PDF summary of the reaction to the backend to be saved
-//  */
-// async function makePDF() {
-//   await sleep(7000);
-//
-//   let element = document.getElementById("print-container").cloneNode(true);
-//   let elementTitle = document.getElementById("name-id").cloneNode(true);
-//
-//
-//   let textareaElement = document.getElementById("js-reaction-description");
-//   let elementExperimental = document.createElement("div");
-//   elementExperimental.innerHTML = textareaElement.value;
-//   elementExperimental.classList.add("break-word");
-//   let dateTime = getDateTime();
-//   let elementDateTime = document.createElement("div");
-//   elementDateTime.innerHTML = `<br><br><b>PDF Summary generated on: ${dateTime}</b>`;
-//
-//
-//   let elementToPrint = document.createElement("div");
-//   elementToPrint.id = "outer-print-div";
-//   elementToPrint.appendChild(elementTitle);
-//   elementToPrint.appendChild(element);
-//   elementToPrint.appendChild(elementExperimental);
-//   elementToPrint.appendChild(elementDateTime);
-//   elementToPrint.classList.add("pdf-print");
-//
-//   // options for html2pdf
-//   const opt = {
-//     margin: 10,
-//     filename: "myfile.pdf",
-//     image: { type: "jpeg", quality: 0.98 },
-//     html2canvas: { scale: 1.2, scrollY: 0 },
-//     jsPDF: {
-//       orientation: "landscape",
-//       format: [420, 594],
-//     },
-//   };
-//
-//
-//   let blob = await html2pdf().set(opt).from(elementToPrint).output("blob");
-//
-//   // get other variables to send to backend
-//   let workgroup = $("#js-active-workgroup").val();
-//   let workbook = $("#js-active-workbook").val();
-//   let reactionID = getVal("#js-reaction-id");
-//
-//   // make formData and append the file and others variables to it.
-//   const formData = new FormData();
-//   formData.append("pdfFile", blob, `${reactionID}-summary.pdf`);
-//   formData.append("workgroup", workgroup);
-//   formData.append("workbook", workbook);
-//   formData.append("reactionID", reactionID);
-//   await fetch("/pdf", {
-//     method: "POST",
-//     body: formData,
-//   });
-// }
-
 /**
  * Asynchronously generates a PDF summary of the reaction, sends it to the backend, and saves it.
  */
 async function makePDF() {
-  await sleep(7000);
-
   // Create the main element to be included in the PDF
   const elementToPrint = createPDFElement();
 
@@ -100,8 +39,6 @@ function createPDFElement() {
   elementToPrint.appendChild(element);
   elementToPrint.appendChild(elementExperimental);
   elementToPrint.appendChild(elementDateTime);
-  elementToPrint.classList.add("pdf-print");
-
   return elementToPrint;
 }
 
@@ -191,7 +128,7 @@ async function sendFormDataToBackend(formData) {
 function getDateTime() {
   // Get the current date and time in UTC
   const currentUtcDate = new Date();
-  // Specify the target timezone (e.g., 'Europe/London' for UK)
+  // Specify the target timezone
   const targetTimeZone = "Europe/London";
   // Create an Intl.DateTimeFormat object with the specified timezone
   const dateTimeFormat = new Intl.DateTimeFormat("en-GB", {
@@ -201,4 +138,49 @@ function getDateTime() {
   });
   // Format the current date and time in the UK timezone
   return dateTimeFormat.format(currentUtcDate);
+}
+
+/**
+ * Displays a loading overlay with a spinning flask whilst saving a PDF summary of the reaction.
+ * @param {string} [message='Please do not exit or refresh the page'] - The message to display on the loading overlay.
+ */
+function showLoadingOverlay(message) {
+  let overlay = document.getElementById("loading-overlay");
+  let messageElement = document.getElementById("loading-message");
+  let iconElement = document.getElementById("loading-icon");
+
+  if (!overlay) {
+    // Create overlay and message elements if not exists
+    overlay = document.createElement("div");
+    overlay.id = "loading-overlay";
+    document.body.appendChild(overlay);
+
+    messageElement = document.createElement("div");
+    messageElement.id = "loading-message";
+    overlay.appendChild(messageElement);
+
+    iconElement = document.createElement("i");
+    iconElement.id = "summary-loading-icon";
+    iconElement.className = "fa fa-flask"; // Replace with the class of the icon you selected
+    overlay.appendChild(iconElement);
+  }
+
+  // Set the message
+  messageElement.textContent =
+    message + "\nPlease do not exit or refresh the page";
+
+  // Show the loading overlay
+  overlay.style.display = "block";
+}
+
+/**
+ * Hides the loading overlay.
+ */
+function hideLoadingOverlay() {
+  let overlay = document.getElementById("loading-overlay");
+
+  if (overlay) {
+    // Hide the loading overlay
+    overlay.style.display = "none";
+  }
 }

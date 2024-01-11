@@ -292,7 +292,7 @@ function postReactionData(complete = "not complete") {
       toExport: JSON.stringify(toExport),
     },
     dataType: "json",
-    success: function (response) {
+    success: async function (response) {
       if (complete === "complete") {
         if (
           response.feedback ===
@@ -340,8 +340,10 @@ function postReactionData(complete = "not complete") {
             .removeClass("add-highlight-unfilled-cell")
             .addClass("remove-highlight-summary-cell");
           $("#js-complete").val("complete");
-          makePDF();
           controlLockedReactionFunctionality();
+          showLoadingOverlay("Locking Reaction");
+          await makePDF();
+          hideLoadingOverlay();
         }
       } else {
         // if not locking reaction save as normal
