@@ -41,6 +41,7 @@ def get_surfer_names() -> (List, List, List):
         )
     )
 
+    solvent_data = solvent_data.fillna('')
     names = extract_names(solvent_data["Solvent"].values.tolist())
     alt_names = extract_names(solvent_data["Alternative Name"].values.tolist())
 
