@@ -41,6 +41,7 @@ def get_surfer_names() -> (List, List, List):
         )
     )
 
+    solvent_data = solvent_data.fillna('')
     names = extract_names(solvent_data["Solvent"].values.tolist())
     alt_names = extract_names(solvent_data["Alternative Name"].values.tolist())
 
@@ -88,7 +89,10 @@ def find_reaction_table_mode_variables(
         r_class = "Other"
 
     if name in names:
-        point = [names.index(name) - 1]
+        if name == '':
+            point = []
+        else:
+            point = [names.index(name) - 1]
 
     elif name in alt_names:
         point = [alt_names.index(name) - 1]

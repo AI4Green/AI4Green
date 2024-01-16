@@ -324,7 +324,6 @@ def save_graph() -> Response:
         embedding_algorithm=embedding_algorithm_dict,
         descriptors=str(graph_data["descriptors"]),
         time_of_creation=datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-7],
-        date_of_creation=date.today(),
         creator_person=author,
         status="active",
     )
