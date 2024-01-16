@@ -89,7 +89,10 @@ def find_reaction_table_mode_variables(
         r_class = "Other"
 
     if name in names:
-        point = [names.index(name) - 1]
+        if name == '':
+            point = []
+        else:
+            point = [names.index(name) - 1]
 
     elif name in alt_names:
         point = [alt_names.index(name) - 1]
