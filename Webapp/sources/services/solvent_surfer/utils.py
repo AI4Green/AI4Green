@@ -203,6 +203,11 @@ def get_mode(
             mode, name, names, alt_names, point, r_class
         )
 
+    if r_class == "":
+        mode = "start_up"
+        point = []
+        name = ""
+
     return colour_name, point, r_class, name, names, mode, df, control_points
 
 
