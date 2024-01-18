@@ -2,9 +2,9 @@
  * Makes a ketcher sketcher, hides it and sets up the autosave
  * @param {string} [width="1020px"] - width of the sketcher in pixels
  */
-function setupNewKetcherSketcher(width="1020px"){
-    let ketcherHTML = `<iframe id="ketcher-editor" src=/static/ketcher/index.html width=${width} height="480px"></iframe>`
-    $("#ketcher-sketcher").empty().append(ketcherHTML).hide();
+function setupNewKetcherSketcher(width = "1020px") {
+  let ketcherHTML = `<iframe id="ketcher-editor" src=/static/ketcher/index.html width=${width} height="480px"></iframe>`;
+  $("#ketcher-sketcher").empty().append(ketcherHTML).hide();
 }
 
 /**
@@ -12,41 +12,41 @@ function setupNewKetcherSketcher(width="1020px"){
  * @return {Promise<void>}
  */
 async function switchToKetcherSketcher() {
-    await exportSmilesFromMarvinToKetcher()
-    displayKetcher()
+  await exportSmilesFromMarvinToKetcher();
+  displayKetcher();
 }
 
 /**
  * Shows the ketcher sketcher, hides marvin and the loading circle
  */
-function displayKetcher(){
-    $("#marvin-sketcher").hide()
-    $("#ketcher-sketcher").show()
-    hideSketcherLoadingCircle()
+function displayKetcher() {
+  $("#marvin-sketcher").hide();
+  $("#ketcher-sketcher").show();
+  hideSketcherLoadingCircle();
 }
 
 /**
  * Autosave when the sketcher is edited
  */
-function setupKetcherAutosave(){
-    let ketcher = getKetcher()
-    ketcher.editor.subscribe('change', function(){
-        setTimeout(autoSaveCheck(null, true), 100)
-    });
+function setupKetcherAutosave() {
+  let ketcher = getKetcher();
+  ketcher.editor.subscribe("change", function () {
+    setTimeout(autoSaveCheck(null, true), 100);
+  });
 }
 
 /**
  * Exports structures from Marvin to Ketcher vin via SMILES
  */
-async function exportSmilesFromMarvinToKetcher(){
-    if (marvin) {
-        let smiles = await exportSmilesFromMarvin()
-        if (smiles){
-            let ketcher = getKetcher()
+async function exportSmilesFromMarvinToKetcher() {
+  if (marvin) {
+    let smiles = await exportSmilesFromMarvin();
+    if (smiles) {
+      let ketcher = getKetcher();
 
-            ketcher.setMolecule(smiles);
-        }
+      ketcher.setMolecule(smiles);
     }
+  }
 }
 
 /**
@@ -54,28 +54,28 @@ async function exportSmilesFromMarvinToKetcher(){
  * @return {Promise<string>} Reaction SMILES string where reagents are optional and later discarded
  * in format: "reactant1.reactantX>reagent1.reagentX>product1.productX"
  */
-async function exportSmilesFromKetcher(){
-    let ketcher = getKetcher()
-    return ketcher.getSmiles()
+async function exportSmilesFromKetcher() {
+  let ketcher = getKetcher();
+  return ketcher.getSmiles();
 }
 
 /**
  * Enters the example reaction into the Ketcher editor
  */
-function ketcherExampleSmiles(){
-    let smiles = "OC(=O)C1=CC=CC=C1.CCN>>CCNC(=O)C1=CC=CC=C1";
-    let ketcher = getKetcher()
-    ketcher.setMolecule(smiles);
+function ketcherExampleSmiles() {
+  let smiles = "OC(=O)C1=CC=CC=C1.CCN>>CCNC(=O)C1=CC=CC=C1";
+  let ketcher = getKetcher();
+  ketcher.setMolecule(smiles);
 }
 
 /**
  * Gets the Ketcher editor as an object with access to its methods
  * @return {Object} Ketcher Object
  */
-function getKetcher(){
-    let ketcherFrame = document.getElementById('ketcher-editor');
-    if ('contentDocument' in ketcherFrame)
-        return ketcherFrame.contentWindow.ketcher;
+function getKetcher() {
+  let ketcherFrame = document.getElementById("ketcher-editor");
+  if ("contentDocument" in ketcherFrame)
+    return ketcherFrame.contentWindow.ketcher;
 }
 
 /**
@@ -83,15 +83,94 @@ function getKetcher(){
  * width of the images exported from MarvinJS
  * @param {string }smiles
  */
-function exportKetcherImage(smiles){
-    let ketcher = getKetcher()
-    ketcher.generateImage(smiles).then(function (source) {
-        // Shrink the blob image and display the shrunken image
-        shrinkBlobImage(source, 600, 400, function (shrunkenBlob) {
-            sessionStorage.setItem("reactionSchemeImage", URL.createObjectURL(shrunkenBlob))
-        });
-    });
+async function exportKetcherImage(smiles) {
+  let ketcher = getKetcher();
 }
+// let reactionSchemeImage
+// const source = await ketcher.generateImage(smiles);
+//
+// ketcher.generateImage(smiles).then(function (source) {
+// // Shrink the blob image and display the shrunken image
+//
+//         await ketcher.generateImage(smiles).then(function (source) {
+//     blobToBase64(source, function (base64Data) {
+//         // Now 'base64Data' contains the base64-encoded data URL
+//         console.log(base64Data);
+//         reactionSchemeImage = base64Data;
+//
+// shrinkBlobImage(source, 600, 400, function (shrunkenBlob) {
+//     console.log(typeof(shrunkenBlob))
+//     sessionStorage.setItem("reactionSchemeImage", URL.createObjectURL(shrunkenBlob))
+// });
+// // TODO fix this func and remove console logs to do with product numbering.
+//
+//
+// const reader = new FileReader();
+// let base64data
+// reader.readAsDataURL(source);
+// reader.onloadend = function () {
+//     base64data = reader.result.split(',')[1];
+//     console.log(base64data);
+// }
+// return base64data
+//
+
+// Shrink the blob image and display the shrunken image
+
+//
+//
+//
+//     reactionSchemeImage = await new Promise((resolve) => {
+//         shrinkBlobImage(source, 600, 400, function (shrunkenBlob) {
+//             // sessionStorage.setItem("reactionSchemeImage", URL.createObjectURL(shrunkenBlob))
+//             console.log(shrunkenBlob);
+//             resolve(URL.createObjectURL(shrunkenBlob));
+//         });
+//     });
+//     let reactionSchemeImage
+//         const source = await ketcher.generateImage(smiles);
+//
+//         const base64Data = await blobToBase64(source);
+//         console.log(base64Data);
+//         // Now 'base64Data' contains the base64-encoded data URL
+//         return base64Data;
+//         await ketcher.generateImage(smiles).then(function (source) {
+//         blobToBase64(source, function (base64Data) {
+//             // Now 'base64Data' contains the base64-encoded data URL
+//             console.log(base64Data);
+//             reactionSchemeImage = base64Data;
+//         });
+//     // });
+//
+//     // console.log(reactionSchemeImage);
+//     // return reactionSchemeImage
+// }
+//
+
+// Assuming 'source' is a Blob obtained from ketcher.generateImage
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64Data = reader.result.split(",")[1];
+      resolve(base64Data);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+// let reactionSchemeImage;
+//
+// try {
+//     await ketcher.generateImage(smiles).then(function (source) {
+//         blobToBase64(source, function (base64Data) {
+//             // Now 'base64Data' contains the base64-encoded data URL
+//             console.log(base64Data);
+//             reactionSchemeImage = base64Data;
+//         });
+//     });
 
 /**
  * // Function to shrink the blob image whilst keeping the aspect ratio
@@ -101,10 +180,10 @@ function exportKetcherImage(smiles){
  * @param {function(blob): void} callback - The anonymous function where the shrunken blob is used
  */
 function shrinkBlobImage(blob, maxWidth, maxHeight, callback) {
-    const img = new Image();
-    img.onload = function() {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.onload = function () {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
     let width = img.width;
     let height = img.height;
     // Calculate new dimensions to maintain the aspect ratio
@@ -120,12 +199,12 @@ function shrinkBlobImage(blob, maxWidth, maxHeight, callback) {
     canvas.width = width;
     canvas.height = height;
     // white background
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = "white";
     ctx.fillRect(0, 0, width, height);
     // Draw the image on the canvas with the new size
     ctx.drawImage(img, 0, 0, width, height);
     // Convert the canvas to a blob with the new image size
-    canvas.toBlob(callback, 'image/jpeg', 1.0);
-    };
-    img.src = URL.createObjectURL(blob)
+    canvas.toBlob(callback, "image/jpeg", 1.0);
+  };
+  img.src = URL.createObjectURL(blob);
 }

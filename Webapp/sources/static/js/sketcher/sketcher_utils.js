@@ -32,12 +32,17 @@ async function exportSmilesFromActiveEditor() {
  */
 async function exportImageFromActiveEditor() {
   let selectedSketcher = $('input[name="sketcher-select"]:checked').attr("id");
+  let reactionSchemeImage;
   if (selectedSketcher === "marvin-select") {
-    exportMarvinImage();
+    reactionSchemeImage = await exportMarvinImage();
+    //console.log(reactionSchemeImage)
   } else if (selectedSketcher === "ketcher-select") {
     let smiles = await exportSmilesFromKetcher();
-    exportKetcherImage(smiles);
+    reactionSchemeImage = await exportKetcherImage(smiles);
+    // console.log(reactionSchemeImage)
   }
+  //console.log(reactionSchemeImage)
+  return reactionSchemeImage;
 }
 
 /**

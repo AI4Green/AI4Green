@@ -62,7 +62,7 @@ function loadExampleSmiles() {
  */
 async function createReactionTable() {
   let smiles = await exportSmilesFromActiveEditor();
-  await exportImageFromActiveEditor();
+  // await exportImageFromActiveEditor();
   sketcherDataLossHandler();
   let [reactants, products] =
     reactionSmilesToReactantsAndProductsSmiles(smiles);

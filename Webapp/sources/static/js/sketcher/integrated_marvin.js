@@ -119,10 +119,14 @@ function marvinExampleSmiles() {
 /**
  * Makes an image of the current reaction scheme and saves to a hidden HTML input
  */
-function exportMarvinImage() {
+async function exportMarvinImage() {
   let settings = { width: 600, height: 400 };
-  marvin.exportStructure("jpeg", settings).then(function (source) {
-    sessionStorage.setItem("reactionSchemeImage", source);
+  let reactionSchemeImage;
+  await marvin.exportStructure("jpeg", settings).then(function (source) {
+    reactionSchemeImage = source;
+    console.log(reactionSchemeImage);
+    // sessionStorage.setItem("reactionSchemeImage", source);
     //$("#js-reaction-scheme-image").val(source);
   });
+  return reactionSchemeImage;
 }
