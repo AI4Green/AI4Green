@@ -45,7 +45,7 @@ def get_surfer_names() -> (List, List, List):
     names = extract_names(solvent_data["Solvent"].values.tolist())
     alt_names = extract_names(solvent_data["Alternative Name"].values.tolist())
 
-    all_names = names.extend(alt_names)
+    all_names = names + alt_names
 
     return names, alt_names, all_names
 
@@ -88,15 +88,22 @@ def find_reaction_table_mode_variables(
     if r_class == "-select-":
         r_class = "Other"
 
-    if name in names:
+    upper_names = [x.upper() for x in names]
+    upper_alt = [y.upper() for y in alt_names]
+    upper_name = name.upper()
+
+    if upper_name in upper_names:
         if name == '':
             point = []
         else:
-            point = [names.index(name) - 1]
+            point = [upper_names.index(upper_name) - 1]
 
-    elif name in alt_names:
-        point = [alt_names.index(name) - 1]
+    elif upper_name in upper_alt:
+        point = [upper_alt.index(upper_name) - 1]
         name = names[point[0] + 1]
+
+    else:
+        point = []
 
     return r_class, name, point
 
@@ -120,6 +127,7 @@ def sort_mode_variables(
         name: str, name extracted from names list using point
         point: List, name index in names for selecting point
     """
+
     if "name" in mode:
         point = find_point_from_name(name, names)
 
@@ -130,6 +138,7 @@ def sort_mode_variables(
         r_class, name, point = find_reaction_table_mode_variables(
             r_class, name, names, alt_names
         )
+    print('sort', name)
 
     return r_class, name, point
 
@@ -158,7 +167,6 @@ def get_mode(
     names, alt_names, all_names = get_surfer_names()
 
     # modes for get graph
-
     colour_name = "CHEM21"
     point = []
     r_class = ""
@@ -288,18 +296,22 @@ def get_suggest_solvent_table(point: List, df: pd.DataFrame) -> (Response, List)
     """
     # renders suggest solvent table template based on the selected point. needs output df of get_pca()
 
-    best_df = get_closest(point[0], df)
-    best_solvents = best_df.to_dict("index")
-    best_solvents = [value for value in best_solvents.values()]
-    try:
-        sol = best_df.iloc[0]["Solvent"]
-    except KeyError:
-        sol = best_df.iloc[0]["names"]
+    if len(point) > 0:
+        best_df = get_closest(point[0], df)
+        best_solvents = best_df.to_dict("index")
+        best_solvents = [value for value in best_solvents.values()]
+        try:
+            sol = best_df.iloc[0]["Solvent"]
+        except KeyError:
+            sol = best_df.iloc[0]["names"]
 
-    # this is the solvent selected
-    suggest_solvent_table = render_template(
-        "_suggest_solvent_table.html", solvents=best_solvents, sol=sol
-    )
+        # this is the solvent selected
+        suggest_solvent_table = render_template(
+            "_suggest_solvent_table.html", solvents=best_solvents, sol=sol
+        )
+    else:
+        suggest_solvent_table = None
+        best_solvents = []
 
     return suggest_solvent_table, best_solvents
 

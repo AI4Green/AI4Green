@@ -163,6 +163,7 @@ def from_reaction_table(mode="from_reaction_table") -> Response:
     if name != "":
         suggest_solvent_table, best_solvents = sfr.utils.get_suggest_solvent_table(point, df)
 
+    print(name)
     # plot graph
     editable_chart = sfr.graph.editable_bokeh_graph(
         df,
@@ -192,15 +193,21 @@ def from_reaction_table(mode="from_reaction_table") -> Response:
 
     # else return possible sustainable substitutions for alert in rxn table
     else:
-        alternatives, substitutions = sfr.utils.search_suggest_solvent_table(best_solvents)
+        if len(point) != 0:
+            alternatives, substitutions = sfr.utils.search_suggest_solvent_table(best_solvents)
+
+        else:
+            alternatives = ""
+            substitutions = ""
 
         return jsonify(
             {
-                "solvents": [x.upper() for x in names],
+                "solvents": [x.upper() for x in all_names],
                 "alternatives": alternatives,
                 "substitutions": substitutions,
             }
         )
+
 
 
 @solvent_PCA_bp.route("/update_interactive_graph/<mode>", methods=["GET", "POST"])
