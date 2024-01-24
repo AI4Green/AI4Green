@@ -163,7 +163,6 @@ def from_reaction_table(mode="from_reaction_table") -> Response:
     if name != "":
         suggest_solvent_table, best_solvents = sfr.utils.get_suggest_solvent_table(point, df)
 
-    print(name)
     # plot graph
     editable_chart = sfr.graph.editable_bokeh_graph(
         df,

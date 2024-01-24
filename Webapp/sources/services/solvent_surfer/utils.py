@@ -138,7 +138,6 @@ def sort_mode_variables(
         r_class, name, point = find_reaction_table_mode_variables(
             r_class, name, names, alt_names
         )
-    print('sort', name)
 
     return r_class, name, point
 
