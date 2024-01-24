@@ -12,6 +12,7 @@ from sources.extensions import db
 from .best_closest import get_closest
 from .interactive.interactive_embeddings import GetEmbedding
 from .interactive.Embedder import cPCA
+from sources.blueprints.main.routes import get_custom_colours
 
 
 def extract_names(name_list: List) -> List:
@@ -297,6 +298,8 @@ def get_suggest_solvent_table(point: List, df: pd.DataFrame) -> (Response, List)
     # renders suggest solvent table template based on the selected point. needs output df of get_pca()
 
     if len(point) > 0:
+        colour_dict = get_custom_colours().get_json()['colours']
+        print(colour_dict)
         best_df = get_closest(point[0], df)
         best_solvents = best_df.to_dict("index")
         best_solvents = [value for value in best_solvents.values()]
@@ -307,7 +310,7 @@ def get_suggest_solvent_table(point: List, df: pd.DataFrame) -> (Response, List)
 
         # this is the solvent selected
         suggest_solvent_table = render_template(
-            "_suggest_solvent_table.html", solvents=best_solvents, sol=sol
+            "_suggest_solvent_table.html", solvents=best_solvents, sol=sol, colours=colour_dict
         )
     else:
         suggest_solvent_table = None
