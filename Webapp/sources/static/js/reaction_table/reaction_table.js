@@ -493,7 +493,7 @@ function addNewReagent() {
 
 async function removeReagent(removedReagentNumber) {
   // called from remove reagent button
-  removedReagentNumber = getNum(removedReagentNumber);
+  removedReagentNumber = Number(removedReagentNumber)
   let reactantNumber = getNum("#js-number-of-reactants");
   let reagentNumber = getNum("#js-number-of-reagents");
   // remove the reagent table row from the html
