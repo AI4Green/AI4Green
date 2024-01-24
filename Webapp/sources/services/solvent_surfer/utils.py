@@ -97,6 +97,7 @@ def find_reaction_table_mode_variables(
             point = []
         else:
             point = [upper_names.index(upper_name) - 1]
+            name = names[point[0] + 1]
 
     elif upper_name in upper_alt:
         point = [upper_alt.index(upper_name) - 1]
