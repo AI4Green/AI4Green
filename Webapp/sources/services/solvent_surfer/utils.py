@@ -299,7 +299,6 @@ def get_suggest_solvent_table(point: List, df: pd.DataFrame) -> (Response, List)
 
     if len(point) > 0:
         colour_dict = get_custom_colours().get_json()['colours']
-        print(colour_dict)
         best_df = get_closest(point[0], df)
         best_solvents = best_df.to_dict("index")
         best_solvents = [value for value in best_solvents.values()]
