@@ -602,10 +602,11 @@ function datalist_initiate(solventInputID, solventDatalistID, solventNumber) {
   updateStyling();
   for (let option of document.getElementById(solventDatalistID).options) {
     option.onclick = function () {
+    console.log('AAAA')
       document.getElementById(solventInputID).value = option.value;
       document.getElementById(solventDatalistID).style.display = "none";
       document.getElementById(solventInputID).style.borderRadius = "5px";
-      postSolventData(option.value, solventNumber);
+      postSolventData(option.value, solventNumber, true);
     };
   }
   // hide the solvent dropdown if clicking on non-dropdown/input element
@@ -805,6 +806,7 @@ function autofillSolventData(x) {
     $(this).attr("oldValue", solventName);
     // post data if new value is different to previous value to prevent duplicate ajax calls
     if (oldValue !== solventName) {
+    console.log('BBBB')
       postSolventData(solventName, x);
     }
   });
