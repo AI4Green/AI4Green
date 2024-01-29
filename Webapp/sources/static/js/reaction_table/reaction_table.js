@@ -493,7 +493,7 @@ function addNewReagent() {
 
 async function removeReagent(removedReagentNumber) {
   // called from remove reagent button
-  removedReagentNumber = getNum(removedReagentNumber);
+  removedReagentNumber = Number(removedReagentNumber);
   let reactantNumber = getNum("#js-number-of-reactants");
   let reagentNumber = getNum("#js-number-of-reagents");
   // remove the reagent table row from the html
@@ -810,7 +810,6 @@ function autofillSolventData(x) {
   });
 }
 function postSolventData(solventName, x) {
-  checkPCASolvents(solventName, x);
   return new Promise(function (resolve) {
     let workbook = getVal($("#js-active-workbook"));
     let workgroup = getVal($("#js-active-workgroup"));
@@ -829,6 +828,7 @@ function postSolventData(solventName, x) {
           resolve("undefined");
           return;
         }
+        checkPCASolvents(solventName, x);
         let y = response.num;
         let solvent = response.solvent;
         let newSolvent = response.new_solvent;

@@ -17,25 +17,17 @@
               <td><i class="bi bi-bullseye"></i></td>
               <td>{{ solvent["Solvent"] }}</td>
               <td></td>
-              <td style="background-color: {% if solvent["CHEM21"] == "Recommended" %}green{% elif solvent["CHEM21"] == "Problematic" %}gold{% elif solvent["CHEM21"] == "Hazardous" %}red{% elif solvent["CHEM21"] == "Highly Hazardous" %}darkred; color: white{% elif solvent["CHEM21"] == "Not Ranked" %}gray{% endif %}"><span style="font-weight:normal">{{ solvent["CHEM21"] }}</span></td>
-              <td>{% if solvent["CHEM21"] != "No Ranking" %}<button class="btn btn-sm btn-link py-0" style="font-size: 0.8em;" title="Open Solvent Guide" type="button" onclick='solventGuide("{{ solvent["Solvent"] }}")'><i class="bi bi-info-circle-fill" style="font-size: 10pt"></i></button>{% else %}{% endif %}</td>
+              <td style="background-color: {% if solvent["CHEM21"] == "Recommended" %}{{colours["Recommended"]}}{% elif solvent["CHEM21"] == "Problematic" %}{{colours["Problematic"]}}{% elif solvent["CHEM21"] == "Hazardous" %}{{colours["Hazardous"]}}{% elif solvent["CHEM21"] == "Highly Hazardous" %}{{colours["HighlyHazardous"]}}; color: white{% elif solvent["CHEM21"] == "Not Ranked" %}gray{% endif %}"><span style="font-weight:normal">{{ solvent["CHEM21"] }}</span></td>
           </tr>
       {% else %}
           <tr>
               <td>{{ loop.index - 1}}</td>
               <td>{{ solvent["Solvent"] }}</td>
               <td>{{ "%.2f"|format(solvent.distances) }}</td>
-              <td style="background-color: {% if solvent["CHEM21"] == "Recommended" %}green{% elif solvent["CHEM21"] == "Problematic" %}gold{% elif solvent["CHEM21"] == "Hazardous" %}red{% elif solvent["CHEM21"] == "Highly Hazardous" %}darkred; color: white{% elif solvent["CHEM21"] == "Not Ranked" %}gray{% endif %}"><span style="font-weight:normal">{{ solvent["CHEM21"] }}</span></td>
-              <td>{% if solvent["CHEM21"] != "No Ranking" %}<button class="btn btn-sm btn-link py-0" style="font-size: 0.8em;" title="Open Solvent Guide" type="button" onclick='solventGuide("{{ solvent["Solvent"] }}")'><i class="bi bi-info-circle-fill" style="font-size: 10pt"></i></button>{% else %}{% endif %}</td>
+              <td style="background-color: {% if solvent["CHEM21"] == "Recommended" %}{{colours["Recommended"]}}{% elif solvent["CHEM21"] == "Problematic" %}{{colours["Problematic"]}}{% elif solvent["CHEM21"] == "Hazardous" %}{{colours["Hazardous"]}}{% elif solvent["CHEM21"] == "Highly Hazardous" %}{{colours["HighlyHazardous"]}}; color: white{% elif solvent["CHEM21"] == "Not Ranked" %}gray{% endif %}"><span style="font-weight:normal">{{ solvent["CHEM21"] }}</span></td>
           </tr>
       {% endif %}
   {% endfor %}
   </tbody>
 </table>
 </div>
-<script>
-    function solventGuide(solvent){
-        let sol_name = $("#sol-name").val()
-        window.open("/solvent_guide/" + sol_name + "/" + solvent + "/PCA", '_blank').focus();
-    }
-</script>
