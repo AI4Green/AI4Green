@@ -472,8 +472,10 @@ def jsonify_embedding_params(embedding_algorithm: cPCA) -> json.dumps:
 
     embedding_algorithm_dict = embedding_algorithm.__dict__
 
-    # remove python classes from dict (these can't be converted to JSON)
-    del embedding_algorithm_dict['parent']
-    del embedding_algorithm_dict['embedder']
+    save_dict = embedding_algorithm_dict.copy()
 
-    return json.dumps(embedding_algorithm_dict, cls=NumpyEncoder)
+    # remove python classes from dict (these can't be converted to JSON)
+    del save_dict['parent']
+    del save_dict['embedder']
+
+    return json.dumps(save_dict, cls=NumpyEncoder)
