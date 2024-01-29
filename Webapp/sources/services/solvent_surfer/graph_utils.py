@@ -68,6 +68,9 @@ def get_exp_data_dict() -> Dict:
         "Alkene metathesis": ["Alkene Metathesis"],
         "SNAr/SN2": ["SNAr"],
         "Buchwald-Hartwig coupling": ["Buchwald-Hartwig"],
+        "Alcohol oxidation": [],
+        "Ester hydrolysis": [],
+        "Other": []
     }
 
     return exp_data

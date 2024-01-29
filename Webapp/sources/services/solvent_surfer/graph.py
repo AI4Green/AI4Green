@@ -101,7 +101,7 @@ def editable_bokeh_graph(
 
     if r_class in exp_data:
         for exp in exp_data[r_class]:
-            descriptors.insert(1, exp) if r_class not in descriptors else descriptors
+            descriptors.insert(1, exp) if exp not in descriptors else descriptors
 
     # set up dropdowns using values above
     dropdown_class = Select(
@@ -124,20 +124,24 @@ def editable_bokeh_graph(
     # colour control points red if applicable
     mapper_control_point = control_point_colours()
 
-    # generate colour mappers depending on colours
-    if colour_name != "CHEM21":
-        if colour_name in exp_data_fields:
-            mapper = yield_colours(colour_name)
+    # define default colour
+    mapper = CHEM21_colours()
 
-        else:
-            mapper = descriptor_colours(colour_name, df)
+    # update colour mapper depending on colour_name
+    if colour_name in exp_data_fields and colour_name in exp_data[r_class]:
+        mapper = yield_colours(colour_name)
+        # create and add colour bar
+        color_bar = colour_bar(colour_name, mapper)
+        p1.add_layout(color_bar, "right")
 
+    elif colour_name != "CHEM21" and colour_name in descriptors:
+        mapper = descriptor_colours(colour_name, df)
         # create and add colour bar
         color_bar = colour_bar(colour_name, mapper)
         p1.add_layout(color_bar, "right")
 
     else:
-        mapper = CHEM21_colours()
+        colour_name = 'CHEM21'
 
     # set up scatter plot
     scatter = scatter_plot(p1, df, mapper_control_point, mapper, colour_name)
