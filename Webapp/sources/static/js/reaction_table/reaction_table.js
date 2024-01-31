@@ -605,7 +605,7 @@ function datalist_initiate(solventInputID, solventDatalistID, solventNumber) {
       document.getElementById(solventInputID).value = option.value;
       document.getElementById(solventDatalistID).style.display = "none";
       document.getElementById(solventInputID).style.borderRadius = "5px";
-      postSolventData(option.value, solventNumber);
+      postSolventData(option.value, solventNumber, true);
     };
   }
   // hide the solvent dropdown if clicking on non-dropdown/input element
@@ -809,7 +809,7 @@ function autofillSolventData(x) {
     }
   });
 }
-function postSolventData(solventName, x) {
+function postSolventData(solventName, x, reload = false) {
   return new Promise(function (resolve) {
     let workbook = getVal($("#js-active-workbook"));
     let workgroup = getVal($("#js-active-workgroup"));
@@ -828,7 +828,9 @@ function postSolventData(solventName, x) {
           resolve("undefined");
           return;
         }
-        checkPCASolvents(solventName, x);
+        if (!reload) {
+            checkPCASolvents(solventName, x);
+        }
         let y = response.num;
         let solvent = response.solvent;
         let newSolvent = response.new_solvent;
