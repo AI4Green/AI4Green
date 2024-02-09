@@ -1,0 +1,33 @@
+<input type="hidden" value="{{ sol }}" id="sol-name">
+<div class="div_before_table">
+<table class="table table-sm">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Solvent</th>
+      <th scope="col">Distance</th>
+      <th scope="col">CHEM21 Ranking</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for solvent in solvents %}
+      {% if solvent["Solvent"] == sol %}
+          <tr style="background-color: lightgray">
+              <td><i class="bi bi-bullseye"></i></td>
+              <td>{{ solvent["Solvent"] }}</td>
+              <td></td>
+              <td style="background-color: {% if solvent["CHEM21"] == "Recommended" %}{{colours["Recommended"]}}{% elif solvent["CHEM21"] == "Problematic" %}{{colours["Problematic"]}}{% elif solvent["CHEM21"] == "Hazardous" %}{{colours["Hazardous"]}}{% elif solvent["CHEM21"] == "Highly Hazardous" %}{{colours["HighlyHazardous"]}}; color: white{% elif solvent["CHEM21"] == "Not Ranked" %}gray{% endif %}"><span style="font-weight:normal">{{ solvent["CHEM21"] }}</span></td>
+          </tr>
+      {% else %}
+          <tr>
+              <td>{{ loop.index - 1}}</td>
+              <td>{{ solvent["Solvent"] }}</td>
+              <td>{{ "%.2f"|format(solvent.distances) }}</td>
+              <td style="background-color: {% if solvent["CHEM21"] == "Recommended" %}{{colours["Recommended"]}}{% elif solvent["CHEM21"] == "Problematic" %}{{colours["Problematic"]}}{% elif solvent["CHEM21"] == "Hazardous" %}{{colours["Hazardous"]}}{% elif solvent["CHEM21"] == "Highly Hazardous" %}{{colours["HighlyHazardous"]}}; color: white{% elif solvent["CHEM21"] == "Not Ranked" %}gray{% endif %}"><span style="font-weight:normal">{{ solvent["CHEM21"] }}</span></td>
+          </tr>
+      {% endif %}
+  {% endfor %}
+  </tbody>
+</table>
+</div>

@@ -1,0 +1,65 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="440px" height="146px" viewBox="0 0 440 146" style="background-color: #ffffff00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" >
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 1639.44,1992.45 L 1651.44,1999.38 L 1651.44,2280.62 L 1639.44,2287.55 L 1639.44,1992.45 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 1691.42,2025.93 L 1703.42,2025.93 L 1703.42,2254.07 L 1691.42,2254.07 L 1691.42,2025.93 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 1639.44,2287.55 L 1651.44,2280.62 L 1895,2421.23 L 1895,2435.1 L 1639.44,2287.55 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 1895,2435.1 L 1895,2421.23 L 2138.56,2280.62 L 2150.56,2287.55 L 1895,2435.1 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 1898,2373.34 L 1892,2362.94 L 2089.58,2248.87 L 2095.57,2259.27 L 1898,2373.34 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 2150.56,2287.55 L 2138.56,2280.62 L 2138.56,1999.38 L 2150.56,1992.45 L 2150.56,2287.55 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 2150.56,1992.45 L 2138.56,1999.38 L 1895,1858.77 L 1895,1852 L 1900.77,1848.56 L 2150.56,1992.45 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 2095.57,2020.73 L 2089.58,2031.13 L 1892,1917.06 L 1898,1906.66 L 2095.57,2020.73 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 1889.23,1848.56 L 1895,1852 L 1895,1858.77 L 1651.44,1999.38 L 1639.44,1992.45 L 1889.23,1848.56 Z " />
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 128.18 21.2)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+X</text>
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 1900.77,1848.56 L 1895,1852 L 1889.23,1848.56 L 1889,1673.17 L 1901,1673.17 L 1900.77,1848.56 Z " />
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 4.85 71)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+R</text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 19.2934 75.4)" font-style="normal" font-weight="normal" font-size="150px" font-family="Arial" >
+2</text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 27.6356 71)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+NH</text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 72.85 70)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
++</text>
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 3940.52,2096 L 2495,2096 L 2495,2084 L 3940.52,2084 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 4175.8,2090 C 4175.8,2090 3905.8,2158.56 3905.8,2158.56 C 3905.8,2158.56 3939.52,2120 3939.52,2090 C 3939.52,2059.56 3905.8,2020.44 3905.8,2020.44 C 3905.8,2020.44 4175.8,2090 4175.8,2090 C 4175.8,2090 4175.8,2090 4175.8,2090 " />
+<path stroke="#000000" stroke-width="1" fill="none" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 4175.8,2090 C 4175.8,2090 3905.8,2158.56 3905.8,2158.56 C 3905.8,2158.56 3939.52,2120 3939.52,2090 C 3939.52,2059.56 3905.8,2020.44 3905.8,2020.44 C 3905.8,2020.44 4175.8,2090 4175.8,2090 C 4175.8,2090 4175.8,2090 4175.8,2090 " />
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 190.141 37)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+Catalyst, </text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 273.5 37)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+Ligand</text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 197.924 60)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+Base, </text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 254.623 60)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+Additive</text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 196.85 89)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+Solvent, </text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 274.672 89)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+Temp</text>
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 4349.44,2072.45 L 4361.44,2079.38 L 4361.44,2360.62 L 4349.44,2367.55 L 4349.44,2072.45 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 4401.42,2105.93 L 4413.42,2105.93 L 4413.42,2334.07 L 4401.42,2334.07 L 4401.42,2105.93 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 4349.44,2367.55 L 4361.44,2360.62 L 4605,2501.23 L 4605,2515.1 L 4349.44,2367.55 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 4605,2515.1 L 4605,2501.23 L 4848.56,2360.62 L 4860.56,2367.55 L 4605,2515.1 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 4608,2453.34 L 4602,2442.94 L 4799.58,2328.87 L 4805.57,2339.27 L 4608,2453.34 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 4860.56,2367.55 L 4848.56,2360.62 L 4848.56,2079.38 L 4860.56,2072.45 L 4860.56,2367.55 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 4860.56,2072.45 L 4848.56,2079.38 L 4605,1938.77 L 4605,1932 L 4610.77,1928.56 L 4860.56,2072.45 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 4805.57,2100.73 L 4799.58,2111.13 L 4602,1997.06 L 4608,1986.66 L 4805.57,2100.73 Z " />
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 4599.23,1928.56 L 4605,1932 L 4605,1938.77 L 4361.44,2079.38 L 4349.44,2072.45 L 4599.23,1928.56 Z " />
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 398.628 29.2)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+NR</text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 427.515 33.6)" font-style="normal" font-weight="normal" font-size="150px" font-family="Arial" >
+2</text>
+<path stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 -54.65 -143)" d="M 4610.77,1928.56 L 4605,1932 L 4599.23,1928.56 L 4599,1755.17 L 4611,1755.17 L 4610.77,1928.56 Z " />
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 16.85 136)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+X </text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 35.7465 136)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+= </text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 52.9828 136)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+Cl, </text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 82.9828 136)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+Br, </text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 114.096 136)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+I, </text>
+<text x="0" y="0" stroke="none" fill="#000000" transform="matrix(0.1 0 0 0.1 130.766 136)" font-style="normal" font-weight="normal" font-size="200px" font-family="Arial" >
+OTf</text>
+</svg>

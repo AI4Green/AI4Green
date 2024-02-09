@@ -22,3 +22,4 @@ Pubchem-update
 *.eml
 pytest-coverage.txt
 .coverage
+/.mypy_cache/

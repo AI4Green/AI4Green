@@ -80,7 +80,7 @@ async function reactionTableReload(){
         let j = String(i + 1)
         document.querySelector('.js-add-solvent').click();
         // wait for solvent data to be filled in from database before proceeding
-        await postSolventData(js_reaction_table_data["solvent_names"][i], i + 1)
+        await postSolventData(js_reaction_table_data["solvent_names"][i], i + 1, true)
         // iterate through the dictionary for each solvent field
         for (const [jsonField, fieldID] of Object.entries(solventFields)) {
             let solventFieldID = "#js-solvent" + fieldID + j
