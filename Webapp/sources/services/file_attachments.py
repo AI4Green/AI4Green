@@ -127,4 +127,4 @@ def verify_integrity(file_contents: bytes, file_uuid: str):
         checksum = services.file_attachments.sha256_from_file_contents(file_contents)
         if file_db_object.sha256_checksum != checksum:
             print("invalid checksum. could not verify file integrity")
-            abort(500)
+            abort(400)
