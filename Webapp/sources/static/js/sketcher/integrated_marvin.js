@@ -124,9 +124,6 @@ async function exportMarvinImage() {
   let reactionSchemeImage;
   await marvin.exportStructure("jpeg", settings).then(function (source) {
     reactionSchemeImage = source;
-    console.log(reactionSchemeImage);
-    // sessionStorage.setItem("reactionSchemeImage", source);
-    //$("#js-reaction-scheme-image").val(source);
   });
   return reactionSchemeImage;
 }

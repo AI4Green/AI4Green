@@ -78,6 +78,17 @@ function getKetcher() {
     return ketcherFrame.contentWindow.ketcher;
 }
 
+// OLD VERSION
+// function exportKetcherImage(smiles){
+//     let ketcher = getKetcher()
+//     ketcher.generateImage(smiles).then(function (source) {
+//         // Shrink the blob image and display the shrunken image
+//         shrinkBlobImage(source, 600, 400, function (shrunkenBlob) {
+//             sessionStorage.setItem("reactionSchemeImage", URL.createObjectURL(shrunkenBlob))
+//         });
+//     });
+// }
+
 /**
  * Makes an image from the SMILES string and saves to a hidden HTML input as a Blob that has been shrunk to match the
  * width of the images exported from MarvinJS
@@ -85,126 +96,73 @@ function getKetcher() {
  */
 async function exportKetcherImage(smiles) {
   let ketcher = getKetcher();
-}
-// let reactionSchemeImage
-// const source = await ketcher.generateImage(smiles);
-//
-// ketcher.generateImage(smiles).then(function (source) {
-// // Shrink the blob image and display the shrunken image
-//
-//         await ketcher.generateImage(smiles).then(function (source) {
-//     blobToBase64(source, function (base64Data) {
-//         // Now 'base64Data' contains the base64-encoded data URL
-//         console.log(base64Data);
-//         reactionSchemeImage = base64Data;
-//
-// shrinkBlobImage(source, 600, 400, function (shrunkenBlob) {
-//     console.log(typeof(shrunkenBlob))
-//     sessionStorage.setItem("reactionSchemeImage", URL.createObjectURL(shrunkenBlob))
-// });
-// // TODO fix this func and remove console logs to do with product numbering.
-//
-//
-// const reader = new FileReader();
-// let base64data
-// reader.readAsDataURL(source);
-// reader.onloadend = function () {
-//     base64data = reader.result.split(',')[1];
-//     console.log(base64data);
-// }
-// return base64data
-//
 
-// Shrink the blob image and display the shrunken image
-
-//
-//
-//
-//     reactionSchemeImage = await new Promise((resolve) => {
-//         shrinkBlobImage(source, 600, 400, function (shrunkenBlob) {
-//             // sessionStorage.setItem("reactionSchemeImage", URL.createObjectURL(shrunkenBlob))
-//             console.log(shrunkenBlob);
-//             resolve(URL.createObjectURL(shrunkenBlob));
-//         });
-//     });
-//     let reactionSchemeImage
-//         const source = await ketcher.generateImage(smiles);
-//
-//         const base64Data = await blobToBase64(source);
-//         console.log(base64Data);
-//         // Now 'base64Data' contains the base64-encoded data URL
-//         return base64Data;
-//         await ketcher.generateImage(smiles).then(function (source) {
-//         blobToBase64(source, function (base64Data) {
-//             // Now 'base64Data' contains the base64-encoded data URL
-//             console.log(base64Data);
-//             reactionSchemeImage = base64Data;
-//         });
-//     // });
-//
-//     // console.log(reactionSchemeImage);
-//     // return reactionSchemeImage
-// }
-//
-
-// Assuming 'source' is a Blob obtained from ketcher.generateImage
-
-function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64Data = reader.result.split(",")[1];
-      resolve(base64Data);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
-// let reactionSchemeImage;
-//
-// try {
-//     await ketcher.generateImage(smiles).then(function (source) {
-//         blobToBase64(source, function (base64Data) {
-//             // Now 'base64Data' contains the base64-encoded data URL
-//             console.log(base64Data);
-//             reactionSchemeImage = base64Data;
-//         });
-//     });
-
-/**
- * // Function to shrink the blob image whilst keeping the aspect ratio
- * @param {Blob} blob - The blob image to be shrunk
- * @param {number} maxWidth - The maximum width of the shrunk image
- * @param {number} maxHeight - The maximum width of the shrunk image
- * @param {function(blob): void} callback - The anonymous function where the shrunken blob is used
- */
-function shrinkBlobImage(blob, maxWidth, maxHeight, callback) {
-  const img = new Image();
-  img.onload = function () {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    let width = img.width;
-    let height = img.height;
-    // Calculate new dimensions to maintain the aspect ratio
-    if (width > maxWidth) {
-      height *= maxWidth / width;
-      width = maxWidth;
-    }
-    if (height > maxHeight) {
-      width *= maxHeight / height;
-      height = maxHeight;
-    }
-    // Set canvas dimensions to match the new image size
-    canvas.width = width;
-    canvas.height = height;
-    // white background
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, width, height);
-    // Draw the image on the canvas with the new size
-    ctx.drawImage(img, 0, 0, width, height);
-    // Convert the canvas to a blob with the new image size
-    canvas.toBlob(callback, "image/jpeg", 1.0);
+  /**
+   * Return reaction scheme image as promise from SMILES
+   * @param {string} smiles - the SMILES string for the reaction
+   */
+  const generateImageAsync = (smiles) => {
+    return new Promise((resolve, reject) => {
+      ketcher.generateImage(smiles).then(resolve).catch(reject);
+    });
   };
-  img.src = URL.createObjectURL(blob);
+  /**
+   * // Function to shrink the blob image whilst keeping the aspect ratio
+   * @param {Blob} blob - The blob image to be shrunk
+   * @param {number} maxWidth - The maximum width of the shrunk image
+   * @param {number} maxHeight - The maximum width of the shrunk image
+   */
+  const shrinkBlobImage = (blob, maxWidth, maxHeight) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        let width = img.width;
+        let height = img.height;
+
+        // Calculate new dimensions to maintain the aspect ratio
+        if (width > maxWidth) {
+          height *= maxWidth / width;
+          width = maxWidth;
+        }
+        if (height > maxHeight) {
+          width *= maxHeight / height;
+          height = maxHeight;
+        }
+
+        // Set canvas dimensions to match the new image size
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw the image on the canvas with the new size
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert the canvas to a blob with the new image size
+        canvas.toBlob(resolve, "image/jpeg", 1.0);
+      };
+      img.src = URL.createObjectURL(blob);
+    });
+  };
+
+  try {
+    const blob = await generateImageAsync(smiles);
+    const shrunkenBlob = await shrinkBlobImage(blob, 600, 400);
+
+    const reader = new FileReader();
+
+    // Convert the Blob to a Base64 string
+    const base64Promise = new Promise((resolve) => {
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(shrunkenBlob);
+    });
+
+    const reactionSchemeImage = await base64Promise;
+    return reactionSchemeImage;
+  } catch (error) {
+    console.error("Error generating image:", error);
+    return "error generating image";
+  }
 }

@@ -35,13 +35,10 @@ async function exportImageFromActiveEditor() {
   let reactionSchemeImage;
   if (selectedSketcher === "marvin-select") {
     reactionSchemeImage = await exportMarvinImage();
-    //console.log(reactionSchemeImage)
   } else if (selectedSketcher === "ketcher-select") {
     let smiles = await exportSmilesFromKetcher();
     reactionSchemeImage = await exportKetcherImage(smiles);
-    // console.log(reactionSchemeImage)
   }
-  //console.log(reactionSchemeImage)
   return reactionSchemeImage;
 }
 

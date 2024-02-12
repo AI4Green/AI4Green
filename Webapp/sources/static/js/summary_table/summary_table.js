@@ -15,7 +15,7 @@ function checkDemoMode() {
 
 function reloadSummary() {
   // get reaction image
-  exportImage();
+  makeReactionSchemeImage();
   if ($("#js-tutorial").val() === "yes" || $("#js-demo").val() === "demo") {
     return;
   }

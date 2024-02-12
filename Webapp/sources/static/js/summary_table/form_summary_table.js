@@ -228,7 +228,6 @@ async function showSummary(mode) {
   let mainProductTableNumber = getNum(
     $("input[name='js-main-product']:checked"),
   );
-  console.log(mainProductTableNumber);
 
   let productMasses = "";
   let roundedProductMasses = "";
@@ -394,13 +393,11 @@ async function showSummary(mode) {
   });
 }
 
-async function exportImage() {
+async function makeReactionSchemeImage() {
   // make reaction image above summary table
   let $image = $("#image");
   $image.attr("src", "");
   let imgSource = await exportImageFromActiveEditor();
-  console.log(imgSource);
   $image.attr("src", imgSource);
   $("#imageContainer").css("display", "block");
-  // sessionStorage.clear();
 }
