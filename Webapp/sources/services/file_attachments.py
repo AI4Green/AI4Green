@@ -118,7 +118,7 @@ def verify_integrity(file_contents: bytes, file_uuid: str):
         file_uuid: A string containing the UUID of the file for integrity verification.
 
     Raises:
-        HTTPException: Raised with a status code of 500 if the integrity check fails.
+        HTTPException: Raised with a status code of 400 if the integrity check fails.
     """
     file_db_object = database_object_from_uuid(file_uuid)
     if (
