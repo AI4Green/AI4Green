@@ -1,9 +1,10 @@
 /**
  * Asynchronously generates a PDF summary of the reaction, sends it to the backend, and saves it.
+ * @param {string} mode - either none or "locked" which indicates the summary is generated for the locked reaction
  */
-async function makePDF() {
+async function makePDF(mode) {
   // Create the main element to be included in the PDF
-  const elementToPrint = createPDFElement();
+  const elementToPrint = createPDFElement(mode);
 
   // Generate a blob from the HTML element using html2pdf
   const blob = await html2pdf()
@@ -11,11 +12,8 @@ async function makePDF() {
     .from(elementToPrint)
     .output("blob");
 
-  // Get form-related variables
-  const { workgroup, workbook, reactionID } = getFormVariables();
-
   // Create FormData and append the file and other variables to it
-  const formData = createFormData(blob, reactionID);
+  const formData = createFormData(blob);
 
   // Send the FormData to the backend
   await sendPDFToBackend(formData);
@@ -23,15 +21,17 @@ async function makePDF() {
 
 /**
  * Creates the main HTML element to be included in the PDF summary.
+ * @param {string} mode - either none or "locked" to indicate reaction is being locked
  * @returns {HTMLDivElement} The created HTML element.
  */
-function createPDFElement() {
+function createPDFElement(mode) {
   // clone variables to add to PDF summary
   const element = document.getElementById("print-container").cloneNode(true);
   const elementTitle = document.getElementById("name-id").cloneNode(true);
   const elementExperimental = createExperimentalElement();
   const dateTime = getDateTime();
   const elementDateTime = createDateTimeElement(dateTime);
+
   // make new element to append all desired elements for pdf summary
   const elementToPrint = document.createElement("div");
   elementToPrint.id = "outer-print-div";
@@ -39,6 +39,12 @@ function createPDFElement() {
   elementToPrint.appendChild(element);
   elementToPrint.appendChild(elementExperimental);
   elementToPrint.appendChild(elementDateTime);
+  // if locking the reaction also include this in the summary
+  if (mode === "locked") {
+    const elementLockedTime = document.createElement("div");
+    elementLockedTime.innerHTML = `<br><br><b>Reaction locked on: ${dateTime}</b>`;
+    elementToPrint.appendChild(elementLockedTime);
+  }
   return elementToPrint;
 }
 
@@ -95,14 +101,12 @@ function getFormVariables() {
 /**
  * Creates a FormData and appends the file and other variables to it.
  * @param {Blob} blob - The PDF blob to append.
- * @param {string} reactionID - The reaction ID.
  * @returns {FormData} The created FormData.
  */
-function createFormData(blob, reactionID) {
-  blob;
+function createFormData(blob) {
   const formData = new FormData();
+  const { workgroup, workbook, reactionID } = getFormVariables();
   formData.append("pdfFile", blob, `${reactionID}-summary.pdf`);
-  const { workgroup, workbook } = getFormVariables();
   formData.append("workgroup", workgroup);
   formData.append("workbook", workbook);
   formData.append("reactionID", reactionID);

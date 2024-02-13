@@ -158,7 +158,7 @@ async function reactionTableReload() {
   let js_summary_table_data = JSON.parse($("#js-summary-table-data").val());
   // load summary table if it has previously been loaded, element sustainability is used because this is autofilled upon load.
   if (js_summary_table_data["element_sustainability"] !== "undefined") {
-    setTimeout(showSummary("reload"), 1000);
+    setTimeout(() => showSummary("reload"), 1000);
   } else {
     $loadTracker.val("loaded");
   }

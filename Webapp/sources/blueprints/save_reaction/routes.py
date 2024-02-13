@@ -497,18 +497,5 @@ def download_experiment_files():
 @login_required
 def delete_reaction_attachment():
     """Delete file attached to reaction"""
-    services.auth.reaction(permission_level="edit", request_method="DELETE")
-    # connect to blob
-    blob_client = services.file_attachments.get_blob()
-    # delete blob
-    blob_client.delete_blob()
-    # confirm deletion
-    if blob_client.exists():
-        abort(401)
-    # reflect changes in the database
-    file_uuid = request.form["uuid"]
-    file_object = services.file_attachments.database_object_from_uuid(file_uuid)
-    db.session.delete(file_object)
-    db.session.commit()
-
+    services.file_attachments.delete_file_attachment()
     return "success"

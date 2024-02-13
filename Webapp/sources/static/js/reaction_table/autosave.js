@@ -342,7 +342,7 @@ function postReactionData(complete = "not complete") {
           $("#js-complete").val("complete");
           controlLockedReactionFunctionality();
           showLoadingOverlay("Locking Reaction");
-          await makePDF();
+          await makePDF("locked");
           hideLoadingOverlay();
         }
       } else {
