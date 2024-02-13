@@ -4,7 +4,6 @@ GET request and renders the reaction table template
 """
 
 import re
-from datetime import datetime
 from typing import Dict, List, Tuple, Union
 from urllib.parse import quote
 from urllib.request import urlopen
@@ -18,6 +17,7 @@ from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
 from sources.dto import ReactionNoteSchema
 
 from . import reaction_table_bp
+from sources import services
 
 if not current_app.config["DEBUG"]:
     try:
@@ -64,7 +64,7 @@ def process():
         "name_list": [],
         "hazard_list": [],
         "density_list": [],
-        "primary_key_list": [],
+        "primary_key_list": []
     }
     product_data = {
         "molecular_weight_list": [],
@@ -72,7 +72,7 @@ def process():
         "hazard_list": [],
         "density_list": [],
         "primary_key_list": [],
-        "table_numbers": [],
+        "table_numbers": []
     }
 
     # Find reactants in database then add data to the dictionary
@@ -170,6 +170,8 @@ def process():
     else:
         sol_rows = services.solvent.get_workbook_list(workbook)
 
+    r_class, r_classes = services.reaction_classification.classify_reaction(reactants_smiles_list, products_smiles_list)
+
     # Now it renders the reaction table template
     reaction_table = render_template(
         "_reaction_table.html",
@@ -192,6 +194,8 @@ def process():
         summary_table_data="",
         sol_rows=sol_rows,
         reaction=reaction,
+        reaction_class=r_class,
+        reaction_classes=r_classes,
     )
     return jsonify({"reactionTable": reaction_table})
 

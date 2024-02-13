@@ -510,4 +510,5 @@ def delete_reaction_attachment():
     file_object = services.file_attachments.database_object_from_uuid(file_uuid)
     db.session.delete(file_object)
     db.session.commit()
+
     return "success"

@@ -1,0 +1,88 @@
+<div class="div_before_table">
+    <br>
+    <h3>Grignard Addition</h3>
+    <p> Grignard reagents are highly reactive nucleophiles formed from the oxidative addition of elemental magnesium across a carbon-halide bond.
+        These reagents are air and moisture sensitive, and are often reacted with electrophiles such as ketones <i>via</i> nucleophilic addition.
+    </p>
+    <br><br>
+    <div style="text-align: center;">
+    <img alt="General Grignard reaction scheme" style="width: 90%" src="{{url_for('static', filename='img/solvent_PCA_reactions/grignard_general.svg')}}">
+    </div>
+    <br><br>
+    Grignard reagents are usually prepared in ethereal solvents (THF, Et<sub>2</sub>O) which can stabilise the magnesium centre by coordination,
+    though highly basic solvents have been shown to reduce the
+    <a href="https://doi.org/10.1002/pol.1969.150070738" target="_blank">rates of Grignard addition reactions.</a><sup>1</sup>
+    This effect is also seen with polar solvents, which can raise the activation energy of the addition step by
+    <a href="https://doi.org/10.1002/poc.534" target="_blank">stabilising the organometallic reagent.</a><sup>2</sup>
+    Protic solvents are also detrimental, as these can lead to violent quenching of the Grignard species.
+    These considerations mean that aprotic, basic solvents with medium polarity are ideal for
+    these reactions, and the descriptor set for PCA was chosen accordingly.
+
+
+    <br><br>
+    <table class="table table-sm table-bordered">
+
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Measured Dipole Moment (DeBye)'>Dipole Moment</a>
+            </td>
+
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Measured Dielectric Constant'>Dielectric Constant</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hydrogen Bond Donor Ability'>Kamlet-Taft &alpha;</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hydrogen Bond Acceptor Ability'>Kamlet-Taft &beta;</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Polarizability'>Kamlet-Taft &pi;<sup>*</sup></a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Dipolar Interactions'>Polarity <i>&delta;<sub>p</sub></i></a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Hydrogen Bonding'>Hydrogen Bonding <i>&delta;<sub>h</sub></i></a>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <h4>Experimental Data</h4>
+     A report by
+    <a href="https://doi.org/10.1039/C3GC40702K" target="_blank">Kadam <i>et al.</i></a><sup>3</sup>
+     investigated the application of green solvents for various Grignard additions to ketone electrophiles.
+    The yield for each of the below reactions was averaged for each solvent, and these results can be viewed by selecting "Grignard"
+    from the colour change dropdown.
+    <br><br>
+    <div style="text-align: center;">
+    <img alt="Grignard experimental results" style="width: 90%" src="{{url_for('static', filename='img/solvent_PCA_reactions/grignard_experimental.svg')}}">
+    </div>
+    <br>
+
+    <h4>References</h4>
+    <p style="font-size: 11px">
+        1. Osawa Z, Kimura T, Kasuga T. Polymerization of methyl methacrylate under ultrasonic irradiation. Part IV. Effect
+        of ultrasonic irradiation on Grignard catalyst and stereoregularity of the polymers produced in
+        dioxane–tetrahydrofuran mixed solvent. 1969;7:2007-2014
+        <a href="https://doi.org/10.1002/pol.1969.150070738" target="_blank">https://doi.org/10.1002/pol.1969.150070738</a>
+        <br>
+        2. Tuulmets A, Pällin V, Tammiku-Taul J, Burk P, Raie K. Solvent effects in the Grignard reaction with alkynes.
+        2002;15:701-705
+        <a href="https://doi.org/10.1002/poc.534" target="_blank">https://doi.org/10.1002/poc.534</a>
+        3. Kadam A, Nguyen M, Kopach M, Richardson P, Gallou F, Wane ZK, Zhang W. Comparative performance evaluation
+        and systematic screening of solvents in a range of Grignard reactions. 2013;15:1880-1888
+        <a href="https://doi.org/10.1039/C3GC40702K" target="_blank"> https://doi.org/10.1039/C3GC40702K</a>
+    </p>
+
+</div>
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
+</div>

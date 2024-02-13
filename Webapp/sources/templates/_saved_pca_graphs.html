@@ -1,0 +1,14 @@
+<div id="graph-list">
+    {% for graph in graph_list %}
+        <div id="graph-{{ loop.index }}" class="graph-card">
+            <div id="graph-name{{ loop.index }}" class="graph-name"><h4>{{ graph.name }}</h4></div>
+
+            <div class="description">{{ graph.description }}</div>
+            <div id="image{{ loop.index }}"></div>
+            <div class="graph-time">{{ graph.time_of_creation }}</div>
+            <button id="{{ graph.name }}-reload" class="btn btn-success reload-btn" onclick="reloadGraph({{graph.graph_id}})">Reload</button>
+            <button id="{{ graph.name }}-delete" name="delete-reaction" class="btn btn-danger" onclick="deleteGraph({{graph.graph_id}})">Delete</button>
+            <hr class="line">
+        </div>
+    {% endfor %}
+</div>

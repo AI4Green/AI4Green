@@ -126,13 +126,16 @@ def verify_integrity(file_contents: bytes, file_uuid: str):
         file_uuid: A string containing the UUID of the file for integrity verification.
 
     Raises:
-        HTTPException: Raised with a status code of 500 if the integrity check fails.
+        HTTPException: Raised with a status code of 400 if the integrity check fails.
     """
     file_db_object = database_object_from_uuid(file_uuid)
-    checksum = services.file_attachments.sha256_from_file_contents(file_contents)
-    if file_db_object.sha256_checksum != checksum:
-        print("invalid checksum. could not verify file integrity")
-        abort(500)
+    if (
+        file_db_object.sha256_checksum != "not_available"
+    ):  # older files use this default value
+        checksum = services.file_attachments.sha256_from_file_contents(file_contents)
+        if file_db_object.sha256_checksum != checksum:
+            print("invalid checksum. could not verify file integrity")
+            abort(400)
 
 
 class UploadExperimentDataFiles:

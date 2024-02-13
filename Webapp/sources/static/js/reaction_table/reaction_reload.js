@@ -118,7 +118,11 @@ async function reactionTableReload() {
     let j = String(i + 1);
     document.querySelector(".js-add-solvent").click();
     // wait for solvent data to be filled in from database before proceeding
-    await postSolventData(js_reaction_table_data["solvent_names"][i], i + 1);
+    await postSolventData(
+      js_reaction_table_data["solvent_names"][i],
+      i + 1,
+      true,
+    );
     // iterate through the dictionary for each solvent field
     for (const [jsonField, fieldID] of Object.entries(solventFields)) {
       let solventFieldID = "#js-solvent" + fieldID + j;
@@ -154,9 +158,7 @@ async function reactionTableReload() {
   let js_summary_table_data = JSON.parse($("#js-summary-table-data").val());
   // load summary table if it has previously been loaded, element sustainability is used because this is autofilled upon load.
   if (js_summary_table_data["element_sustainability"] !== "undefined") {
-    setTimeout(async () => {
-      await showSummary("reload");
-    }, 1000);
+    setTimeout(showSummary("reload"), 1000);
   } else {
     $loadTracker.val("loaded");
   }

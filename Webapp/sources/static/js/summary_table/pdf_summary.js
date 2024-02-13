@@ -18,7 +18,7 @@ async function makePDF() {
   const formData = createFormData(blob, reactionID);
 
   // Send the FormData to the backend
-  await sendFormDataToBackend(formData);
+  await sendPDFToBackend(formData);
 }
 
 /**
@@ -114,7 +114,7 @@ function createFormData(blob, reactionID) {
  * @param {FormData} formData - The FormData to send.
  * @returns {Promise} A promise representing the completion of the backend request.
  */
-async function sendFormDataToBackend(formData) {
+async function sendPDFToBackend(formData) {
   return fetch("/pdf", {
     method: "POST",
     body: formData,
