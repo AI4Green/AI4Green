@@ -24,7 +24,13 @@ def delete_file_attachment(request_source: str, file_uuid: str = None):
     """
     if not file_uuid:
         file_uuid = request.form["uuid"]
-    services.auth.reaction(permission_level="edit", request_source=request_source)
+    # reflect changes in the database
+    file_object = services.file_attachments.database_object_from_uuid(file_uuid)
+    services.auth.reaction_files(
+        permission_level="edit",
+        request_source=request_source,
+        file_object_for_deletion=file_object,
+    )
     # connect to blob
     blob_client = services.file_attachments.get_blob(file_uuid)
     # delete blob
@@ -32,8 +38,6 @@ def delete_file_attachment(request_source: str, file_uuid: str = None):
     # confirm deletion
     if blob_client.exists():
         abort(401)
-    # reflect changes in the database
-    file_object = services.file_attachments.database_object_from_uuid(file_uuid)
     db.session.delete(file_object)
     db.session.commit()
 

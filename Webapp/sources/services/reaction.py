@@ -11,22 +11,22 @@ from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
 
 
-def get_current_from_request(async_type: str = "AJAX") -> models.Reaction:
+def get_current_from_request() -> models.Reaction:
     """
-    Gets the current reaction for a request from the frontend. Either AJAX or fetch
+    Gets the current reaction for a request from the frontend. Either using request.form or request.json
     Returns:
         The reaction which matches the details of the request
     """
-    if async_type == "AJAX":
-        reaction = get_current_from_ajax_request()
-    elif async_type == "fetch":
-        reaction = get_current_from_fetch()
+    if request.form:
+        reaction = get_current_from_request_form()
+    elif request.json:
+        reaction = get_current_from_request_json()
     return reaction
 
 
-def get_current_from_ajax_request() -> models.Reaction:
+def get_current_from_request_form() -> models.Reaction:
     """
-    Gets the current reaction from an AJAX request using the request.form variable
+    Gets the current reaction using the request.form variable
     Returns:
         Reaction that corresponds to data in request.form
     """
@@ -48,9 +48,9 @@ def get_current_from_ajax_request() -> models.Reaction:
     )
 
 
-def get_current_from_fetch() -> models.Reaction:
+def get_current_from_request_json() -> models.Reaction:
     """
-    Gets the current reaction from a fetch using request.json
+    Gets the current reaction using request.json
     Returns:
         Reaction that corresponds to data in request.json
     """

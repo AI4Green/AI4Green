@@ -445,7 +445,7 @@ def check_reaction_name() -> Response:
 @login_required
 def upload_experiment_files():
     """Takes a list of files, and saves upon successful validation. Url added to database, file saved to azure blob"""
-    services.auth.reaction(permission_level="edit")
+    services.auth.reaction_files(permission_level="edit")
     new_upload = services.file_attachments.UploadExperimentDataFiles(request)
     new_upload.validate_files()
     new_upload.save_validated_files()
@@ -458,7 +458,7 @@ def view_reaction_attachment() -> Response:
     """
     Authenticate user has permission to view, then use the uuid to find the file on azure and then return the file.
     """
-    services.auth.reaction(permission_level="view_only")
+    services.auth.reaction_files(permission_level="view_only")
     file_uuid = request.args.get("uuid")
     # get the blob file and send the filestream, display name and mimetype to the frontend to be displayed.
     blob_client = services.file_attachments.get_blob(file_uuid)
@@ -479,7 +479,7 @@ def view_reaction_attachment() -> Response:
 @login_required
 def download_experiment_files():
     """Take a file and return as attachment to the user"""
-    services.auth.reaction(permission_level="view_only")
+    services.auth.reaction_files(permission_level="view_only")
     blob_client = services.file_attachments.get_blob()
     file_uuid = request.form["uuid"]
     file_attachment = services.file_attachments.download_from_blob_client(
