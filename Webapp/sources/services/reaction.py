@@ -11,10 +11,52 @@ from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
 
 
-def get_current_from_request():
+def get_current_from_request(async_type: str = "AJAX") -> models.Reaction:
+    """
+    Gets the current reaction for a request from the frontend. Either AJAX or fetch
+    Returns:
+        The reaction which matches the details of the request
+    """
+    if async_type == "AJAX":
+        reaction = get_current_from_ajax_request()
+    elif async_type == "fetch":
+        reaction = get_current_from_fetch()
+    return reaction
+
+
+def get_current_from_ajax_request() -> models.Reaction:
+    """
+    Gets the current reaction from an AJAX request using the request.form variable
+    Returns:
+        Reaction that corresponds to data in request.form
+    """
     reaction_id = str(request.form["reactionID"])
     workgroup_name = str(request.form["workgroup"])
     workbook_name = str(request.form["workbook"])
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
+    return (
+        db.session.query(models.Reaction)
+        .filter(models.Reaction.reaction_id == reaction_id)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook.id)
+        .join(models.WorkGroup)
+        .filter(models.WorkGroup.name == workgroup_name)
+        .first()
+    )
+
+
+def get_current_from_fetch() -> models.Reaction:
+    """
+    Gets the current reaction from a fetch using request.json
+    Returns:
+        Reaction that corresponds to data in request.json
+    """
+    reaction_id = str(request.json["reactionID"])
+    workgroup_name = str(request.json["workgroup"])
+    workbook_name = str(request.json["workbook"])
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )

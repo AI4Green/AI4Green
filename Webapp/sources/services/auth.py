@@ -4,7 +4,7 @@ from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook
 
 
-def reaction(permission_level: str, request_method: str):
+def reaction(permission_level: str, request_method: str, async_type: str = "AJAX"):
     """
     Authenticates user to either view or edit the reaction.
     permission_level: Takes value of 'edit' or 'view_only'
@@ -13,7 +13,7 @@ def reaction(permission_level: str, request_method: str):
     if permission_level == "view_only":
         view_files(request_method)
     if permission_level == "edit":
-        reaction = services.reaction.get_current_from_request()
+        reaction = services.reaction.get_current_from_request(async_type)
         edit_reaction(reaction, file_attachment=True)
 
 

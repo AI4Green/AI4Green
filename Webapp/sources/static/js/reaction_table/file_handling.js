@@ -53,6 +53,7 @@ function viewFile(clicked_file) {
 }
 
 function makeNewElement(response) {
+  // Makes a pdf or image from the file upload
   let newElement;
   if (response.mimetype.includes("pdf")) {
     newElement = makeNewPDFElement(response.stream);
@@ -101,6 +102,30 @@ function validateFiles(filesToUpload) {
   return fileFormData;
 }
 
+/**
+ * Appends reaction data to a formData dictionary. Reaction data required to identify reaction in backend.
+ * @param {formData} reactionFormData - a blank or partly populated form.
+ * @return {formData} - formData with reaction data appended
+ */
+function appendReactionDataToForm(reactionFormData) {
+  const { workgroup, workbook, reactionID } = getReactionFormVariables();
+  reactionFormData.append("workgroup", workgroup);
+  reactionFormData.append("workbook", workbook);
+  reactionFormData.append("reactionID", reactionID);
+}
+
+/**
+ * Retrieves form-related variables required to identify reaction in backend.
+ * @returns {Object} Form-related variables.
+ */
+function getReactionFormVariables() {
+  return {
+    workgroup: $("#js-active-workgroup").val(),
+    workbook: $("#js-active-workbook").val(),
+    reactionID: getVal("#js-reaction-id"),
+  };
+}
+
 function uploadFiles() {
   // get files from input, basic front-end validation, post to backend for additional validation and save
   maximumNumberOfFileAttachmentsCheck();
@@ -108,12 +133,7 @@ function uploadFiles() {
   checkNumberOfUploads(filesToUpload);
   // iterate through and validate files
   let fileFormData = validateFiles(filesToUpload);
-  let workgroup = $("#js-active-workgroup").val();
-  let workbook = $("#js-active-workbook").val();
-  let reactionID = $("#js-reaction-id").val();
-  fileFormData.append("workgroup", workgroup);
-  fileFormData.append("workbook", workbook);
-  fileFormData.append("reactionID", reactionID);
+  appendReactionDataToForm(fileFormData);
   $.ajax({
     url: "/_upload_experimental_data",
     type: "post",
@@ -123,12 +143,10 @@ function uploadFiles() {
     success: function (response) {
       alert("files successfully uploaded");
       $("#upload-files").val("");
-      // showExperimentalDataFiles()
-      showUploadedFileAttachments(response.uploaded_files);
+      showFileAttachmentButtons(response.uploaded_files);
     },
     error: function (response) {
       alert("file upload failed");
-      //alert(`file could not be validated due to: ${response.failure_message}`)
     },
   });
 }
@@ -141,9 +159,14 @@ function maximumNumberOfFileAttachmentsCheck() {
   }
 }
 
-function showUploadedFileAttachments(uploadedFiles) {
+/**
+ * Makes a view, delete, and download multibutton for each file attachment in a reaction from the given list.
+ * @param uploadedFiles {Array[Object]} - A list of objects with file name and uuid. One item in list per file attachment
+ */
+function showFileAttachmentButtons(uploadedFiles) {
   let numberOfFileAttachments = $("#file-list").children().length + 1;
   for (let [idx, file] of uploadedFiles.entries()) {
+    console.log(uploadedFiles, typeof uploadedFiles, typeof file);
     let newIdx = numberOfFileAttachments + idx;
     let newFileButtonGroup = $("#blank-file-attachment")
       .html()

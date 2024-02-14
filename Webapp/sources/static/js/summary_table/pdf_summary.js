@@ -87,29 +87,14 @@ function getPDFOptions() {
 }
 
 /**
- * Retrieves form-related variables.
- * @returns {Object} Form-related variables.
- */
-function getFormVariables() {
-  return {
-    workgroup: $("#js-active-workgroup").val(),
-    workbook: $("#js-active-workbook").val(),
-    reactionID: getVal("#js-reaction-id"),
-  };
-}
-
-/**
  * Creates a FormData and appends the file and other variables to it.
  * @param {Blob} blob - The PDF blob to append.
  * @returns {FormData} The created FormData.
  */
 function createFormData(blob) {
   const formData = new FormData();
-  const { workgroup, workbook, reactionID } = getFormVariables();
-  formData.append("pdfFile", blob, `${reactionID}-summary.pdf`);
-  formData.append("workgroup", workgroup);
-  formData.append("workbook", workbook);
-  formData.append("reactionID", reactionID);
+  appendReactionDataToForm(formData);
+  formData.append("pdfFile", blob, `${formData.get("reactionID")}-summary.pdf`);
   return formData;
 }
 
@@ -122,7 +107,33 @@ async function sendPDFToBackend(formData) {
   return fetch("/pdf", {
     method: "POST",
     body: formData,
+  }).then(() => {
+    updateFileAttachmentList();
   });
+}
+
+/**
+ * Fetch request to backend to get the updated reaction attachments in order for the current reaction.
+ */
+function updateFileAttachmentList() {
+  const { workgroup, workbook, reactionID } = getReactionFormVariables();
+  return fetch("/get_file_attachment_list", {
+    method: "POST",
+    body: JSON.stringify({
+      workgroup: workgroup,
+      workbook: workbook,
+      reactionID: reactionID,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.json()) // Parse the JSON response
+    .then((data) => {
+      // empty the list of attachments then repopulate with the response data
+      $("#file-list").empty();
+      showFileAttachmentButtons(data.file_attachments);
+    });
 }
 
 /**
@@ -182,7 +193,6 @@ function showLoadingOverlay(message) {
  */
 function hideLoadingOverlay() {
   let overlay = document.getElementById("loading-overlay");
-
   if (overlay) {
     // Hide the loading overlay
     overlay.style.display = "none";

@@ -381,10 +381,13 @@ async function showSummary(mode) {
   });
 }
 
+/**
+ * Shows the loading overlay during the creation of the PDF
+ */
 function displayOverlayWhilstMakingPDF() {
   showLoadingOverlay("Creating Summary");
-  setTimeout(() => {
-    makePDF()
+  setTimeout(async () => {
+    await makePDF("summary")
       .then(() => {
         // PDF creation is complete, hide loading circle
         hideLoadingOverlay();
