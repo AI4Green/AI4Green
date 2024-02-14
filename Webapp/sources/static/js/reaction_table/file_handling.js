@@ -105,7 +105,6 @@ function validateFiles(filesToUpload) {
 /**
  * Appends reaction data to a formData dictionary. Reaction data required to identify reaction in backend.
  * @param {formData} reactionFormData - a blank or partly populated form.
- * @return {formData} - formData with reaction data appended
  */
 function appendReactionDataToForm(reactionFormData) {
   const { workgroup, workbook, reactionID } = getReactionFormVariables();
