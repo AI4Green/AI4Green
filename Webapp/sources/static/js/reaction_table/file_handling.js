@@ -185,14 +185,12 @@ function validateFile(file) {
   let fileExtensionValidation = validateFileExtension(file);
   if (fileExtensionValidation === "failed") {
     alert("Files must be of type 'pdf', 'jpeg', or 'png'");
-    // throw new Error('File wrong type');
     return false;
   }
   let fileSizeValidation = validateFileSize(file);
   if (fileSizeValidation === "failed") {
     alert("Files must be  below 1 mb");
     return false;
-    // throw new Error('File too large');
   }
   return true;
 }

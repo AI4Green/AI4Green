@@ -28,7 +28,7 @@ $(async function () {
   await sleep(1000);
   // sketcher changes when user clicks radio button
   await switchActiveEditor();
-  // setTimeout(switchActiveEditor, 500);
+
   $('input[name="sketcher-select"]').click(function () {
     switchActiveEditor();
   });
@@ -62,7 +62,6 @@ function loadExampleSmiles() {
  */
 async function createReactionTable() {
   let smiles = await exportSmilesFromActiveEditor();
-  // await exportImageFromActiveEditor();
   sketcherDataLossHandler();
   let [reactants, products] =
     reactionSmilesToReactantsAndProductsSmiles(smiles);

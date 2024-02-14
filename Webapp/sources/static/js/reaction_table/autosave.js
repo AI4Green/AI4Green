@@ -202,7 +202,7 @@ function postReactionData(complete = "not complete") {
   if (summary_to_print_el !== null) {
     summary_to_print = summary_to_print_el.outerHTML;
   }
-  // let num_reactants = length(reagentPrimaryKeys)
+
   let $reactionSaveIndicator = $("#reaction-saved-indicator");
   $.ajax({
     url: "/_autosave",

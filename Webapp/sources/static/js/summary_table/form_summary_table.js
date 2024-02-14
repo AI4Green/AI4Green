@@ -224,11 +224,9 @@ async function showSummary(mode) {
   //Product data from reaction table
   let products = "";
   let productTableNumbers = "";
-  //let mainProductTableNumber = $("input[name='js-main-product']:checked").val();
   let mainProductTableNumber = getNum(
     $("input[name='js-main-product']:checked"),
   );
-
   let productMasses = "";
   let roundedProductMasses = "";
   let productMolecularWeights = "";
