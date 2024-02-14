@@ -375,6 +375,12 @@ async function showSummary(mode) {
         // make and save pdf summary if not in demo/tutorial mode, and we are generating summary from the button not a reload
         if (demo === "not demo" && tutorial === "no" && mode !== "reload") {
           displayOverlayWhilstMakingPDF();
+        } else if (
+          demo === "not demo" &&
+          tutorial === "no" &&
+          mode === "reload"
+        ) {
+          await updateFileAttachmentList();
         }
       }
     },

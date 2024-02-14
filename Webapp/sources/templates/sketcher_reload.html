@@ -112,21 +112,7 @@
             </div>
         </div>
         <div id="file-list">
-        {% if file_attachments %}
-            {% for file in file_attachments %}
-                    <div id="file-button-group{{ loop.index }}" class="btn-group btn-group-justified mb-3" role="group" aria-label="">
-                        <div class="btn-group" role="group">
-                            <button id="download-file-button{{ loop.index }}" type="button" class="btn btn-outline-primary download-file-button" onclick="downloadFile(this)" value="{{ file.uuid }}" title="Download"><i class="bi bi-download"></i></button>
-                        </div>
-                        <div class="btn-group" role="group">
-                            <button id="view-file-button{{ loop.index }}" type="button" class="btn btn-outline-dark view-file-button" onclick="viewFile(this)" value="{{ file.uuid }}" title="View">{{ file.display_name }}</button>
-                        </div>
-                        <div class="btn-group" role="group">
-                            <button id="delete-file-button{{ loop.index }}" type="button" onclick="deleteFile(this)" value="{{ file.uuid }}" class="btn btn-outline-danger delete-file-button" title="Delete"><i class="bi bi-x"></i></button>
-                        </div>
-                    </div>
-            {% endfor %}
-        {% endif %}
+{#            file attachments loaded here from get_file_attachment_list#}
         </div>
     </div>
 

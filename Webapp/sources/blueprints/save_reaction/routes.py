@@ -497,5 +497,5 @@ def download_experiment_files():
 @login_required
 def delete_reaction_attachment():
     """Delete file attached to reaction"""
-    services.file_attachments.delete_file_attachment()
+    services.file_attachments.delete_file_attachment(user_request=True)
     return "success"
