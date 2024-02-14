@@ -55,7 +55,7 @@ function createPDFElement(mode) {
 function createExperimentalElement() {
   const textareaElement = document.getElementById("js-reaction-description");
   const elementExperimental = document.createElement("div");
-  elementExperimental.innerHTML = textareaElement.value;
+  elementExperimental.innerHTML = $("<div>").text(textareaElement.value).html();
   elementExperimental.classList.add("break-word");
   return elementExperimental;
 }
