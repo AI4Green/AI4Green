@@ -147,8 +147,6 @@ def summary() -> Response:
         if product_table_num == main_product_table_number:
             main_prod_idx = int(idx)
             break
-    main_prod_idx = 0  # TODO temp code whilst troubleshooting
-    print(main_prod_idx, main_product_table_number, product_table_numbers)
     # check all the requirement information has been typed into the reaction table
     # this is limiting reagent mass, any other reagent equivalents, physical forms and solvent volume
 
