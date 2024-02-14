@@ -176,7 +176,7 @@ function showLoadingOverlay(message) {
 
     iconElement = document.createElement("i");
     iconElement.id = "summary-loading-icon";
-    iconElement.className = "fa fa-flask"; // Replace with the class of the icon you selected
+    iconElement.className = "fa fa-flask";
     overlay.appendChild(iconElement);
   }
 
@@ -197,4 +197,23 @@ function hideLoadingOverlay() {
     // Hide the loading overlay
     overlay.style.display = "none";
   }
+}
+
+/**
+ * Shows the loading overlay during the creation of the PDF
+ * @param {String} mode - pdf generation mode. Either 'summary' or 'locked'
+ */
+function displayOverlayWhilstMakingPDF(mode) {
+  setTimeout(async () => {
+    await makePDF(mode)
+      .then(() => {
+        // PDF creation is complete, hide loading circle
+        hideLoadingOverlay();
+      })
+      .catch((error) => {
+        // Handle any errors that occurred during PDF creation
+        console.error("Error making PDF:", error);
+        hideLoadingOverlay(); // Ensure loading circle is hidden even on error
+      });
+  }, 5000);
 }
