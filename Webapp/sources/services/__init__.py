@@ -13,6 +13,7 @@ from . import (
     reaction_classification,
     solvent,
     solvent_surfer,
+    summary,
     user,
     workbook,
     workgroup,
