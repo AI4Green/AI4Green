@@ -36,9 +36,10 @@ hazard_exposure_risk = {  # combination of risks - risk category dictionary
 }
 
 
-def get_multiple_compounds_data(
-    compounds_hazard_codes_list: List[str], physical_forms_list: List[str]
-) -> Tuple[List[int], List[str], List[str], List[str], List[str], List[str], List[str]]:
+# def get_multiple_compounds_data(
+#     compounds_hazard_codes_list: List[str], physical_forms_list: List[str]
+# ) -> Tuple[List[int], List[str], List[str], List[str], List[str], List[str], List[str]]:
+def get_multiple_compounds_data(component_dict: Dict, component_type: str):
     """
     For a list of compounds (e.g., products) this returns all their hazard data. Each array has one item per compound
 
@@ -46,7 +47,7 @@ def get_multiple_compounds_data(
         compounds_hazard_codes_list - example: ['H201-H302', 'H401-H310']
         physical_forms_list - example: ['Volatile liquid', 'Dense solid']
 
-    Returns:
+    Updates to the dict:
         compounds_most_severe_hazard_numerical_ratings - how hazardous each compound is. 4 most hazardous
         compounds_hazard_sentences - each string item is all the h codes and phrases for a compound in a sentence
         compound_hazard_ratings - how hazardous each compound is. VH most hazardous
@@ -55,44 +56,47 @@ def get_multiple_compounds_data(
         compounds_risk_ratings - the risk from a compound. VH is the highest risk
         compounds_risk_colours - should risk table cell be white background(hazard-reset) or red (hazard-hazardous)
     """
-    # check data
-
     # initiate the list variables to be returned
-    compounds_most_severe_hazard_numerical_ratings = []
-    compounds_hazard_sentences = []
-    compounds_hazard_ratings = []
-    compounds_hazard_colours = []
-    compounds_exposure_potentials = []
-    compounds_risk_ratings = []
-    compounds_risk_colours = []
+    component_dict[f"{component_type}_most_severe_hazard_numerical_ratings"] = []
+    component_dict[f"{component_type}_hazard_sentences"] = []
+    component_dict[f"{component_type}_hazard_ratings"] = []
+    component_dict[f"{component_type}_hazard_colours"] = []
+    component_dict[f"{component_type}_exposure_potentials"] = []
+    component_dict[f"{component_type}_risk_ratings"] = []
+    component_dict[f"{component_type}_risk_colours"] = []
     # iterate through the compounds
+
     for compound_hazard_codes, physical_form in zip(
-        compounds_hazard_codes_list, physical_forms_list
+        component_dict[f"{component_type}_hazards"],
+        component_dict[f"{component_type}_physical_forms"],
     ):
         # get all the data for the compound or skip if we don't have hazard codes and physical form data to use
         if not compound_hazard_codes or not physical_form:
             continue
         compound_data = get_single_compound_data(compound_hazard_codes, physical_form)
         # append the data to the relevant lists
-        compounds_most_severe_hazard_numerical_ratings.append(
+        component_dict[f"{component_type}_most_severe_hazard_numerical_ratings"].append(
             compound_data["most_severe_hazard_numerical_rating"]
         )
-        compounds_hazard_sentences.append(compound_data["hazard_sentence"])
-        compounds_hazard_ratings.append(compound_data["hazard_ratings"])
-        compounds_hazard_colours.append(compound_data["hazard_colour_code"])
-        compounds_exposure_potentials.append(compound_data["exposure_potential"])
-        compounds_risk_ratings.append(compound_data["risk_ratings"])
-        compounds_risk_colours.append(compound_data["risk_colour_code"])
 
-    return (
-        compounds_most_severe_hazard_numerical_ratings,
-        compounds_hazard_sentences,
-        compounds_hazard_ratings,
-        compounds_hazard_colours,
-        compounds_exposure_potentials,
-        compounds_risk_ratings,
-        compounds_risk_colours,
-    )
+        component_dict[f"{component_type}_hazard_sentences"].append(
+            compound_data["hazard_sentence"]
+        )
+        component_dict[f"{component_type}_hazard_ratings"].append(
+            compound_data["hazard_ratings"]
+        )
+        component_dict[f"{component_type}_hazard_colours"].append(
+            compound_data["hazard_colour_code"]
+        )
+        component_dict[f"{component_type}_exposure_potentials"].append(
+            compound_data["exposure_potential"]
+        )
+        component_dict[f"{component_type}_risk_ratings"].append(
+            compound_data["risk_ratings"]
+        )
+        component_dict[f"{component_type}_risk_colours"].append(
+            compound_data["risk_colour_code"]
+        )
 
 
 def get_single_compound_data(compound_hazard_codes: str, physical_form: str) -> Dict:

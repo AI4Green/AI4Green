@@ -2,7 +2,18 @@ import re
 from typing import Dict, List, Tuple
 
 from flask import abort, request
-from sources import auxiliary
+from sources import auxiliary, services
+
+
+def get_request_data_from_keys(keys: List[str]) -> Dict:
+    component_dict = {}
+    for key in keys:
+        # Convert camelCase to snake_case
+        snake_case_key = "".join(
+            ["_" + c.lower() if c.isupper() else c for c in key]
+        ).lstrip("_")
+        component_dict[snake_case_key] = auxiliary.get_data(key)
+    return component_dict
 
 
 def get_reactant_data() -> Dict:
@@ -13,28 +24,21 @@ def get_reactant_data() -> Dict:
     """
     keys = [
         "reactants",
-        "reactant_molecular_weights",
-        "reactant_densities",
-        "reactant_concentrations",
-        "reactant_equivalents",
-        "reactant_amounts",
-        "rounded_reactant_amounts",
-        "reactant_volumes",
-        "rounded_reactant_volumes",
-        "reactant_masses",
-        "rounded_reactant_masses",
-        "reactant_hazards",
-        "reactant_physical_forms",
+        "reactantMolecularWeights",
+        "reactantDensities",
+        "reactantConcentrations",
+        "reactantEquivalents",
+        "reactantAmounts",
+        "roundedReactantAmounts",
+        "reactantVolumes",
+        "roundedReactantVolumes",
+        "reactantMasses",
+        "roundedReactantMasses",
+        "reactantHazards",
+        "reactantPhysicalForms",
     ]
-    # Create a dictionary to store the data
-    reactant_dict = {}
-    # Iterate through each key and retrieve the data
-    for key in keys:
-        # Convert camelCase to snake_case
-        snake_case_key = "".join(
-            ["_" + c.lower() if c.isupper() else c for c in key]
-        ).lstrip("_")
-        reactant_dict[snake_case_key] = auxiliary.get_data(key)
+    reactant_dict = get_request_data_from_keys(keys)
+    services.hazard_code.get_multiple_compounds_data(reactant_dict, "reactant")
 
     # Get sum values
     reactant_dict["reactant_mass_sum"] = float(request.form["reactantMassSum"])
@@ -68,16 +72,8 @@ def get_reagent_data() -> Dict:
         "reagentHazards",
         "reagentPhysicalForms",
     ]
-
-    # Create a dictionary to store the reagent data
-    reagent_dict = {}
-    # Iterate through each key and retrieve the data
-    for key in keys:
-        # Convert camelCase to snake_case
-        snake_case_key = "".join(
-            ["_" + c.lower() if c.isupper() else c for c in key]
-        ).lstrip("_")
-        reagent_dict[snake_case_key] = auxiliary.get_data(key)
+    reagent_dict = get_request_data_from_keys(keys)
+    services.hazard_code.get_multiple_compounds_data(reagent_dict, "reagent")
 
     # Get sum data
     reagent_dict["reagent_molecular_weight_sum"] = float(
@@ -92,6 +88,9 @@ def get_reagent_data() -> Dict:
         if x
     ]
     reagent_dict["reagent_primary_keys_list"] = reagent_primary_keys_ls
+    reagent_dict["reagent_smiles_ls"] = services.all_compounds.get_smiles_list(
+        reagent_primary_keys_ls
+    )
     return reagent_dict
 
 
@@ -109,18 +108,16 @@ def get_solvent_data() -> Dict:
         "solventPhysicalForms",
         "solventPrimaryKeys",
     ]
-    solvent_dict = {}
+    solvent_dict = get_request_data_from_keys(solvent_data_keys)
+    services.hazard_code.get_multiple_compounds_data(solvent_dict, "solvent")
 
-    # Iterate through each key and retrieve the data
-    for key in solvent_data_keys:
-        # Convert camelCase to snake_case
-        snake_case_key = "".join(
-            ["_" + c.lower() if c.isupper() else c for c in key]
-        ).lstrip("_")
-        solvent_dict[snake_case_key] = auxiliary.get_data(key)
-
-    # Additional data
+    # Concurrency for if no solvents are chosen
     solvent_dict["number_of_solvents"] = request.form["numberOfSolvents"]
+    if solvent_dict["number_of_solvents"] == "0":  # if no solvents have been chosen
+        solvent_dict["number_of_solvents"] = 1  # then it shows only one empty cell
+        solvent_dict["solvents"] = [" "]
+
+    # handle solvent primary keys
     solvent_primary_keys_ls = auxiliary.get_data("solventPrimaryKeys")
     solvent_dict["solvent_primary_keys_str"] = ", ".join(solvent_primary_keys_ls)
     solvent_primary_keys_ls = [
@@ -129,15 +126,15 @@ def get_solvent_data() -> Dict:
         if x
     ]
     solvent_dict["solvent_primary_keys_list"] = solvent_primary_keys_ls
+    # get the smiles from the primary keys
+    solvent_dict["solvent_smiles_ls"] = services.all_compounds.get_smiles_list(
+        solvent_primary_keys_ls
+    )
     return solvent_dict
 
 
 # TODO
 def make_rxn_file():
-    return {}
-
-
-def get_sustainability_metrics():
     return {}
 
 
@@ -157,16 +154,8 @@ def get_product_data() -> Dict:
         "productPhysicalForms",
         "productPrimaryKeys",
     ]
-    # Create a dictionary to store the product data
-    product_dict = {}
-
-    # Iterate through each key and retrieve the data
-    for key in product_data_keys:
-        # Convert camelCase to snake_case
-        snake_case_key = "".join(
-            ["_" + c.lower() if c.isupper() else c for c in key]
-        ).lstrip("_")
-        product_dict[snake_case_key] = auxiliary.get_data(key)
+    product_dict = get_request_data_from_keys(product_data_keys)
+    services.hazard_code.get_multiple_compounds_data(product_dict, "product")
 
     # Primary keys
     product_primary_keys = auxiliary.get_data("productPrimaryKeys")
@@ -179,7 +168,7 @@ def get_product_data() -> Dict:
     )
 
     for idx, product_table_num in enumerate(product_dict["product_table_numbers"]):
-        if product_table_num == product_dict["main_product_table_number"]:
+        if int(product_table_num) == product_dict["main_product_table_number"]:
             product_dict["main_product_index"] = idx
             break
     return product_dict
@@ -213,7 +202,7 @@ def check_reactant_data(reactant_data: Dict) -> str:
         str: Returns a message indicating missing data or "check successful" if all data is present.
     """
     for equivalents, mass in zip(
-        reactant_data["reactantEquivalents"], reactant_data["reactantMasses"]
+        reactant_data["reactant_equivalents"], reactant_data["reactant_masses"]
     ):
         if mass == "" or mass == 0 or equivalents == "":
             return "Ensure you have entered all the necessary reactant information!"
@@ -230,10 +219,10 @@ def check_reagent_data(reagent_data: Dict) -> str:
     Returns:
         str: Returns a message indicating missing data or "check successful" if all data is present.
     """
-    if reagent_data.get("reagentTableNumbers"):
+    if reagent_data.get("reagents")[0]:
         for equivalents, hazard, name in zip(
-            reagent_data["reagentEquivalents"],
-            reagent_data["reagentHazards"],
+            reagent_data["reagent_equivalents"],
+            reagent_data["reagent_hazards"],
             reagent_data["reagents"],
         ):
             if equivalents == "" or name == "" or hazard == "":
@@ -251,8 +240,8 @@ def check_solvent_data(solvent_dict: Dict) -> str:
     Returns:
         str: Returns a message indicating missing data or "check successful" if all data is present.
     """
-    if solvent_dict.get("solventTableNumbers"):
-        for sol, vol in zip(solvent_dict["solvents"], solvent_dict["solventVolumes"]):
+    if solvent_dict.get("solvents")[0] and solvent_dict.get("solvents") != [" "]:
+        for sol, vol in zip(solvent_dict["solvents"], solvent_dict["solvent_volumes"]):
             if vol == "" or vol == 0 or sol == "" or sol == 0:
                 return "Ensure you have entered all the necessary solvent information!"
     return "check successful"
@@ -297,10 +286,10 @@ def check_required_data_is_present(
         check_reagent_data(reagent_data),
         check_solvent_data(solvent_dict),
         check_physical_forms(
-            reactant_data["reactantPhysicalForms"]
-            + reagent_data.get("reagentPhysicalForms", [])
-            + solvent_dict.get("solventPhysicalForms", [])
-            + product_dict["productPhysicalForms"]
+            reactant_data["reactant_physical_forms"]
+            + reagent_data.get("reagent_physical_forms", [])
+            + solvent_dict.get("solvent_physical_forms", [])
+            + product_dict["product_physical_forms"]
         ),
     ]
 
@@ -327,3 +316,35 @@ def reform_novel_compound_primary_key(primary_key: str) -> Tuple:
     compound_name = re.search(r"\('([^']*)', \d", primary_key).group(1)
     workbook_id = int(re.search(r"', (\d+)", primary_key).group(1))
     return compound_name, workbook_id
+
+
+def get_risk_data(
+    reactants: Dict, reagents: Dict, solvents: Dict, products: Dict
+) -> Dict:
+    category_rate = {
+        "": 0,
+        "L": 1,
+        "M": 2,
+        "H": 3,
+        "VH": 4,
+    }
+
+    risk_data = {}
+    most_severe_hazard_numerical_rating = (
+        reactants["reactant_most_severe_hazard_numerical_ratings"]
+        + reagents["reagent_most_severe_hazard_numerical_ratings"]
+        + solvents["solvent_most_severe_hazard_numerical_ratings"]
+        + products["product_most_severe_hazard_numerical_ratings"]
+    )
+    max_most_severe_hazard_numerical_rating = int(
+        max(most_severe_hazard_numerical_rating)
+    )  # max total hazard rate
+    risk_data["risk_rating"] = list(category_rate.keys())[
+        max_most_severe_hazard_numerical_rating
+    ]  # resulting hazard rating
+    risk_data["risk_colour"] = (
+        "hazard-hazardous"
+        if risk_data["risk_rating"] == "VH"
+        else "hazard-reset-hazard"
+    )  # colour code for the hazard rating
+    return risk_data

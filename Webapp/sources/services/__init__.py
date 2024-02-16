@@ -14,6 +14,7 @@ from . import (
     solvent,
     solvent_surfer,
     summary,
+    sustainability,
     user,
     workbook,
     workgroup,
