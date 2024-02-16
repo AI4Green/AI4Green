@@ -1,12 +1,25 @@
-from flask import (Response, flash, redirect, render_template, request,
-                   send_file, url_for, jsonify, current_app)
+from flask import (
+    Response,
+    current_app,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    url_for,
+)
 from flask_login import (  # protects a view function against anonymous users
-    current_user, login_required)
-
+    current_user,
+    login_required,
+)
 from sources import models
-from sources.auxiliary import (get_notification_number, get_workbooks,
-                               get_workgroups,
-                               security_member_workgroup_workbook)
+from sources.auxiliary import (
+    get_notification_number,
+    get_workbooks,
+    get_workgroups,
+    security_member_workgroup_workbook,
+)
 from sources.extensions import db
 
 from . import main_bp  # imports the blueprint of the main route
@@ -31,10 +44,14 @@ def index() -> Response:
             workgroup_selected = request.form["WG-select"]
             if workgroup_selected != "-Select Workgroup-":
                 return redirect(
-                    url_for("workgroup.workgroup", workgroup_selected=workgroup_selected)
+                    url_for(
+                        "workgroup.workgroup", workgroup_selected=workgroup_selected
+                    )
                 )
         news_items = (
-            db.session.query(models.NewsItem).order_by(models.NewsItem.time.desc()).all()
+            db.session.query(models.NewsItem)
+            .order_by(models.NewsItem.time.desc())
+            .all()
         )
     else:
         # user not logged in
@@ -51,11 +68,9 @@ def index() -> Response:
     )
 
 
-@main_bp.route(
-    "/get_marvinjs_key", methods=["POST"]
-)
+@main_bp.route("/get_marvinjs_key", methods=["POST"])
 def get_marvinjs_key():
-    return jsonify({'marvinjs_key': current_app.config["MARVIN_JS_API_KEY"]})
+    return jsonify({"marvinjs_key": current_app.config["MARVIN_JS_API_KEY"]})
 
 
 # Go to the sketcher
@@ -90,9 +105,6 @@ def sketcher(
         .filter(models.Reaction.id == reaction.id)
         .all()
     )
-    file_attachments = reaction.file_attachments
-    if reaction.file_attachments:
-        file_attachments = reaction.file_attachments
     if reaction.reaction_smiles:
         load_status = "loading"
     else:
@@ -108,7 +120,6 @@ def sketcher(
         active_workbook=workbook,
         tutorial=tutorial,
         addenda=addenda,
-        file_attachments=file_attachments,
     )
 
 
@@ -247,14 +258,16 @@ def get_custom_colours() -> Response:
         colours = current_user.hazard_colors
     else:
         # use default colours if user is not logged in
-        colours = {'Recommended': '#00ff00',
-                   'Problematic': '#ffff00',
-                   'Hazardous': '#ff0000',
-                   'HighlyHazardous': '#8b0000',
-                   'Recommended_text': '#000000',
-                   'Problematic_text': '#000000',
-                   'Hazardous_text': '#000000',
-                   'HighlyHazardous_text': '#ffffff'}
+        colours = {
+            "Recommended": "#00ff00",
+            "Problematic": "#ffff00",
+            "Hazardous": "#ff0000",
+            "HighlyHazardous": "#8b0000",
+            "Recommended_text": "#000000",
+            "Problematic_text": "#000000",
+            "Hazardous_text": "#000000",
+            "HighlyHazardous_text": "#ffffff",
+        }
     return jsonify({"colours": colours})
 
 

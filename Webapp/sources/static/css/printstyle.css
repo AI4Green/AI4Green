@@ -11,3 +11,12 @@
     top: 0;
   }
 }
+
+tr {
+  page-break-inside: avoid;
+}
+
+#outer-print-div {
+  border: 1px solid #000;
+  padding: 10px;
+}

@@ -1,5 +1,7 @@
 from . import (
+    PCA_graph,
     all_compounds,
+    auth,
     compound,
     email,
     file_attachments,
@@ -8,11 +10,10 @@ from . import (
     novel_compound,
     person,
     reaction,
+    reaction_classification,
     solvent,
+    solvent_surfer,
     user,
     workbook,
     workgroup,
-    reaction_classification,
-    PCA_graph,
-    solvent_surfer
 )

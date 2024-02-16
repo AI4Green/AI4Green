@@ -1,5 +1,9 @@
-//Functions to form summary table + image of reaction scheme
-function showSummary() {
+/**
+ * Forms summary table + image of reaction scheme
+ * @param mode - either undefined or 'reload' to indicate the function is running to reload an existing reaction
+ * @return {Promise<void>}
+ */
+async function showSummary(mode) {
   // check if summary table already populated if so warn user
   const reactionDiv = document.getElementById("js-summary-table");
   let tutorial_mode = $("#js-tutorial").val();
@@ -220,7 +224,9 @@ function showSummary() {
   //Product data from reaction table
   let products = "";
   let productTableNumbers = "";
-  let mainProductTableNumber = $("input[name='js-main-product']:checked").val();
+  let mainProductTableNumber = getNum(
+    $("input[name='js-main-product']:checked"),
+  );
   let productMasses = "";
   let roundedProductMasses = "";
   let productMolecularWeights = "";
@@ -261,6 +267,12 @@ function showSummary() {
   let workbook = $("#js-active-workbook").val();
   let demo = $("#js-demo").val();
   let tutorial = getVal("#js-tutorial");
+  let reactionID;
+  if (demo === "not demo" && tutorial === "no") {
+    reactionID = getVal("#js-reaction-id");
+  } else {
+    reactionID = null;
+  }
   $.ajax({
     url: "/_summary",
     type: "post",
@@ -326,9 +338,10 @@ function showSummary() {
       workbook: workbook,
       demo: demo,
       tutorial: tutorial,
+      reactionID: reactionID,
     },
     dataType: "json",
-    success: function (response) {
+    success: async function (response) {
       if (
         response.summary ===
         "Ensure you have entered all the necessary information!"
@@ -356,17 +369,28 @@ function showSummary() {
         $("#complete-reaction-div").show();
         $("#reaction-file-attachments").show();
         $("#js-load-status").val("loaded");
+
+        // make and save pdf summary if not in demo/tutorial mode, and we are generating summary from the button not a reload
+        if (demo === "not demo" && tutorial === "no" && mode !== "reload") {
+          showLoadingOverlay("Creating Summary");
+          displayOverlayWhilstMakingPDF("summary");
+        } else if (
+          demo === "not demo" &&
+          tutorial === "no" &&
+          mode === "reload"
+        ) {
+          await updateFileAttachmentList();
+        }
       }
     },
   });
 }
 
-function exportImage() {
+async function makeReactionSchemeImage() {
   // make reaction image above summary table
   let $image = $("#image");
   $image.attr("src", "");
-  let imgSource = sessionStorage.getItem("reactionSchemeImage");
+  let imgSource = await exportImageFromActiveEditor();
   $image.attr("src", imgSource);
   $("#imageContainer").css("display", "block");
-  sessionStorage.clear();
 }
