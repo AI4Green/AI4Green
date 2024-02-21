@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from typing import Optional, Tuple
 
@@ -15,6 +16,7 @@ def get_smiles(primary_key: Tuple[str, int]) -> str:
     Returns:
         The SMILES string corresponding to the primary key or None
     """
+    print(primary_key)
     primary_key = (primary_key[0], int(primary_key[1]))
     workbook = services.workbook.get(primary_key[1])
     if current_user.Person not in workbook.users:
@@ -144,3 +146,22 @@ def add(
     db.session.add(nc)
     db.session.commit()
     return nc
+
+
+def reform_novel_compound_primary_key(primary_key: str) -> Tuple:
+    """
+    Converts a novel primary key to a tuple from the string returned from the frontend HTML
+
+    Args:
+        primary_key - the primary key as a string. e.g., ('pixie dust', 1)
+
+    Returns:
+        A tuple of (compound_name, workbook_id)
+    """
+    if len(primary_key) > 350:
+        abort(
+            413
+        )  # content too large. Exceeds max workbook name length + max novel compound name length
+    compound_name = re.search(r"\('([^']*)', \d", primary_key).group(1)
+    workbook_id = int(re.search(r"', (\d+)", primary_key).group(1))
+    return compound_name, workbook_id

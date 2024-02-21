@@ -18,11 +18,21 @@ def get_smiles_list(primary_key_ls: List[Union[Tuple[str, int], int]]) -> List[s
     Returns:
         The list of smiles for the compounds - or None if that item has no SMILES.
     """
+    primary_key_ls = [
+        int(x)
+        if x.isdigit()
+        else services.novel_compound.reform_novel_compound_primary_key(x)
+        for x in primary_key_ls
+        if x
+    ]
     smiles_ls = []
     for primary_key in primary_key_ls:
-        if isinstance(primary_key, int):
-            smiles = services.compound.get_smiles(primary_key)
-        else:
-            smiles = services.novel_compound.get_smiles(primary_key)
-        smiles_ls.append(smiles)
+        if primary_key:
+            print(primary_key)
+            if isinstance(primary_key, int):
+                smiles = services.compound.get_smiles(primary_key)
+            elif isinstance(primary_key, tuple):
+                smiles = services.novel_compound.get_smiles(primary_key)
+            print(smiles)
+            smiles_ls.append(smiles)
     return smiles_ls

@@ -9,7 +9,7 @@ import json
 
 from flask import Response, abort, jsonify, render_template, request
 from flask_login import login_required
-from sources import auxiliary, db, models, services
+from sources import auxiliary, services
 
 from . import summary_bp
 
@@ -57,8 +57,6 @@ def summary() -> Response:
         reactant_data, reagent_data, solvent_data, product_data
     )
 
-    services.summary.make_rxn_file()
-
     # if product mass and reactant mass sum are calculated, then it forms a summary table
     if product_data and reactant_data:
         summary_table = render_template(
@@ -69,7 +67,7 @@ def summary() -> Response:
             solvent_volume_unit=unit_data["solvent_volume_unit"],
             product_mass_unit=unit_data["product_mass_unit"],
             reactants=reactant_data["reactants"],
-            reactant_primary_keys=reactant_data["reactant_primary_keys"],
+            reactant_primary_keys=reactant_data["reactant_primary_keys_str"],
             reagent_primary_keys=reagent_data["reagent_primary_keys_str"],
             reagents=reagent_data["reagents"],
             reagent_table_numbers=reagent_data["reagent_table_numbers"],
@@ -100,7 +98,7 @@ def summary() -> Response:
             rounded_reactant_volumes=reactant_data["rounded_reactant_volumes"],
             reactant_masses=reactant_data["reactant_masses"],
             rounded_reactant_masses=reactant_data["rounded_reactant_masses"],
-            product_primary_keys=product_data["product_primary_keys"],
+            product_primary_keys=product_data["product_primary_keys_str"],
             main_product_table_number=product_data["main_product_table_number"],
             main_product_index=product_data["main_product_index"],
             product_molecular_weights=product_data["product_molecular_weights"],

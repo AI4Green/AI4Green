@@ -1,8 +1,15 @@
 import re
 from typing import Dict, List, Tuple
 
+from chython import files as ctf  # - chemical table files
+from chython import smiles
+from chython.containers import MoleculeContainer, ReactionContainer
 from flask import abort, request
+from rdkit.Chem import AllChem
 from sources import auxiliary, services
+
+# from rdfreader.write import write_rdf
+# from rdfreader import RDFParser
 
 
 def get_request_data_from_keys(keys: List[str]) -> Dict:
@@ -45,8 +52,12 @@ def get_reactant_data() -> Dict:
     reactant_dict["reactant_molecular_weight_sum"] = float(
         request.form["reactantMolecularWeightSum"]
     )
-    # Joining primary keys
-    reactant_dict["reactant_primary_keys"] = ", ".join(reactant_dict["reactants"])
+    # Joining primary keys and getting smiles
+    reactant_primary_keys_ls = auxiliary.get_data("reactantPrimaryKeys")
+    reactant_dict["reactant_primary_keys_str"] = ", ".join(reactant_primary_keys_ls)
+    reactant_dict["reactant_smiles_ls"] = services.all_compounds.get_smiles_list(
+        reactant_primary_keys_ls
+    )
     return reactant_dict
 
 
@@ -82,11 +93,6 @@ def get_reagent_data() -> Dict:
     # Getting primary keys and format
     reagent_primary_keys_ls = auxiliary.get_data("reagentPrimaryKeys")
     reagent_dict["reagent_primary_keys_str"] = ", ".join(reagent_primary_keys_ls)
-    reagent_primary_keys_ls = [
-        int(x) if x.isdigit() else reform_novel_compound_primary_key(x)
-        for x in reagent_primary_keys_ls
-        if x
-    ]
     reagent_dict["reagent_primary_keys_list"] = reagent_primary_keys_ls
     reagent_dict["reagent_smiles_ls"] = services.all_compounds.get_smiles_list(
         reagent_primary_keys_ls
@@ -106,7 +112,6 @@ def get_solvent_data() -> Dict:
         "solventVolumes",
         "solventHazards",
         "solventPhysicalForms",
-        "solventPrimaryKeys",
     ]
     solvent_dict = get_request_data_from_keys(solvent_data_keys)
     services.hazard_code.get_multiple_compounds_data(solvent_dict, "solvent")
@@ -120,22 +125,12 @@ def get_solvent_data() -> Dict:
     # handle solvent primary keys
     solvent_primary_keys_ls = auxiliary.get_data("solventPrimaryKeys")
     solvent_dict["solvent_primary_keys_str"] = ", ".join(solvent_primary_keys_ls)
-    solvent_primary_keys_ls = [
-        int(x) if x.isdigit() else reform_novel_compound_primary_key(x)
-        for x in solvent_primary_keys_ls
-        if x
-    ]
     solvent_dict["solvent_primary_keys_list"] = solvent_primary_keys_ls
     # get the smiles from the primary keys
     solvent_dict["solvent_smiles_ls"] = services.all_compounds.get_smiles_list(
         solvent_primary_keys_ls
     )
     return solvent_dict
-
-
-# TODO
-def make_rxn_file():
-    return {}
 
 
 def get_product_data() -> Dict:
@@ -152,14 +147,17 @@ def get_product_data() -> Dict:
         "productMolecularWeights",
         "productHazards",
         "productPhysicalForms",
-        "productPrimaryKeys",
     ]
     product_dict = get_request_data_from_keys(product_data_keys)
     services.hazard_code.get_multiple_compounds_data(product_dict, "product")
 
-    # Primary keys
-    product_primary_keys = auxiliary.get_data("productPrimaryKeys")
-    product_dict["product_primary_keys"] = ", ".join(product_primary_keys)
+    # Primary keys and SMILES
+    # Joining primary keys and getting smiles
+    product_primary_keys_ls = auxiliary.get_data("productPrimaryKeys")
+    product_dict["product_primary_keys_str"] = ", ".join(product_primary_keys_ls)
+    product_dict["product_smiles_ls"] = services.all_compounds.get_smiles_list(
+        product_primary_keys_ls
+    )
     # Table numbers
     product_table_numbers = auxiliary.get_data("productTableNumbers")
     product_dict["product_table_numbers"] = list(filter(None, product_table_numbers))
@@ -297,25 +295,6 @@ def check_required_data_is_present(
         if check_result != "check successful":
             return check_result
     return "checks successful"
-
-
-def reform_novel_compound_primary_key(primary_key: str) -> Tuple:
-    """
-    Converts a novel primary key to a tuple from the string returned from the frontend HTML
-
-    Args:
-        primary_key - the primary key as a string. e.g., ('pixie dust', 1)
-
-    Returns:
-        A tuple of (compound_name, workbook_id)
-    """
-    if len(primary_key) > 350:
-        abort(
-            413
-        )  # content too large. Exceeds max workbook name length + max novel compound name length
-    compound_name = re.search(r"\('([^']*)', \d", primary_key).group(1)
-    workbook_id = int(re.search(r"', (\d+)", primary_key).group(1))
-    return compound_name, workbook_id
 
 
 def get_risk_data(
