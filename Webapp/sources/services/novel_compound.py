@@ -1,9 +1,12 @@
-from datetime import datetime
-from typing import Optional, Tuple
+import re
+from typing import Dict, List, Optional, Tuple, Union
 
-from flask import abort
+from flask import abort, request
 from flask_login import current_user
+from rdkit import Chem
+from rdkit.Chem import rdMolDescriptors
 from sources import models, services
+from sources.auxiliary import sanitise_user_input
 from sources.extensions import db
 from sqlalchemy import func
 
@@ -144,3 +147,175 @@ def add(
     db.session.add(nc)
     db.session.commit()
     return nc
+
+
+class NewNovelCompound:
+    def __init__(self, workbook):
+        self.workbook = workbook
+        self.name = sanitise_user_input(request.form["name"])
+        self.density = request.form["density"]
+        self.concentration = request.form["concentration"]
+        self.mol_weight = request.form["molWeight"][0]
+        self.hazard_codes = sanitise_user_input(request.form["hPhrase"])
+        self.smiles = sanitise_user_input(request.form["smiles"])
+        self.cas = sanitise_user_input(request.form["cas"])
+        self.mol_formula = ""
+        self.inchi = None
+        self.inchi_key = None
+
+        self.feedback = ""
+        self.validation = ""
+        self.validation_functions = [
+            self.validate_name_is_allowed,
+            self.validate_name_is_unique,
+            self.validate_cas,
+            self.validate_cas_is_unique,
+            self.validate_hazards,
+            self.validate_numerical_properties,
+            self.validate_structure_is_unique,
+        ]
+
+    def validate(self):
+        for validation_function in self.validation_functions:
+            validation_function()
+            if self.validation == "failed":
+                print("New compound validation failed due to: ", self.feedback)
+                return
+
+        self.feedback = "Compound added to the database"
+        return "validation_successful"
+
+    def validate_name_is_allowed(self):
+        """
+        Validates and sanitizes the compound name from the request.
+        """
+        if len(self.name) > 200:
+            self.feedback = "Name must be under 200 characters long"
+            self.validation = "failed"
+        if not self.name:
+            self.feedback = "Compound requires a name"
+            self.validation = "failed"
+
+    def validate_name_is_unique(self):
+        """
+        Checks if the compound name is unique within the compound database and the given workbook.
+        """
+        check_in_compound_database = services.compound.get_compound_from_name(self.name)
+        if check_in_compound_database:
+            self.feedback = (
+                "There is already a compound with this name in the compound database"
+            )
+            self.validation = "failed"
+
+        check_in_workbook = (
+            services.novel_compound.get_novel_compound_from_name_and_workbook(
+                self.name, self.workbook
+            )
+        )
+        if check_in_workbook:
+            self.feedback = (
+                "There is already a compound with this name in this workbook"
+            )
+            self.validation = "failed"
+
+    def validate_cas(self):
+        """
+        Validates the CAS number from the request. Checks it fits the expected CAS pattern with a regular expression
+        """
+        cas = sanitise_user_input(request.form["cas"])
+        if cas:
+            cas_regex = r"^[0-9]{1,7}-\d{2}-\d$"
+            if not re.findall(cas_regex, cas):
+                self.feedback = "Invalid CAS number"
+                self.validation = "failed"
+
+    def validate_cas_is_unique(self):
+        """
+        Checks if the compound CAS number is unique within the compound database and the given workbook.
+        """
+        check_in_compound_database = services.compound.get_compound_from_cas(self.cas)
+        if check_in_compound_database:
+            self.feedback = (
+                "A compound with this CAS number is already in the compound database"
+            )
+            self.validation = "failed"
+
+        check_in_workbook = (
+            services.novel_compound.get_novel_compound_from_cas_and_workbook(
+                self.cas, self.workbook
+            )
+        )
+        if check_in_workbook:
+            self.feedback = (
+                "A compound with this CAS number is already in this workbook"
+            )
+            self.validation = "failed"
+
+    def validate_structure_is_unique(self):
+        """
+        Optional validation if the user supplies a SMILES string or draws the compound.
+        Confirms the structure is not already in the database in either the user's workbook or the compound database.
+        """
+        if not self.inchi:
+            return
+        check_in_workbook = (
+            services.novel_compound.get_novel_compound_from_inchi_and_workbook(
+                self.inchi, self.workbook
+            )
+        )
+        check_in_compound_db = services.compound.get_compound_from_inchi(self.inchi)
+        if check_in_compound_db:
+            self.feedback = f"There is already a compound with this structure in the Compound database with the name: {check_in_compound_db.name}"
+            self.validation = "failed"
+        elif check_in_workbook:
+            self.feedback = f"There is already a compound with this structure saved in this workbook with the name: {check_in_workbook.name}"
+            self.validation = "failed"
+
+    def validate_numerical_properties(self):
+        """
+        Density, concentration, and molecular weight are optional properties that if provided must be a positive number.
+        This function validates this data or fails the validation and provides feedback.
+        """
+        numerical_values = [self.density, self.concentration, self.mol_weight]
+        # if all entries are blank or positive numbers then validation is passed
+        numerical_values = [float(x) if x != "" else None for x in numerical_values]
+        if all(
+            entry == "" or check_positive_number(entry) for entry in numerical_values
+        ):
+            return
+        self.feedback = "Molecular weight, density, and concentration must be empty or a positive number"
+        self.validation = "failed"
+
+    def calculate_molecule_identifiers(self):
+        """
+        Calculate additional molecule identifiers if SMILES is present.
+        """
+        if not self.smiles:
+            return
+        mol = Chem.MolFromSmiles(self.smiles)
+        if not mol:
+            return
+        self.mol_formula = rdMolDescriptors.CalcMolFormula(mol)
+        self.inchi = Chem.MolToInchi(mol)
+        self.inchi_key = Chem.MolToInchiKey(mol)
+
+    def validate_hazards(self):
+        """
+        Check hazard codes are in the correct format.
+        """
+        if not self.hazard_codes:
+            return
+        hazard_codes_ls = self.hazard_codes.split("-")
+        for hazard_code in hazard_codes_ls:
+            hazard_match = services.hazard_code.get(hazard_code)
+            if hazard_match is None:
+                self.feedback = f'Hazard code "{hazard_code}" is invalid. Must be valid hazard code and formatted correctly. e.g., H200-H301.'
+                self.validation = "failed"
+
+
+def check_positive_number(s: float) -> bool:
+    """Checks the entry is a positive number."""
+    try:
+        return s >= 0
+    except ValueError:
+        return False
