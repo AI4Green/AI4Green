@@ -20,7 +20,7 @@ from . import reaction_table_bp
 
 if not current_app.config["DEBUG"]:
     try:
-        import STOUT.translate_forward
+        from STOUT import translate_forward
 
         print("STOUT successfully imported")
     except Exception:
@@ -324,8 +324,9 @@ def iupac_convert(smiles: str) -> str:
         print("failed CIR")
     print("trying STOUT")
     try:
-        iupac_name = STOUT.translate_forward(smiles)
-        return iupac_name
+        iupac_name = translate_forward(smiles)
+        if iupac_name != "Could not generate IUPAC name for SMILES provided.":
+            return iupac_name
     except Exception:
         print("STOUT failed")
     return ""

@@ -153,15 +153,28 @@ class NewNovelCompound:
     def __init__(self, workbook):
         self.workbook = workbook
         self.name = sanitise_user_input(request.form["name"])
-        self.density = request.form["density"]
-        self.concentration = request.form["concentration"]
-        self.mol_weight = request.form["molWeight"][0]
+        self.density = (
+            float(request.form["density"]) if request.form["density"] != "" else None
+        )
+        self.concentration = (
+            float(request.form["concentration"])
+            if request.form["concentration"] != ""
+            else None
+        )
+        self.mol_weight = (
+            float(request.form["molWeight"])
+            if request.form["molWeight"] != ""
+            else None
+        )
         self.hazard_codes = sanitise_user_input(request.form["hPhrase"])
         self.smiles = sanitise_user_input(request.form["smiles"])
         self.cas = sanitise_user_input(request.form["cas"])
-        self.mol_formula = ""
+        self.mol_formula = (
+            ""  # if SMILES is provided mol_formula, inchi, and inchi_key are calculated
+        )
         self.inchi = None
         self.inchi_key = None
+        self.calculate_molecule_identifiers()
 
         self.feedback = ""
         self.validation = ""
@@ -172,6 +185,7 @@ class NewNovelCompound:
             self.validate_cas_is_unique,
             self.validate_hazards,
             self.validate_numerical_properties,
+            self.validate_smiles,
             self.validate_structure_is_unique,
         ]
 
@@ -233,6 +247,8 @@ class NewNovelCompound:
         """
         Checks if the compound CAS number is unique within the compound database and the given workbook.
         """
+        if not self.cas:
+            return
         check_in_compound_database = services.compound.get_compound_from_cas(self.cas)
         if check_in_compound_database:
             self.feedback = (
@@ -258,16 +274,17 @@ class NewNovelCompound:
         """
         if not self.inchi:
             return
+        check_in_compound_db = services.compound.get_compound_from_inchi(self.inchi)
+        if check_in_compound_db:
+            self.feedback = f"There is already a compound with this structure in the Compound database with the name: {check_in_compound_db.name}"
+            self.validation = "failed"
+
         check_in_workbook = (
             services.novel_compound.get_novel_compound_from_inchi_and_workbook(
                 self.inchi, self.workbook
             )
         )
-        check_in_compound_db = services.compound.get_compound_from_inchi(self.inchi)
-        if check_in_compound_db:
-            self.feedback = f"There is already a compound with this structure in the Compound database with the name: {check_in_compound_db.name}"
-            self.validation = "failed"
-        elif check_in_workbook:
+        if check_in_workbook:
             self.feedback = f"There is already a compound with this structure saved in this workbook with the name: {check_in_workbook.name}"
             self.validation = "failed"
 
@@ -277,27 +294,35 @@ class NewNovelCompound:
         This function validates this data or fails the validation and provides feedback.
         """
         numerical_values = [self.density, self.concentration, self.mol_weight]
-        # if all entries are blank or positive numbers then validation is passed
-        numerical_values = [float(x) if x != "" else None for x in numerical_values]
         if all(
-            entry == "" or check_positive_number(entry) for entry in numerical_values
+            entry is None or check_positive_number(entry) for entry in numerical_values
         ):
             return
         self.feedback = "Molecular weight, density, and concentration must be empty or a positive number"
         self.validation = "failed"
 
+    def validate_smiles(self):
+        """
+        If the SMILES string is provided confirm that it can generate a structure in rdkit.
+        Validation ignored for compounds drawn in the sketcher to prevent blocking users if there is issue with rdkit.
+        """
+        if self.smiles and request.form["source"] != "sketcher":
+            mol = Chem.MolFromSmiles(self.smiles)
+            if mol is None:
+                self.feedback = (
+                    f"Failed to generate molecule from SMILES string: {self.smiles}"
+                )
+                self.validation = "failed"
+
     def calculate_molecule_identifiers(self):
         """
         Calculate additional molecule identifiers if SMILES is present.
         """
-        if not self.smiles:
-            return
         mol = Chem.MolFromSmiles(self.smiles)
-        if not mol:
-            return
-        self.mol_formula = rdMolDescriptors.CalcMolFormula(mol)
-        self.inchi = Chem.MolToInchi(mol)
-        self.inchi_key = Chem.MolToInchiKey(mol)
+        if mol is not None:
+            self.mol_formula = rdMolDescriptors.CalcMolFormula(mol)
+            self.inchi = Chem.MolToInchi(mol)
+            self.inchi_key = Chem.MolToInchiKey(mol)
 
     def validate_hazards(self):
         """
@@ -317,5 +342,5 @@ def check_positive_number(s: float) -> bool:
     """Checks the entry is a positive number."""
     try:
         return s >= 0
-    except ValueError:
+    except (ValueError, TypeError):
         return False
