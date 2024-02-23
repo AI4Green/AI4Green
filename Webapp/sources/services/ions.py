@@ -186,7 +186,6 @@ def reactants_and_products_from_ionic_cx_smiles(
         products_ls - the list of products as SMILES strings with ions combined to ionic compounds
 
     """
-    print("cs smiles func", cx_smiles)
     # get list of ion positions
     ion_list = cx_smiles.split("f:")[1].split("|")[0].split(",")
     # reagents to be added too.
