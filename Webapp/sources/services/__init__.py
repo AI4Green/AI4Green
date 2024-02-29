@@ -17,6 +17,7 @@ from . import (
     summary,
     sustainability,
     user,
+    utils,
     workbook,
     workgroup,
 )

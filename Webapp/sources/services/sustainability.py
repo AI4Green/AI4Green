@@ -1,4 +1,4 @@
-from typing import Dict, List, Set
+from typing import Dict, List, Optional, Set
 
 import rdkit
 from flask import request
@@ -15,7 +15,7 @@ class SustainabilityMetrics:
         self.product_data = product_data
         self.sustainability_data = {}
 
-    def get_sustainability_metrics(self):
+    def get_sustainability_metrics(self) -> Dict:
         self.sustainability_data["ae"] = self.get_atom_economy()
         self.sustainability_data["ae_flag"] = metric_flag(
             self.sustainability_data["ae"]
@@ -77,7 +77,7 @@ class SustainabilityMetrics:
         }
         return element_flag_dict[self.sustainability_data["element_sustainability"]]
 
-    def get_atom_economy(self):
+    def get_atom_economy(self) -> Optional[float]:
         return (
             round(
                 100
@@ -156,3 +156,37 @@ def metric_flag(metric: int) -> str:
         return "hazard-hazardous"
     else:
         return "hazard-warning"
+
+
+def percent_yield_from_rxn_data(rxn_data: Dict, obtained_yield_mass: float) -> float:
+    """
+    Calculates the percentage yield from rxn_data from the attribute: models.reaction.reaction_data.
+    Args:
+        rxn_data: dictionary with limiting reactant and desired product data
+        obtained_yield_mass: the product mass yield - obtained from models.reaction.summary_data['real_product_mass']
+
+    Returns:
+        The percentage yield relative to the theoretical yield for a reaction.
+    """
+    # unit dicts
+    mass_factor_dict = {"μg": 0.000001, "mg": 0.001, "g": 1}
+    amount_factor_dict = {"μmol": 0.000001, "mmol": 0.001, "mol": 1}
+    # get the amount of limiting reactant standardised for different amount units
+    limiting_reactant_index = int(rxn_data["limiting_reactant_table_number"]) - 1
+    amount_of_limiting_reactant = float(
+        rxn_data["reactant_amounts_raw"][limiting_reactant_index]
+    )
+    amount_factor = amount_factor_dict[rxn_data["amount_units"]]
+    normalised_limiting_reactant_amount = amount_of_limiting_reactant * amount_factor
+    # get the theoretical yield of product standardised for different mass units
+    main_product_index = int(rxn_data["main_product"]) - 1
+    desired_product_molecular_weight = float(
+        rxn_data["product_molecular_weights"][main_product_index]
+    )
+    mass_factor = mass_factor_dict[rxn_data["product_mass_units"]]
+    theoretical_yield = (
+        normalised_limiting_reactant_amount * desired_product_molecular_weight
+    )
+    normalised_yield_mass = obtained_yield_mass * mass_factor
+    # percent_yield = round(normalised_yield_mass / theoretical_yield * 100, 3)
+    return round(normalised_yield_mass / theoretical_yield * 100, 2)

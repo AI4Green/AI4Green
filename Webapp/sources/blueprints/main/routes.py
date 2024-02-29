@@ -105,11 +105,7 @@ def sketcher(
         .filter(models.Reaction.id == reaction.id)
         .all()
     )
-    # todo remove dev codde
-    from sources import services
 
-    # reaction_smiles = services.data_export.make_reaction_smiles(reaction)
-    # services.data_export.make_rxn_file(reaction)
     if reaction.reaction_smiles:
         load_status = "loading"
     else:

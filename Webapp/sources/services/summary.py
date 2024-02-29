@@ -1,24 +1,13 @@
-import re
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
-from chython import files as ctf  # - chemical table files
-from chython import smiles
-from chython.containers import MoleculeContainer, ReactionContainer
-from flask import abort, request
-from rdkit.Chem import AllChem
+from flask import request
 from sources import auxiliary, services
-
-# from rdfreader.write import write_rdf
-# from rdfreader import RDFParser
 
 
 def get_request_data_from_keys(keys: List[str]) -> Dict:
     component_dict = {}
     for key in keys:
-        # Convert camelCase to snake_case
-        snake_case_key = "".join(
-            ["_" + c.lower() if c.isupper() else c for c in key]
-        ).lstrip("_")
+        snake_case_key = services.utils.camelCase_to_snake_case(key)
         component_dict[snake_case_key] = auxiliary.get_data(key)
     return component_dict
 

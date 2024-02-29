@@ -45,9 +45,7 @@ class Reaction(Model):
     )
     reactants = db.Column(db.ARRAY(db.Text()), nullable=False, default="{}")  # smiles
     products = db.Column(db.ARRAY(db.Text()), nullable=False, default="{}")  # smiles
-    reagents = db.Column(
-        db.ARRAY(db.Text()), nullable=False, default="{}"
-    )  # primary keys
+    reagents = db.Column(db.ARRAY(db.Text()), nullable=False, default="{}")  # smiles
     solvent = db.Column(
         db.ARRAY(db.Text()), nullable=False, default="{}"
     )  # primary keys

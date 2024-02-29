@@ -16,7 +16,6 @@ def get_smiles(primary_key: Tuple[str, int]) -> str:
     Returns:
         The SMILES string corresponding to the primary key or None
     """
-    print(primary_key)
     primary_key = (primary_key[0], int(primary_key[1]))
     workbook = services.workbook.get(primary_key[1])
     if current_user.Person not in workbook.users:
@@ -24,7 +23,7 @@ def get_smiles(primary_key: Tuple[str, int]) -> str:
 
     return (
         db.session.query(models.NovelCompound.smiles)
-        .filter(models.NovelCompound.name == primary_key[0])
+        .filter(models.NovelCompound.name == primary_key[0].lower())
         .join(models.WorkBook)
         .filter(models.WorkBook.id == primary_key[1])
         .first()
