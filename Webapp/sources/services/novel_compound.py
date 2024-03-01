@@ -349,6 +349,7 @@ class NewNovelCompound:
         Check hazard codes are in the correct format.
         """
         if not self.hazard_codes:
+            self.hazard_codes = "Unknown"
             return
         hazard_codes_ls = self.hazard_codes.split("-")
         for hazard_code in hazard_codes_ls:

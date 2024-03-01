@@ -207,12 +207,11 @@ def check_reagent_data(reagent_data: Dict) -> str:
         str: Returns a message indicating missing data or "check successful" if all data is present.
     """
     if reagent_data.get("reagents")[0]:
-        for equivalents, hazard, name in zip(
+        for equivalents, name in zip(
             reagent_data["reagent_equivalents"],
-            reagent_data["reagent_hazards"],
             reagent_data["reagents"],
         ):
-            if equivalents == "" or name == "" or hazard == "":
+            if equivalents == "" or name == "":
                 return "Ensure you have entered all the necessary reagent information!"
     return "check successful"
 
