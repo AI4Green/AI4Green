@@ -99,45 +99,21 @@ def ions_to_ionic_compounds(ion_list: List[Tuple[int, str]]) -> List[Dict]:
             current_ion["idx_list"].append(ion[0])
             current_ion["component_ions"].append(ion[1])
 
-        if len(current_ion["idx_list"]) >= 2:
+        if len(current_ion["idx_list"]) >= 1:
             if assess_neutrality(current_ion["string"]) == "neutral":
-                current_ion["string"] = rearrange_ionic_compound(
-                    current_ion["component_ions"]
-                )
+                current_ion["string"] = ".".join(current_ion["component_ions"])
                 finished_ion_list.append(current_ion)
                 current_ion = {"string": "", "idx_list": [], "component_ions": []}
                 continue
 
             if not [idx + 1 in ion_reactant_tuple for ion_reactant_tuple in ion_list]:
-                current_ion["string"] = rearrange_ionic_compound(
-                    current_ion["component_ions"]
-                )
+                current_ion["string"] = ".".join(current_ion["component_ions"])
                 finished_ion_list.append(current_ion)
                 current_ion = {"string": "", "idx_list": [], "component_ions": []}
                 continue
         previous_ion_index = ion[0]
 
     return finished_ion_list
-
-
-def rearrange_ionic_compound(component_ions: List[str]) -> str:
-    """
-    Rearrange the ionic compound.
-
-    Args:
-        component_ions (List[str]): List of component ions.
-
-    Returns:
-        str: Rearranged ionic compound.
-    """
-    result_list = sorted(component_ions, key=lambda x: abs(get_charge(x)))
-    max_charge_element = max(result_list, key=lambda x: abs(get_charge(x)))
-    result_list.remove(max_charge_element)
-    result_list.insert(len(result_list) // 2, max_charge_element)
-    rearranged_ion = (
-        "".join(result_list).replace("+", "").replace("-", "").replace(r"\d+", "")
-    )
-    return re.sub(r"\d+", "", rearranged_ion)
 
 
 def get_charge(element: str) -> int:
@@ -217,6 +193,7 @@ def reactants_and_products_from_ionic_cx_smiles(
     # separate compounds, reactants, and products
     compounds_ls = cx_smiles.split(" |")[0].replace(">>", ".").split(".")
     reactants_ls = cx_smiles.split(">>")[0].split(".")
+    original_number_of_reactants = len(reactants_ls)
     products_ls = cx_smiles.split(">>")[1].split(" |")[0].split(".")
     # for each ionic compound pair the constituent ions to make a salt
     for idx, ion_group in enumerate(ion_list):
@@ -224,6 +201,7 @@ def reactants_and_products_from_ionic_cx_smiles(
         ion_indexes = [int(x) for x in ion_indexes]
         salt = ".".join([compounds_ls[x] for x in ion_indexes])
         ions_in_previous_salts = 0
+        # this if block does reactants
         if len(reactants_ls) > ion_indexes[-1]:
             # append salt to salt list, and compute+append the index of the ions which the salt will substitute
             for salt_dict in reactant_salt_dict_list:
@@ -242,6 +220,7 @@ def reactants_and_products_from_ionic_cx_smiles(
                     "salt_smiles": salt,
                 }
             )
+        # this else block deals with products
         else:
             for salt_dict in product_salt_dict_list:
                 ions_in_previous_salts += salt_dict["number_of_ions"]
@@ -250,6 +229,7 @@ def reactants_and_products_from_ionic_cx_smiles(
                 ion_indexes[0]
                 - ions_in_previous_salts
                 + previous_number_of_product_salts
+                - original_number_of_reactants
             )
             product_salt_dict_list.append(
                 {
