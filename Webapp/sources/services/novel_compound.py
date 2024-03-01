@@ -169,12 +169,6 @@ class NewNovelCompound:
         self.hazard_codes = sanitise_user_input(request.form["hPhrase"])
         self.smiles = sanitise_user_input(request.form["smiles"])
         self.cas = sanitise_user_input(request.form["cas"])
-        self.mol_formula = (
-            ""  # if SMILES is provided mol_formula, inchi, and inchi_key are calculated
-        )
-        self.inchi = None
-        self.inchi_key = None
-        self.calculate_molecule_identifiers()
 
         self.feedback = ""
         self.validation = ""
@@ -188,6 +182,12 @@ class NewNovelCompound:
             self.validate_smiles,
             self.validate_structure_is_unique,
         ]
+
+        # if SMILES is provided mol_formula, inchi, and inchi_key are calculated
+        self.mol_formula = ""
+        self.inchi = None
+        self.inchi_key = None
+        self.calculate_molecule_identifiers()
 
     def validate(self):
         for validation_function in self.validation_functions:
@@ -319,10 +319,11 @@ class NewNovelCompound:
         Calculate additional molecule identifiers if SMILES is present.
         """
         mol = Chem.MolFromSmiles(self.smiles)
-        if mol is not None:
-            self.mol_formula = rdMolDescriptors.CalcMolFormula(mol)
-            self.inchi = Chem.MolToInchi(mol)
-            self.inchi_key = Chem.MolToInchiKey(mol)
+        if mol is None or mol.GetNumAtoms() == 0:
+            return
+        self.mol_formula = rdMolDescriptors.CalcMolFormula(mol)
+        self.inchi = Chem.MolToInchi(mol)
+        self.inchi_key = Chem.MolToInchiKey(mol)
 
     def validate_hazards(self):
         """
