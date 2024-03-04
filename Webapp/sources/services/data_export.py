@@ -1,3 +1,4 @@
+import ast
 import json
 from typing import Dict, List, Optional
 
@@ -6,6 +7,18 @@ from sources import models, services
 
 
 class ReactionDataFile:
+    non_string_types_inside_meta = [
+        "reagents",
+        "reactants",
+        "solvents",
+        "products",
+        "standard_protocols_used",
+        "file_attachment_names",
+        "addenda",
+        "solvent_sustainability",
+        "sustainability_data",
+    ]
+
     def __init__(self, db_reaction: models.Reaction, filename: str):
         """
         Filename should not include extension.
@@ -68,25 +81,17 @@ class ReactionDataFile:
         # opening file for testing purposes
         with chython.files.RDFRead(self.filename) as f:
             rdf_contents = next(f)
+        self.literal_eval_metadata(rdf_contents)
+        self.validate_rdf(rdf_contents)
 
-        non_string_types_inside_meta = [
-            "reagents",
-            "reactants",
-            "solvents",
-            "products",
-            "standard_protocols_used",
-            "file_attachment_names",
-            "addenda",
-            "solvent_sustainability",
-            "sustainability_data",
-        ]
-        import ast
+    def literal_eval_metadata(self, rdf_contents: chython.ReactionContainer):
+        """Read the rdf values literally to reintroduce their types"""
 
         for key in self.metadata.keys():
             # if the string is equal to none we reload
             if (
                 rdf_contents.meta[key] == "None"
-                or key in non_string_types_inside_meta
+                or key in self.non_string_types_inside_meta
                 and isinstance(rdf_contents.meta[key], str)
             ):
                 print(key)
@@ -94,49 +99,31 @@ class ReactionDataFile:
                     {key: ast.literal_eval(rdf_contents.meta[key])}
                 )
 
-            if self.reaction_container.meta[key] != rdf_contents.meta[key]:
-                print(
-                    key,
-                    rdf_contents.meta[key],
-                    self.reaction_container.meta[key],
-                    "unequal",
-                )
-
-            if self.reaction_container.meta[key] == rdf_contents.meta[key]:
-                print("equal")
-
-        if (
-            not self.reaction_container.meta["products"]
-            == rdf_contents.meta["products"]
-        ):
-            print("prod unequal")
-        else:
-            print("prod equal")
-
-        if (
-            not self.reaction_container.meta["reagents"]
-            == rdf_contents.meta["reagents"]
-        ):
-            print("reagents unequal")
-        else:
-            print("reagents equal")
-
-        if (
-            not self.reaction_container.meta["reactants"]
-            == rdf_contents.meta["reactants"]
-        ):
-            print("reactants unequal")
-        else:
-            print("reactants equal")
-
-        assert (
-            rdf_contents == self.reaction_container
-        ), "change in data during file read/write"
-
-        print("we all good")
-
+    def validate_rdf(self, rdf_contents: chython.ReactionContainer):
+        """Validates the read RDF file contains the same data as the original object in Python"""
         assert rdf_contents.meta == self.reaction_container.meta, "unequal  metas"
-        assert rdf_contents.r
+        assert (
+            rdf_contents.reactants == self.reaction_container.reactants
+        ), "unequal reactants"
+        assert (
+            rdf_contents.reagents == self.reaction_container.reagents
+        ), "unequal reagents"
+        assert (
+            rdf_contents.products == self.reaction_container.products
+        ), "unequal products"
+
+        # for key in self.metadata.keys():
+        #     if self.reaction_container.meta[key] != rdf_contents.meta[key]:
+        #         print(
+        #             key,
+        #             rdf_contents.meta[key],
+        #             self.reaction_container.meta[key],
+        #             "unequal",
+        #         )
+        #
+        #     if self.reaction_container.meta[key] == rdf_contents.meta[key]:
+        #         print(key, "equal")
+        #
 
     def save_as_json(self):
         with open(self.filename, "w") as f:
