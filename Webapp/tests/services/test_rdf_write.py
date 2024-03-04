@@ -1,67 +1,107 @@
 import os
 import pickle
 
+import chython
 import pytest
-from flask import current_app
-from sources.extensions import mail
+import pytest_mock
+from flask import Flask
+from sources import services
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
-def test_send_email_sending(app):
-    """
-    Test sending an email when MAIL_USE_LOCAL is set to False.
-
-    This test ensures that the 'send_email' function correctly sends an email when the 'MAIL_USE_LOCAL' configuration
-    is set to False, indicating that the email should be sent using the Flask-Mail extension.
-
-    Args:
-        client: Flask test client.
-
-    """
-    subject = "Test Email"
-    sender = "sender@example.com"
-    recipients = ["recipient@example.com"]
-    text_body = "Text body of the email."
-    html_body = "<p>HTML body of the email.</p>"
-
-    with app.app_context():
-        current_app.config["MAIL_USE_LOCAL"] = False
-        with mail.mail.record_messages() as outbox:
-            mail.send_email(subject, sender, recipients, text_body, html_body)
-            assert len(outbox) == 1
-            assert outbox[0].subject == subject
-
-
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Local temp files don't work in CI")
-def test_export_reaction_as_rdf_local_save(app):
+def test_export_reaction_as_rdf(app: Flask, mocker: pytest_mock.MockerFixture):
     """
-    Test saving an exported reaction data file locally when the storage container is set to 'experiment_data'.
+    Test saving an exported reaction data file locally and reloading it and checking for data changes
 
     This test ensures that the services.data_export.ReactionDataFile.save_as_rdf function correctly saves the .RDF
-    The .RDF should be stored as a file in an Azurite emulator
+    It then tests we can reload it and the contents are the same as the original.
 
     Args:
-        client: Flask test client.
+        app: Flask test client.
+        mocker: Mock
 
     """
-    # reaction = pickle
+    with open(
+        os.path.join(
+            os.path.dirname(os.getcwd()), "data", "reaction_database_object.pickle"
+        ),
+        "rb",
+    ) as f:
+        serialized_data = f.read()
 
-    subject = "Test Email"
-    sender = "sender@example.com"
-    recipients = ["recipient@example.com"]
-    text_body = "Text body of the email."
-    html_body = "<p>HTML body of the email.</p>"
+    make_mocks(mocker)
 
+    reaction = pickle.loads(serialized_data)
     with app.app_context():
-        mail.send_email(subject, sender, recipients, text_body, html_body)
+        file_path = os.path.join(app.config["MAIL_SAVE_DIR"], "test_rdf")
+        test_rdf = services.data_export.ReactionDataFile(reaction, file_path)
+        # includes validation to ensure reactants, meta, reagents, products are equal before and after saving
+        rdf = test_rdf.reaction_container
+        test_rdf.save_as_rdf()
+        with chython.files.RDFRead(file_path) as f:
+            rdf_contents = next(f)
+        test_rdf.literal_eval_metadata(rdf_contents)
+        validate_rdf(rdf, rdf_contents)
 
-        file_path = os.path.join(
-            app.config["MAIL_SAVE_DIR"], f"{subject} - {recipients[0]}.eml"
-        )
-        with open(file_path, "r") as file:
-            content = file.read()
-            assert subject in content
-            assert sender in content
-            assert recipients[0] in content
-            assert text_body in content
+
+def make_mocks(mocker: pytest_mock.MockerFixture):
+    """Makes mocks and return values for the functions that would normally access the database during RDF creation."""
+    mock_get_smiles_from_db = mocker.patch(
+        "sources.services.all_compounds.smiles_from_primary_key"
+    )
+    mock_get_smiles_from_db.return_value = "CO"
+
+    mock_read_username = mocker.patch(
+        "sources.services.data_export.ReactionMetaData.read_creator_username"
+    )
+    mock_read_username.return_value = "Al Forgreen"
+
+    mock_read_workbook = mocker.patch(
+        "sources.services.data_export.ReactionMetaData.read_workbook"
+    )
+    mock_read_workbook.return_value = "Alchemical aspirations"
+
+    mock_read_workgroup = mocker.patch(
+        "sources.services.data_export.ReactionMetaData.read_workgroup"
+    )
+    mock_read_workgroup.return_value = "AI4Alchemy"
+
+    mock_read_file_attachments = mocker.patch(
+        "sources.services.data_export.ReactionMetaData.read_file_attachment_names"
+    )
+    mock_read_file_attachments.return_value = ["AI1-001-summary.pdf"]
+
+    mock_read_addenda = mocker.patch(
+        "sources.services.data_export.ReactionMetaData.read_addenda"
+    )
+    mock_read_addenda.return_value = None
+
+
+def validate_rdf(
+    reaction_container: chython.ReactionContainer,
+    rdf_contents: chython.ReactionContainer,
+):
+    """Validates the read RDF file contains the same data as the original object in Python"""
+    assert rdf_contents.meta == reaction_container.meta, "unequal  metas"
+
+    for original_reactant, loaded_reactant in zip(
+        rdf_contents.reactants, reaction_container.reactants
+    ):
+        if original_reactant and loaded_reactant:
+            assert original_reactant.is_equal(loaded_reactant), "reactant inequality"
+
+    for original_reagent, loaded_reagent in zip(
+        rdf_contents.reagents, reaction_container.reagents
+    ):
+        if original_reagent and loaded_reagent:
+            assert original_reagent.is_equal(loaded_reagent), "reagent inequality"
+
+    for original_product, loaded_product in zip(
+        rdf_contents.products, reaction_container.products
+    ):
+        if original_product and loaded_product:
+            assert original_product.is_equal(loaded_product), "product inequality"
+
+    print("all assertions passed")

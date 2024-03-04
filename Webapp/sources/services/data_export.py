@@ -66,6 +66,7 @@ class ReactionDataFile:
         return reaction_smiles
 
     def save(self):
+        """Calls the appropriate method to save the data. Can't use .RDF without a reaction_container object"""
         if self.reaction_container:
             self.filename += ".rdf"
             self.save_as_rdf()
@@ -74,15 +75,9 @@ class ReactionDataFile:
             self.save_as_json()
 
     def save_as_rdf(self):
-        with chython.files.RDFWrite(self.filename) as f:  # context manager supported
-            # for r in data:
+        """Saves as an RDF"""
+        with chython.files.RDFWrite(self.filename) as f:
             f.write(self.reaction_container)
-        #  TESTING CODE @
-        # opening file for testing purposes
-        with chython.files.RDFRead(self.filename) as f:
-            rdf_contents = next(f)
-        self.literal_eval_metadata(rdf_contents)
-        self.validate_rdf(rdf_contents)
 
     def literal_eval_metadata(self, rdf_contents: chython.ReactionContainer):
         """Read the rdf values literally to reintroduce their types"""
@@ -97,45 +92,6 @@ class ReactionDataFile:
                 rdf_contents.meta.update(
                     {key: ast.literal_eval(rdf_contents.meta[key])}
                 )
-
-    def validate_rdf(self, rdf_contents: chython.ReactionContainer):
-        """Validates the read RDF file contains the same data as the original object in Python"""
-        assert rdf_contents.meta == self.reaction_container.meta, "unequal  metas"
-
-        for original_reactant, loaded_reactant in zip(
-            rdf_contents.reactants, self.reaction_container.reactants
-        ):
-            if original_reactant and loaded_reactant:
-                assert original_reactant.is_equal(
-                    loaded_reactant
-                ), "reactant inequality"
-
-        for original_reagent, loaded_reagent in zip(
-            rdf_contents.reagents, self.reaction_container.reagents
-        ):
-            if original_reagent and loaded_reagent:
-                assert original_reagent.is_equal(loaded_reagent), "reagent inequality"
-
-        for original_product, loaded_product in zip(
-            rdf_contents.products, self.reaction_container.products
-        ):
-            if original_product and loaded_product:
-                assert original_product.is_equal(loaded_product), "product inequality"
-
-        print("all assertions passed")
-
-        # for key in self.metadata.keys():
-        #     if self.reaction_container.meta[key] != rdf_contents.meta[key]:
-        #         print(
-        #             key,
-        #             rdf_contents.meta[key],
-        #             self.reaction_container.meta[key],
-        #             "unequal",
-        #         )
-        #
-        #     if self.reaction_container.meta[key] == rdf_contents.meta[key]:
-        #         print(key, "equal")
-        #
 
     def save_as_json(self):
         with open(self.filename, "w") as f:
@@ -605,7 +561,10 @@ class ReactionMetaData:
 
     def get_volumes(self, component) -> List[str]:
         """Returns a list of volumes for type of component: reactant/reagent/solvent/product"""
-        return [str(round(float(x), 2)) for x in self.rxn_data[f"{component}_volumes"]]
+        return [
+            str(round(float(x), 2)) if x else None
+            for x in self.rxn_data[f"{component}_volumes"]
+        ]
 
     def get_h_codes(self, component) -> List[str]:
         """Returns a list of GHS hazard codes for type of component: reactant/reagent/solvent/product"""
@@ -680,7 +639,7 @@ class ReactionStringMapper:
             "hazard-warning": "3",
             "hazard-hazardous": "4",
         }
-        return chem21_dict[chem21_str]
+        return chem21_dict.get(chem21_str)
 
     @staticmethod
     def css_classes_to_chem21_colour_flag(css_class: str) -> str:
@@ -689,9 +648,8 @@ class ReactionStringMapper:
             "hazard-acceptable": "green",
             "hazard-warning": "amber",
             "hazard-hazardous": "red",
-            None: None,
         }
-        return css_chem21_dict[css_class]
+        return css_chem21_dict.get(css_class)
 
     @staticmethod
     def isolation(isolation_method: str) -> Optional[str]:
@@ -706,7 +664,6 @@ class ReactionStringMapper:
             "6": "Multiple recryst.",
             "7": "Distillation < 140 degC",
             "8": "Distillation > 140 degC",
-            "undefined": None,
         }
         return isolation_dict.get(isolation_method)
 
@@ -718,9 +675,8 @@ class ReactionStringMapper:
             "2": "50-500 years",
             "1": "5-50 years",
             "0": "",
-            "undefined": None,
         }
-        return elements_dict[element_value]
+        return elements_dict.get(element_value)
 
     @staticmethod
     def solvent_sustainability(solvent_flag: int) -> str:
@@ -732,9 +688,8 @@ class ReactionStringMapper:
             2: "Hazardous",
             1: "Highly Hazardous",
             5: "Unknown",  # non-chem21 elsewhere in code sometimes.
-            "undefined": None,
         }
-        return solvent_flag_dict[solvent_flag]
+        return solvent_flag_dict.get(solvent_flag)
 
     @staticmethod
     def physical_forms(physical_form):
@@ -751,9 +706,8 @@ class ReactionStringMapper:
             "8": "Highly volatile liquid (b.p. < 70 degC)",
             "9": "Aerosol",
             "10": "Solution that promotes skin absorption",
-            "undefined": None,
         }
-        return physical_form_dict[physical_form]
+        return physical_form_dict.get(physical_form)
 
     @staticmethod
     def radio_buttons(radio_button) -> str:

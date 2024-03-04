@@ -106,11 +106,6 @@ def sketcher(
         .all()
     )
 
-    from sources import services
-
-    x = services.data_export.ReactionDataFile(reaction, "exmaple")
-    x.save()
-
     if reaction.reaction_smiles:
         load_status = "loading"
     else:

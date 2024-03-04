@@ -44,6 +44,7 @@ def test_send_email_local_save(app):
         client: Flask test client.
 
     """
+
     subject = "Test Email"
     sender = "sender@example.com"
     recipients = ["recipient@example.com"]
@@ -51,6 +52,7 @@ def test_send_email_local_save(app):
     html_body = "<p>HTML body of the email.</p>"
 
     with app.app_context():
+        current_app.config["MAIL_USE_LOCAL"] = "local"
         mail.send_email(subject, sender, recipients, text_body, html_body)
 
         file_path = os.path.join(

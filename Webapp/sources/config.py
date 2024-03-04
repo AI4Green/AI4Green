@@ -64,7 +64,9 @@ class TestConfig(BaseConfig):
     DEBUG = True
     LIVESERVER_PORT = 8943
     LOGIN_DISABLED = False
-    SQLALCHEMY_DATABASE_URI = os.getenv("TEST_DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "TEST_DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/ai4green"
+    )
     SQLALCHEMY_BINDS = {
         "db": SQLALCHEMY_DATABASE_URI,
         "update": "sqlite:///temp_update.sqlite",
