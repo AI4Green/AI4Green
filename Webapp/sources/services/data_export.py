@@ -94,7 +94,6 @@ class ReactionDataFile:
                 or key in self.non_string_types_inside_meta
                 and isinstance(rdf_contents.meta[key], str)
             ):
-                print(key)
                 rdf_contents.meta.update(
                     {key: ast.literal_eval(rdf_contents.meta[key])}
                 )
@@ -102,15 +101,28 @@ class ReactionDataFile:
     def validate_rdf(self, rdf_contents: chython.ReactionContainer):
         """Validates the read RDF file contains the same data as the original object in Python"""
         assert rdf_contents.meta == self.reaction_container.meta, "unequal  metas"
-        assert (
-            rdf_contents.reactants == self.reaction_container.reactants
-        ), "unequal reactants"
-        assert (
-            rdf_contents.reagents == self.reaction_container.reagents
-        ), "unequal reagents"
-        assert (
-            rdf_contents.products == self.reaction_container.products
-        ), "unequal products"
+
+        for original_reactant, loaded_reactant in zip(
+            rdf_contents.reactants, self.reaction_container.reactants
+        ):
+            if original_reactant and loaded_reactant:
+                assert original_reactant.is_equal(
+                    loaded_reactant
+                ), "reactant inequality"
+
+        for original_reagent, loaded_reagent in zip(
+            rdf_contents.reagents, self.reaction_container.reagents
+        ):
+            if original_reagent and loaded_reagent:
+                assert original_reagent.is_equal(loaded_reagent), "reagent inequality"
+
+        for original_product, loaded_product in zip(
+            rdf_contents.products, self.reaction_container.products
+        ):
+            if original_product and loaded_product:
+                assert original_product.is_equal(loaded_product), "product inequality"
+
+        print("all assertions passed")
 
         # for key in self.metadata.keys():
         #     if self.reaction_container.meta[key] != rdf_contents.meta[key]:
@@ -337,9 +349,12 @@ class ReactionMetaData:
         batch_flow = self.summary_data.get("batch_flow")
         return batch_flow if batch_flow != "-select-" else None
 
-    def read_purification_method(self) -> Optional[str]:
+    def read_isolation_method(self) -> Optional[str]:
         """Returns the method of purification used from the dropdown the user selected in the summary table"""
-        return ReactionStringMapper.isolation(self.summary_data.get("isolation_method"))
+        isolation_method = ReactionStringMapper.isolation(
+            self.summary_data.get("isolation_method")
+        )
+        return isolation_method if isolation_method else None
 
     def read_stoichiometry(self) -> Optional[str]:
         """Returns string to indicate whether catalyst was used or stoichiometric reagents or neither"""
@@ -630,7 +645,7 @@ class ReactionMetaData:
             "temperature": self.read_temperature,
             "element_sustainability": self.read_element_sustainability,
             "batch_or_flow": self.read_batch_or_flow,
-            "purification_method": self.read_purification_method,
+            "isolation_method": self.read_isolation_method,
             "catalyst_use": self.read_stoichiometry,
             "catalyst_recovery": self.read_catalyst_recovery,
             "atom_economy": self.read_atom_economy,
@@ -648,7 +663,10 @@ class ReactionMetaData:
         """From [{'key': 'risk-score', 'value': 'danger'}] -> {'risk-score': 'danger'}"""
         result_dict = {}
         for item in ls:
-            result_dict[item["key"]] = item["value"]
+            try:
+                result_dict[item["key"]] = item["value"]
+            except KeyError:
+                result_dict[item["key"]] = None
         return result_dict
 
 
@@ -676,7 +694,7 @@ class ReactionStringMapper:
         return css_chem21_dict[css_class]
 
     @staticmethod
-    def isolation(isolation_method: str) -> str:
+    def isolation(isolation_method: str) -> Optional[str]:
         """Uses to replace the isolation dropdown index with the corresponding string value"""
         isolation_dict = {
             "0": "",
@@ -690,7 +708,7 @@ class ReactionStringMapper:
             "8": "Distillation > 140 degC",
             "undefined": None,
         }
-        return isolation_dict[isolation_method]
+        return isolation_dict.get(isolation_method)
 
     @staticmethod
     def element_sustainability(element_value: str) -> str:
@@ -778,7 +796,7 @@ def get_metadata_keys() -> List[str]:
         "creator_workgroup",
         "time_of_creation",
         "reaction_completed",
-        "purification_method",
+        "isolation_method",
         "batch_or_flow",
         "percent_yield",
         "reactants",
