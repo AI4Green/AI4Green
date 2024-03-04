@@ -112,7 +112,7 @@ function toggleInputButton(component) {
 
 function submitNovelCompoundViaTable(component) {
   let newCompoundInputNumber = $(`#js-input-${component}`).val();
-  let name = $(`#js-input-${component}-name`).val();
+  let name = getVal(`#js-input-${component}-name`);
   let smiles = $(`#js-input-${component}-smiles`).val();
   let hazards = $(`#js-input-${component}-hazards`).val();
   let cas = $(`#js-input-${component}-cas`).val();
@@ -173,7 +173,7 @@ function submitNovelCompoundViaTable(component) {
           if (component === "reagent") {
             postReagentData(name, newCompoundInputNumber);
           } else if (component === "solvent") {
-            let numberOfSolvents = Number($("#js-number-of-solvents").val());
+            let numberOfSolvents = getNum("#js-number-of-solvents");
             for (let i = 1; i < numberOfSolvents + 1; i++) {
               $(`#js-solvent-datalist${i}`).append(
                 `<option value="${name}" class="datalistOption hazard-reset-hazard">${name}`,
