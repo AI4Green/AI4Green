@@ -109,25 +109,34 @@ class ReactionDataFile:
             not self.reaction_container.meta["products"]
             == rdf_contents.meta["products"]
         ):
-            print("prod")
+            print("prod unequal")
+        else:
+            print("prod equal")
 
         if (
             not self.reaction_container.meta["reagents"]
             == rdf_contents.meta["reagents"]
         ):
-            print("reagents")
+            print("reagents unequal")
+        else:
+            print("reagents equal")
 
         if (
             not self.reaction_container.meta["reactants"]
             == rdf_contents.meta["reactants"]
         ):
-            print("reactants")
+            print("reactants unequal")
+        else:
+            print("reactants equal")
 
         assert (
             rdf_contents == self.reaction_container
         ), "change in data during file read/write"
 
         print("we all good")
+
+        assert rdf_contents.meta == self.reaction_container.meta, "unequal  metas"
+        assert rdf_contents.r
 
     def save_as_json(self):
         with open(self.filename, "w") as f:
