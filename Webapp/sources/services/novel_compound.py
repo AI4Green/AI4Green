@@ -195,7 +195,7 @@ class NewNovelCompound:
         self.validation_functions = [
             self.validate_name_is_allowed,
             self.validate_name_is_unique,
-            self.validate_cas,
+            self.validate_cas_is_allowed,
             self.validate_cas_is_unique,
             self.validate_hazards,
             self.validate_numerical_properties,
@@ -252,7 +252,7 @@ class NewNovelCompound:
             )
             self.validation = "failed"
 
-    def validate_cas(self):
+    def validate_cas_is_allowed(self):
         """
         Validates the CAS number from the request. Checks it fits the expected CAS pattern with a regular expression
         """
