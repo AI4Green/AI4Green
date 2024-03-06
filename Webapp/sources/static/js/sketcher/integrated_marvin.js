@@ -81,9 +81,10 @@ async function switchToMarvinSketcher() {
  * Switches back to Ketcher, disables further switching and hides the loading circle again
  */
 function abortMarvinSketcherCreation() {
-  // alert("Marvin JS is temporarily unavailable")
+  // runs when
+  alert("Marvin JS is temporarily unavailable");
   $("#ketcher-select").prop("checked", true);
-  // $("#marvin-select").prop("disabled", true)
+  $("#marvin-select").prop("disabled", true);
 }
 
 /**
@@ -134,10 +135,11 @@ function marvinExampleSmiles() {
 /**
  * Makes an image of the current reaction scheme and saves to a hidden HTML input
  */
-function exportMarvinImage() {
+async function exportMarvinImage() {
   let settings = { width: 600, height: 400 };
-  marvin.exportStructure("jpeg", settings).then(function (source) {
-    sessionStorage.setItem("reactionSchemeImage", source);
-    //$("#js-reaction-scheme-image").val(source);
+  let reactionSchemeImage;
+  await marvin.exportStructure("jpeg", settings).then(function (source) {
+    reactionSchemeImage = source;
   });
+  return reactionSchemeImage;
 }

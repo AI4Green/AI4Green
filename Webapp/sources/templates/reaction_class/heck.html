@@ -1,0 +1,96 @@
+<div class="div_before_table">
+    <br>
+    <h3>Heck Cross-coupling</h3>
+    <p> The Heck reaction is a type of transition metal-catalysed cross-coupling that forms a carbon-carbon bond between
+        an alkene and an aryl halide. These reactions are usually catalysed by palladium and the choice of ligand, base
+        and solvent can affect both productivity and selectivity.
+    </p>
+    <br>
+    <div style="text-align: center;">
+    <img alt="Heck Reaction Scheme" style="width: 80%" src="{{url_for('static', filename='img/solvent_PCA_reactions/heck.svg')}}">
+    </div>
+    <br><br>
+    In the presence of ligand, the rate-determining step of the reaction mechanism is the
+     <a href="https://doi.org/10.1021/jo0626010" target="_blank"> palladium insertion into the alkene bond</a>,<sup>1</sup>
+     which leads to a significant build-up of charge. Polar solvents that can stabilise this charge lead to an
+    <a href="https://doi.org/10.1021/sc5002287" target="_blank"> increase in the initial rate</a>,<sup>2</sup> which shows a dependence
+    on the dipolarity (Kamlet-Taft &pi;<sup>*</sup>) of the solvent. Conversely, protic solvents lead to a decrease in the initial rate.
+    <br><br>
+
+    A previous report by
+     <a href="https://doi.org/10.1002/adsc.200303141" target="_blank"> Burello <i>et al.</i></a><sup>3</sup>
+     employed PCA for the optimisation of the Heck reaction, and found that solvent polarity and basicity
+    were important for an effective description of solvent space. As such, descriptors that capture these properties were chosen for
+    this Heck PCA map.
+
+
+    <br><br>
+    <table class="table table-sm table-bordered">
+
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Measured Dipole Moment (DeBye)'>Dipole Moment</a>
+            </td>
+
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Measured Dielectric Constant'>Dielectric Constant</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hydrogen Bond Donor Ability'>Kamlet-Taft &alpha;</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hydrogen Bond Acceptor Ability'>Kamlet-Taft &beta;</a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Polarizability'>Kamlet-Taft &pi;<sup>*</sup></a>
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Dipolar Interactions'>Polarity <i>&delta;<sub>p</sub></i></a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a data-toggle="tooltip" data-placement="bottom" data-html="true" title='Hansen Solubility Parameter Describing Hydrogen Bonding'>Hydrogen Bonding <i>&delta;<sub>h</sub></i></a>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <h4>Experimental Data</h4>
+     A report by
+    <a href="https://doi.org/10.1039/D0RE00174K" target="_blank"> Sangon <i>et al.</i></a><sup>4</sup>
+    explored the use of greener solvents for the Heck reaction of iodobenzene with methylacrylate and styrene. The conversions of these reactions
+    in each solvent was averaged and this data can be viewed by selecting "Heck" in the Colour Change dropdown.
+    <div style="text-align: center;">
+    <img alt="Heck Experimental Reaction Scheme" style="width: 95%" src="{{url_for('static', filename='img/solvent_PCA_reactions/heck_experimental.svg')}}">
+    </div>
+    <br><br>
+
+    <h4>References</h4>
+    <p style="font-size: 11px">
+        1. Batsanov BS, Knowles JP, Whiting A. Mechanistic Studies on the Heck−Mizoroki Cross-Coupling Reaction of a
+        Hindered Vinylboronate Ester as a Key Approach to Developing a Highly Stereoselective Synthesis of a C1−C7
+        Z,Z,E-Triene Synthon for Viridenomycin. J. Org. Chem. 2007;72:2525-2532.
+        <a href="https://doi.org/10.1021/jo0626010" target="_blank">https://doi.org/10.1021/jo0626010</a>
+        <br>
+        2. Parker HL, Sherwood J, Hunt AJ, Clark JH. Cyclic Carbonates as Green Alternative Solvents for the Heck Reaction.
+        ACS Sustainable Chem. Eng. 2014;2:1739-1742
+        <a href="https://doi.org/10.1021/sc5002287" target="_blank">https://doi.org/10.1021/sc5002287</a>
+        <br>
+        3. Burello E, Rothenburg G. Optimal Heck Cross-Coupling Catalysis: A Pseudo-Pharmaceutical Approach.
+        Adv. Synth. Catal. 2003;345:1334-1340
+        <a href="https://doi.org/10.1002/adsc.200303141" target="_blank">https://doi.org/10.1002/adsc.200303141</a>
+        <br>
+        4. Sangon S, Supanchaiyamat M, Sherwood J, McElroy CR, Hunt AJ. Direct comparison of safer or sustainable
+        alternative dipolar aprotic solvents for use in carbon–carbon bond formation. React. Chem. Eng. 2020;5:1798-1804
+        <a href="https://doi.org/10.1039/D0RE00174K" target="_blank">https://doi.org/10.1039/D0RE00174K</a>.<br>
+
+    </p>
+
+</div>
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>

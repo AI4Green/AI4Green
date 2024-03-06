@@ -1,4 +1,8 @@
 <head>
+    <script src="https://unpkg.com/html2canvas@1.0.0-alpha.12/dist/npm/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{#    TODO - look at replacing with html3pdf when a CDN url is made available https://github.com/davidnbooth/html3pdf.js#}
+   <script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/pdf_summary.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/custom_colours.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/form_summary_table.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>
@@ -21,7 +25,21 @@
     </div>
     <p><b>Please fill in the highlighted boxes to proceed</b></p>
 </div>
+<label for="reaction-class"><b>Reaction Class:</b> </label>
+<select size="1" name="reactionClass" id="reaction-class">
+
+     {% for option in reaction_classes %}
+     {% if option == reaction_class %}
+        <option value="{{option}}" SELECTED>{{option}}</option>
+     {% else %}
+        <option value="{{option}}">{{option}}</option>
+    {% endif %}
+    {% endfor %}
+</select>
+
 <div style="overflow-x:auto;" class="table-responsive text-nowrap" id="reaction-table-div">
+    <br>
+
     <table class="table table-sm w-auto">
         <tr class="not-novel-compound-input">
             <th scope="col">&#8470;</th>
@@ -310,7 +328,7 @@
         placeholder="Name or CAS Number">
         </td>
         <td><button value="-x-" id="go-to-solvent-guide-x-" title="Open solvent guide in new tab" class="btn btn-outline-primary btn-primary btn-sm" onclick="goToSolventGuide(this.value)">Solvent Guide</button></td>
-        <td></td>
+        <td><button  value="-x-" id="go-to-solvent-surfer" title="Open solvent surfer in new tab" class="btn btn-outline-primary btn-primary btn-sm" onclick="goToSolventSurfer(this.value)">Solvent Surfer</button></td>
         <td></td>
         <td><input type="number" step="any" min="0" placeholder="-"
          id="js-solvent-rounded-concentration-x-"
@@ -471,4 +489,3 @@
     </div>
   </div>
 </div>
-

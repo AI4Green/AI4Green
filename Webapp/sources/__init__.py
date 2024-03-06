@@ -133,6 +133,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(solvents_bp)
 
+    from sources.blueprints.solvent_PCA import solvent_PCA_bp
+
+    app.register_blueprint(solvent_PCA_bp)
+
     from sources.blueprints.summary import summary_bp
 
     app.register_blueprint(summary_bp)

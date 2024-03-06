@@ -3,14 +3,73 @@ from datetime import datetime, timedelta
 from typing import Dict, List
 
 import pytz
+from flask import request
 from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
-from sources import models
+from sources import models, services
+from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
-from sources.services.ions import (
-    reaction_from_ionic_cx_smiles,
-    reaction_from_ionic_smiles,
-)
+
+
+def get_current_from_request() -> models.Reaction:
+    """
+    Gets the current reaction for a request from the frontend. Either using request.form or request.json
+    Returns:
+        The reaction which matches the details of the request
+    """
+    if request.form:
+        reaction = get_current_from_request_form()
+    elif request.json:
+        reaction = get_current_from_request_json()
+    return reaction
+
+
+def get_current_from_request_form() -> models.Reaction:
+    """
+    Gets the current reaction using the request.form variable
+    Returns:
+        Reaction that corresponds to data in request.form
+    """
+    reaction_id = str(request.form["reactionID"])
+    workgroup_name = str(request.form["workgroup"])
+    workbook_name = str(request.form["workbook"])
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
+    return (
+        db.session.query(models.Reaction)
+        .filter(models.Reaction.reaction_id == reaction_id)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook.id)
+        .join(models.WorkGroup)
+        .filter(models.WorkGroup.name == workgroup_name)
+        .first()
+    )
+
+
+def get_current_from_request_json() -> models.Reaction:
+    """
+    Gets the current reaction using request.json
+    Returns:
+        Reaction that corresponds to data in request.json
+    """
+    reaction_id = str(request.json["reactionID"])
+    workgroup_name = str(request.json["workgroup"])
+    workbook_name = str(request.json["workbook"])
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
+    return (
+        db.session.query(models.Reaction)
+        .filter(models.Reaction.reaction_id == reaction_id)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook.id)
+        .join(models.WorkGroup)
+        .filter(models.WorkGroup.name == workgroup_name)
+        .first()
+    )
 
 
 def list_recent() -> List[models.Reaction]:
@@ -114,9 +173,9 @@ def make_scheme_list(reaction_list: List[models.Reaction], size: str) -> List[st
             # we test to see if ions are present in which case further logic is needed
             # first we see if it is from marvin js and contains ions
             if len(reaction_smiles.split(" |")) > 1:
-                rxn = reaction_from_ionic_cx_smiles(reaction_smiles)
+                rxn = services.ions.reaction_from_ionic_cx_smiles(reaction_smiles)
             elif "+" in reaction_smiles or "-" in reaction_smiles:
-                rxn = reaction_from_ionic_smiles(reaction_smiles)
+                rxn = services.ions.reaction_from_ionic_smiles(reaction_smiles)
                 # reactions with no ions - make rxn object directly from string
             else:
                 rxn = AllChem.ReactionFromSmarts(reaction_smiles, useSmiles=True)

@@ -6,7 +6,6 @@ $(async function () {
   await sleep(1000);
   // sketcher changes when user clicks radio button
   await switchActiveEditor();
-  // setTimeout(switchActiveEditor, 500);
   $('input[name="sketcher-select"]').click(function () {
     switchActiveEditor();
   });
@@ -49,4 +48,26 @@ async function showSearchReactions(response) {
     $(`#image${idx1}`).append($("<div>").html(scheme));
   }
   document.getElementById("export-div").style.display = "none";
+}
+
+function updateSelectedWorkGroup() {
+  // updates the workbook+creator dropdowns after change to selected workgroup
+  let workgroup = $("#active-workgroup").val();
+  $.ajax({
+    url: "/updated_workgroup_dropdown",
+    type: "post",
+    datatype: "json",
+    data: { workgroup: workgroup },
+    success: function (response) {
+      // update dropdown with workbook options
+      let dropdownSelect = $("#active-workbook");
+      dropdownSelect.empty();
+      for (let workbook of response.workbooks) {
+        let option = document.createElement("option");
+        option.text = workbook;
+        option.value = workbook;
+        dropdownSelect.append(option);
+      }
+    },
+  });
 }

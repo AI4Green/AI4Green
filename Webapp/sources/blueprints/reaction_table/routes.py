@@ -4,7 +4,6 @@ GET request and renders the reaction table template
 """
 
 import re
-from datetime import datetime
 from typing import Dict, List, Tuple, Union
 from urllib.parse import quote
 from urllib.request import urlopen
@@ -22,7 +21,10 @@ from . import reaction_table_bp
 if not current_app.config["DEBUG"]:
     try:
         from STOUT import translate_forward
+
+        print("STOUT successfully imported")
     except Exception:
+        print("Failed to import STOUT")
         pass
 
 
@@ -170,6 +172,10 @@ def process():
     else:
         sol_rows = services.solvent.get_workbook_list(workbook)
 
+    r_class, r_classes = services.reaction_classification.classify_reaction(
+        reactants_smiles_list, products_smiles_list
+    )
+
     # Now it renders the reaction table template
     reaction_table = render_template(
         "_reaction_table.html",
@@ -192,6 +198,8 @@ def process():
         summary_table_data="",
         sol_rows=sol_rows,
         reaction=reaction,
+        reaction_class=r_class,
+        reaction_classes=r_classes,
     )
     return jsonify({"reactionTable": reaction_table})
 
@@ -298,20 +306,27 @@ def save_reaction_note():
     return jsonify({"reaction_note": schema.dump(new_addendum)})
 
 
-def iupac_convert(ids):
-    print("Running CIR")
+def iupac_convert(smiles: str) -> str:
+    """
+    Tries to make the iupac name for a compound not in the database.
+    First we try the CIR service. Second we try the STOUT-pypi python package
+    """
+    # print("Running CIR")
     try:
         url = (
-            "http://cactus.nci.nih.gov/chemical/structure/" + quote(ids) + "/iupac_name"
+            "http://cactus.nci.nih.gov/chemical/structure/"
+            + quote(smiles)
+            + "/iupac_name"
         )  # https://opsin.ch.cam.ac.uk/opsin/cyclopropane.png
-        ans = urlopen(url, [5]).read().decode("utf8")
-        return ans
+        iupac_name = urlopen(url, [5]).read().decode("utf8")
+        return iupac_name
     except Exception:
         print("failed CIR")
     print("trying STOUT")
     try:
-        ans = translate_forward(ids)
-        return ans
+        iupac_name = translate_forward(smiles)
+        if iupac_name != "Could not generate IUPAC name for SMILES provided.":
+            return iupac_name
     except Exception:
         print("STOUT failed")
     return ""

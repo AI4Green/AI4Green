@@ -493,7 +493,7 @@ function addNewReagent() {
 
 async function removeReagent(removedReagentNumber) {
   // called from remove reagent button
-  removedReagentNumber = getNum(removedReagentNumber);
+  removedReagentNumber = Number(removedReagentNumber);
   let reactantNumber = getNum("#js-number-of-reactants");
   let reagentNumber = getNum("#js-number-of-reagents");
   // remove the reagent table row from the html
@@ -605,7 +605,7 @@ function datalist_initiate(solventInputID, solventDatalistID, solventNumber) {
       document.getElementById(solventInputID).value = option.value;
       document.getElementById(solventDatalistID).style.display = "none";
       document.getElementById(solventInputID).style.borderRadius = "5px";
-      postSolventData(option.value, solventNumber);
+      postSolventData(option.value, solventNumber, true);
     };
   }
   // hide the solvent dropdown if clicking on non-dropdown/input element
@@ -809,7 +809,7 @@ function autofillSolventData(x) {
     }
   });
 }
-function postSolventData(solventName, x) {
+function postSolventData(solventName, x, reload = false) {
   return new Promise(function (resolve) {
     let workbook = getVal($("#js-active-workbook"));
     let workgroup = getVal($("#js-active-workgroup"));
@@ -827,6 +827,9 @@ function postSolventData(solventName, x) {
         if (response === undefined) {
           resolve("undefined");
           return;
+        }
+        if (!reload) {
+            checkPCASolvents(solventName, x);
         }
         let y = response.num;
         let solvent = response.solvent;
@@ -939,6 +942,54 @@ function goToSolventGuide(sol_x) {
     window.open("/solvent_guide/" + solventName, "_blank").focus();
   } else {
     window.open("/solvent_guide", "_blank").focus();
+  }
+}
+
+function goToSolventSurfer(sol_x) {
+  let reactionClass = $("#reaction-class").val();
+  let solventName = $("#js-solvent" + sol_x).val();
+
+  localStorage.setItem("solventName", solventName);
+  localStorage.setItem("reactionClass", reactionClass);
+
+  window.open("/solvent_PCA");
+}
+
+async function checkPCASolvents(solventName, x) {
+  let reactionClass = $("#reaction-class").val();
+  let response = await fetch("/from_reaction_table/check_solvents", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      class_selected: reactionClass,
+      name_selected: solventName,
+    }),
+  });
+  let PCASolvents = await response.json();
+  let btn = document.getElementById("go-to-solvent-surfer");
+
+  if (!PCASolvents.solvents.includes(solventName.toUpperCase())) {
+    btn.disabled = true;
+    btn.title = "Selected solvent is not included in the solvent surfer";
+  } else {
+    btn.disabled = false;
+    btn.title = "Open solvent surfer in new tab";
+
+    if (PCASolvents.substitutions) {
+      if (
+        confirm(
+          "Suggested sustainable solvent switch:\n\n" +
+            solventName +
+            " \t " +
+            PCASolvents.alternatives +
+            "\n\nProceed to Solvent Surfer?",
+        ) == true
+      ) {
+        goToSolventSurfer(x);
+      }
+    }
   }
 }
 
