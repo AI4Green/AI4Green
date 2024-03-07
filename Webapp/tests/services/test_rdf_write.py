@@ -1,5 +1,6 @@
 import os
 import pickle
+import tempfile
 
 import chython
 import pytest
@@ -30,16 +31,21 @@ def test_export_reaction_as_rdf(app: Flask, mocker: pytest_mock.MockerFixture):
         "rb",
     ) as f:
         serialized_data = f.read()
-
+    # mock the database responses
     make_mocks(mocker)
 
     reaction = pickle.loads(serialized_data)
     with app.app_context():
-        file_path = os.path.join(app.config["MAIL_SAVE_DIR"], "test_rdf")
+        # making a temporary directory to save the output file
+        local_path = tempfile.gettempdir()
+        file_path = os.path.join(local_path, "test_rdf")
+        # take a reaction pickle and confirm the function exports correctly.
         test_rdf = services.data_export.ReactionDataFile(reaction, file_path)
-        # includes validation to ensure reactants, meta, reagents, products are equal before and after saving
+
+        # save and load the file and confirm no data has been lost
         rdf = test_rdf.reaction_container
         test_rdf.save_as_rdf()
+
         with chython.files.RDFRead(file_path) as f:
             rdf_contents = next(f)
         test_rdf.literal_eval_metadata(rdf_contents)
