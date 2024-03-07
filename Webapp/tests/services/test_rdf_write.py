@@ -3,7 +3,6 @@ import pickle
 import tempfile
 
 import chython
-import pytest
 import pytest_mock
 from flask import Flask
 from sources import services
