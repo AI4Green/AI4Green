@@ -65,7 +65,8 @@ class TestConfig(BaseConfig):
     LIVESERVER_PORT = 8943
     LOGIN_DISABLED = False
     SQLALCHEMY_DATABASE_URI = os.getenv(
-        "TEST_DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/ai4green"
+        "TEST_DATABASE_URL",
+        "postgresql://postgres:postgres@localhost:5433/ai4greentest",
     )
     SQLALCHEMY_BINDS = {
         "db": SQLALCHEMY_DATABASE_URI,
