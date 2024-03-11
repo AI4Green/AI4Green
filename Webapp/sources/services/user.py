@@ -12,3 +12,17 @@ def list_all() -> List[models.User]:
          List of all users
     """
     return db.session.query(models.User).all()
+
+
+def add(
+    username: str, email: str, fullname: str, password_data: str, person: models.Person
+):
+    user = models.User(
+        username=username,
+        email=email,
+        fullname=fullname,
+        Person=person,
+        password_hash=models.User.set_password(password_data),
+    )
+    db.session.add(user)
+    db.session.commit()

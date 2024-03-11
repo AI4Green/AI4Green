@@ -1,0 +1,236 @@
+import json
+from datetime import datetime
+
+import pytz
+from compound_database import Compound_database_extraction as CDE
+from sources import models, services
+from sources.extensions import db
+
+
+def insert_test_data():
+    time_of_creation = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
+    # make a person and a user
+    CDE.seed_role_types()
+    p1 = models.Person()
+    # Capitalize unique fields for consistency
+    db.session.add(p1)
+
+    services.user.add(
+        "test_username", "test_user@test.com", "Gloria Testeban", "test_pw", p1
+    )
+    db.session.commit()
+
+    # Make an institution, workgroup and workbook
+    institution1 = models.Institution(
+        name="Test University", time_of_creation=time_of_creation
+    )
+    db.session.add(institution1)
+    db.session.commit()
+
+    workgroup = models.WorkGroup(
+        name="Test-Workgroup", institution=institution1.id, principal_investigator=[p1]
+    )
+    db.session.add(workgroup)
+    db.session.commit()
+
+    workbook = models.WorkBook(
+        name="Test-Workbook", group=workgroup.id, users=[p1], abbreviation="TW1"
+    )
+    db.session.add(workbook)
+    db.session.commit()
+
+    # add some compounds to the database
+    compound1 = models.Compound(
+        name="Testoic Acid",
+        cas="123-45-5",
+        cid=-10,
+        hphrase="H999-H998",
+        molec_weight=123,
+        smiles="C",
+    )
+    compound2 = models.Compound(
+        name="Testamine",
+        cas="123-45-7",
+        cid=-2,
+        hphrase="H789",
+        molec_weight=101,
+        smiles="CC",
+    )
+    compound3 = models.Compound(
+        name="Testide",
+        cas="123-45-8",
+        cid=-3,
+        hphrase="H123",
+        molec_weight=150,
+        smiles="CCC",
+    )
+    compound4 = models.Compound(
+        name="Testol",
+        cas="123-45-9",
+        cid=-4,
+        hphrase="H456",
+        molec_weight=175,
+        smiles="CCCC",
+    )
+    compound5 = models.Compound(
+        name="Testanol",
+        cas="123-46-0",
+        cid=-5,
+        hphrase="H789",
+        molec_weight=200,
+        smiles="CCCCC",
+    )
+    compound6 = models.Compound(
+        name="Testproductine",
+        cas="123-46-1",
+        cid=-6,
+        hphrase="H999",
+        molec_weight=225,
+        smiles="CP",
+    )
+    compound7 = models.Compound(
+        name="Testproductone",
+        cas="123-46-2",
+        cid=-7,
+        hphrase="Unknown",
+        molec_weight=255,
+        smiles="CCP",
+    )
+    for compound in [
+        compound1,
+        compound2,
+        compound3,
+        compound4,
+        compound5,
+        compound6,
+        compound7,
+    ]:
+        db.session.add(compound)
+
+    # take compound5 and add it to solvent table
+    solvent = models.Solvent(
+        name="Testanol",
+        flag=2,
+        hazard="H789",
+        compound=[compound5],
+        time_of_creation=time_of_creation,
+    )
+    db.session.add(solvent)
+
+    # data for saving a reaction
+    reaction_table = json.dumps(reaction_table_json_contents())
+
+    summary_table = json.dumps(summary_json_contents())
+
+    reaction2 = models.Reaction(
+        creator=p1.id,
+        time_of_creation=time_of_creation,
+        reaction_id="TW1-001",
+        name="a test reaction",
+        description="testing a reaction involving compounds from the test family",
+        reactants=["C", "CC"],
+        products=["CP", "CPP"],
+        reagents=["CCC", "CCCCC"],
+        solvent=[-5],
+        reaction_smiles="C.CC>>CP.CPP",
+        workbooks=workbook.id,
+        reaction_table_data=reaction_table,
+        summary_table_data=summary_table,
+        complete="not complete",
+        status="active",
+    )
+    db.session.add(reaction2)
+    db.session.commit()
+    # add a novel compound
+    inchi_1 = "InChI=1S/C21H15NO/c23-21(15-8-2-1-3-9-15)22-20-18-12-6-4-10-16(18)14-17-11-5-7-13-19(17)20/h1-14H,(H,22,23)"
+    novel_reactant1 = models.NovelCompound(
+        name="Starting material",
+        cas="",
+        workbook=workbook.id,
+        molec_formula="C21H15NO",
+        hphrase="Unknown",
+        density=None,
+        concentration=None,
+        molec_weight=297.12,
+        smiles="O=C(NC1=C2C=CC=CC2=CC2=C1C=CC=C2)C1=CC=CC=C1",
+        inchi=inchi_1,
+        inchikey="MRGYEWYAVKQUEA-UHFFFAOYSA-N",
+    )
+    db.session.add(novel_reactant1)
+
+    db.session.commit()
+    print("Database populated with test data")
+
+
+def reaction_table_json_contents():
+    return {
+        "reaction_smiles": "C.CC>>CP.CCP",
+        "reaction_name": "nitro reduction2",
+        "reaction_description": "iron catalysed nitro reduction",
+        # reactant data
+        "reactant_ids": [-1, -2],
+        "reactant_masses": ["123", "101"],
+        "reactant_masses_raw": ["123", "101"],
+        "reactant_amounts": ["1.00", "10.0"],
+        "reactant_amounts_raw": ["1.00", "10.0"],
+        "reactant_volumes": ["0.10", "0.02"],
+        "reactant_densities": ["1.204", "0.995"],
+        "reactant_volumes_raw": ["0.10", "0.02"],
+        "reactant_equivalents": ["1", "10"],
+        "reactant_concentrations": ["-", "-"],
+        "reactant_physical_forms": ["2", "6"],
+        "limiting_reactant_table_number": 1,
+        "reagent_ids": [-3, -4],
+        "reagent_names": ["Testide", "Testol"],
+        "reagent_amounts": ["0.20", "2.60"],
+        "reagent_amounts_raw": ["0.20", "2.60"],
+        "reagent_equivalents": ["0.2", "2.6"],
+        "reagent_molecular_weights": ["150", "175"],
+        "reagent_densities": ["", "0.703"],
+        "reagent_concentrations": ["", ""],
+        "reagent_masses": ["3.21", "297"],
+        "reagent_masses_raw": ["3.2054", "296.706"],
+        "reagent_volumes": ["", "0.42"],
+        "reagent_volumes_raw": ["", "0.422475"],
+        "reagent_physical_forms": ["1", "1"],
+        "reagent_hazards": ["H220", "H225-H302-H304-H312-H315-H319-H336-H400-H410"],
+        "solvent_names": ["Testanol"],
+        "solvent_concentrations": ["0.50", "1.00"],
+        "solvent_ids": [-5],
+        "solvent_volumes": ["2", "1"],
+        "solvent_physical_forms": ["2", "6"],
+        "solvent_hazards": ["H225-H302-H319-H371", "H225-H302-H319-H335-H351"],
+        "product_ids": [-6, -7],
+        "product_masses": ["93.0", "18.0"],
+        "product_masses_raw": ["93.0", "18.0"],
+        "product_amounts": ["1.00", "1.00"],
+        "product_amounts_raw": ["1.00", "1.00"],
+        "product_mass_units": "g",
+        "product_physical_forms": ["7", "6"],
+        "main_product_table_number": 7,
+        "main_product": 1,
+        "amount_units": "mmol",
+        "mass_units": "mg",
+        "volume_units": "mL",
+        "solvent_volume_units": "mL",
+        "product_amount_units": "mmol",
+    }
+
+
+def summary_json_contents():
+    return {
+        "real_product_mass": "90",
+        "unreacted_reactant_mass": "2",
+        "reaction_temperature": "70",
+        "element_sustainability": "3",
+        "batch_flow": "Batch",
+        "isolation_method": "2",
+        "catalyst_used": "Catalyst or enzyme",
+        "catalyst_recovered": "Not recovered catalyst",
+        "radio_buttons": ["hplc", "massSpec"],
+        "custom_protocol1": "",
+        "custom_protocol2": "",
+        "other_hazards_text": "Weigh out reactants in fumehood",
+        "researcher": "",
+        "supervisor": "",
+    }
