@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pytz
 from compound_database import Compound_database_extraction as CDE
+from rdkit import Chem
 from sources import models, services
 from sources.extensions import db
 
@@ -105,6 +106,9 @@ def insert_test_data():
         compound6,
         compound7,
     ]:
+        # add inchi using SMILES then add to db
+        mol = Chem.MolFromSmiles(compound.smiles)
+        compound.inchi = Chem.MolToInchi(mol)
         db.session.add(compound)
 
     # take compound5 and add it to solvent table
