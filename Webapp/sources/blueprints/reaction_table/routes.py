@@ -17,7 +17,6 @@ from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
 from sources.dto import ReactionNoteSchema
 
 from . import reaction_table_bp
-from sources import services
 
 if not current_app.config["DEBUG"]:
     try:
@@ -64,7 +63,7 @@ def process():
         "name_list": [],
         "hazard_list": [],
         "density_list": [],
-        "primary_key_list": []
+        "primary_key_list": [],
     }
     product_data = {
         "molecular_weight_list": [],
@@ -72,7 +71,7 @@ def process():
         "hazard_list": [],
         "density_list": [],
         "primary_key_list": [],
-        "table_numbers": []
+        "table_numbers": [],
     }
 
     # Find reactants in database then add data to the dictionary
@@ -118,7 +117,7 @@ def process():
     number_of_reactants = len(reactant_data["name_list"])
 
     # Find products in database then add data to the dictionary
-    for idx, product_smiles in enumerate(products_smiles_list):
+    for idx, product_smiles in enumerate(products_smiles_list, 1):
         novel_compound = False  # false but change later if true
         mol = Chem.MolFromSmiles(product_smiles)
         if mol is None:
@@ -170,7 +169,9 @@ def process():
     else:
         sol_rows = services.solvent.get_workbook_list(workbook)
 
-    r_class, r_classes = services.reaction_classification.classify_reaction(reactants_smiles_list, products_smiles_list)
+    r_class, r_classes = services.reaction_classification.classify_reaction(
+        reactants_smiles_list, products_smiles_list
+    )
 
     # Now it renders the reaction table template
     reaction_table = render_template(
