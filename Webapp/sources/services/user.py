@@ -17,12 +17,10 @@ def list_all() -> List[models.User]:
 def add(
     username: str, email: str, fullname: str, password_data: str, person: models.Person
 ):
-    user = models.User(
+    models.User.create(
         username=username,
         email=email,
         fullname=fullname,
         Person=person,
         password_hash=models.User.set_password(password_data),
     )
-    db.session.add(user)
-    db.session.commit()

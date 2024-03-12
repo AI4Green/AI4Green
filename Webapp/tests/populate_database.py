@@ -22,30 +22,24 @@ def insert_test_data():
     db.session.commit()
 
     # Make an institution, workgroup and workbook
-    institution1 = models.Institution(
+    institution1 = models.Institution.create(
         name="Test University", time_of_creation=time_of_creation
     )
-    db.session.add(institution1)
-    db.session.commit()
 
-    workgroup = models.WorkGroup(
+    workgroup = models.WorkGroup.create(
         name="Test-Workgroup", institution=institution1.id, principal_investigator=[p1]
     )
-    db.session.add(workgroup)
-    db.session.commit()
 
-    workbook = models.WorkBook(
+    workbook = models.WorkBook.create(
         name="Test-Workbook", group=workgroup.id, users=[p1], abbreviation="TW1"
     )
-    db.session.add(workbook)
-    db.session.commit()
 
     # add some compounds to the database
     compound1 = models.Compound(
         name="Testoic Acid",
         cas="123-45-5",
         cid=-10,
-        hphrase="H999-H998",
+        hphrase="H900-H901",
         molec_weight=123,
         smiles="C",
     )
@@ -53,7 +47,7 @@ def insert_test_data():
         name="Testamine",
         cas="123-45-7",
         cid=-2,
-        hphrase="H789",
+        hphrase="H900",
         molec_weight=101,
         smiles="CC",
     )
@@ -61,7 +55,7 @@ def insert_test_data():
         name="Testide",
         cas="123-45-8",
         cid=-3,
-        hphrase="H123",
+        hphrase="H901",
         molec_weight=150,
         smiles="CCC",
     )
@@ -69,7 +63,7 @@ def insert_test_data():
         name="Testol",
         cas="123-45-9",
         cid=-4,
-        hphrase="H456",
+        hphrase="H901",
         molec_weight=175,
         smiles="CCCC",
     )
@@ -77,7 +71,7 @@ def insert_test_data():
         name="Testanol",
         cas="123-46-0",
         cid=-5,
-        hphrase="H789",
+        hphrase="H900",
         molec_weight=200,
         smiles="CCCCC",
     )
@@ -85,7 +79,7 @@ def insert_test_data():
         name="Testproductine",
         cas="123-46-1",
         cid=-6,
-        hphrase="H999",
+        hphrase="H900",
         molec_weight=225,
         smiles="CP",
     )
@@ -112,21 +106,23 @@ def insert_test_data():
         db.session.add(compound)
 
     # take compound5 and add it to solvent table
-    solvent = models.Solvent(
+    models.Solvent.create(
         name="Testanol",
         flag=2,
-        hazard="H789",
+        hazard="H900",
         compound=[compound5],
         time_of_creation=time_of_creation,
     )
-    db.session.add(solvent)
+
+    models.HazardCode.create(code="H900", phrase="Caution testing", category="")
+    models.HazardCode.create(code="H901", phrase="May cause tests", category="")
 
     # data for saving a reaction
     reaction_table = json.dumps(reaction_table_json_contents())
 
     summary_table = json.dumps(summary_json_contents())
 
-    reaction2 = models.Reaction(
+    models.Reaction.create(
         creator=p1.id,
         time_of_creation=time_of_creation,
         reaction_id="TW1-001",
@@ -143,11 +139,10 @@ def insert_test_data():
         complete="not complete",
         status="active",
     )
-    db.session.add(reaction2)
-    db.session.commit()
+
     # add a novel compound
     inchi_1 = "InChI=1S/C21H15NO/c23-21(15-8-2-1-3-9-15)22-20-18-12-6-4-10-16(18)14-17-11-5-7-13-19(17)20/h1-14H,(H,22,23)"
-    novel_reactant1 = models.NovelCompound(
+    models.NovelCompound.create(
         name="Starting material",
         cas="",
         workbook=workbook.id,
@@ -160,17 +155,46 @@ def insert_test_data():
         inchi=inchi_1,
         inchikey="MRGYEWYAVKQUEA-UHFFFAOYSA-N",
     )
-    db.session.add(novel_reactant1)
 
-    db.session.commit()
     print("Database populated with test data")
+
+
+def seed_limited_element_sustainability_data():
+    models.Element.create(
+        commit=False,
+        name="Carbon",
+        symbol="C",
+        remaining_supply=500,
+        colour="lime",
+    ),
+    models.Element.create(
+        commit=False,
+        name="Nitrogen",
+        symbol="N",
+        remaining_supply=500,
+        colour="lime",
+    ),
+    models.Element.create(
+        commit=False,
+        name="Oxygen",
+        symbol="O",
+        remaining_supply=500,
+        colour="lime",
+    ),
+    models.Element.create(
+        commit=False,
+        name="Phosphorus",
+        symbol="P",
+        remaining_supply=500,
+        colour="lime",
+    )
 
 
 def reaction_table_json_contents():
     return {
         "reaction_smiles": "C.CC>>CP.CCP",
-        "reaction_name": "nitro reduction2",
-        "reaction_description": "iron catalysed nitro reduction",
+        "reaction_name": "test reaction name",
+        "reaction_description": "testing routes and services",
         # reactant data
         "reactant_ids": [-1, -2],
         "reactant_masses": ["123", "101"],

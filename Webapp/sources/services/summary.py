@@ -7,6 +7,7 @@ from sources import auxiliary, services
 def get_request_data_from_keys(keys: List[str]) -> Dict:
     component_dict = {}
     for key in keys:
+        print(key)
         snake_case_key = services.utils.camelCase_to_snake_case(key)
         component_dict[snake_case_key] = auxiliary.get_data(key)
     return component_dict
