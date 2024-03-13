@@ -1,6 +1,7 @@
 import io
 import os
 
+import pytest
 import pytest_mock
 from flask.testing import FlaskClient
 from tests.utils import login
@@ -8,6 +9,7 @@ from tests.utils import login
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Azure blob storage is not setup in CI")
 def test_reaction_file_attachment_upload_successful(
     client: FlaskClient, mocker: pytest_mock.MockerFixture
 ):
