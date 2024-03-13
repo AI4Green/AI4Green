@@ -10,6 +10,15 @@ services:
       POSTGRES_DB: ai4green
       POSTGRES_PASSWORD: postgres
 
+  testdb:
+    image: postgres:13
+    restart: always
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_DB: ai4greentest
+      POSTGRES_PASSWORD: postgres
+
   azurite:
       image: mcr.microsoft.com/azure-storage/azurite
       restart: always

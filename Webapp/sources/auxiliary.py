@@ -47,18 +47,6 @@ def smiles_symbols(
     return compound.replace("minus", "-").replace("plus", "+").replace("sharp", "#")
 
 
-def metric_flag(metric: int) -> str:
-    """
-    Colour flags for metrics
-    """
-    if metric > 90:
-        return "hazard-acceptable"
-    elif metric < 70:
-        return "hazard-hazardous"
-    else:
-        return "hazard-warning"
-
-
 def get_data(field) -> List[str]:
     """
     Get a list of compound data from a semicolon delimited string sent from the frontend

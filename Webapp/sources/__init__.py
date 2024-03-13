@@ -93,6 +93,7 @@ def register_cli(app: Flask) -> None:
     from sources.commands import commands
 
     app.cli.add_command(commands.drop_db)
+    app.cli.add_command(commands.create_db)
     app.cli.add_command(commands.seed_db)
     app.cli.add_command(commands.seed_users)
     app.cli.add_command(commands.download_pubchem)

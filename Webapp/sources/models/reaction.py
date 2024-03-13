@@ -1,4 +1,5 @@
 from sources.extensions import db
+
 from .base import Model
 
 metadata = db.Model.metadata
@@ -27,10 +28,7 @@ class Reaction(Model):
         db.UniqueConstraint("workbooks", "reaction_id"),
     )
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
+    id = db.Column(db.Integer, primary_key=True)
     reaction_id = db.Column(db.Text, nullable=False)
     name = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False, default="")
@@ -45,10 +43,12 @@ class Reaction(Model):
     workbooks = db.Column(
         db.ForeignKey("WorkBook.id", ondelete="CASCADE"), nullable=False
     )
-    reactants = db.Column(db.ARRAY(db.Text()), nullable=False, default="{}")
-    products = db.Column(db.ARRAY(db.Text()), nullable=False, default="{}")
-    reagents = db.Column(db.ARRAY(db.Text()), nullable=False, default="{}")
-    solvent = db.Column(db.ARRAY(db.Text()), nullable=False, default="{}")
+    reactants = db.Column(db.ARRAY(db.Text()), nullable=False, default="{}")  # smiles
+    products = db.Column(db.ARRAY(db.Text()), nullable=False, default="{}")  # smiles
+    reagents = db.Column(db.ARRAY(db.Text()), nullable=False, default="{}")  # smiles
+    solvent = db.Column(
+        db.ARRAY(db.Text()), nullable=False, default="{}"
+    )  # primary keys
     reaction_table_data = db.Column(db.JSON, nullable=False)
     summary_table_data = db.Column(db.JSON, nullable=False)
     reaction_smiles = db.Column(db.Text, nullable=False, default="")

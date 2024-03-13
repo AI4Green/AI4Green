@@ -195,6 +195,8 @@ function postReactionData(complete = "not complete") {
     productHazards,
     productPhysicalFormsText,
     massEfficiency,
+    conversion,
+    selectivity,
     toExport,
   } = getFieldData();
   let summary_to_print_el = document.getElementById("section-to-print");
@@ -289,6 +291,8 @@ function postReactionData(complete = "not complete") {
       productPhysicalFormsText: productPhysicalFormsText,
       summary_to_print: summary_to_print,
       massEfficiency: massEfficiency,
+      conversion: conversion,
+      selectivity: selectivity,
       toExport: JSON.stringify(toExport),
     },
     dataType: "json",
@@ -581,6 +585,8 @@ function getFieldData() {
     summaryTableData,
     "isolation_method",
   );
+  let conversion = summaryInput("#js-conversion", "");
+  let selectivity = summaryInput("#js-selectivity", "");
   let catalystUsed = summaryInput("#js-catalyst", "-select-");
   let catalystRecovered = summaryInput("#js-recovery", "-select-");
   let otherHazardTextArea = summaryInput("#other-risks-textbox", "");
@@ -750,6 +756,8 @@ function getFieldData() {
     productHazards: productHazards,
     productPhysicalFormsText: productPhysicalFormsText,
     massEfficiency: mass_efficiency,
+    conversion: conversion,
+    selectivity: selectivity,
     toExport: toExport,
   };
 }

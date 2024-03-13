@@ -29,6 +29,16 @@ def drop_db() -> None:
     click.echo("Dropped the database.")
 
 
+@click.command("create-db")
+@with_appcontext
+def create_db() -> None:
+    """
+    Create your database tables.
+    """
+    db.create_all()
+    click.echo("Created the database.")
+
+
 @click.command("seed-db")
 @with_appcontext
 def seed_db() -> None:
