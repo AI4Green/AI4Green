@@ -36,7 +36,7 @@ def test_solvent_chem21(client: FlaskClient):
     expected_values = {
         "alert_message": "",
         "flag": "hazard-hazardous",
-        "hazards": "H789",
+        "hazards": "H900",
         "num": "1",
         "primary_key": [5],
         "new_solvent": False,

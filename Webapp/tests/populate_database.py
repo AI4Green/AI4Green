@@ -87,7 +87,7 @@ def insert_test_data():
         name="Testproductone",
         cas="123-46-2",
         cid=-7,
-        hphrase="Unknown",
+        hphrase="H900",
         molec_weight=255,
         smiles="CCP",
     )
@@ -155,34 +155,31 @@ def insert_test_data():
         inchi=inchi_1,
         inchikey="MRGYEWYAVKQUEA-UHFFFAOYSA-N",
     )
+    seed_limited_element_sustainability_data()
 
     print("Database populated with test data")
 
 
 def seed_limited_element_sustainability_data():
     models.Element.create(
-        commit=False,
         name="Carbon",
         symbol="C",
         remaining_supply=500,
         colour="lime",
     ),
     models.Element.create(
-        commit=False,
         name="Nitrogen",
         symbol="N",
         remaining_supply=500,
         colour="lime",
     ),
     models.Element.create(
-        commit=False,
         name="Oxygen",
         symbol="O",
         remaining_supply=500,
         colour="lime",
     ),
     models.Element.create(
-        commit=False,
         name="Phosphorus",
         symbol="P",
         remaining_supply=500,
