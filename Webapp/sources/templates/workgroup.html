@@ -71,11 +71,12 @@
                 </div>
                 <br>
                 <div id="export-div" style="display: block;">
-                    <h3>Export Reaction Data</h3>
-                    <button id="export-csv" class="btn btn-primary" onclick="getcsv()">Export as CSV</button>
-                    <button id="export-pdf" class="btn btn-primary" onclick="getpdf()">Export to Print/PDF</button>
-                    <br><br>
-                    <p>Please note that not all data will be exported for reactions last updated before version 1.5.</p>
+                    <a id="export-data-link" class="btn btn-primary" href="{{ url_for('export_data.export_data_home') }}">Export Data</a>
+{#                    <h3>Export Reaction Data</h3>#}
+{#                    <button id="export-csv" class="btn btn-primary" onclick="getcsv()">Export as CSV</button>#}
+{#                    <button id="export-pdf" class="btn btn-primary" onclick="getpdf()">Export to Print/PDF</button>#}
+{#                    <br><br>#}
+{#                    <p>Please note that not all data will be exported for reactions last updated before version 1.5.</p>#}
                 </div>
             </div>
         </div>

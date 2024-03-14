@@ -38,7 +38,9 @@ def test_export_reaction_as_rdf(app: Flask, mocker: pytest_mock.MockerFixture):
         local_path = tempfile.gettempdir()
         file_path = os.path.join(local_path, "test_rdf")
         # take a reaction pickle and confirm the function exports correctly.
-        test_rdf = services.data_export.ReactionDataFile(reaction, file_path)
+        test_rdf = services.data_export.reaction_data_file.ReactionDataFile(
+            reaction, file_path
+        )
 
         # save and load the file and confirm no data has been lost
         rdf = test_rdf.reaction_container

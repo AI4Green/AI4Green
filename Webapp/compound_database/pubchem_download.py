@@ -92,7 +92,7 @@ def find_database_updates() -> List[str]:
     for link in list_of_links:
         with contextlib.suppress(ValueError):
             date_time_obj = datetime.strptime(link[:-1], "%Y-%m-%d")
-            if date_last_obj <= date_time_obj:
+            if date_last_obj == "Unknown date" or date_last_obj <= date_time_obj:
                 refined_list_of_links.append(link)
     print(f"Updates to apply: {refined_list_of_links}")
     return refined_list_of_links

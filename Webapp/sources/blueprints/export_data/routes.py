@@ -1,24 +1,21 @@
 import ast
 import json
-import time
-from datetime import datetime
-from typing import Optional
 
 import pandas as pd
-import pytz
-from flask import Response, flash, redirect, render_template, request, url_for
+from flask import Response, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from sources import models, services
 from sources.auxiliary import (
     get_notification_number,
     get_workgroups,
     security_member_workgroup_workbook,
+    security_pi_workgroup,
 )
 from sources.dto import ReactionSchema
 from sources.extensions import db
+from sources.services.data_export.ro_crate import ELNFile
 
 from . import export_data_bp
-from .ro_crate import DataExport, ELNFile
 
 
 # ### structure - 1 route per format
@@ -28,10 +25,22 @@ def export_data_home():
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
-        "export_data.html",
+        "data_export.html",
         workgroups=workgroups,
         notification_number=notification_number,
     )
+
+
+@export_data_bp.route("/export_permission", methods=["GET", "POST"])
+@login_required
+def export_permission():
+    """Checks if the user has permission to export the selected workbook"""
+    if security_pi_workgroup(request.json["workgroup"]):
+        return jsonify({"permission": "user has export permission for this workbook"})
+    else:
+        return jsonify(
+            {"permission": "user does not have export permission for this workbook"}
+        )
 
 
 @export_data_bp.route("/export_data_eln_file", methods=["GET", "POST"])

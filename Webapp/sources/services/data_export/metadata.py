@@ -1,106 +1,9 @@
-import ast
 import json
 from typing import Dict, List, Optional
 
-import chython.files
 from sources import models, services
 
-
-class ReactionDataFile:
-    non_string_types_inside_meta = [
-        "reagents",
-        "reactants",
-        "solvents",
-        "products",
-        "standard_protocols_used",
-        "file_attachment_names",
-        "addenda",
-        "solvent_sustainability",
-        "sustainability_data",
-    ]
-
-    def __init__(self, db_reaction: models.Reaction, filename: str):
-        """
-        Filename should not include extension.
-        """
-        self.db_reaction = db_reaction
-        self.reaction_container = self.make_reaction_container()
-        self.metadata = ReactionMetaData(db_reaction).get_dict()
-        self.filename = filename
-        if self.reaction_container:
-            self.reaction_container.meta.update(self.metadata)
-
-    def make_reaction_container(self):
-        """
-        Makes a reaction container by using the SMILES obtained from the db reaction object.
-        Full reaction SMILES including reactants, agents (aka reagents and solvents), and products
-        """
-        reaction_smiles = self.make_reaction_smiles()
-        # return None if we cannot make a reaction_container from smiles - likely to be due to no smiles present.
-        try:
-            return chython.files.smiles(reaction_smiles)
-        except ValueError:
-            return None
-
-    def make_reaction_smiles(self) -> str:
-        """
-        Makes a reaction smiles in format reactant1.reactants2>reagents.solvents>products from a db reaction object
-
-        Returns:
-            the reaction smiles string.
-        """
-        reactant_smiles = remove_default_data(self.db_reaction.reactants)
-        reagent_smiles = remove_default_data(self.db_reaction.reagents)
-        solvent_smiles = services.all_compounds.get_smiles_list(
-            self.db_reaction.solvent
-        )
-        product_smiles = remove_default_data(self.db_reaction.products)
-        reaction_smiles = (
-            ".".join(reactant_smiles)
-            + ">"
-            + ".".join(reagent_smiles)
-            + ".".join(solvent_smiles)
-            + ">"
-            + ".".join(product_smiles)
-        )
-        return reaction_smiles
-
-    def save(self):
-        """Calls the appropriate method to save the data. Can't use .RDF without a reaction_container object"""
-        if self.reaction_container:
-            self.filename += ".rdf"
-            self.save_as_rdf()
-        else:
-            self.filename += ".json"
-            self.save_as_json()
-
-    def save_as_rdf(self):
-        """Saves as an RDF"""
-        with chython.files.RDFWrite(self.filename) as f:
-            f.write(self.reaction_container)
-
-    def literal_eval_metadata(self, rdf_contents: chython.ReactionContainer):
-        """Read the rdf values literally to reintroduce their types"""
-
-        for key in self.metadata.keys():
-            # if the string is equal to none we reload
-            if (
-                rdf_contents.meta[key] == "None"
-                or key in self.non_string_types_inside_meta
-                and isinstance(rdf_contents.meta[key], str)
-            ):
-                rdf_contents.meta.update(
-                    {key: ast.literal_eval(rdf_contents.meta[key])}
-                )
-
-    def save_as_json(self):
-        with open(self.filename, "w") as f:
-            json.dump(self.metadata, f)
-
-        with open(self.filename, "r") as f:
-            meta_reload = json.load(f)
-
-        assert meta_reload == self.metadata, "change in data during file read/write"
+from . import utils
 
 
 class ReactionMetaData:
@@ -249,7 +152,7 @@ class ReactionMetaData:
     def read_standard_protocols_used(self) -> Optional[List[str]]:
         """Returns a list of the standard protocol fields that the user ticked that apply to this reaction"""
         standard_protocols = [
-            ReactionStringMapper.radio_buttons(
+            utils.ReactionStringMapper.radio_buttons(
                 services.utils.camelCase_to_snake_case(x)
             )
             for x in self.summary_data.get("radio_buttons")
@@ -273,9 +176,11 @@ class ReactionMetaData:
     # how sustainable was the reaction
     def read_solvent_sustainability(self) -> Optional[List[str]]:
         """Returns a list of strings to describe the sustainability of each solvent using the CHEM21 system"""
-        cleaned_solvent_primary_keys = remove_default_data(self.db_reaction.solvent)
+        cleaned_solvent_primary_keys = utils.remove_default_data(
+            self.db_reaction.solvent
+        )
         sustainability_flags = [
-            ReactionStringMapper.solvent_sustainability(
+            utils.ReactionStringMapper.solvent_sustainability(
                 services.solvent.sustainability_from_primary_key(x)
             )
             for x in cleaned_solvent_primary_keys
@@ -296,7 +201,7 @@ class ReactionMetaData:
 
     def read_element_sustainability(self) -> Optional[str]:
         """Returns the element sustainability expressed as a range of years"""
-        return ReactionStringMapper.element_sustainability(
+        return utils.ReactionStringMapper.element_sustainability(
             self.summary_data.get("element_sustainability")
         )
 
@@ -307,7 +212,7 @@ class ReactionMetaData:
 
     def read_isolation_method(self) -> Optional[str]:
         """Returns the method of purification used from the dropdown the user selected in the summary table"""
-        isolation_method = ReactionStringMapper.isolation(
+        isolation_method = utils.ReactionStringMapper.isolation(
             self.summary_data.get("isolation_method")
         )
         return isolation_method if isolation_method else None
@@ -380,37 +285,37 @@ class ReactionMetaData:
     def read_sustainability_flags(self) -> Dict:
         """Returns a dictionary with a colour-coded flag for each metric. Green, amber, red or None"""
         return {
-            "temperature_flag": ReactionStringMapper.css_classes_to_chem21_colour_flag(
+            "temperature_flag": utils.ReactionStringMapper.css_classes_to_chem21_colour_flag(
                 self.exported_from_js.get("Temperature Sustainability")
             ),
-            "element_sustainability_flag": ReactionStringMapper.css_classes_to_chem21_colour_flag(
+            "element_sustainability_flag": utils.ReactionStringMapper.css_classes_to_chem21_colour_flag(
                 self.exported_from_js.get("Elements Sustainability")
             ),
-            "batch_or_flow_flag": ReactionStringMapper.css_classes_to_chem21_colour_flag(
+            "batch_or_flow_flag": utils.ReactionStringMapper.css_classes_to_chem21_colour_flag(
                 self.exported_from_js.get("Batch or Flow Sustainability")
             ),
-            "isolation_flag": ReactionStringMapper.css_classes_to_chem21_colour_flag(
+            "isolation_flag": utils.ReactionStringMapper.css_classes_to_chem21_colour_flag(
                 self.exported_from_js.get("Isolation Sustainability")
             ),
-            "catalyst_used_flag": ReactionStringMapper.css_classes_to_chem21_colour_flag(
+            "catalyst_used_flag": utils.ReactionStringMapper.css_classes_to_chem21_colour_flag(
                 self.exported_from_js.get("Catalyst Sustainability")
             ),
-            "catalyst_recovery_flag": ReactionStringMapper.css_classes_to_chem21_colour_flag(
+            "catalyst_recovery_flag": utils.ReactionStringMapper.css_classes_to_chem21_colour_flag(
                 self.exported_from_js.get("Recovery Sustainability")
             ),
-            "atom_economy_flag": ReactionStringMapper.css_classes_to_chem21_colour_flag(
+            "atom_economy_flag": utils.ReactionStringMapper.css_classes_to_chem21_colour_flag(
                 self.exported_from_js.get("Atom Economy Sustainability")
             ),
-            "mass_efficiency_flag": ReactionStringMapper.css_classes_to_chem21_colour_flag(
+            "mass_efficiency_flag": utils.ReactionStringMapper.css_classes_to_chem21_colour_flag(
                 self.exported_from_js.get("Mass Efficiency Sustainability")
             ),
-            "yield_flag": ReactionStringMapper.css_classes_to_chem21_colour_flag(
+            "yield_flag": utils.ReactionStringMapper.css_classes_to_chem21_colour_flag(
                 self.exported_from_js.get("Yield Sustainability")
             ),
-            "conversion_flag": ReactionStringMapper.css_classes_to_chem21_colour_flag(
+            "conversion_flag": utils.ReactionStringMapper.css_classes_to_chem21_colour_flag(
                 self.exported_from_js.get("Conversion Sustainability")
             ),
-            "selectivity_flag": ReactionStringMapper.css_classes_to_chem21_colour_flag(
+            "selectivity_flag": utils.ReactionStringMapper.css_classes_to_chem21_colour_flag(
                 self.exported_from_js.get("Selectivity Sustainability")
             ),
         }
@@ -428,7 +333,7 @@ class ReactionMetaData:
         component: reactant/reagent/solvent/product
         Returns True if that compound type is present in the reaction. e.g., A reaction has no solvents returns False
         """
-        return bool(remove_default_data(getattr(self.db_reaction, component)))
+        return bool(utils.remove_default_data(getattr(self.db_reaction, component)))
 
     @staticmethod
     def standardise_compound_data(compound_data: Dict):
@@ -573,7 +478,7 @@ class ReactionMetaData:
     def get_physical_forms(self, component):
         """Returns a list of physical forms for type of component: reactant/reagent/solvent/product"""
         return [
-            ReactionStringMapper.physical_forms(x)
+            utils.ReactionStringMapper.physical_forms(x)
             for x in self.rxn_data[f"{component}_physical_forms"]
         ]
 
@@ -627,140 +532,3 @@ class ReactionMetaData:
             except KeyError:
                 result_dict[item["key"]] = None
         return result_dict
-
-
-class ReactionStringMapper:
-    @staticmethod
-    def chem21_to_numerical(chem21_str: str) -> str:
-        """Used to replace the css classes that indicate colour with a numerical equivalent"""
-        chem21_dict = {
-            "recommended": "1",
-            "problematic": "2",
-            "hazard-warning": "3",
-            "hazard-hazardous": "4",
-        }
-        return chem21_dict.get(chem21_str)
-
-    @staticmethod
-    def css_classes_to_chem21_colour_flag(css_class: str) -> str:
-        css_chem21_dict = {
-            "hazard-reset-hazard": None,
-            "hazard-acceptable": "green",
-            "hazard-warning": "amber",
-            "hazard-hazardous": "red",
-        }
-        return css_chem21_dict.get(css_class)
-
-    @staticmethod
-    def isolation(isolation_method: str) -> Optional[str]:
-        """Uses to replace the isolation dropdown index with the corresponding string value"""
-        isolation_dict = {
-            "0": "",
-            "1": "Column",
-            "2": "HPLC",
-            "3": "Ion exchange",
-            "4": "Crystallization",
-            "5": "Filtration",
-            "6": "Multiple recryst.",
-            "7": "Distillation < 140 degC",
-            "8": "Distillation > 140 degC",
-        }
-        return isolation_dict.get(isolation_method)
-
-    @staticmethod
-    def element_sustainability(element_value: str) -> str:
-        """Replaces the element sustainability dropdown index with the corresponding string value"""
-        elements_dict = {
-            "3": "+500 years",
-            "2": "50-500 years",
-            "1": "5-50 years",
-            "0": "",
-        }
-        return elements_dict.get(element_value)
-
-    @staticmethod
-    def solvent_sustainability(solvent_flag: int) -> str:
-        """Replaces the solvent sustainability numerical flag found in the database with the corresponding string"""
-        # get solvent sustainability
-        solvent_flag_dict = {
-            4: "Recommended",
-            3: "Problematic",
-            2: "Hazardous",
-            1: "Highly Hazardous",
-            5: "Unknown",  # non-chem21 elsewhere in code sometimes.
-        }
-        return solvent_flag_dict.get(solvent_flag)
-
-    @staticmethod
-    def physical_forms(physical_form):
-        """Replaces the physical form dropdown index with the corresponding string value"""
-        physical_form_dict = {
-            "0": "",
-            "1": "Dense Solid",
-            "2": "Non-volatile liquid (b.p. > 130 degC)",
-            "3": "Unknown",
-            "4": "Dusty Solid",
-            "5": "Lyophilised solid",
-            "6": "Volatile liquid (b.p. 70-130 degC)",
-            "7": "Gas",
-            "8": "Highly volatile liquid (b.p. < 70 degC)",
-            "9": "Aerosol",
-            "10": "Solution that promotes skin absorption",
-        }
-        return physical_form_dict.get(physical_form)
-
-    @staticmethod
-    def radio_buttons(radio_button) -> str:
-        """
-        We take the radio button name and change it if it appears in the dict, otherwise we return the original
-
-        Args:
-            radio_button - the string from the frontend of the selected radio button
-
-        Returns:
-            Either the new string from the dict value or the original if the string was not in the dictionary,
-        """
-        radio_button_dict = {
-            "slight": "hazard: slight",
-            "serious": "hazard: serious",
-            "major": "hazard: major",
-            "low_likelihood": "risk: low likelihood",
-            "possible": "risk: possible",
-            "frequent_occur": "risk: frequent occur",
-            "individual": "consequences: individual",
-            "local_labs": "consequences: local labs",
-            "building_wide": "consequences: building wide",
-        }
-        new_string = radio_button_dict.get(radio_button)
-        if new_string:
-            return new_string
-        return radio_button
-
-
-def get_metadata_keys() -> List[str]:
-    """
-    Returns the keys used in the metadata
-    """
-    return [
-        "temperature",
-        "solvents",
-        "reagents",
-        "creator_username",
-        "creator_workbook",
-        "creator_workgroup",
-        "time_of_creation",
-        "reaction_completed",
-        "isolation_method",
-        "batch_or_flow",
-        "percent_yield",
-        "reactants",
-        "experimental_writeup",
-        "standard_protocols_used",
-        "nmr_data",
-        "file_attachment_names",
-    ]
-
-
-def remove_default_data(list_: List):
-    """Removes default database values from lists for database reaction components"""
-    return [x for x in list_ if x not in ["{", "}", ""]]

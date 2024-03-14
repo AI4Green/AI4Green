@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/auxiliary.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/export_data.js') }}"></script>
+    <script>
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+
+</head>
+<body>
+<div class="container-fluid mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            <h4>Workbook to Export</h4>
+            <form class="form">
+                <!-- Workgroups -->
+                <div class="form-group">
+                    <label for="active-workgroup">Workgroup</label>
+                    <select id="active-workgroup" class="form-control" onchange="updateSelectedWorkGroup()">
+                        {% for workgroup in workgroups %}
+                        <option value="{{ workgroup }}">{{ workgroup }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!-- Workbooks -->
+                <div class="form-group">
+                    <label for="active-workbook">Workbook</label>
+                    <select id="active-workbook" class="form-control" onchange="checkExportPermissions()"></select>
+                </div>
+            </form>
+            <p id="export-permission-result"></p>
+        </div>
+        <div class="col-md-9">
+            <h4>Select Export Format</h4>
+            <h6>Human-Readable Formats:</h6>
+            <div class="row">
+                <div class="col-sm-3">
+                    <button class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Portable Document Format (PDF) - suitable for printing and viewing.">.PDF</button>
+                </div>
+            </div>
+            <h6>Machine-Readable Formats:</h6>
+            <div class="row">
+                <div class="col-sm-3">
+                    <button class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="JavaScript Object Notation (JSON) - A structured data format commonly used for exchanging information between servers and web applications.">.JSON</button>
+                </div>
+                <div class="col-sm-3">
+                    <button class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title=
+"Reaction Data File (RDF) - Format for storing chemical reaction data, including reactants, products, agents, and metadata.">.RDF</button>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-sm-3">
+                    <a class="btn btn-primary text-white mb-2 btn-block" id="eln-button" data-toggle="tooltip" data-placement="top" title="Electronic Lab Notebook (ELN) - A file format based on research object crates and designed to be interoperable with other ELNs.">.ELN</a>
+                </div>
+            </div>
+            <h6>Human- and Machine-Readable Formats:</h6>
+            <div class="row">
+                <div class="col-sm-3">
+                    <button class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Comma-Separated Values (CSV) - A simple text-based format for storing tabular data. Can be opened as a spreadsheet using Excel.">.CSV</button>
+                </div>
+                <div class="col-sm-3">
+                    <button class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Simple User-Friendly Reaction Format (SURF) - A standardised CSV with a tabular data format for storing reaction data and that can be converted to other formats. Can be opened as a spreadsheet using Excel.">.SURF</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+{% endblock %}
