@@ -65,7 +65,7 @@ def test_reagent_compound_table(client: FlaskClient):
     # assert status code and response values are as expected
     assert response.status_code == 200
     expected_values = {
-        "hazards": "H123",
+        "hazards": "H901",
         "number": "1",
         "concentration": None,
         "density": None,

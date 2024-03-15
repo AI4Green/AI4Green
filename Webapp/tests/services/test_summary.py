@@ -1,35 +1,100 @@
-from flask import Flask
 from flask.testing import FlaskClient
-from sources import services
-from tests.utils import assert_expected_values, login
+from tests.utils import login
 
 
-def test_summary(app: Flask, client: FlaskClient):
-    """Tests the response when adding a novel compound from the sketcher"""
+def test_summary(client: FlaskClient):
+    """Tests the response when loading the summary table for a workbook reaction"""
     login(client)
     # Define form data to send in the request
-    form_data = make_summary_form()
+    form_data = make_workbook_summary_form()
     # Send a POST request to the route with the form data and confirm response
     response = client.post("/_summary", data=form_data)
-    assert response.status_code == 200 and response.json["ae"] == 16
+    assert response.status_code == 200
+    assert_summary_table_html_formed(response)
 
 
-# def test_summary_demo():
-#     pass
+def test_summary_demo(client: FlaskClient):
+    """Tests the response when loading the summary table for a demo reaction"""
+    # Define form data to send in the request
+    form_data = make_demo_summary_form()
+    # Send a POST request to the route with the form data and confirm response
+    response = client.post("/_summary", data=form_data)
+    assert response.status_code == 200
+    assert_summary_table_html_formed(response)
 
 
-def make_summary_form():
-    # Provided data dictionary
+def test_summary_tutorial(client: FlaskClient):
+    """Tests the response when loading the summary table for a tutorial reaction"""
+    # Define form data to send in the request
+    form_data = make_tutorial_summary_form()
+    # Send a POST request to the route with the form data and confirm response
+    response = client.post("/_summary", data=form_data)
+    assert response.status_code == 200
+    assert_summary_table_html_formed(response)
+
+
+def assert_summary_table_html_formed(response):
+    # element sustainability has been calculated
+    assert (
+        """<td id="js-elements-cell" class="hazard-acceptable"><select size="1" id="js-elements" class="hazard-acceptable">"""
+        in response.json["summary"]
+    )
+    # atom economy
+    assert (
+        """<td id="js-ae-cell" class="hazard-hazardous"><input type="number" class="hazard-hazardous to-export" name="Atom Efficiency" value="40.4" style="width: 80px; border:none;" readonly></td>"""
+        in response.json["summary"]
+    )
+    # theoretical yield
+    assert (
+        """<td colspan="2"><input type="number" id="js-product-rounded-mass1"
+                               value="93.0" style="width:80px; border:none" readonly></td>"""
+        in response.json["summary"]
+    )
+
+
+def make_demo_summary_form():
+    summary_form = make_default_summary_form()
+    summary_form.update(
+        {
+            "demo": "demo",
+            "tutorial": "no",
+        }
+    )
+    return summary_form
+
+
+def make_tutorial_summary_form():
+    summary_form = make_default_summary_form()
+    summary_form.update(
+        {
+            "demo": "not demo",
+            "tutorial": "yes",
+        }
+    )
+    return summary_form
+
+
+def make_workbook_summary_form():
+    """All the fields that are sent from JS to /_summary endpoint"""
+    summary_form = make_default_summary_form()
+    summary_form.update(
+        {
+            "reactionName": "test reaction name",
+            "reactionID": "TW1-001",
+            "reactionDescription": "testing routes and services",
+            "demo": "not demo",
+            "tutorial": "no",
+            "workgroup": "Test-Workgroup",
+            "workbook": "Test-Workbook",
+        }
+    )
+    return summary_form
+
+
+def make_default_summary_form():
     return {
         # reaction
         "reactionSmiles": "C.CC>>CP.CCP",
-        "reactionName": "test reaction name",
-        "reactionID": "TW1-001",
-        "reactionDescription": "testing routes and services",
-        "demo": "not demo",
-        "tutorial": "no",
-        "workgroup": "Test-Workgroup",
-        "workbook": "Test-Workbook",
         # reactant
         "reactants": "Testoic Acid;Testamine",
         "reactantIds": "-1;-2",
@@ -87,7 +152,7 @@ def make_summary_form():
         "roundedProductAmounts": "1.00;1.00",
         "productAmounts": "1.00;1.00",
         "productMolecularWeights": "225;255",
-        "productHazards": "H900;Unknown",
+        "productHazards": "H900;H900",
         "productPrimaryKeys": "6;7",
         "productPhysicalForms": "Unknown;Unknown",
         "mainProductTableNumber": "7",
