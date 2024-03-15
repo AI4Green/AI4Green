@@ -7,7 +7,7 @@ license = "AGPL-3.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">3.9,<3.10"
+python = ">=3.9,<3.11"
 azure-core = "^1.29.3"
 azure-identity = "^1.14.0"
 azure-storage-blob = "==12.17.0"
