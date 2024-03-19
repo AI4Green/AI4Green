@@ -125,7 +125,6 @@ function deleteGraph(graphId) {
       return response.json();
     })
     .then(function (item) {
-      console.log(item);
       showSavedGraphs(item);
     });
 }
