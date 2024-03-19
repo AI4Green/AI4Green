@@ -17,30 +17,31 @@ from sources.services.data_export.ro_crate import ELNFile
 
 from . import export_data_bp
 
-# # ### structure - 1 route per format
-# @export_data_bp.route("/export_data/home", methods=["GET", "POST"])
-# @login_required
-# def export_data_home():
-#     workgroups = get_workgroups()
-#     notification_number = get_notification_number()
-#     return render_template(
-#         "data_export.html",
-#         workgroups=workgroups,
-#         notification_number=notification_number,
-#     )
-#
-#
-# @export_data_bp.route("/export_data/new_request")
-# @login_required
-# def new_data_export_request():
-#     """Initiates a data export request"""
-#     # from this we need:
-#     # reaction_list =
-#     # workbooks reactions originate from
-#     # requestor
-#     # format
-#     services.data_export.export.new_request()
-#
+
+# ### structure - 1 route per format
+@export_data_bp.route("/export_data/home", methods=["GET", "POST"])
+@login_required
+def export_data_home():
+    workgroups = get_workgroups()
+    notification_number = get_notification_number()
+    return render_template(
+        "data_export.html",
+        workgroups=workgroups,
+        notification_number=notification_number,
+    )
+
+
+@export_data_bp.route("/export_data/new_request", methods=["POST", "GET"])
+@login_required
+def new_data_export_request():
+    """Initiates a data export request if user has permission"""
+    export_request = services.data_export.export.NewRequest()
+    permission_status = export_request.check_permissions()
+    if permission_status == "permission accepted":
+        export_request.submit_request()
+    return jsonify(permission_status)
+
+
 #
 # @export_data_bp.route("/export_data/rdf", methods=["GET", "POST"])
 # @login_required
@@ -90,17 +91,35 @@ from . import export_data_bp
 #     return jsonify({"feedback": "export file will be available in 2 days"})
 #
 #
-# @export_data_bp.route("/export_permission", methods=["GET", "POST"])
-# @login_required
-# def export_permission():
-#     """Checks if the user has permission to export the selected workbook"""
-#     if security_pi_workgroup(request.json["workgroup"]):
-#         return jsonify({"permission": "user has export permission for this workbook"})
-#     else:
-#         return jsonify(
-#             {"permission": "user does not have export permission for this workbook"}
-#         )
-#
+@export_data_bp.route("/export_permission", methods=["GET", "POST"])
+@login_required
+def export_permission():
+    """
+    Checks if the user has permission to export from the selected workbook.
+    The requestor must be either a workbook member or a workgroup PI
+    """
+    if security_pi_workgroup(
+        request.json["workgroup"]
+    ) or security_member_workgroup_workbook(
+        request.form["workgroup"], request.form["workbook"]
+    ):
+        return jsonify({"permission": "user has export permission for this workbook"})
+    else:
+        return jsonify(
+            {"permission": "user does not have export permission for this workbook"}
+        )
+
+
+@export_data_bp.route("/get_reaction_id_list", methods=["GET", "POST"])
+@login_required
+def get_reaction_id_list():
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        request.json["workgroup"], request.json["workbook"]
+    )
+    reaction_ids = [rxn.reaction_id for rxn in workbook.reactions]
+    return jsonify(reaction_ids)
+
+
 #
 # @export_data_bp.route("/export_data_eln_file", methods=["GET", "POST"])
 # @login_required

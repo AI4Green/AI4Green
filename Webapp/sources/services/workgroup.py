@@ -14,6 +14,21 @@ def list_all() -> List[models.WorkGroup]:
     return db.session.query(models.WorkGroup).all()
 
 
+def from_name(name: str) -> models.WorkGroup:
+    """Returns the database workgroup object from the name"""
+    return (
+        db.session.query(models.WorkGroup).filter(models.WorkGroup.name == name).first()
+    )
+
+
+def get_institution():
+    return (
+        db.session.query(models.Institution)
+        .filter(models.Institution.name == "Test User Institution")
+        .first()
+    )
+
+
 def get_new_workgroup_requests() -> List[models.WorkGroupRequest]:
     """
     Gets a list of all workgroup requests in the database

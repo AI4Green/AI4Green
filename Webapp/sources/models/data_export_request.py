@@ -33,6 +33,16 @@ data_export_request_approvers = db.Table(
     db.Column("approved", db.Boolean, default=False),
 )
 
+# Association table for the many-to-many relationship between DataExportRequest and WorkBook
+data_export_request_workbooks = db.Table(
+    "data_export_request_workbook_association",
+    db.Model.metadata,
+    db.Column(
+        "data_export_request_id", db.Integer, db.ForeignKey("DataExportRequest.id")
+    ),
+    db.Column("workbook_id", db.Integer, db.ForeignKey("WorkBook.id")),
+)
+
 
 class DataExportRequest(Model):
     """
@@ -68,15 +78,30 @@ class DataExportRequest(Model):
 
     status = db.Column(db.Enum(ApprovalStatus), default=ApprovalStatus.PENDING.value)
 
-    workbook = db.Column(db.ForeignKey("WorkBook.id"), nullable=False)
-    workbook = db.relationship("WorkBook", foreign_keys=[workbook])
+    # workbooks_id = db.Column(db.Integer, db.ForeignKey("WorkBook.id"), nullable=False)
+    # workbooks = db.relationship("WorkBook", foreign_keys=[workbooks_id])
+
+    reactions = db.Column(
+        db.ForeignKey("Reaction.id", ondelete="CASCADE"), nullable=False
+    )
+    Reactions = db.relationship("Reaction", foreign_keys=[reactions])
+
+    workbooks = db.relationship(
+        "WorkBook",
+        secondary=data_export_request_workbooks,
+        backref="data_export_requests",
+    )
+
+    # workbooks = db.Column(db.ForeignKey("WorkBook.id", ondelete="CASCADE"), nullable=False, index=True)
+    # WorkBooks = db.relationship("WorkBook", foreign_keys=[workbooks])
+
     workgroup = db.Column(
         db.ForeignKey("WorkGroup.id", ondelete="CASCADE"), nullable=False, index=True
     )
     WorkGroup = db.relationship(
-        "WorkGroup", backref="WorkGroupRequest", cascade="all, delete"
+        "WorkGroup", backref="DataExportRequest", cascade="all, delete"
     )
     institution = db.Column(
         db.ForeignKey("Institution.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    Institution = db.relationship("Institution", backref="WorkGroupRequest")
+    Institution = db.relationship("Institution", backref="DataExportRequest")
