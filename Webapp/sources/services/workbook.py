@@ -6,7 +6,7 @@ from sources.extensions import db
 
 def list_all() -> List[models.WorkBook]:
     """
-    Gets a list of all workbooks
+    Gets a list of all workbooks. Used in admin dashboard.
 
     Returns:
          List of all workbooks

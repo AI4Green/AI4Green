@@ -17,55 +17,114 @@ from sources.services.data_export.ro_crate import ELNFile
 
 from . import export_data_bp
 
+# # ### structure - 1 route per format
+# @export_data_bp.route("/export_data/home", methods=["GET", "POST"])
+# @login_required
+# def export_data_home():
+#     workgroups = get_workgroups()
+#     notification_number = get_notification_number()
+#     return render_template(
+#         "data_export.html",
+#         workgroups=workgroups,
+#         notification_number=notification_number,
+#     )
+#
+#
+# @export_data_bp.route("/export_data/new_request")
+# @login_required
+# def new_data_export_request():
+#     """Initiates a data export request"""
+#     # from this we need:
+#     # reaction_list =
+#     # workbooks reactions originate from
+#     # requestor
+#     # format
+#     services.data_export.export.new_request()
+#
+#
+# @export_data_bp.route("/export_data/rdf", methods=["GET", "POST"])
+# @login_required
+# def rdf_export():
+#     """make an rdf per workbook reaction"""
+#     # first intialise variables and get permission
+#     workgroup = request.form["workgroup"]
+#     workbook = request.form["workbook"]
+#     security_pi_workgroup(workgroup)
+#     services.data_export.export.initiate("rdf")
+#     return jsonify({"feedback": "export file will be available in 2 days"})
+#
+#
+# @export_data_bp.route("/export_data/pdf", methods=["GET", "POST"])
+# @login_required
+# def pdf_export():
+#     """make a pdf per workbook reaction"""
+#     # first intialise variables and get permission
+#     workgroup = request.form["workgroup"]
+#     workbook = request.form["workbook"]
+#     security_pi_workgroup(workgroup)
+#     services.data_export.export.initiate("pdf")
+#     return jsonify({"feedback": "export file will be available in 2 days"})
+#
+#
+# @export_data_bp.route("/export_data/surf", methods=["GET", "POST"])
+# @login_required
+# def surf_export():
+#     """make a surf for all reactions inside a workbook"""
+#     # first intialise variables and get permission
+#     workgroup = request.form["workgroup"]
+#     workbook = request.form["workbook"]
+#     security_pi_workgroup(workgroup)
+#     services.data_export.export.initiate("surf")
+#     return jsonify({"feedback": "export file will be available in 2 days"})
+#
+#
+# @export_data_bp.route("/export_data/eln", methods=["GET", "POST"])
+# @login_required
+# def surf_export():
+#     """make a .eln for all reactions inside a workbook"""
+#     # first intialise variables and get permission
+#     workgroup = request.form["workgroup"]
+#     workbook = request.form["workbook"]
+#     security_pi_workgroup(workgroup)
+#     services.data_export.export.initiate("eln")
+#     return jsonify({"feedback": "export file will be available in 2 days"})
+#
+#
+# @export_data_bp.route("/export_permission", methods=["GET", "POST"])
+# @login_required
+# def export_permission():
+#     """Checks if the user has permission to export the selected workbook"""
+#     if security_pi_workgroup(request.json["workgroup"]):
+#         return jsonify({"permission": "user has export permission for this workbook"})
+#     else:
+#         return jsonify(
+#             {"permission": "user does not have export permission for this workbook"}
+#         )
+#
+#
+# @export_data_bp.route("/export_data_eln_file", methods=["GET", "POST"])
+# @login_required
+# def export_data_eln_file() -> Response:
+#     """
+#     We are making a .eln file for a specific workbook. This is a zipped directory containing a ro-crate-metadata.json
+#     to describe the contents.
+#     """
+#
+#     # reaction_list = services.reaction.list_active_in_workbook(
+#     #     workbook, workgroup, sort_crit="time"
+#     # )
+#     workgroup_name = request.form["workgroup"]
+#     workbook_name = request.form["workbook"]
+#     eln_file = ELNFile(workgroup_name, workbook_name)
+#     # eln_file = DataExport(workgroup_name, workbook_name).to_eln_file()
+#     return eln_file
 
-# ### structure - 1 route per format
-@export_data_bp.route("/export_data", methods=["GET", "POST"])
-@login_required
-def export_data_home():
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
-    return render_template(
-        "data_export.html",
-        workgroups=workgroups,
-        notification_number=notification_number,
-    )
-
-
-@export_data_bp.route("/export_permission", methods=["GET", "POST"])
-@login_required
-def export_permission():
-    """Checks if the user has permission to export the selected workbook"""
-    if security_pi_workgroup(request.json["workgroup"]):
-        return jsonify({"permission": "user has export permission for this workbook"})
-    else:
-        return jsonify(
-            {"permission": "user does not have export permission for this workbook"}
-        )
-
-
-@export_data_bp.route("/export_data_eln_file", methods=["GET", "POST"])
-@login_required
-def export_data_eln_file() -> Response:
-    """
-    We are making a .eln file for a specific workbook. This is a zipped directory containing a ro-crate-metadata.json
-    to describe the contents.
-    """
-
-    # reaction_list = services.reaction.list_active_in_workbook(
-    #     workbook, workgroup, sort_crit="time"
-    # )
-    workgroup_name = request.form["workgroup"]
-    workbook_name = request.form["workbook"]
-    eln_file = ELNFile(workgroup_name, workbook_name)
-    # eln_file = DataExport(workgroup_name, workbook_name).to_eln_file()
-    return eln_file
-
-    # made according to this specification https://github.com/TheELNConsortium/TheELNFileFormat
-    # first we describe the ro-crate metadata_json
-    # ro_crate_metadata_json_contents = describe_ro_crate_metadata_json()
-    # now for each reaction we want to make a research object crate
-    # for idx, reaction in enumerate(reaction_list):
-    # make a folder per experiment.
+# made according to this specification https://github.com/TheELNConsortium/TheELNFileFormat
+# first we describe the ro-crate metadata_json
+# ro_crate_metadata_json_contents = describe_ro_crate_metadata_json()
+# now for each reaction we want to make a research object crate
+# for idx, reaction in enumerate(reaction_list):
+# make a folder per experiment.
 
 
 @export_data_bp.route(
