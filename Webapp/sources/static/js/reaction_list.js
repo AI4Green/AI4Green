@@ -40,16 +40,68 @@ function updateSelectedWorkbook() {
  * loads and resets the modal window to make a new reaction
  * and assigns the reaction id corresponding to the active workbook
  */
-function newReactionModalWindow() {
+function newReactionModalWindow(type="new", oldReactionID=null) {
   let reactionIDs = getVal("#workbook_corresponding_next_reaction_ids");
   let reactionIDsDic = JSON.parse(reactionIDs);
   let workbook = getVal("#active-workbook");
   let activeReactionID = reactionIDsDic[workbook];
   $("#new-reaction-id").val(activeReactionID);
   $("#new-reaction-name").val("");
-  $("#error-warning-new-reaction").html("");
+  $("#error-warning-new-reaction").html();
+  if (type == 'clone') {
+    let name = "Repeat of Reaction " + oldReactionID;
+    $("#new-reaction-name").val(name);
+    $("#new-reaction-data-submit").attr("onclick", "cloneReaction()")
+    $("#old-reaction-id").val(oldReactionID);
+
+  };
 }
 
+function cloneReaction() {
+  let workgroup = getVal("#active-workgroup");
+  let workbook = getVal("#active-workbook");
+  let reactionName = getVal("#new-reaction-name");
+  let newReactionID = getVal("#new-reaction-id");
+  let oldReactionID = getVal("#old-reaction-id")
+
+  $.ajax({
+    url: "/clone_reaction",
+    type: "post",
+    datatype: "json",
+    data: {
+        "reactionName": reactionName,
+        "newReactionID": newReactionID,
+        "workbook": workbook,
+        "workgroup": workgroup,
+        "reactionID": oldReactionID
+    },
+    success: function (response) {
+      if (response.feedback === "New reaction made") {
+        window.location.href = `/sketcher/${workgroup}/${workbook}/${newReactionID}/no`;
+      } else {
+        $("#error-warning-new-reaction").html(response.feedback);
+      }
+    }
+  })
+
+//  fetch("/clone_reaction", {
+//      headers: {
+//        "Content-Type": "application/json",
+//      },
+//      method: "POST",
+//      body: JSON.stringify({
+//        "newReactionName": reactionName,
+//        "newReactionID": newReactionID,
+//        "workbook": workbook,
+//        "workgroup": workgroup,
+//        "reactionID": oldReactionID
+//      }),
+//  })
+//  .then(function (response) {
+//    console.log(response.feedback)
+//
+//  })
+}
 /**
  * Validates the input of the modal window.
  * Upon successful validation creates a new reaction and redirects browser to the page for the new reaction
