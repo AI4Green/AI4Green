@@ -1,9 +1,8 @@
-from typing import List
+from datetime import datetime
 
+import pytz
 from flask import request
-from flask_login import current_user
 from sources import models, services
-from sources.extensions import db
 
 
 class NewRequest:
@@ -25,7 +24,7 @@ class NewRequest:
             ]
         else:
             self.reaction_list = services.reaction.list_active_in_workbook(
-                self.workgroup.name, self.workbook.name, sort_crit="time"
+                self.workbook.name, self.workgroup.name, sort_crit="time"
             )
         self.workbooks = (
             set()
@@ -34,6 +33,8 @@ class NewRequest:
     def check_permissions(self) -> str:
         """Turn reaction list into a workbook list. User must either be workbook member or PI"""
         # workbook_set = {}
+        if len(self.reaction_list) == 0:
+            return "no data to export"
         for reaction in self.reaction_list:
             print(type(reaction))
             print(reaction.workbook.WorkGroup.name, reaction.workbook.name)
@@ -53,15 +54,34 @@ class NewRequest:
         return "permission accepted"
 
     def submit_request(self):
+        """Save request to database and notify and email approvers."""
+        self._save_to_database()
+        self._notify_approvers()
+
+    def _save_to_database(self):
         institution = services.workgroup.get_institution()
-        reaction_id_list = [x.id for x in self.reaction_list]
 
         models.DataExportRequest.create(
+            data_format=self.data_format,
             requestor=self.requestor.id,
             required_approvers=self.workgroup.principal_investigator,
-            status="pending",
-            reactions=reaction_id_list,
+            status="PENDING",
+            reactions=self.reaction_list,
             workbooks=list(self.workbooks),
             workgroup=self.workgroup.id,
             institution=institution.id,
         )
+
+    def _notify_approvers(self):
+        workbook_names = [wb.name for wb in self.workbooks]
+        for principal_investigator in self.workgroup.principal_investigator:
+            models.Notification.create(
+                person=principal_investigator.id,
+                type="Your request to export data",  # todo add link to info
+                info=f"The following user: {self.requestor.user.fullname} has requested to export data from workbooks: "
+                f"{', '.join(workbook_names)} in {self.data_format} format.\n"
+                f"This request will expire after 7 days.",
+                time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
+                status="active",
+            )
+            services.email.send_notification(principal_investigator)

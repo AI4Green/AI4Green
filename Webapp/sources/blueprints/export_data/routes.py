@@ -3,7 +3,7 @@ import json
 
 import pandas as pd
 from flask import Response, flash, jsonify, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 from sources import models, services
 from sources.auxiliary import (
     get_notification_number,
@@ -25,7 +25,7 @@ def export_data_home():
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
-        "data_export.html",
+        "data_export/data_export_home.html",
         workgroups=workgroups,
         notification_number=notification_number,
     )
@@ -40,6 +40,29 @@ def new_data_export_request():
     if permission_status == "permission accepted":
         export_request.submit_request()
     return jsonify(permission_status)
+
+
+# route to reset password when link in email is used
+@export_data_bp.route("/export_data/request_response/<token>", methods=["GET", "POST"])
+def export_data_request_response(token: str) -> Response:
+    # token must be correct
+    # verify link token is correct
+    user = services.email.verify_data_export_request_token(token)
+    # if link has expired send back to log in
+    if not user:
+        flash("Password reset link expired")
+        return redirect(url_for("auth.login"))
+    return "", 204
+    # # create reset form
+    # form = ResetPasswordForm()
+    # # when validly submitted
+    # if form.validate_on_submit():
+    #     # update password and send back to log in
+    #     user.password_hash = user.set_password(form.password.data)
+    #     user.update()
+    #     flash("Your password has been reset!")
+    #     return redirect(url_for("auth.login"))
+    # return render_template("reset_password.html", form=form)
 
 
 #

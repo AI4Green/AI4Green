@@ -7,6 +7,56 @@ from sources import models
 from sources.extensions import mail
 
 
+def get_data_export_request_token(
+    approver: models.User, data_export_request: models.DataExportRequest
+) -> str:
+    """
+    Get token with expiry time of 1 week.
+
+    Args:
+        approver: The user corresponding to a data export request approver
+        data_export_request: Data export request to encode.
+
+    Returns:
+        A token string.
+    """
+    expires_in = 604800
+    return jwt.encode(
+        {
+            "data_export_request": data_export_request.id,
+            "approver": approver.id,
+            "exp": time() + expires_in,
+        },
+        current_app.config["SECRET_KEY"],
+        algorithm="HS256",
+    )
+
+
+def send_data_export_approval_request(
+    user: models.User, data_export_request: models.DataExportRequest
+) -> None:
+    """
+    Send password reset email to a given user.
+
+    Args:
+        user: User to send to.
+        data_export_request: request we are asking PI user to accept or deny
+    """
+    token = get_reset_password_token(data_export_request)
+    protocol = get_protocol_type()
+    mail.send_email(
+        "AI4Chem Reset Your Password",
+        sender=current_app.config["MAIL_ADMIN_SENDER"],
+        recipients=[user.email],
+        text_body=render_template(
+            "email/reset_password_text.txt", user=user, token=token, protocol=protocol
+        ),
+        html_body=render_template(
+            "email/reset_password_text.html", user=user, token=token, protocol=protocol
+        ),
+    )
+
+
 def get_reset_password_token(user: models.User) -> str:
     """
     Get token with expiry time.
@@ -117,6 +167,31 @@ def verify_reset_password_token(token: str) -> models.User:
     except Exception:
         return
     return models.User.query.get(user_id)
+
+
+def verify_data_export_request_token(
+    token: str,
+) -> Tuple[models.User, models.DataExportRequest]:
+    """
+    Verify token link is valid and return user id.
+
+    Args:
+        token: Token to verify.
+
+    Returns:
+         User the token identifies.
+    """
+    try:
+        data_export_request_id, approver_user_id = jwt.decode(
+            token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
+        )["data_export_request"]["approver"]
+        # data_export_request = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"],
+        # )
+    except Exception:
+        return
+    return models.User.query.get(approver_user_id), models.DataExportRequest.query.get(
+        data_export_request_id
+    )
 
 
 def get_protocol_type() -> str:

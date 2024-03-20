@@ -61,7 +61,7 @@ class DataExportRequest(Model):
         db.DateTime,
         nullable=False,
         default=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
-        + timedelta(hours=48),
+        + timedelta(hours=168),
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -84,10 +84,15 @@ class DataExportRequest(Model):
     # workbooks_id = db.Column(db.Integer, db.ForeignKey("WorkBook.id"), nullable=False)
     # workbooks = db.relationship("WorkBook", foreign_keys=[workbooks_id])
 
-    reactions = db.Column(
-        db.ForeignKey("Reaction.id", ondelete="CASCADE"), nullable=False
-    )
-    Reactions = db.relationship("Reaction", foreign_keys=[reactions])
+    # reactions = db.relationship("Reaction", backref="DataExportRequest")
+    reactions = db.relationship("Reaction", backref="data_export_request")
+
+    # reactions = db.relationship("Reaction", secondary=)
+    #
+    # reactions = db.Column(
+    #     db.ForeignKey("Reaction.id", ondelete="CASCADE"), nullable=False
+    # )
+    # Reactions = db.relationship("Reaction", foreign_keys=[reactions])
 
     # supports multiple workbooks if desired in future functionality
     workbooks = db.relationship(
@@ -100,9 +105,9 @@ class DataExportRequest(Model):
         db.ForeignKey("WorkGroup.id", ondelete="CASCADE"), nullable=False, index=True
     )
     WorkGroup = db.relationship(
-        "WorkGroup", backref="DataExportRequest", cascade="all, delete"
+        "WorkGroup", backref="data_export_request", cascade="all, delete"
     )
     institution = db.Column(
         db.ForeignKey("Institution.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    Institution = db.relationship("Institution", backref="DataExportRequest")
+    Institution = db.relationship("Institution", backref="data_export_request")
