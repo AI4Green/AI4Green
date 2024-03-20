@@ -20,6 +20,7 @@ class ExportFormat(Enum):
     ELN = "ELN"
     SURF = "SURF"
     CSV = "CSV"
+    JSON = "JSON"  # todo redo migration before PR - forgot to include json earlier
     SI = "SI"
 
 

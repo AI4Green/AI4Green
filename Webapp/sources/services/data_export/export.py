@@ -26,9 +26,8 @@ class NewRequest:
             self.reaction_list = services.reaction.list_active_in_workbook(
                 self.workbook.name, self.workgroup.name, sort_crit="time"
             )
-        self.workbooks = (
-            set()
-        )  # used to check the user has permission if reactions from multiple workbooks
+        # used to check the user has permission if reactions from multiple workbooks
+        self.workbooks = set()
 
     def check_permissions(self) -> str:
         """Turn reaction list into a workbook list. User must either be workbook member or PI"""
@@ -78,8 +77,8 @@ class NewRequest:
             models.Notification.create(
                 person=principal_investigator.id,
                 type="Your request to export data",  # todo add link to info
-                info=f"The following user: {self.requestor.user.fullname} has requested to export data from workbooks: "
-                f"{', '.join(workbook_names)} in {self.data_format} format.\n"
+                info=f"The following user: {self.requestor.user.email} has requested to export data from workbooks: "
+                f"{', '.join(workbook_names)} in {self.data_format} format.<br>"
                 f"This request will expire after 7 days.",
                 time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
                 status="active",
