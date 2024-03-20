@@ -39,6 +39,9 @@
                         data-workgroup="{{ reaction.workgroup }}" data-workbook="{{ reaction.workbook }}">Delete
                 </button>
             {% endif %}
+            <button
+                    onclick="newReactionModalWindow('clone', this.id)" id="{{ reaction.reaction_id }}" class="btn btn-info"  data-toggle="modal" data-target="#new-reaction-modal" title="Create New Reaction">Clone
+            </button>
             {% if reaction.completion_status == "complete" %}
                 <i class="fa fa-lock" style="font-size:20px; color:darkgrey;"></i><b style="font-size:12px; color:darkgrey;">  Reaction Locked</b>
             {% endif %}
