@@ -8,18 +8,19 @@ from .base import Model
 
 
 class ApprovalStatus(Enum):
-    PENDING = "pending"
-    APPROVED = "approved"
-    REJECTED = "rejected"
-    EXPIRED = "expired"
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    EXPIRED = "EXPIRED"
 
 
 class ExportFormat(Enum):
-    RDF = "rdf"
-    PDF = "pdf"
-    ELN = "eln"
-    SURF = "surf"
-    CSV = "csv"
+    RDF = "RDF"
+    PDF = "PDF"
+    ELN = "ELN"
+    SURF = "SURF"
+    CSV = "CSV"
+    SI = "SI"
 
 
 # Define an association table to represent the many-to-many relationship
@@ -64,6 +65,8 @@ class DataExportRequest(Model):
     )
 
     id = db.Column(db.Integer, primary_key=True)
+    data_format = db.Column(db.Enum(ExportFormat))
+
     requestor = db.Column(
         db.ForeignKey("Person.id", ondelete="CASCADE"), nullable=False, index=True
     )
@@ -86,14 +89,12 @@ class DataExportRequest(Model):
     )
     Reactions = db.relationship("Reaction", foreign_keys=[reactions])
 
+    # supports multiple workbooks if desired in future functionality
     workbooks = db.relationship(
         "WorkBook",
         secondary=data_export_request_workbooks,
         backref="data_export_requests",
     )
-
-    # workbooks = db.Column(db.ForeignKey("WorkBook.id", ondelete="CASCADE"), nullable=False, index=True)
-    # WorkBooks = db.relationship("WorkBook", foreign_keys=[workbooks])
 
     workgroup = db.Column(
         db.ForeignKey("WorkGroup.id", ondelete="CASCADE"), nullable=False, index=True
