@@ -1,7 +1,14 @@
 $(function () {
-  updateSelectedWorkGroup("export_data");
-  checkExportPermissions();
+  let currentURL = window.location.href;
+  // These functions run on load of export_data/home
+  if (currentURL.includes("export_data/home")) {
+    updateSelectedWorkGroup("export_data");
+    checkExportPermissions();
+    initiateReactionLists();
+  }
+});
 
+function initiateReactionLists() {
   // These functions enable user to move items between the lists in the reaction selection modal window.
   $(document).on("click", "#excluded-list .list-group-item", function () {
     const $item = $(this);
@@ -14,7 +21,7 @@ $(function () {
     $item.detach().appendTo("#excluded-list");
     sortList("#excluded-list");
   });
-});
+}
 
 /**
  * Checks export permissions for the current workbook.
@@ -34,17 +41,11 @@ function checkExportPermissions() {
   })
     .then((response) => response.json())
     .then((permissionResult) => {
-      if (
-        permissionResult["permission"] ===
-        "user has export permission for this workbook"
-      ) {
+      if (permissionResult === "permission accepted") {
         $("#export-permission-result").html(
           'You have permission to export data from this workbook <i class="bi bi-check" style="color:green"></i>',
         );
-      } else if (
-        permissionResult["permission"] ===
-        "user does not have export permission for this workbook"
-      ) {
+      } else if (permissionResult === "permission denied") {
         $("#export-permission-result").html(
           'Only a principal investigator of a workgroup has permission to export data from a workbook. <i class="bi bi-cross" style="color:red"></i>',
         );
@@ -130,7 +131,7 @@ function makeDataExportRequest(exportFormat) {
       return response.json();
     })
     .then((data) => {
-      handleNewExportRequestResponse(data.feedback);
+      handleNewExportRequestResponse(data, exportFormat);
     })
     .catch((error) => {
       console.error("Error:", error);
@@ -141,16 +142,21 @@ function makeDataExportRequest(exportFormat) {
  * Handles the response
  * @param feedback
  */
-function handleNewExportRequestResponse(feedback) {
+function handleNewExportRequestResponse(feedback, exportFormat) {
+  let $requestFeedback = $("#request-feedback");
   switch (feedback) {
-    case "Data export request created. Your export will be accessible once all of the workgroup principal investigators have approved the request.":
-      console.log("Show success");
+    case "permission accepted":
+      $requestFeedback.text(
+        `${exportFormat} Data export request created. Your export will be accessible once all of the workgroup principal investigators have approved the request.`,
+      );
       break;
-    case "You do not have permission to export this data. You must be either the principal investigator or workbook member":
-      console.log("Show failed");
+    case "permission denied":
+      $requestFeedback.text(
+        "You do not have permission to export this data. You must be either the principal investigator or workbook member",
+      );
       break;
     default:
-      console.log("Show problem");
+      $requestFeedback.text("Request Failed Unexpectedly");
       break;
   }
 }
@@ -168,6 +174,54 @@ function sortList(listId) {
     return parseInt(numberA) - parseInt(numberB);
   });
   $list.empty().append(items);
+}
+
+/**
+ *
+ * @param exportID {str} the data export request ID
+ */
+function dataExportRequestDeny(exportID) {
+  fetch("/export_data/export_denied", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      exportID: exportID,
+    }),
+  })
+    .then((response) => response.json())
+    .then(() => {
+      $("#decision-feedback").val("Request successfully denied.");
+      $("#data-export-request-buttons").html("");
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+
+/**
+ *
+ * @param exportID the data export request ID
+ */
+function dataExportRequestApprove(exportID) {
+  fetch("/export_data/export_approved", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      exportID: exportID,
+    }),
+  })
+    .then((response) => response.json())
+    .then(() => {
+      $("#decision-feedback").val("Request successfully approved.");
+      $("#data-export-request-buttons").html("");
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
 }
 
 // function export_data() {

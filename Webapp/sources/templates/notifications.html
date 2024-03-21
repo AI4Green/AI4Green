@@ -16,8 +16,6 @@
         <a id="wb{{ loop.index }}" href='/manage_workbook/go_to_workbook/{{ notification.wb }}/{{ notification.wg }}' class="btn btn-primary">See Request</a>
         {% elif notification.wg %}
         <a id="wg{{ loop.index }}" href='/manage_workgroup/go_to_workgroup/{{ notification.wg }}' class="btn btn-primary">See Request</a>
-        {% else %}
-             <a class="btn btn-primary">See Request</a>
         {% endif %}
         <hr>
         <p style="font-size:12px">{{ notification.time }}</p>

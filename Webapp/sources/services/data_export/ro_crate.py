@@ -19,7 +19,7 @@ class DataExport:
         self.workbook = services.workbook.get_workbook_from_group_book_name_combination(
             workgroup_name, workbook_name
         )
-        self.requester = current_user.email
+        self.requestor = current_user.email
         self.time_of_request = datetime.now(pytz.timezone("Europe/London")).replace(
             tzinfo=None
         )

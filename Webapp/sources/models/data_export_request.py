@@ -24,7 +24,7 @@ class ExportFormat(Enum):
     SI = "SI"
 
 
-# Define an association table to represent the many-to-many relationship
+# Association table for the many-to-many relationship between Person and DataExportRequests
 data_export_request_approvers = db.Table(
     "data_export_request_approvers",
     db.Model.metadata,
@@ -82,18 +82,7 @@ class DataExportRequest(Model):
 
     status = db.Column(db.Enum(ApprovalStatus), default=ApprovalStatus.PENDING.value)
 
-    # workbooks_id = db.Column(db.Integer, db.ForeignKey("WorkBook.id"), nullable=False)
-    # workbooks = db.relationship("WorkBook", foreign_keys=[workbooks_id])
-
-    # reactions = db.relationship("Reaction", backref="DataExportRequest")
     reactions = db.relationship("Reaction", backref="data_export_request")
-
-    # reactions = db.relationship("Reaction", secondary=)
-    #
-    # reactions = db.Column(
-    #     db.ForeignKey("Reaction.id", ondelete="CASCADE"), nullable=False
-    # )
-    # Reactions = db.relationship("Reaction", foreign_keys=[reactions])
 
     # supports multiple workbooks if desired in future functionality
     workbooks = db.relationship(

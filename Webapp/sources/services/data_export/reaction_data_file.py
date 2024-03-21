@@ -18,7 +18,7 @@ class MakeZip:
             workbook, workgroup
         )
         self.workgroup = workgroup
-        self.requester = current_user
+        self.requestor = current_user
         # self.make_zip()
 
     #

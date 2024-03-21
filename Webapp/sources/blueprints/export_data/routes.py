@@ -44,76 +44,46 @@ def new_data_export_request():
 
 # route to reset password when link in email is used
 @export_data_bp.route("/export_data/request_response/<token>", methods=["GET", "POST"])
+@login_required
 def export_data_request_response(token: str) -> Response:
-    # token must be correct
-    # verify link token is correct
-    user = services.email.verify_data_export_request_token(token)
-    # if link has expired send back to log in
-    if not user:
-        flash("Password reset link expired")
-        return redirect(url_for("auth.login"))
-    return "", 204
-    # # create reset form
-    # form = ResetPasswordForm()
-    # # when validly submitted
-    # if form.validate_on_submit():
-    #     # update password and send back to log in
-    #     user.password_hash = user.set_password(form.password.data)
-    #     user.update()
-    #     flash("Your password has been reset!")
-    #     return redirect(url_for("auth.login"))
-    # return render_template("reset_password.html", form=form)
+    # verify token and get the approver user object and the data_export_request object
+    user, data_export_request = services.email.verify_data_export_request_token(token)
+    # if link has expired send back to home
+    if not (user and data_export_request):
+        flash("Data export request expired")
+        return redirect(url_for("main.home"))
+    # get workgroup name, workbook
+    workbooks_names = [wb.name for wb in data_export_request.workbooks]
+    workbooks = ", ".join(workbooks_names)
+
+    return render_template(
+        "data_export/data_export_request.html",
+        data_export_request=data_export_request,
+        workbooks=workbooks,
+    )
 
 
-#
-# @export_data_bp.route("/export_data/rdf", methods=["GET", "POST"])
-# @login_required
-# def rdf_export():
-#     """make an rdf per workbook reaction"""
-#     # first intialise variables and get permission
-#     workgroup = request.form["workgroup"]
-#     workbook = request.form["workbook"]
-#     security_pi_workgroup(workgroup)
-#     services.data_export.export.initiate("rdf")
-#     return jsonify({"feedback": "export file will be available in 2 days"})
-#
-#
-# @export_data_bp.route("/export_data/pdf", methods=["GET", "POST"])
-# @login_required
-# def pdf_export():
-#     """make a pdf per workbook reaction"""
-#     # first intialise variables and get permission
-#     workgroup = request.form["workgroup"]
-#     workbook = request.form["workbook"]
-#     security_pi_workgroup(workgroup)
-#     services.data_export.export.initiate("pdf")
-#     return jsonify({"feedback": "export file will be available in 2 days"})
-#
-#
-# @export_data_bp.route("/export_data/surf", methods=["GET", "POST"])
-# @login_required
-# def surf_export():
-#     """make a surf for all reactions inside a workbook"""
-#     # first intialise variables and get permission
-#     workgroup = request.form["workgroup"]
-#     workbook = request.form["workbook"]
-#     security_pi_workgroup(workgroup)
-#     services.data_export.export.initiate("surf")
-#     return jsonify({"feedback": "export file will be available in 2 days"})
-#
-#
-# @export_data_bp.route("/export_data/eln", methods=["GET", "POST"])
-# @login_required
-# def surf_export():
-#     """make a .eln for all reactions inside a workbook"""
-#     # first intialise variables and get permission
-#     workgroup = request.form["workgroup"]
-#     workbook = request.form["workbook"]
-#     security_pi_workgroup(workgroup)
-#     services.data_export.export.initiate("eln")
-#     return jsonify({"feedback": "export file will be available in 2 days"})
-#
-#
+@export_data_bp.route("/export_data/export_denied", methods=["POST", "GET"])
+@login_required
+def export_denied():
+    """Update the request in the database"""
+    data_export_request = models.DataExportRequest.query.get(request.json["exportID"])
+    services.data_export.export.request_rejected(data_export_request)
+    flash("Data export denied!")
+    return redirect(url_for("main.index"))
+
+
+@export_data_bp.route("/export_data/export_approved", methods=["POST", "GET"])
+@login_required
+def export_approved():
+    """Update the database with the approval. Then check if all approvers have done so and start export."""
+    data_export_request = models.DataExportRequest.query.get(request.json["exportID"])
+    services.data_export.export.request_accepted(data_export_request)
+    services.data_export.export.update_request_status(data_export_request)
+    flash("Data export approved!")
+    return redirect(url_for("main.index"))
+
+
 @export_data_bp.route("/export_permission", methods=["GET", "POST"])
 @login_required
 def export_permission():
@@ -126,11 +96,9 @@ def export_permission():
     ) or security_member_workgroup_workbook(
         request.form["workgroup"], request.form["workbook"]
     ):
-        return jsonify({"permission": "user has export permission for this workbook"})
+        return jsonify("permission accepted")
     else:
-        return jsonify(
-            {"permission": "user does not have export permission for this workbook"}
-        )
+        return jsonify("permission denied")
 
 
 @export_data_bp.route("/get_reaction_id_list", methods=["GET", "POST"])

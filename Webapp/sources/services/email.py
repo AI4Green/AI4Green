@@ -8,13 +8,13 @@ from sources.extensions import mail
 
 
 def get_data_export_request_token(
-    approver: models.User, data_export_request: models.DataExportRequest
+    user: models.User, data_export_request: models.DataExportRequest
 ) -> str:
     """
     Get token with expiry time of 1 week.
 
     Args:
-        approver: The user corresponding to a data export request approver
+        user: The user who is a data export request approver
         data_export_request: Data export request to encode.
 
     Returns:
@@ -24,7 +24,7 @@ def get_data_export_request_token(
     return jwt.encode(
         {
             "data_export_request": data_export_request.id,
-            "approver": approver.id,
+            "approver": user.id,
             "exp": time() + expires_in,
         },
         current_app.config["SECRET_KEY"],
@@ -34,27 +34,36 @@ def get_data_export_request_token(
 
 def send_data_export_approval_request(
     user: models.User, data_export_request: models.DataExportRequest
-) -> None:
+):
     """
-    Send password reset email to a given user.
+    Send data export request email to a given user.
 
     Args:
         user: User to send to.
         data_export_request: request we are asking PI user to accept or deny
     """
-    token = get_reset_password_token(data_export_request)
+    token = get_data_export_request_token(user, data_export_request)
     protocol = get_protocol_type()
     mail.send_email(
-        "AI4Chem Reset Your Password",
+        "AI4Green Data Export Request",
         sender=current_app.config["MAIL_ADMIN_SENDER"],
         recipients=[user.email],
         text_body=render_template(
-            "email/reset_password_text.txt", user=user, token=token, protocol=protocol
+            "email/data_export_request.txt",
+            data_export_request=data_export_request,
+            user=user,
+            token=token,
+            protocol=protocol,
         ),
         html_body=render_template(
-            "email/reset_password_text.html", user=user, token=token, protocol=protocol
+            "email/data_export_request.html",
+            data_export_request=data_export_request,
+            user=user,
+            token=token,
+            protocol=protocol,
         ),
     )
+    print("email sent")
 
 
 def get_reset_password_token(user: models.User) -> str:
@@ -181,14 +190,15 @@ def verify_data_export_request_token(
     Returns:
          User the token identifies.
     """
-    try:
-        data_export_request_id, approver_user_id = jwt.decode(
-            token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
-        )["data_export_request"]["approver"]
-        # data_export_request = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"],
-        # )
-    except Exception:
-        return
+    decoded_token = jwt.decode(
+        token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
+    )
+
+    data_export_request_id, approver_user_id = (
+        decoded_token["data_export_request"],
+        decoded_token["approver"],
+    )
+
     return models.User.query.get(approver_user_id), models.DataExportRequest.query.get(
         data_export_request_id
     )
