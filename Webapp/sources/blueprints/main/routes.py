@@ -29,6 +29,10 @@ from . import main_bp  # imports the blueprint of the main route
 @main_bp.route("/", methods=["GET", "POST"])
 @main_bp.route("/home", methods=["GET", "POST"])
 def index() -> Response:
+    # used to display flash messages after a redirect following a fetch request.
+    messages_from_redirects = (
+        [request.args.get("message")] if request.args.get("message") else []
+    )
     # gets jinja variables if user is logged in to populate the homepage, else the non-logged in user homepage is loaded
     if current_user.is_authenticated:
         # get the users role to determine if they can access the admin dashboard button or not
@@ -65,6 +69,7 @@ def index() -> Response:
         workgroups=workgroups,
         notification_number=notification_number,
         news_items=news_items,
+        messages_from_redirects=messages_from_redirects,
     )
 
 

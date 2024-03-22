@@ -46,6 +46,9 @@ def new_data_export_request():
 @export_data_bp.route("/export_data/request_response/<token>", methods=["GET", "POST"])
 @login_required
 def export_data_request_response(token: str) -> Response:
+    """
+    Verify the token and the approver and either redirect or render the page with the request information
+    """
     # verify token and get the approver user object and the data_export_request object
     user, data_export_request = services.email.verify_data_export_request_token(token)
     # if link has expired send back to home
@@ -81,6 +84,7 @@ def export_approved():
     services.data_export.export.request_accepted(data_export_request)
     services.data_export.export.update_request_status(data_export_request)
     flash("Data export approved!")
+    print("here")
     return redirect(url_for("main.index"))
 
 

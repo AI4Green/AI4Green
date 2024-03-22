@@ -33,6 +33,7 @@ data_export_request_approvers = db.Table(
     ),
     db.Column("person_id", db.Integer, db.ForeignKey("Person.id")),
     db.Column("approved", db.Boolean, default=False),
+    db.Column("responded", db.Boolean, default=False),
 )
 
 # Association table for the many-to-many relationship between DataExportRequest and WorkBook

@@ -2,7 +2,8 @@ from datetime import datetime
 from typing import List, Literal
 
 import pytz
-from flask import request
+from flask import flash, request
+from flask_login import current_user
 from sources import models, services
 from sources.extensions import db
 from sqlalchemy import update
@@ -165,21 +166,62 @@ def update_request_status(data_export_request: models.DataExportRequest):
     Args:
        data_export_request (models.DataExportRequest): The data export request object.
     """
-    # TODO update this to work with association table
-    data_export_approvers = models.data_export_request_approvers.query.filter_by(
-        data_export_request_id=data_export_request.id
-    ).first()
-    approval_decisions = []
-    for approver in data_export_approvers:
-        approval_decisions.append(
-            models.data_export_request_approvers.query.filter_by(
-                data_export_request_id=data_export_request.id, person_id=approver.id
-            )
-            .first()
-            .approved
+    # get all the required approvers and check if they have all approved.
+    data_export_approvers = (
+        db.session.query(models.data_export_request_approvers.c.approved)
+        .filter(
+            models.data_export_request_approvers.c.data_export_request_id
+            == data_export_request.id
         )
+        .all()
+    )
+    # get the results out of the row objects.
+    approval_results = [x[0] for x in data_export_approvers]
 
-    if all(approval_decisions is True):
+    if all(x is True for x in approval_results):
+        print("APPROVED!")
         data_export_request.status = "APPROVED"
         db.session.commit()
         # initiate data export release with threads then notify requestor after successful data export generation.
+
+
+class RequestLinkVerification:
+    """Verifies access to data export request response page."""
+
+    def __init__(self, token):
+        self.token = token
+        self.approver = None
+        self.data_export_request = None
+        self.status = ""
+
+    def verify_request_link(self, token):
+        """Checks user is a required approver for this request and that it has not already been approved."""
+        (
+            self.approver,
+            self.data_export_request,
+        ) = services.email.verify_data_export_request_token(token)
+        if not (
+            self.approver == current_user
+            and services.person.from_current_user_email()
+            in self.data_export_request.required_approvers
+        ):
+            flash("Data export request expired")
+            return "failed"
+        # redirect if user has already approved.
+        if self.check_if_already_approved() is True:
+            flash("You have already approved this data export request")
+            return "failed"
+        return "success"
+
+    def check_if_already_approved(self):
+        return (
+            db.session.query(models.data_export_request_approvers.c.approved)
+            .filter(
+                models.data_export_request_approvers.c.data_export_request_id
+                == self.data_export_request.id
+            )
+            .filter(
+                models.data_export_request_approvers.c.person_id == self.approver.id
+            )
+            .first()
+        )[0]

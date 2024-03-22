@@ -39,31 +39,31 @@
             <h6>Human-Readable Formats:</h6>
             <div class="row">
                 <div class="col-sm-3">
-                    <button onclick="makeDataExportRequest('PDF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Portable Document Format (PDF) - suitable for printing and viewing.">.PDF</button>
+                    <button id="pdf-button" onclick="makeDataExportRequest('PDF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Portable Document Format (PDF) - suitable for printing and viewing.">.PDF</button>
                 </div>
             </div>
             <h6>Machine-Readable Formats:</h6>
             <div class="row">
                 <div class="col-sm-3">
-                    <button onclick="makeDataExportRequest('JSON')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="JavaScript Object Notation (JSON) - A structured data format commonly used for exchanging information between servers and web applications.">.JSON</button>
+                    <button id="json-button" onclick="makeDataExportRequest('JSON')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="JavaScript Object Notation (JSON) - A structured data format commonly used for exchanging information between servers and web applications.">.JSON</button>
                 </div>
                 <div class="col-sm-3">
-                    <button onclick="makeDataExportRequest('RDF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title=
+                    <button id="rdf-button" onclick="makeDataExportRequest('RDF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title=
 "Reaction Data File (RDF) - Format for storing chemical reaction data, including reactants, products, agents, and metadata.">.RDF</button>
                 </div>
             </div>
             <div class="row mt-3">
                 <div class="col-sm-3">
-                    <a onclick="makeDataExportRequest('ELN')" class="btn btn-primary text-white mb-2 btn-block" id="eln-button" data-toggle="tooltip" data-placement="top" title="Electronic Lab Notebook (ELN) - A file format based on research object crates and designed to be interoperable with other ELNs.">.ELN</a>
+                    <button id="eln-button" onclick="makeDataExportRequest('ELN')" class="btn btn-primary text-white mb-2 btn-block" id="eln-button" data-toggle="tooltip" data-placement="top" title="Electronic Lab Notebook (ELN) - A file format based on research object crates and designed to be interoperable with other ELNs.">.ELN</button>
                 </div>
             </div>
             <h6>Human- and Machine-Readable Formats:</h6>
             <div class="row">
                 <div class="col-sm-3">
-                    <button onclick="makeDataExportRequest('CSV')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Comma-Separated Values (CSV) - A simple text-based format for storing tabular data. Can be opened as a spreadsheet using Excel.">.CSV</button>
+                    <button id="csv-button" onclick="makeDataExportRequest('CSV')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Comma-Separated Values (CSV) - A simple text-based format for storing tabular data. Can be opened as a spreadsheet using Excel.">.CSV</button>
                 </div>
                 <div class="col-sm-3">
-                    <button onclick="makeDataExportRequest('SURF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Simple User-Friendly Reaction Format (SURF) - A standardised CSV with a tabular data format for storing reaction data and that can be converted to other formats. Can be opened as a spreadsheet using Excel.">.SURF</button>
+                    <button id="surf-button" onclick="makeDataExportRequest('SURF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Simple User-Friendly Reaction Format (SURF) - A standardised CSV with a tabular data format for storing reaction data and that can be converted to other formats. Can be opened as a spreadsheet using Excel.">.SURF</button>
                 </div>
             </div>
             <b id="request-feedback">

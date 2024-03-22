@@ -140,7 +140,8 @@ function makeDataExportRequest(exportFormat) {
 
 /**
  * Handles the response
- * @param feedback
+ * @param feedback {string} - the result from the backend when creating the export request
+ * @param exportFormat {string} - the data format of the requested export
  */
 function handleNewExportRequestResponse(feedback, exportFormat) {
   let $requestFeedback = $("#request-feedback");
@@ -149,6 +150,7 @@ function handleNewExportRequestResponse(feedback, exportFormat) {
       $requestFeedback.text(
         `${exportFormat} Data export request created. Your export will be accessible once all of the workgroup principal investigators have approved the request.`,
       );
+      $(`#${exportFormat.toLowerCase()}-button`).addClass("disabled");
       break;
     case "permission denied":
       $requestFeedback.text(
@@ -189,15 +191,13 @@ function dataExportRequestDeny(exportID) {
     body: JSON.stringify({
       exportID: exportID,
     }),
-  })
-    .then((response) => response.json())
-    .then(() => {
-      $("#decision-feedback").val("Request successfully denied.");
-      $("#data-export-request-buttons").html("");
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
+  }).then((response) => {
+    if (response.redirected) {
+      const redirectUrl = new URL(response.url);
+      redirectUrl.searchParams.set("message", "Data export rejected");
+      window.location.href = redirectUrl.toString();
+    }
+  });
 }
 
 /**
@@ -213,15 +213,13 @@ function dataExportRequestApprove(exportID) {
     body: JSON.stringify({
       exportID: exportID,
     }),
-  })
-    .then((response) => response.json())
-    .then(() => {
-      $("#decision-feedback").val("Request successfully approved.");
-      $("#data-export-request-buttons").html("");
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
+  }).then((response) => {
+    if (response.redirected) {
+      const redirectUrl = new URL(response.url);
+      redirectUrl.searchParams.set("message", "Data export approved");
+      window.location.href = redirectUrl.toString();
+    }
+  });
 }
 
 // function export_data() {
