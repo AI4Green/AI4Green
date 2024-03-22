@@ -1,3 +1,5 @@
+import threading
+import time
 from datetime import datetime
 from typing import List, Literal
 
@@ -115,74 +117,79 @@ class NewRequest:
             )
 
 
-def request_rejected(data_export_request: models.DataExportRequest):
-    """
-    Updates the status of a data export request to 'REJECTED' and notifies the requestor of rejection.
+class RequestStatus:
+    def __init__(self, data_export_request: models.DataExportRequest):
+        self.data_export_request = data_export_request
 
-    Args:
-        data_export_request (models.DataExportRequest): The data export request object.
-    """
-    data_export_request.status = "REJECTED"
-    db.session.commit()
-    # notify requestor of rejection
-    workbooks = ", ".join([wb.name for wb in data_export_request.workbooks])
-    models.Notification.create(
-        person=data_export_request.requestor,
-        type="Data Export Request Rejected",
-        info=f"Your request to export {len(data_export_request.reactions)} reactions from {workbooks} in "
-        f"{data_export_request.data_format} was rejected.",
-        time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
-        status="active",
-    )
+    def accept(self):
+        """
+        Accepts a data export request, updates the approval status of the current user's approval
+        in the data export request approvers association table, and updates the status of the data export request.
 
-
-def request_accepted(data_export_request: models.DataExportRequest):
-    """
-    Accepts a data export request, updates the approval status of the current user's approval
-    in the data export request approvers association table, and updates the status of the data export request.
-
-    Args:
-        data_export_request - The data export request object for which the current user's approval is being updated.
-    """
-    approver = services.person.from_current_user_email()
-    # use update query because it is an association table. Normal query returns immutable Row.
-    update_query = (
-        update(models.data_export_request_approvers)
-        .where(
-            models.data_export_request_approvers.c.data_export_request_id
-            == data_export_request.id
+        """
+        approver = services.person.from_current_user_email()
+        # use update query because it is an association table. Normal query returns immutable Row.
+        update_query = (
+            update(models.data_export_request_approvers)
+            .where(
+                models.data_export_request_approvers.c.data_export_request_id
+                == self.data_export_request.id
+            )
+            .where(models.data_export_request_approvers.c.person_id == approver.id)
+            .values(approved=True, responded=True)
         )
-        .where(models.data_export_request_approvers.c.person_id == approver.id)
-        .values(approved=True)
-    )
-    db.session.execute(update_query)
-    db.session.commit()
-
-
-def update_request_status(data_export_request: models.DataExportRequest):
-    """
-    Updates the status of a data export request based on the approval decisions of the approvers.
-
-    Args:
-       data_export_request (models.DataExportRequest): The data export request object.
-    """
-    # get all the required approvers and check if they have all approved.
-    data_export_approvers = (
-        db.session.query(models.data_export_request_approvers.c.approved)
-        .filter(
-            models.data_export_request_approvers.c.data_export_request_id
-            == data_export_request.id
-        )
-        .all()
-    )
-    # get the results out of the row objects.
-    approval_results = [x[0] for x in data_export_approvers]
-
-    if all(x is True for x in approval_results):
-        print("APPROVED!")
-        data_export_request.status = "APPROVED"
+        db.session.execute(update_query)
         db.session.commit()
-        # initiate data export release with threads then notify requestor after successful data export generation.
+
+    def deny(self):
+        """
+        Updates the status of a data export request to 'REJECTED' and notifies the requestor of rejection.
+        """
+        approver = services.person.from_current_user_email()
+        update_query = (
+            update(models.data_export_request_approvers)
+            .where(
+                models.data_export_request_approvers.c.data_export_request_id
+                == self.data_export_request.id
+            )
+            .where(models.data_export_request_approvers.c.person_id == approver.id)
+            .values(approved=False, responded=True)
+        )
+        db.session.execute(update_query)
+        db.session.commit()
+        self.data_export_request.status = "REJECTED"
+        db.session.commit()
+        # notify requestor of rejection
+        workbooks = ", ".join([wb.name for wb in self.data_export_request.workbooks])
+        models.Notification.create(
+            person=self.data_export_request.requestor,
+            type="Data Export Request Rejected",
+            info=f"Your request to export {len(self.data_export_request.reactions)} reactions from {workbooks} in "
+            f"{self.data_export_request.data_format} was rejected.",
+            time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
+            status="active",
+        )
+
+    def update_status(self):
+        """
+        Updates the status attribute of a data export request if all approvers have approved.
+        """
+        # get all the required approvers and check if they have all approved.
+        data_export_approvers = (
+            db.session.query(models.data_export_request_approvers.c.approved)
+            .filter(
+                models.data_export_request_approvers.c.data_export_request_id
+                == self.data_export_request.id
+            )
+            .all()
+        )
+        # get the results out of the row objects.
+        approval_results = [x[0] for x in data_export_approvers]
+
+        if all(x is True for x in approval_results):
+            print("APPROVED!")
+            self.data_export_request.status = "APPROVED"
+            db.session.commit()
 
 
 class RequestLinkVerification:
@@ -194,12 +201,12 @@ class RequestLinkVerification:
         self.data_export_request = None
         self.status = ""
 
-    def verify_request_link(self, token):
+    def verify_request_link(self):
         """Checks user is a required approver for this request and that it has not already been approved."""
         (
             self.approver,
             self.data_export_request,
-        ) = services.email.verify_data_export_request_token(token)
+        ) = services.email.verify_data_export_request_token(self.token)
         if not (
             self.approver == current_user
             and services.person.from_current_user_email()
@@ -208,14 +215,15 @@ class RequestLinkVerification:
             flash("Data export request expired")
             return "failed"
         # redirect if user has already approved.
-        if self.check_if_already_approved() is True:
-            flash("You have already approved this data export request")
+        if self._check_if_already_responded() is True:
+            flash("You have already responded to this data export request")
             return "failed"
         return "success"
 
-    def check_if_already_approved(self):
+    def _check_if_already_responded(self) -> bool:
+        """Returns True if the user has already responded to this data export request"""
         return (
-            db.session.query(models.data_export_request_approvers.c.approved)
+            db.session.query(models.data_export_request_approvers.c.responded)
             .filter(
                 models.data_export_request_approvers.c.data_export_request_id
                 == self.data_export_request.id
@@ -225,3 +233,45 @@ class RequestLinkVerification:
             )
             .first()
         )[0]
+
+
+class InitiateDataExport:
+    def __init__(self, data_export_request: models.DataExportRequest):
+        self.data_export_request = data_export_request
+
+    def initiate(self):
+        export_function = self.get_export_function()
+        export_function()
+        print(export_function.__name__)
+        print("work")
+        time.sleep(20)
+        print("still working")
+
+    def get_export_function(self):
+        export_function_dict = {
+            "RDF": self.make_rdf_export,
+            "CSV": self.make_csv_export,
+            "JSON": self.make_json_export,
+            "SURF": self.make_surf_export,
+            "PDF": self.make_pdf_export,
+            "ELN": self.make_eln_export,
+        }
+        return export_function_dict[self.data_export_request.data_format.value]
+
+    def make_rdf_export(self):
+        pass
+
+    def make_csv_export(self):
+        pass
+
+    def make_json_export(self):
+        pass
+
+    def make_surf_export(self):
+        pass
+
+    def make_pdf_export(self):
+        pass
+
+    def make_eln_export(self):
+        pass

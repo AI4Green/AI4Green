@@ -150,7 +150,9 @@ function handleNewExportRequestResponse(feedback, exportFormat) {
       $requestFeedback.text(
         `${exportFormat} Data export request created. Your export will be accessible once all of the workgroup principal investigators have approved the request.`,
       );
-      $(`#${exportFormat.toLowerCase()}-button`).addClass("disabled");
+      $(`#${exportFormat.toLowerCase()}-button`)
+        .prop("disabled", true)
+        .tooltip("hide");
       break;
     case "permission denied":
       $requestFeedback.text(

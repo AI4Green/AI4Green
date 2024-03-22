@@ -1,5 +1,7 @@
 import ast
 import json
+import threading
+import time
 
 import pandas as pd
 from flask import Response, flash, jsonify, redirect, render_template, request, url_for
@@ -49,19 +51,17 @@ def export_data_request_response(token: str) -> Response:
     """
     Verify the token and the approver and either redirect or render the page with the request information
     """
-    # verify token and get the approver user object and the data_export_request object
-    user, data_export_request = services.email.verify_data_export_request_token(token)
-    # if link has expired send back to home
-    if not (user and data_export_request):
-        flash("Data export request expired")
-        return redirect(url_for("main.home"))
-    # get workgroup name, workbook
-    workbooks_names = [wb.name for wb in data_export_request.workbooks]
+    # verify and give user the request data or if they fail verification send them home.
+    verification = services.data_export.export.RequestLinkVerification(token)
+    if verification.verify_request_link() == "failed":
+        return redirect(url_for("main.index"))
+    # get workbook names from list
+    workbooks_names = [wb.name for wb in verification.data_export_request.workbooks]
     workbooks = ", ".join(workbooks_names)
 
     return render_template(
         "data_export/data_export_request.html",
-        data_export_request=data_export_request,
+        data_export_request=verification.data_export_request,
         workbooks=workbooks,
     )
 
@@ -71,7 +71,8 @@ def export_data_request_response(token: str) -> Response:
 def export_denied():
     """Update the request in the database"""
     data_export_request = models.DataExportRequest.query.get(request.json["exportID"])
-    services.data_export.export.request_rejected(data_export_request)
+    request_status = services.data_export.export.RequestStatus(data_export_request)
+    request_status.deny()
     flash("Data export denied!")
     return redirect(url_for("main.index"))
 
@@ -81,8 +82,18 @@ def export_denied():
 def export_approved():
     """Update the database with the approval. Then check if all approvers have done so and start export."""
     data_export_request = models.DataExportRequest.query.get(request.json["exportID"])
-    services.data_export.export.request_accepted(data_export_request)
-    services.data_export.export.update_request_status(data_export_request)
+    request_status = services.data_export.export.RequestStatus(data_export_request)
+    request_status.accept()
+    request_status.update_status()
+    if data_export_request.status.value == "APPROVED":
+        # initiate data export release with threads then notify requestor after successful data export generation.
+        export_process = services.data_export.export.InitiateDataExport(
+            data_export_request
+        )
+        task_thread = threading.Thread(target=export_process.initiate)
+        task_thread.start()
+
+    # services.data_export.export.update_request_status(data_export_request)
     flash("Data export approved!")
     print("here")
     return redirect(url_for("main.index"))
