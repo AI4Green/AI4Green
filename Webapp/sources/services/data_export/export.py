@@ -259,6 +259,12 @@ class InitiateDataExport:
         return export_function_dict[self.data_export_request.data_format.value]
 
     def make_rdf_export(self):
+        # container_name = hash(self.data_export_request)
+        # for reaction in self.data_export_request.reactions:
+        #     rdf = services.data_export.reaction_data_file.ReactionDataFile(
+        #         reaction,
+        #         reaction.reaction_id,
+        #     )
         pass
 
     def make_csv_export(self):
@@ -275,3 +281,29 @@ class InitiateDataExport:
 
     def make_eln_export(self):
         pass
+
+
+class MakeZip:
+    """Makes a zip file of the reaction data files"""
+
+    def __init__(self, workbook, workgroup):
+        self.workbook = services.workbook.get_workbook_from_group_book_name_combination(
+            workbook, workgroup
+        )
+        self.workgroup = workgroup
+        self.requestor = current_user
+        # self.make_zip()
+
+    #
+    #     def make_zip(self):
+    #         """Temporarily saves a zip file to the blob service"""
+    #
+    #         reactions = services.reaction.list_active_in_workbook(
+    #             self.workbook.name, self.workgroup
+    #         )
+    #         rdf_list = []
+    #
+    #         for reaction in reactions:
+    #             ReactionDataFile(
+    #                 reaction,
+    #             )

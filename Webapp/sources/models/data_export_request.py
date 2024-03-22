@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 from enum import Enum
 
@@ -83,7 +84,9 @@ class DataExportRequest(Model):
 
     status = db.Column(db.Enum(ApprovalStatus), default=ApprovalStatus.PENDING.value)
 
-    reactions = db.relationship("Reaction", backref="data_export_request")
+    # uuid = db.Column(db.Text, default=db.str(uuid.uuid4()))
+
+    # reactions = db.relationship("Reaction", backref="data_export_request")
 
     # supports multiple workbooks if desired in future functionality
     workbooks = db.relationship(
