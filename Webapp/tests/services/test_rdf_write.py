@@ -10,6 +10,7 @@ from sources import services
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Local temp files don't work in CI")
 def test_export_reaction_as_rdf(app: Flask, mocker: pytest_mock.MockerFixture):
     """
     Test saving an exported reaction data file locally and reloading it and checking for data changes
