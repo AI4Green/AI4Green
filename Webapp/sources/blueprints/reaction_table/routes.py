@@ -120,7 +120,7 @@ def process():
     number_of_reactants = len(reactant_data["name_list"])
 
     # Find products in database then add data to the dictionary
-    for idx, product_smiles in enumerate(products_smiles_list):
+    for idx, product_smiles in enumerate(products_smiles_list, 1):
         novel_compound = False  # false but change later if true
         mol = Chem.MolFromSmiles(product_smiles)
         if mol is None:
