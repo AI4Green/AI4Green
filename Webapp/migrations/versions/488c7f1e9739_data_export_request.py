@@ -1,15 +1,15 @@
 """data_export_request
 
-Revision ID: 089a7b23873c
+Revision ID: 488c7f1e9739
 Revises: 436a03e01053
-Create Date: 2024-03-20 13:56:12.245914
+Create Date: 2024-03-22 13:59:39.262748
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "089a7b23873c"
+revision = "488c7f1e9739"
 down_revision = "436a03e01053"
 branch_labels = None
 depends_on = None
@@ -24,7 +24,9 @@ def upgrade():
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column(
             "data_format",
-            sa.Enum("RDF", "PDF", "ELN", "SURF", "CSV", "SI", name="exportformat"),
+            sa.Enum(
+                "RDF", "PDF", "ELN", "SURF", "CSV", "JSON", "SI", name="exportformat"
+            ),
             nullable=True,
         ),
         sa.Column("requestor", sa.Integer(), nullable=False),
@@ -62,6 +64,7 @@ def upgrade():
         sa.Column("data_export_request_id", sa.Integer(), nullable=True),
         sa.Column("person_id", sa.Integer(), nullable=True),
         sa.Column("approved", sa.Boolean(), nullable=True),
+        sa.Column("responded", sa.Boolean(), nullable=True),
         sa.ForeignKeyConstraint(
             ["data_export_request_id"],
             ["DataExportRequest.id"],
