@@ -77,7 +77,7 @@ class Reaction(Model):
     data_export_request_id = db.Column(
         db.Integer, db.ForeignKey("DataExportRequest.id")
     )
-    data_export_request = db.relationship("DataExportRequest", backref="reactions")
+    # data_export_request = db.relationship("DataExportRequest", backref="reactions")
 
 
 t_Reaction_Reaction = db.Table(

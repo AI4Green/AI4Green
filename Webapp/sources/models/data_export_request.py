@@ -84,9 +84,9 @@ class DataExportRequest(Model):
 
     status = db.Column(db.Enum(ApprovalStatus), default=ApprovalStatus.PENDING.value)
 
-    # uuid = db.Column(db.Text, default=db.str(uuid.uuid4()))
+    uuid = db.Column(db.Text, default=str(uuid.uuid4()))
 
-    # reactions = db.relationship("Reaction", backref="data_export_request")
+    reactions = db.relationship("Reaction", backref="data_export_request")
 
     # supports multiple workbooks if desired in future functionality
     workbooks = db.relationship(
