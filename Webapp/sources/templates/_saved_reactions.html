@@ -1,6 +1,7 @@
 <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_list.css') }}">
+    {% from "macros.html" import render_new_reaction_modal %}
 <script>
     $(function() {
         if (window.location.pathname.split("/")[1] !== 'search') {
@@ -23,6 +24,9 @@
 <div id="reaction-list">
     {% for reaction in reactions %}
         <div id="reaction-{{ loop.index }}" class="reaction-card">
+            <input type="hidden" value="{{ reaction.reaction_id }}" id="reaction-id">
+            <input type="hidden" value="{{ reaction.workbook }}" id="workbook">
+            <input type="hidden" value="{{ reaction.workgroup }}" id="workgroup">
             <div id="reaction-name{{ loop.index }}" class="reaction-name"><h4>{{ reaction.name }}</h4></div>
             <div id="reaction-id{{ loop.index }}"><h5>{{ reaction.reaction_id }}</h5></div>
             <div class="description">{{ reaction.description }}</div>
@@ -40,7 +44,8 @@
                 </button>
             {% endif %}
             <button
-                    onclick="newReactionModalWindow('clone', this.id)" id="{{ reaction.reaction_id }}" class="btn btn-info"  data-toggle="modal" data-target="#new-reaction-modal" title="Create New Reaction">Clone
+                    onclick="cloneReactionModalWindow(this)" id="{{ reaction.reaction_id }}" class="btn btn-info"  data-toggle="modal"
+                    data-target="#new-reaction-modal" title="Create New Reaction" data-workbook="{{ reaction.workbook }}" data-workgroup="{{ reaction.workgroup }}">Clone
             </button>
             {% if reaction.completion_status == "complete" %}
                 <i class="fa fa-lock" style="font-size:20px; color:darkgrey;"></i><b style="font-size:12px; color:darkgrey;">  Reaction Locked</b>
@@ -58,5 +63,7 @@
 {% else %}
 
 {% endif %}
+
+{{ render_new_reaction_modal() }}
 <input type="hidden" value="{{ reactions|length }}" id="js-number-of-reactions">
 <input type="hidden" value="{{ sort_crit }}" id="js-sort-crit">

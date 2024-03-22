@@ -14,6 +14,8 @@ from sources.auxiliary import (
     abort_if_user_not_in_workbook,
     security_member_workgroup_workbook,
 )
+from datetime import datetime
+import pytz
 from sources.extensions import db
 
 from . import reaction_list_bp
@@ -72,9 +74,10 @@ def get_reactions() -> Response:
     reactions = services.reaction.list_active_in_workbook(
         workbook_name, workgroup_name, sort_crit
     )
+    new_reaction_id = services.workbook.get_next_reaction_id_in_workbook(workbook)
     reactions = services.reaction.to_dict(reactions)
     reaction_details = render_template(
-        "_saved_reactions.html", reactions=reactions, sort_crit=escape(sort_crit)
+        "_saved_reactions.html", reactions=reactions, sort_crit=escape(sort_crit), workgroup=workgroup_name, new_reaction_id=new_reaction_id
     )
     return jsonify({"reactionDetails": reaction_details})
 
@@ -98,3 +101,18 @@ def get_schemata() -> Response:
     )
     schemes = services.reaction.make_scheme_list(reaction_list, size)
     return {"schemes": schemes, "sort_crit": escape(sort_crit)}
+
+
+@reaction_list_bp.route("/get_new_reaction_id", methods=["GET", "POST"])
+@login_required
+def get_new_reaction_id() -> Response:
+    workbook_name = request.json['workbook']
+    workgroup_name = request.json['workgroup']
+
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
+
+    new_id = services.workbook.get_next_reaction_id_in_workbook(workbook)
+
+    return jsonify(new_id)

@@ -51,3 +51,24 @@ def get_workbook_from_group_book_name_combination(
         .filter(models.WorkGroup.name == workgroup_name)
         .first()
     )
+
+
+def get_next_reaction_id_in_workbook(workbook: models.WorkBook) -> str:
+    workbook_abbreviation = workbook.abbreviation
+    # find the newest reaction and then +1 to the id and return
+    newest_reaction = (
+        db.session.query(models.Reaction)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook.id)
+        .order_by(models.Reaction.reaction_id.desc())
+        .first()
+    )
+    if not newest_reaction:
+        # if no reactions in workbook yet, then start with 001
+        return f"{workbook_abbreviation}-001"
+    most_recent_reaction_id = newest_reaction.reaction_id
+    # take the number on the rhs of the reaction id, remove the 0s, convert to int, add 1, convert to str, add 0s
+    new_reaction_id_number = str(
+        int(most_recent_reaction_id.split("-")[-1].lstrip("0")) + 1
+    ).zfill(3)
+    return f"{workbook_abbreviation}-{new_reaction_id_number}"

@@ -4,7 +4,7 @@ from typing import Optional
 from flask import Response, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required
 
-from sources import models
+from sources import models, services
 from sources.auxiliary import (get_notification_number, get_workgroups,
                                security_member_workgroup)
 from sources.extensions import db
@@ -83,7 +83,7 @@ def workgroup(
     workbook_names = [wb.name for wb in workbooks]
     workbook_new_reaction_ids_dic = {}
     for workbook in workbooks:
-        next_reaction_id = find_next_reaction_id(workbook)
+        next_reaction_id = services.workbook.get_next_reaction_id_in_workbook(workbook)
         workbook_new_reaction_ids_dic[workbook.name] = next_reaction_id
     # select workbook with newest reaction in as active workbook to be selected by default
     if workbooks:
@@ -131,22 +131,4 @@ def workgroup(
     )
 
 
-def find_next_reaction_id(workbook: models.WorkBook) -> str:
-    workbook_abbreviation = workbook.abbreviation
-    # find the newest reaction and then +1 to the id and return
-    newest_reaction = (
-        db.session.query(models.Reaction)
-        .join(models.WorkBook)
-        .filter(models.WorkBook.id == workbook.id)
-        .order_by(models.Reaction.reaction_id.desc())
-        .first()
-    )
-    if not newest_reaction:
-        # if no reactions in workbook yet, then start with 001
-        return f"{workbook_abbreviation}-001"
-    most_recent_reaction_id = newest_reaction.reaction_id
-    # take the number on the rhs of the reaction id, remove the 0s, convert to int, add 1, convert to str, add 0s
-    new_reaction_id_number = str(
-        int(most_recent_reaction_id.split("-")[-1].lstrip("0")) + 1
-    ).zfill(3)
-    return f"{workbook_abbreviation}-{new_reaction_id_number}"
+

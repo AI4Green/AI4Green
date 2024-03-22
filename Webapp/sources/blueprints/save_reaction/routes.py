@@ -137,20 +137,24 @@ def new_reaction() -> Response:
     else:
         return name_check
 
+
 @save_reaction_bp.route("/clone_reaction", methods=["POST", "GET"])
 @login_required
 def clone_reaction() -> Response:
+
     old_reaction = services.reaction.get_current_from_request_form()
+
     new_reaction_name = request.form['reactionName']
-    new_reaction_id = request.form['newReactionID']
     workbook_name = request.form["workbook"]
     workgroup_name = request.form["workgroup"]
-
+    new_reaction_id = request.form['newReactionID']
     workbook_object = services.workbook.get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
 
     creator = services.person.from_current_user_email()
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
 
+    remove_yield_dict = json.loads(old_reaction.summary_table_data)
+    remove_yield_dict.update({"real_product_mass": "", "unreacted_reactant_mass": ""})
     # check for reaction id - catches errors caused if user has 2 tabs open
     reaction_id_check = services.reaction.get_from_reaction_id_and_workbook_id(new_reaction_id, workbook_object.id)
     if reaction_id_check:
@@ -168,7 +172,7 @@ def clone_reaction() -> Response:
             status="active",
             complete="not complete",
             reaction_table_data=old_reaction.reaction_table_data,
-            summary_table_data=old_reaction.summary_table_data,
+            summary_table_data=json.dumps(remove_yield_dict),
             reaction_smiles=old_reaction.reaction_smiles
         )
         db.session.add(reaction)
@@ -360,7 +364,6 @@ def autosave() -> Response:
     catalyst_recovered = request.form["catalystRecovered"]
     # radio buttons for standard protocols, disposal, spillage, and hazard categorisation
     radio_buttons = get_data("selectedRadioButtons")[:-1]
-    print(radio_buttons)
     # other hazards textbox, and custom protocol fields
     custom_protocol1 = request.form["customProtocol1"]
     custom_protocol2 = request.form["customProtocol2"]
