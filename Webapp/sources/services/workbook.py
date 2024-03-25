@@ -53,16 +53,37 @@ def get_workbook_from_group_book_name_combination(
     )
 
 
-def get_next_reaction_id_in_workbook(workbook: models.WorkBook) -> str:
-    workbook_abbreviation = workbook.abbreviation
-    # find the newest reaction and then +1 to the id and return
-    newest_reaction = (
+def get_newest_reaction_in_workbook(workbook: models.WorkBook) -> models.Reaction:
+    """
+    Finds the most recent reaction in specified workbook
+    Args:
+        workbook: models.Workbook, workbook to search
+
+    Returns:
+        models.Reaction, most recent reaction in workbook
+    """
+
+    return (
         db.session.query(models.Reaction)
         .join(models.WorkBook)
         .filter(models.WorkBook.id == workbook.id)
         .order_by(models.Reaction.reaction_id.desc())
         .first()
     )
+
+def get_next_reaction_id_in_workbook(workbook: models.WorkBook) -> str:
+    """
+    Gets the Id for the next reaction to be added to the workbook
+    Args:
+        workbook: models.Workbook, workbook reaction will be added to
+
+    Returns:
+        Reaction ID: Next reaction ID in the form: workbook_abbreviation-reaction_number
+    """
+    workbook_abbreviation = workbook.abbreviation
+    # find the newest reaction and then +1 to the id and return
+    newest_reaction = get_newest_reaction_in_workbook(workbook)
+
     if not newest_reaction:
         # if no reactions in workbook yet, then start with 001
         return f"{workbook_abbreviation}-001"

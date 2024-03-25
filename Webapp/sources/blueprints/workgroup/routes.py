@@ -24,49 +24,15 @@ def workgroup(
     if not security_member_workgroup(workgroup_selected):
         flash("You do not have permission to view this page")
         return redirect(url_for("main.index"))
+
     workgroups = get_workgroups()
 
     # finds workgroup object (needs institution later)
-    workgroup_selected_obj = (
-        db.session.query(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_selected)
-        .first()
-    )
+    workgroup_selected_obj = services.workgroup.get_workgroup_from_workgroup_name(workgroup_selected)
     approval_status = workgroup_selected_obj.approved
     notification_number = get_notification_number()
 
-    pi = (
-        db.session.query(models.User.email)
-        .join(models.Person)
-        .join(models.t_Person_WorkGroup)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_selected)
-        .all()
-    )
-    if current_user.email in [user.email for user in pi]:
-        user_type = "principal_investigator"
-
-    sr = (
-        db.session.query(models.User)
-        .join(models.Person)
-        .join(models.t_Person_WorkGroup_2)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_selected)
-        .all()
-    )
-    if current_user.email in [user.email for user in sr]:
-        user_type = "senior_researcher"
-
-    sm = (
-        db.session.query(models.User)
-        .join(models.Person)
-        .join(models.t_Person_WorkGroup_3)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_selected)
-        .all()
-    )
-    if current_user.email in [user.email for user in sm]:
-        user_type = "standard_member"
+    user_type = services.workgroup.get_user_type_in_workbook(workgroup_selected)
 
     # get lists of workbooks, and the next reaction id for each workbooks
     workbooks = (
