@@ -36,9 +36,6 @@ hazard_exposure_risk = {  # combination of risks - risk category dictionary
 }
 
 
-# def get_multiple_compounds_data(
-#     compounds_hazard_codes_list: List[str], physical_forms_list: List[str]
-# ) -> Tuple[List[int], List[str], List[str], List[str], List[str], List[str], List[str]]:
 def get_multiple_compounds_data(component_dict: Dict, component_type: str):
     """
     For a list of compounds (e.g., products) this returns all their hazard data. Each array has one item per compound

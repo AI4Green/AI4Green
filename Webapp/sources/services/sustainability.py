@@ -188,5 +188,4 @@ def percent_yield_from_rxn_data(rxn_data: Dict, obtained_yield_mass: float) -> f
         normalised_limiting_reactant_amount * desired_product_molecular_weight
     )
     normalised_yield_mass = obtained_yield_mass * mass_factor
-    # percent_yield = round(normalised_yield_mass / theoretical_yield * 100, 3)
     return round(normalised_yield_mass / theoretical_yield * 100, 2)

@@ -35,11 +35,11 @@ def summary() -> Response:
     if summary_table_data != "no data":
         summary_table_data = ast.literal_eval(summary_table_data)
 
-    unit_data = services.summary.get_unit_data()
-    reactant_data = services.summary.get_reactant_data()
-    reagent_data = services.summary.get_reagent_data()
-    solvent_data = services.summary.get_solvent_data()
-    product_data = services.summary.get_product_data()
+    unit_data = services.summary.get_unit_data(request.form)
+    reactant_data = services.summary.get_reactant_data(request.form)
+    reagent_data = services.summary.get_reagent_data(request.form)
+    solvent_data = services.summary.get_solvent_data(request.form)
+    product_data = services.summary.get_product_data(request.form)
 
     # check all the requirement information has been typed into the reaction table
     check_results = services.summary.check_required_data_is_present(
