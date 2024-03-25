@@ -72,6 +72,7 @@ def register_extensions(app: Flask) -> None:
 
     login.init_app(app)
     login.login_view = "auth.login"
+
     @login.user_loader
     def load_user(user_id: int):
         return models.User.query.get(user_id)
@@ -92,6 +93,7 @@ def register_cli(app: Flask) -> None:
     from sources.commands import commands
 
     app.cli.add_command(commands.drop_db)
+    app.cli.add_command(commands.create_db)
     app.cli.add_command(commands.seed_db)
     app.cli.add_command(commands.seed_users)
     app.cli.add_command(commands.download_pubchem)

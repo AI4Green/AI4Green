@@ -1,6 +1,5 @@
 import ast
 import json
-from typing import Optional
 
 import pandas as pd
 from flask import Response, flash, redirect, render_template, url_for

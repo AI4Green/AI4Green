@@ -1,5 +1,6 @@
 import re
-from typing import Dict, List, Optional, Tuple, Union
+from datetime import datetime
+from typing import Optional, Tuple
 
 from flask import abort, request
 from flask_login import current_user
@@ -25,7 +26,7 @@ def get_smiles(primary_key: Tuple[str, int]) -> str:
 
     return (
         db.session.query(models.NovelCompound.smiles)
-        .filter(models.NovelCompound.name == primary_key[0])
+        .filter(models.NovelCompound.name == primary_key[0].lower())
         .join(models.WorkBook)
         .filter(models.WorkBook.id == primary_key[1])
         .first()
@@ -147,6 +148,25 @@ def add(
     db.session.add(nc)
     db.session.commit()
     return nc
+
+
+def reform_novel_compound_primary_key(primary_key: str) -> Tuple:
+    """
+    Converts a novel primary key to a tuple from the string returned from the frontend HTML
+
+    Args:
+        primary_key - the primary key as a string. e.g., ('pixie dust', 1)
+
+    Returns:
+        A tuple of (compound_name, workbook_id)
+    """
+    if len(primary_key) > 350:
+        abort(
+            413
+        )  # content too large. Exceeds max workbook name length + max novel compound name length
+    compound_name = re.search(r"\('([^']*)', \d", primary_key).group(1)
+    workbook_id = int(re.search(r"', (\d+)", primary_key).group(1))
+    return compound_name, workbook_id
 
 
 class NewNovelCompound:
@@ -330,6 +350,7 @@ class NewNovelCompound:
         Check hazard codes are in the correct format.
         """
         if not self.hazard_codes:
+            self.hazard_codes = "Unknown"
             return
         hazard_codes_ls = self.hazard_codes.split("-")
         for hazard_code in hazard_codes_ls:

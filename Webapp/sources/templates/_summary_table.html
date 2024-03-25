@@ -35,7 +35,7 @@
         <td><input type="number" value="{{ rounded_reagent_amounts[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td><input type="number" value="{{ rounded_reagent_volumes[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td><input type="number" value="{{ rounded_reagent_masses[loop.index0] }}" style="width:80px; border:none" readonly></td>
-    </tr>    
+    </tr>
     {% endfor %}
     <tr>
         <td style="background-color: rgb(184, 184, 184);"></td>
@@ -59,7 +59,7 @@
         <td></td>
         <td><input type="number" value="{{ solvent_volumes[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td></td>
-    </tr>    
+    </tr>
     {% endfor %}
     <tr>
         <td style="background-color: rgb(184, 184, 184);"></td>
@@ -108,7 +108,7 @@
         <td id="Reactant-Hazard-Rating{{ loop.index }}" colspan="2" class="{{ reactant_hazard_colors[loop.index0] }} to-export-hazard-matrix">{{ reactant_hazard_ratings[loop.index0] }}</td>
         <td id="Reactant-Exposure-Potential{{ loop.index }}" colspan="2" class="to-export-hazard-matrix">{{ reactant_exposure_potentials[loop.index0] }}</td>
         <td id="Reactant-Risk-Rating{{ loop.index }}" colspan="2" class="{{ reactant_risk_colors[loop.index0] }} to-export-hazard-matrix">{{ reactant_risk_ratings[loop.index0] }}</td>
-    </tr>    
+    </tr>
     {%  endfor %}
     {% for reagent in reagents %}
     <tr>
@@ -117,7 +117,7 @@
         <td id="Reagent-Hazard-Rating{{ loop.index }}" colspan="2" class="{{ reagent_hazard_colors[loop.index0] }} to-export-hazard-matrix">{{ reagent_hazard_ratings[loop.index0] }}</td>
         <td id="Reagent-Exposure-Potential{{ loop.index }}" class="to-export-hazard-matrix" colspan="2">{{ reagent_exposure_potentials[loop.index0] }}</td>
         <td id="Reagent-Risk-Rating{{ loop.index }}" colspan="2" class="{{ reagent_risk_colors[loop.index0] }} to-export-hazard-matrix">{{ reagent_risk_ratings[loop.index0] }}</td>
-    </tr>    
+    </tr>
     {% endfor %}
     {% for solvent in solvents %}
     <tr>
@@ -169,8 +169,8 @@
                     </td>
                     <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Batch/flow</b></td>
                     <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Isolation</b></td>
-                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Catalyst</b></td>
-                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Recovery</b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Stoichiometry</b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Cat. Recovery</b></td>
                 </tr>
                 <tr>
                     <td id="js-safety-cell" class="{{ risk_color }}">{{ risk_rating }}</td>
