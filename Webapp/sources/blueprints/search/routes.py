@@ -128,7 +128,7 @@ class SearchHandler:
 
     def render_results_template(self) -> None:
         """Makes the results list"""
-        reactions = services.reaction.to_dict(self.matches, "AZ")
+        reactions = services.reaction.to_dict(self.matches)
         self.schemes = services.reaction.make_scheme_list(self.matches, "small")
         self.search_results = render_template(
             "_saved_reactions.html", reactions=reactions, sort_crit="AZ"

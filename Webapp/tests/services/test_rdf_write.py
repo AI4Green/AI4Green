@@ -3,6 +3,7 @@ import pickle
 import tempfile
 
 import chython
+import pytest
 import pytest_mock
 from flask import Flask
 from sources import services
@@ -10,6 +11,7 @@ from sources import services
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Local temp files don't work in CI")
 def test_export_reaction_as_rdf(app: Flask, mocker: pytest_mock.MockerFixture):
     """
     Test saving an exported reaction data file locally and reloading it and checking for data changes
@@ -109,5 +111,3 @@ def validate_rdf(
     ):
         if original_product and loaded_product:
             assert original_product.is_equal(loaded_product), "product inequality"
-
-    print("all assertions passed")

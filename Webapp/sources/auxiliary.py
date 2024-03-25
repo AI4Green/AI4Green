@@ -47,11 +47,20 @@ def smiles_symbols(
     return compound.replace("minus", "-").replace("plus", "+").replace("sharp", "#")
 
 
-def get_data(field) -> List[str]:
+def get_data(field: str, request_data: Optional[Dict] = None) -> List[str]:
     """
     Get a list of compound data from a semicolon delimited string sent from the frontend
+    Request data is preferably passed explicitly but global variable will be used if not.
+
+    Args:
+        field - is the key we are accessing
+        request_data - the dictionary from flask.request.form/json.
+
     """
-    data0 = str(request.form[field])
+    if request_data:
+        data0 = str(request_data[field])
+    else:
+        data0 = str(request.form[field])
     return data0.split(";")
 
 
