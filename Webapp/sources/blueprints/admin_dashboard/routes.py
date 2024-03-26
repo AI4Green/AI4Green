@@ -45,7 +45,9 @@ def admin_dashboard(
     all_users = services.user.list_all()
     all_workgroups = services.workgroup.list_all()
     all_workbooks = services.workbook.list_all()
+    all_solvent_surfers = services.PCA_graph.list_all()
     recent_reactions = services.reaction.list_recent()
+
 
     return render_template(
         "admin_dashboard.html",
@@ -53,12 +55,14 @@ def admin_dashboard(
         compound_data_error_reports=compound_data_error_reports,
         number_compounds_in_db=compound_count,
         number_reactions_in_db=reaction_count,
+        number_surfers_in_db=len(all_solvent_surfers),
         new_workgroup_requests=new_workgroup_requests,
         notification_number=notification_number,
         users=all_users,
         wgs=all_workgroups,
         workbooks=all_workbooks,
         recent_reactions=recent_reactions,
+        all_solvent_surfers=all_solvent_surfers
     )
 
 
