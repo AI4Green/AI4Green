@@ -8,7 +8,7 @@ import os
 import uuid
 from datetime import datetime
 
-import magic
+#import magic
 import pytz
 from azure.core.exceptions import ResourceExistsError
 from azure.storage.blob import BlobClient, BlobServiceClient
@@ -141,6 +141,14 @@ def new_reaction() -> Response:
 @save_reaction_bp.route("/clone_reaction", methods=["POST", "GET"])
 @login_required
 def clone_reaction() -> Response:
+    """
+    Takes reactions data from previously saved reaction and copies it into a new reaction which is saved to the database
+    real_product_mass and unreacted_reactant_mass are removed from the reaction data for users to input upon reaction completion
+
+    Returns:
+        Response as JSON, either New Reaction Made or Reaction Name is not Unique
+
+    """
 
     old_reaction = services.reaction.get_current_from_request_form()
 
@@ -155,6 +163,7 @@ def clone_reaction() -> Response:
 
     remove_yield_dict = json.loads(old_reaction.summary_table_data)
     remove_yield_dict.update({"real_product_mass": "", "unreacted_reactant_mass": ""})
+
     # check for reaction id - catches errors caused if user has 2 tabs open
     reaction_id_check = services.reaction.get_from_reaction_id_and_workbook_id(new_reaction_id, workbook_object.id)
     if reaction_id_check:
