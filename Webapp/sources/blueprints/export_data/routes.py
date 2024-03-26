@@ -87,9 +87,7 @@ def export_approved():
     request_status.update_status()
     if data_export_request.status.value == "APPROVED":
         # initiate data export release with threads then notify requestor after successful data export generation.
-        export_process = services.data_export.export.InitiateDataExport(
-            data_export_request
-        )
+        export_process = services.data_export.export.DataExport(data_export_request.id)
         task_thread = threading.Thread(target=export_process.initiate)
         task_thread.start()
 

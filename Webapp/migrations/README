@@ -1,1 +1,2 @@
 Single-database configuration for Flask.
+Put stuff about editing migration files  conventions for creating foreign key constraints and enums #todo

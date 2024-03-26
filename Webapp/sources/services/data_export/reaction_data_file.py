@@ -90,14 +90,13 @@ class ReactionDataFile:
         # connect to azure
         blob_service_client = services.file_attachments.connect_to_azure_blob_service()
         # make more get container
-        container_name = "data_export_temp"
         # container_client = (
         #     services.file_attachments.create_or_get_existing_container_client(
-        #         blob_service_client, container_name
+        #         blob_service_client, self.container_name
         #     )
         # )
         blob_client = blob_service_client.get_blob_client(
-            container=container_name, blob=self.filename
+            container=self.container_name, blob=self.filename
         )
 
         print("uploading blob")

@@ -1,14 +1,17 @@
+import io
+import os
 import threading
 import time
+import zipfile
 from datetime import datetime
 from typing import List, Literal
 
 import pytz
-from flask import flash, request
+from flask import abort, flash, request
 from flask_login import current_user
 from sources import models, services
 from sources.extensions import db
-from sqlalchemy import update
+from sqlalchemy import inspect, update
 
 
 class NewRequest:
@@ -105,7 +108,7 @@ class NewRequest:
         for principal_investigator in self.workgroup.principal_investigator:
             models.Notification.create(
                 person=principal_investigator.id,
-                type="Data Export Request",  # todo add link to info
+                type="Data Export Request",
                 info=f"The following user: {self.requestor.user.email} has requested to export data from workbooks: "
                 f"{', '.join(workbook_names)} in {self.data_format} format.<br>"
                 f"To respond please follow the link sent to your email account. This request will expire after 7 days.",
@@ -165,7 +168,7 @@ class RequestStatus:
             person=self.data_export_request.requestor,
             type="Data Export Request Rejected",
             info=f"Your request to export {len(self.data_export_request.reactions)} reactions from {workbooks} in "
-            f"{self.data_export_request.data_format} was rejected.",
+            f"{self.data_export_request.data_format} was rejected by a principal investigator in your workgroup.",
             time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
             status="active",
         )
@@ -215,7 +218,7 @@ class RequestLinkVerification:
             flash("Data export request expired")
             return "failed"
         # redirect if user has already approved.
-        if self._check_if_already_responded() is True:
+        if self._check_if_already_responded() is False:  # todo debugg
             flash("You have already responded to this data export request")
             return "failed"
         return "success"
@@ -235,9 +238,18 @@ class RequestLinkVerification:
         )[0]
 
 
-class InitiateDataExport:
-    def __init__(self, data_export_request: models.DataExportRequest):
-        self.data_export_request = data_export_request
+class DataExport:
+    """Calls the methods required to actually create the desired export"""
+
+    # def __init__(self, data_export_request: models.DataExportRequest):
+    def __init__(self, data_export_request_id: int):
+        # db.session.refresh(data_export_request)
+        self.data_export_request = models.DataExportRequest.query.get(
+            data_export_request_id
+        )
+        self.container_name = self.data_export_request.uuid
+        insp = inspect(self.data_export_request)
+        print(insp.persistent, "init")
 
     def initiate(self):
         export_function = self.get_export_function()
@@ -259,13 +271,107 @@ class InitiateDataExport:
         return export_function_dict[self.data_export_request.data_format.value]
 
     def make_rdf_export(self):
-        # container_name = hash(self.data_export_request)
-        # for reaction in self.data_export_request.reactions:
-        #     rdf = services.data_export.reaction_data_file.ReactionDataFile(
-        #         reaction,
-        #         reaction.reaction_id,
-        #     )
-        pass
+        # uuid = self.data_export_request.uuid
+        # filenames = 'temp' / reaction.reaction_id + '_' + self.data_export_request.uuid,
+
+        # 1) make a container 2) iter through that container a
+
+        # zipfile_name = "export_" + self.data_export_request.uuid
+
+        insp = inspect(self.data_export_request)
+        print(insp.persistent, "preloop")
+        for reaction in self.data_export_request.reactions:
+            # save all files to the container
+            services.data_export.reaction_data_file.ReactionDataFile(
+                reaction, reaction.reaction_id, self.data_export_request.uuid
+            )
+            insp = inspect(self.data_export_request)
+            print(insp.persistent, "midloop")
+
+        # start
+
+        # Initialize your Blob Service Client
+        blob_service_client = services.file_attachments.connect_to_azure_blob_service()
+        # Get the container and iterate through blobs
+        container_client = (
+            services.file_attachments.create_or_get_existing_container_client(
+                blob_service_client, self.container_name
+            )
+        )
+        generator = container_client.list_blobs()
+
+        # Create an in-memory zip file
+        zip_stream = io.BytesIO()
+
+        with zipfile.ZipFile(zip_stream, mode="w") as zip_output:
+            for blob in generator:
+                # Read blob data
+                data = container_client.download_blob(blob.name).readall()
+
+                # Add blob data to the zip file
+                zip_output.writestr(blob.name, data)
+
+        # Upload the zip file to another container
+        blob_client = blob_service_client.get_blob_client(
+            container="export_outputs", blob=self.data_export_request.uuid
+        )
+        blob_client.upload_blob(zip_stream.getvalue(), overwrite=True)
+
+        with open(file=os.path.join(r"filepath", "filename"), mode="wb") as sample_blob:
+            download_stream = blob_client.download_blob()
+            sample_blob.write(download_stream.readall())
+
+        # Check if the upload was successful
+        if not blob_client.exists():
+            print("Blob upload failed")
+        # Upload the zip file to another container
+        results_blob = blob_service_client.get_blob_client(
+            container="export_outputs", blob="your_zipfile.zip"
+        )
+        results_blob.upload_blob(zip_stream.getvalue(), overwrite=True)
+
+        # You might want to handle this differently based on your application's requirements
+        # For example, raise an exception or return an appropriate HTTP status code
+
+    # end
+    #
+    #     blob_service_client = services.file_attachments.connect_to_azure_blob_service()
+    #
+    #     container = blob_service_client.get_container_client(container=self.data_export_request.uuid)
+    #     # then we iter through container and zip
+    #     generator = container.list_blobs()
+    #     for blob in generator:
+    #         data = container.download_blob(blob.name).readall()
+    #         results_blob = blob_service_client.get_blob_client(container="export_outputs",
+    #                                                            blob=f"{self.data_export_request.uuid}.zip")
+    #         results_blob.upload_blob(data, overwrite=True)
+    #         if not results_blob.exists():
+    #             print(f"blob {zipfile_name} upload failed")
+    #             abort(401)
+
+    #     # zipf.write(rdf.memory_file)
+    #
+    # blob_service_client = services.file_attachments.connect_to_azure_blob_service()
+    # # make more get container
+    # container_name = "data_export_temp"
+    # blob_client = blob_service_client.get_blob_client(
+    #     container=container_name, blob='export_' + self.data_export_request.uuid
+    # )
+    #
+    # print("uploading blob")
+    #
+    #
+    # file_hash = services.file_attachments.sha256_from_file_contents(
+    #     zipf.read()
+    # )
+    # if not file_hash:
+    #     print("Failed to generate hash")
+    #     abort(500)
+    # # Upload the blob data - default blob type is BlockBlob
+    # zipf.stream.seek(0)
+    # upload = io.BytesIO(zipf.stream.read())
+    # blob_client.upload_blob(upload, blob_type="BlockBlob")
+    # # confirm upload
 
     def make_csv_export(self):
         pass
