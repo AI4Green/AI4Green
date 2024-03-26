@@ -35,54 +35,35 @@ def workgroup(
     user_type = services.workgroup.get_user_type_in_workbook(workgroup_selected)
 
     # get lists of workbooks, and the next reaction id for each workbooks
-    workbooks = (
-        db.session.query(models.WorkBook)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_selected)
-        .join(models.t_Person_WorkBook)
-        .join(models.Person)
-        .join(models.User)
-        .filter(models.User.email == current_user.email)
-        .all()
-    )
+    workbooks = services.workbook.get_workbooks_from_user_group_combination(workgroup_selected, current_user)
 
-    workbook_names = [wb.name for wb in workbooks]
     workbook_new_reaction_ids_dic = {}
     for workbook in workbooks:
         next_reaction_id = services.workbook.get_next_reaction_id_in_workbook(workbook)
         workbook_new_reaction_ids_dic[workbook.name] = next_reaction_id
     # select workbook with newest reaction in as active workbook to be selected by default
     if workbooks:
-        workbook_object_list = (
-            db.session.query(models.WorkBook)
-            .filter(models.WorkBook.name.in_(workbook_names))
-            .join(models.WorkGroup)
-            .filter(models.WorkGroup.name == workgroup_selected)
-            .all()
-        )
 
-        newest_reaction = (
-            db.session.query(models.Reaction)
-            .join(models.WorkBook)
-            .filter(models.Reaction.workbooks.in_([x.id for x in workbook_object_list]))
-            .order_by(models.Reaction.time_of_creation.desc())
-            .first()
-        )
+        newest_reaction = services.workbook.get_newest_reaction_in_workbooks(workbooks)
 
         # if there is a newest reaction in the workbook collection, set to default and set the new reaction id
         if newest_reaction:
             workbook_selected_obj = newest_reaction.workbook
             # assign variable for workbook name and 3 letter abbreviation
             workbook_selected = workbook_selected_obj.name
+
         # if no reactions in any of the workbooks then take the workbook with the oldest primary key and make new reaction id
         else:
-            workbook_selected = workbook_object_list[0].name
+            workbook_selected = workbooks[0].name
+
         # find the new reaction id of the active workbook
         new_reaction_id = workbook_new_reaction_ids_dic[workbook_selected]
+
     else:
         # if no workbooks assign variables here
         workbooks = "no_workbooks"
         new_reaction_id = None
+
     return render_template(
         "workgroup.html",
         workgroup_selected=workgroup_selected,
@@ -95,6 +76,3 @@ def workgroup(
         workbook_next_reaction_ids=json.dumps(workbook_new_reaction_ids_dic),
         new_reaction_id=new_reaction_id,
     )
-
-
-

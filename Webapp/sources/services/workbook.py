@@ -2,6 +2,7 @@ from typing import List
 
 from sources import models
 from sources.extensions import db
+import flask_login
 
 
 def list_all() -> List[models.WorkBook]:
@@ -31,6 +32,29 @@ def get(primary_key: int) -> models.WorkBook:
     )
 
 
+def get_workbooks_from_user_group_combination(workgroup: str, user: flask_login.current_user) -> List[models.WorkBook]:
+    """
+    gets list of workbook objects from user and workbook
+
+    Args:
+        workgroup: str, workbook to search
+        user: flask_login.current_user, current user to retrieve workbooks for
+
+    Returns:
+        list of workbook objects for the specified user/workbook combination
+    """
+    return (
+        db.session.query(models.WorkBook)
+        .join(models.WorkGroup)
+        .filter(models.WorkGroup.name == workgroup)
+        .join(models.t_Person_WorkBook)
+        .join(models.Person)
+        .join(models.User)
+        .filter(models.User.email == user.email)
+        .all()
+    )
+
+
 def get_workbook_from_group_book_name_combination(
     workgroup_name: str, workbook_name: str
 ) -> models.WorkBook:
@@ -53,11 +77,11 @@ def get_workbook_from_group_book_name_combination(
     )
 
 
-def get_newest_reaction_in_workbook(workbook: models.WorkBook) -> models.Reaction:
+def get_newest_reaction_in_workbooks(workbooks: List[models.WorkBook]) -> models.Reaction:
     """
-    Finds the most recent reaction in specified workbook
+    Finds the most recent reaction in specified workbooks.
     Args:
-        workbook: models.Workbook, workbook to search
+        workbooks: list, contains models.Workbook to search from.
 
     Returns:
         models.Reaction, most recent reaction in workbook
@@ -66,10 +90,11 @@ def get_newest_reaction_in_workbook(workbook: models.WorkBook) -> models.Reactio
     return (
         db.session.query(models.Reaction)
         .join(models.WorkBook)
-        .filter(models.WorkBook.id == workbook.id)
-        .order_by(models.Reaction.reaction_id.desc())
+        .filter(models.Reaction.workbooks.in_([x.id for x in workbooks]))
+        .order_by(models.Reaction.time_of_creation.desc())
         .first()
     )
+
 
 def get_next_reaction_id_in_workbook(workbook: models.WorkBook) -> str:
     """
@@ -82,7 +107,7 @@ def get_next_reaction_id_in_workbook(workbook: models.WorkBook) -> str:
     """
     workbook_abbreviation = workbook.abbreviation
     # find the newest reaction and then +1 to the id and return
-    newest_reaction = get_newest_reaction_in_workbook(workbook)
+    newest_reaction = get_newest_reaction_in_workbooks([workbook])
 
     if not newest_reaction:
         # if no reactions in workbook yet, then start with 001
