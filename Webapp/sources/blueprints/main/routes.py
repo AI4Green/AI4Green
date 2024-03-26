@@ -105,6 +105,7 @@ def sketcher(
         .filter(models.Reaction.id == reaction.id)
         .all()
     )
+
     if reaction.reaction_smiles:
         load_status = "loading"
     else:

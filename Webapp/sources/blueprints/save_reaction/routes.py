@@ -371,6 +371,8 @@ def autosave() -> Response:
     researcher = request.form["researcher"]
     supervisor = request.form["supervisor"]
     mass_efficiency = request.form["massEfficiency"]
+    selectivity = request.form["selectivity"]
+    conversion = request.form["conversion"]
     to_export = request.form["toExport"]
 
     summary_table = json.dumps(
@@ -391,6 +393,8 @@ def autosave() -> Response:
             "radio_buttons": radio_buttons,
             "summary_to_print": summary_to_print,
             "mass_efficiency": mass_efficiency,
+            "selectivity": selectivity,
+            "conversion": conversion,
             "to_export": to_export,
         }
     )

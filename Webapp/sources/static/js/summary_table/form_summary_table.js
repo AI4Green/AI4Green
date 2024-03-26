@@ -342,10 +342,7 @@ async function showSummary(mode) {
     },
     dataType: "json",
     success: async function (response) {
-      if (
-        response.summary ===
-        "Ensure you have entered all the necessary information!"
-      ) {
+      if (response.summary.includes("Ensure you have entered all")) {
         alert(response.summary);
       } else {
         let limitingReactantTableNumber = $(
