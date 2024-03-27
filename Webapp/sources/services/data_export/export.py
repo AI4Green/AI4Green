@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import List, Literal
 
 import pytz
+from azure.storage.blob import BlobClient, BlobServiceClient
 from flask import abort, flash, request
 from flask_login import current_user
 from sources import models, services
@@ -211,31 +212,44 @@ class RequestLinkVerification:
             self.data_export_request,
         ) = services.email.verify_data_export_request_token(self.token)
         if not (
-            self.approver == current_user
+            self.approver
+            and self.data_export_request
+            and self.approver == current_user
             and services.person.from_current_user_email()
             in self.data_export_request.required_approvers
         ):
             flash("Data export request expired")
             return "failed"
         # redirect if user has already approved.
-        if self._check_if_already_responded() is False:  # todo debugg
+        if (
+            self._check_if_already_responded() is False
+        ):  # todo changed from True to False to debug subsequent function
             flash("You have already responded to this data export request")
             return "failed"
         return "success"
 
     def _check_if_already_responded(self) -> bool:
         """Returns True if the user has already responded to this data export request"""
-        return (
-            db.session.query(models.data_export_request_approvers.c.responded)
+        approver_responded = (
+            db.session.query(models.data_export_request_approvers)
             .filter(
                 models.data_export_request_approvers.c.data_export_request_id
                 == self.data_export_request.id
             )
             .filter(
-                models.data_export_request_approvers.c.person_id == self.approver.id
+                models.data_export_request_approvers.c.person_id
+                == self.approver.Person.id
             )
             .first()
-        )[0]
+        )
+        return approver_responded[0]
+
+
+def initiate(data_export_request_id: int):
+    """Function calls the DataExport class to start making the export file.
+    Called from here to instantiate the class object during the threaded process."""
+    export = DataExport(data_export_request_id)
+    export.initiate()
 
 
 class DataExport:
@@ -252,14 +266,14 @@ class DataExport:
         print(insp.persistent, "init")
 
     def initiate(self):
-        export_function = self.get_export_function()
+        export_function = self._get_export_function()
         export_function()
         print(export_function.__name__)
         print("work")
         time.sleep(20)
         print("still working")
 
-    def get_export_function(self):
+    def _get_export_function(self):
         export_function_dict = {
             "RDF": self.make_rdf_export,
             "CSV": self.make_csv_export,
@@ -278,57 +292,68 @@ class DataExport:
 
         # zipfile_name = "export_" + self.data_export_request.uuid
 
-        insp = inspect(self.data_export_request)
-        print(insp.persistent, "preloop")
         for reaction in self.data_export_request.reactions:
             # save all files to the container
-            services.data_export.reaction_data_file.ReactionDataFile(
+            rdf = services.data_export.reaction_data_file.ReactionDataFile(
                 reaction, reaction.reaction_id, self.data_export_request.uuid
             )
-            insp = inspect(self.data_export_request)
-            print(insp.persistent, "midloop")
+            rdf.save()
 
         # start
 
         # Initialize your Blob Service Client
         blob_service_client = services.file_attachments.connect_to_azure_blob_service()
-        # Get the container and iterate through blobs
+        # Get the container with all the export files
         container_client = (
             services.file_attachments.create_or_get_existing_container_client(
                 blob_service_client, self.container_name
             )
         )
-        generator = container_client.list_blobs()
 
-        # Create an in-memory zip file
+        blob_list = container_client.list_blobs()
+        # now we need to make a zip file from these files
+        # Create a ZipFile Object
         zip_stream = io.BytesIO()
 
-        with zipfile.ZipFile(zip_stream, mode="w") as zip_output:
-            for blob in generator:
-                # Read blob data
-                data = container_client.download_blob(blob.name).readall()
+        with zipfile.ZipFile(zip_stream, "w", zipfile.ZIP_DEFLATED) as zip_object:
+            for blob in blob_list:
+                print(blob)
+                # Adding files that need to be zipped
+                fileblob = container_client.download_blob(blob.name)
+                data = fileblob.readall()
+                # Adding the data to the zip file
+                zip_object.writestr(blob.name, data)
 
-                # Add blob data to the zip file
-                zip_output.writestr(blob.name, data)
+        # get hash!
 
+        # testing code again
+        # Write the contents of the zip stream to 'dummy.zip'
+        with open("dummy1.zip", "wb") as dummy_file:
+            dummy_file.write(zip_stream.getvalue())
+        # make container if doesnt exist
+        services.file_attachments.create_or_get_existing_container_client(
+            blob_service_client, "export-outputs"
+        )
         # Upload the zip file to another container
         blob_client = blob_service_client.get_blob_client(
-            container="export_outputs", blob=self.data_export_request.uuid
+            container="export-outputs", blob=self.data_export_request.uuid
         )
-        blob_client.upload_blob(zip_stream.getvalue(), overwrite=True)
+        upload = io.BytesIO(zip_stream.getvalue())
+        blob_client.upload_blob(upload, overwrite=True)
 
-        with open(file=os.path.join(r"filepath", "filename"), mode="wb") as sample_blob:
+        # testing code
+        with open("dummy.zip", mode="wb") as dummy_file:
             download_stream = blob_client.download_blob()
-            sample_blob.write(download_stream.readall())
+            dummy_file.write(download_stream.readall())
 
         # Check if the upload was successful
         if not blob_client.exists():
             print("Blob upload failed")
         # Upload the zip file to another container
-        results_blob = blob_service_client.get_blob_client(
-            container="export_outputs", blob="your_zipfile.zip"
-        )
-        results_blob.upload_blob(zip_stream.getvalue(), overwrite=True)
+        # results_blob = blob_service_client.get_blob_client(
+        #     container="export_outputs", blob="your_zipfile.zip"
+        # )
+        # results_blob.upload_blob(zip_stream.getvalue(), overwrite=True)
 
         # You might want to handle this differently based on your application's requirements
         # For example, raise an exception or return an appropriate HTTP status code

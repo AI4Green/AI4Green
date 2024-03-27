@@ -37,6 +37,7 @@ class ReactionDataFile:
         self.container_name = container_name
         self.filename = filename
         self.memory_file = None
+        self.file_contents = None
         self.file_hash = None
         if self.reaction_container:
             self.reaction_container.meta.update(self.metadata)
@@ -87,30 +88,24 @@ class ReactionDataFile:
         return reaction_smiles
 
     def _save_blob(self):
+        """Saves the blob to Azure blob service"""
         # connect to azure
         blob_service_client = services.file_attachments.connect_to_azure_blob_service()
-        # make more get container
-        # container_client = (
-        #     services.file_attachments.create_or_get_existing_container_client(
-        #         blob_service_client, self.container_name
-        #     )
-        # )
+        # make or get container
+        services.file_attachments.create_or_get_existing_container_client(
+            blob_service_client, self.container_name
+        )
+        # connect to the blob client
         blob_client = blob_service_client.get_blob_client(
             container=self.container_name, blob=self.filename
         )
 
-        print("uploading blob")
-        # self.memory_file.stream.seek(0)
-        # self.file_hash = services.file_attachments.sha256_from_file_contents(
-        #     self.memory_file.stream.read()
-        # )
-        # if not self.file_hash:
-        #     print("Failed to generate hash")
-        #     abort(500)
-        # Upload the blob data - default blob type is BlockBlob
-        self.memory_file.stream.seek(0)
-        upload = io.BytesIO(self.memory_file.stream.read())
+        # Upload the blob data
+        # self.memory_file.seek(0)
+        upload = io.BytesIO(self.file_contents)
+
         blob_client.upload_blob(upload, blob_type="BlockBlob")
+
         # confirm upload
         if not blob_client.exists():
             print(f"blob {self.filename} upload failed")
@@ -118,16 +113,21 @@ class ReactionDataFile:
 
     def _save_as_rdf(self):
         """Saves as an RDF"""
-        # Create an in-memory file-like object
-        self.memory_file = io.BytesIO()
-        with chython.files.RDFWrite(self.filename) as f:
+        # Write to an in-memory file then save the contents to be uploaded to Azure as a blob
+        self.memory_file = io.StringIO()
+        with chython.files.RDFWrite(self.memory_file) as f:
             f.write(self.reaction_container)
+            self.file_contents = bytearray(f.file.getvalue(), "utf-8")
 
     def _save_as_json(self):
-        with open(self.filename, "w") as f:
+        self.memory_file = io.StringIO()
+
+        with self.memory_file as f:
             json.dump(self.metadata, f)
+            self.file_contents = bytearray(f.getvalue(), "utf-8")
 
-        with open(self.filename, "r") as f:
-            meta_reload = json.load(f)
+        # # Testing lines
+        # with self.memory_file as f:
+        #     meta_reload = json.load(f)
 
-        assert meta_reload == self.metadata, "change in data during file read/write"
+        # assert meta_reload == self.metadata, "change in data during file read/write"

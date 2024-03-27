@@ -63,6 +63,8 @@ def export_data_request_response(token: str) -> Response:
         "data_export/data_export_request.html",
         data_export_request=verification.data_export_request,
         workbooks=workbooks,
+        workgroups=get_workgroups(),
+        notification_number=get_notification_number(),
     )
 
 
@@ -87,8 +89,8 @@ def export_approved():
     request_status.update_status()
     if data_export_request.status.value == "APPROVED":
         # initiate data export release with threads then notify requestor after successful data export generation.
-        export_process = services.data_export.export.DataExport(data_export_request.id)
-        task_thread = threading.Thread(target=export_process.initiate)
+        export_process = services.data_export.export.initiate(data_export_request.id)
+        task_thread = threading.Thread(target=export_process)
         task_thread.start()
 
     # services.data_export.export.update_request_status(data_export_request)
