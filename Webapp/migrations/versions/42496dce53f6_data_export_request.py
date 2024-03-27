@@ -1,15 +1,15 @@
 """data_export_request
 
-Revision ID: f131e6c86df4
+Revision ID: 42496dce53f6
 Revises: 436a03e01053
-Create Date: 2024-03-25 11:21:35.499483
+Create Date: 2024-03-27 10:50:55.264671
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "f131e6c86df4"
+revision = "42496dce53f6"
 down_revision = "436a03e01053"
 branch_labels = None
 depends_on = None
@@ -38,6 +38,7 @@ def upgrade():
             nullable=True,
         ),
         sa.Column("uuid", sa.Text(), nullable=True),
+        sa.Column("hash", sa.Text(), nullable=True),
         sa.Column("workgroup", sa.Integer(), nullable=False),
         sa.Column("institution", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(

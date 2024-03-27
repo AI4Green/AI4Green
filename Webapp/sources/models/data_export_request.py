@@ -85,7 +85,7 @@ class DataExportRequest(Model):
     status = db.Column(db.Enum(ApprovalStatus), default=ApprovalStatus.PENDING.value)
 
     uuid = db.Column(db.Text, default=str(uuid.uuid4()))  # Unique container name
-    # hash = db.Column(db.Text)  # to confirm zip download contents
+    hash = db.Column(db.Text)  # to confirm zip download contents
 
     reactions = db.relationship("Reaction", backref="data_export_request")
 
