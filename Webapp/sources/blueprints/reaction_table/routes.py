@@ -19,6 +19,7 @@ from sources.dto import ReactionNoteSchema
 from . import reaction_table_bp
 
 if not current_app.config["DEBUG"]:
+    print("Trying to import STOUT")
     try:
         from STOUT import translate_forward
 
@@ -26,6 +27,8 @@ if not current_app.config["DEBUG"]:
     except Exception:
         print("Failed to import STOUT")
         pass
+else:
+    print("Application in debug mode. Not importing STOUT")
 
 
 # Processing data from Marvin JS and creating reaction table
