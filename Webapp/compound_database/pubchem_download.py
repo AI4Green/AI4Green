@@ -92,7 +92,7 @@ def find_database_updates() -> List[str]:
     for link in list_of_links:
         with contextlib.suppress(ValueError):
             date_time_obj = datetime.strptime(link[:-1], "%Y-%m-%d")
-            if date_last_obj <= date_time_obj:
+            if date_last_obj == "Unknown date" or date_last_obj <= date_time_obj:
                 refined_list_of_links.append(link)
     print(f"Updates to apply: {refined_list_of_links}")
     return refined_list_of_links
@@ -363,10 +363,11 @@ def add_new_entries(compounds: Iterable[models.UpdateCompound]) -> None:
         compounds: the list of compounds to add.
     """
     print(f"Adding {len(compounds)} to database")
-    for compound in compounds:
+    for idx, compound in enumerate(compounds):
         compound_data = compound.to_dict()
         new_compound = models.Compound(**compound_data)
         db.session.add(new_compound)
+        print(compound, f"added to db {idx}/{len(compounds)}")
         try:
             db.session.commit()
         except IntegrityError:

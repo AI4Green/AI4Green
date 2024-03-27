@@ -7,6 +7,7 @@ import pytest
 import pytest_mock
 from flask import Flask
 from sources import services
+from utilities import basedir
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
@@ -25,9 +26,7 @@ def test_export_reaction_as_rdf(app: Flask, mocker: pytest_mock.MockerFixture):
 
     """
     with open(
-        os.path.join(
-            os.path.dirname(os.getcwd()), "data", "reaction_database_object.pickle"
-        ),
+        os.path.join(basedir, "tests", "data", "reaction_database_object.pickle"),
         "rb",
     ) as f:
         serialized_data = f.read()

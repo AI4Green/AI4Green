@@ -2,20 +2,28 @@
 This module contains user authentication functions:
 login, logout, and register
 """
+from datetime import datetime
+
+import pytz
+
 # imports the objects of the login and registration forms
 from flask import Response, flash, redirect, render_template, request, session, url_for
 
 # url_parse parses the URL if it is relative or
 # absolute to avoid redirection to a malicious site
 from flask_login import current_user, login_user, logout_user
-from sources import auxiliary  # imports the user database object
-from sources import models
+from sources import auxiliary, models, services  # imports the user database object
 
 # login_user registers the user as logged in and sets the current_user variable for that user
 # logout_user offers users the option to log out of the application
 # current_user is a proxy for the current user
 from sources.extensions import db
 from sqlalchemy import func
+from werkzeug.urls import url_parse
+
+from . import auth_bp  # imports the blueprint of the
+from .forms import LoginForm, RegistrationForm
+from .utils import login_not_allowed
 
 # render_template renders html templates
 # redirect instructs the client web browser to automatically
@@ -23,13 +31,6 @@ from sqlalchemy import func
 # url_for generates URLs using its internal mapping of URLs to view functions
 # flash stores a message for the user to show it when called from the templates
 # request parses incoming request data and gives access to it
-
-from werkzeug.urls import url_parse
-from datetime import datetime
-import pytz
-from . import auth_bp  # imports the blueprint of the
-from .forms import LoginForm, RegistrationForm
-from .utils import login_not_allowed
 
 
 # Login page
@@ -117,19 +118,12 @@ def register() -> Response:  # the view function that handles user registrations
         receive the web page with the form or if at least one field fails validation."""
         # Creates a person and user and commits to the database
         p = models.Person()
-        fullname = auxiliary.sanitise_user_input(form.fullname.data)
         # Capitalize unique fields for consistency
         db.session.add(p)
-        user = models.User(
-            username=form.username.data,
-            email=form.email.data,
-            fullname=fullname,
-            Person=p,
-            password_hash=models.User.set_password(form.password.data),
+        fullname = auxiliary.sanitise_user_input(form.fullname.data)
+        services.user.add(
+            form.username.data, form.email.data, fullname, form.password.data, p
         )
-        db.session.add(user)
-        db.session.commit()
-
         flash(
             "Congratulations, you are now a registered user!"
         )  # flashes the success message
