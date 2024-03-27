@@ -108,5 +108,3 @@ def validate_rdf(
     ):
         if original_product and loaded_product:
             assert original_product.is_equal(loaded_product), "product inequality"
-
-    print("all assertions passed")
