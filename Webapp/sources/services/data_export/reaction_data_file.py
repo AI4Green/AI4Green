@@ -2,6 +2,7 @@ import ast
 import io
 import json
 
+import azure.core.exceptions
 import chython.files
 from flask import abort
 from flask_login import current_user
@@ -104,7 +105,10 @@ class ReactionDataFile:
         # self.memory_file.seek(0)
         upload = io.BytesIO(self.file_contents)
 
-        blob_client.upload_blob(upload, blob_type="BlockBlob")
+        try:
+            blob_client.upload_blob(upload, blob_type="BlockBlob")
+        except azure.core.exceptions.ResourceExistsError:
+            pass
 
         # confirm upload
         if not blob_client.exists():

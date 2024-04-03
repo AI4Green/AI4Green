@@ -1,259 +1,64 @@
+import hashlib
 import io
-import os
-import threading
-import time
 import zipfile
-from datetime import datetime
-from typing import List, Literal
+from datetime import datetime, timedelta
+from typing import Callable
 
 import pytz
-from azure.storage.blob import BlobClient, BlobServiceClient
-from flask import abort, flash, request
-from flask_login import current_user
+from azure.storage.blob import BlobClient, BlobSasPermissions, generate_blob_sas
 from sources import models, services
 from sources.extensions import db
-from sqlalchemy import inspect, update
 
 
-class NewRequest:
-    def __init__(self):
-        self.requestor = services.user.person_from_current_user()
-        self.data_format = request.json["exportFormat"]
-        self.invalid_workbooks = None
-        self.workgroup = services.workgroup.from_name(request.json["workgroup"])
-        self.workbook = services.workbook.get_workbook_from_group_book_name_combination(
-            self.workgroup.name, request.json["workbook"]
-        )
-        # if the user has customised the list of reactions to export use that else export all in workbook.
-        self.reaction_list = self._get_reaction_list()
-        # used to check the user has permission if reactions from multiple workbooks
-        self.workbooks = set()
-        self.data_export_request = None
+def make_sas_link(data_export_request: models.DataExportRequest) -> str:
+    """
+    Generates a Shared Access Signature (SAS) token for accessing a blob in an Azure Blob Storage container,
+    and constructs the SAS URL for accessing the blob with the given permissions and validity period.
 
-    def check_permissions(
-        self,
-    ) -> Literal["permission denied", "permission accepted", "no data to export"]:
-        """
-        Turn reaction list into a workbook list. User must either be workbook member or PI
-        Returns:
-            the permission result is either accepted or denied
-        """
-        # if there are no reactions we cannot export
-        if len(self.reaction_list) == 0:
-            return "no data to export"
-        # get each workbook that we are exporting data from
-        self._get_workbooks()
-        # check if the user is either a PI of the workgroup or a workbook member for each workbook.
-        for workbook in self.workbooks:
-            if self._user_in_workbook_or_pi(workbook):
-                continue
-            else:
-                return "permission denied"
-        return "permission accepted"
+    Args:
+        data_export_request (models.DataExportRequest): An instance of DataExportRequest model relating to the
+        data export blob
 
-    def submit_request(self):
-        """Save request to database and notify and email approvers."""
-        self._save_to_database()
-        self._notify_approvers()
+    Returns:
+        str: The SAS URL for accessing the blob with the generated SAS token appended as query parameters.
+    """
+    blob_service_client = services.file_attachments.connect_to_azure_blob_service()
+    blob_client = blob_service_client.get_blob_client(
+        container="export-outputs", blob=data_export_request.uuid
+    )
+    # Set the start time and expiry time for the SAS token
+    start_time = datetime.utcnow()
+    expiry_time = datetime.utcnow() + timedelta(minutes=2)
 
-    def _get_workbooks(self):
-        """Adds each workbook we are exporting data from to the self.workbooks set."""
-        for reaction in self.reaction_list:
-            self.workbooks.add(
-                services.workbook.get_workbook_from_group_book_name_combination(
-                    reaction.workbook.WorkGroup.name, reaction.workbook.name
-                )
-            )
+    # Define permissions for the SAS token
+    permissions = BlobSasPermissions(read=True)
 
-    def _user_in_workbook_or_pi(self, workbook) -> bool:
-        return (
-            self.requestor in workbook.users
-            or self.requestor in workbook.workgroup.principal_investigator
-        )
+    # Generate the SAS token
+    sas_token = generate_blob_sas(
+        blob_client.account_name,
+        blob_client.container_name,
+        blob_client.blob_name,
+        account_key=blob_service_client.credential.account_key,
+        permission=permissions,
+        expiry=expiry_time,
+        start=start_time,
+    )
 
-    def _get_reaction_list(self) -> List[models.Reaction]:
-        """Either get customised reaction list from request or all reactions in a workbook."""
-        if request.json["reactionIDList"]:
-            reaction_list = [
-                services.reaction.get_from_reaction_id_and_workbook_id(
-                    rxn_id, self.workbook.id
-                )
-                for rxn_id in request.json["reactionIDList"]
-            ]
-        else:
-            reaction_list = services.reaction.list_active_in_workbook(
-                self.workbook.name, self.workgroup.name, sort_crit="time"
-            )
-        return reaction_list
-
-    def _save_to_database(self):
-        """Save the data export request to the database"""
-        institution = services.workgroup.get_institution()
-
-        self.data_export_request = models.DataExportRequest.create(
-            data_format=self.data_format,
-            requestor=self.requestor.id,
-            required_approvers=self.workgroup.principal_investigator,
-            status="PENDING",
-            reactions=self.reaction_list,
-            workbooks=list(self.workbooks),
-            workgroup=self.workgroup.id,
-            institution=institution.id,
-        )
-
-    def _notify_approvers(self):
-        """
-        Send a notification and an email to each principal investigator of the workgroup the data is being exported from
-        """
-        workbook_names = [wb.name for wb in self.workbooks]
-        for principal_investigator in self.workgroup.principal_investigator:
-            models.Notification.create(
-                person=principal_investigator.id,
-                type="Data Export Request",
-                info=f"The following user: {self.requestor.user.email} has requested to export data from workbooks: "
-                f"{', '.join(workbook_names)} in {self.data_format} format.<br>"
-                f"To respond please follow the link sent to your email account. This request will expire after 7 days.",
-                time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
-                status="active",
-            )
-            services.email.send_data_export_approval_request(
-                principal_investigator.user, self.data_export_request
-            )
-
-
-class RequestStatus:
-    def __init__(self, data_export_request: models.DataExportRequest):
-        self.data_export_request = data_export_request
-
-    def accept(self):
-        """
-        Accepts a data export request, updates the approval status of the current user's approval
-        in the data export request approvers association table, and updates the status of the data export request.
-
-        """
-        approver = services.person.from_current_user_email()
-        # use update query because it is an association table. Normal query returns immutable Row.
-        update_query = (
-            update(models.data_export_request_approvers)
-            .where(
-                models.data_export_request_approvers.c.data_export_request_id
-                == self.data_export_request.id
-            )
-            .where(models.data_export_request_approvers.c.person_id == approver.id)
-            .values(approved=True, responded=True)
-        )
-        db.session.execute(update_query)
-        db.session.commit()
-
-    def deny(self):
-        """
-        Updates the status of a data export request to 'REJECTED' and notifies the requestor of rejection.
-        """
-        approver = services.person.from_current_user_email()
-        update_query = (
-            update(models.data_export_request_approvers)
-            .where(
-                models.data_export_request_approvers.c.data_export_request_id
-                == self.data_export_request.id
-            )
-            .where(models.data_export_request_approvers.c.person_id == approver.id)
-            .values(approved=False, responded=True)
-        )
-        db.session.execute(update_query)
-        db.session.commit()
-        self.data_export_request.status = "REJECTED"
-        db.session.commit()
-        # notify requestor of rejection
-        workbooks = ", ".join([wb.name for wb in self.data_export_request.workbooks])
-        models.Notification.create(
-            person=self.data_export_request.requestor,
-            type="Data Export Request Rejected",
-            info=f"Your request to export {len(self.data_export_request.reactions)} reactions from {workbooks} in "
-            f"{self.data_export_request.data_format} was rejected by a principal investigator in your workgroup.",
-            time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
-            status="active",
-        )
-
-    def update_status(self):
-        """
-        Updates the status attribute of a data export request if all approvers have approved.
-        """
-        # get all the required approvers and check if they have all approved.
-        data_export_approvers = (
-            db.session.query(models.data_export_request_approvers.c.approved)
-            .filter(
-                models.data_export_request_approvers.c.data_export_request_id
-                == self.data_export_request.id
-            )
-            .all()
-        )
-        # get the results out of the row objects.
-        approval_results = [x[0] for x in data_export_approvers]
-
-        if all(x is True for x in approval_results):
-            print("APPROVED!")
-            self.data_export_request.status = "APPROVED"
-            db.session.commit()
-
-
-class RequestLinkVerification:
-    """Verifies access to data export request response page."""
-
-    def __init__(self, token):
-        self.token = token
-        self.approver = None
-        self.data_export_request = None
-        self.status = ""
-
-    def verify_request_link(self):
-        """Checks user is a required approver for this request and that it has not already been approved."""
-        (
-            self.approver,
-            self.data_export_request,
-        ) = services.email.verify_data_export_request_token(self.token)
-        if not (
-            self.approver
-            and self.data_export_request
-            and self.approver == current_user
-            and services.person.from_current_user_email()
-            in self.data_export_request.required_approvers
-        ):
-            flash("Data export request expired")
-            return "failed"
-        # redirect if user has already approved.
-        if (
-            self._check_if_already_responded() is False
-        ):  # todo changed from True to False to debug subsequent function
-            flash("You have already responded to this data export request")
-            return "failed"
-        return "success"
-
-    def _check_if_already_responded(self) -> bool:
-        """Returns True if the user has already responded to this data export request"""
-        approver_responded = (
-            db.session.query(models.data_export_request_approvers)
-            .filter(
-                models.data_export_request_approvers.c.data_export_request_id
-                == self.data_export_request.id
-            )
-            .filter(
-                models.data_export_request_approvers.c.person_id
-                == self.approver.Person.id
-            )
-            .first()
-        )
-        return approver_responded[0]
+    # Construct the SAS URL
+    return f"{blob_client.url}?{sas_token}"
 
 
 def initiate(data_export_request_id: int):
-    """Function calls the DataExport class to start making the export file.
-    Called from here to instantiate the class object during the threaded process."""
+    """
+    Calls the DataExport class to start making the export file.
+    Called from here to instantiate the class object during the threaded process.
+    """
     export = DataExport(data_export_request_id)
-    export.initiate()
+    export.create()
 
 
 class DataExport:
-    """Calls the methods required to actually create the desired export"""
+    """Class to control the creation the data export, once approved."""
 
     # def __init__(self, data_export_request: models.DataExportRequest):
     def __init__(self, data_export_request_id: int):
@@ -262,36 +67,135 @@ class DataExport:
             data_export_request_id
         )
         self.container_name = self.data_export_request.uuid
-        insp = inspect(self.data_export_request)
-        print(insp.persistent, "init")
+        self.blob_service_client = (
+            services.file_attachments.connect_to_azure_blob_service()
+        )
 
-    def initiate(self):
+    def create(self):
+        """
+        Main function where we decide the appropriate export type to make and then create a zip file
+        and notify the requestor once this is complete.
+        """
         export_function = self._get_export_function()
         export_function()
-        print(export_function.__name__)
-        print("work")
-        time.sleep(20)
-        print("still working")
+        # Make the zip file and generate an md5 checksum to check file integrity
+        zip_stream = self._make_zip_file()
+        checksum = hashlib.md5(zip_stream.getvalue()).hexdigest()
+        # upload file and confirm the upload was successful
+        blob_client = self._upload_zip(zip_stream)
+        self._confirm_upload(blob_client, checksum)
+        # update database entry with hash
+        self._update_db_with_hash(checksum)
+        self._update_requestor()
+        # delete container
+        self.blob_service_client.delete_container(self.container_name)
+        # the zip file will be deleted after 7 days. This is controlled by Azure Blob Storage Lifecycle policies.
 
-    def _get_export_function(self):
+    def _get_export_function(self) -> Callable:
+        """Returns the function which matches the requested data export format"""
         export_function_dict = {
-            "RDF": self.make_rdf_export,
-            "CSV": self.make_csv_export,
-            "JSON": self.make_json_export,
-            "SURF": self.make_surf_export,
-            "PDF": self.make_pdf_export,
-            "ELN": self.make_eln_export,
+            "RDF": self._make_rdf_export,
+            "CSV": self._make_csv_export,
+            "JSON": self._make_json_export,
+            "SURF": self._make_surf_export,
+            "PDF": self._make_pdf_export,
+            "ELN": self._make_eln_export,
         }
         return export_function_dict[self.data_export_request.data_format.value]
 
-    def make_rdf_export(self):
-        # uuid = self.data_export_request.uuid
-        # filenames = 'temp' / reaction.reaction_id + '_' + self.data_export_request.uuid,
+    def _make_zip_file(self):
+        """
+        Creates a zip file containing all blobs stored in the specified container in Azure Blob Storage.
 
-        # 1) make a container 2) iter through that container a
+        Returns:
+            io.BytesIO: A byte stream representing the created zip file.
+        """
+        # Get the container with all the export files
+        container_client = (
+            services.file_attachments.create_or_get_existing_container_client(
+                self.blob_service_client, self.container_name
+            )
+        )
+        blob_list = container_client.list_blobs()
+        # now we need to make a zip file from these files
+        zip_stream = io.BytesIO()
+        with zipfile.ZipFile(zip_stream, "w", zipfile.ZIP_DEFLATED) as zip_object:
+            for blob in blob_list:
+                # Adding files that need to be zipped
+                fileblob = container_client.download_blob(blob.name)
+                data = fileblob.readall()
+                # Adding the data to the zip file
+                zip_object.writestr(blob.name, data)
+        return zip_stream
 
-        # zipfile_name = "export_" + self.data_export_request.uuid
+    def _update_requestor(self):
+        """Sends a notification and an email to the requestor telling them their export is ready."""
+        models.Notification.create(
+            person=self.data_export_request.requestor_person.id,
+            type="Data Export Ready",
+            info="Your data export is ready.<br>"
+            "To respond please follow the link sent to your email account. This request will expire after 7 days.",
+            time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
+            status="active",
+        )
+        services.email.send_data_export_ready_message(
+            self.data_export_request.requestor_person.user, self.data_export_request
+        )
 
+    def _update_db_with_hash(self, checksum: str):
+        self.data_export_request.hash = checksum
+        db.session.commit()
+
+    def _upload_zip(self, zip_stream: io.BytesIO) -> BlobClient:
+        """
+        Uploads a zip file stream to Azure Blob Storage and returns the BlobClient for the uploaded blob.
+
+        Args:
+            zip_stream (io.BytesIO): The byte stream of the zip file to be uploaded.
+
+        Returns:
+            BlobClient: A BlobClient instance representing the uploaded blob.
+        """
+        # we name the zip file with the uuid, to ensure it has a unique name within the export container.
+        zip_blob_name = self.data_export_request.uuid
+        # make container if doesnt exist
+        services.file_attachments.create_or_get_existing_container_client(
+            self.blob_service_client, "export-outputs"
+        )
+
+        # Upload the zip file to the designated container
+        blob_client = self.blob_service_client.get_blob_client(
+            container="export-outputs", blob=zip_blob_name
+        )
+        upload_blob = io.BytesIO(zip_stream.getvalue())
+        blob_client.upload_blob(upload_blob, overwrite=True)
+        return blob_client
+
+    @staticmethod
+    def _confirm_upload(blob_client: BlobClient, original_hash: str):
+        """
+        Confirms the blob 1) exists. 2) the checksums match when downloaded
+
+        Args:
+            blob_client - the client for the zip blob we are testing has uploaded correctly
+            original_hash - the hash generated when we made the zip file
+
+        """
+        # confirm upload exists
+        if not blob_client.exists():
+            return False
+        # confirm checksum
+        download_stream = blob_client.download_blob()
+        checksum = hashlib.md5(download_stream.readall()).hexdigest()
+        if not checksum == original_hash:
+            return False
+        return True
+
+    def _make_rdf_export(self):
+        """
+        The main function called to create a zip file of reactions saved as RDFs or JSONs
+        """
+        # iterate through the reactions and save each as azure blob as an rdf or json if no reaction_smiles is present
         for reaction in self.data_export_request.reactions:
             # save all files to the container
             rdf = services.data_export.reaction_data_file.ReactionDataFile(
@@ -299,142 +203,17 @@ class DataExport:
             )
             rdf.save()
 
-        # start
-
-        # Initialize your Blob Service Client
-        blob_service_client = services.file_attachments.connect_to_azure_blob_service()
-        # Get the container with all the export files
-        container_client = (
-            services.file_attachments.create_or_get_existing_container_client(
-                blob_service_client, self.container_name
-            )
-        )
-
-        blob_list = container_client.list_blobs()
-        # now we need to make a zip file from these files
-        # Create a ZipFile Object
-        zip_stream = io.BytesIO()
-
-        with zipfile.ZipFile(zip_stream, "w", zipfile.ZIP_DEFLATED) as zip_object:
-            for blob in blob_list:
-                print(blob)
-                # Adding files that need to be zipped
-                fileblob = container_client.download_blob(blob.name)
-                data = fileblob.readall()
-                # Adding the data to the zip file
-                zip_object.writestr(blob.name, data)
-
-        # get hash!
-
-        # testing code again
-        # Write the contents of the zip stream to 'dummy.zip'
-        with open("dummy1.zip", "wb") as dummy_file:
-            dummy_file.write(zip_stream.getvalue())
-        # make container if doesnt exist
-        services.file_attachments.create_or_get_existing_container_client(
-            blob_service_client, "export-outputs"
-        )
-        # Upload the zip file to another container
-        blob_client = blob_service_client.get_blob_client(
-            container="export-outputs", blob=self.data_export_request.uuid
-        )
-        upload = io.BytesIO(zip_stream.getvalue())
-        blob_client.upload_blob(upload, overwrite=True)
-
-        # testing code
-        with open("dummy.zip", mode="wb") as dummy_file:
-            download_stream = blob_client.download_blob()
-            dummy_file.write(download_stream.readall())
-
-        # Check if the upload was successful
-        if not blob_client.exists():
-            print("Blob upload failed")
-        # Upload the zip file to another container
-        # results_blob = blob_service_client.get_blob_client(
-        #     container="export_outputs", blob="your_zipfile.zip"
-        # )
-        # results_blob.upload_blob(zip_stream.getvalue(), overwrite=True)
-
-        # You might want to handle this differently based on your application's requirements
-        # For example, raise an exception or return an appropriate HTTP status code
-
-    # end
-    #
-    #     blob_service_client = services.file_attachments.connect_to_azure_blob_service()
-    #
-    #     container = blob_service_client.get_container_client(container=self.data_export_request.uuid)
-    #     # then we iter through container and zip
-    #     generator = container.list_blobs()
-    #     for blob in generator:
-    #         data = container.download_blob(blob.name).readall()
-    #         results_blob = blob_service_client.get_blob_client(container="export_outputs",
-    #                                                            blob=f"{self.data_export_request.uuid}.zip")
-    #         results_blob.upload_blob(data, overwrite=True)
-    #         if not results_blob.exists():
-    #             print(f"blob {zipfile_name} upload failed")
-    #             abort(401)
-
-    #     # zipf.write(rdf.memory_file)
-    #
-    # blob_service_client = services.file_attachments.connect_to_azure_blob_service()
-    # # make more get container
-    # container_name = "data_export_temp"
-    # blob_client = blob_service_client.get_blob_client(
-    #     container=container_name, blob='export_' + self.data_export_request.uuid
-    # )
-    #
-    # print("uploading blob")
-    #
-    #
-    # file_hash = services.file_attachments.sha256_from_file_contents(
-    #     zipf.read()
-    # )
-    # if not file_hash:
-    #     print("Failed to generate hash")
-    #     abort(500)
-    # # Upload the blob data - default blob type is BlockBlob
-    # zipf.stream.seek(0)
-    # upload = io.BytesIO(zipf.stream.read())
-    # blob_client.upload_blob(upload, blob_type="BlockBlob")
-    # # confirm upload
-
-    def make_csv_export(self):
+    def _make_csv_export(self):
         pass
 
-    def make_json_export(self):
+    def _make_json_export(self):
         pass
 
-    def make_surf_export(self):
+    def _make_surf_export(self):
         pass
 
-    def make_pdf_export(self):
+    def _make_pdf_export(self):
         pass
 
-    def make_eln_export(self):
+    def _make_eln_export(self):
         pass
-
-
-class MakeZip:
-    """Makes a zip file of the reaction data files"""
-
-    def __init__(self, workbook, workgroup):
-        self.workbook = services.workbook.get_workbook_from_group_book_name_combination(
-            workbook, workgroup
-        )
-        self.workgroup = workgroup
-        self.requestor = current_user
-        # self.make_zip()
-
-    #
-    #     def make_zip(self):
-    #         """Temporarily saves a zip file to the blob service"""
-    #
-    #         reactions = services.reaction.list_active_in_workbook(
-    #             self.workbook.name, self.workgroup
-    #         )
-    #         rdf_list = []
-    #
-    #         for reaction in reactions:
-    #             ReactionDataFile(
-    #                 reaction,
-    #             )

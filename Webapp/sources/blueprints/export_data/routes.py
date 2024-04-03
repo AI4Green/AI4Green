@@ -1,10 +1,19 @@
 import ast
 import json
 import threading
-import time
 
 import pandas as pd
-from flask import Response, flash, jsonify, redirect, render_template, request, url_for
+import sources.services.data_export.requests
+from flask import (
+    Response,
+    abort,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask_login import current_user, login_required
 from sources import models, services
 from sources.auxiliary import (
@@ -37,7 +46,7 @@ def export_data_home():
 @login_required
 def new_data_export_request():
     """Initiates a data export request if user has permission"""
-    export_request = services.data_export.export.NewRequest()
+    export_request = services.data_export.requests.NewRequest()
     permission_status = export_request.check_permissions()
     if permission_status == "permission accepted":
         export_request.submit_request()
@@ -52,10 +61,10 @@ def export_data_request_response(token: str) -> Response:
     Verify the token and the approver and either redirect or render the page with the request information
     """
     # verify and give user the request data or if they fail verification send them home.
-    verification = services.data_export.export.RequestLinkVerification(token)
-    if verification.verify_request_link() == "failed":
+    verification = services.data_export.requests.RequestLinkVerification(token)
+    if verification.verify_approver_link() == "failed":
         return redirect(url_for("main.index"))
-    # get workbook names from list
+    # get request workbook names from list to render template message
     workbooks_names = [wb.name for wb in verification.data_export_request.workbooks]
     workbooks = ", ".join(workbooks_names)
 
@@ -68,12 +77,38 @@ def export_data_request_response(token: str) -> Response:
     )
 
 
+@export_data_bp.route("/export_data/request_download/<token>", methods=["POST", "GET"])
+@login_required
+def request_download(token: str) -> Response:
+    """
+    Verify the token and the requestor and either redirect or render the page with the link to download the export file.
+    """
+    # verify and give user the request data or if they fail verification send them home.
+    verification = services.data_export.requests.RequestLinkVerification(token)
+    if verification.verify_requestor_link() == "failed":
+        return redirect(url_for("main.index"))
+    # get workbook names from list
+    workbooks_names = [wb.name for wb in verification.data_export_request.workbooks]
+    workbooks = ", ".join(workbooks_names)
+    sas_url = services.data_export.export.make_sas_link(
+        verification.data_export_request
+    )
+    return render_template(
+        "data_export/data_export_download.html",
+        sas_url=sas_url,
+        data_export_request=verification.data_export_request,
+        workbooks=workbooks,
+        workgroups=get_workgroups(),
+        notification_number=get_notification_number(),
+    )
+
+
 @export_data_bp.route("/export_data/export_denied", methods=["POST", "GET"])
 @login_required
 def export_denied():
     """Update the request in the database"""
     data_export_request = models.DataExportRequest.query.get(request.json["exportID"])
-    request_status = services.data_export.export.RequestStatus(data_export_request)
+    request_status = services.data_export.requests.RequestStatus(data_export_request)
     request_status.deny()
     flash("Data export denied!")
     return redirect(url_for("main.index"))
@@ -84,7 +119,7 @@ def export_denied():
 def export_approved():
     """Update the database with the approval. Then check if all approvers have done so and start export."""
     data_export_request = models.DataExportRequest.query.get(request.json["exportID"])
-    request_status = services.data_export.export.RequestStatus(data_export_request)
+    request_status = services.data_export.requests.RequestStatus(data_export_request)
     request_status.accept()
     request_status.update_status()
     if data_export_request.status.value == "APPROVED":
@@ -93,9 +128,7 @@ def export_approved():
         task_thread = threading.Thread(target=export_process)
         task_thread.start()
 
-    # services.data_export.export.update_request_status(data_export_request)
     flash("Data export approved!")
-    print("here")
     return redirect(url_for("main.index"))
 
 

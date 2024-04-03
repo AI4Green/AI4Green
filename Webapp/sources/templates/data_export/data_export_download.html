@@ -36,9 +36,8 @@
         </p>
       </div>
     </div>
-        <div id="data-export-request-buttons" class="mt-5">
-            <button id="request_approve" value="{{ data_export_request.id }}" class="btn btn-success mr-5" onclick="dataExportRequestApprove(this.value)" style="width:110px;">Approve</button>
-            <button id="request_deny" value="{{ data_export_request.id }}" class="btn btn-danger ml-5" onclick="dataExportRequestDeny(this.value)" style="width:110px;">Deny</button>
+        <div id="data-export-buttons" class="mt-3">
+            <a class="btn btn-success" href="{{ sas_url }}">Download</a>
         </div>
     </div>
 </div>
