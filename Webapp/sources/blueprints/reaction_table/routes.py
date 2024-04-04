@@ -18,6 +18,18 @@ from sources.dto import ReactionNoteSchema
 
 from . import reaction_table_bp
 
+# if not current_app.config["DEBUG"]:
+#     print("Trying to import STOUT")
+#     try:
+#         from STOUT import translate_forward
+#
+#         print("STOUT successfully imported")
+#     except Exception:
+#         print("Failed to import STOUT")
+#         pass
+# else:
+#     print("Application in debug mode. Not importing STOUT")
+
 
 # Processing data from Marvin JS and creating reaction table
 @reaction_table_bp.route("/_process", methods=["GET"])
@@ -69,11 +81,11 @@ def process():
     }
 
     # Find reactants in database then add data to the dictionary
-    for idx, reactant_smiles in enumerate(reactants_smiles_list):
+    for idx, reactant_smiles in enumerate(reactants_smiles_list, 1):
         novel_compound = False  # false but change later if true
         mol = Chem.MolFromSmiles(reactant_smiles)
         if mol is None:
-            return jsonify({"error": f"Cannot process Reactant {idx + 1} structure"})
+            return jsonify({"error": f"Cannot process Reactant {idx} structure"})
         inchi = Chem.MolToInchi(mol)
         reactant = services.compound.get_compound_from_inchi(inchi)
 
@@ -98,7 +110,7 @@ def process():
                     "_novel_compound.html",
                     component="Reactant",
                     name=reactant_name,
-                    number=idx + 1,
+                    number=idx,
                     mw=reactant_mol_wt,
                     smiles=reactant_smiles,
                 )
@@ -115,7 +127,7 @@ def process():
         novel_compound = False  # false but change later if true
         mol = Chem.MolFromSmiles(product_smiles)
         if mol is None:
-            return jsonify({"error": f"Cannot process product {idx + 1} structure"})
+            return jsonify({"error": f"Cannot process product {idx} structure"})
         inchi = Chem.MolToInchi(mol)
         product = services.compound.get_compound_from_inchi(inchi)
 
@@ -138,9 +150,9 @@ def process():
                 product_mol_wt = round(mol_weight_generate(product_smiles), 2)
                 novel_product_html = render_template(
                     "_novel_compound.html",
-                    component="product",
+                    component="Product",
                     name=product_name,
-                    number=idx + 1,
+                    number=idx,
                     mw=product_mol_wt,
                     smiles=product_smiles,
                 )
@@ -313,6 +325,14 @@ def iupac_convert(smiles: str) -> str:
         return iupac_name
     except Exception:
         print("failed CIR")
+    # Build issues with stout. needs looking at in future if we want to use.
+    # print("trying STOUT")
+    # try:
+    #     iupac_name = translate_forward(smiles)
+    #     if iupac_name != "Could not generate IUPAC name for SMILES provided.":
+    #         return iupac_name
+    # except Exception:
+    #     print("STOUT failed")
     return ""
 
 
