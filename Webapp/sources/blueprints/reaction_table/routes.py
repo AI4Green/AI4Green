@@ -18,15 +18,6 @@ from sources.dto import ReactionNoteSchema
 
 from . import reaction_table_bp
 
-if not current_app.config["DEBUG"]:
-    try:
-        from STOUT import translate_forward
-
-        print("STOUT successfully imported")
-    except Exception:
-        print("Failed to import STOUT")
-        pass
-
 
 # Processing data from Marvin JS and creating reaction table
 @reaction_table_bp.route("/_process", methods=["GET"])
@@ -309,7 +300,7 @@ def save_reaction_note():
 def iupac_convert(smiles: str) -> str:
     """
     Tries to make the iupac name for a compound not in the database.
-    First we try the CIR service. Second we try the STOUT-pypi python package
+    First we try the CIR service.
     """
     # print("Running CIR")
     try:
@@ -322,13 +313,6 @@ def iupac_convert(smiles: str) -> str:
         return iupac_name
     except Exception:
         print("failed CIR")
-    print("trying STOUT")
-    try:
-        iupac_name = translate_forward(smiles)
-        if iupac_name != "Could not generate IUPAC name for SMILES provided.":
-            return iupac_name
-    except Exception:
-        print("STOUT failed")
     return ""
 
 

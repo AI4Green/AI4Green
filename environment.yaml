@@ -1,6 +1,0 @@
-name: ai4green
-channels:
-  - conda-forge
-dependencies:
-  - python=3.8
-  - flask
