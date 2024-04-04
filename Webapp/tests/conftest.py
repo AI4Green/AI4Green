@@ -1,6 +1,7 @@
 import pytest
-from sources import create_app
+from sources import create_app, services
 from sources.extensions import db
+from tests import populate_database
 
 
 @pytest.fixture(scope="session")
@@ -15,7 +16,9 @@ def app():
     app = create_app("test")
 
     with app.app_context():
+        db.drop_all()
         db.create_all()
+        populate_database.insert_test_data()
 
     yield app
 

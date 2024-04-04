@@ -17,8 +17,6 @@ from sources.extensions import db
 BASE_DIR = os.path.dirname(
     os.path.abspath(__file__)
 )  # absolute path to the directory containing this file
-solvents_db_path = os.path.join(BASE_DIR, "solvents.db")
-hazard_codes_db_path = os.path.join(BASE_DIR, "hazard_codes.db")
 
 
 def replace_symbols(
