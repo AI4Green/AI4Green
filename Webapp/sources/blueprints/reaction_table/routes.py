@@ -8,7 +8,7 @@ from typing import Dict, List, Tuple, Union
 from urllib.parse import quote
 from urllib.request import urlopen
 
-from flask import current_app, jsonify, render_template, request
+from flask import jsonify, render_template, request
 from flask_login import login_required
 from rdkit import Chem
 from rdkit.Chem import Descriptors
@@ -17,18 +17,6 @@ from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
 from sources.dto import ReactionNoteSchema
 
 from . import reaction_table_bp
-
-# if not current_app.config["DEBUG"]:
-#     print("Trying to import STOUT")
-#     try:
-#         from STOUT import translate_forward
-#
-#         print("STOUT successfully imported")
-#     except Exception:
-#         print("Failed to import STOUT")
-#         pass
-# else:
-#     print("Application in debug mode. Not importing STOUT")
 
 
 # Processing data from Marvin JS and creating reaction table
@@ -314,7 +302,6 @@ def iupac_convert(smiles: str) -> str:
     Tries to make the iupac name for a compound not in the database.
     First we try the CIR service.
     """
-    # print("Running CIR")
     try:
         url = (
             "http://cactus.nci.nih.gov/chemical/structure/"
@@ -325,14 +312,6 @@ def iupac_convert(smiles: str) -> str:
         return iupac_name
     except Exception:
         print("failed CIR")
-    # Build issues with stout. needs looking at in future if we want to use.
-    # print("trying STOUT")
-    # try:
-    #     iupac_name = translate_forward(smiles)
-    #     if iupac_name != "Could not generate IUPAC name for SMILES provided.":
-    #         return iupac_name
-    # except Exception:
-    #     print("STOUT failed")
     return ""
 
 
