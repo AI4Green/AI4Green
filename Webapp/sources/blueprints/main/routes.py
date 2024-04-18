@@ -38,12 +38,7 @@ def index() -> Response:
             .filter(models.User.email == current_user.email)
             .first()
         )
-        if not user.is_confirmed:
-            flash(
-                Markup(
-                    "AI4Green now requires email verification. <a href='/email_verification_request' class='alert-link'>Click here</a> to send a verification email."
-                )
-            )
+        user_confirmed = user.is_confirmed
         user_role = user.Role.name
         workgroups = get_workgroups()
         notification_number = get_notification_number()
@@ -62,6 +57,7 @@ def index() -> Response:
         )
     else:
         # user not logged in
+        user_confirmed = None
         user_role = None
         workgroups = []
         notification_number = 0
@@ -69,6 +65,7 @@ def index() -> Response:
     return render_template(
         "home.html",
         user_role=user_role,
+        user_confirmed=user_confirmed,
         workgroups=workgroups,
         notification_number=notification_number,
         news_items=news_items,
