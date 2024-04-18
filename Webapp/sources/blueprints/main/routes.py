@@ -8,6 +8,7 @@ from flask import (
     request,
     send_file,
     url_for,
+    Markup
 )
 from flask_login import (  # protects a view function against anonymous users
     current_user,
@@ -37,6 +38,12 @@ def index() -> Response:
             .filter(models.User.email == current_user.email)
             .first()
         )
+        if not user.is_confirmed:
+            flash(
+                Markup(
+                    "AI4Green now requires email verification. <a href='/email_verification_request' class='alert-link'>Click here</a> to send a verification email."
+                )
+            )
         user_role = user.Role.name
         workgroups = get_workgroups()
         notification_number = get_notification_number()

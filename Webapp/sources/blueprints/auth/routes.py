@@ -124,8 +124,10 @@ def register() -> Response:  # the view function that handles user registrations
         services.user.add(
             form.username.data, form.email.data, fullname, form.password.data, p
         )
+        services.email.send_email_verification(p.user)
+
         flash(
-            "Congratulations, you are now a registered user!"
+            "An email has been sent to your address. Please follow the instructions to verify your account."
         )  # flashes the success message
         return redirect(url_for("auth.login"))  # redirects to the login page
     return render_template(

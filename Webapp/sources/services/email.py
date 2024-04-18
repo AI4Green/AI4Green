@@ -25,6 +25,28 @@ def get_reset_password_token(user: models.User) -> str:
     )
 
 
+def send_email_verification(user: models.User) -> None:
+    """
+    Send email verification to defined user.
+
+    Args:
+        user: User to send to.
+    """
+    token = get_reset_password_token(user)
+    protocol = get_protocol_type()
+    mail.send_email(
+        "AI4Green Email Verification",
+        sender=current_app.config["MAIL_ADMIN_SENDER"],
+        recipients=[user.email],
+        text_body=render_template(
+            "email/email_verification.txt", user=user, token=token, protocol=protocol
+        ),
+        html_body=render_template(
+            "email/email_verification.html", user=user, token=token, protocol=protocol
+        ),
+    )
+
+
 def send_password_reset(user: models.User) -> None:
     """
     Send password reset email to a given user.
@@ -35,7 +57,7 @@ def send_password_reset(user: models.User) -> None:
     token = get_reset_password_token(user)
     protocol = get_protocol_type()
     mail.send_email(
-        "AI4Chem Reset Your Password",
+        "AI4Green Reset Your Password",
         sender=current_app.config["MAIL_ADMIN_SENDER"],
         recipients=[user.email],
         text_body=render_template(
@@ -117,7 +139,6 @@ def verify_reset_password_token(token: str) -> models.User:
     except Exception:
         return
     return models.User.query.get(user_id)
-
 
 def get_protocol_type() -> str:
     """
