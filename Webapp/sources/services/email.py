@@ -1,5 +1,5 @@
 from time import time
-from typing import Tuple
+from typing import Tuple, Dict
 
 import jwt
 from flask import current_app, render_template
@@ -7,19 +7,20 @@ from sources import models
 from sources.extensions import mail
 
 
-def get_encoded_token(user: models.User) -> str:
+def get_encoded_token(time_limit: int, arg_dict: Dict) -> str:
     """
     Get token with expiry time.
 
     Args:
-        user: User to encode with.
+        time_limit: number of seconds before token expires. Use 600 for password resets and 7200 for email verification
+        arg_dict: arguments to encode. Should contain either "password_reset" or "email_verification" key with user.id value
 
     Returns:
         A token string.
     """
-    expires_in = 600
+    arg_dict["exp"] = time() + time_limit
     return jwt.encode(
-        {"user_id": user.id, "exp": time() + expires_in},
+        arg_dict,
         current_app.config["SECRET_KEY"],
         algorithm="HS256",
     )
@@ -32,7 +33,7 @@ def send_email_verification(user: models.User) -> None:
     Args:
         user: User to send to.
     """
-    token = get_encoded_token(user)
+    token = get_encoded_token(time_limit=7200, arg_dict={"verify_email": user.id})
     protocol = get_protocol_type()
     mail.send_email(
         "AI4Green Email Verification",
@@ -54,7 +55,7 @@ def send_password_reset(user: models.User) -> None:
     Args:
         user: User to send to.
     """
-    token = get_encoded_token(user)
+    token = get_encoded_token(time_limit=600, arg_dict={"reset_password": user.id})
     protocol = get_protocol_type()
     mail.send_email(
         "AI4Green Reset Your Password",
@@ -101,7 +102,7 @@ def send_password_reset_test(user: models.User) -> Tuple[str, str]:
     Returns:
         A tuple of the rendered template, and the token.
     """
-    token = get_encoded_token(user)
+    token = get_encoded_token(time_limit=600, arg_dict={"reset_password": user.id})
     return (
         render_template("email/reset_password_text.html", user=user, token=token),
         token,
@@ -122,12 +123,13 @@ def send_notification_test(person: models.Person) -> str:
     return render_template("email/notification_text.html", user=person.user)
 
 
-def verify_encoded_token(token: str) -> models.User:
+def verify_encoded_token(token: str, identifier: str) -> models.User:
     """
     Verify token link is valid and return user id.
 
     Args:
         token: Token to verify.
+        identifier: Dictionary key to query after token is decoded. Currently supports "reset_password" or "verify_email"
 
     Returns:
          User the token identifies.
@@ -135,7 +137,7 @@ def verify_encoded_token(token: str) -> models.User:
     try:
         user_id = jwt.decode(
             token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
-        )["user_id"]
+        )[identifier]
     except Exception:
         return
     return models.User.query.get(user_id)

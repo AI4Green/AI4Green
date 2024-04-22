@@ -10,12 +10,12 @@ from . import email_verification_bp  # imports the blueprint of the dummy route
 
 @email_verification_bp.route("/verify_email/<token>")
 def verify_email(token: str) -> Response:
-    user = services.email.verify_encoded_token(token)
+    user = services.email.verify_encoded_token(token=token, identifier="verify_email")
 
     if not user:
         flash(
             Markup(
-                "Email verification link is invalid or has expired."
+                "Email verification link is invalid or has expired. Please login to resend."
             )
         )
         return redirect(url_for("auth.login"))
