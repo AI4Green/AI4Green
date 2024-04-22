@@ -22,3 +22,15 @@ def person_from_current_user():
         .filter(models.User.email == current_user.email)
         .first()
     )
+
+
+def add(
+    username: str, email: str, fullname: str, password_data: str, person: models.Person
+):
+    models.User.create(
+        username=username,
+        email=email,
+        fullname=fullname,
+        Person=person,
+        password_hash=models.User.set_password(password_data),
+    )

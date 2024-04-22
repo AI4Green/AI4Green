@@ -363,10 +363,11 @@ def add_new_entries(compounds: Iterable[models.UpdateCompound]) -> None:
         compounds: the list of compounds to add.
     """
     print(f"Adding {len(compounds)} to database")
-    for compound in compounds:
+    for idx, compound in enumerate(compounds):
         compound_data = compound.to_dict()
         new_compound = models.Compound(**compound_data)
         db.session.add(new_compound)
+        print(compound, f"added to db {idx}/{len(compounds)}")
         try:
             db.session.commit()
         except IntegrityError:

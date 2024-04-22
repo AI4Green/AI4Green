@@ -8,7 +8,7 @@ from typing import Dict, List, Tuple, Union
 from urllib.parse import quote
 from urllib.request import urlopen
 
-from flask import current_app, jsonify, render_template, request
+from flask import jsonify, render_template, request
 from flask_login import login_required
 from rdkit import Chem
 from rdkit.Chem import Descriptors
@@ -17,15 +17,6 @@ from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
 from sources.dto import ReactionNoteSchema
 
 from . import reaction_table_bp
-
-if not current_app.config["DEBUG"]:
-    try:
-        from STOUT import translate_forward
-
-        print("STOUT successfully imported")
-    except Exception:
-        print("Failed to import STOUT")
-        pass
 
 
 # Processing data from Marvin JS and creating reaction table
@@ -78,11 +69,11 @@ def process():
     }
 
     # Find reactants in database then add data to the dictionary
-    for idx, reactant_smiles in enumerate(reactants_smiles_list):
+    for idx, reactant_smiles in enumerate(reactants_smiles_list, 1):
         novel_compound = False  # false but change later if true
         mol = Chem.MolFromSmiles(reactant_smiles)
         if mol is None:
-            return jsonify({"error": f"Cannot process Reactant {idx + 1} structure"})
+            return jsonify({"error": f"Cannot process Reactant {idx} structure"})
         inchi = Chem.MolToInchi(mol)
         reactant = services.compound.get_compound_from_inchi(inchi)
 
@@ -107,7 +98,7 @@ def process():
                     "_novel_compound.html",
                     component="Reactant",
                     name=reactant_name,
-                    number=idx + 1,
+                    number=idx,
                     mw=reactant_mol_wt,
                     smiles=reactant_smiles,
                 )
@@ -124,7 +115,7 @@ def process():
         novel_compound = False  # false but change later if true
         mol = Chem.MolFromSmiles(product_smiles)
         if mol is None:
-            return jsonify({"error": f"Cannot process product {idx + 1} structure"})
+            return jsonify({"error": f"Cannot process product {idx} structure"})
         inchi = Chem.MolToInchi(mol)
         product = services.compound.get_compound_from_inchi(inchi)
 
@@ -147,9 +138,9 @@ def process():
                 product_mol_wt = round(mol_weight_generate(product_smiles), 2)
                 novel_product_html = render_template(
                     "_novel_compound.html",
-                    component="product",
+                    component="Product",
                     name=product_name,
-                    number=idx + 1,
+                    number=idx,
                     mw=product_mol_wt,
                     smiles=product_smiles,
                 )
@@ -309,9 +300,8 @@ def save_reaction_note():
 def iupac_convert(smiles: str) -> str:
     """
     Tries to make the iupac name for a compound not in the database.
-    First we try the CIR service. Second we try the STOUT-pypi python package
+    First we try the CIR service.
     """
-    # print("Running CIR")
     try:
         url = (
             "http://cactus.nci.nih.gov/chemical/structure/"
@@ -322,13 +312,6 @@ def iupac_convert(smiles: str) -> str:
         return iupac_name
     except Exception:
         print("failed CIR")
-    print("trying STOUT")
-    try:
-        iupac_name = translate_forward(smiles)
-        if iupac_name != "Could not generate IUPAC name for SMILES provided.":
-            return iupac_name
-    except Exception:
-        print("STOUT failed")
     return ""
 
 
