@@ -7,7 +7,7 @@ from sources import models
 from sources.extensions import mail
 
 
-def get_reset_password_token(user: models.User) -> str:
+def get_encoded_token(user: models.User) -> str:
     """
     Get token with expiry time.
 
@@ -19,7 +19,7 @@ def get_reset_password_token(user: models.User) -> str:
     """
     expires_in = 600
     return jwt.encode(
-        {"reset_password": user.id, "exp": time() + expires_in},
+        {"user_id": user.id, "exp": time() + expires_in},
         current_app.config["SECRET_KEY"],
         algorithm="HS256",
     )
@@ -32,7 +32,7 @@ def send_email_verification(user: models.User) -> None:
     Args:
         user: User to send to.
     """
-    token = get_reset_password_token(user)
+    token = get_encoded_token(user)
     protocol = get_protocol_type()
     mail.send_email(
         "AI4Green Email Verification",
@@ -54,7 +54,7 @@ def send_password_reset(user: models.User) -> None:
     Args:
         user: User to send to.
     """
-    token = get_reset_password_token(user)
+    token = get_encoded_token(user)
     protocol = get_protocol_type()
     mail.send_email(
         "AI4Green Reset Your Password",
@@ -101,7 +101,7 @@ def send_password_reset_test(user: models.User) -> Tuple[str, str]:
     Returns:
         A tuple of the rendered template, and the token.
     """
-    token = get_reset_password_token(user)
+    token = get_encoded_token(user)
     return (
         render_template("email/reset_password_text.html", user=user, token=token),
         token,
@@ -122,7 +122,7 @@ def send_notification_test(person: models.Person) -> str:
     return render_template("email/notification_text.html", user=person.user)
 
 
-def verify_reset_password_token(token: str) -> models.User:
+def verify_encoded_token(token: str) -> models.User:
     """
     Verify token link is valid and return user id.
 
@@ -135,10 +135,11 @@ def verify_reset_password_token(token: str) -> models.User:
     try:
         user_id = jwt.decode(
             token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
-        )["reset_password"]
+        )["user_id"]
     except Exception:
         return
     return models.User.query.get(user_id)
+
 
 def get_protocol_type() -> str:
     """

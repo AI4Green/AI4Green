@@ -7,7 +7,7 @@ from datetime import datetime
 import pytz
 
 # imports the objects of the login and registration forms
-from flask import Response, flash, redirect, render_template, request, session, url_for
+from flask import Response, flash, redirect, render_template, request, session, url_for, Markup
 
 # url_parse parses the URL if it is relative or
 # absolute to avoid redirection to a malicious site
@@ -66,6 +66,17 @@ def login() -> Response:  # the login view function
             """
             flash("Invalid username or password")
             return redirect(url_for("auth.login"))
+
+        # if user was added after 22/04/2024 their email needs to be verified before login
+        if user.time_of_creation > datetime(2024, 4, 22) and not user.is_confirmed:
+            verification_url = "/email_verification_request/" + str(user.id)
+            flash(
+                Markup(
+                    f"Please verify your email address before logging in. Didn't receive an email? <a href='{verification_url}' class='alert-link'>Click here</a> to resend."
+                )
+            )
+            return redirect(url_for("auth.login"))
+
         login_user(user, remember=form.remember_me.data)
         role = (
             db.session.query(models.Role)
