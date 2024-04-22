@@ -1,3 +1,4 @@
+import ast
 import os
 import pickle
 import tempfile
@@ -41,17 +42,43 @@ def test_export_reaction_as_rdf(app: Flask, mocker: pytest_mock.MockerFixture):
         file_path = os.path.join(local_path, "test_rdf")
         # take a reaction pickle and confirm the function exports correctly.
         test_rdf = services.data_export.reaction_data_file.ReactionDataFile(
-            reaction, file_path
+            reaction, file_path, "containertest"
         )
 
         # save and load the file and confirm no data has been lost
-        rdf = test_rdf.reaction_container
-        test_rdf.save_as_rdf()
-
-        with chython.files.RDFRead(file_path) as f:
+        rxn_block = test_rdf.reaction_object
+        test_rdf.save()
+        saved_file_path = os.path.join(local_path, "test_rdf.rdf")
+        with chython.files.RDFRead(saved_file_path) as f:
             rdf_contents = next(f)
-        test_rdf.literal_eval_metadata(rdf_contents)
-        validate_rdf(rdf, rdf_contents)
+        # read_metadata = literal_eval_metadata(raw_metadata)
+        literal_eval_metadata(rdf_contents)
+        validate_rdf(rxn_block, rdf_contents)
+
+
+def literal_eval_metadata(rdf_contents: chython.ReactionContainer):
+    """Read the rdf values literally to reintroduce their types"""
+    non_string_types_inside_metadata = [
+        "reagents",
+        "reactants",
+        "solvents",
+        "products",
+        "standard_protocols_used",
+        "file_attachment_names",
+        "addenda",
+        "solvent_sustainability",
+        "sustainability_data",
+    ]
+
+    metadata = rdf_contents.meta
+    for key in metadata.keys():
+        # if the string is equal to none we reload
+        if (
+            rdf_contents.meta[key] == "None"
+            or key in non_string_types_inside_metadata
+            and isinstance(rdf_contents.meta[key], str)
+        ):
+            rdf_contents.meta.update({key: ast.literal_eval(rdf_contents.meta[key])})
 
 
 def make_mocks(mocker: pytest_mock.MockerFixture):
@@ -62,27 +89,27 @@ def make_mocks(mocker: pytest_mock.MockerFixture):
     mock_get_smiles_from_db.return_value = "CO"
 
     mock_read_username = mocker.patch(
-        "sources.services.data_export.ReactionMetaData.read_creator_username"
+        "sources.services.data_export.metadata.ReactionMetaData.read_creator_username"
     )
     mock_read_username.return_value = "Al Forgreen"
 
     mock_read_workbook = mocker.patch(
-        "sources.services.data_export.ReactionMetaData.read_workbook"
+        "sources.services.data_export.metadata.ReactionMetaData.read_workbook"
     )
     mock_read_workbook.return_value = "Alchemical aspirations"
 
     mock_read_workgroup = mocker.patch(
-        "sources.services.data_export.ReactionMetaData.read_workgroup"
+        "sources.services.data_export.metadata.ReactionMetaData.read_workgroup"
     )
     mock_read_workgroup.return_value = "AI4Alchemy"
 
     mock_read_file_attachments = mocker.patch(
-        "sources.services.data_export.ReactionMetaData.read_file_attachment_names"
+        "sources.services.data_export.metadata.ReactionMetaData.read_file_attachment_names"
     )
     mock_read_file_attachments.return_value = ["AI1-001-summary.pdf"]
 
     mock_read_addenda = mocker.patch(
-        "sources.services.data_export.ReactionMetaData.read_addenda"
+        "sources.services.data_export.metadata.ReactionMetaData.read_addenda"
     )
     mock_read_addenda.return_value = None
 

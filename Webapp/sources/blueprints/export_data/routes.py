@@ -7,6 +7,7 @@ import sources.services.data_export.requests
 from flask import (
     Response,
     abort,
+    current_app,
     flash,
     jsonify,
     redirect,
@@ -124,8 +125,12 @@ def export_approved():
     request_status.update_status()
     if data_export_request.status.value == "APPROVED":
         # initiate data export release with threads then notify requestor after successful data export generation.
-        export_process = services.data_export.export.initiate(data_export_request.id)
-        task_thread = threading.Thread(target=export_process)
+        export_process = services.data_export.export.initiate
+        task_thread = threading.Thread(
+            target=export_process,
+            args=[current_app.app_context(), data_export_request.id],
+        )
+
         task_thread.start()
 
     flash("Data export approved!")

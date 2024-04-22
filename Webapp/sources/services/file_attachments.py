@@ -41,6 +41,17 @@ def file_from_uuid(file_uuid: str) -> models.ReactionDataFile:
     )
 
 
+def get_blob_client(container_name: str, blob_name: str) -> BlobClient:
+    # connect to azure
+    blob_service_client = services.file_attachments.connect_to_azure_blob_service()
+    # make or get container
+    services.file_attachments.create_or_get_existing_container_client(
+        blob_service_client, container_name
+    )
+    # connect to the blob client
+    return blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+
+
 def delete_file_attachment(request_source: str, file_uuid: str = None):
     """
     Delete file attached to reaction from storage and reference in database

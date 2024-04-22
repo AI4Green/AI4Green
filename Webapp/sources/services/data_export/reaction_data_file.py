@@ -3,16 +3,19 @@ import io
 import json
 
 import azure.core.exceptions
-import chython.files
+
+# import chython.files
 from flask import abort
 from flask_login import current_user
+from rdkit.Chem import AllChem
 from sources import models, services
 
 from . import utils
 
 
 class ReactionDataFile:
-    non_string_types_inside_meta = [
+    # currently only used in testing but in future will want to read files in
+    non_string_types_inside_metadata = [
         "reagents",
         "reactants",
         "solvents",
@@ -31,7 +34,8 @@ class ReactionDataFile:
         Filename should not include extension.
         """
         self.db_reaction = db_reaction
-        self.reaction_container = self._make_reaction_container()
+        self.reaction_object = self._make_reaction_object()
+        # self.reaction_container = self._make_reaction_container()
         self.metadata = services.data_export.metadata.ReactionMetaData(
             db_reaction
         ).get_dict()
@@ -40,12 +44,12 @@ class ReactionDataFile:
         self.memory_file = None
         self.file_contents = None
         self.file_hash = None
-        if self.reaction_container:
-            self.reaction_container.meta.update(self.metadata)
+        # if self.reaction_object:
+        #     self.reaction_object.meta.update(self.metadata)
 
     def save(self):
         """Calls the appropriate method to save the data. Can't use .RDF without a reaction_container object"""
-        if self.reaction_container:
+        if self.reaction_object:
             self.filename += ".rdf"
             self._save_as_rdf()
         else:
@@ -53,7 +57,7 @@ class ReactionDataFile:
             self._save_as_json()
         self._save_blob()
 
-    def _make_reaction_container(self):
+    def _make_reaction_object(self):
         """
         Makes a reaction container by using the SMILES obtained from the db reaction object.
         Full reaction SMILES including reactants, agents (aka reagents and solvents), and products
@@ -61,9 +65,22 @@ class ReactionDataFile:
         reaction_smiles = self._make_reaction_smiles()
         # return None if we cannot make a reaction_container from smiles - likely to be due to no smiles present.
         try:
-            return chython.files.smiles(reaction_smiles)
+            rxn = AllChem.ReactionFromSmarts(reaction_smiles)
+            return AllChem.ReactionToRxnBlock(rxn)
         except ValueError:
             return None
+
+    # def _make_reaction_container(self):
+    #     """
+    #     Makes a reaction container by using the SMILES obtained from the db reaction object.
+    #     Full reaction SMILES including reactants, agents (aka reagents and solvents), and products
+    #     """
+    #     reaction_smiles = self._make_reaction_smiles()
+    #     # return None if we cannot make a reaction_container from smiles - likely to be due to no smiles present.
+    #     try:
+    #         return chython.files.smiles(reaction_smiles)
+    #     except ValueError:
+    #         return None
 
     def _make_reaction_smiles(self) -> str:
         """
@@ -90,24 +107,16 @@ class ReactionDataFile:
 
     def _save_blob(self):
         """Saves the blob to Azure blob service"""
-        # connect to azure
-        blob_service_client = services.file_attachments.connect_to_azure_blob_service()
-        # make or get container
-        services.file_attachments.create_or_get_existing_container_client(
-            blob_service_client, self.container_name
+        blob_client = services.file_attachments.get_blob_client(
+            self.container_name, self.filename
         )
-        # connect to the blob client
-        blob_client = blob_service_client.get_blob_client(
-            container=self.container_name, blob=self.filename
-        )
-
         # Upload the blob data
-        # self.memory_file.seek(0)
         upload = io.BytesIO(self.file_contents)
 
         try:
             blob_client.upload_blob(upload, blob_type="BlockBlob")
         except azure.core.exceptions.ResourceExistsError:
+            print("duplicate resource name error. skipping second one")
             pass
 
         # confirm upload
@@ -118,10 +127,24 @@ class ReactionDataFile:
     def _save_as_rdf(self):
         """Saves as an RDF"""
         # Write to an in-memory file then save the contents to be uploaded to Azure as a blob
+
+        # with open('replace_chython.rdf', 'w') as f:
+        #     #f.write('Hey Joe')
+        #     f.write(self.reaction_object)
+        #     # add dict / extra data
+        #     self.file_contents = bytearray(f.file.getvalue(), "utf-8")
+
         self.memory_file = io.StringIO()
-        with chython.files.RDFWrite(self.memory_file) as f:
-            f.write(self.reaction_container)
-            self.file_contents = bytearray(f.file.getvalue(), "utf-8")
+        with self.memory_file as f:
+            f.write(self.reaction_object)
+            # add dict / extra data
+            self.file_contents = bytearray(f.getvalue(), "utf-8")
+
+        #
+        # with chython.files.RDFWrite(self.memory_file) as f:
+        #     f.write(self.reaction_container)
+        #     # self.file_contents = bytearray(f.file.getvalue(), "utf-8")
+        #     self.file_contents = bytearray(self.memory_file.getvalue(), "utf-8")
 
     def _save_as_json(self):
         self.memory_file = io.StringIO()

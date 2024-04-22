@@ -6,6 +6,7 @@ from typing import Callable
 
 import pytz
 from azure.storage.blob import BlobClient, BlobSasPermissions, generate_blob_sas
+from flask.ctx import AppContext
 from sources import models, services
 from sources.extensions import db
 
@@ -48,13 +49,14 @@ def make_sas_link(data_export_request: models.DataExportRequest) -> str:
     return f"{blob_client.url}?{sas_token}"
 
 
-def initiate(data_export_request_id: int):
+def initiate(current_app_context: AppContext, data_export_request_id: int):
     """
     Calls the DataExport class to start making the export file.
     Called from here to instantiate the class object during the threaded process.
     """
-    export = DataExport(data_export_request_id)
-    export.create()
+    with current_app_context:
+        export = DataExport(data_export_request_id)
+        export.create()
 
 
 class DataExport:
