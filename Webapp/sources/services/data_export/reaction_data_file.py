@@ -1,12 +1,11 @@
-import ast
+import datetime
 import io
 import json
+from typing import Optional
 
 import azure.core.exceptions
-
-# import chython.files
+import pytz
 from flask import abort
-from flask_login import current_user
 from rdkit.Chem import AllChem
 from sources import models, services
 
@@ -34,7 +33,7 @@ class ReactionDataFile:
         Filename should not include extension.
         """
         self.db_reaction = db_reaction
-        self.reaction_object = self._make_reaction_object()
+        self.reaction_object = self._make_rxn_block()
         # self.reaction_container = self._make_reaction_container()
         self.metadata = services.data_export.metadata.ReactionMetaData(
             db_reaction
@@ -57,32 +56,20 @@ class ReactionDataFile:
             self._save_as_json()
         self._save_blob()
 
-    def _make_reaction_object(self):
+    def _make_rxn_block(self) -> Optional[str]:
         """
+        Makes a rxn block with RDKIT for the
         Makes a reaction container by using the SMILES obtained from the db reaction object.
         Full reaction SMILES including reactants, agents (aka reagents and solvents), and products
         """
         reaction_smiles = self._make_reaction_smiles()
         # return None if we cannot make a reaction_container from smiles - likely to be due to no smiles present.
-        try:
+        if reaction_smiles:
             rxn = AllChem.ReactionFromSmarts(reaction_smiles)
-            return AllChem.ReactionToRxnBlock(rxn)
-        except ValueError:
-            return None
+            return AllChem.ReactionToRxnBlock(rxn, separateAgents=True)
+        return None
 
-    # def _make_reaction_container(self):
-    #     """
-    #     Makes a reaction container by using the SMILES obtained from the db reaction object.
-    #     Full reaction SMILES including reactants, agents (aka reagents and solvents), and products
-    #     """
-    #     reaction_smiles = self._make_reaction_smiles()
-    #     # return None if we cannot make a reaction_container from smiles - likely to be due to no smiles present.
-    #     try:
-    #         return chython.files.smiles(reaction_smiles)
-    #     except ValueError:
-    #         return None
-
-    def _make_reaction_smiles(self) -> str:
+    def _make_reaction_smiles(self) -> Optional[str]:
         """
         Makes a reaction smiles in format reactant1.reactants2>reagents.solvents>products from a db reaction object
 
@@ -95,15 +82,16 @@ class ReactionDataFile:
             self.db_reaction.solvent
         )
         product_smiles = utils.remove_default_data(self.db_reaction.products)
-        reaction_smiles = (
-            ".".join(reactant_smiles)
-            + ">"
-            + ".".join(reagent_smiles)
-            + ".".join(solvent_smiles)
-            + ">"
-            + ".".join(product_smiles)
-        )
-        return reaction_smiles
+        if reactant_smiles and product_smiles:
+            return (
+                ".".join(reactant_smiles)
+                + ">"
+                + ".".join(reagent_smiles)
+                + ".".join(solvent_smiles)
+                + ">"
+                + ".".join(product_smiles)
+            )
+        return None
 
     def _save_blob(self):
         """Saves the blob to Azure blob service"""
@@ -113,7 +101,7 @@ class ReactionDataFile:
         # Upload the blob data
         upload = io.BytesIO(self.file_contents)
 
-        try:
+        try:  # todo remove before deployment because this should only happen when debugging
             blob_client.upload_blob(upload, blob_type="BlockBlob")
         except azure.core.exceptions.ResourceExistsError:
             print("duplicate resource name error. skipping second one")
@@ -124,37 +112,33 @@ class ReactionDataFile:
             print(f"blob {self.filename} upload failed")
             abort(401)
 
+    def _make_rdf_contents(self) -> str:
+        """Makes a .RDF reaction data file contents from a RXN block and metadata"""
+        current_time = datetime.datetime.now(pytz.timezone("Europe/London")).replace(
+            tzinfo=None
+        )
+        # add rdf header
+        rdf_header = f"$RDFILE 1\n$DATM\t{current_time}\n$RFMT\n"
+        # Make a multiline string from the metadata with each key-value pair formatted as $DTYPE and $DATUM
+        rdf_metadata = [
+            f"$DTYPE {key}\n$DATUM {value}" for key, value in self.metadata.items()
+        ]
+        formatted_metadata = "\n".join(rdf_metadata)
+        return rdf_header + self.reaction_object + formatted_metadata
+
     def _save_as_rdf(self):
-        """Saves as an RDF"""
-        # Write to an in-memory file then save the contents to be uploaded to Azure as a blob
-
-        # with open('replace_chython.rdf', 'w') as f:
-        #     #f.write('Hey Joe')
-        #     f.write(self.reaction_object)
-        #     # add dict / extra data
-        #     self.file_contents = bytearray(f.file.getvalue(), "utf-8")
-
+        """Saves the file contents as a bytearray to self.memory_file to be uploaded to Azure"""
+        rdf_contents = self._make_rdf_contents()
         self.memory_file = io.StringIO()
         with self.memory_file as f:
-            f.write(self.reaction_object)
+            f.write(rdf_contents)
             # add dict / extra data
             self.file_contents = bytearray(f.getvalue(), "utf-8")
 
-        #
-        # with chython.files.RDFWrite(self.memory_file) as f:
-        #     f.write(self.reaction_container)
-        #     # self.file_contents = bytearray(f.file.getvalue(), "utf-8")
-        #     self.file_contents = bytearray(self.memory_file.getvalue(), "utf-8")
-
     def _save_as_json(self):
+        """Saves a JSON as a bytearray to self.memory_file. This is used over rdf when no reaction smiles are present"""
         self.memory_file = io.StringIO()
 
         with self.memory_file as f:
             json.dump(self.metadata, f)
             self.file_contents = bytearray(f.getvalue(), "utf-8")
-
-        # # Testing lines
-        # with self.memory_file as f:
-        #     meta_reload = json.load(f)
-
-        # assert meta_reload == self.metadata, "change in data during file read/write"
