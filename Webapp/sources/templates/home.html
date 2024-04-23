@@ -9,7 +9,7 @@
         <div class="jumbotron">
             <div class="container">
                 {% if user_confirmed == false %}
-                    <div class="alert alert-primary">AI4Green now requires email validation  <a href='/email_verification_request' class='alert-link'>Click here</a> to send a verification email.</div>
+                    <div class="alert alert-primary">AI4Green now requires email verification.  <a href='/email_verification_request' class='alert-link'>Click here</a> to send a verification email to your email address.</div>
                 {% endif %}
                 <h2>Welcome to AI4Green, {{ current_user.username }}!</h2>
                 <p>AI4Green is an Electronic Laboratory Notebook built around encouraging green and sustainable chemistry.</p>
