@@ -20,6 +20,7 @@ from sources import auxiliary, models, services  # imports the user database obj
 from sources.extensions import db
 from sqlalchemy import func
 from werkzeug.urls import url_parse
+from urllib.parse import urlparse
 
 from . import auth_bp  # imports the blueprint of the
 from .forms import LoginForm, RegistrationForm
@@ -102,7 +103,7 @@ def login() -> Response:  # the login view function
             to a relative path (a URL without the domain portion),
             then the user is redirected to that URL."""
             next_page = next_page.replace('\\', '')
-            if not url_parse(next_page).netloc:
+            if not urlparse(next_page).netloc:
                 return redirect(next_page)
 
     return render_template(
