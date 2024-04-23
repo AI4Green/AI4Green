@@ -96,11 +96,13 @@ def login() -> Response:  # the login view function
             """If the login URL does not have a next argument or the
             next argument is set to a full URL that includes a domain
             name, then the user is redirected to the index page."""
-            next_page = url_for("main.index")
+            return redirect(url_for("main.index"))
+        else:
             """If the login URL includes a next argument that is set
             to a relative path (a URL without the domain portion),
             then the user is redirected to that URL."""
-        return redirect(next_page)
+            return redirect(next_page)
+
     return render_template(
         "auth/login.html", title="Sign In", form=form
     )  # renders the login template
