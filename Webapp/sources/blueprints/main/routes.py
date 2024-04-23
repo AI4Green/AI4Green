@@ -38,7 +38,7 @@ def index() -> Response:
             .filter(models.User.email == current_user.email)
             .first()
         )
-        user_confirmed = user.is_confirmed
+        user_confirmed = user.is_verified
         user_role = user.Role.name
         workgroups = get_workgroups()
         notification_number = get_notification_number()

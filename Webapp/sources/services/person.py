@@ -17,3 +17,11 @@ def from_current_user_email() -> models.Person:
         .filter(models.User.email == current_user.email)
         .first()
     )
+
+
+def from_id(person_id: int) -> models.Person:
+    return (
+        db.session.query(models.Person)
+        .filter(models.Person.id == person_id)
+        .first()
+    )

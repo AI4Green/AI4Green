@@ -20,7 +20,7 @@ def verify_email(token: str) -> Response:
         )
         return redirect(url_for("auth.login"))
 
-    user.is_confirmed = True
+    user.is_verified = True
     user.confirmed_on = datetime.now()
     db.session.commit()
     flash("Your account is now verified. Thank you!", "success")

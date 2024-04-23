@@ -53,8 +53,8 @@ class User(Model, UserMixin):
     time_of_creation = db.Column(db.DateTime)
     Role = db.relationship("Role")
 
-    is_confirmed = db.Column(db.Boolean, nullable=True, server_default=sa.sql.false(), default=False)
-    confirmed_on = db.Column(db.DateTime, nullable=True)
+    is_verified = db.Column(db.Boolean, nullable=True, server_default=sa.sql.false(), default=False)
+    verified_on = db.Column(db.DateTime, nullable=True)
 
     """Password hashing is implemented by the two following methods"""
 

@@ -68,7 +68,7 @@ def login() -> Response:  # the login view function
             return redirect(url_for("auth.login"))
 
         # if user was added after 22/04/2024 their email needs to be verified before login
-        if user.time_of_creation > datetime(2024, 4, 22) and not user.is_confirmed:
+        if user.time_of_creation > datetime(2024, 4, 22) and not user.is_verified:
             verification_url = "/email_verification_request/" + str(user.id)
             flash(
                 Markup(
