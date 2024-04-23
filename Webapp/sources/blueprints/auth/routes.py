@@ -101,7 +101,9 @@ def login() -> Response:  # the login view function
             """If the login URL includes a next argument that is set
             to a relative path (a URL without the domain portion),
             then the user is redirected to that URL."""
-            return redirect(next_page)
+            next_page = next_page.replace('\\', '')
+            if not url_parse(next_page).netloc:
+                return redirect(next_page)
 
     return render_template(
         "auth/login.html", title="Sign In", form=form
