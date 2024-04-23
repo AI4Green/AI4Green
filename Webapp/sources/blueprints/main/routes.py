@@ -8,7 +8,6 @@ from flask import (
     request,
     send_file,
     url_for,
-    Markup
 )
 from flask_login import (  # protects a view function against anonymous users
     current_user,
