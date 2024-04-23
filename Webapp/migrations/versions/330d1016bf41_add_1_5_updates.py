@@ -156,10 +156,10 @@ def upgrade():
         batch_op.create_index(batch_op.f("ix_User_role"), ["role"], unique=False)
 
     with op.batch_alter_table("WBStatusRequest", schema=None) as batch_op:
-        # batch_op.drop_index("idx_wbstatusrequest__notification")
-        # batch_op.drop_index("idx_wbstatusrequest__person")
-        # batch_op.drop_index("idx_wbstatusrequest__pi_sr")
-        # batch_op.drop_index("idx_wbstatusrequest__wb")
+        batch_op.drop_index("idx_wbstatusrequest__notification")
+        batch_op.drop_index("idx_wbstatusrequest__person")
+        batch_op.drop_index("idx_wbstatusrequest__pi_sr")
+        batch_op.drop_index("idx_wbstatusrequest__wb")
         batch_op.create_index(
             batch_op.f("ix_WBStatusRequest_notification"),
             ["notification"],
