@@ -62,6 +62,30 @@ def admin_dashboard(
     )
 
 
+@admin_dashboard_bp.route("/admin_delete_user/<user_id>", methods=["GET", "POST"])
+def delete_user(user_id=None):
+
+    user = services.user.from_id(user_id)
+
+    if user:
+        person = services.person.from_id(user.person)
+
+        is_PI = person.workgroup_principal_investigator.first()
+        is_SR = person.workgroup_senior_researcher.first()
+        is_SM = person.workgroup_standard_member.first()
+
+        if not is_PI and not is_SR and not is_SM:
+            db.session.delete(user)
+            db.session.delete(person)
+            db.session.commit()
+            flash("User deleted!")
+
+        else:
+            flash("This user is a member of a workgroup and cannot be deleted at this time.")
+
+    return redirect(url_for("admin_dashboard.admin_dashboard"))
+
+
 def handle_new_workgroup_request(
     request_institution: str, request_name: str, decision: str
 ) -> str:

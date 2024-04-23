@@ -1,0 +1,13 @@
+Dear {{ user.username }},
+
+Thank you for signing up to AI4Green!
+
+To verify your email click on the following link:
+
+{{ url_for('email_verification.verify_email', token=token, _external=True, _scheme='protocol') }}
+
+If you have not recently signed up to AI4Green simply ignore this message.
+
+Sincerely,
+
+AI4Green Team

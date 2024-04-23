@@ -24,3 +24,20 @@ def add(
         Person=person,
         password_hash=models.User.set_password(password_data),
     )
+
+
+def from_id(user_id: int) -> models.User:
+    """
+    Gets user from User id
+    Args:
+        user_id: id of user to search for
+
+    Returns:
+        models.User with matching id
+    """
+
+    return (
+        db.session.query(models.User)
+        .filter(models.User.id == user_id)
+        .first()
+    )

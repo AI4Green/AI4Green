@@ -51,7 +51,7 @@ def reset_password(token: str) -> Response:
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
     # verify link token is correct
-    user = services.email.verify_reset_password_token(token)
+    user = services.email.verify_encoded_token(token=token, identifier="reset_password")
     # if link has expired send back to log in
     if not user:
         flash("Password reset link expired")
