@@ -791,6 +791,7 @@ def seed_predefined_data():
             person=p.id,
             password_hash=models.User.set_password(user["password"]),
             role=role.id,
+            is_verified=True
         )
     if workgroups_to_add:
         for workgroup in workgroups_to_add.values():

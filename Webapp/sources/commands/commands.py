@@ -129,6 +129,7 @@ def add_user(
         person=person.id,
         password_hash=models.User.set_password(password),
         role=role_model.id,
+        is_verified=True
     )
     click.echo(f"Created {username}")
 
