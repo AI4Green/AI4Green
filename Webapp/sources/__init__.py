@@ -188,6 +188,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(reset_password_bp)
 
+    from sources.blueprints.email_verification import email_verification_bp
+
+    app.register_blueprint(email_verification_bp)
+
     from sources.blueprints.novel_compound import novel_compound_bp
 
     app.register_blueprint(novel_compound_bp)

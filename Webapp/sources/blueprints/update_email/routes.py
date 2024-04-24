@@ -69,9 +69,11 @@ def update_email() -> Response:
             return redirect(url_for("update_email.update_email"))
         # change user's email
         user.email = form.email.data
+        user.is_verified = False
         user.update()
+        services.email.send_email_verification(user)
         # alert user of success and redirect to home
-        flash("Your email has been successfully updated!")
+        flash("Your email address has been successfully updated! Please check your inbox for instructions on how to verify this new address!")
         return redirect(url_for("main.index"))
     workgroups = get_workgroups()
     notification_number = get_notification_number()

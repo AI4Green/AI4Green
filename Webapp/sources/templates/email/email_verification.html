@@ -1,0 +1,13 @@
+<p>Dear {{ user.username }},</p>
+<p>Thank you for signing up to AI4Green!</p>
+<p>
+    To verify your email address
+    <a href="{{ url_for('email_verification.verify_email', token=token, _external=True, _scheme='protocol') }}">
+        click here.</a>
+</p>
+<p>Alternatively, you can paste the following link in your browser's address bar:</p>
+<p>{{ url_for('email_verification.verify_email', token=token, _external=True, _scheme='protocol') }}</p>
+<p>This link will expire in 10 minutes</p>
+<p>If you have not recently signed up to AI4Green simply ignore this message.</p>
+<p>Sincerely,</p>
+<p>The AI4Green Team</p>

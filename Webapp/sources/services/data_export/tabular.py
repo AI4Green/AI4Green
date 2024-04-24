@@ -1,7 +1,7 @@
 """ For tabbular data export formats - CSV or SURF"""
 import json
 import math
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
 from sources import models, services
 
@@ -9,7 +9,10 @@ from sources import models, services
 class SurfExport:
     amount_factor_dict = {"μmol": 0.000001, "mmol": 0.001, "mol": 1}
 
-    """Format described in more detail here https://github.com/alexarnimueller/surf"""
+    """
+    Format described in more detail here https://github.com/alexarnimueller/surf.
+    Functionality to convert SURF to open reaction database format can also be found at the SURF github.
+    """
 
     def __init__(self, data_export_request: models.DataExportRequest):
         self.data_export_request = data_export_request
@@ -33,9 +36,15 @@ class SurfExport:
         )
         self._add_reagent_and_catalyst_data(data, reaction, reaction_data)
         if services.data_export.utils.check_compounds_present(reaction, "solvent"):
-            for solvent in reaction.solvent:
-                print(solvent)
-                # get data
+            for idx, solvent in enumerate(reaction.solvent, 1):
+                solvent_db = services.solvent.from_primary_key(solvent)
+                print(solvent_db)
+                # cas = solvent_db.cas if solvent_db else None
+                # data[f"solvent_{idx}_cas"] = solvent_db.cas
+
+                # solvent_volume = reaction_data
+
+                # get data from primary key
 
         # reagent and catalyst are same
         # data['catalyst_1_cas']
@@ -49,7 +58,11 @@ class SurfExport:
         # # startingmat
         # ['cas', 'eq', 'smiles']
 
-    def _reagent_or_catalyst(self, equivalent: float):
+    def _reagent_or_catalyst(self, equivalent: float) -> Literal["reagent", "catalyst"]:
+        """
+        Uses the equivalent of a reagent to determine to label it a reagent or a catalyst
+
+        """
         if equivalent > 0.25:
             return "reagent"
         return "catalyst"

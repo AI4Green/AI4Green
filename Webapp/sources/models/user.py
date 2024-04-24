@@ -3,6 +3,7 @@ from datetime import datetime
 import pytz
 from flask_login import UserMixin
 from sources.extensions import db
+import sqlalchemy as sa
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .base import Model
@@ -51,6 +52,9 @@ class User(Model, UserMixin):
     )
     time_of_creation = db.Column(db.DateTime)
     Role = db.relationship("Role")
+
+    is_verified = db.Column(db.Boolean, nullable=True, server_default=sa.sql.false(), default=False)
+    verified_on = db.Column(db.DateTime, nullable=True)
 
     """Password hashing is implemented by the two following methods"""
 
