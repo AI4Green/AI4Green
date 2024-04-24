@@ -1,16 +1,16 @@
 """data_export_request
 
-Revision ID: 42496dce53f6
-Revises: 436a03e01053
-Create Date: 2024-03-27 10:50:55.264671
+Revision ID: 57cdfc52c9ed
+Revises: c57d03c696a9
+Create Date: 2024-04-24 13:46:55.135517
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "42496dce53f6"
-down_revision = "436a03e01053"
+revision = "57cdfc52c9ed"
+down_revision = "c57d03c696a9"
 branch_labels = None
 depends_on = None
 
