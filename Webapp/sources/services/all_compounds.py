@@ -1,6 +1,8 @@
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
-from sources import services
+from rdkit import Chem
+from sources import models, services
+from sources.extensions import db
 
 """
 Contains functions for when it is unknown if a compound is from the Compound table and from PubChem or a Novel compound
@@ -58,3 +60,24 @@ def validate_primary_key(primary_key):
         if len(primary_key) > 1:
             return True
     return False
+
+
+def cas_from_smiles(smiles: str) -> Optional[str]:
+    """Look in compound and novel compound database. Return CAS if present in either else None"""
+    cas = None
+    mol = Chem.MolFromSmiles(smiles)
+    inchi = Chem.MolToInchi(mol)
+    compound = (
+        db.session.query(models.Compound).filter(models.Compound.inchi == inchi).first()
+    )
+    if compound:
+        cas = compound.cas
+    else:
+        novel_compound = (
+            db.session.query(models.Compound)
+            .filter(models.NovelCompound.inchi == inchi)
+            .first()
+        )
+        if novel_compound:
+            cas = novel_compound.cas
+    return cas if cas else None

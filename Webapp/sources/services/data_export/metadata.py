@@ -79,7 +79,9 @@ class ReactionMetaData:
         """
         If solvents are present, returns a list of dictionaries with the solvent name, SMILES, volume and volume unit
         """
-        if not self.check_compounds_present("solvent"):
+        if not services.data_export.utils.check_compounds_present(
+            self.db_reaction, "solvent"
+        ):
             return None
 
         solvent_data = self.get_compound_data("solvent")
@@ -96,7 +98,9 @@ class ReactionMetaData:
         """
         If reactants are present, returns a list of dictionaries with reactant name, SMILES, masses, amounts and units
         """
-        if not self.check_compounds_present("reactants"):
+        if not services.data_export.utils.check_compounds_present(
+            self.db_reaction, "reactants"
+        ):
             return None
 
         reactant_data = self.get_compound_data("reactant")
@@ -114,7 +118,9 @@ class ReactionMetaData:
         """
         If reagents are present, returns a list of dictionaries with reagent name, SMILES, masses, amounts, and units
         """
-        if not self.check_compounds_present("reagents"):
+        if not services.data_export.utils.check_compounds_present(
+            self.db_reaction, "reagents"
+        ):
             return None
         reagent_data = self.get_compound_data("reagent")
         self.standardise_compound_data(reagent_data)
@@ -131,7 +137,9 @@ class ReactionMetaData:
         """
         If products are present, returns a list of dictionaries with product name, SMILES, masses, amounts, and units
         """
-        if not self.check_compounds_present("products"):
+        if not services.data_export.utils.check_compounds_present(
+            self.db_reaction, "products"
+        ):
             return None
         product_data = self.get_compound_data("product")
         self.standardise_compound_data(product_data)
@@ -329,13 +337,6 @@ class ReactionMetaData:
         self.units["product_amount"] = self.rxn_data["product_amount_units"]
         self.units["product_mass"] = self.rxn_data["product_mass_units"]
         self.units["solvent_volume"] = self.rxn_data["solvent_volume_units"]
-
-    def check_compounds_present(self, component: str) -> bool:
-        """
-        component: reactant/reagent/solvent/product
-        Returns True if that compound type is present in the reaction. e.g., A reaction has no solvents returns False
-        """
-        return bool(utils.remove_default_data(getattr(self.db_reaction, component)))
 
     @staticmethod
     def standardise_compound_data(compound_data: Dict):

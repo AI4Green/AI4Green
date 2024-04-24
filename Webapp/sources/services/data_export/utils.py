@@ -1,5 +1,7 @@
 from typing import List, Optional
 
+from sources import models
+
 
 class ReactionStringMapper:
     @staticmethod
@@ -136,3 +138,11 @@ def get_metadata_keys() -> List[str]:
 def remove_default_data(list_: List):
     """Removes default database values from lists for database reaction components"""
     return [x for x in list_ if x not in ["{", "}", ""]]
+
+
+def check_compounds_present(db_reaction: models.Reaction, component: str) -> bool:
+    """
+    component: reactant/reagent/solvent/product
+    Returns True if that compound type is present in the reaction. e.g., A reaction has no solvents returns False
+    """
+    return bool(remove_default_data(getattr(db_reaction, component)))
