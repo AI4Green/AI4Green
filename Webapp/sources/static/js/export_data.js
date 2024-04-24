@@ -5,6 +5,7 @@ $(function () {
     updateSelectedWorkGroup("export_data");
     checkExportPermissions();
     initiateReactionLists();
+    $('[data-toggle="tooltip"]').tooltip();
   }
 });
 

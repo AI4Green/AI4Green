@@ -230,8 +230,11 @@ class DataExport:
             df_rows.append(surf_export.make_row(reaction))
 
         # save export df as blob as .surf
-        surf_export.concat(df_rows)
-        surf_export.save()
+        # df_rows = [pd.DataFrame(x, index=[0]) for x in df_rows]
+        # df_rows = df_rows * 3
+        # df = pd.concat(df_rows, ignore_index=True)
+        # now we have the dataframe we must save it as csv to an azure container in the same way we save the final zip file
+        # df.to_csv()
 
         pass
 

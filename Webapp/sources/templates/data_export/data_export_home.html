@@ -3,12 +3,6 @@
 <head>
     <script type="text/javascript" src="{{ url_for('static', filename='js/auxiliary.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/export_data.js') }}"></script>
-    <script>
-        $(document).ready(function(){
-            $('[data-toggle="tooltip"]').tooltip();
-        });
-    </script>
-
 </head>
 <body>
 <div class="container-fluid mt-5">
@@ -32,6 +26,7 @@
                 </div>
             </form>
             <p id="export-permission-result"></p>
+            <p>Only reactions with a recorded yield are available for export.</p>
             <button onclick="openReactionModal()" class="btn btn-primary-outline mb-2">Select Reactions</button>
         </div>
         <div class="col-md-9">
@@ -80,7 +75,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="reactionsModalLabel">Select Reactions</h5>
+        <h3 class="modal-title" id="reactionsModalLabel">Select Reactions</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

@@ -267,8 +267,7 @@ class ReactionMetaData:
               percentage yield as a string
         """
         actual_mass_yield = self.summary_data.get("real_product_mass")
-        # a yield of zero is a valid yield
-        if not actual_mass_yield and actual_mass_yield != "0":
+        if not actual_mass_yield:
             return None
         return str(
             services.sustainability.percent_yield_from_rxn_data(

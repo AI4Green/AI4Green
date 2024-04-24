@@ -3,6 +3,7 @@ import json
 import math
 from typing import Dict, List, Literal, Optional
 
+import pandas as pd
 from sources import models, services
 
 
@@ -26,7 +27,9 @@ class SurfExport:
         data["source_id"] = "AI4Green.app"
         data["source_type"] = "ELN"
         data["rxn_type"] = None
-        data["temperature_deg_c"] = self._read_value(summary_data, "temperature")
+        data["temperature_deg_c"] = self._read_value(
+            summary_data, "reaction_temperature"
+        )
         data["time_h"] = None
         data["atmosphere"] = None
         data["stirring_shaking"] = None
@@ -35,30 +38,108 @@ class SurfExport:
             reaction_data.get("solvent_concentrations")
         )
         self._add_reagent_and_catalyst_data(data, reaction, reaction_data)
+        self._add_solvent_data(data, reaction, reaction_data)
+        self._add_starting_material_data(data, reaction, reaction_data)
+        self._add_product_data(data, reaction, reaction_data, summary_data)
+        creator = reaction.creator_person.user
+        data[
+            "provenance"
+        ] = f"{creator.fullname} {creator.email} {reaction.workbook.WorkGroup.name}"
+        data["procedure"] = reaction.description
+        df = pd.DataFrame(data, index=[0])
+        return df
+
+    def _add_product_data(
+        self,
+        data: Dict,
+        reaction: models.Reaction,
+        reaction_data: Dict,
+        summary_data: Dict,
+    ):
+        """
+        Updates the data export dict with product data
+        Args:
+            data - the data export dictionary which is updated in the function
+            reaction - the reaction we are getting data for
+            reaction_data - the reaction table data for the reaction we are looking at.
+        """
+        if services.data_export.utils.check_compounds_present(reaction, "products"):
+            for idx, product_smiles in enumerate(reaction.products, 1):
+                data[f"product_{idx}_cas"] = services.all_compounds.cas_from_smiles(
+                    product_smiles
+                )
+                data[f"product_{idx}_ms"] = None
+                data[f"product_{idx}_nmr"] = None
+                data[f"product_{idx}_smiles"] = product_smiles
+                # only main product yield is recorded
+                if str(idx) == summary_data["main_product"]:
+                    percent_yield = self._get_percent_yield(reaction_data, summary_data)
+                else:
+                    percent_yield = None
+                data[f"product_{idx}_yield"] = percent_yield
+                data[f"product_{idx}_yieldtype"] = None
+
+    @staticmethod
+    def _add_starting_material_data(
+        data: Dict, reaction: models.Reaction, reaction_data: Dict
+    ):
+        """
+        Updates the data export dict with reactant/starting material data
+        Args:
+            data - the data export dictionary which is updated in the function
+            reaction - the reaction we are getting data for
+            reaction_data - the reaction table data for the reaction we are looking at.
+        """
+        if services.data_export.utils.check_compounds_present(reaction, "reactants"):
+            for idx, reactant_smiles in enumerate(reaction.reactants, 1):
+                data[f"startingmat_{idx}_eq"] = reaction_data["reactant_equivalents"][
+                    idx - 1
+                ]
+                data[f"startingmat_{idx}_cas"] = services.all_compounds.cas_from_smiles(
+                    reactant_smiles
+                )
+                data[f"startingmat_{idx}_smiles"] = reactant_smiles
+
+    @staticmethod
+    def _add_solvent_data(data: Dict, reaction: models.Reaction, reaction_data: Dict):
+        """
+        Updates the data export dict with solvent data
+        Args:
+            data - the data export dictionary which is updated in the function
+            reaction - the reaction we are getting data for
+            reaction_data - the reaction table data for the reaction we are looking at.
+        """
         if services.data_export.utils.check_compounds_present(reaction, "solvent"):
-            for idx, solvent in enumerate(reaction.solvent, 1):
-                solvent_db = services.solvent.from_primary_key(solvent)
-                print(solvent_db)
-                # cas = solvent_db.cas if solvent_db else None
-                # data[f"solvent_{idx}_cas"] = solvent_db.cas
+            for idx, solvent_pk in enumerate(reaction.solvent, 1):
+                data[f"solvent_{idx}_cas"] = services.solvent.cas_from_primary_key(
+                    solvent_pk
+                )
+                # get volumes of all solvents in this reaction
+                total_solvent_volume = sum(
+                    [float(x) for x in reaction_data["solvent_volumes"]]
+                )
+                data[f"solvent_{idx}_fraction"] = (
+                    float(reaction_data["solvent_volumes"][idx - 1])
+                    / total_solvent_volume
+                )
+                data[
+                    f"solvent_{idx}_smiles"
+                ] = services.solvent.smiles_from_primary_key(solvent_pk)
 
-                # solvent_volume = reaction_data
+    @staticmethod
+    def _get_percent_yield(reaction_data: Dict, summary_data: Dict) -> Optional[float]:
+        actual_mass_yield = summary_data.get("real_product_mass")
+        # a yield of zero is a valid yield
+        if actual_mass_yield:
+            percent_yield = services.sustainability.percent_yield_from_rxn_data(
+                reaction_data, float(actual_mass_yield)
+            )
+        else:
+            percent_yield = None
+        return percent_yield
 
-                # get data from primary key
-
-        # reagent and catalyst are same
-        # data['catalyst_1_cas']
-        # data['catalyst_1_eq']
-        # data['catalyst_1_smiles']
-        #
-        # # solvent
-        # ['cas', 'fraction', 'SMILES']
-        #
-        #
-        # # startingmat
-        # ['cas', 'eq', 'smiles']
-
-    def _reagent_or_catalyst(self, equivalent: float) -> Literal["reagent", "catalyst"]:
+    @staticmethod
+    def _reagent_or_catalyst(equivalent: float) -> Literal["reagent", "catalyst"]:
         """
         Uses the equivalent of a reagent to determine to label it a reagent or a catalyst
 
@@ -67,36 +148,39 @@ class SurfExport:
             return "reagent"
         return "catalyst"
 
-    def _get_concentration(self, solvent_concentrations: List) -> Optional[float]:
+    @staticmethod
+    def _get_concentration(solvent_concentrations: List) -> Optional[float]:
         """Gets the concentration the reaction was performed at using volume of solvent and limited reactants."""
-        if (
-            not isinstance(solvent_concentrations, list)
-            or not solvent_concentrations[0].isdigit()
-        ):
+        if not solvent_concentrations:
             return
         solvent_concentrations = [float(x) for x in solvent_concentrations]
         return math.prod(solvent_concentrations)
 
     def _get_mol_scale(self, reaction_data: Dict) -> Optional[float]:
+        """
+        To get the mol scale, look up the limiting reactant and get this amount and its units and convert to mol
+        Args:
+            reaction_data - the reaction table data for the reaction we are looking at.
+        Returns:
+            The mol scale of the reaction expressed as a float
+        """
         limiting_reactant = reaction_data.get("limiting_reactant_table_number")
-        if limiting_reactant:
+        if limiting_reactant and reaction_data.get("reactant_amounts_raw"):
             limiting_reactant_idx = int(limiting_reactant) - 1
-            if reaction_data.get("reactant_amounts_raw"):
-                limiting_reactant_amount = round(
-                    float(
-                        reaction_data.get("reactant_amounts_raw")[limiting_reactant_idx]
-                    ),
-                    2,
-                )
-                # convert to mol scale
-                reactant_amount_unit = reaction_data["amount_units"]
-                amount_factor = self.amount_factor_dict[reactant_amount_unit]
-                return limiting_reactant_amount * amount_factor
+            limiting_reactant_amount = round(
+                float(reaction_data.get("reactant_amounts_raw")[limiting_reactant_idx]),
+                2,
+            )
+            # convert to mol scale
+            reactant_amount_unit = reaction_data["amount_units"]
+            amount_factor = self.amount_factor_dict[reactant_amount_unit]
+            return limiting_reactant_amount * amount_factor
         return None
 
-    def _read_value(self, summary_data, key) -> Optional[str]:
+    @staticmethod
+    def _read_value(summary_data, key) -> Optional[str]:
         """Returns the reaction temperature the user entered into the summary table"""
-        value = summary_data.get("reaction_temperature")
+        value = summary_data.get(key)
         return value if value != "" else None
 
     def _add_reagent_and_catalyst_data(
@@ -120,26 +204,50 @@ class SurfExport:
                     reagent_idx_list.append(idx)
                 if role == "catalyst":
                     catalyst_idx_list.append(idx)
+            self._update_reagent_or_catalyst_dict(
+                data, reaction, reaction_data, "reagent", reagent_idx_list
+            )
+            self._update_reagent_or_catalyst_dict(
+                data, reaction, reaction_data, "catalyst", catalyst_idx_list
+            )
 
-            if catalyst_idx_list:
-                for catalyst_idx, idx in enumerate(catalyst_idx_list, 1):
-                    catalyst_equivalent = reaction.reagent_equivalents[idx]
-                    catalyst_smiles = reaction.reagents[idx]
-                    data[f"catalyst_{catalyst_idx}_eq"] = catalyst_equivalent
-                    data[
-                        f"catalyst_{catalyst_idx}_cas"
-                    ] = services.all_compounds.cas_from_smiles(catalyst_smiles)
-                    data[f"catalyst_{catalyst_idx}_smiles"] = catalyst_smiles
+            # if catalyst_idx_list:
+            #     for label_idx, idx in enumerate(catalyst_idx_list, 1):
+            #         catalyst_equivalent = reaction_data['reagent_equivalents'][idx]
+            #         catalyst_smiles = reaction.reagents[idx]
+            #         data[f"catalyst_{label_idx}_eq"] = catalyst_equivalent
+            #         data[
+            #             f"catalyst_{label_idx}_cas"
+            #         ] = services.all_compounds.cas_from_smiles(catalyst_smiles)
+            #         data[f"catalyst_{label_idx}_smiles"] = catalyst_smiles
+            #
+            # if reagent_idx_list:
+            #     for label_idx, idx in enumerate(reagent_idx_list, 1):
+            #         reagent_equivalent = reaction_data['reagent_equivalents'][idx]
+            #         reagent_smiles = reaction.reagents[idx]
+            #         data[f"reagent_{label_idx}_eq"] = reagent_equivalent
+            #         data[
+            #             f"reagent_{label_idx}_cas"
+            #         ] = services.all_compounds.cas_from_smiles(reagent_smiles)
+            #         data[f"reagent_{label_idx}_smiles"] = reagent_smiles
 
-            if reagent_idx_list:
-                for reagent_idx, idx in enumerate(reagent_idx_list, 1):
-                    reagent_equivalent = reaction.reagent_equivalents[idx]
-                    reagent_smiles = reaction.reagents[idx]
-                    data[f"reagent_{reagent_idx}_eq"] = reagent_equivalent
-                    data[
-                        f"reagent_{reagent_idx}_cas"
-                    ] = services.all_compounds.cas_from_smiles(reagent_smiles)
-                    data[f"reagent_{reagent_idx}_smiles"] = reagent_smiles
+    @staticmethod
+    def _update_reagent_or_catalyst_dict(
+        data: Dict,
+        reaction: models.Reaction,
+        reaction_data: Dict,
+        role: str,
+        compound_idx_list: List[int],
+    ):
+        if compound_idx_list:
+            for label_idx, idx in enumerate(compound_idx_list, 1):
+                compound_equivalent = reaction_data["reagent_equivalents"][idx]
+                compound_smiles = reaction.reagents[idx]
+                data[f"{role}_{label_idx}_eq"] = compound_equivalent
+                data[
+                    f"{role}_{label_idx}_cas"
+                ] = services.all_compounds.cas_from_smiles(compound_smiles)
+                data[f"{role}_{label_idx}_smiles"] = compound_smiles
 
 
 # def _save_blob(self):

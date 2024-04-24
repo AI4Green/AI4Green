@@ -80,6 +80,11 @@ class NewRequest:
             reaction_list = services.reaction.list_active_in_workbook(
                 self.workbook.name, self.workgroup.name, sort_crit="time"
             )
+            reaction_list = [
+                rxn
+                for rxn in reaction_list
+                if services.data_export.utils.validate_reaction(rxn)
+            ]
         return reaction_list
 
     def _save_to_database(self):

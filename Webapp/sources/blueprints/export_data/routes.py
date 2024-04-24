@@ -160,7 +160,12 @@ def get_reaction_id_list():
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         request.json["workgroup"], request.json["workbook"]
     )
-    reaction_ids = [rxn.reaction_id for rxn in workbook.reactions]
+    validated_reactions = [
+        rxn
+        for rxn in workbook.reactions
+        if services.data_export.utils.validate_reaction(rxn)
+    ]
+    reaction_ids = [rxn.reaction_id for rxn in validated_reactions]
     return jsonify(reaction_ids)
 
 

@@ -7,6 +7,38 @@ from sources import models
 from sources.extensions import mail
 
 
+def send_data_export_approval_request(
+    user: models.User, data_export_request: models.DataExportRequest
+):
+    """
+    Send data export request email to a given user.
+    Args:
+        user: User to send to.
+        data_export_request: request we are asking PI user to accept or deny
+    """
+    token = get_data_export_token(user, data_export_request)
+    protocol = get_protocol_type()
+    mail.send_email(
+        "AI4Green Data Export Request",
+        sender=current_app.config["MAIL_ADMIN_SENDER"],
+        recipients=[user.email],
+        text_body=render_template(
+            "email/data_export_request.txt",
+            data_export_request=data_export_request,
+            user=user,
+            token=token,
+            protocol=protocol,
+        ),
+        html_body=render_template(
+            "email/data_export_request.html",
+            data_export_request=data_export_request,
+            user=user,
+            token=token,
+            protocol=protocol,
+        ),
+    )
+
+
 def send_data_export_ready_message(
     user: models.User, data_export_request: models.DataExportRequest
 ):

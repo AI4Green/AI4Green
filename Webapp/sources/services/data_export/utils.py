@@ -1,12 +1,26 @@
+import json
 from typing import List, Optional
 
 from sources import models
 
 
+def validate_reaction(reaction: models.Reaction) -> bool:
+    """Validates a reaction is suitable for export. We use whether the user has entered a yield to decide this.
+    Args:
+        reaction - the reaction we are validating for export
+    Returns:
+        True if the reaction is valid (user has entered a yield) and False if it is not.
+    """
+    yield_mass = json.loads(reaction.summary_table_data).get("real_product_mass")
+    if yield_mass and yield_mass.isdigit():
+        return True
+    return False
+
+
 class ReactionStringMapper:
     @staticmethod
     def chem21_to_numerical(chem21_str: str) -> str:
-        """Used to replace the css classes that indicate colour with a numerical equivalent"""
+        """Replaces the css classes that indicate colour with a numerical equivalent"""
         chem21_dict = {
             "recommended": "1",
             "problematic": "2",
@@ -17,6 +31,7 @@ class ReactionStringMapper:
 
     @staticmethod
     def css_classes_to_chem21_colour_flag(css_class: str) -> str:
+        """Replaces the css classes with their default colour flags - used in elements table"""
         css_chem21_dict = {
             "hazard-reset-hazard": None,
             "hazard-acceptable": "green",
