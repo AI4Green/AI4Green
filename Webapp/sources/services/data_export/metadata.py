@@ -30,9 +30,9 @@ class ReactionMetaData:
         self.metadata_access_methods = self.get_metadata_access_methods()
         self.units = {}
         self.metadata_dict = {}
-        self.make_metadata_dict()
+        self._make_metadata_dict()
 
-    def make_metadata_dict(self):
+    def _make_metadata_dict(self):
         """Called on __init__, makes the metadata dictionary by iterating through the access method dict"""
         self.initialise_units()
         for key, access_method in self.metadata_access_methods.items():
@@ -61,6 +61,10 @@ class ReactionMetaData:
     def read_time_of_creation(self):
         """Returns the time the reaction was made"""
         return self.db_reaction.time_of_creation.isoformat()
+
+    def read_time_of_last_update(self):
+        """Returns the time the most recent update to the reaction was made"""
+        return self.db_reaction.time_of_update.isoformat()
 
     def read_reaction_completed(self):
         """Returns whether the reaction is 'complete' or 'not complete'"""
@@ -493,6 +497,7 @@ class ReactionMetaData:
             "creator_workgroup": self.read_workgroup,
             # when
             "time_of_creation": self.read_time_of_creation,
+            "time_of_last_update": self.read_time_of_last_update,
             "reaction_completed": self.read_reaction_completed,
             # what
             "reaction_id": self.read_reaction_id,

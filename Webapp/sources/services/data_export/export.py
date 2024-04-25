@@ -101,11 +101,12 @@ class DataExport:
         """
         export_function = self._get_export_function()
         export_function()
+        self._update_requestor()
         # if we make a zip file, the intermediate container we make the zip from is deleted after making the zip
         # Files in the export-container will be deleted after 7 days. This is controlled by Azure Blob Storage Lifecycle policies.
-        # Make the zip file and generate an md5 checksum to check file integrity
 
     def _make_zip(self):
+        """Make the zip file and generate an md5 checksum to check file integrity"""
         zip_stream = self._make_zip_file()
         checksum = hashlib.md5(zip_stream.getvalue()).hexdigest()
         # upload file and confirm the upload was successful
@@ -113,7 +114,6 @@ class DataExport:
         self._confirm_upload(blob_client, checksum)
         # update database entry with hash
         self._update_db_with_hash(checksum)
-        self._update_requestor()
         # delete container
         self.blob_service_client.delete_container(self.container_name)
 
@@ -221,10 +221,20 @@ class DataExport:
         # iterate through the reactions and save each as an azure blob
         for reaction in self.data_export_request.reactions:
             # save all files to the container
-            rdf = services.data_export.reaction_data_file.ReactionDataFile(
+            rdf = services.data_export.serialisation.ReactionDataFileExport(
                 reaction, reaction.reaction_id, self.data_export_request.uuid
             )
             rdf.save()
+        self._make_zip()
+
+    def _make_json_export(self):
+        # iterate through the reactions and save each as an azure blob
+        for reaction in self.data_export_request.reactions:
+            # save all files to the container
+            json_file = services.data_export.serialisation.JsonExport(
+                reaction, reaction.reaction_id, self.data_export_request.uuid
+            )
+            json_file.save()
         self._make_zip()
 
     def _make_csv_export(self):
@@ -238,18 +248,6 @@ class DataExport:
         # save the csv file with all the export reactions to Azure.
         file_ext = get_export_file_extension(self.data_export_request.data_format.value)
         csv_export.save(df, self.data_export_request.uuid + file_ext)
-
-        df_rows = []
-        surf_export = services.data_export.tabular.SurfExport(self.data_export_request)
-        for reaction in self.data_export_request.reactions:
-            df_rows.append(surf_export.make_row(reaction))
-        df = pd.concat(df_rows, ignore_index=True)
-        # save the surf file with all the export reactions to Azure.
-        file_ext = get_export_file_extension(self.data_export_request.data_format.value)
-        surf_export.save(df, self.data_export_request.uuid + file_ext)
-
-    def _make_json_export(self):
-        pass
 
     def _make_surf_export(self):
         """Condense all export into single csv with standardised headings"""

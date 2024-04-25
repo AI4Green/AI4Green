@@ -3,6 +3,7 @@ from . import (
     all_compounds,
     auth,
     compound,
+    data_export,
     email,
     file_attachments,
     hazard_code,

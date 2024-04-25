@@ -16,19 +16,70 @@ class CsvExport:
     def __init__(self, data_export_request: models.DataExportRequest):
         self.data_export_request = data_export_request
 
-    def make_row(self, reaction):
+    def make_row(self, reaction: models.Reaction) -> pd.DataFrame:
         # first get the data included in the surf export
-        data = SurfExport(self.data_export_request).make_row(reaction).to_dict()
-        # now get the data not included within the surf export
-        data["time_of_creation"] = reaction.time_of_creation
-        data["time_of_update"] = reaction.time_of_update
-        data["complete"] = reaction.complete
-        # get the sustainability data
+        data = SurfExport(self.data_export_request).get_surf_data(reaction)
+        # use metadata to get sustainability and other data not part of SURF
+        # this could be optimised in the future to avoid getting some data we already have
         metadata_dict = services.data_export.metadata.ReactionMetaData(
             reaction
-        ).make_metadata_dict()
+        ).get_dict()
         # combine these dicts without duplicating entries.
-        print(metadata_dict)
+        metadata_keys_to_include = [
+            "creator_workbook",
+            "creator_workgroup",
+            "creator_username",
+            "time_of_creation",
+            "time_of_last_update",
+            "reaction_completed",
+            "reaction_name",
+            "reactants",
+            "reagents",
+            "solvents",
+            "products",
+            "standard_protocols_used",
+            "file_attachment_names",
+            "addenda",
+            "solvent_sustainability",
+            "safety",
+            "element_sustainability",
+            "batch_or_flow",
+            "isolation_method",
+            "catalyst_use",
+            "catalyst_recovery",
+            "atom_economy",
+            "mass_efficiency",
+            "conversion",
+            "selectivity",
+            "sustainability_data",
+        ]
+        for key in metadata_keys_to_include:
+            data.update({key: metadata_dict[key]})
+        df = pd.DataFrame.from_dict(data, orient="index").transpose()
+        return df
+
+    def save(self, df: pd.DataFrame, filename: str):
+        """Calls the appropriate method to save the data"""
+        """Saves the blob to Azure blob service"""
+
+        csv_buffer = io.StringIO()
+        df.to_csv(csv_buffer, index=False, sep="\t")
+        # Get CSV file contents from csv buffer and save as a csv in the export container in Azure
+        file_contents = bytearray(csv_buffer.getvalue(), "utf-8")
+
+        # Upload the blob data
+        upload = io.BytesIO(file_contents)
+        blob_client = services.file_attachments.get_blob_client(
+            "export-outputs", filename
+        )
+
+        # todo remove before deployment because this should only happen when debugging
+        blob_client.upload_blob(upload, blob_type="BlockBlob", overwrite=True)
+
+        # confirm upload
+        if not blob_client.exists():
+            print(f"blob {filename} upload failed")
+            abort(401)
 
 
 class SurfExport:
@@ -42,7 +93,26 @@ class SurfExport:
     def __init__(self, data_export_request: models.DataExportRequest):
         self.data_export_request = data_export_request
 
-    def make_row(self, reaction: models.Reaction):
+    def make_row(self, reaction: models.Reaction) -> pd.DataFrame:
+        """
+        Makes a row of a surf export as a pandas dataframe
+        Args:
+            reaction - the reaction we are getting data for
+        Returns:
+            A single row dataframe with all the data for a reaction
+        """
+        data = self.get_surf_data(reaction)
+        df = pd.DataFrame(data, index=[0])
+        return df
+
+    def get_surf_data(self, reaction: models.Reaction) -> Dict:
+        """
+        Gets the data required for SURF export
+        Args:
+            reaction - the reaction we are getting data for
+        Returns:
+            A dict with all the data
+        """
         summary_data = json.loads(reaction.summary_table_data)
         reaction_data = json.loads(reaction.reaction_table_data)
         # we need to get all the necessary data and add it to a dict
@@ -57,9 +127,9 @@ class SurfExport:
         data["time_h"] = None
         data["atmosphere"] = None
         data["stirring_shaking"] = None
-        data["scale_mol"] = self._get_mol_scale(reaction_data)
-        data["concentration_mol_l"] = self._get_concentration(
-            reaction_data.get("solvent_concentrations")
+        data["scale_mol"] = round(self._get_mol_scale(reaction_data), 2)
+        data["concentration_mol_l"] = round(
+            self._get_concentration(reaction_data.get("solvent_concentrations")), 2
         )
         self._add_reagent_and_catalyst_data(data, reaction, reaction_data)
         self._add_solvent_data(data, reaction, reaction_data)
@@ -70,8 +140,7 @@ class SurfExport:
             "provenance"
         ] = f"{creator.fullname} {creator.email} {reaction.workbook.WorkGroup.name}"
         data["procedure"] = reaction.description
-        df = pd.DataFrame(data, index=[0])
-        return df
+        return data
 
     def _add_product_data(
         self,
@@ -116,9 +185,9 @@ class SurfExport:
         """
         if services.data_export.utils.check_compounds_present(reaction, "reactants"):
             for idx, reactant_smiles in enumerate(reaction.reactants, 1):
-                data[f"startingmat_{idx}_eq"] = reaction_data["reactant_equivalents"][
-                    idx - 1
-                ]
+                data[f"startingmat_{idx}_eq"] = round(
+                    float(reaction_data["reactant_equivalents"][idx - 1]), 2
+                )
                 data[f"startingmat_{idx}_cas"] = services.all_compounds.cas_from_smiles(
                     reactant_smiles
                 )
@@ -152,6 +221,14 @@ class SurfExport:
 
     @staticmethod
     def _get_percent_yield(reaction_data: Dict, summary_data: Dict) -> Optional[float]:
+        """
+        Gets the percentage yield by using the user entered obtained mass
+        Args:
+            reaction_data - the reaction table data for the reaction - contains the main product index.
+            summary_data - the summary table data for the reaction - contains the obtained mass yield for the main product
+        Returns:
+            the percentage yield for the reaction
+        """
         actual_mass_yield = summary_data.get("real_product_mass")
         # a yield of zero is a valid yield
         if actual_mass_yield:
@@ -166,7 +243,8 @@ class SurfExport:
     def _reagent_or_catalyst(equivalent: float) -> Literal["reagent", "catalyst"]:
         """
         Uses the equivalent of a reagent to determine to label it a reagent or a catalyst
-
+        Args:
+            equivalent - the equivalents of the compound relative to the user-specified limiting reactant
         """
         if equivalent > 0.25:
             return "reagent"
@@ -174,7 +252,12 @@ class SurfExport:
 
     @staticmethod
     def _get_concentration(solvent_concentrations: List) -> Optional[float]:
-        """Gets the concentration the reaction was performed at using volume of solvent and limited reactants."""
+        """Gets the concentration the reaction was performed at using volume of solvent and limited reactants.
+        Args:
+            solvent_concentrations - the concentration of each solvent relative to the mol scale
+        Returns:
+            The overall concentration of the reaction considering all solvents present relative to the mol scale.
+        """
         if not solvent_concentrations:
             return
         solvent_concentrations = [float(x) for x in solvent_concentrations]
@@ -202,7 +285,7 @@ class SurfExport:
         return None
 
     @staticmethod
-    def _read_value(summary_data, key) -> Optional[str]:
+    def _read_value(summary_data: Dict, key: str) -> Optional[str]:
         """Returns the reaction temperature the user entered into the summary table"""
         value = summary_data.get(key)
         return value if value != "" else None
@@ -240,12 +323,25 @@ class SurfExport:
         data: Dict,
         reaction: models.Reaction,
         reaction_data: Dict,
-        role: str,
+        role: Literal["reagent", "catalyst"],
         compound_idx_list: List[int],
     ):
+        """
+        Catalysts and reagents are separate in SURF but treated the same in AI4Green, both stored in reaction.reagents
+        This function updates the dictionary for either reagents or catalysts
+        Args:
+            data - the dictionary we are putting in data to make the surf export
+            reaction - the reaction we are getting data for
+            reaction_data - the reaction table data for the reaction we are looking at.
+            role - either reagent or catalyst, determines which we are updating
+            compound_idx_list - the index of the compound in the reaction.reagents field.
+        """
+
         if compound_idx_list:
             for label_idx, idx in enumerate(compound_idx_list, 1):
-                compound_equivalent = reaction_data["reagent_equivalents"][idx]
+                compound_equivalent = round(
+                    float(reaction_data["reagent_equivalents"][idx]), 2
+                )
                 compound_smiles = reaction.reagents[idx]
                 data[f"{role}_{label_idx}_eq"] = compound_equivalent
                 data[
@@ -254,10 +350,11 @@ class SurfExport:
                 data[f"{role}_{label_idx}_smiles"] = compound_smiles
 
     def save(self, df: pd.DataFrame, filename: str):
-        """Calls the appropriate method to save the data. Can't use .RDF without a reaction_container object"""
+        """Saves as a csv in memory and then to Azure as a blob"""
         """Saves the blob to Azure blob service"""
 
         csv_buffer = io.StringIO()
+        # tab seperator used because of common use of commas in NMR results.
         df.to_csv(csv_buffer, index=False, sep="\t")
         # Get CSV file contents from csv buffer and save as a csv in the export container in Azure
         file_contents = bytearray(csv_buffer.getvalue(), "utf-8")

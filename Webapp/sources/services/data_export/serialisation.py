@@ -12,8 +12,10 @@ from sources import models, services
 from . import utils
 
 
-class ReactionDataFile:
-    # currently only used in testing but in future will want to read files in
+class ReactionDataFileExport:
+    """For exporting files as reaction data file (.RDF) Consisting of RXN and MOL blocks."""
+
+    # needed for reading files in, currently only used in testing but in future will want to implement ourselves
     non_string_types_inside_metadata = [
         "reagents",
         "reactants",
@@ -34,7 +36,6 @@ class ReactionDataFile:
         """
         self.db_reaction = db_reaction
         self.reaction_object = self._make_rxn_block()
-        # self.reaction_container = self._make_reaction_container()
         self.metadata = services.data_export.metadata.ReactionMetaData(
             db_reaction
         ).get_dict()
@@ -43,8 +44,6 @@ class ReactionDataFile:
         self.memory_file = None
         self.file_contents = None
         self.file_hash = None
-        # if self.reaction_object:
-        #     self.reaction_object.meta.update(self.metadata)
 
     def save(self):
         """Calls the appropriate method to save the data. Can't use .RDF without a reaction_container object"""
@@ -142,3 +141,52 @@ class ReactionDataFile:
         with self.memory_file as f:
             json.dump(self.metadata, f)
             self.file_contents = bytearray(f.getvalue(), "utf-8")
+
+
+class JsonExport:
+    def __init__(
+        self, db_reaction: models.Reaction, filename: str, container_name: str
+    ):
+        """
+        Filename should not include extension.
+        """
+        self.db_reaction = db_reaction
+        self.metadata = services.data_export.metadata.ReactionMetaData(
+            db_reaction
+        ).get_dict()
+        self.container_name = container_name
+        self.filename = filename
+        self.memory_file = None
+        self.file_contents = None
+        self.file_hash = None
+
+    def save(self):
+        self._save_json()
+        self._save_blob()
+
+    def _save_json(self):
+        """Saves a JSON as a bytearray to self.memory_file. This is used over rdf when no reaction smiles are present"""
+        self.memory_file = io.StringIO()
+
+        with self.memory_file as f:
+            json.dump(self.metadata, f)
+            self.file_contents = bytearray(f.getvalue(), "utf-8")
+
+    def _save_blob(self):
+        """Saves the blob to Azure blob service"""
+        blob_client = services.file_attachments.get_blob_client(
+            self.container_name, self.filename
+        )
+        # Upload the blob data
+        upload = io.BytesIO(self.file_contents)
+
+        try:  # todo remove before deployment because this should only happen when debugging
+            blob_client.upload_blob(upload, blob_type="BlockBlob")
+        except azure.core.exceptions.ResourceExistsError:
+            print("duplicate resource name error. skipping second one")
+            pass
+
+        # confirm upload
+        if not blob_client.exists():
+            print(f"blob {self.filename} upload failed")
+            abort(401)
