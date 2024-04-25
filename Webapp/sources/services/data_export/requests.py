@@ -68,23 +68,13 @@ class NewRequest:
         )
 
     def _get_reaction_list(self) -> List[models.Reaction]:
-        """Either get customised reaction list from request or all reactions in a workbook."""
-        if request.json["reactionIDList"]:
-            reaction_list = [
-                services.reaction.get_from_reaction_id_and_workbook_id(
-                    rxn_id, self.workbook.id
-                )
-                for rxn_id in request.json["reactionIDList"]
-            ]
-        else:
-            reaction_list = services.reaction.list_active_in_workbook(
-                self.workbook.name, self.workgroup.name, sort_crit="time"
+        """Get customised reaction list from request"""
+        reaction_list = [
+            services.reaction.get_from_reaction_id_and_workbook_id(
+                rxn_id, self.workbook.id
             )
-            reaction_list = [
-                rxn
-                for rxn in reaction_list
-                if services.data_export.utils.validate_reaction(rxn)
-            ]
+            for rxn_id in request.json["reactionIDList"]
+        ]
         return reaction_list
 
     def _save_to_database(self):
@@ -191,7 +181,6 @@ class RequestStatus:
         approval_results = [x[0] for x in data_export_approvers]
 
         if all(x is True for x in approval_results):
-            print("APPROVED!")
             self.data_export_request.status = "APPROVED"
             db.session.commit()
 

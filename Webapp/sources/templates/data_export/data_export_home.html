@@ -13,7 +13,7 @@
                 <!-- Workgroups -->
                 <div class="form-group">
                     <label for="active-workgroup">Workgroup</label>
-                    <select id="active-workgroup" class="form-control" onchange="updateSelectedWorkGroup()">
+                    <select id="active-workgroup" class="form-control">
                         {% for workgroup in workgroups %}
                         <option value="{{ workgroup }}">{{ workgroup }}</option>
                         {% endfor %}
@@ -22,12 +22,12 @@
                 <!-- Workbooks -->
                 <div class="form-group">
                     <label for="active-workbook">Workbook</label>
-                    <select id="active-workbook" class="form-control" onchange="checkExportPermissions()"></select>
+                    <select id="active-workbook" class="form-control"></select>
                 </div>
             </form>
             <p id="export-permission-result"></p>
-            <p>Only reactions with a recorded yield are available for export.</p>
             <button onclick="openReactionModal()" class="btn btn-primary-outline mb-2">Select Reactions</button>
+            <p>Only reactions with a recorded yield are available for export.</p>
         </div>
         <div class="col-md-9">
             <h4>Select Export Format</h4>

@@ -1,10 +1,34 @@
 """ For tabbular data export formats - CSV or SURF"""
+import io
 import json
 import math
 from typing import Dict, List, Literal, Optional
 
+import azure.core.exceptions
 import pandas as pd
+from flask import abort
 from sources import models, services
+
+
+class CsvExport:
+    """CSV export intended to have all the data to recreate an experiment in AI4Green"""
+
+    def __init__(self, data_export_request: models.DataExportRequest):
+        self.data_export_request = data_export_request
+
+    def make_row(self, reaction):
+        # first get the data included in the surf export
+        data = SurfExport(self.data_export_request).make_row(reaction).to_dict()
+        # now get the data not included within the surf export
+        data["time_of_creation"] = reaction.time_of_creation
+        data["time_of_update"] = reaction.time_of_update
+        data["complete"] = reaction.complete
+        # get the sustainability data
+        metadata_dict = services.data_export.metadata.ReactionMetaData(
+            reaction
+        ).make_metadata_dict()
+        # combine these dicts without duplicating entries.
+        print(metadata_dict)
 
 
 class SurfExport:
@@ -72,7 +96,7 @@ class SurfExport:
                 data[f"product_{idx}_nmr"] = None
                 data[f"product_{idx}_smiles"] = product_smiles
                 # only main product yield is recorded
-                if str(idx) == summary_data["main_product"]:
+                if str(idx) == reaction_data["main_product"]:
                     percent_yield = self._get_percent_yield(reaction_data, summary_data)
                 else:
                     percent_yield = None
@@ -211,26 +235,6 @@ class SurfExport:
                 data, reaction, reaction_data, "catalyst", catalyst_idx_list
             )
 
-            # if catalyst_idx_list:
-            #     for label_idx, idx in enumerate(catalyst_idx_list, 1):
-            #         catalyst_equivalent = reaction_data['reagent_equivalents'][idx]
-            #         catalyst_smiles = reaction.reagents[idx]
-            #         data[f"catalyst_{label_idx}_eq"] = catalyst_equivalent
-            #         data[
-            #             f"catalyst_{label_idx}_cas"
-            #         ] = services.all_compounds.cas_from_smiles(catalyst_smiles)
-            #         data[f"catalyst_{label_idx}_smiles"] = catalyst_smiles
-            #
-            # if reagent_idx_list:
-            #     for label_idx, idx in enumerate(reagent_idx_list, 1):
-            #         reagent_equivalent = reaction_data['reagent_equivalents'][idx]
-            #         reagent_smiles = reaction.reagents[idx]
-            #         data[f"reagent_{label_idx}_eq"] = reagent_equivalent
-            #         data[
-            #             f"reagent_{label_idx}_cas"
-            #         ] = services.all_compounds.cas_from_smiles(reagent_smiles)
-            #         data[f"reagent_{label_idx}_smiles"] = reagent_smiles
-
     @staticmethod
     def _update_reagent_or_catalyst_dict(
         data: Dict,
@@ -249,22 +253,25 @@ class SurfExport:
                 ] = services.all_compounds.cas_from_smiles(compound_smiles)
                 data[f"{role}_{label_idx}_smiles"] = compound_smiles
 
+    def save(self, df: pd.DataFrame, filename: str):
+        """Calls the appropriate method to save the data. Can't use .RDF without a reaction_container object"""
+        """Saves the blob to Azure blob service"""
 
-# def _save_blob(self):
-#     """Saves the blob to Azure blob service"""
-#     blob_client = services.file_attachments.get_blob_client(
-#         self.container_name, self.filename
-#     )
-#     # Upload the blob data
-#     upload = io.BytesIO(self.file_contents)
-#
-#     try:  # todo remove before deployment because this should only happen when debugging
-#         blob_client.upload_blob(upload, blob_type="BlockBlob")
-#     except azure.core.exceptions.ResourceExistsError:
-#         print("duplicate resource name error. skipping second one")
-#         pass
-#
-#     # confirm upload
-#     if not blob_client.exists():
-#         print(f"blob {self.filename} upload failed")
-#         abort(401)
+        csv_buffer = io.StringIO()
+        df.to_csv(csv_buffer, index=False, sep="\t")
+        # Get CSV file contents from csv buffer and save as a csv in the export container in Azure
+        file_contents = bytearray(csv_buffer.getvalue(), "utf-8")
+
+        # Upload the blob data
+        upload = io.BytesIO(file_contents)
+        blob_client = services.file_attachments.get_blob_client(
+            "export-outputs", filename
+        )
+
+        # todo remove before deployment because this should only happen when debugging
+        blob_client.upload_blob(upload, blob_type="BlockBlob", overwrite=True)
+
+        # confirm upload
+        if not blob_client.exists():
+            print(f"blob {filename} upload failed")
+            abort(401)

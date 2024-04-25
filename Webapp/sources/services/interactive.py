@@ -8,6 +8,7 @@ def update_workbook_dropdown():
     """
     workgroup = request.form["workgroup"]
     workbooks = get_workbooks(workgroup)
+    print(request.form.get("origin_page"))
     if request.form.get("origin_page") != "export_data":
         workbooks.insert(0, "All")
     return workbooks

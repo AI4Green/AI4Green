@@ -1,16 +1,51 @@
-$(function () {
+$(async function () {
   let currentURL = window.location.href;
   // These functions run on load of export_data/home
   if (currentURL.includes("export_data/home")) {
-    updateSelectedWorkGroup("export_data");
+    // set up the page
+    await updateSelectedWorkGroup("export_data");
     checkExportPermissions();
     initiateReactionLists();
+    populateReactionIDList();
     $('[data-toggle="tooltip"]').tooltip();
+    // need to update workbooks when the workgroup is changed
+    $("#active-workgroup").change(async function () {
+      await updateSelectedWorkGroup("export_data");
+      $("#active-workbook").trigger("change");
+    });
+    // need to update reaction list when the workbook is updated
+    $("#active-workbook").change(function () {
+      if (checkValidWorkbookAndWorkgroup()) {
+        checkExportPermissions();
+        populateReactionIDList();
+      }
+    });
   }
 });
 
+/**
+ * Checks neither workgroup or workbook are null and hence invalid
+ * @return {boolean} true if the workbook/group combo is valid, false if not
+ */
+function checkValidWorkbookAndWorkgroup() {
+  if (
+    $("#active-workbook").val() === null ||
+    $("#active-workgroup").val() === null
+  ) {
+    $("#included-list").empty();
+    $("#excluded-list").empty();
+    $("#export-permission-result").html(
+      'Please enter a valid workgroup and workbook <i class="bi bi-x" style="color:red"></i>',
+    );
+    return false;
+  }
+  return true;
+}
+
+/**
+ *  Enables user to move items between the lists in the reaction selection modal window.
+ */
 function initiateReactionLists() {
-  // These functions enable user to move items between the lists in the reaction selection modal window.
   $(document).on("click", "#excluded-list .list-group-item", function () {
     const $item = $(this);
     $item.detach().appendTo("#included-list");
@@ -30,14 +65,16 @@ function initiateReactionLists() {
  * Updates the export permission result message accordingly.
  */
 function checkExportPermissions() {
+  let workgroup = $("#active-workgroup").val();
+  let workbook = $("#active-workbook").val();
   fetch("/export_permission", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      workgroup: $("#active-workgroup").val(),
-      workbook: $("#active-workbook").val(),
+      workgroup: workgroup,
+      workbook: workbook,
     }),
   })
     .then((response) => response.json())
@@ -48,7 +85,7 @@ function checkExportPermissions() {
         );
       } else if (permissionResult === "permission denied") {
         $("#export-permission-result").html(
-          'Only a principal investigator of a workgroup has permission to export data from a workbook. <i class="bi bi-cross" style="color:red"></i>',
+          'Only a principal investigator of a workgroup has permission to export data from a workbook. <i class="bi bi-x" style="color:red"></i>',
         );
       } else {
         $("#export-permission-result").html();
@@ -56,6 +93,10 @@ function checkExportPermissions() {
     });
 }
 
+/**
+ * Gets the list of valid reactions (have a recorded yield) to populate the list in the modal window
+ * @return {Promise<any>}
+ */
 function getReactionIDList() {
   return fetch("/get_reaction_id_list", {
     method: "POST",
@@ -79,22 +120,28 @@ function getReactionIDList() {
     });
 }
 
-function openReactionModal() {
-  // if anything in left column don't fetch.
-  const $excludedList = $("#excluded-list");
-  if ($excludedList.children().length === 0) {
-    getReactionIDList().then((data) => {
-      // Populate the included column with all reaction IDs initially
-      const $includedList = $("#included-list");
-      $includedList.empty(); // Clear existing content
-      data.forEach((item) => {
-        const $listItem = $("<a>")
-          .addClass("list-group-item list-group-item-action")
-          .text(item);
-        $includedList.append($listItem);
-      });
+/**
+ * Empties the current lists in the modal window and populates with reactions from the newly selected workbook
+ */
+function populateReactionIDList() {
+  getReactionIDList().then((data) => {
+    // Populate the included column with all reaction IDs initially
+    $("#excluded-list").empty(); // Clear existing content
+    const $includedList = $("#included-list");
+    $includedList.empty(); // Clear existing content
+    data.forEach((item) => {
+      const $listItem = $("<a>")
+        .addClass("list-group-item list-group-item-action")
+        .text(item);
+      $includedList.append($listItem);
     });
-  }
+  });
+}
+
+/**
+ * Opens the modal window to see the reaction list
+ */
+function openReactionModal() {
   $("#reactionsModal").modal("show");
 }
 
@@ -161,7 +208,10 @@ function handleNewExportRequestResponse(feedback, exportFormat) {
       );
       break;
     default:
-      $requestFeedback.text("Request Failed Unexpectedly");
+      $requestFeedback.text(
+        "Request failed. This could happen if there are no reactions selected for export. " +
+          "For further support get in touch through our help page.",
+      );
       break;
   }
 }
@@ -224,32 +274,3 @@ function dataExportRequestApprove(exportID) {
     }
   });
 }
-
-// function export_data() {
-//   let workgroup = $("#active-workgroup").val();
-//   let workbook = $("#active-workbook").val();
-//
-//   $.ajax({
-//     url: "/export_data_eln_file",
-//     type: "post",
-//     datatype: "json",
-//     data: {
-//       workgroup: workgroup,
-//       workbook: workbook,
-//       // exportType: exportType,
-//     },
-//     success: function (response) {
-//       if (response.status === "approved") {
-//         showSuccessMessage(response);
-//       } else if (response.status === "not approved") {
-//         showFailureMessage(response);
-//       }
-//     },
-//   });
-// }
-
-function showSuccessMessage() {
-  $("#export-response").html(response.success_message).show();
-}
-
-function showFailureMessage() {}
