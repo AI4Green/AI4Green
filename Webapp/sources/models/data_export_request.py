@@ -21,7 +21,7 @@ class ExportFormat(Enum):
     ELN = "ELN"
     SURF = "SURF"
     CSV = "CSV"
-    JSON = "JSON"  # todo redo migration before PR - forgot to include json earlier
+    JSON = "JSON"
     SI = "SI"
 
 
@@ -59,12 +59,6 @@ class DataExportRequest(Model):
         db.DateTime,
         nullable=False,
         default=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
-    )
-    time_of_release = db.Column(
-        db.DateTime,
-        nullable=False,
-        default=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
-        + timedelta(hours=168),
     )
 
     id = db.Column(db.Integer, primary_key=True)

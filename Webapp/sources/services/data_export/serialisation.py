@@ -1,3 +1,4 @@
+"""For serialisation export methods into JSON format or RDF format which has Mol Blocks and serialised metadata"""
 import datetime
 import io
 import json
@@ -5,6 +6,7 @@ from typing import Optional
 
 import azure.core.exceptions
 import pytz
+import sources.services.data_export.export
 from flask import abort
 from rdkit.Chem import AllChem
 from sources import models, services
@@ -53,7 +55,9 @@ class ReactionDataFileExport:
         else:
             self.filename += ".json"
             self._save_as_json()
-        self._save_blob()
+        sources.services.data_export.export.save_blob(
+            self.container_name, self.filename, self.file_contents
+        )
 
     def _make_rxn_block(self) -> Optional[str]:
         """
@@ -64,7 +68,7 @@ class ReactionDataFileExport:
         reaction_smiles = self._make_reaction_smiles()
         # return None if we cannot make a reaction_container from smiles - likely to be due to no smiles present.
         if reaction_smiles:
-            rxn = AllChem.ReactionFromSmarts(reaction_smiles)
+            rxn = AllChem.ReactionFromSmarts(reaction_smiles, useSmiles=True)
             return AllChem.ReactionToRxnBlock(rxn, separateAgents=True)
         return None
 
@@ -86,30 +90,12 @@ class ReactionDataFileExport:
                 ".".join(reactant_smiles)
                 + ">"
                 + ".".join(reagent_smiles)
+                + "."
                 + ".".join(solvent_smiles)
                 + ">"
                 + ".".join(product_smiles)
             )
         return None
-
-    def _save_blob(self):
-        """Saves the blob to Azure blob service"""
-        blob_client = services.file_attachments.get_blob_client(
-            self.container_name, self.filename
-        )
-        # Upload the blob data
-        upload = io.BytesIO(self.file_contents)
-
-        try:  # todo remove before deployment because this should only happen when debugging
-            blob_client.upload_blob(upload, blob_type="BlockBlob")
-        except azure.core.exceptions.ResourceExistsError:
-            print("duplicate resource name error. skipping second one")
-            pass
-
-        # confirm upload
-        if not blob_client.exists():
-            print(f"blob {self.filename} upload failed")
-            abort(401)
 
     def _make_rdf_contents(self) -> str:
         """Makes a .RDF reaction data file contents from a RXN block and metadata"""
@@ -162,7 +148,10 @@ class JsonExport:
 
     def save(self):
         self._save_json()
-        self._save_blob()
+        self.filename += ".json"
+        sources.services.data_export.export.save_blob(
+            self.container_name, self.filename, self.file_contents
+        )
 
     def _save_json(self):
         """Saves a JSON as a bytearray to self.memory_file. This is used over rdf when no reaction smiles are present"""
@@ -171,22 +160,3 @@ class JsonExport:
         with self.memory_file as f:
             json.dump(self.metadata, f)
             self.file_contents = bytearray(f.getvalue(), "utf-8")
-
-    def _save_blob(self):
-        """Saves the blob to Azure blob service"""
-        blob_client = services.file_attachments.get_blob_client(
-            self.container_name, self.filename
-        )
-        # Upload the blob data
-        upload = io.BytesIO(self.file_contents)
-
-        try:  # todo remove before deployment because this should only happen when debugging
-            blob_client.upload_blob(upload, blob_type="BlockBlob")
-        except azure.core.exceptions.ResourceExistsError:
-            print("duplicate resource name error. skipping second one")
-            pass
-
-        # confirm upload
-        if not blob_client.exists():
-            print(f"blob {self.filename} upload failed")
-            abort(401)

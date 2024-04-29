@@ -2,11 +2,13 @@ import ast
 import os
 import pickle
 import tempfile
+from typing import Dict, List
 
-import chython
 import pytest
 import pytest_mock
 from flask import Flask
+from rdkit import Chem
+from rdkit.Chem import AllChem
 from sources import services
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
@@ -44,19 +46,47 @@ def test_export_reaction_as_rdf(app: Flask, mocker: pytest_mock.MockerFixture):
         test_rdf = services.data_export.serialisation.ReactionDataFileExport(
             reaction, file_path, "containertest"
         )
+        rdf_contents = test_rdf._make_rdf_contents()
 
         # save and load the file and confirm no data has been lost
-        rxn_block = test_rdf.reaction_object
-        test_rdf.save()
         saved_file_path = os.path.join(local_path, "test_rdf.rdf")
-        with chython.files.RDFRead(saved_file_path) as f:
-            rdf_contents = next(f)
-        # read_metadata = literal_eval_metadata(raw_metadata)
-        literal_eval_metadata(rdf_contents)
-        validate_rdf(rxn_block, rdf_contents)
+        with open(saved_file_path, "w") as f:
+            f.write(rdf_contents)
+
+        # read rdf
+        previous_line = ""
+        metadata = {}
+        key = ""
+        in_rxn_block = False
+        rxn_block = ""
+
+        with open(saved_file_path, "r") as f:
+            for line in f:
+                # get the role indices
+                if previous_line == "RDKit":
+                    role_indices = line.strip().split("  ")
+                # get the rxnblock data
+                if line.strip() == "$RXN":
+                    in_rxn_block = True
+
+                if line.startswith("$DYPTE"):
+                    in_rxn_block = False
+
+                if in_rxn_block is True:
+                    rxn_block += line
+                # get the metadata
+                if line.startswith("$DTYPE"):
+                    key = line.strip().split("$DTYPE ")[-1]
+                if previous_line.startswith("$DTYPE "):
+                    metadata.update({key: line.strip().split("$DATUM ")[-1]})
+                previous_line = line.strip() if line.strip() else previous_line
+
+        role_indices = [int(x) for x in role_indices]
+        literal_eval_metadata(metadata)
+        validate_rdf(test_rdf, role_indices, rxn_block, metadata)
 
 
-def literal_eval_metadata(rdf_contents: chython.ReactionContainer):
+def literal_eval_metadata(metadata: Dict):
     """Read the rdf values literally to reintroduce their types"""
     non_string_types_inside_metadata = [
         "reagents",
@@ -70,15 +100,16 @@ def literal_eval_metadata(rdf_contents: chython.ReactionContainer):
         "sustainability_data",
     ]
 
-    metadata = rdf_contents.meta
     for key in metadata.keys():
+        print(key)
+        print(metadata[key])
         # if the string is equal to none we reload
         if (
-            rdf_contents.meta[key] == "None"
+            metadata[key] == "None"
             or key in non_string_types_inside_metadata
-            and isinstance(rdf_contents.meta[key], str)
+            and isinstance(metadata[key], str)
         ):
-            rdf_contents.meta.update({key: ast.literal_eval(rdf_contents.meta[key])})
+            metadata.update({key: ast.literal_eval(metadata[key])})
 
 
 def make_mocks(mocker: pytest_mock.MockerFixture):
@@ -115,26 +146,42 @@ def make_mocks(mocker: pytest_mock.MockerFixture):
 
 
 def validate_rdf(
-    reaction_container: chython.ReactionContainer,
-    rdf_contents: chython.ReactionContainer,
+    original_rdf: services.data_export.serialisation.ReactionDataFileExport,
+    role_indices: List[int],
+    rxn_block: str,
+    metadata: Dict,
 ):
-    """Validates the read RDF file contains the same data as the original object in Python"""
-    assert rdf_contents.meta == reaction_container.meta, "unequal  metas"
+    """
+    Validates the read RDF file contains the expected data
+    Args:
+        original_rdf - the rdf that was made during the export
+        role_indices - the number of each reactant, product and agents (in that order)
+        rxn_block - the rxn block read from the rdf file
+        metadata - the metadata read from the rdf file and literally evaluated
+    """
+    assert role_indices == [2, 1, 2], "unequal role indices"
 
-    for original_reactant, loaded_reactant in zip(
-        rdf_contents.reactants, reaction_container.reactants
-    ):
-        if original_reactant and loaded_reactant:
-            assert original_reactant.is_equal(loaded_reactant), "reactant inequality"
+    rxn = AllChem.ReactionFromRxnBlock(rxn_block)
+    rxn_smiles = AllChem.ReactionToSmiles(rxn, canonical=True)
+    reactants = [Chem.CanonSmiles(smi) for smi in rxn_smiles.split(">")[0].split(".")]
+    agents = [Chem.CanonSmiles(smi) for smi in rxn_smiles.split(">")[1].split(".")]
+    products = [Chem.CanonSmiles(smi) for smi in rxn_smiles.split(">")[-1].split(".")]
 
-    for original_reagent, loaded_reagent in zip(
-        rdf_contents.reagents, reaction_container.reagents
-    ):
-        if original_reagent and loaded_reagent:
-            assert original_reagent.is_equal(loaded_reagent), "reagent inequality"
+    # combine reagent and solvent SMILES to get agents
+    original_agents = (
+        original_rdf.db_reaction.reagents
+        + services.all_compounds.get_smiles_list(original_rdf.db_reaction.solvent)
+    )
+    original_agents = [x for x in original_agents if x]
 
-    for original_product, loaded_product in zip(
-        rdf_contents.products, reaction_container.products
-    ):
-        if original_product and loaded_product:
-            assert original_product.is_equal(loaded_product), "product inequality"
+    assert original_rdf.metadata == metadata
+
+    assert sorted(reactants) == sorted(
+        original_rdf.db_reaction.reactants
+    ), "difference in reactants"
+
+    assert sorted(agents) == sorted(original_agents), "difference in reagents"
+
+    assert sorted(products) == sorted(
+        original_rdf.db_reaction.products
+    ), "difference in products"

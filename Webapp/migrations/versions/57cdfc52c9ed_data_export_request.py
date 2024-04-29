@@ -20,7 +20,6 @@ def upgrade():
     op.create_table(
         "DataExportRequest",
         sa.Column("time_of_request", sa.DateTime(), nullable=False),
-        sa.Column("time_of_release", sa.DateTime(), nullable=False),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column(
             "data_format",

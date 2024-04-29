@@ -1,12 +1,10 @@
-""" For tabbular data export formats - CSV or SURF"""
+""" For tabular data export formats - CSV or SURF where each reaction is a row within a table"""
 import io
 import json
 import math
 from typing import Dict, List, Literal, Optional
 
-import azure.core.exceptions
 import pandas as pd
-from flask import abort
 from sources import models, services
 
 
@@ -58,28 +56,13 @@ class CsvExport:
         df = pd.DataFrame.from_dict(data, orient="index").transpose()
         return df
 
-    def save(self, df: pd.DataFrame, filename: str):
-        """Calls the appropriate method to save the data"""
-        """Saves the blob to Azure blob service"""
 
-        csv_buffer = io.StringIO()
-        df.to_csv(csv_buffer, index=False, sep="\t")
-        # Get CSV file contents from csv buffer and save as a csv in the export container in Azure
-        file_contents = bytearray(csv_buffer.getvalue(), "utf-8")
-
-        # Upload the blob data
-        upload = io.BytesIO(file_contents)
-        blob_client = services.file_attachments.get_blob_client(
-            "export-outputs", filename
-        )
-
-        # todo remove before deployment because this should only happen when debugging
-        blob_client.upload_blob(upload, blob_type="BlockBlob", overwrite=True)
-
-        # confirm upload
-        if not blob_client.exists():
-            print(f"blob {filename} upload failed")
-            abort(401)
+def make_csv(df: pd.DataFrame) -> bytearray:
+    csv_buffer = io.StringIO()
+    # tab seperator used because of common use of commas in NMR results.
+    df.to_csv(csv_buffer, index=False, sep="\t")
+    # Get CSV file contents from csv buffer and save as a csv in the export container in Azure
+    return bytearray(csv_buffer.getvalue(), "utf-8")
 
 
 class SurfExport:
@@ -348,27 +331,3 @@ class SurfExport:
                     f"{role}_{label_idx}_cas"
                 ] = services.all_compounds.cas_from_smiles(compound_smiles)
                 data[f"{role}_{label_idx}_smiles"] = compound_smiles
-
-    def save(self, df: pd.DataFrame, filename: str):
-        """Saves as a csv in memory and then to Azure as a blob"""
-        """Saves the blob to Azure blob service"""
-
-        csv_buffer = io.StringIO()
-        # tab seperator used because of common use of commas in NMR results.
-        df.to_csv(csv_buffer, index=False, sep="\t")
-        # Get CSV file contents from csv buffer and save as a csv in the export container in Azure
-        file_contents = bytearray(csv_buffer.getvalue(), "utf-8")
-
-        # Upload the blob data
-        upload = io.BytesIO(file_contents)
-        blob_client = services.file_attachments.get_blob_client(
-            "export-outputs", filename
-        )
-
-        # todo remove before deployment because this should only happen when debugging
-        blob_client.upload_blob(upload, blob_type="BlockBlob", overwrite=True)
-
-        # confirm upload
-        if not blob_client.exists():
-            print(f"blob {filename} upload failed")
-            abort(401)

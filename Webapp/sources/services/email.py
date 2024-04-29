@@ -11,12 +11,15 @@ def send_data_export_approval_request(
     user: models.User, data_export_request: models.DataExportRequest
 ):
     """
-    Send data export request email to a given user.
+    Send data export request email to a given user. They have a week(or 604800 seconds) to respond
     Args:
         user: User to send to.
         data_export_request: request we are asking PI user to accept or deny
     """
-    token = get_data_export_token(user, data_export_request)
+    token = get_encoded_token(
+        time_limit=604800,
+        arg_dict={"data_export_request": data_export_request.id, "user": user.id},
+    )
     protocol = get_protocol_type()
     mail.send_email(
         "AI4Green Data Export Request",
@@ -43,13 +46,16 @@ def send_data_export_ready_message(
     user: models.User, data_export_request: models.DataExportRequest
 ):
     """
-    Send data export ready email message to a user
+    Send data export ready email message to a user. They have a week(or 604800 seconds) to respond
 
     Args:
         user: User to send to.
         data_export_request: The request which has been complete
     """
-    token = get_data_export_token(user, data_export_request)
+    token = get_encoded_token(
+        time_limit=604800,
+        arg_dict={"data_export_request": data_export_request.id, "user": user.id},
+    )
     protocol = get_protocol_type()
     mail.send_email(
         "AI4Green Data Export Ready",
@@ -69,31 +75,6 @@ def send_data_export_ready_message(
             token=token,
             protocol=protocol,
         ),
-    )
-
-
-def get_data_export_token(
-    user: models.User, data_export_request: models.DataExportRequest
-) -> str:
-    """
-    Get token with expiry time of 1 week.
-
-    Args:
-        user: The user who is either a request approver or requestor depending on context.
-        data_export_request: Data export request to encode.
-
-    Returns:
-        A token string.
-    """
-    expires_in = 604800
-    return jwt.encode(
-        {
-            "data_export_request": data_export_request.id,
-            "user": user.id,
-            "exp": time() + expires_in,
-        },
-        current_app.config["SECRET_KEY"],
-        algorithm="HS256",
     )
 
 

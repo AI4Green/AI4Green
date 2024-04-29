@@ -180,9 +180,7 @@ class ReactionMetaData:
     def read_addenda(self) -> Optional[List[Dict]]:
         """Returns the addenda a list of dictionaries with the author, comment text, and date."""
         return (
-            [
-                x.to_dict() for x in self.db_reaction.addenda
-            ]  # todo compare dto and model serialisation.
+            [x.to_dict() for x in self.db_reaction.addenda]
             if self.db_reaction.addenda
             else None
         )

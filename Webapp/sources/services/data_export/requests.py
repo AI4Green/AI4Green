@@ -248,4 +248,4 @@ class RequestLinkVerification:
             )
             .first()
         )
-        return approver_responded[0]
+        return approver_responded[-1]

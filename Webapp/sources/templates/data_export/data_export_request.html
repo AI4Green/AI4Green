@@ -9,6 +9,9 @@
       <hr> <!-- Horizontal rule to separate sections -->
       <strong>Request Details:</strong>
       <p>
+        <strong>Date made:</strong> {{ data_export_request.time_of_request.strftime('%d-%B-%Y %H:%M:%S') }}
+      </p>
+      <p>
         <strong>Workgroup:</strong> {{ data_export_request.WorkGroup.name }}
       </p>
       <p>
@@ -33,6 +36,9 @@
         </p>
         <p>
           <strong>Username:</strong> {{ data_export_request.requestor_person.user.username }}
+        </p>
+        <p>
+          <strong>Verified User Email:</strong> {{ data_export_request.requestor_person.user.is_verified }}
         </p>
       </div>
     </div>
