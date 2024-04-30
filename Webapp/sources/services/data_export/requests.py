@@ -137,7 +137,7 @@ class RequestStatus:
 
     def deny(self):
         """
-        Updates the status of a data export request to 'REJECTED' and notifies the requestor of rejection.
+        Updates the status of a data export request to as responded to (bool) and 'REJECTED' and notifies the requestor.
         """
         approver = services.person.from_current_user_email()
         update_query = (
