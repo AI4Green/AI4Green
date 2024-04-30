@@ -196,7 +196,8 @@ function handleNewExportRequestResponse(feedback, exportFormat) {
   switch (feedback) {
     case "permission accepted":
       $requestFeedback.text(
-        `${exportFormat} Data export request created. Your export will be accessible once all of the workgroup principal investigators have approved the request.`,
+        `${exportFormat} Data export request created. You will receive an email notification regarding your export
+        once all of the workgroup principal investigators have approved the request.`,
       );
       $(`#${exportFormat.toLowerCase()}-button`)
         .prop("disabled", true)

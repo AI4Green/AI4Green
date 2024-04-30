@@ -34,17 +34,17 @@
             <h6>Human-Readable Formats:</h6>
             <div class="row">
                 <div class="col-sm-3">
-                    <button id="pdf-button" onclick="makeDataExportRequest('PDF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Portable Document Format (PDF) - suitable for printing and viewing.">.PDF</button>
+                    <button id="pdf-button" onclick="makeDataExportRequest('PDF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Portable Document Format (PDF) - suitable for printing and viewing.">PDF</button>
                 </div>
             </div>
             <h6>Machine-Readable Formats:</h6>
             <div class="row">
                 <div class="col-sm-3">
-                    <button id="json-button" onclick="makeDataExportRequest('JSON')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="JavaScript Object Notation (JSON) - A structured data format commonly used for exchanging information between servers and web applications.">.JSON</button>
+                    <button id="json-button" onclick="makeDataExportRequest('JSON')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="JavaScript Object Notation (JSON) - A structured data format commonly used for exchanging information between servers and web applications.">JSON</button>
                 </div>
                 <div class="col-sm-3">
                     <button id="rdf-button" onclick="makeDataExportRequest('RDF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title=
-"Reaction Data File (RDF) - Format for storing chemical reaction data, including reactants, products, agents, and metadata.">.RDF</button>
+"Reaction Data File (RDF) - Format for storing chemical reaction data, including reactants, products, agents, and metadata.">RDF</button>
                 </div>
             </div>
 {#            Not implemented yet#}
@@ -56,19 +56,21 @@
             <h6>Human- and Machine-Readable Formats:</h6>
             <div class="row">
                 <div class="col-sm-3">
-                    <button id="csv-button" onclick="makeDataExportRequest('CSV')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Comma-Separated Values (CSV) - A simple text-based format for storing tabular data. Can be opened as a spreadsheet using Excel.">.CSV</button>
+                    <button id="csv-button" onclick="makeDataExportRequest('CSV')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Comma-Separated Values (CSV) - A simple text-based format for storing tabular data. Can be opened as a spreadsheet using Excel.">CSV</button>
                 </div>
                 <div class="col-sm-3">
-                    <button id="surf-button" onclick="makeDataExportRequest('SURF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Simple User-Friendly Reaction Format (SURF) - A standardised CSV with a tabular data format for storing reaction data and that can be converted to other formats. Can be opened as a spreadsheet using Excel.">.SURF</button>
+                    <button id="surf-button" onclick="makeDataExportRequest('SURF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Simple User-Friendly Reaction Format (SURF) - A standardised CSV with a tabular data format for storing reaction data and that can be converted to other formats. Can be opened as a spreadsheet using Excel.">SURF <sup>[1]</sup></button>
                 </div>
             </div>
-            <b id="request-feedback">
-
+            <b id="request-feedback" class="mb-5 pb-5">
             </b>
-
+            <div class="mt-5 pt-5">
+              <b>References:</b>
+             <p>[1] Simple User-Friendly Reaction Format, <i>Chemrxiv</i>, 2023, DOI: <a href="https://doi.org/10.26434/chemrxiv-2023-nfq7h">10.26434/chemrxiv-2023-nfq7h</a></p>
+            </div>
         </div>
     </div>
-</div>
+   </div>
 </body>
 
 <!-- Modal -->
