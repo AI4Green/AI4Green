@@ -4,10 +4,9 @@ import io
 import json
 from typing import Optional
 
-import azure.core.exceptions
+import magic
 import pytz
 import sources.services.data_export.export
-from flask import abort
 from rdkit.Chem import AllChem
 from sources import models, services
 
@@ -46,6 +45,7 @@ class ReactionDataFileExport:
         self.memory_file = None
         self.file_contents = None
         self.file_hash = None
+        self.mime_type = None
 
     def save(self):
         """Calls the appropriate method to save the data. Can't use .RDF without a reaction_container object"""
@@ -55,6 +55,11 @@ class ReactionDataFileExport:
         else:
             self.filename += ".json"
             self._save_as_json()
+        self.file_hash = services.file_attachments.sha256_from_file_contents(
+            self.file_contents
+        )
+        mime = magic.Magic(mime=True)
+        self.mime_type = mime.from_buffer(self.file_contents)
         sources.services.data_export.export.save_blob(
             self.container_name, self.filename, self.file_contents
         )
@@ -149,12 +154,15 @@ class JsonExport:
     def save(self):
         self._save_json()
         self.filename += ".json"
+        self.file_hash = services.file_attachments.sha256_from_file_contents(
+            self.file_contents
+        )
         sources.services.data_export.export.save_blob(
             self.container_name, self.filename, self.file_contents
         )
 
     def _save_json(self):
-        """Saves a JSON as a bytearray to self.memory_file. This is used over rdf when no reaction smiles are present"""
+        """Saves a JSON as a bytearray to self.memory_file."""
         self.memory_file = io.StringIO()
 
         with self.memory_file as f:
