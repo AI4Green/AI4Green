@@ -225,6 +225,7 @@ class DataExport:
         eln_export = services.data_export.eln_file.ELNFileExport(
             self.data_export_request
         )
+        eln_export.make_eln_file()
         print(eln_export)
 
     def _make_rdf_export(self):
@@ -324,7 +325,9 @@ def save_blob(container_name: str, filename: str, file_contents: bytearray):
     blob_client = services.file_attachments.get_blob_client(container_name, filename)
     # Upload the blob data
     upload = io.BytesIO(file_contents)
-    blob_client.upload_blob(upload, blob_type="BlockBlob")
+    blob_client.upload_blob(
+        upload, blob_type="BlockBlob", overwrite=True
+    )  # todo overwrite=True is debugging dev code
 
     # confirm upload
     if not blob_client.exists():
