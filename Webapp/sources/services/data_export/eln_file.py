@@ -1,5 +1,6 @@
 import io
 import json
+import uuid
 from datetime import datetime
 from itertools import zip_longest
 from typing import Dict, Generator, List, Optional, Tuple
@@ -52,18 +53,20 @@ class ELNFileExport:
         self._make_ro_crate_metadata_json()
 
     def _make_ro_crate_metadata_json(self):
+        # TODO Rework this to make a list of dicts to exactly match the output
         defined_ro_crate_json = get_constant_ro_crate_start()
         defined_root_dir = self._describe_root_directory()
+        defined_comments = []
+        defined_files = []
+        defined_datasets = []
+
         for rxn in self.reaction_list:
-            defined_comments_json = {}
-            defined_files_json = {}
-            defined_datasets_json = {}
             for comment in rxn.defined_comments:
-                defined_comments_json.update(comment)
+                defined_comments.append(comment)
             for file in rxn.defined_files:
-                defined_files_json.update(file)
+                defined_files.append(file)
             for dataset in rxn.defined_datasets:
-                defined_datasets_json.update(dataset)
+                defined_datasets.append(dataset)
         # ', '.join(json.dumps(d) for d in list_of_dicts)
         defined_authors = {}
         [defined_authors.update(author) for author in self.defined_authors]
@@ -77,11 +80,11 @@ class ELNFileExport:
                 # contents of ro_crate
                 defined_root_dir,
                 # for ELNExportDataset in ELNExportDatasets
-                defined_datasets_json,
+                defined_datasets,
                 # for ELNExportFile in ELNExportFiles
-                defined_files_json,
+                defined_files,
                 # define comments
-                defined_comments_json,
+                defined_comments,
                 # define authors
                 defined_authors,
             ],
@@ -158,6 +161,7 @@ class ELNExportReaction:
             "sha256": rdf.file_hash,
             "mimetype": rdf.mime_type,
             "time_of_creation": self.time,
+            "uuid": uuid.uuid4(),
         }
         self.files.append(rdf_dict)
 
@@ -177,28 +181,28 @@ class ELNExportReaction:
 
     def _define_reaction_dataset(self):
         # each reaction has 1 part for the dataset (reaction) and n number of files for the reaction
-        with current_app.test_request_context():  # todo
-            self.defined_datasets.append(
-                {
-                    "@id": f"{self.root}/{self.reaction.reaction_id}",
-                    "@type": "Dataset",
-                    "name": self.reaction.name,
-                    # "identifier": self.reaction.uuid, reaction has no uuid yet.
-                    "author": {"@id": f"./author/{self.reaction.creator_person.id}"},
-                    "dateCreated": self.reaction.time_of_creation.strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                    "dateModified": self.reaction.time_of_update.strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                    "comment": [comment["@id"] for comment in self.defined_comments],
-                    "hasPart": [file["@id"] for file in self.defined_files],  # files
-                    "url": quote(
-                        f"{request.base_url}/{self.reaction.workbook.WorkGroup.name}/{self.reaction.workbook.name}/{self.reaction.reaction_id}/no"
-                    ),
-                    # may remove no in future
-                }
-            )
+        self.defined_datasets.append(
+            {
+                "@id": f"{self.root}/{self.reaction.reaction_id}",
+                "@type": "Dataset",
+                "name": self.reaction.name,
+                # "identifier": self.reaction.uuid, reaction has no uuid yet.
+                "author": {"@id": f"./author/{self.reaction.creator_person.id}"},
+                "dateCreated": self.reaction.time_of_creation.strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
+                "dateModified": self.reaction.time_of_update.strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
+                "comment": [comment["@id"] for comment in self.defined_comments],
+                "hasPart": [file["@id"] for file in self.defined_files],  # files
+                "url": url_for("main.index", _external=True)
+                + quote(
+                    f"/{self.reaction.workbook.WorkGroup.name}/{self.reaction.workbook.name}/{self.reaction.reaction_id}/no"
+                ),
+                # may remove no in future
+            }
+        )
 
     def _define_comments(self):
         for comment in self.reaction.addenda:
@@ -216,12 +220,12 @@ class ELNExportReaction:
         for file in self.files:
             self.defined_files.append(
                 {
-                    "@id": f"{self.root}/{self.reaction.reaction_id}/{file['display_name']}",
+                    "@id": f"{self.root}/{self.reaction.reaction_id}/{file['uuid']}",
                     "@type": "File",
                     "name": f"{file['display_name']}",
                     "description": self._get_file_description(file),
                     "encodingFormat": file["mimetype"],
-                    "contentSize": file["content_size"],
+                    "contentSize": str(file["content_size"]),
                     "sha256": file["sha256"],
                     "dateModified": file["time_of_creation"],
                 }
