@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ai4green"
-version = "1.5.1"
+version = "1.5.2"
 description = "AI4Green is an Electronic Laboratory Notebook which combines data storage and sharing while promoting green and sustainable chemistry."
 authors = ["ai4green", "<ai4green@nottingham.ac.uk>"]
 license = "AGPL-3.0"
