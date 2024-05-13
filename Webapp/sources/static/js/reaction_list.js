@@ -45,7 +45,6 @@ function newReactionModalWindow() {
   let reactionIDsDic = JSON.parse(reactionIDs);
   let workbook = getVal("#active-workbook");
   let activeReactionID = reactionIDsDic[workbook];
-  console.log(activeReactionID)
   $("#new-reaction-id-input").val(activeReactionID);
   $("#new-reaction-name").val("");
   $("#error-warning-new-reaction").html("");
@@ -70,7 +69,7 @@ function cloneReactionModalWindow(reaction) {
     })
   .then(function (response) { return response.json() })
   .then(function (newReactionID) {
-  $("#new-reaction-id-input").val(newReactionID); console.log(newReactionID)
+  $("#new-reaction-id-input").val(newReactionID);
   $("#new-reaction-name").val(name);
   $("#new-reaction-data-submit").attr("onclick", "cloneReaction()");
   })
@@ -82,7 +81,6 @@ function cloneReaction() {
   let reactionName = getVal("#new-reaction-name");
   let oldReactionID = getVal("#reaction-id")
   let newReactionID = getVal("#new-reaction-id-input")
-  console.log(newReactionID)
   $.ajax({
     url: "/clone_reaction",
     type: "post",
