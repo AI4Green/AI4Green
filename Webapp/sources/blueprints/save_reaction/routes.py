@@ -413,6 +413,7 @@ def clone_reaction() -> Response:
     workgroup_name = request.form["workgroup"]
     new_reaction_id = request.form['newReactionID']
     workbook_object = services.workbook.get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook_object)
 
     creator = services.person.from_current_user_email()
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
