@@ -54,39 +54,62 @@ class ELNFileExport:
 
     def _make_ro_crate_metadata_json(self):
         # TODO Rework this to make a list of dicts to exactly match the output
-        defined_ro_crate_json = get_constant_ro_crate_start()
-        defined_root_dir = self._describe_root_directory()
-        defined_comments = []
-        defined_files = []
-        defined_datasets = []
 
-        for rxn in self.reaction_list:
-            for comment in rxn.defined_comments:
-                defined_comments.append(comment)
-            for file in rxn.defined_files:
-                defined_files.append(file)
-            for dataset in rxn.defined_datasets:
-                defined_datasets.append(dataset)
-        # ', '.join(json.dumps(d) for d in list_of_dicts)
-        defined_authors = {}
-        [defined_authors.update(author) for author in self.defined_authors]
+        ro_crate_graph = []
+        ro_crate_graph += get_constant_ro_crate_start()
+        ro_crate_graph.append(self._describe_root_directory())
+        ro_crate_graph += [
+            comment for rxn in self.reaction_list for comment in rxn.defined_comments
+        ]
+        ro_crate_graph += [
+            file for rxn in self.reaction_list for file in rxn.defined_files
+        ]
+        ro_crate_graph += [
+            dataset for rxn in self.reaction_list for dataset in rxn.defined_datasets
+        ]
+        ro_crate_graph += [author for author in self.defined_authors]
+
+        # ro_crate_graph.append(get_constant_ro_crate_start())
+        # ro_crate_graph.append(self._describe_root_directory())
+        # ro_crate_graph.append([comment for rxn in self.reaction_list for comment in rxn.defined_comments])
+        # ro_crate_graph.append([file for rxn in self.reaction_list for file in rxn.defined_files])
+        # ro_crate_graph.append([dataset for rxn in self.reaction_list for dataset in rxn.defined_datasets])
+        # ro_crate_graph.append([author for author in self.defined_authors])
+
+        # defined_ro_crate_json = get_constant_ro_crate_start()
+        # defined_root_dir = self._describe_root_directory()
+        # defined_comments = []
+        # defined_files = []
+        # defined_datasets = []
+        #
+        # for rxn in self.reaction_list:
+        #     for comment in rxn.defined_comments:
+        #         defined_comments.append(comment)
+        #     for file in rxn.defined_files:
+        #         defined_files.append(file)
+        #     for dataset in rxn.defined_datasets:
+        #         defined_datasets.append(dataset)
+        # # ', '.join(json.dumps(d) for d in list_of_dicts)
+        # defined_authors = {}
+        # [defined_authors.update(author) for author in self.defined_authors]
         # defined_authors = {}.update(author) for author in self.defined_authors)
         # this part is common to all .eln files from AI4Green
         ro_crate_metadata_contents = {
             "@context": "https://w3id.org/ro/crate/1.1/context",
             "@graph": [
-                defined_ro_crate_json,
-                # now from here this is export specific.
-                # contents of ro_crate
-                defined_root_dir,
-                # for ELNExportDataset in ELNExportDatasets
-                defined_datasets,
-                # for ELNExportFile in ELNExportFiles
-                defined_files,
-                # define comments
-                defined_comments,
-                # define authors
-                defined_authors,
+                ro_crate_graph
+                # defined_ro_crate_json,
+                # # now from here this is export specific.
+                # # contents of ro_crate
+                # defined_root_dir,
+                # # for ELNExportDataset in ELNExportDatasets
+                # defined_datasets,
+                # # for ELNExportFile in ELNExportFiles
+                # defined_files,
+                # # define comments
+                # defined_comments,
+                # # define authors
+                # defined_authors,
             ],
         }
         with open("ro-crate-metadata.json", "w") as f:
@@ -248,7 +271,7 @@ class ELNExportReaction:
 
 def get_constant_ro_crate_start():
     version, git_hash = services.utils.get_app_version()
-    return (
+    return [
         {
             "@id": "ro-crate-metadata.json",
             "@type": "CreativeWork",
@@ -293,4 +316,4 @@ def get_constant_ro_crate_start():
             },
             "actionStatus": {"@id": "http://schema.org/CompletedActionStatus"},
         },
-    )
+    ]
