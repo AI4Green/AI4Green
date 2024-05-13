@@ -3,16 +3,10 @@ This module receives a reaction name from the reaction
 table and saves it in the reaction database
 """
 import base64
-import io
-import os
-import uuid
 from datetime import datetime
 
-import magic
 import pytz
-from azure.core.exceptions import ResourceExistsError
-from azure.storage.blob import BlobClient, BlobServiceClient
-from flask import Response, abort, current_app, json, jsonify, request
+from flask import Response, abort, json, jsonify, request
 from flask_login import current_user, login_required
 from sources import models, services
 from sources.auxiliary import (
@@ -23,7 +17,6 @@ from sources.auxiliary import (
 )
 from sources.extensions import db
 from sqlalchemy import func
-from werkzeug.utils import secure_filename
 
 from . import save_reaction_bp
 
@@ -36,16 +29,35 @@ def new_reaction() -> Response:
     workgroup_name = request.form["workgroup"]
 
     # finds workgroup object (needs institution later)
-    workbook_object = services.workbook.get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    workgroup_selected_obj = (
+        db.session.query(models.WorkGroup)
+        .filter(models.WorkGroup.name == workgroup_name)
+        .first()
+    )
+    workbook_object = (
+        db.session.query(models.WorkBook)
+        .filter(models.WorkBook.name == workbook_name)
+        .filter(models.WorkBook.group == workgroup_selected_obj.id)
+        .first()
+    )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook_object)
     reaction_name = sanitise_user_input(request.form["reactionName"])
     reaction_id = request.form["reactionID"]
 
-    creator = services.person.from_current_user_email()
+    creator = (
+        db.session.query(models.Person)
+        .join(models.User)
+        .filter(models.User.email == current_user.email)
+        .first()
+    )
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
     # check for reaction id - catches errors caused if user has 2 tabs open
-    reaction_id_check = services.reaction.get_from_reaction_id_and_workbook_id(reaction_id, workbook_object.id)
-
+    reaction_id_check = (
+        db.session.query(models.Reaction)
+        .filter(models.Reaction.reaction_id == reaction_id)
+        .filter(models.Reaction.workbooks == workbook_object.id)
+        .first()
+    )
     if reaction_id_check:
         feedback = "A reaction with this ID already exists. Please refresh the page and try again."
         return jsonify({"feedback": feedback})
@@ -138,92 +150,15 @@ def new_reaction() -> Response:
         return name_check
 
 
-@save_reaction_bp.route("/clone_reaction", methods=["POST", "GET"])
-@login_required
-def clone_reaction() -> Response:
-    """
-    Takes reactions data from previously saved reaction and copies it into a new reaction which is saved to the database
-    real_product_mass and unreacted_reactant_mass are removed from the reaction data for users to input upon reaction completion
-
-    Returns:
-        Response as JSON, either New Reaction Made or Reaction Name is not Unique
-
-    """
-
-    old_reaction = services.reaction.get_current_from_request_form()
-
-    new_reaction_name = request.form['reactionName']
-    workbook_name = request.form["workbook"]
-    workgroup_name = request.form["workgroup"]
-    new_reaction_id = request.form['newReactionID']
-    workbook_object = services.workbook.get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
-
-    creator = services.person.from_current_user_email()
-    current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
-
-    remove_yield_dict = json.loads(old_reaction.summary_table_data)
-    remove_yield_dict.update({"real_product_mass": "", "unreacted_reactant_mass": ""})
-
-    # check for reaction id - catches errors caused if user has 2 tabs open
-    reaction_id_check = services.reaction.get_from_reaction_id_and_workbook_id(new_reaction_id, workbook_object.id)
-    if reaction_id_check:
-        feedback = "A reaction with this ID already exists. Please refresh the page and try again."
-        return jsonify({"feedback": feedback})
-
-    name_check = check_reaction_name()
-    if b"This reaction name is unique" in name_check.data:
-        reaction = models.Reaction(
-            creator=creator.id,
-            reaction_id=new_reaction_id,
-            time_of_creation=current_time,
-            name=new_reaction_name,
-            workbooks=workbook_object.id,
-            status="active",
-            complete="not complete",
-            reaction_table_data=old_reaction.reaction_table_data,
-            summary_table_data=json.dumps(remove_yield_dict),
-            reaction_smiles=old_reaction.reaction_smiles
-        )
-        db.session.add(reaction)
-        db.session.commit()
-        feedback = "New reaction made"
-        return jsonify({"feedback": feedback})
-    else:
-        return name_check
-
-
-def authenticate_user_to_edit_reaction(
-    reaction: models.Reaction, file_attachment=False
-):
-    """
-    In addition to frontend validation, backend validation protects against user edited HTML.
-    Validates the active user is the creator and validates the reaction is not locked.
-    Aborts process with a 400 error if validation is failed
-    """
-    # validate user is in workbook
-    workbook_persons = reaction.workbook.users
-    workbook_users = [x.user for x in workbook_persons]
-    if current_user not in workbook_users:
-        abort(401)
-    # validate the user is the creator
-    if reaction.creator_person.user.email != current_user.email:
-        abort(401)
-    if file_attachment:
-        return
-    # validate the reaction is not locked, unless it is a file attachment being edited.
-    if reaction.complete == "complete":
-        abort(401)
-
-
 @save_reaction_bp.route("/_autosave", methods=["POST"])
 @login_required
 def autosave() -> Response:
     """autosave when a field changes in the reaction page"""
     reaction_description = str(request.form["reactionDescription"])
-    reaction = get_current_reaction()
+    reaction = services.reaction.get_current_from_request()
     reaction_name = reaction.name
 
-    authenticate_user_to_edit_reaction(reaction)
+    services.auth.edit_reaction(reaction)
 
     summary_to_print = str(request.form["summary_to_print"])
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
@@ -459,13 +394,67 @@ def autosave() -> Response:
     return jsonify({"feedback": feedback})
 
 
+@save_reaction_bp.route("/clone_reaction", methods=["POST", "GET"])
+@login_required
+def clone_reaction() -> Response:
+    """
+    Takes reactions data from previously saved reaction and copies it into a new reaction which is saved to the database
+    real_product_mass and unreacted_reactant_mass are removed from the reaction data for users to input upon reaction completion
+
+    Returns:
+        Response as JSON, either New Reaction Made or Reaction Name is not Unique
+
+    """
+
+    old_reaction = services.reaction.get_current_from_request_form()
+
+    new_reaction_name = request.form['reactionName']
+    workbook_name = request.form["workbook"]
+    workgroup_name = request.form["workgroup"]
+    new_reaction_id = request.form['newReactionID']
+    workbook_object = services.workbook.get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+
+    creator = services.person.from_current_user_email()
+    current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
+
+    remove_yield_dict = json.loads(old_reaction.summary_table_data)
+    remove_yield_dict.update({"real_product_mass": "", "unreacted_reactant_mass": ""})
+
+    # check for reaction id - catches errors caused if user has 2 tabs open
+    reaction_id_check = services.reaction.get_from_reaction_id_and_workbook_id(new_reaction_id, workbook_object.id)
+    if reaction_id_check:
+        feedback = "A reaction with this ID already exists. Please refresh the page and try again."
+        return jsonify({"feedback": feedback})
+
+    name_check = check_reaction_name()
+    if b"This reaction name is unique" in name_check.data:
+        reaction = models.Reaction(
+            creator=creator.id,
+            reaction_id=new_reaction_id,
+            time_of_creation=current_time,
+            name=new_reaction_name,
+            workbooks=workbook_object.id,
+            status="active",
+            complete="not complete",
+            reaction_table_data=old_reaction.reaction_table_data,
+            summary_table_data=json.dumps(remove_yield_dict),
+            reaction_smiles=old_reaction.reaction_smiles
+        )
+        db.session.add(reaction)
+        db.session.commit()
+        feedback = "New reaction made"
+        return jsonify({"feedback": feedback})
+    else:
+        return name_check
+
+
 @save_reaction_bp.route("/_autosave_sketcher", methods=["POST"])
 @login_required
 def autosave_sketcher() -> Response:
     """Autosave function for saving changes to the sketcher only. Only used before reaction table is generated."""
 
-    reaction = get_current_reaction()
-    authenticate_user_to_edit_reaction(reaction)
+    reaction = services.reaction.get_current_from_request()
+    services.auth.edit_reaction(reaction)
 
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
     reaction_smiles = str(request.form["reactionSmiles"])
@@ -514,8 +503,8 @@ def check_reaction_name() -> Response:
 @login_required
 def upload_experiment_files():
     """Takes a list of files, and saves upon successful validation. Url added to database, file saved to azure blob"""
-    authenticate_user(permission_level="edit", request_method="POST")
-    new_upload = UploadExperimentDataFiles(request)
+    services.auth.reaction_files(permission_level="edit")
+    new_upload = services.file_attachments.UploadExperimentDataFiles(request)
     new_upload.validate_files()
     new_upload.save_validated_files()
     return jsonify({"uploaded_files": new_upload.uploaded_files})
@@ -527,12 +516,14 @@ def view_reaction_attachment() -> Response:
     """
     Authenticate user has permission to view, then use the uuid to find the file on azure and then return the file.
     """
-    authenticate_user(permission_level="view_only", request_method="GET")
+    services.auth.reaction_files(permission_level="view_only")
     file_uuid = request.args.get("uuid")
     # get the blob file and send the filestream, display name and mimetype to the frontend to be displayed.
-    blob_client = get_blob(file_uuid)
-    file_attachment = blob_to_file_attachment(blob_client)
-    file_object = file_from_uuid(file_uuid)
+    blob_client = services.file_attachments.get_blob(file_uuid)
+    file_attachment = services.file_attachments.download_from_blob_client(
+        blob_client, file_uuid
+    )
+    file_object = services.file_attachments.database_object_from_uuid(file_uuid)
 
     mimetype = file_object.file_details["mimetype"]
     display_name = file_object.display_name
@@ -546,14 +537,13 @@ def view_reaction_attachment() -> Response:
 @login_required
 def download_experiment_files():
     """Take a file and return as attachment to the user"""
-    authenticate_user(permission_level="view_only", request_method="POST")
-    blob_client = get_blob()
-    stream_storage = blob_client.download_blob()
-    stream = stream_storage.readall()
-    file_attachment = base64.b64encode(stream).decode()
+    services.auth.reaction_files(permission_level="view_only")
+    blob_client = services.file_attachments.get_blob()
     file_uuid = request.form["uuid"]
-    file_object = file_from_uuid(file_uuid)
-
+    file_attachment = services.file_attachments.download_from_blob_client(
+        blob_client, file_uuid
+    )
+    file_object = services.file_attachments.database_object_from_uuid(file_uuid)
     mimetype = file_object.file_details["mimetype"]
     display_name = file_object.display_name
     return jsonify(
@@ -565,214 +555,5 @@ def download_experiment_files():
 @login_required
 def delete_reaction_attachment():
     """Delete file attached to reaction"""
-    authenticate_user(permission_level="edit", request_method="DELETE")
-    # connect to blob
-    blob_client = get_blob()
-    # delete blob
-    blob_client.delete_blob()
-    # confirm deletion
-    if blob_client.exists():
-        abort(401)
-    # reflect changes in the database
-    file_uuid = request.form["uuid"]
-    file_object = file_from_uuid(file_uuid)
-    db.session.delete(file_object)
-    db.session.commit()
+    services.file_attachments.delete_file_attachment(request_source="user")
     return "success"
-
-
-def get_blob(file_uuid: str = None) -> BlobClient:
-    # connect to azure
-    blob_service_client = connect_to_azure_blob_service()
-    # connect to blob
-    container_name = current_app.config["STORAGE_CONTAINER"]
-    if file_uuid is None:
-        file_uuid = request.form["uuid"]
-    blob_client = blob_service_client.get_blob_client(
-        container=container_name, blob=file_uuid
-    )
-    return blob_client
-
-
-def blob_to_file_attachment(blob_client) -> str:
-    stream = blob_client.download_blob()
-    data = stream.readall()
-    file_attachment = base64.b64encode(data).decode()
-    return file_attachment
-
-
-def authenticate_user(permission_level: str, request_method: str):
-    """
-    Authenticates user to either view or edit the reaction.
-    permission_level: Takes value of 'edit' or 'view_only'
-    request_method: Value of 'GET' changes behaviour, other strings all have same behaviour (e.g. POST, DELETE)
-    """
-    if permission_level == "view_only":
-        authenticate_user_to_view_files(request_method)
-    if permission_level == "edit":
-        reaction = get_current_reaction()
-        authenticate_user_to_edit_reaction(reaction, file_attachment=True)
-
-
-def authenticate_user_to_view_files(request_method):
-    """Authenticates user as a workbook member or aborts. Gets the workgroup_name, workbook_name, and workbook."""
-    if request_method == "GET":
-        workgroup_name = request.args.get("workgroup")
-        workbook_name = request.args.get("workbook")
-    else:
-        workgroup_name = request.form["workgroup"]
-        workbook_name = request.form["workbook"]
-    # validate user belongs to the workbook
-    workbook = services.workbook.get_workbook_from_group_book_name_combination(
-        workgroup_name, workbook_name
-    )
-    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
-
-
-def connect_to_azure_blob_service() -> BlobServiceClient:
-    """
-    Returns the Azure blob service client using the connection string from configs.
-    From this object, file attachment contents can be accessed by specifying the container name and file uuid.
-    """
-    return BlobServiceClient.from_connection_string(
-        current_app.config["AZURE_STORAGE_CONNECTION_STRING"]
-    )
-
-
-def file_from_uuid(file_uuid: str) -> models.ReactionDataFile:
-    """Return database file object from the uuid. (autogenerated unique identifier)"""
-    return (
-        db.session.query(models.ReactionDataFile)
-        .filter(models.ReactionDataFile.uuid == file_uuid)
-        .first()
-    )
-
-
-class UploadExperimentDataFiles:
-    def __init__(self, ajax_request):
-        self.files_to_upload = ajax_request.files
-        self.institution = db.session.query(models.Institution).first()
-        self.workgroup = ajax_request.form["workgroup"]
-        self.workbook = ajax_request.form["workbook"]
-        self.reaction_id = ajax_request.form["reactionID"]
-        self.validated_files = []
-        self.container_client = None
-        self.reaction = get_current_reaction()
-        self.uploaded_files = []
-
-    def validate_number_of_attachments(self):
-        number_of_attachments = len(self.reaction.file_attachments)
-        if number_of_attachments >= 10:
-            abort(401)
-
-    def validate_files(self):
-        for file in self.files_to_upload.values():
-            validation_result = self.file_security_validation(file)
-            if validation_result == "success":
-                self.validated_files.append(file)
-            else:
-                abort(401)
-
-    def save_validated_files(self):
-        for file in self.validated_files:
-            # file name must be unique - needs workgroup/book/reaction_id/filename. Check for uniqueness of filename.
-            filename = str(uuid.uuid4())
-            self.save_blob(file, filename)
-            print("blob uploaded")
-            # save file details to database, and shorten filename if too long.
-            name, extension = os.path.splitext(file.filename)
-            if len(name) > 21:
-                file.filename = name[0:10] + "..." + name[-10:-1] + extension
-            self.save_file_details_to_database(file, filename)
-            self.uploaded_files.append({"uuid": filename, "name": file.filename})
-
-    def save_file_details_to_database(self, file, filename):
-        current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
-        storage_name = self.container_client.account_name
-        container_name = self.container_client.container_name
-        file_size = os.fstat(file.fileno()).st_size
-        file_ext = os.path.splitext(file.filename)[1]
-        file_details = {
-            "mimetype": file.mimetype,
-            "size": file_size,
-            "extension": file_ext,
-        }
-        models.ReactionDataFile.create(
-            reaction=self.reaction.id,
-            storage_name=storage_name,
-            container_name=container_name,
-            uuid=filename,
-            display_name=file.filename,
-            time_of_upload=current_time,
-            file_details=file_details,
-        )
-
-    def save_blob(self, file, filename):
-        # connect to storage account
-        blob_service_client = connect_to_azure_blob_service()
-        # connect to container
-        container_name = current_app.config["STORAGE_CONTAINER"]
-        try:
-            self.container_client = blob_service_client.create_container(container_name)
-        except ResourceExistsError:
-            self.container_client = blob_service_client.get_container_client(
-                container_name
-            )
-
-        blob_client = blob_service_client.get_blob_client(
-            container=container_name, blob=filename
-        )
-        print("uploading blob")
-        # Upload the blob data - default blob type is BlockBlob
-        file.stream.seek(0)
-        upload2 = io.BytesIO(file.stream.read())
-        blob_client.upload_blob(upload2, blob_type="BlockBlob")
-        # confirm upload
-        if not blob_client.exists():
-            print(f"blob {filename} upload failed")
-            abort(401)
-
-    @staticmethod
-    def file_security_validation(file):
-        """Validates the filesize, name, extension, and mimetype"""
-        filename = file.filename
-        secure_filename(filename)
-        if filename != "":
-            # size under 1 mb
-            filesize = os.fstat(file.fileno()).st_size
-            if filesize > 1000000:
-                print("file too large")
-                return "failure"
-            # acceptable file extension
-            file_ext = os.path.splitext(filename)[1]
-            if file_ext not in current_app.config["UPLOAD_EXTENSIONS"]:
-                print("incorrect extension")
-                return "failure"
-            # acceptable mimetype
-            mime = magic.Magic(mime=True)
-            mime_type = mime.from_buffer(file.read(2048))
-            if mime_type not in current_app.config["UPLOAD_MIME_TYPES"]:
-                print("incorrect mimetype")
-                return "failure"
-        else:
-            return "failure"
-        return "success"
-
-
-def get_current_reaction():
-    reaction_id = str(request.form["reactionID"])
-    workgroup_name = str(request.form["workgroup"])
-    workbook_name = str(request.form["workbook"])
-    workbook = services.workbook.get_workbook_from_group_book_name_combination(
-        workgroup_name, workbook_name
-    )
-    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
-    return (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.reaction_id == reaction_id)
-        .join(models.WorkBook)
-        .filter(models.WorkBook.id == workbook.id)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_name)
-        .first()
-    )
