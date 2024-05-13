@@ -35,7 +35,7 @@ def workgroup(
     user_type = services.workgroup.get_user_type_in_workbook(workgroup_selected)
 
     # get lists of workbooks, and the next reaction id for each workbooks
-    workbooks = services.workbook.get_workbooks_from_user_group_combination(workgroup_selected, current_user)
+    workbooks = services.workbook.get_workbooks_from_user_group_combination(workgroup_selected)
 
     workbook_new_reaction_ids_dic = {}
     for workbook in workbooks:

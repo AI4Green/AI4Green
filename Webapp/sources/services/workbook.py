@@ -2,7 +2,7 @@ from typing import List
 
 from sources import models
 from sources.extensions import db
-import flask_login
+from flask_login import current_user
 
 
 def list_all() -> List[models.WorkBook]:
@@ -32,7 +32,7 @@ def get(primary_key: int) -> models.WorkBook:
     )
 
 
-def get_workbooks_from_user_group_combination(workgroup: str, user: flask_login.current_user) -> List[models.WorkBook]:
+def get_workbooks_from_user_group_combination(workgroup: str) -> List[models.WorkBook]:
     """
     gets list of workbook objects from user and workbook
 
@@ -50,7 +50,7 @@ def get_workbooks_from_user_group_combination(workgroup: str, user: flask_login.
         .join(models.t_Person_WorkBook)
         .join(models.Person)
         .join(models.User)
-        .filter(models.User.email == user.email)
+        .filter(models.User.email == current_user.email)
         .all()
     )
 
