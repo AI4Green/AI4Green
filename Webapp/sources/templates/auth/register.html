@@ -44,7 +44,6 @@
                 </div>
             {% endfor %}
             {{ form.privacy }} I have read and agree to the conditions in the <a id="privacy_link" href="{{ url_for('auth.privacy_notice') }}" target="_blank" onclick="enablePrivacyCheckbox()">privacy notice</a><br>
-
             {% for error in form.privacy.errors %}
                 <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
                     {{ error }}
@@ -57,10 +56,19 @@
                 </div>
             {% endfor %}
 
+            <div style="margin: auto; width: 60%">
+                {{ form.recaptcha }}
+                {% for error in form.recaptcha.errors %}
+                <div class="alert alert-danger" style="width: 91%" role="alert">
+                    Please confirm you are not a robot!
+                </div>
+                {% endfor %}
+            </div>
+
 
             {{ form.submit() }}
         </form>
     </div>
 </div>
-<input type="checkbox" id="agree-terms" name="agreeterms" hidden>
+<input type="checkbox" id="agree-terms" name="agreeterms" hidden onclick="enablePrivacyCheckbox()">
 {% endblock %}

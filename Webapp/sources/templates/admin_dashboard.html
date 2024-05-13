@@ -4,7 +4,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/admin_dashboard.js') }}"></script>
 </head>
 <body onload="userFocus()">
-    <div class="container">
+    <div class="container" style="max-width:1250px">
 <!--        Title-->
         <h2>Admin Dashboard</h2>
         <!--Tabs    -->
@@ -29,6 +29,9 @@
           </li>
           <li class="nav-item">
               <a class="nav-link" role="tab" data-toggle="tab" href="#recent-reactions-tab" aria-selected="false">Recent Reactions</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" role="tab" data-toggle="tab" href="#solvent-surfer-tab" aria-selected="false">Recent Surfers</a>
           </li>
           <li class="nav-item">
               <a class="nav-link" role="tab" data-toggle="tab" href="#news_feed_tab" aria-selected="false" id="news-feed-tab">News Feed</a>
@@ -181,6 +184,22 @@
                         </td>
                         <td>
                             {{ number_reactions_in_db }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Reactions
+                        </td>
+                        <td>
+                            {{ number_reactions_in_db }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Solvent Surfers
+                        </td>
+                        <td>
+                            {{ number_surfers_in_db }}
                         </td>
                     </tr>
                 </table>
@@ -409,6 +428,61 @@
                     {% endfor %}
                 </table>
             </div>
+
+<!--            Recent Surfers-->
+            <div class="tab-pane fade in" id="solvent-surfer-tab" role="tabpanel">
+                <table id="recent-surfers-table" class="table table-striped table-sm">
+                    <tr>
+                        <th>
+                            &#8470;
+                        </th>
+                        <th>
+                            Surfer Name
+                        </th>
+                        <th>
+                            Creator
+                        </th>
+                        <th>
+                            Reaction Class
+                        </th>
+                        <th>
+                            Colour
+                        </th>
+                        <th>
+                            Date of creation
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                    </tr>
+                    {% for surfer in all_solvent_surfers %}
+                    <tr>
+                        <td>
+                            {{ surfer.id }}
+                        </td>
+                        <td>
+                            {{ surfer.graph_name }}
+                        </td>
+                        <td>
+                            {{ surfer.creator_person.user.email }}
+                        </td>
+                        <td>
+                            {{ surfer.r_class|string }}
+                        </td>
+                        <td>
+                            {{ surfer.colour_selected|string }}
+                        </td>
+                        <td>
+                            {{ (surfer.time_of_creation|string) }}
+                        </td>
+                        <td>
+                            {{ surfer.status }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
 
 <!--            News feed-->
             <div class="tab-pane fade in" id="news_feed_tab" role="tabpanel">

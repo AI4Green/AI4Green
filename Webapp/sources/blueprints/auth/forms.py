@@ -2,6 +2,7 @@
 This module stores web form classes for user authentication
 """
 from flask_wtf import FlaskForm  # imports the FlaskForm base class
+from flask_wtf.recaptcha import RecaptchaField
 from sqlalchemy import func
 # The Flask-WTF extension uses Python classes to represent web forms
 # A form class defines the fields of the form as class variables
@@ -77,6 +78,9 @@ class RegistrationForm(FlaskForm):  # this class defines the registration form f
         "I have read and understood the hazard disclaimer",
         render_kw={"onclick": "enableSubmit()"},
     )
+
+    recaptcha = RecaptchaField()
+
     submit = SubmitField(
         "Register", render_kw={"class": "btn btn-primary", "disabled": "true"}
     )
