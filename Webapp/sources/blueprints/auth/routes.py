@@ -2,20 +2,29 @@
 This module contains user authentication functions:
 login, logout, and register
 """
+from datetime import datetime
+
+import pytz
+
 # imports the objects of the login and registration forms
-from flask import Response, flash, redirect, render_template, request, session, url_for
+from flask import Response, flash, redirect, render_template, request, session, url_for, Markup
 
 # url_parse parses the URL if it is relative or
 # absolute to avoid redirection to a malicious site
 from flask_login import current_user, login_user, logout_user
-from sources import auxiliary  # imports the user database object
-from sources import models
+from sources import auxiliary, models, services  # imports the user database object
 
 # login_user registers the user as logged in and sets the current_user variable for that user
 # logout_user offers users the option to log out of the application
 # current_user is a proxy for the current user
 from sources.extensions import db
 from sqlalchemy import func
+from werkzeug.urls import url_parse
+from urllib.parse import urlparse
+
+from . import auth_bp  # imports the blueprint of the
+from .forms import LoginForm, RegistrationForm
+from .utils import login_not_allowed
 
 # render_template renders html templates
 # redirect instructs the client web browser to automatically
@@ -23,13 +32,6 @@ from sqlalchemy import func
 # url_for generates URLs using its internal mapping of URLs to view functions
 # flash stores a message for the user to show it when called from the templates
 # request parses incoming request data and gives access to it
-
-from werkzeug.urls import url_parse
-from datetime import datetime
-import pytz
-from . import auth_bp  # imports the blueprint of the
-from .forms import LoginForm, RegistrationForm
-from .utils import login_not_allowed
 
 
 # Login page
@@ -65,6 +67,17 @@ def login() -> Response:  # the login view function
             """
             flash("Invalid username or password")
             return redirect(url_for("auth.login"))
+
+        # if user was added after 22/04/2024 their email needs to be verified before login
+        if user.time_of_creation and user.time_of_creation > datetime(2024, 4, 22) and not user.is_verified:
+                verification_url = "/email_verification_request/" + str(user.id)
+                flash(
+                    Markup(
+                        f"Please verify your email address before logging in. Didn't receive an email? <a href='{verification_url}' class='alert-link'>Click here</a> to resend."
+                    )
+                )
+                return redirect(url_for("auth.login"))
+
         login_user(user, remember=form.remember_me.data)
         role = (
             db.session.query(models.Role)
@@ -84,11 +97,15 @@ def login() -> Response:  # the login view function
             """If the login URL does not have a next argument or the
             next argument is set to a full URL that includes a domain
             name, then the user is redirected to the index page."""
-            next_page = url_for("main.index")
+            return redirect(url_for("main.index"))
+        else:
             """If the login URL includes a next argument that is set
             to a relative path (a URL without the domain portion),
             then the user is redirected to that URL."""
-        return redirect(next_page)
+            next_page = next_page.replace('\\', '')
+            if not urlparse(next_page).netloc:
+                return redirect(next_page)
+
     return render_template(
         "auth/login.html", title="Sign In", form=form
     )  # renders the login template
@@ -117,21 +134,16 @@ def register() -> Response:  # the view function that handles user registrations
         receive the web page with the form or if at least one field fails validation."""
         # Creates a person and user and commits to the database
         p = models.Person()
-        fullname = auxiliary.sanitise_user_input(form.fullname.data)
         # Capitalize unique fields for consistency
         db.session.add(p)
-        user = models.User(
-            username=form.username.data,
-            email=form.email.data,
-            fullname=fullname,
-            Person=p,
-            password_hash=models.User.set_password(form.password.data),
+        fullname = auxiliary.sanitise_user_input(form.fullname.data)
+        services.user.add(
+            form.username.data, form.email.data, fullname, form.password.data, p
         )
-        db.session.add(user)
-        db.session.commit()
+        services.email.send_email_verification(p.user)
 
         flash(
-            "Congratulations, you are now a registered user!"
+            "An email has been sent to your address. Please follow the instructions to verify your account."
         )  # flashes the success message
         return redirect(url_for("auth.login"))  # redirects to the login page
     return render_template(
