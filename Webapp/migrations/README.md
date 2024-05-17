@@ -18,7 +18,7 @@ convention = {
 https://flask-sqlalchemy.palletsprojects.com/en/2.x/config/#using-custom-metadata-and-naming-conventions
 
 
-#### Example migration: 42496dce53f6_data_export_request
+#### Example migration: 57cdfc52c9ed_data_export_request
 This migration script has been edited to add a name to the foreign key constraint.\
 The foreign key constraint cannot be dropped if it does not have a name, giving an error during flask db downgrade. \
 \
