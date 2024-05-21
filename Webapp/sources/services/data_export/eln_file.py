@@ -13,6 +13,9 @@ from flask import abort, current_app, request, url_for
 from rdkit.Chem import AllChem
 from sources import models, services
 
+# todo need to use './' in the json and 'root/' in the blob names
+# solution use: ro-crate-id and blob-id
+
 
 class ELNFileExport:
     # absolute basic example for now just include an rdf for a reaction
@@ -95,23 +98,26 @@ class ELNFileExport:
         # this part is common to all .eln files from AI4Green
         ro_crate_graph += get_constant_ro_crate_start()
         ro_crate_graph.append(self._describe_root_directory())
-        ro_crate_graph += [
-            comment for rxn in self.reaction_list for comment in rxn.defined_comments
-        ]
-        ro_crate_graph += [
-            file for rxn in self.reaction_list for file in rxn.defined_files
-        ]
+
         ro_crate_graph += [
             dataset for rxn in self.reaction_list for dataset in rxn.defined_datasets
         ]
+
+        ro_crate_graph += [
+            file for rxn in self.reaction_list for file in rxn.defined_files
+        ]
+
+        ro_crate_graph += [
+            comment for rxn in self.reaction_list for comment in rxn.defined_comments
+        ]
+
         ro_crate_graph += [author for author in self.defined_authors]
 
         ro_crate_metadata_contents = {
             "@context": "https://w3id.org/ro/crate/1.1/context",
-            "@graph": [
-                # the graph is a list of dictionaries defining the elements and their structure
-                ro_crate_graph
-            ],
+            "@graph":
+            # the graph is a list of dictionaries defining the elements and their structure
+            ro_crate_graph,
         }
         self.memory_file = io.StringIO()
 
@@ -136,7 +142,7 @@ class ELNFileExport:
     def _describe_root_directory(self):
         return {
             "@id": "./",
-            "@type": ["Dataset"],
+            "@type": "Dataset",
             "hasPart": [{"@id": part["@id"]} for part in self.root_parts],
         }
 
@@ -203,12 +209,13 @@ class ELNExportReaction:
             "time_of_creation": self.time,
             # "temp_uuid": blob_name,
             "uuid": blob_name,
+            "ro-crate-id": file_uuid
             # "blob_name": blob_name
         }
         self.files.append(rdf_dict)
 
     def get_files(self):
-        self._make_export_files()
+        # self._make_export_files()
         # get pre existing files
         pre_existing_files = [
             x.to_export_dict() for x in self.reaction.file_attachments
@@ -241,9 +248,9 @@ class ELNExportReaction:
         # each reaction has 1 part for the dataset (reaction) and n number of files for the reaction
         self.defined_datasets.append(
             {
-                "@id": f"{self.root}/{self.reaction.reaction_id}",
+                "@id": f"./{self.reaction.reaction_id}",
                 "@type": "Dataset",
-                "name": self.reaction.name,
+                "name": self.reaction.name,  # experiment title
                 # "identifier": self.reaction.uuid, reaction has no uuid yet.
                 "author": {"@id": f"./author/{self.reaction.creator_person.id}"},
                 "dateCreated": self.reaction.time_of_creation.strftime(
@@ -253,7 +260,11 @@ class ELNExportReaction:
                     "%Y-%m-%d %H:%M:%S"
                 ),
                 "comment": [comment["@id"] for comment in self.defined_comments],
-                "hasPart": [file["@id"] for file in self.defined_files],  # files
+                "hasPart": [
+                    {"@id": file["@id"]} for file in self.defined_files
+                ],  # files
+                "description": "<h1>Chemistry Time</h1>",
+                "text": "more chemistry",  # todo format as html for summary table + write up
                 "url": url_for("main.index", _external=True)
                 + quote(
                     f"/{self.reaction.workbook.WorkGroup.name}/{self.reaction.workbook.name}/{self.reaction.reaction_id}/no"
@@ -278,7 +289,7 @@ class ELNExportReaction:
         for file in self.files:
             self.defined_files.append(
                 {
-                    "@id": f"{self.root}/{self.reaction.reaction_id}/{file['display_name']}",
+                    "@id": f"./{self.reaction.reaction_id}/{file['display_name']}",
                     "@type": "File",
                     "name": f"{file['display_name']}",
                     "description": self._get_file_description(file),
