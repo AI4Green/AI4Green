@@ -46,6 +46,7 @@ def make_sas_link(data_export_request: models.DataExportRequest) -> str:
 
     # Define permissions for the SAS token
     permissions = BlobSasPermissions(read=True)
+    filename = services.data_export.eln_file.get_root_name(data_export_request) + ".eln"
 
     # Generate the SAS token
     sas_token = generate_blob_sas(
@@ -56,6 +57,7 @@ def make_sas_link(data_export_request: models.DataExportRequest) -> str:
         permission=permissions,
         expiry=expiry_time,
         start=start_time,
+        content_disposition=f'attachment; filename="{filename}"',
     )
 
     # Construct the SAS URL
@@ -66,6 +68,7 @@ def get_export_file_extension(
     export_format: models.data_export_request.ExportFormat,
 ) -> str:
     return {
+        "ELN": ".eln",
         "RDF": ".zip",
         "JSON": ".zip",
         "CSV": ".csv",
@@ -223,10 +226,11 @@ class DataExport:
 
     def _make_eln_export(self):
         eln_export = services.data_export.eln_file.ELNFileExport(
-            self.data_export_request
+            self.data_export_request,
         )
         eln_export.make_eln_file()
         print(eln_export)
+        self._make_zip()
 
     def _make_rdf_export(self):
         """

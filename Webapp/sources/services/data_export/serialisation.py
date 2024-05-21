@@ -48,14 +48,16 @@ class ReactionDataFileExport:
         self.mime_type = None
         self.content_size = None
 
-    def save(self):
+    def save(self, extension=True):
         """Calls the appropriate method to save the data. Can't use .RDF without a reaction_container object"""
         if self.reaction_object:
-            self.filename += ".rdf"
+            if extension is True:
+                self.filename += ".rdf"
             self._save_as_rdf()
             self.mime_type = "chemical/x-mdl-rdfile"
         else:
-            self.filename += ".json"
+            if extension is True:
+                self.filename += ".json"
             self._save_as_json()
             self.mime_type = "application/json"
 
