@@ -82,23 +82,6 @@ function cloneReactionModalWindow(reaction) {
   })
 }
 
-//if (response.status != 200) {
-//window.alert("The server rejected this request. Please try again.")
-//}
-//else
-//$("#new-reaction-id-input").val(newReactionID);
-//$("#new-reaction-name").val(name);
-//$("#new-reaction-data-submit").attr("onclick", "cloneReaction()")
-//$("#new-reaction-modal").modal("show")
-//)
-//}
-//}
-//  .then(function (newReactionID) {
-//        $("#new-reaction-id-input").val(newReactionID);
-//        $("#new-reaction-name").val(name);
-//        $("#new-reaction-data-submit").attr("onclick", "cloneReaction()");
-//  })
-//}
 
 function cloneReaction() {
   let reactionWorkgroup = getVal("#workgroup");
