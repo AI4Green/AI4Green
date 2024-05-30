@@ -64,13 +64,13 @@ function cloneReactionModalWindow(reaction) {
       method: "POST",
       body: JSON.stringify({
         "workgroup": workgroup,
-        "workbook": workbook
+
 
       }),
     })
   .then(function (response)  { return response.json(); })
   .then(function (newReactionID) {
-      if (newReactionID !== "not_found") {
+      if (newReactionID !== "Bad Request") {
           $("#new-reaction-id-input").val(newReactionID);
           $("#new-reaction-name").val(name);
           $("#new-reaction-data-submit").attr("onclick", "cloneReaction()");

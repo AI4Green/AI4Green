@@ -110,7 +110,7 @@ def get_new_reaction_id() -> Response:
     workgroup_name = request.json.get("workgroup")
 
     if workgroup_name is None or workbook_name is None:
-        return jsonify('not_found'), status.HTTP_400_BAD_REQUEST
+        return jsonify('Bad Request'), status.HTTP_400_BAD_REQUEST
 
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
