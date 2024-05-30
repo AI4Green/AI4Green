@@ -7,7 +7,9 @@ from flask import (
     render_template,
     request,
     url_for,
+    abort
 )
+from flask_api import status
 from flask_login import current_user, login_required
 from sources import models, services
 from sources.auxiliary import (
@@ -72,9 +74,10 @@ def get_reactions() -> Response:
     reactions = services.reaction.list_active_in_workbook(
         workbook_name, workgroup_name, sort_crit
     )
+    new_reaction_id = services.workbook.get_next_reaction_id_in_workbook(workbook)
     reactions = services.reaction.to_dict(reactions)
     reaction_details = render_template(
-        "_saved_reactions.html", reactions=reactions, sort_crit=escape(sort_crit)
+        "_saved_reactions.html", reactions=reactions, sort_crit=escape(sort_crit), workgroup=workgroup_name, new_reaction_id=new_reaction_id
     )
     return jsonify({"reactionDetails": reaction_details})
 
@@ -98,3 +101,21 @@ def get_schemata() -> Response:
     )
     schemes = services.reaction.make_scheme_list(reaction_list, size)
     return {"schemes": schemes, "sort_crit": escape(sort_crit)}
+
+
+@reaction_list_bp.route("/get_new_reaction_id", methods=["GET", "POST"])
+@login_required
+def get_new_reaction_id() -> Response:
+    workbook_name = request.json.get("workbook")
+    workgroup_name = request.json.get("workgroup")
+
+    if workgroup_name is None or workbook_name is None:
+        return jsonify('Bad Request'), status.HTTP_400_BAD_REQUEST
+
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
+
+    new_id = services.workbook.get_next_reaction_id_in_workbook(workbook)
+
+    return jsonify(new_id)

@@ -38,3 +38,15 @@ def PCAgraph_from_id(graph_id: str, user: models.Person) -> models.PCAGraph:
         .filter(models.PCAGraph.id == graph_id)
         .first()
     )
+
+
+def list_all() -> List[models.PCAGraph]:
+    """
+        Gets a list of all PCA graphs saved. For the admin_dashboard
+
+        Returns:
+             List of all PCA graphs sorted by date
+        """
+    return (db.session.query(models.PCAGraph)
+            .order_by(models.PCAGraph.time_of_creation.desc())
+            ).all()

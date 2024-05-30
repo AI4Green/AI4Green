@@ -4,6 +4,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/standard_user.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/new_reaction.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
+    {% from "macros.html" import render_new_reaction_modal %}
     <script>
         $(document).ready(function() {
             // when page loads get the reactions
@@ -84,39 +85,7 @@
     <input id="active-workgroup" type="hidden" value="{{ workgroup_selected }}" >
     <input type="hidden" value="{{ sort_crit }}" id="js-sort-crit">
     <input id="workbook_corresponding_next_reaction_ids" type="hidden" value="{{ workbook_next_reaction_ids }}">
-
-    <!-- new reaction modal -->
-    <div class="modal fade" id="new-reaction-modal" tabindex="-1" role="dialog" aria-labelledby="new-reaction-modal-title">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="new-reaction-modal-title">New Reaction</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div id="new-reaction-body">
-              <div id="new-reaction-inner-body">
-                  <br>
-                  <form>
-                      <label class="new-reaction-label">
-                          Reaction ID
-                          <input id="new-reaction-id" disabled value="{{ new_reaction_id }}" class="new-reaction-input">
-                      </label>
-                      <label class="new-reaction-label">
-                          Reaction Name
-                          <input id="new-reaction-name" type="text" class="new-reaction-input">
-                      </label>
-                  </form>
-                  <div style="padding-left: 5px; color: red" id="error-warning-new-reaction"></div>
-              </div>
-
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-danger" data-dismiss="modal" id="new-reaction-data-close">Cancel</button>
-            <button type="button" class="btn btn-success" id="new-reaction-data-submit" onclick="newReactionCreate()">Create</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    {{ render_new_reaction_modal() }}
 
 </body>
 
