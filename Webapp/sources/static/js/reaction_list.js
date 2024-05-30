@@ -63,17 +63,42 @@ function cloneReactionModalWindow(reaction) {
       },
       method: "POST",
       body: JSON.stringify({
-        "workbook": workbook,
         "workgroup": workgroup,
+        "workbook": workbook
       }),
     })
-  .then(function (response) { return response.json() })
+  .then(function (response) {
+    if (response.status == 200) { return response.json(); }
+    else { return console.error(response.statusText) }
+  })
   .then(function (newReactionID) {
-  $("#new-reaction-id-input").val(newReactionID);
-  $("#new-reaction-name").val(name);
-  $("#new-reaction-data-submit").attr("onclick", "cloneReaction()");
+      if (newReactionID !== undefined) {
+          $("#new-reaction-id-input").val(newReactionID);
+          $("#new-reaction-name").val(name);
+          $("#new-reaction-data-submit").attr("onclick", "cloneReaction()");
+          $("#new-reaction-modal").modal("show")
+      }
+      else { window.alert("Something went wrong. Please try again.")}
   })
 }
+
+//if (response.status != 200) {
+//window.alert("The server rejected this request. Please try again.")
+//}
+//else
+//$("#new-reaction-id-input").val(newReactionID);
+//$("#new-reaction-name").val(name);
+//$("#new-reaction-data-submit").attr("onclick", "cloneReaction()")
+//$("#new-reaction-modal").modal("show")
+//)
+//}
+//}
+//  .then(function (newReactionID) {
+//        $("#new-reaction-id-input").val(newReactionID);
+//        $("#new-reaction-name").val(name);
+//        $("#new-reaction-data-submit").attr("onclick", "cloneReaction()");
+//  })
+//}
 
 function cloneReaction() {
   let reactionWorkgroup = getVal("#workgroup");
