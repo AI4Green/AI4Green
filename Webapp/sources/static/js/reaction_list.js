@@ -65,14 +65,12 @@ function cloneReactionModalWindow(reaction) {
       body: JSON.stringify({
         "workgroup": workgroup,
         "workbook": workbook
+
       }),
     })
-  .then(function (response) {
-    if (response.status == 200) { return response.json(); }
-    else { return console.error(response.statusText) }
-  })
+  .then(function (response)  { return response.json(); })
   .then(function (newReactionID) {
-      if (newReactionID !== undefined) {
+      if (newReactionID !== "not_found") {
           $("#new-reaction-id-input").val(newReactionID);
           $("#new-reaction-name").val(name);
           $("#new-reaction-data-submit").attr("onclick", "cloneReaction()");
@@ -101,6 +99,7 @@ function cloneReaction() {
         "newReactionID": newReactionID
     },
     success: function (response) {
+    console.log(response)
       if (response.feedback === "New reaction made") {
         window.location.href = `/sketcher/${reactionWorkgroup}/${reactionWorkbook}/${newReactionID}/no`;
       } else {
