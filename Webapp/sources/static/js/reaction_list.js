@@ -99,7 +99,6 @@ function cloneReaction() {
         "newReactionID": newReactionID
     },
     success: function (response) {
-    console.log(response)
       if (response.feedback === "New reaction made") {
         window.location.href = `/sketcher/${reactionWorkgroup}/${reactionWorkbook}/${newReactionID}/no`;
       } else {
