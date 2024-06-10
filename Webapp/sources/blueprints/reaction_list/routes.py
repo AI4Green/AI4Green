@@ -7,7 +7,9 @@ from flask import (
     render_template,
     request,
     url_for,
+    abort
 )
+from flask_api import status
 from flask_login import current_user, login_required
 from sources import models, services
 from sources.auxiliary import (
@@ -104,8 +106,11 @@ def get_schemata() -> Response:
 @reaction_list_bp.route("/get_new_reaction_id", methods=["GET", "POST"])
 @login_required
 def get_new_reaction_id() -> Response:
-    workbook_name = request.json['workbook']
-    workgroup_name = request.json['workgroup']
+    workbook_name = request.json.get("workbook")
+    workgroup_name = request.json.get("workgroup")
+
+    if workgroup_name is None or workbook_name is None:
+        return jsonify('Bad Request'), status.HTTP_400_BAD_REQUEST
 
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name

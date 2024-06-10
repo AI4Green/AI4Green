@@ -15,6 +15,7 @@ from sources.auxiliary import (
     get_smiles,
     sanitise_user_input,
 )
+from flask_api import status
 from sources.extensions import db
 from sqlalchemy import func
 
@@ -408,10 +409,14 @@ def clone_reaction() -> Response:
 
     old_reaction = services.reaction.get_current_from_request_form()
 
-    new_reaction_name = request.form['reactionName']
-    workbook_name = request.form["workbook"]
-    workgroup_name = request.form["workgroup"]
-    new_reaction_id = request.form['newReactionID']
+    new_reaction_name = request.form.get('reactionName')
+    workbook_name = request.form.get("workbook")
+    workgroup_name = request.form.get("workgroup")
+    new_reaction_id = request.form.get('newReactionID')
+
+    if None in [new_reaction_name, workbook_name, workgroup_name, new_reaction_id]:
+        return status.HTTP_400_BAD_REQUEST
+
     workbook_object = services.workbook.get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook_object)
 

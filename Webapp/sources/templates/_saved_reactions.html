@@ -44,7 +44,7 @@
                 </button>
             {% endif %}
             <button
-                    onclick="cloneReactionModalWindow(this)" id="{{ reaction.reaction_id }}" class="btn btn-info"  data-toggle="modal"
+                    onclick="cloneReactionModalWindow(this)" id="{{ reaction.reaction_id }}" class="btn btn-info"
                     data-target="#new-reaction-modal" title="Create New Reaction" data-workbook="{{ reaction.workbook }}" data-workgroup="{{ reaction.workgroup }}">Clone
             </button>
             {% if reaction.completion_status == "complete" %}

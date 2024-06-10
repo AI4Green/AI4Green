@@ -63,17 +63,23 @@ function cloneReactionModalWindow(reaction) {
       },
       method: "POST",
       body: JSON.stringify({
-        "workbook": workbook,
         "workgroup": workgroup,
+
+
       }),
     })
-  .then(function (response) { return response.json() })
+  .then(function (response)  { return response.json(); })
   .then(function (newReactionID) {
-  $("#new-reaction-id-input").val(newReactionID);
-  $("#new-reaction-name").val(name);
-  $("#new-reaction-data-submit").attr("onclick", "cloneReaction()");
+      if (newReactionID !== "Bad Request") {
+          $("#new-reaction-id-input").val(newReactionID);
+          $("#new-reaction-name").val(name);
+          $("#new-reaction-data-submit").attr("onclick", "cloneReaction()");
+          $("#new-reaction-modal").modal("show")
+      }
+      else { window.alert("Something went wrong. Please try again.")}
   })
 }
+
 
 function cloneReaction() {
   let reactionWorkgroup = getVal("#workgroup");
