@@ -36,10 +36,6 @@ def make_sas_link(data_export_request: models.DataExportRequest) -> str:
         blob=data_export_request.uuid
         + get_export_file_extension(data_export_request.data_format.value),
     )
-    print(
-        data_export_request.uuid
-        + get_export_file_extension(data_export_request.data_format.value)
-    )
     # Set the start time and expiry time for the SAS token
     start_time = datetime.utcnow()
     expiry_time = datetime.utcnow() + timedelta(minutes=2)
