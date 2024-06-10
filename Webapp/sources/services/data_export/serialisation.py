@@ -34,7 +34,12 @@ class ReactionDataFileExport:
         self, db_reaction: models.Reaction, filename: str, container_name: str
     ):
         """
-        Filename should not include extension.
+        Creates an instance of the ReactionDataFileExport class
+
+        Args:
+             db_reaction - the database entry for the reaction
+             filename - the filename for the blob without the file extension. Normally the reaction_id e.g., DW1-001
+             container_name - the name of the export container.
         """
         self.db_reaction = db_reaction
         self.reaction_object = self._make_rxn_block()
@@ -61,9 +66,10 @@ class ReactionDataFileExport:
 
     def _make_rxn_block(self) -> Optional[str]:
         """
-        Makes a rxn block with RDKIT for the
-        Makes a reaction container by using the SMILES obtained from the db reaction object.
+        Makes a rxn block with RDKIT by using the SMILES obtained from the db reaction object.
         Full reaction SMILES including reactants, agents (aka reagents and solvents), and products
+        Returns:
+            RXN Block as a string
         """
         reaction_smiles = self._make_reaction_smiles()
         # return None if we cannot make a reaction_container from smiles - likely to be due to no smiles present.
@@ -130,11 +136,18 @@ class ReactionDataFileExport:
 
 
 class JsonExport:
+    """Class for exporting files as .JSON."""
+
     def __init__(
         self, db_reaction: models.Reaction, filename: str, container_name: str
     ):
         """
-        Filename should not include extension.
+        Creates an instance of the JsonExport class
+
+        Args:
+             db_reaction - the database entry for the reaction
+             filename - the filename for the blob without the file extension. Normally the reaction_id e.g., DW1-001
+             container_name - the name of the export container.
         """
         self.db_reaction = db_reaction
         self.metadata = services.data_export.metadata.ReactionMetaData(

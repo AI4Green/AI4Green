@@ -15,7 +15,8 @@ def list_all() -> List[models.User]:
     return db.session.query(models.User).all()
 
 
-def person_from_current_user():
+def person_from_current_user() -> models.Person:
+    """Returns the Person entry in the database Table corresponding to the email of the current user"""
     return (
         db.session.query(models.Person)
         .join(models.User)
