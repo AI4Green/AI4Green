@@ -33,9 +33,7 @@
                         </select><br><br>
                         <button type="submit" id="go-to-workgroup" class="btn btn-success" style="width: 190px;">Proceed to Workgroup</button>
                     </form>
-                    <p><a href="{{ url_for('join_workgroup.join_workgroup') }}" id="join-WG" class="btn btn-primary">+ Join Existing Workgroup</a></p>
-                    <p><a href="{{ url_for('create_workgroup.create_workgroup') }}" id="create-workgroup" class="btn btn-primary">+ Create Workgroup</a></p>
-                    <p><a href="{{ url_for('workgroup_membership_summary.workgroup_membership_summary') }}" id="WG-membership-summary" class="btn btn-primary">Workgroup Membership Summary</a></p>
+                    <a href="{{ url_for('create_workgroup.create_workgroup') }}" id="create-workgroup" class="btn btn-primary">+ Create Workgroup</a>
                     {% if user_role == 'Admin' %}
                         <p><a href="{{ url_for('admin_dashboard.admin_dashboard') }}" id="admin_dashboard" class="btn btn-primary">Admin Dashboard</a></p>
                     {% endif %}
