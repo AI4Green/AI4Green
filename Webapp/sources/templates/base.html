@@ -110,17 +110,23 @@
     </div>
     {% if session_type != 'UNIT_TEST' %}
     <!--Utility Links-->
-    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+    <div class="text-center p-1" style="background-color: rgba(0, 0, 0, 0.5);">
+
         <table>
-            <tr></tr>
+             <tr>
+                <span class="text-left" style="position: fixed; left: 1em; bottom: 0.09em;">
+                    <img src="/static/img/ai4green_logo.png" alt="AI4Green Logo" width="100">
+                </span>
+            </tr>
             <tr>
-                <a class="text-dark" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank">Hazard Disclaimer</a> |
-                <a class="text-dark" href="{{ url_for('auth.privacy_notice') }}" target="_blank">Privacy Notice</a> |
-                <a class="text-dark" href="https://twitter.com/ai4green" target="_blank">Twitter</a> |
-                <a class="text-dark" href="https://github.com/AI4Green/AI4Green" target="_blank">GitHub</a>
+                <a class="text-green" style="color:#82F5A8;" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank">Hazard Disclaimer </a> |
+                <a class="text-green" href="{{ url_for('auth.privacy_notice') }}" target="_blank">Privacy Notice</a> |
+                <a class="text-green" href="https://twitter.com/ai4green" target="_blank">Twitter</a> |
+                <a class="text-green" href="https://github.com/AI4Green/AI4Green" target="_blank">GitHub</a>
+            </tr>
             <tr style="width: 33%;">
                 <span class="text-right" style="position: fixed; right:1em; width: 33%;">
-                    <p style="display: inline; width: 33%;" class="text-dark text-right">Hazard data sourced from ECHA references on PubChem</p>
+                    <p style="display: inline; width: 33%;" class="text-green">Hazard data sourced from ECHA references on PubChem</p>
                 </span>
             </tr>
         </table>

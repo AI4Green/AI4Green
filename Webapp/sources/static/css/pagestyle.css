@@ -11,6 +11,10 @@ body {
     margin-top: -2.5rem;
 }
 
+.text-green {
+    color: #82F5A8;
+}
+
 #flash-messages{
     margin-bottom: 2rem;
 }
