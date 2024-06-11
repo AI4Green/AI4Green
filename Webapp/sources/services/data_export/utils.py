@@ -21,17 +21,6 @@ class ReactionStringMapper:
     """Collection of static methods to replace strings within the data export methods."""
 
     @staticmethod
-    def chem21_to_numerical(chem21_str: str) -> str:
-        """Replaces the css classes that indicate colour with a numerical equivalent"""
-        chem21_dict = {
-            "recommended": "1",
-            "problematic": "2",
-            "hazard-warning": "3",
-            "hazard-hazardous": "4",
-        }
-        return chem21_dict.get(chem21_str)
-
-    @staticmethod
     def css_classes_to_chem21_colour_flag(css_class: str) -> str:
         """Replaces the css classes with their default colour flags - used in elements table"""
         css_chem21_dict = {
