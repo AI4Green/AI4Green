@@ -13,6 +13,7 @@ from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
+from .forms import LoginForm
 from sources import models
 from sources.auxiliary import (
     get_notification_number,
@@ -37,6 +38,7 @@ def index() -> Response:
             .filter(models.User.email == current_user.email)
             .first()
         )
+        form=None
         user_confirmed = user.is_verified
         user_role = user.Role.name
         workgroups = get_workgroups()
@@ -57,6 +59,7 @@ def index() -> Response:
     else:
         # user not logged in
         user_confirmed = None
+        form = LoginForm()
         user_role = None
         workgroups = []
         notification_number = 0
@@ -68,6 +71,7 @@ def index() -> Response:
         workgroups=workgroups,
         notification_number=notification_number,
         news_items=news_items,
+        form=form
     )
 
 

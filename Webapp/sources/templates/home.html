@@ -6,24 +6,25 @@
 <body>
     {% if current_user.is_authenticated %}
 
-        <div class="jumbotron">
+        <div class="jumbotron" style="min-height=100px">
+
             <div class="container">
-                {% if user_confirmed == false %}
-                    <div class="alert alert-primary">AI4Green now requires email verification.  <a href='/email_verification_request' class='alert-link'>Click here</a> to send a verification email to your email address.</div>
-                {% endif %}
+                <img src="/static/img/ai4green_logo.png" alt="Royal Society of Engineering Logo">
                 <h2>Welcome to AI4Green, {{ current_user.username }}!</h2>
-                <p>AI4Green is an Electronic Laboratory Notebook built around encouraging green and sustainable chemistry.</p>
-                <p>
-                    <a id="about-button" class="btn btn-primary btn-lg" href="{{ url_for('main.about') }}" role="button">Learn more &raquo;</a>
-                    <a id="quickstart-guide" href="{{ url_for('main.send_quickstart_guide') }}" class="btn btn-primary btn-lg">Quickstart Guide &raquo;</a>
-                </p>
             </div>
         </div>
         <div class="container">
+            {% if user_confirmed == false %}
+                    <div class="alert alert-primary">AI4Green now requires email verification.  <a href='/email_verification_request' class='alert-link'>Click here</a> to send a verification email to your email address.</div>
+                {% endif %}
             <div class="row">
                 <div class="col-7">
                     <h2>Please select a Workgroup to get started</h2>
                     <br>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-2"></div>
+                        <div class="col-5">
                     <form method="post" novalidate>
                         <select name="WG-select" id="WG-select" class="form-select">
                             <option>-Select Workgroup-</option>
@@ -37,6 +38,9 @@
                     {% if user_role == 'Admin' %}
                         <p><a href="{{ url_for('admin_dashboard.admin_dashboard') }}" id="admin_dashboard" class="btn btn-primary">Admin Dashboard</a></p>
                     {% endif %}
+                        </div>
+                        </div>
+                        </div>
                 </div>
                 <div class="col-5">
                     <h2><i class="bi bi-pin-angle"></i> News Feed</h2>
@@ -60,12 +64,56 @@
                         {% endif %}
                     </div>
                 </div>
+            <p>
+                    <a id="about-button" class="btn btn-primary btn-lg" href="{{ url_for('main.about') }}" role="button">Learn more &raquo;</a>
+                    <a id="quickstart-guide" href="{{ url_for('main.send_quickstart_guide') }}" class="btn btn-primary btn-lg">Quickstart Guide &raquo;</a>
+                </p>
             </div>
         </div>
     {% else %}
         <!--    current user is not logged in-->
-        <div class="jumbotron">
-            <!--        welcome text and description of AI4Green-->
+        <div class="jumbotron" style="background: linear-gradient(90deg, #777778 50%, #82F5A8)">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-6" style="margin:auto; color: #777778">
+                        <!--        welcome text and description of AI4Green-->
+                        <img src="/static/img/ai4green_logo.png" alt="AI4Green Logo" width="100%" >
+                    </div>
+                    <div class="col-6" style="margin:auto;"> <br><br>
+<div class="container text-center">
+<br><br>
+<div class="form-outline mb-4" style="margin: auto; width: 50%">
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        {{ form.username }}<br>
+        {% for error in form.username.errors %}
+            <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                {{ error }}
+            </div>
+        <br>
+        {% endfor %}
+        {{ form.password }}<br>
+        {% for error in form.password.errors %}
+            <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                {{ error }}
+            </div>
+        <br>
+        {% endfor %}
+        {{ form.submit() }} <br><br>
+        {{ form.remember_me() }} {{ form.remember_me.label }}
+
+    </form>
+</div>
+    New User? <a id="register" class="text-grey" href="{{ url_for('auth.register') }}">Click to Register!</a><br>
+    Forgotten Your Password? <a class="btn btn-link" id="reset-password" href="{{ url_for('reset_password.reset_password_request') }}">Click to Reset!</a>
+</div></div>
+                </div>
+            </div>
+        </div>
+        <!--    video and login/registration buttons-->
+        <div class="container-fluid text-center">
+            <div class="row">
+            <div class="col-6">
             <h1>Welcome to AI4Green</h1>
             <h5>
                 AI4Green provides an ELN including collaboration tools, data archival and management and green and sustainability metrics for organic chemistry.<br><br>
@@ -78,21 +126,12 @@
               <li>Reaction summary including colour coding of solvent sustainability and hazards</li>
             </ul>
             <p>For any queries please contact us at <a id="email-link" href="mailto:ai4green@nottingham.ac.uk">ai4green@nottingham.ac.uk</a>.</p>
-        </div>
-        <!--    video and login/registration buttons-->
-        <div class="container text-center">
-            <div class="row my-5">
-                <div class="col">
-                    <h3>Existing User</h3>
-                    <a class="btn btn-primary btn-lg" href="{{ url_for('auth.login') }}">Log in</a>
-                </div>
-                <div class="col">
-                    <h3>New User</h3>
-                    <a class="btn btn-success btn-lg" href="{{ url_for('auth.register') }}">Register</a>
-                </div>
             </div>
-            <iframe id="help-video" width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PL7u_tOd0vTynC0tgWt0cb7jLlnEoDwiO4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><br><br>
+        <div class="col-6">
+            <iframe id="help-video" width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PL7u_tOd0vTynC0tgWt0cb7jLlnEoDwiO4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
+        </div>
+            </div>
     {% endif %}
 </body>
 

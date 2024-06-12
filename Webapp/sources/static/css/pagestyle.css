@@ -7,12 +7,44 @@ body {
 #content {
     margin-top: 6rem;
 }
+
 .jumbotron {
     margin-top: -2.5rem;
 }
 
-.text-green {
+.text-primary-green {
     color: #82F5A8;
+}
+
+.text-secondary-green {
+    color: #62BA79;
+}
+
+.text-grey {
+    color: #777778
+}
+
+.btn.btn-primary {
+  background-color: #777778; /* Green */
+  border-color: #777778;
+  color: #82F5A8;
+}
+
+.btn.btn-primary:hover {
+  background-color: #686868;
+  border-color: #686868;
+}
+
+
+.btn.btn-secondary {
+  background-color: #82F5A8; /* Green */
+  border-color: #82F5A8;
+  color: #777778;
+}
+
+.btn.btn-secondary:hover {
+  background-color: #62BA79;
+  border-color: #62BA79;
 }
 
 #flash-messages{

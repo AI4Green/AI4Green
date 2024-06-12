@@ -101,32 +101,32 @@
 
 
 <footer class="bg-light text-center text-lg-start fixed-bottom footer-at-bottom">
-    <div style="display: none" id="cookie-consent-banner" class="nk-cookie-banner alert alert-dark text-center mb-0 fixed-bottom" role="alert">
+    <div style="display: none; background-color: #777778" id="cookie-consent-banner" class="nk-cookie-banner alert alert-dark text-primary-green mb-0 fixed-bottom" role="alert">
       🍪 This website uses first party cookies to ensure you get the best experience on our website.
-      <a href=" {{ url_for('auth.privacy_notice') }}" target="blank" rel="noopener noreferrer">Learn more</a>
-      <button id="accept_cookies" type="button" class="btn btn-primary btn-sm ml-3" onclick="updateCookiePreferences()">
+      <a href=" {{ url_for('auth.privacy_notice') }}" target="blank" rel="noopener noreferrer" class="text-secondary-green">Learn more</a>
+      <button id="accept_cookies" type="button" class="btn btn-secondary btn-sm ml-3" onclick="updateCookiePreferences()">
         I Got It
       </button>
     </div>
     {% if session_type != 'UNIT_TEST' %}
     <!--Utility Links-->
-    <div class="text-center p-1" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="text-center p-3" style="background-color: #777778;">
 
         <table>
              <tr>
-                <span class="text-left" style="position: fixed; left: 1em; bottom: 0.09em;">
-                    <img src="/static/img/ai4green_logo.png" alt="AI4Green Logo" width="100">
+                <span class="text-left" style="position: fixed; left: 1em; bottom: 0.2em;">
+                    <img src="/static/img/ai4green_logo.png" alt="AI4Green Logo" width="140">
                 </span>
             </tr>
             <tr>
-                <a class="text-green" style="color:#82F5A8;" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank">Hazard Disclaimer</a>  <span class="text-green"> | </span>
-                <a class="text-green" href="{{ url_for('auth.privacy_notice') }}" target="_blank">Privacy Notice</a> <span class="text-green"> | </span>
-                <a class="text-green" href="https://twitter.com/ai4green" target="_blank">Twitter</a> <span class="text-green"> | </span>
-                <a class="text-green" href="https://github.com/AI4Green/AI4Green" target="_blank">GitHub</a>
+                <a class="text-primary-green" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank">Hazard Disclaimer</a>  <span class="text-primary-green"> | </span>
+                <a class="text-primary-green" href="{{ url_for('auth.privacy_notice') }}" target="_blank">Privacy Notice</a> <span class="text-primary-green"> | </span>
+                <a class="text-primary-green" href="https://twitter.com/ai4green" target="_blank">Twitter</a> <span class="text-primary-green"> | </span>
+                <a class="text-primary-green" href="https://github.com/AI4Green/AI4Green" target="_blank">GitHub</a>
             </tr>
             <tr style="width: 33%;">
                 <span class="text-right" style="position: fixed; right:1em; width: 33%;">
-                    <p style="display: inline; width: 33%;" class="text-green">Hazard data sourced from ECHA references on PubChem</p>
+                    <p style="display: inline; width: 33%;" class="text-primary-green">Hazard data sourced from ECHA references on PubChem</p>
                 </span>
             </tr>
         </table>
