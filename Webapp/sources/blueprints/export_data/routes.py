@@ -165,3 +165,23 @@ def get_reaction_id_list():
 # @export_data_bp.route("/export_data_eln_file", methods=["GET", "POST"])
 # @login_required
 # def export_data_eln_file() -> Response:
+#     """
+#     We are making a .eln file for a specific workbook. This is a zipped directory containing a ro-crate-metadata.json
+#     to describe the contents.
+#     """
+#
+#     # reaction_list = services.reaction.list_active_in_workbook(
+#     #     workbook, workgroup, sort_crit="time"
+#     # )
+#     workgroup_name = request.form["workgroup"]
+#     workbook_name = request.form["workbook"]
+#     eln_file = ELNFile(workgroup_name, workbook_name)
+#     # eln_file = DataExport(workgroup_name, workbook_name).to_eln_file()
+#     return eln_file
+
+# made according to this specification https://github.com/TheELNConsortium/TheELNFileFormat
+# first we describe the ro-crate metadata_json
+# ro_crate_metadata_json_contents = describe_ro_crate_metadata_json()
+# now for each reaction we want to make a research object crate
+# for idx, reaction in enumerate(reaction_list):
+# make a folder per experiment.

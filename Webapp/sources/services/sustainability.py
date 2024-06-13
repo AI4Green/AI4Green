@@ -56,7 +56,6 @@ class SustainabilityMetrics:
                     )  # appends solvent flag to their list
                 except KeyError:
                     solvent_flags.append(5)
-        print(f"{solvent_flags=}")
         return solvent_flags
 
     def get_element_sustainability(self, reaction_smiles: str = None):

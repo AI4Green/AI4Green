@@ -18,16 +18,7 @@ def validate_reaction(reaction: models.Reaction) -> bool:
 
 
 class ReactionStringMapper:
-    @staticmethod
-    def chem21_to_numerical(chem21_str: str) -> str:
-        """Replaces the css classes that indicate colour with a numerical equivalent"""
-        chem21_dict = {
-            "recommended": "1",
-            "problematic": "2",
-            "hazard-warning": "3",
-            "hazard-hazardous": "4",
-        }
-        return chem21_dict.get(chem21_str)
+    """Collection of static methods to replace strings within the data export methods."""
 
     @staticmethod
     def css_classes_to_chem21_colour_flag(css_class: str) -> str:
@@ -81,7 +72,7 @@ class ReactionStringMapper:
         return solvent_flag_dict.get(solvent_flag)
 
     @staticmethod
-    def physical_forms(physical_form):
+    def physical_forms(physical_form: str):
         """Replaces the physical form dropdown index with the corresponding string value"""
         physical_form_dict = {
             "0": "",
@@ -99,7 +90,7 @@ class ReactionStringMapper:
         return physical_form_dict.get(physical_form)
 
     @staticmethod
-    def radio_buttons(radio_button) -> str:
+    def radio_buttons(radio_button: str) -> str:
         """
         We take the radio button name and change it if it appears in the dict, otherwise we return the original
 
@@ -150,14 +141,19 @@ def get_metadata_keys() -> List[str]:
     ]
 
 
-def remove_default_data(list_: List):
+def remove_default_data(list_: List) -> List:
     """Removes default database values from lists for database reaction components"""
     return [x for x in list_ if x not in ["{", "}", ""]]
 
 
 def check_compounds_present(db_reaction: models.Reaction, component: str) -> bool:
     """
-    component: reactant/reagent/solvent/product
-    Returns True if that compound type is present in the reaction. e.g., A reaction has no solvents returns False
+    Checks if a role of compounds are present within a reaction
+    e.g., if component='solvent', a reaction has no solvents returns False
+    Args:
+        db_reaction - the database entry for the reaction being checked
+        component - the role being checked - reactant/reagent/solvent/product
+    Returns:
+         True if that compound type is present in the reaction.
     """
     return bool(remove_default_data(getattr(db_reaction, component)))

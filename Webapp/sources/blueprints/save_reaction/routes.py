@@ -15,6 +15,7 @@ from sources.auxiliary import (
     get_smiles,
     sanitise_user_input,
 )
+from flask_api import status
 from sources.extensions import db
 from sqlalchemy import func
 
@@ -392,6 +393,65 @@ def autosave() -> Response:
     }
     reaction.update(**update_dict)
     return jsonify({"feedback": feedback})
+
+
+@save_reaction_bp.route("/clone_reaction", methods=["POST", "GET"])
+@login_required
+def clone_reaction() -> Response:
+    """
+    Takes reactions data from previously saved reaction and copies it into a new reaction which is saved to the database
+    real_product_mass and unreacted_reactant_mass are removed from the reaction data for users to input upon reaction completion
+
+    Returns:
+        Response as JSON, either New Reaction Made or Reaction Name is not Unique
+
+    """
+
+    old_reaction = services.reaction.get_current_from_request_form()
+
+    new_reaction_name = request.form.get('reactionName')
+    workbook_name = request.form.get("workbook")
+    workgroup_name = request.form.get("workgroup")
+    new_reaction_id = request.form.get('newReactionID')
+
+    if None in [new_reaction_name, workbook_name, workgroup_name, new_reaction_id]:
+        return status.HTTP_400_BAD_REQUEST
+
+    workbook_object = services.workbook.get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook_object)
+
+    creator = services.person.from_current_user_email()
+    current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
+
+    remove_yield_dict = json.loads(old_reaction.summary_table_data)
+    remove_yield_dict.update({"real_product_mass": "", "unreacted_reactant_mass": ""})
+
+    # check for reaction id - catches errors caused if user has 2 tabs open
+    reaction_id_check = services.reaction.get_from_reaction_id_and_workbook_id(new_reaction_id, workbook_object.id)
+    if reaction_id_check:
+        feedback = "A reaction with this ID already exists. Please refresh the page and try again."
+        return jsonify({"feedback": feedback})
+
+    name_check = check_reaction_name()
+    if b"This reaction name is unique" in name_check.data:
+        reaction = models.Reaction(
+            creator=creator.id,
+            reaction_id=new_reaction_id,
+            time_of_creation=current_time,
+            name=new_reaction_name,
+            workbooks=workbook_object.id,
+            status="active",
+            complete="not complete",
+            reaction_table_data=old_reaction.reaction_table_data,
+            summary_table_data=json.dumps(remove_yield_dict),
+            reaction_smiles=old_reaction.reaction_smiles
+        )
+        db.session.add(reaction)
+        db.session.commit()
+        feedback = "New reaction made"
+        return jsonify({"feedback": feedback})
+    else:
+        return name_check
 
 
 @save_reaction_bp.route("/_autosave_sketcher", methods=["POST"])

@@ -12,6 +12,7 @@ class NewRequest:
     """Class to handle the creation of new data export requests"""
 
     def __init__(self):
+        """Creates an instance of the NewRequest class using from the request json."""
         self.requestor = services.user.person_from_current_user()
         self.data_format = request.json["exportFormat"]
         self.invalid_workbooks = None
@@ -31,7 +32,7 @@ class NewRequest:
         """
         Turn reaction list into a workbook list. User must either be workbook member or PI
         Returns:
-            the permission result is either accepted or denied
+            the permission result is either accepted or denied or no data
         """
         # if there are no reactions we cannot export
         if len(self.reaction_list) == 0:
@@ -60,7 +61,7 @@ class NewRequest:
                 )
             )
 
-    def _user_in_workbook_or_pi(self, workbook) -> bool:
+    def _user_in_workbook_or_pi(self, workbook: models.workbook) -> bool:
         """Returns True if the user is either in the workbook or is the PI of the workgroup."""
         return (
             self.requestor in workbook.users
@@ -113,7 +114,10 @@ class NewRequest:
 
 
 class RequestStatus:
+    """Class to update the request status when an approver accepts or denies a request"""
+
     def __init__(self, data_export_request: models.DataExportRequest):
+        """Creates an instance of the RequestStatus class."""
         self.data_export_request = data_export_request
 
     def accept(self):

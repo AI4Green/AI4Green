@@ -601,7 +601,7 @@ function getFieldData() {
     "#massSpec",
     "#pyrophorics",
     "#microwave",
-    "#diazoisation",
+    "#diazotisation",
     "#hydrogenation",
     "#peptideSynthesis",
     "#ozone",

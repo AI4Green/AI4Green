@@ -9,12 +9,24 @@ from sources import models, services
 
 
 class CsvExport:
-    """CSV export intended to have all the data to recreate an experiment in AI4Green"""
+    """Class for exporting reactions within a .csv file"""
 
     def __init__(self, data_export_request: models.DataExportRequest):
+        """
+        Creates an instance of the CsvExport class
+        Args:
+            data_export_request - the request being made
+        """
         self.data_export_request = data_export_request
 
     def make_row(self, reaction: models.Reaction) -> pd.DataFrame:
+        """
+        Gets data for a single reaction and returns it as a single row Pandas DataFrame
+        Args:
+            reaction - the reaction the data belongs to
+        Returns:
+            Single row Pandas Dataframe with reaction data
+        """
         # first get the data included in the surf export
         data = SurfExport(self.data_export_request).get_surf_data(reaction)
         # use metadata to get sustainability and other data not part of SURF
@@ -58,9 +70,16 @@ class CsvExport:
 
 
 def make_csv(df: pd.DataFrame) -> bytearray:
+    """
+    Makes the csv file in memory from the dataframe
+    Args:
+        df - the dataframe with all reactions data
+    Returns:
+        an in memory csv as a bytearray
+    """
     csv_buffer = io.StringIO()
     # tab seperator used because of common use of commas in NMR results.
-    df.to_csv(csv_buffer, index=False, sep="\t")
+    df.to_csv(csv_buffer, index=False)
     # Get CSV file contents from csv buffer and save as a csv in the export container in Azure
     return bytearray(csv_buffer.getvalue(), "utf-8")
 
@@ -69,6 +88,7 @@ class SurfExport:
     amount_factor_dict = {"μmol": 0.000001, "mmol": 0.001, "mol": 1}
 
     """
+    Class for exporting a collection of reactions as a standardised CSV called SURF.
     Format described in more detail here https://github.com/alexarnimueller/surf.
     Functionality to convert SURF to open reaction database format can also be found at the SURF github.
     """
@@ -269,7 +289,7 @@ class SurfExport:
 
     @staticmethod
     def _read_value(summary_data: Dict, key: str) -> Optional[str]:
-        """Returns the reaction temperature the user entered into the summary table"""
+        """Returns the value the user entered into the summary table for the provided key"""
         value = summary_data.get(key)
         return value if value != "" else None
 

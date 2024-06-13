@@ -42,6 +42,10 @@ class BaseConfig(object):  # class to store configuration variables
     # Marvin JS - Change to your own
     MARVIN_JS_API_KEY = os.getenv("MARVIN_JS_API_KEY", "")
 
+    # reCaptcha Keys - Change to your own
+    RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY', "")
+    RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY', "")
+
     # Azurite file storage
     AZURE_STORAGE_CONNECTION_STRING = os.getenv(
         "AZURE_STORAGE_CONNECTION_STRING",

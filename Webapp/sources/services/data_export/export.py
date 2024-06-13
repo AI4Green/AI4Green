@@ -36,10 +36,6 @@ def make_sas_link(data_export_request: models.DataExportRequest) -> str:
         blob=data_export_request.uuid
         + get_export_file_extension(data_export_request.data_format.value),
     )
-    print(
-        data_export_request.uuid
-        + get_export_file_extension(data_export_request.data_format.value)
-    )
     # Set the start time and expiry time for the SAS token
     start_time = datetime.utcnow()
     expiry_time = datetime.utcnow() + timedelta(minutes=2)
@@ -67,6 +63,16 @@ def make_sas_link(data_export_request: models.DataExportRequest) -> str:
 def get_export_file_extension(
     export_format: models.data_export_request.ExportFormat,
 ) -> str:
+    """
+    Uses the dictionary to return the file extension which matches the export format, including .zip.
+
+    Args:
+        export_format: String enum value from an entry in data_export_request Table
+
+    Returns:
+        file extension as a string e.g., .csv
+    """
+
     return {
         "ELN": ".eln",
         "RDF": ".zip",
@@ -79,8 +85,12 @@ def get_export_file_extension(
 
 def initiate(current_app_context: AppContext, data_export_request_id: int):
     """
-    Calls the DataExport class to start making the export file.
-    Called from here to instantiate the class object during the threaded process.
+    Starts the process of creating the data export once it has been approved.
+    This is called from here to enable working within a threaded process.
+
+    Args:
+        current_app_context - the app context required to access the database within a threaded process
+        data_export_request_id - the primary key id of the data export request we are making the export file for
     """
     with current_app_context:
         export = DataExport(data_export_request_id)
@@ -94,9 +104,13 @@ class DataExport:
     Files in the export-container will be deleted after 7 days. Controlled by Azure Blob Storage Lifecycle policies.
     """
 
-    # def __init__(self, data_export_request: models.DataExportRequest):
     def __init__(self, data_export_request_id: int):
-        # db.session.refresh(data_export_request)
+        """
+        Create an instance of the DataExport class and setup class variables.
+
+        Args:
+            data_export_request_id - the primary key id of the data export request being exported.
+        """
         self.data_export_request = models.DataExportRequest.query.get(
             data_export_request_id
         )
@@ -107,9 +121,8 @@ class DataExport:
 
     def create(self):
         """
-        Main function where we decide the appropriate export type to make and then create a zip file
-        and notify the requestor once this is complete
-
+        Main function called for the class where the appropriate export function is identified and called.
+        Once the data export has been made, the requestor is notified.
         """
         export_function = self._get_export_function()
         export_function()
@@ -139,7 +152,7 @@ class DataExport:
         }
         return export_function_dict[self.data_export_request.data_format.value]
 
-    def _make_zip_file(self):
+    def _make_zip_file(self) -> io.BytesIO:
         """
         Creates a zip file containing all blobs stored in the specified container in Azure Blob Storage.
 
@@ -179,7 +192,11 @@ class DataExport:
         )
 
     def _update_db_with_hash(self, checksum: str):
-        """Adds the checksum for an export file to the database"""
+        """
+        Adds the checksum for an export file to the database
+        Args:
+            checksum - the md5 checksum for an exported file.
+        """
         self.data_export_request.hash = checksum
         db.session.commit()
 
@@ -233,9 +250,7 @@ class DataExport:
         self._make_zip()
 
     def _make_rdf_export(self):
-        """
-        The main function called to create a zip file of reactions saved as RDFs or JSONs if no SMILES are present
-        """
+        """Creates a zip file of reactions saved as RDFs or JSONs if no SMILES are present"""
         # iterate through the reactions and save each as an azure blob
         for reaction in self.data_export_request.reactions:
             # save all files to the container
@@ -246,6 +261,7 @@ class DataExport:
         self._make_zip()
 
     def _make_json_export(self):
+        """Creates a zip file of reactions saved as JSONs"""
         # iterate through the reactions and save each as an azure blob
         for reaction in self.data_export_request.reactions:
             # save all files to the container
@@ -256,7 +272,7 @@ class DataExport:
         self._make_zip()
 
     def _make_csv_export(self):
-        """Condense all export into single csv"""
+        """Create a single CSV to describe all reactions in export"""
         df_rows = []
         csv_export = services.data_export.tabular.CsvExport(self.data_export_request)
         for reaction in self.data_export_request.reactions:
@@ -271,7 +287,9 @@ class DataExport:
         )
 
     def _make_surf_export(self):
-        """Condense all export into single csv with standardised headings"""
+        """
+        Create a single csv to describe all reactions in export with standardised headings
+        """
         df_rows = []
         surf_export = services.data_export.tabular.SurfExport(self.data_export_request)
         for reaction in self.data_export_request.reactions:
@@ -286,10 +304,10 @@ class DataExport:
 
     def _make_pdf_export(self):
         """
-        The main function called to create a zip file of reactions saved as PDFs
+        Creates a zip file of reactions saved as PDFs
         """
-        # the PDFs are autogenerated when making a reaction summary. - may change in future for most up-to date results.
-        # we need to iterate through and copy each blob to the container for this export
+        # the PDFs are autogenerated when making a reaction summary.
+        # we need to iterate through and copy each blob to the export container
         blob_service_client = services.file_attachments.connect_to_azure_blob_service()
         services.file_attachments.create_or_get_existing_container_client(
             blob_service_client, self.data_export_request.uuid
@@ -301,7 +319,8 @@ class DataExport:
     def _copy_autogenerated_pdf(
         self, reaction: models.Reaction, blob_service_client: BlobServiceClient
     ):
-        """Copies the autogenerated pdf of a reaction - if it exists - to the export container
+        """
+        Copies the autogenerated pdf of a reaction, if it exists, to the export container
         Args:
             reaction - the reaction we are trying to copy the autogenerated PDF of
             blob_service_client - the blob service client which is connected to Azure, for all containers.
@@ -325,7 +344,14 @@ class DataExport:
 
 
 def save_blob(container_name: str, filename: str, file_contents: bytearray):
-    """Saves the blob to Azure blob service"""
+    """
+    Saves the blob to Azure blob service
+    Args:
+        container_name - the container the blob is being saved in
+        filename - the name of the blobfile
+        file_contents - the file data
+
+    """
     blob_client = services.file_attachments.get_blob_client(container_name, filename)
     # Upload the blob data
     upload = io.BytesIO(file_contents)
