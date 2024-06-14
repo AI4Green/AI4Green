@@ -1,26 +1,30 @@
 import io
 import json
 import os.path
+import re
 import uuid
 from datetime import datetime
-from itertools import zip_longest
-from typing import Dict, Generator, List, Optional, Tuple
+from typing import Dict, List
 from urllib.parse import quote
 
 import pytz
 import sources.services.data_export.export
-from flask import abort, current_app, request, url_for
-from rdkit.Chem import AllChem
+from flask import abort, render_template, url_for
 from sources import models, services
-
-# todo need to use './' in the json and 'root/' in the blob names
-# solution use: ro-crate-id and blob-id
 
 
 class ELNFileExport:
-    # absolute basic example for now just include an rdf for a reaction
+    """
+    Class for making an ELN File export consisting of a directory per reaction and a metadata json at the root
+    describing the contents: https://github.com/TheELNConsortium/TheELNFileFormat
+    """
 
     def __init__(self, data_export_request: models.DataExportRequest):
+        """
+        Creates an instance of the ELNFileExport class and names the root variable
+        Args:
+            data_export_request - the data export request we are making the eln file export for.
+        """
         self.data_export_request = data_export_request
         self.container_name = data_export_request.uuid
         self.blob_service_client = (
@@ -38,17 +42,14 @@ class ELNFileExport:
         self.defined_authors = []
 
     def make_eln_file(self):
-        # name the root?
-
-        # for each reaction extract and name the parts needed to make the ELN file
-
-        # define authors
+        """The main function that calls the required functions to make the ELN file"""
         self._define_components()
         self._make_ro_crate_metadata_json()
         self._make_reaction_folders()
-        self._remove_temp()
+        self._remove_temp_blobs()
 
-    def _remove_temp(self):
+    def _remove_temp_blobs(self):
+        """Deletes the temporary blobs used to create the export file"""
         container_client = (
             services.file_attachments.create_or_get_existing_container_client(
                 self.blob_service_client, self.container_name
@@ -56,9 +57,8 @@ class ELNFileExport:
         )
         blob_list = container_client.list_blobs(name_starts_with="temp/")
 
-        # blob_list =
+        # delete each blob in the temporary container
         for blob in blob_list:
-            print(blob["name"])
             blob_client = self.blob_service_client.get_blob_client(
                 container=self.container_name, blob=blob["name"]
             )
@@ -67,6 +67,7 @@ class ELNFileExport:
                 abort(401)
 
     def _make_reaction_folders(self):
+        """Makes a directory in the ELN for each reaction being exported"""
         for reaction in self.reaction_list:
             # for each reaction make a folder named after the dataset (workbook) with all belonging files included
             subdirectory = reaction.reaction.reaction_id + "/"
@@ -84,6 +85,7 @@ class ELNFileExport:
                 new_blob.start_copy_from_url(source_blob_client.url)
 
     def _define_components(self):
+        """Defines the components being described in the metadata json"""
         self._define_authors()
         for reaction in self.data_export_request.reactions:
             export_rxn = ELNExportReaction(reaction, self)
@@ -94,11 +96,12 @@ class ELNFileExport:
             self.root_parts = export_rxn.defined_datasets
 
     def _make_ro_crate_metadata_json(self):
+        """Makes the metadata json file that describes the export contents."""
         ro_crate_graph = []
-        # this part is common to all .eln files from AI4Green
+        # these parts are common to all .eln files from AI4Green
         ro_crate_graph += get_constant_ro_crate_start()
         ro_crate_graph.append(self._describe_root_directory())
-
+        # update the ro-crate with export specific data
         ro_crate_graph += [
             dataset for rxn in self.reaction_list for dataset in rxn.defined_datasets
         ]
@@ -113,12 +116,14 @@ class ELNFileExport:
 
         ro_crate_graph += [author for author in self.defined_authors]
 
+        # define the contents of the metadata json
         ro_crate_metadata_contents = {
             "@context": "https://w3id.org/ro/crate/1.1/context",
             "@graph":
             # the graph is a list of dictionaries defining the elements and their structure
             ro_crate_graph,
         }
+        # save as a file to memory then upload the blob to azure.
         self.memory_file = io.StringIO()
 
         with self.memory_file as f:
@@ -126,20 +131,14 @@ class ELNFileExport:
             self.file_contents = bytearray(f.getvalue(), "utf-8")
             self.content_size = f.seek(0, os.SEEK_END)
 
-        # save this json to azure in root dir
-        # blob_client = self.blob_service_client.get_blob_client(self.container_name, "ro_crate_metadata.json")
-        # blob_client.upload_blob()
         sources.services.data_export.export.save_blob(
             self.container_name,
             self.root + "/" + "ro-crate-metadata.json",
             self.file_contents,
         )
 
-        # # testing the json looks right
-        # with open("ro-crate-metadata.json", "w") as f:
-        #     f.write(json.dumps(ro_crate_metadata_contents))
-
     def _describe_root_directory(self):
+        """Describes the root directory by listing the reaction IDs in hasPart for the metadata json"""
         return {
             "@id": "./",
             "@type": "Dataset",
@@ -147,9 +146,9 @@ class ELNFileExport:
         }
 
     def _define_authors(self):
-        # get the json definition of every author of a reaction in the export list
+        """List of all authors of the exported reactions"""
         [
-            self.defined_authors.append(self.get_author(reaction))
+            self.defined_authors.append(self._get_author(reaction))
             for reaction in self.data_export_request.reactions
         ]
         # remove duplicates
@@ -159,7 +158,15 @@ class ELNFileExport:
             if i not in self.defined_authors[:n]
         ]
 
-    def get_author(self, reaction: models.Reaction) -> Dict:
+    @staticmethod
+    def _get_author(reaction: models.Reaction) -> Dict:
+        """
+        Gets the author data from the reaction creator property
+        Args:
+            reaction: the reaction being exported
+        Returns:
+            Details of the reaction author in the format required for the metadata JSON
+        """
         person = reaction.creator_person
         if person.user:
             author = {
@@ -168,6 +175,7 @@ class ELNFileExport:
                 "fullName": person.user.fullname,
                 "emailAddress": person.user.email,
             }
+        # if the user has deleted their account then no personal details are included, only a unique ID is provided
         else:
             author = {
                 "@id": f"./author/{person.id}",
@@ -179,7 +187,16 @@ class ELNFileExport:
 
 
 class ELNExportReaction:
+    """Class for getting the reaction data required for an ELN File export."""
+
     def __init__(self, reaction: models.Reaction, eln_export: ELNFileExport):
+        """
+        Creates a new instance of the ELNExportReaction class
+        Args:
+            reaction - the reaction being exported
+            eln_export - the eln file export that the exported reaction is a part of
+        """
+
         self.reaction = reaction
         self.container_name = eln_export.data_export_request.uuid
         self.root = eln_export.root
@@ -189,9 +206,12 @@ class ELNExportReaction:
         self.defined_comments = []
         self.defined_files = []
         self.defined_datasets = []
+        self.rxn_metadata = services.data_export.metadata.ReactionMetaData(
+            reaction
+        ).get_dict()
 
     def _make_export_files(self):
-        # for now we JUST make rdf
+        """Makes files which are included with the ELN File export. Includes: .rdf"""
         file_uuid = str(uuid.uuid4())
         blob_name = "temp/" + file_uuid
         rdf = services.data_export.serialisation.ReactionDataFileExport(
@@ -215,7 +235,7 @@ class ELNExportReaction:
         self.files.append(rdf_dict)
 
     def get_files(self):
-        # self._make_export_files()
+        """Gets the file details for the reaction being exported"""
         # get pre existing files
         pre_existing_files = [
             x.to_export_dict() for x in self.reaction.file_attachments
@@ -226,7 +246,7 @@ class ELNExportReaction:
         self._make_file_display_names_unique()
 
     def _make_file_display_names_unique(self):
-        """Change display names to ensure they are all unique"""
+        """Change display names to ensure they are all unique - required for the metadata json ID"""
         file_names = []
         for file in self.files:
             original_name, ext = os.path.splitext(file["display_name"])
@@ -245,13 +265,12 @@ class ELNExportReaction:
         self._define_reaction_dataset()
 
     def _define_reaction_dataset(self):
-        # each reaction has 1 part for the dataset (reaction) and n number of files for the reaction
+        """One reaction is its own dataset within the ELN file export and is defined here."""
         self.defined_datasets.append(
             {
                 "@id": f"./{self.reaction.reaction_id}",
                 "@type": "Dataset",
                 "name": self.reaction.name,  # experiment title
-                # "identifier": self.reaction.uuid, reaction has no uuid yet.
                 "author": {"@id": f"./author/{self.reaction.creator_person.id}"},
                 "dateCreated": self.reaction.time_of_creation.strftime(
                     "%Y-%m-%d %H:%M:%S"
@@ -260,11 +279,10 @@ class ELNExportReaction:
                     "%Y-%m-%d %H:%M:%S"
                 ),
                 "comment": [comment["@id"] for comment in self.defined_comments],
-                "hasPart": [
-                    {"@id": file["@id"]} for file in self.defined_files
-                ],  # files
-                "description": "<h1>Chemistry Time</h1>",
-                "text": "more chemistry",  # todo format as html for summary table + write up
+                "hasPart": [{"@id": file["@id"]} for file in self.defined_files],
+                "description": self.reaction.description,
+                "text": self._get_summary_html(),
+                "encodingFormat": "text/html",
                 "url": url_for("main.index", _external=True)
                 + quote(
                     f"/{self.reaction.workbook.WorkGroup.name}/{self.reaction.workbook.name}/{self.reaction.reaction_id}/no"
@@ -274,6 +292,7 @@ class ELNExportReaction:
         )
 
     def _define_comments(self):
+        """Gets all the comments associated with a reaction and defines them in a format for the metadata json"""
         for comment in self.reaction.addenda:
             self.defined_comments.append(
                 {
@@ -286,6 +305,7 @@ class ELNExportReaction:
             )
 
     def _define_files(self):
+        """Gets all the file details associated with a reaction and defines them in a format for the metadata json"""
         for file in self.files:
             self.defined_files.append(
                 {
@@ -300,7 +320,9 @@ class ELNExportReaction:
                 }
             )
 
-    def _get_file_description(self, file: Dict) -> str:
+    @staticmethod
+    def _get_file_description(file: Dict) -> str:
+        """Gets the description for a file attachment of a reaction"""
         if file["made_for_export"] is True:
             export_file_type_description_dict = {
                 "RDF": "A Chemistry specific format with serialized metadata and molecules represented in a "
@@ -314,8 +336,256 @@ class ELNExportReaction:
                 description = "Reaction data uploaded by user"
         return description
 
+    @staticmethod
+    def replace_inputs_with_values(html_code: str):
+        # Regular expression to find all <td><input ... value="..."></td> patterns
+        pattern = re.compile(r'<td><input[^>]*value="([^"]*)"[^>]*></td>')
 
-def get_constant_ro_crate_start():
+        # Function to replace each match
+        def replace_match(match):
+            value = match.group(1)
+            return f"<td>{value}</td>"
+
+        # Replace all matches in the HTML code
+        new_html_code = pattern.sub(replace_match, html_code)
+
+        return new_html_code
+
+    @staticmethod
+    def replace_inputs_with_dict(html_code: str, value_dict: Dict):
+        # Regular expression to find all <td><input ...></td> patterns
+        pattern = re.compile(r"<td([^>]*)><input([^>]*)></td>")
+
+        def replace_match(match: re.Match):
+            td_attrs = match.group(1)
+            input_attrs = match.group(2)
+            # Extract the id or name from the input element
+            id_match = re.search(r'id="([^"]+)"', input_attrs)
+            # Get the value from the dictionary if it exists
+            key = id_match.group(1)
+            value = value_dict.get(key, "")
+            # Construct the new <td> element with the value
+            return f"<td{td_attrs}>{value}</td>"
+
+        # Replace all matches in the HTML code
+        new_html_code = pattern.sub(replace_match, html_code)
+
+        return new_html_code
+
+    @staticmethod
+    def remove_unselected_options(html_code: str, keep_dict: Dict[str, str]) -> str:
+        # Function to replace select options
+        def replace_select_options(match):
+            select_id = match.group(1)
+            select_attrs = match.group(2)
+            options_html = match.group(3)
+
+            # Find the text to keep for this select element
+            keep_text = keep_dict.get(select_id)
+
+            if keep_text is None:
+                return f'<select id="{select_id}"{select_attrs}></select>'
+
+            # Find all <option> elements
+            option_pattern = re.compile(r"<option[^>]*>(.*?)</option>", re.DOTALL)
+            new_options = []
+
+            for option_match in option_pattern.finditer(options_html):
+                option_text = option_match.group(1).strip()
+                if option_text == keep_text:
+                    new_options.append(option_match.group(0))
+
+            # Create the new <select> content with the filtered options
+            new_options_html = "".join(new_options)
+            return f'<select id="{select_id}"{select_attrs}>{new_options_html}</select>'
+
+        # Regular expression to find <select> elements with their id and options
+        select_pattern = re.compile(
+            r'<select\s+[^>]*id="([^"]+)"([^>]*)>(.*?)</select>', re.DOTALL
+        )
+
+        # Replace <select> elements based on the dictionary
+        new_html_code = select_pattern.sub(replace_select_options, html_code)
+
+        return new_html_code
+
+    @staticmethod
+    def _remove_unchecked_checkboxes(html_code: str, id_list: List[str]):
+        # Create a set from the id list for quick lookup
+        id_set = set(id_list)
+
+        # Regular expression to match <td> elements containing checkboxes and labels
+        pattern = re.compile(
+            r'<td><input\s+type="checkbox"([^>]*)\s+id="([^"]+)"([^>]*)><label\s+for="([^"]+)">([^<]+)</label></td>'
+        )
+
+        # Function to replace checkboxes based on the given id list
+        def filter_checkboxes(match: re.Match):
+            checkbox_id = match.group(2)
+            if checkbox_id in id_set:
+                # Return the original match if the id is in the id_list
+                return match.group(0)
+            else:
+                # Return an empty string if the id is not in the id_list
+                return ""
+
+        # Replace checkboxes in the HTML code
+        new_html_code = pattern.sub(filter_checkboxes, html_code)
+
+        return new_html_code
+
+    def _get_summary_html(self):
+        """Uses the template to generate the HTML summary table for the reaction."""
+        # need to get all the data required for the summary table template
+        print("getting summary")
+        summary_table_data = json.loads(self.reaction.summary_table_data)
+        summary_table_html = summary_table_data["summary_to_print"]
+
+        summary_table_html = self.replace_inputs_with_values(summary_table_html)
+
+        reaction_data = json.loads(self.reaction.reaction_table_data)
+        main_product_idx = int(reaction_data["main_product"]) - 1
+        theoretical_yield = reaction_data["product_masses"][main_product_idx]
+        sustainability_metirc_value_dict = {
+            "js-ae": self.rxn_metadata["atom_economy"],
+            "js-me": self.rxn_metadata["mass_efficiency"],
+            "js-yield": self.rxn_metadata["percent_yield"],
+            "js-conversion": self.rxn_metadata["conversion"],
+            "js-selectivity": self.rxn_metadata["selectivity"],
+            "js-unreacted-reactant-mass": summary_table_data["unreacted_reactant_mass"],
+            "js-real-product-mass": summary_table_data["real_product_mass"],
+            "js-percentage-yield": self.rxn_metadata["percent_yield"],
+            "js-product-rounded-mass"
+            + reaction_data["main_product"]: theoretical_yield,
+            "js-temperature": self.rxn_metadata["temperature"],
+        }
+        summary_table_html = self.replace_inputs_with_dict(
+            summary_table_html, sustainability_metirc_value_dict
+        )
+
+        dropdowns_value_dict = {
+            "js-elements": self.rxn_metadata["element_sustainability"],
+            "js-batch-flow": self.rxn_metadata["batch_or_flow"],
+            "js-isolation": self.rxn_metadata["isolation_method"],
+            "js-catalyst": self.rxn_metadata["catalyst_use"],
+            "js-recovery": self.rxn_metadata["catalyst_recovery"],
+        }
+        summary_table_html = self.remove_unselected_options(
+            summary_table_html, dropdowns_value_dict
+        )
+
+        checked_boxes = summary_table_data["radio_buttons"]
+        summary_table_html = self._remove_unchecked_checkboxes(
+            summary_table_html, checked_boxes
+        )
+        summary_table_html = re.sub(
+            r'href="[^"]*"',
+            'href="https://ai4green.app/element_sustainability"',
+            summary_table_html,
+        )
+
+        return summary_table_html
+
+        # unit_data = services.summary.get_unit_data(request.form)
+        # reactant_data = services.summary.get_reactant_data(request.form)
+        # reagent_data = services.summary.get_reagent_data(request.form)
+        # solvent_data = services.summary.get_solvent_data(request.form)
+        # product_data = services.summary.get_product_data(request.form)
+        #
+        # sustainability_data = services.sustainability.SustainabilityMetrics(
+        #     reactant_data, reagent_data, solvent_data, product_data
+        # ).get_sustainability_metrics()
+        #
+        # risk_data = services.summary.get_risk_data(
+        #     reactant_data, reagent_data, solvent_data, product_data
+        # )
+        #
+        # # if product mass and reactant mass sum are calculated, then it forms a summary table
+        # if product_data and reactant_data:
+        #     summary_table = render_template(
+        #         "_summary_table.html",
+        #         amount_unit=unit_data["amount_unit"],
+        #         volume_unit=unit_data["volume_unit"],
+        #         mass_unit=unit_data["mass_unit"],
+        #         solvent_volume_unit=unit_data["solvent_volume_unit"],
+        #         product_mass_unit=unit_data["product_mass_unit"],
+        #         reactants=reactant_data["reactants"],
+        #         reactant_primary_keys=reactant_data["reactant_primary_keys_str"],
+        #         reagent_primary_keys=reagent_data["reagent_primary_keys_str"],
+        #         reagents=reagent_data["reagents"],
+        #         reagent_table_numbers=reagent_data["reagent_table_numbers"],
+        #         reagent_molecular_weights=reagent_data["reagent_molecular_weights"],
+        #         reagent_densities=reagent_data["reagent_densities"],
+        #         reagent_concentrations=reagent_data["reagent_concentrations"],
+        #         reagent_equivalents=reagent_data["reagent_equivalents"],
+        #         reagent_hazards=reagent_data["reagent_hazards"],
+        #         reagent_amounts=reagent_data["reagent_amounts"],
+        #         rounded_reagent_amounts=reagent_data["rounded_reagent_amounts"],
+        #         reagent_volumes=reagent_data["reagent_volumes"],
+        #         rounded_reagent_volumes=reagent_data["rounded_reagent_volumes"],
+        #         reagent_masses=reagent_data["reagent_masses"],
+        #         rounded_reagent_masses=reagent_data["rounded_reagent_masses"],
+        #         solvents=solvent_data["solvents"],
+        #         solvent_volumes=solvent_data["solvent_volumes"],
+        #         solvent_table_numbers=solvent_data["solvent_table_numbers"],
+        #         solvent_flags=sustainability_data["solvent_flags"],
+        #         products=product_data["products"],
+        #         product_table_numbers=product_data["product_table_numbers"],
+        #         reactant_molecular_weights=reactant_data["reactant_molecular_weights"],
+        #         reactant_densities=reactant_data["reactant_densities"],
+        #         reactant_concentrations=reactant_data["reactant_concentrations"],
+        #         reactant_equivalents=reactant_data["reactant_equivalents"],
+        #         reactant_amounts=reactant_data["reactant_amounts"],
+        #         rounded_reactant_amounts=reactant_data["rounded_reactant_amounts"],
+        #         reactant_volumes=reactant_data["reactant_volumes"],
+        #         rounded_reactant_volumes=reactant_data["rounded_reactant_volumes"],
+        #         reactant_masses=reactant_data["reactant_masses"],
+        #         rounded_reactant_masses=reactant_data["rounded_reactant_masses"],
+        #         product_primary_keys=product_data["product_primary_keys_str"],
+        #         main_product_table_number=product_data["main_product_table_number"],
+        #         main_product_index=product_data["main_product_index"],
+        #         product_molecular_weights=product_data["product_molecular_weights"],
+        #         product_masses=product_data["product_masses"],
+        #         rounded_product_masses=product_data["rounded_product_masses"],
+        #         ae=sustainability_data["ae"],
+        #         ae_flag=sustainability_data["ae_flag"],
+        #         element_sustainability=sustainability_data["element_sustainability"],
+        #         element_sustainability_flag=sustainability_data[
+        #             "element_sustainability_flag"
+        #         ],
+        #         reactant_hazard_sentences=reactant_data["reactant_hazard_sentences"],
+        #         reactant_hazard_ratings=reactant_data["reactant_hazard_ratings"],
+        #         reactant_hazard_colors=reactant_data["reactant_hazard_colours"],
+        #         reactant_risk_colors=reactant_data["reactant_risk_colours"],
+        #         reactant_exposure_potentials=reactant_data["reactant_exposure_potentials"],
+        #         reactant_risk_ratings=reactant_data["reactant_risk_ratings"],
+        #         reagent_hazard_sentences=reagent_data["reagent_hazard_sentences"],
+        #         reagent_hazard_ratings=reagent_data["reagent_hazard_ratings"],
+        #         reagent_hazard_colors=reagent_data["reagent_hazard_colours"],
+        #         reagent_risk_colors=reagent_data["reagent_risk_colours"],
+        #         reagent_exposure_potentials=reagent_data["reagent_exposure_potentials"],
+        #         reagent_risk_ratings=reagent_data["reagent_risk_ratings"],
+        #         solvent_primary_keys=solvent_data["solvent_primary_keys_str"],
+        #         solvent_hazard_sentences=solvent_data["solvent_hazard_sentences"],
+        #         solvent_hazard_ratings=solvent_data["solvent_hazard_ratings"],
+        #         solvent_exposure_potentials=solvent_data["solvent_exposure_potentials"],
+        #         solvent_risk_ratings=solvent_data["solvent_risk_ratings"],
+        #         solvent_hazard_colors=solvent_data["solvent_hazard_colours"],
+        #         solvent_risk_colors=solvent_data["solvent_risk_colours"],
+        #         product_hazard_sentences=product_data["product_hazard_sentences"],
+        #         product_hazard_ratings=product_data["product_hazard_ratings"],
+        #         product_exposure_potentials=product_data["product_exposure_potentials"],
+        #         product_risk_ratings=product_data["product_risk_ratings"],
+        #         product_hazard_colors=product_data["product_hazard_colours"],
+        #         product_risk_colors=product_data["product_risk_colours"],
+        #         risk_rating=risk_data["risk_rating"],
+        #         risk_color=risk_data["risk_colour"],
+        #         number_of_solvents=solvent_data["number_of_solvents"],
+        #     )
+
+
+def get_constant_ro_crate_start() -> List[Dict]:
+    """Returns data which is consistent across all ELN file exports"""
     version, git_hash = services.utils.get_app_version()
     return [
         {
@@ -364,6 +634,13 @@ def get_constant_ro_crate_start():
 
 
 def get_root_name(data_export_request: models.DataExportRequest) -> str:
+    """
+    Gets the root directory name for the eln file export.
+    Args:
+        data_export_request - the request being exported
+    Returns:
+        the root name as a string. Combines workbook name and current date.
+    """
     return (
         data_export_request.workbooks[0].name
         + "-"
