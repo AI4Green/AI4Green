@@ -125,6 +125,7 @@
     <br>
     {% endif %}
     <a href="{{url_for('create_workbook.create_workbook', workgroup=current_workgroup)}}" id="create-workbook-button" class="btn btn-success">Create Workbook</a>
+    <a class="btn btn-primary" href="{{url_for('export_data.export_data_home')}}">Export Workbook</a>
 <input type="hidden" id="current_workgroup" value="{{ current_workgroup }}">
 </div>
 <script>

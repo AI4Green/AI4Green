@@ -1,7 +1,6 @@
 from typing import List
 
 from flask_login import current_user
-
 from sources import models
 from sources.extensions import db
 
@@ -14,6 +13,23 @@ def list_all() -> List[models.WorkGroup]:
          List of all workgroups
     """
     return db.session.query(models.WorkGroup).all()
+
+
+def from_name(name: str) -> models.WorkGroup:
+    """Returns the database workgroup object from the name"""
+    return (
+        db.session.query(models.WorkGroup).filter(models.WorkGroup.name == name).first()
+    )
+
+
+def get_institution() -> models.Institution:
+    """Returns the active institution"""
+    # currently all users share institution. May change in future
+    return (
+        db.session.query(models.Institution)
+        .filter(models.Institution.name == "Test User Institution")
+        .first()
+    )
 
 
 def get_new_workgroup_requests() -> List[models.WorkGroupRequest]:
@@ -127,4 +143,3 @@ def get_user_type_in_workbook(workgroup_name: str) -> str:
     if current_user.email in [user.email for user in sm]:
         user_type = "standard_member"
     return user_type
-

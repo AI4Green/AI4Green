@@ -1,0 +1,13 @@
+Dear {{ user.username }},
+
+The following user: {{ data_export_request.requestor_person.user.fullname }} has requested to export data from a workgroup you are a principal investigator of.
+
+To accept or deny this request click on the following link:
+
+{{ url_for('export_data.export_data_request_response', token=token, _external=True, _scheme='protocol') }}
+
+If you do not respond, this request will expire in 7 days and the data will not be exported.
+
+Sincerely,
+
+AI4Green Team

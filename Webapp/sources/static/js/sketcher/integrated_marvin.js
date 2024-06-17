@@ -19,16 +19,32 @@ async function setupNewMarvinSketcher() {
  */
 async function newMarvinSketcher(IDSelector, marvinKey) {
   let marvinKey1 = await getMarvinKey();
+
   try {
-    await $.getScript("https://marvinjs.chemicalize.com/v1/client.js");
-    await $.getScript(
-      `https://marvinjs.chemicalize.com/v1/${marvinKey1}/client-settings.js`,
-    );
+    // Use Promise.race to set a timeout for the entire operation
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("Timeout")), 5000);
+    });
+
+    // Use Promise.all to wait for both scripts to load or for the timeout
+    await Promise.all([
+      $.getScript("https://marvinjs.chemicalize.com/v1/client.js"),
+      $.getScript(
+        `https://marvinjs.chemicalize.com/v1/${marvinKey1}/client-settings.js`,
+      ),
+      timeoutPromise, // Timeout promise
+    ]);
   } catch (error) {
-    console.log(error.status);
-    abortMarvinSketcherCreation();
+    // Check if the error is due to a timeout
+    if (error.message === "Timeout") {
+      console.log("Operation timed out");
+    } else {
+      console.log(error.status);
+      abortMarvinSketcherCreation();
+    }
     return null;
   }
+
   return ChemicalizeMarvinJs.createEditor(IDSelector);
 }
 

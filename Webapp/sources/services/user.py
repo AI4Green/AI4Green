@@ -1,5 +1,6 @@
 from typing import List
 
+from flask_login import current_user
 from sources import models
 from sources.extensions import db
 
@@ -12,6 +13,16 @@ def list_all() -> List[models.User]:
          List of all users
     """
     return db.session.query(models.User).all()
+
+
+def person_from_current_user() -> models.Person:
+    """Returns the Person entry in the database Table corresponding to the email of the current user"""
+    return (
+        db.session.query(models.Person)
+        .join(models.User)
+        .filter(models.User.email == current_user.email)
+        .first()
+    )
 
 
 def add(
@@ -36,8 +47,4 @@ def from_id(user_id: int) -> models.User:
         models.User with matching id
     """
 
-    return (
-        db.session.query(models.User)
-        .filter(models.User.id == user_id)
-        .first()
-    )
+    return db.session.query(models.User).filter(models.User.id == user_id).first()

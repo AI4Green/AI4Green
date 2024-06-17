@@ -7,7 +7,7 @@ from flask_login import current_user
 
 def list_all() -> List[models.WorkBook]:
     """
-    Gets a list of all workbooks
+    Gets a list of all workbooks. Used in admin dashboard.
 
     Returns:
          List of all workbooks

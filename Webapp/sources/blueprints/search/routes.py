@@ -1,22 +1,10 @@
 from flask import Response, jsonify, render_template, request
 from flask_login import login_required
 from sources import models, services
-from sources.auxiliary import get_workbooks, get_workgroups, smiles_to_inchi
+from sources.auxiliary import get_workbooks, get_workgroups
 from sources.extensions import db
 
 from . import search_bp
-
-
-@search_bp.route("/updated_workgroup_dropdown", methods=["POST"])
-@login_required
-def updated_workgroup_dropdown() -> Response:
-    """when the workgroup dropdown is updated, gets all workbooks which belong to the selected workgroup"""
-    # institution = request.form['institution']
-    workgroup = request.form["workgroup"]
-    workbooks = get_workbooks(workgroup)
-    workbooks.insert(0, "All")
-    return jsonify({"workbooks": workbooks})
-
 
 # @search_bp.route("/text_search_handler", methods=["POST"])
 # @login_required
@@ -98,7 +86,7 @@ class SearchHandler:
         """Performs an exact structure search on the reaction list"""
         # get search smiles and convert to inchi
         smiles = request.form["smiles"]
-        target_inchi = smiles_to_inchi(smiles)
+        target_inchi = services.all_compounds.smiles_to_inchi(smiles)
         # iterate through reactant, reagent, and product for each reaction and check for a match
         for reaction in self.reactions:
             self.exact_structure_match_loop(reaction, target_inchi)
@@ -133,7 +121,7 @@ class SearchHandler:
             for component_type in components:
                 for component_smiles in component_type:
                     if component_smiles:
-                        inchi = smiles_to_inchi(component_smiles)
+                        inchi = services.all_compounds.smiles_to_inchi(component_smiles)
                         if inchi == target_inchi:
                             self.matches.append(reaction)
                             return

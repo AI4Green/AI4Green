@@ -50,53 +50,53 @@ function newReactionModalWindow() {
   $("#error-warning-new-reaction").html("");
 }
 
-
 function cloneReactionModalWindow(reaction) {
   let workbook = getData(reaction, "workbook");
   let workgroup = getData(reaction, "workgroup");
-  let oldReactionID = reaction.id
+  let oldReactionID = reaction.id;
   let name = "Repeat of Reaction " + oldReactionID;
 
   fetch("/get_new_reaction_id", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify({
-        "workgroup": workgroup,
-
-
-      }),
-    })
-  .then(function (response)  { return response.json(); })
-  .then(function (newReactionID) {
-      if (newReactionID !== "Bad Request") {
-          $("#new-reaction-id-input").val(newReactionID);
-          $("#new-reaction-name").val(name);
-          $("#new-reaction-data-submit").attr("onclick", "cloneReaction()");
-          $("#new-reaction-modal").modal("show")
-      }
-      else { window.alert("Something went wrong. Please try again.")}
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      workgroup: workgroup,
+      workbook: workbook,
+    }),
   })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (newReactionID) {
+      if (newReactionID !== "Bad Request") {
+        $("#new-reaction-id-input").val(newReactionID);
+        $("#new-reaction-name").val(name);
+        $("#new-reaction-data-submit").attr("onclick", "cloneReaction()");
+        $("#new-reaction-modal").modal("show");
+      } else {
+        window.alert("Something went wrong. Please try again.");
+      }
+    });
 }
-
 
 function cloneReaction() {
   let reactionWorkgroup = getVal("#workgroup");
   let reactionWorkbook = getVal("#workbook");
   let reactionName = getVal("#new-reaction-name");
-  let oldReactionID = getVal("#reaction-id")
-  let newReactionID = getVal("#new-reaction-id-input")
+  let oldReactionID = getVal("#reaction-id");
+  let newReactionID = getVal("#new-reaction-id-input");
   $.ajax({
     url: "/clone_reaction",
     type: "post",
     datatype: "json",
     data: {
-        "reactionName": reactionName,
-        "workbook": reactionWorkbook,
-        "workgroup": reactionWorkgroup,
-        "reactionID": oldReactionID,
-        "newReactionID": newReactionID
+      reactionName: reactionName,
+      workbook: reactionWorkbook,
+      workgroup: reactionWorkgroup,
+      reactionID: oldReactionID,
+      newReactionID: newReactionID,
     },
     success: function (response) {
       if (response.feedback === "New reaction made") {
@@ -104,8 +104,8 @@ function cloneReaction() {
       } else {
         $("#error-warning-new-reaction").html(response.feedback);
       }
-    }
-  })
+    },
+  });
 }
 /**
  * Validates the input of the modal window.
@@ -255,7 +255,7 @@ function getpdf() {
 function getcsv() {
   let workgroup = getVal("#active-workgroup");
   let workbook = getVal("#active-workbook");
-  window.location = `/export_data_csv/${workgroup}/${workbook}`;
+  window.location = `/export_data/csv/${workgroup}/${workbook}`;
 }
 
 /**

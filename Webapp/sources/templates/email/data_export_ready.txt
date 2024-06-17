@@ -1,0 +1,13 @@
+Dear {{ user.username }},
+
+Your data export request is ready.
+
+Please follow this link to download the requested data:
+
+{{ url_for('export_data.request_download', token=token, _external=True, _scheme='protocol') }}
+
+This link will expire in 7 days.
+
+Sincerely,
+
+AI4Green Team
