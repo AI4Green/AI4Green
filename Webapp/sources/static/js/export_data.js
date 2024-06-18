@@ -135,6 +135,7 @@ function populateReactionIDList() {
         .text(item);
       $includedList.append($listItem);
     });
+    sortList("#included-list");
   });
 }
 

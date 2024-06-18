@@ -171,25 +171,37 @@ def make_scheme_list(reaction_list: List[models.Reaction], size: str) -> List[st
         # if there are no smiles use a blank string to maintain correct list length
         if re.search("[a-zA-Z]", reaction_smiles):
             # we test to see if ions are present in which case further logic is needed
-            # first we see if it is from marvin js and contains ions
-            if len(reaction_smiles.split(" |")) > 1:
-                rxn = services.ions.reaction_from_ionic_cx_smiles(reaction_smiles)
-            elif "+" in reaction_smiles or "-" in reaction_smiles:
-                rxn = services.ions.reaction_from_ionic_smiles(reaction_smiles)
-                # reactions with no ions - make rxn object directly from string
-            else:
-                rxn = AllChem.ReactionFromSmarts(reaction_smiles, useSmiles=True)
-            if size == "small":
-                d2d = rdMolDraw2D.MolDraw2DSVG(400, 150)
-            else:
-                d2d = rdMolDraw2D.MolDraw2DSVG(600, 225)
-            d2d.DrawReaction(rxn)
-            # return drawing text
-            scheme = d2d.GetDrawingText()
-            scheme_list.append(scheme)
+            scheme_list.append(make_reaction_scheme_image(reaction_smiles, size))
         else:
             scheme_list.append("")
     return scheme_list
+
+
+def make_reaction_scheme_image(reaction_smiles: str, size: str) -> str:
+    """
+    Makes a reaction scheme from a reaction smiles according to the size parameter.
+    Args:
+        reaction_smiles - the SMILES we are making an image of.
+        size: whether the image is small or not.
+    Returns:
+        the image of the reaction scheme as an svg
+
+    """
+    # first we see if it is from marvin js and contains ions
+    if len(reaction_smiles.split(" |")) > 1:
+        rxn = services.ions.reaction_from_ionic_cx_smiles(reaction_smiles)
+    elif "+" in reaction_smiles or "-" in reaction_smiles:
+        rxn = services.ions.reaction_from_ionic_smiles(reaction_smiles)
+        # reactions with no ions - make rxn object directly from string
+    else:
+        rxn = AllChem.ReactionFromSmarts(reaction_smiles, useSmiles=True)
+    if size == "small":
+        d2d = rdMolDraw2D.MolDraw2DSVG(400, 150)
+    else:
+        d2d = rdMolDraw2D.MolDraw2DSVG(600, 225)
+    d2d.DrawReaction(rxn)
+    # return drawing text
+    return d2d.GetDrawingText()
 
 
 def to_dict(reaction_list: List[models.Reaction]) -> List[Dict]:

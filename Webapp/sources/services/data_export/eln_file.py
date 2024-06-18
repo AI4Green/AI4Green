@@ -1,3 +1,4 @@
+import base64
 import io
 import json
 import os.path
@@ -10,6 +11,8 @@ from urllib.parse import quote
 import pytz
 import sources.services.data_export.export
 from flask import abort, render_template, url_for
+from rdkit.Chem import rdChemReactions
+from rdkit.Chem.Draw import ReactionToImage
 from sources import models, services
 
 
@@ -89,11 +92,12 @@ class ELNFileExport:
         self._define_authors()
         for reaction in self.data_export_request.reactions:
             export_rxn = ELNExportReaction(reaction, self)
+            export_rxn.make_export_files()
             export_rxn.get_files()
             export_rxn.get_parts()
             self.reaction_list.append(export_rxn)
             # get the root parts
-            self.root_parts = export_rxn.defined_datasets
+            self.root_parts.append(export_rxn.defined_dataset)
 
     def _make_ro_crate_metadata_json(self):
         """Makes the metadata json file that describes the export contents."""
@@ -101,18 +105,16 @@ class ELNFileExport:
         # these parts are common to all .eln files from AI4Green
         ro_crate_graph += get_constant_ro_crate_start()
         ro_crate_graph.append(self._describe_root_directory())
+        # ro_crate_graph += [self._describe_root_directory()]
         # update the ro-crate with export specific data
-        ro_crate_graph += [
-            dataset for rxn in self.reaction_list for dataset in rxn.defined_datasets
-        ]
+        for rxn in self.reaction_list:
+            ro_crate_graph.append(rxn.defined_dataset)
 
-        ro_crate_graph += [
-            file for rxn in self.reaction_list for file in rxn.defined_files
-        ]
+        for rxn in self.reaction_list:
+            [ro_crate_graph.append(file) for file in rxn.defined_files]
 
-        ro_crate_graph += [
-            comment for rxn in self.reaction_list for comment in rxn.defined_comments
-        ]
+        for rxn in self.reaction_list:
+            [ro_crate_graph.append(comment) for comment in rxn.defined_comments]
 
         ro_crate_graph += [author for author in self.defined_authors]
 
@@ -205,12 +207,12 @@ class ELNExportReaction:
         self.files = []
         self.defined_comments = []
         self.defined_files = []
-        self.defined_datasets = []
+        self.defined_dataset = []
         self.rxn_metadata = services.data_export.metadata.ReactionMetaData(
             reaction
         ).get_dict()
 
-    def _make_export_files(self):
+    def make_export_files(self):
         """Makes files which are included with the ELN File export. Includes: .rdf"""
         file_uuid = str(uuid.uuid4())
         blob_name = "temp/" + file_uuid
@@ -266,30 +268,24 @@ class ELNExportReaction:
 
     def _define_reaction_dataset(self):
         """One reaction is its own dataset within the ELN file export and is defined here."""
-        self.defined_datasets.append(
-            {
-                "@id": f"./{self.reaction.reaction_id}",
-                "@type": "Dataset",
-                "name": self.reaction.name,  # experiment title
-                "author": {"@id": f"./author/{self.reaction.creator_person.id}"},
-                "dateCreated": self.reaction.time_of_creation.strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                ),
-                "dateModified": self.reaction.time_of_update.strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                ),
-                "comment": [comment["@id"] for comment in self.defined_comments],
-                "hasPart": [{"@id": file["@id"]} for file in self.defined_files],
-                "description": self.reaction.description,
-                "text": self._get_summary_html(),
-                "encodingFormat": "text/html",
-                "url": url_for("main.index", _external=True)
-                + quote(
-                    f"/{self.reaction.workbook.WorkGroup.name}/{self.reaction.workbook.name}/{self.reaction.reaction_id}/no"
-                ),
-                # may remove no in future
-            }
-        )
+        self.defined_dataset = {
+            "@id": f"./{self.reaction.reaction_id}",
+            "@type": "Dataset",
+            "name": self.reaction.name,  # experiment title
+            "author": {"@id": f"./author/{self.reaction.creator_person.id}"},
+            "dateCreated": self.reaction.time_of_creation.strftime("%Y-%m-%d %H:%M:%S"),
+            "dateModified": self.reaction.time_of_update.strftime("%Y-%m-%d %H:%M:%S"),
+            "comment": [comment["@id"] for comment in self.defined_comments],
+            "hasPart": [{"@id": file["@id"]} for file in self.defined_files],
+            "description": self.reaction.description,
+            "text": self._get_summary_html(),  # todo restore after debugging
+            "encodingFormat": "text/html",
+            "url": url_for("main.index", _external=True)
+            + quote(
+                f"/{self.reaction.workbook.WorkGroup.name}/{self.reaction.workbook.name}/{self.reaction.reaction_id}/no"
+            ),
+            # may remove no in future
+        }
 
     def _define_comments(self):
         """Gets all the comments associated with a reaction and defines them in a format for the metadata json"""
@@ -483,105 +479,19 @@ class ELNExportReaction:
             'href="https://ai4green.app/element_sustainability"',
             summary_table_html,
         )
-
-        return summary_table_html
-
-        # unit_data = services.summary.get_unit_data(request.form)
-        # reactant_data = services.summary.get_reactant_data(request.form)
-        # reagent_data = services.summary.get_reagent_data(request.form)
-        # solvent_data = services.summary.get_solvent_data(request.form)
-        # product_data = services.summary.get_product_data(request.form)
-        #
-        # sustainability_data = services.sustainability.SustainabilityMetrics(
-        #     reactant_data, reagent_data, solvent_data, product_data
-        # ).get_sustainability_metrics()
-        #
-        # risk_data = services.summary.get_risk_data(
-        #     reactant_data, reagent_data, solvent_data, product_data
+        # todo get risk score and hazard boxes
+        # reaction = rdChemReactions.ReactionFromSmarts(self.reaction.reaction_smiles)
+        # scheme_image_bytes = ReactionToImage(reaction, returnPNG=True)
+        # scheme_image_base64 = base64.b64encode(scheme_image_bytes).decode("utf-8")
+        # scheme_image = services.reaction.make_reaction_scheme_image(
+        #     self.reaction.reaction_smiles, "normal"
         # )
-        #
-        # # if product mass and reactant mass sum are calculated, then it forms a summary table
-        # if product_data and reactant_data:
-        #     summary_table = render_template(
-        #         "_summary_table.html",
-        #         amount_unit=unit_data["amount_unit"],
-        #         volume_unit=unit_data["volume_unit"],
-        #         mass_unit=unit_data["mass_unit"],
-        #         solvent_volume_unit=unit_data["solvent_volume_unit"],
-        #         product_mass_unit=unit_data["product_mass_unit"],
-        #         reactants=reactant_data["reactants"],
-        #         reactant_primary_keys=reactant_data["reactant_primary_keys_str"],
-        #         reagent_primary_keys=reagent_data["reagent_primary_keys_str"],
-        #         reagents=reagent_data["reagents"],
-        #         reagent_table_numbers=reagent_data["reagent_table_numbers"],
-        #         reagent_molecular_weights=reagent_data["reagent_molecular_weights"],
-        #         reagent_densities=reagent_data["reagent_densities"],
-        #         reagent_concentrations=reagent_data["reagent_concentrations"],
-        #         reagent_equivalents=reagent_data["reagent_equivalents"],
-        #         reagent_hazards=reagent_data["reagent_hazards"],
-        #         reagent_amounts=reagent_data["reagent_amounts"],
-        #         rounded_reagent_amounts=reagent_data["rounded_reagent_amounts"],
-        #         reagent_volumes=reagent_data["reagent_volumes"],
-        #         rounded_reagent_volumes=reagent_data["rounded_reagent_volumes"],
-        #         reagent_masses=reagent_data["reagent_masses"],
-        #         rounded_reagent_masses=reagent_data["rounded_reagent_masses"],
-        #         solvents=solvent_data["solvents"],
-        #         solvent_volumes=solvent_data["solvent_volumes"],
-        #         solvent_table_numbers=solvent_data["solvent_table_numbers"],
-        #         solvent_flags=sustainability_data["solvent_flags"],
-        #         products=product_data["products"],
-        #         product_table_numbers=product_data["product_table_numbers"],
-        #         reactant_molecular_weights=reactant_data["reactant_molecular_weights"],
-        #         reactant_densities=reactant_data["reactant_densities"],
-        #         reactant_concentrations=reactant_data["reactant_concentrations"],
-        #         reactant_equivalents=reactant_data["reactant_equivalents"],
-        #         reactant_amounts=reactant_data["reactant_amounts"],
-        #         rounded_reactant_amounts=reactant_data["rounded_reactant_amounts"],
-        #         reactant_volumes=reactant_data["reactant_volumes"],
-        #         rounded_reactant_volumes=reactant_data["rounded_reactant_volumes"],
-        #         reactant_masses=reactant_data["reactant_masses"],
-        #         rounded_reactant_masses=reactant_data["rounded_reactant_masses"],
-        #         product_primary_keys=product_data["product_primary_keys_str"],
-        #         main_product_table_number=product_data["main_product_table_number"],
-        #         main_product_index=product_data["main_product_index"],
-        #         product_molecular_weights=product_data["product_molecular_weights"],
-        #         product_masses=product_data["product_masses"],
-        #         rounded_product_masses=product_data["rounded_product_masses"],
-        #         ae=sustainability_data["ae"],
-        #         ae_flag=sustainability_data["ae_flag"],
-        #         element_sustainability=sustainability_data["element_sustainability"],
-        #         element_sustainability_flag=sustainability_data[
-        #             "element_sustainability_flag"
-        #         ],
-        #         reactant_hazard_sentences=reactant_data["reactant_hazard_sentences"],
-        #         reactant_hazard_ratings=reactant_data["reactant_hazard_ratings"],
-        #         reactant_hazard_colors=reactant_data["reactant_hazard_colours"],
-        #         reactant_risk_colors=reactant_data["reactant_risk_colours"],
-        #         reactant_exposure_potentials=reactant_data["reactant_exposure_potentials"],
-        #         reactant_risk_ratings=reactant_data["reactant_risk_ratings"],
-        #         reagent_hazard_sentences=reagent_data["reagent_hazard_sentences"],
-        #         reagent_hazard_ratings=reagent_data["reagent_hazard_ratings"],
-        #         reagent_hazard_colors=reagent_data["reagent_hazard_colours"],
-        #         reagent_risk_colors=reagent_data["reagent_risk_colours"],
-        #         reagent_exposure_potentials=reagent_data["reagent_exposure_potentials"],
-        #         reagent_risk_ratings=reagent_data["reagent_risk_ratings"],
-        #         solvent_primary_keys=solvent_data["solvent_primary_keys_str"],
-        #         solvent_hazard_sentences=solvent_data["solvent_hazard_sentences"],
-        #         solvent_hazard_ratings=solvent_data["solvent_hazard_ratings"],
-        #         solvent_exposure_potentials=solvent_data["solvent_exposure_potentials"],
-        #         solvent_risk_ratings=solvent_data["solvent_risk_ratings"],
-        #         solvent_hazard_colors=solvent_data["solvent_hazard_colours"],
-        #         solvent_risk_colors=solvent_data["solvent_risk_colours"],
-        #         product_hazard_sentences=product_data["product_hazard_sentences"],
-        #         product_hazard_ratings=product_data["product_hazard_ratings"],
-        #         product_exposure_potentials=product_data["product_exposure_potentials"],
-        #         product_risk_ratings=product_data["product_risk_ratings"],
-        #         product_hazard_colors=product_data["product_hazard_colours"],
-        #         product_risk_colors=product_data["product_risk_colours"],
-        #         risk_rating=risk_data["risk_rating"],
-        #         risk_color=risk_data["risk_colour"],
-        #         number_of_solvents=solvent_data["number_of_solvents"],
-        #     )
+        # encoded_svg = base64.b64encode(scheme_image.encode("utf-8")).decode("utf-8")
+        # data_url = f"data:image/svg+xml;base64,{encoded_svg}"
+        image_element = '<img src="{data_url}" alt="Example SVG" />'
+        # image_element = f"<img src=data:image/png;base64,{scheme_image_base64}>"
+        summary_html = f"<h2>{self.reaction.reaction_id}</h2><div>{image_element}{summary_table_html}</div>"
+        return summary_html
 
 
 def get_constant_ro_crate_start() -> List[Dict]:
