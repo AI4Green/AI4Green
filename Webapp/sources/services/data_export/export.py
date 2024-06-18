@@ -348,8 +348,10 @@ def save_blob(container_name: str, filename: str, file_contents: bytearray):
     blob_client = services.file_attachments.get_blob_client(container_name, filename)
     # Upload the blob data
     upload = io.BytesIO(file_contents)
-    blob_client.upload_blob(upload, blob_type="BlockBlob")
-
+    blob_client.upload_blob(
+        upload, blob_type="BlockBlob", overwrite=True
+    )  # todo overwrite true is debug
+    print("exporting")
     # confirm upload
     if not blob_client.exists():
         print(f"blob {filename} upload failed")

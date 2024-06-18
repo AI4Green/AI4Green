@@ -233,7 +233,7 @@ class RequestLinkVerification:
             flash("Data export request expired")
             return "failed"
         # redirect if user has already approved.
-        if self._check_if_already_responded() is True:
+        if self._check_if_already_responded() is False:  # todo debug
             flash("You have already responded to this data export request")
             return "failed"
         return "success"
