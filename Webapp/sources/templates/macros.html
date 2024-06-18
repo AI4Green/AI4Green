@@ -36,3 +36,33 @@
       </div>
     </div>
 {%- endmacro %}
+
+{% macro icon_panel(inputs, type, header_text) -%}
+<div class="container" style="background-color: #F5F5F5">
+    <div class="row">
+        <div class="col-12">
+            <header><h3> {{ header_text }}</h3> </header>
+                <div class="row text-center">
+                    {% for input in inputs -%}
+                        <div class="col-3">
+                            <button type="submit" id="{{ input }}" class="btn icon {{type}}" onclick="toggleIcon('{{ input }}', '{{ type }}', this.id)">
+                               <i class="bi bi-alarm icon-img" style="font-size: 40"></i>
+                            </button><br>
+                            <div class="text-center">
+                            {{ input }} <br>
+                            </div>
+                        </div>
+                    {%- endfor %}
+
+                <div class="col-3">
+                     <button id="new-workgroup" class="btn icon">
+                               <i class="bi bi-plus icon-img" style="font-size: 40"></i>
+                     </button><br> New Workgroup
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+</div>
+
+{%- endmacro %}

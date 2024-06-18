@@ -12,6 +12,11 @@ body {
     margin-top: -2.5rem;
 }
 
+.jumbotron.jumbotron-fluid.home {
+  margin-top: -2.5rem;
+  background: linear-gradient(90deg, #777778 50%, #82F5A8)
+}
+
 .text-primary-green {
     color: #82F5A8;
 }
@@ -21,11 +26,40 @@ body {
 }
 
 .text-grey {
-    color: #777778
+    color: #777778;
 }
 
+.btn.icon {
+    height: 70px;
+    width: 70px;
+    background-color: #caf7e3;
+    border-color: #caf7e3;
+    border-radius: 35px;
+    text-align: center;
+    margin: 7px;
+    line-height: 80px;
+    color: #777778;
+    transition: all 0.3s linear;
+}
+
+.icon:hover {
+  background-color: #777778;
+  border-color: #777778;
+  color: #82F5A8;
+  transform: scale(1.1);
+}
+
+.icon.focused {
+  background-color: #777778;
+  border-color: #82F5A8;
+  border-width: 3;
+  color: #82F5A8;
+  transform: scale(1.1);
+}
+
+
 .btn.btn-primary {
-  background-color: #777778; /* Green */
+  background-color: #777778;
   border-color: #777778;
   color: #82F5A8;
 }
@@ -35,9 +69,8 @@ body {
   border-color: #686868;
 }
 
-
 .btn.btn-secondary {
-  background-color: #82F5A8; /* Green */
+  background-color: #82F5A8;
   border-color: #82F5A8;
   color: #777778;
 }
@@ -45,6 +78,15 @@ body {
 .btn.btn-secondary:hover {
   background-color: #62BA79;
   border-color: #62BA79;
+}
+
+.btn.btn-success {
+  background-color: #d5b546;
+  border-color: #d5b546;
+}
+
+.navbar.navbar-expand-md.navbar-dark.fixed-top.bg-dark{
+  background: linear-gradient(90deg, #777778 50%, #82F5A8)
 }
 
 #flash-messages{
@@ -63,6 +105,10 @@ body {
   padding: 14px 16px;
   text-decoration: none;
   font-size: 17px;
+}
+
+navbar.navbar-expand-md.navbar-dark.fixed-top.bg-dark {
+  background-color: #82F5A8 !important;
 }
 
 .topnav a:hover {

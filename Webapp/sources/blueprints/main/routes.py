@@ -8,13 +8,14 @@ from flask import (
     request,
     send_file,
     url_for,
+    get_template_attribute
 )
 from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
 from .forms import LoginForm
-from sources import models
+from sources import models, services
 from sources.auxiliary import (
     get_notification_number,
     get_workbooks,
@@ -73,6 +74,31 @@ def index() -> Response:
         news_items=news_items,
         form=form
     )
+
+
+@main_bp.route("/load_icons", methods=["GET", "POST"])
+def load_workbooks():
+    data = request.get_json()
+    selected = data["input"]
+    load_type = data["load_type"]
+    icon_names = []
+    header = None
+    if load_type == "workgroup":
+        workgroups = services.workbook.get_workbooks_from_user_group_combination(selected)
+        icon_names = [i.name for i in workgroups]
+        header = "Workbooks in " + selected
+        load_type = "workbook"
+
+    elif load_type == "workbook":
+        reactions = services.reaction.list_active_in_workbook(
+            workbook=selected, workgroup=data["activeWorkgroup"], sort_crit="time"
+        )
+        icon_names = [i.reaction_id for i in reactions]
+        header = "Recent Reactions in " + selected
+        load_type = "reaction"
+
+    icon_macro = get_template_attribute("macros.html", "icon_panel")
+    return jsonify(icon_macro(icon_names, load_type, header))
 
 
 @main_bp.route("/get_marvinjs_key", methods=["POST"])
