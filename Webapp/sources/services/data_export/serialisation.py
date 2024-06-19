@@ -4,10 +4,7 @@ import io
 import json
 from typing import Optional
 
-import azure.core.exceptions
 import pytz
-import sources.services.data_export.export
-from flask import abort
 from rdkit.Chem import AllChem
 from sources import models, services
 
@@ -60,7 +57,7 @@ class ReactionDataFileExport:
         else:
             self.filename += ".json"
             self._save_as_json()
-        sources.services.data_export.export.save_blob(
+        services.data_export.export.save_blob(
             self.container_name, self.filename, self.file_contents
         )
 
@@ -178,7 +175,7 @@ class JsonExport:
     def save(self):
         self._save_json()
         self.filename += ".json"
-        sources.services.data_export.export.save_blob(
+        services.data_export.export.save_blob(
             self.container_name, self.filename, self.file_contents
         )
 
