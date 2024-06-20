@@ -73,3 +73,34 @@ function getNum(jquerySelector) {
 function getLimitingReactantTableNumber() {
   return getVal($("input[name='reactant-limiting']:checked"));
 }
+
+function updateSelectedWorkGroup(origin_page = "") {
+  // updates the workbook+creator dropdowns after change to selected workgroup
+  let workgroup = $("#active-workgroup").val();
+  // Return a promise that resolves when the AJAX request completes
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      url: "/updated_workgroup_dropdown",
+      type: "post",
+      datatype: "json",
+      data: { workgroup: workgroup, origin_page: origin_page },
+      success: function (response) {
+        // update dropdown with workbook options
+        let dropdownSelect = $("#active-workbook");
+        dropdownSelect.empty();
+        for (let workbook of response.workbooks) {
+          let option = document.createElement("option");
+          option.text = workbook;
+          option.value = workbook;
+          dropdownSelect.append(option);
+        }
+        // Resolve the promise once the AJAX request is successful
+        resolve();
+      },
+      error: function (xhr, status, error) {
+        // Reject the promise if there's an error in the AJAX request
+        reject(error);
+      },
+    });
+  });
+}

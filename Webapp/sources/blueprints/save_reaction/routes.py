@@ -6,7 +6,7 @@ import base64
 from datetime import datetime
 
 import pytz
-from flask import Response, abort, json, jsonify, request
+from flask import Response, json, jsonify, request
 from flask_login import current_user, login_required
 from sources import models, services
 from sources.auxiliary import (

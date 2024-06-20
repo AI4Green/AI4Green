@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/export_data.js') }}"></script>
+</head>
+  <div class="container text-center">
+    <h3 class="mt-3 mb-4">Data Export Request</h3>
+    <div class="request-info">
+      <hr> <!-- Horizontal rule to separate sections -->
+      <strong>Request Details:</strong>
+      <p>
+        <strong>Workgroup:</strong> {{ data_export_request.WorkGroup.name }}
+      </p>
+      <p>
+        <strong>Workbooks:</strong> {{ workbooks }}
+      </p>
+      <p>
+        <strong>Number of Reactions:</strong> {{ data_export_request.reactions|length }}
+      </p>
+      <p>
+        <strong>Format:</strong> {{ data_export_request.data_format.value }}
+      </p>
+      <hr> <!-- Horizontal rule to separate sections -->
+      <p>
+        <strong>Requestor Information:</strong>
+      </p>
+      <div class="ml-3">
+        <p>
+          <strong>Name:</strong> {{ data_export_request.requestor_person.user.fullname }}
+        </p>
+        <p>
+          <strong>Email:</strong> {{ data_export_request.requestor_person.user.email }}
+        </p>
+        <p>
+          <strong>Username:</strong> {{ data_export_request.requestor_person.user.username }}
+        </p>
+      </div>
+    </div>
+        <div id="data-export-buttons" class="mt-3">
+            <a class="btn btn-success" href="{{ sas_url }}">Download</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

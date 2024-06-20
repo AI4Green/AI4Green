@@ -83,7 +83,7 @@
       </div>
     </nav>
     <div id="content">
-        {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages() + (messages_from_redirects or []) %}
             {% if messages %}
                 <div id="flash-messages">
                     {% for message in messages %}

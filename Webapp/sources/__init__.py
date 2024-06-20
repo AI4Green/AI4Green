@@ -226,6 +226,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(version_bp)
 
+    from sources.blueprints.utils import utils_bp
+
+    app.register_blueprint(utils_bp)
+
 
 def inject_session_context(app: Flask) -> Dict[str, str]:
     """

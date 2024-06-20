@@ -126,7 +126,7 @@ def list_active_in_workbook(
     workbook: str, workgroup: str, sort_crit: str = "AZ"
 ) -> List[models.Reaction]:
     """
-    Gets the active reactions for a workbook.
+    Gets the active reactions for a workbook. Active means the reaction has not been deleted/archived.
 
     Args:
         workbook (str): The name of the workbook.

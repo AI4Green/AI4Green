@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/auxiliary.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/export_data.js') }}"></script>
+</head>
+<body>
+<div class="container-fluid mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            <h4>Data to Export</h4>
+            <form class="form">
+                <!-- Workgroups -->
+                <div class="form-group">
+                    <label for="active-workgroup">Workgroup</label>
+                    <select id="active-workgroup" class="form-control">
+                        {% for workgroup in workgroups %}
+                        <option value="{{ workgroup }}">{{ workgroup }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!-- Workbooks -->
+                <div class="form-group">
+                    <label for="active-workbook">Workbook</label>
+                    <select id="active-workbook" class="form-control"></select>
+                </div>
+            </form>
+            <p id="export-permission-result"></p>
+            <button onclick="openReactionModal()" class="btn btn-primary-outline mb-2">Select Reactions</button>
+            <p>Only reactions with a recorded yield are available for export.</p>
+        </div>
+        <div class="col-md-9">
+            <h4>Select Export Format</h4>
+            <h6>Human-Readable Formats:</h6>
+            <div class="row">
+                <div class="col-sm-3">
+                    <button id="pdf-button" onclick="makeDataExportRequest('PDF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Portable Document Format (PDF) - suitable for printing and viewing.">PDF</button>
+                </div>
+            </div>
+            <h6>Machine-Readable Formats:</h6>
+            <div class="row">
+                <div class="col-sm-3">
+                    <button id="json-button" onclick="makeDataExportRequest('JSON')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="JavaScript Object Notation (JSON) - A structured data format commonly used for exchanging information between servers and web applications.">JSON</button>
+                </div>
+                <div class="col-sm-3">
+                    <button id="rdf-button" onclick="makeDataExportRequest('RDF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title=
+"Reaction Data File (RDF) - Format for storing chemical reaction data, including reactants, products, agents, and metadata.">RDF</button>
+                </div>
+            </div>
+{#            Not implemented yet#}
+{#            <div class="row mt-3">#}
+{#                <div class="col-sm-3">#}
+{#                    <button id="eln-button" onclick="makeDataExportRequest('ELN')" class="btn btn-primary text-white mb-2 btn-block" id="eln-button" data-toggle="tooltip" data-placement="top" title="Electronic Lab Notebook (ELN) - A file format based on research object crates and designed to be interoperable with other ELNs.">.ELN</button>#}
+{#                </div>#}
+{#            </div>#}
+            <h6>Human- and Machine-Readable Formats:</h6>
+            <div class="row">
+                <div class="col-sm-3">
+                    <button id="csv-button" onclick="makeDataExportRequest('CSV')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Comma-Separated Values (CSV) - A simple text-based format for storing tabular data. Can be opened as a spreadsheet using Excel.">CSV</button>
+                </div>
+                <div class="col-sm-3">
+                    <button id="surf-button" onclick="makeDataExportRequest('SURF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Simple User-Friendly Reaction Format (SURF) - A standardised CSV with a tabular data format for storing reaction data and that can be converted to other formats. Can be opened as a spreadsheet using Excel.">SURF <sup>[1]</sup></button>
+                </div>
+            </div>
+            <b id="request-feedback" class="mb-5 pb-5">
+            </b>
+            <div class="mt-5 pt-5">
+              <b>References:</b>
+             <p>[1] Simple User-Friendly Reaction Format, <i>Chemrxiv</i>, 2023, DOI: <a href="https://doi.org/10.26434/chemrxiv-2023-nfq7h">10.26434/chemrxiv-2023-nfq7h</a></p>
+            </div>
+        </div>
+    </div>
+   </div>
+</body>
+
+<!-- Modal -->
+<div class="modal fade" id="reactionsModal" tabindex="-1" role="dialog" aria-labelledby="reactionsModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="reactionsModalLabel">Select Reactions</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col" id="excludedColumn">
+            <h4>Excluded</h4>
+            <hr>
+            <div id="excluded-list" class="list-group">
+              <!-- List items will be populated here -->
+            </div>
+          </div>
+          <div class="col" id="includedColumn">
+            <h4>Included</h4>
+            <hr>
+            <div id="included-list" class="list-group">
+              <!-- List items will be populated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

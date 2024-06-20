@@ -1,0 +1,14 @@
+<p>Dear {{ user.username }},</p>
+
+<p>Your data export request is ready.</p>
+
+<p>
+    Please follow this link to download the requested data:
+    <a href="{{ url_for('export_data.request_download', token=token, _external=True, _scheme='protocol') }}">
+        click here.</a>
+</p>
+<p>Alternatively, you can paste the following link in your browser's address bar:</p>
+<p>{{ url_for('export_data.request_download', token=token, _external=True, _scheme='protocol') }}</p>
+<p>This link will expire in 7 days.</p>
+<p>Sincerely,</p>
+<p>The AI4Green Team</p>
