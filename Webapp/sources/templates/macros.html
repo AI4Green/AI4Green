@@ -37,7 +37,7 @@
     </div>
 {%- endmacro %}
 
-{% macro icon_panel(inputs, type, header_text) -%}
+{% macro icon_panel(inputs, type, header_text, bootstrap_icon) -%}
 <div class="container" style="background-color: #F5F5F5">
     <div class="row">
         <div class="col-12">
@@ -51,7 +51,7 @@
                     {% for input in inputs -%}
                         <div class="col-3">
                             <button type="submit" id="{{ input }}" class="btn icon {{type}}" onclick="toggleIcon('{{ input }}', '{{ type }}', this.id)">
-                               <i class="bi bi-alarm icon-img" style="font-size: 40"></i>
+                               <i class="{{ bootstrap_icon }}" style="font-size: 40"></i>
                             </button><br>
                             <div class="text-center">
                             {{ input }} <br>

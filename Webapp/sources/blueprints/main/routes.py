@@ -18,7 +18,6 @@ from .forms import LoginForm
 from sources import models, services
 from sources.auxiliary import (
     get_notification_number,
-    get_workbooks,
     get_workgroups,
     security_member_workgroup_workbook,
 )
@@ -88,11 +87,13 @@ def load_workbooks():
     load_type = data["load_type"]
     icon_names = []
     header = None
+    bootstrap_icon = ""
     if load_type == "workgroup":
         workgroups = services.workbook.get_workbooks_from_user_group_combination(selected)
         icon_names = [i.name for i in workgroups]
         header = "Workbooks in " + selected
         load_type = "workbook"
+        bootstrap_icon = "bi bi-journal-text"
 
     elif load_type == "workbook":
         reactions = services.reaction.list_active_in_workbook(
@@ -101,9 +102,10 @@ def load_workbooks():
         icon_names = [i.reaction_id for i in reactions]
         header = "Recent Reactions in " + selected
         load_type = "reaction"
+        bootstrap_icon = "bi bi-eyedropper"
 
     icon_macro = get_template_attribute("macros.html", "icon_panel")
-    return jsonify(icon_macro(icon_names, load_type, header))
+    return jsonify(icon_macro(icon_names, load_type, header, bootstrap_icon))
 
 
 @main_bp.route("/get_marvinjs_key", methods=["POST"])
