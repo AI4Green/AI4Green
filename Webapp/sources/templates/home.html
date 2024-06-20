@@ -21,11 +21,19 @@
                 {% endif %}
             <div class="row" id="workgroup-icons">
                 <div class="col-7" id="quick-access-icons">
-                    <h2><i class="bi bi-star-fill"></i> Quick Access</h2>
+                    <h2><i class="bi bi-star"></i> Quick Access</h2>
                     <hr class="line-news">
                 {{ macro_templates.icon_panel(workgroups, "workgroup", "Your Workgroups", "bi bi-people-fill") }}
                     <div id="workbook-icons"></div>
                 <div id="reaction-icons"></div>
+                    {% if workgroups|length == 0 %}
+                    <br>
+                    <p>
+                        <h4> Create a Workgroup to begin or click below to find out more. </h4>
+                        <a id="about-button" class="btn btn-primary btn-lg" href="{{ url_for('main.about') }}" role="button">Learn more &raquo;</a>
+                        <a id="quickstart-guide" href="{{ url_for('main.send_quickstart_guide') }}" class="btn btn-primary btn-lg">Quickstart Guide &raquo;</a>
+                    </p>
+                    {% endif %}
                 </div>
 
             <div class="col-5">
@@ -52,10 +60,6 @@
             </div>
                 </div>
         </div>
-        <p>
-                <a id="about-button" class="btn btn-primary btn-lg" href="{{ url_for('main.about') }}" role="button">Learn more &raquo;</a>
-                <a id="quickstart-guide" href="{{ url_for('main.send_quickstart_guide') }}" class="btn btn-primary btn-lg">Quickstart Guide &raquo;</a>
-            </p>
     {% else %}
         <!--    current user is not logged in-->
         <div class="jumbotron jumbotron-fluid home">
