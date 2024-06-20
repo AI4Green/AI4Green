@@ -81,8 +81,9 @@ body {
 }
 
 .btn.btn-success {
-  background-color: #d5b546;
-  border-color: #d5b546;
+    background-color: #82F5A8;
+  border-color: #82F5A8;
+  color: #777778;
 }
 
 .navbar.navbar-expand-md.navbar-dark.fixed-top.bg-dark{

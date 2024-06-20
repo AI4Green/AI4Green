@@ -14,7 +14,7 @@
                 <h2 class="text-primary-green">Welcome to AI4Green, {{ current_user.username }}!</h2>
             </div>
         </div>
-        <div class="container">
+        <div class="container-fluid">
             {% if user_confirmed == false %}
                     <div class="alert alert-primary">AI4Green now requires email verification.  <a href='/email_verification_request' class='alert-link'>Click here</a> to send a verification email to your email address.</div>
                 {% endif %}
