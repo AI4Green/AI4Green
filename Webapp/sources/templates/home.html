@@ -2,8 +2,9 @@
 {% block content %}
 <head>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/standard_user.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/home.js') }}"></script>
-    {% from "macros.html" import icon_panel %}
+    {% import "macros.html" as macro_templates %}
 </head>
 <body>
     {% if current_user.is_authenticated %}
@@ -22,7 +23,7 @@
                 <div class="col-7" id="quick-access-icons">
                     <h2><i class="bi bi-arrow-through-heart-fill"></i> Quick Access</h2>
                     <hr class="line-news">
-                {{ icon_panel(workgroups, "workgroup", "Your Workgroups") }}
+                {{ macro_templates.icon_panel(workgroups, "workgroup", "Your Workgroups") }}
                     <div id="workbook-icons"></div>
                 <div id="reaction-icons"></div>
                 </div>
@@ -123,6 +124,7 @@
             </div>
                 </div>
         {% endif %}
+    {{ macro_templates.render_new_reaction_modal() }}
     </body>
 
 {% endblock %}

@@ -25,7 +25,6 @@ function toggleIcon(input, type, btnId) {
         else {
         var workgroup = document.getElementsByClassName("btn icon workgroup focused")[0].id
         var workbook = document.getElementsByClassName("btn icon workbook focused")[0].id
-        console.log(`/sketcher/workgroup/workbook/input/no`)
            window.location.href = "/sketcher/" + workgroup + "/" + workbook + "/" + input +"/no";
         }
     }
@@ -47,7 +46,6 @@ function loadIcons(selected, type){
     // loads workbooks in workgroup selected in homepage
     // only needs selected workgroup to load active reactions
     let selectedWorkgroup = document.getElementsByClassName("btn icon workgroup focused")[0].id
-    console.log(selectedWorkgroup)
     fetch("/load_icons", {
     headers: {
         "Content-Type": "application/json",
@@ -69,4 +67,40 @@ function loadIcons(selected, type){
             $("#reaction-icons").html(item).hide().fadeIn("slow");
         }
     })
+}
+
+function newReactionSetup() {
+    var activeWorkgroup = document.getElementsByClassName("btn icon workgroup focused")[0].id
+    var activeWorkbook = document.getElementsByClassName("btn icon workbook focused")[0].id
+
+     fetch("/get_new_reaction_id", {
+    headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({
+        workgroup: activeWorkgroup,
+        workbook: activeWorkbook,
+      })
+    })
+    .then(function (response) { return response.json() })
+    .then(function (item) {
+      $("#new-reaction-id-input").val(item);
+      $("#new-reaction-name").val("");
+      $("#error-warning-new-reaction").html("");
+    })
+}
+
+function newType(type) {
+    if (type == "workgroup") {
+        window.location.href = "/create_workgroup"
+    }
+    else if (type == "workbook") {
+        var workgroup = document.getElementsByClassName("btn icon workgroup focused")[0].id
+        window.location.href = "/create_workbook/" + workgroup
+    }
+
+    else {
+        newReactionSetup()
+    }
 }

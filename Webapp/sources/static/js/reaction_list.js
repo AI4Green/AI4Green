@@ -66,6 +66,7 @@ function cloneReactionModalWindow(reaction) {
         "workgroup": workgroup,
 
 
+
       }),
     })
   .then(function (response)  { return response.json(); })
