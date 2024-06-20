@@ -56,11 +56,6 @@
                 <a id="about-button" class="btn btn-primary btn-lg" href="{{ url_for('main.about') }}" role="button">Learn more &raquo;</a>
                 <a id="quickstart-guide" href="{{ url_for('main.send_quickstart_guide') }}" class="btn btn-primary btn-lg">Quickstart Guide &raquo;</a>
             </p>
-            {% if user_role == 'Admin' %}
-                    <p><a href="{{ url_for('admin_dashboard.admin_dashboard') }}" id="admin_dashboard" class="btn btn-primary">Admin Dashboard</a></p>
-                {% endif %}
-        </div>
-    </div>
     {% else %}
         <!--    current user is not logged in-->
         <div class="jumbotron jumbotron-fluid home">

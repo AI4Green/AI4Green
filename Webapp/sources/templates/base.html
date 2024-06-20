@@ -73,7 +73,10 @@
                     <a id="manage-account" href="{{ url_for('main.manage_account') }}" class="dropdown-item" type="button">Manage Account</a>
                     <a id="accessibility" href="{{ url_for('main.accessibility') }}" class="dropdown-item" type="button">Accessibility</a>
                     <a id="WG-membership-summary" class="dropdown-item" href="{{ url_for('workgroup_membership_summary.workgroup_membership_summary') }}" type="button">Membership Summary</a>
-                    <div class="dropdown-divider"></div>
+                    {% if user_role == 'Admin' %}
+                        <a href="{{ url_for('admin_dashboard.admin_dashboard') }}" id="admin_dashboard" class="dropdown-item">Admin Dashboard</a>
+                    {% endif %}
+                      <div class="dropdown-divider"></div>
                     <div class="px-4">
                         <a id="TopNavLoginButton" href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger" type="button">Logout</a>
                     </div>
