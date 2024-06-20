@@ -88,7 +88,6 @@ function cloneReaction() {
   let reactionName = getVal("#new-reaction-name");
   let oldReactionID = getVal("#old-reaction-id");
   let newReactionID = getVal("#new-reaction-id-input");
-  console.log(oldReactionID, newReactionID)
   $.ajax({
     url: "/clone_reaction",
     type: "post",
