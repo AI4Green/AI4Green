@@ -72,6 +72,7 @@ function cloneReactionModalWindow(reaction) {
     .then(function (newReactionID) {
       if (newReactionID !== "Bad Request") {
         $("#new-reaction-id-input").val(newReactionID);
+        $("#old-reaction-id").val(oldReactionID);
         $("#new-reaction-name").val(name);
         $("#new-reaction-data-submit").attr("onclick", "cloneReaction()");
         $("#new-reaction-modal").modal("show");
@@ -85,7 +86,7 @@ function cloneReaction() {
   let reactionWorkgroup = getVal("#workgroup");
   let reactionWorkbook = getVal("#workbook");
   let reactionName = getVal("#new-reaction-name");
-  let oldReactionID = getVal("#reaction-id");
+  let oldReactionID = getVal("#old-reaction-id");
   let newReactionID = getVal("#new-reaction-id-input");
   $.ajax({
     url: "/clone_reaction",
