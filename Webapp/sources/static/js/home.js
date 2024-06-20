@@ -3,7 +3,15 @@ function focusIcon(type, btnId) {
                 btn.classList.remove('focused');
             });
 
-    document.getElementById(btnId).classList.add("focused")
+    button = document.getElementById(btnId)
+    button.classList.add("focused")
+
+    if (type == 'workgroup') {
+        $("#active-workgroup").val(button.id)
+    }
+    else if (type == 'workbook') {
+        $("#active-workbook").val(button.id)
+    }
 }
 
 function blurIcon(button) {
@@ -23,9 +31,9 @@ function toggleIcon(input, type, btnId) {
             loadIcons(input, type)
         }
         else {
-        var workgroup = document.getElementsByClassName("btn icon workgroup focused")[0].id
-        var workbook = document.getElementsByClassName("btn icon workbook focused")[0].id
-           window.location.href = "/sketcher/" + workgroup + "/" + workbook + "/" + input +"/no";
+            workgroup = $("#active-workgroup").val();
+            workbook = $("#active-workbook").val();
+            window.location.href = "/sketcher/" + workgroup + "/" + workbook + "/" + input +"/no";
         }
     }
 }
@@ -45,7 +53,7 @@ function unloadIconPanel(type){
 function loadIcons(selected, type){
     // loads workbooks in workgroup selected in homepage
     // only needs selected workgroup to load active reactions
-    let selectedWorkgroup = document.getElementsByClassName("btn icon workgroup focused")[0].id
+    let selectedWorkgroup = $("#active-workgroup").val()
     fetch("/load_icons", {
     headers: {
         "Content-Type": "application/json",
@@ -70,10 +78,10 @@ function loadIcons(selected, type){
 }
 
 function newReactionSetup() {
-    var activeWorkgroup = document.getElementsByClassName("btn icon workgroup focused")[0].id
-    var activeWorkbook = document.getElementsByClassName("btn icon workbook focused")[0].id
+    activeWorkgroup = $("#active-workgroup").val()
+    activeWorkbook = $("#active-workbook").val()
 
-     fetch("/get_new_reaction_id", {
+    fetch("/get_new_reaction_id", {
     headers: {
         "Content-Type": "application/json",
       },
@@ -88,6 +96,7 @@ function newReactionSetup() {
       $("#new-reaction-id-input").val(item);
       $("#new-reaction-name").val("");
       $("#error-warning-new-reaction").html("");
+      $("#new-reaction-modal").modal("show");
     })
 }
 
