@@ -2,10 +2,10 @@ import io
 import json
 import re
 from datetime import datetime
-
+from docx import Document
 from flask import render_template
+from io import StringIO
 from sources import models, services
-from weasyprint import HTML
 
 from . import utils
 
@@ -45,6 +45,11 @@ class PdfExport:
 
         reactant_data = services.summary.get_reactant_data(reaction_data)
         print(reactant_data)
+        document = Document()
+        document.add_heading("Sample Press Release", 0)
+        f = StringIO()
+        document.save(f)
+        f.seek(0)
 
     def save(self):
         self._save_json()
