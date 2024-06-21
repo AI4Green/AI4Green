@@ -13,7 +13,6 @@ from datetime import datetime
 
 def verify_login(form):
     if form.validate_on_submit():
-        print("validate on submit")
         """The form.validate_on_submit returns True when the browser sends the POST
         request as a result of the user pressing the submit button and if all the fields
         passes validation. It returns False when the browser sends the GET request to
@@ -29,7 +28,6 @@ def verify_login(form):
         completed by calling first(), which will return the user object if it exists,
         or None if it does not."""
         if user is None or not user.check_password(form.password.data):
-            print("wrong  password")
             """If it got a match for the username that was provided, it can next check
             if the password came with the form is valid. This is done by invoking the
             check_password() method defined in models.py. This will take the password
@@ -52,7 +50,6 @@ def verify_login(form):
             return redirect(url_for("main.index"))
 
         login_user(user, remember=form.remember_me.data)
-        print("logged in")
         role = (
             db.session.query(models.Role)
             .join(models.User)
@@ -60,7 +57,6 @@ def verify_login(form):
             .first()
         )
         session["role"] = role.name
-        print("session role")
         """If the username and password are both correct, then the login_user() function
         from Flask-Login is called. This function will register the user as logged in,
         which means that any future pages the user navigates to will have the current_user
@@ -69,14 +65,12 @@ def verify_login(form):
         """The next query string argument is set to the original URL,
         so the application can use that to redirect back after login."""
         if not next_page or url_parse(next_page).netloc != "":
-            print("redirect to main")
             """If the login URL does not have a next argument or the
             next argument is set to a full URL that includes a domain
             name, then the user is redirected to the index page."""
             return redirect(url_for("main.index"))
 
         else:
-            print("redirect to next page")
             """If the login URL includes a next argument that is set
             to a relative path (a URL without the domain portion),
             then the user is redirected to that URL."""

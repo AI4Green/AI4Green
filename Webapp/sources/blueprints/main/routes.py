@@ -35,17 +35,24 @@ def index() -> Response:
         [request.args.get("message")] if request.args.get("message") else []
     )
 
+    print(current_user.is_authenticated)
+
     # get default jinja variables for landing page
     user_confirmed = None
     form = LoginForm()
-    services.auth.verify_login(form)
     user_role = None
     workgroups = []
     notification_number = 0
     news_items = []
 
+    if request.method == "POST":
+        # return redirects from login verification to prevent form resubmission
+        page_redirect = services.auth.verify_login(form)
+        return page_redirect
+
     # update jinja variables if user is logged in to populate the homepage
     if current_user.is_authenticated:
+        form = None
         user_role = current_user.Role
         user_confirmed = current_user.is_verified
         workgroups = get_workgroups()

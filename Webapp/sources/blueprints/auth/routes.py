@@ -41,13 +41,13 @@ def login() -> Response:  # the login view function
     # anyone may view
 
     form = LoginForm()  # instantiates an object of LoginForm
-    services.auth.verify_login(form)
+    page_redirect = services.auth.verify_login(form)
     if not current_user.is_authenticated:
         return render_template(
             "auth/login.html", title="Sign In", form=form
         )  # renders the login template
     else:
-        return redirect(url_for("main.index"))
+        return page_redirect
 
 
 # Logout option redirecting to the login page
