@@ -349,9 +349,7 @@ def save_blob(container_name: str, filename: str, file_contents: bytearray):
     # Upload the blob data
     upload = io.BytesIO(file_contents)
     blob_client.upload_blob(
-        upload, blob_type="BlockBlob", overwrite=True
-    )  # todo overwrite true is debug
-    print("exporting")
+        upload, blob_type="BlockBlob")
     # confirm upload
     if not blob_client.exists():
         print(f"blob {filename} upload failed")
