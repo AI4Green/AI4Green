@@ -54,9 +54,9 @@ def get_data(field: str, request_data: Optional[Dict] = None) -> List[str]:
 
     """
     if request_data:
-        data0 = str(request_data[field])
+        data0 = request_data[field]
     else:
-        data0 = str(request.form[field])
+        data0 = request.form[field]
     return data0.split(";")
 
 

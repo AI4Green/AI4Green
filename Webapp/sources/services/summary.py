@@ -1,13 +1,14 @@
 from typing import Dict, List
 
+from flask import render_template
 from sources import auxiliary, services
 
 
 def get_request_data_from_keys(request_data: Dict, keys: List[str]) -> Dict:
     component_dict = {}
     for key in keys:
-        snake_case_key = services.utils.camelCase_to_snake_case(key)
-        component_dict[snake_case_key] = auxiliary.get_data(key, request_data)
+        # snake_case_key = services.utils.camelCase_to_snake_case(key)
+        component_dict[key] = auxiliary.get_data(key, request_data)
     return component_dict
 
 
@@ -22,29 +23,30 @@ def get_reactant_data(request_data: Dict) -> Dict:
     """
     keys = [
         "reactants",
-        "reactantMolecularWeights",
-        "reactantDensities",
-        "reactantConcentrations",
-        "reactantEquivalents",
-        "reactantAmounts",
-        "roundedReactantAmounts",
-        "reactantVolumes",
-        "roundedReactantVolumes",
-        "reactantMasses",
-        "roundedReactantMasses",
-        "reactantHazards",
-        "reactantPhysicalForms",
+        "reactant_molecular_weights",
+        "reactant_densities",
+        "reactant_concentrations",
+        "reactant_equivalents",
+        "reactant_amounts",
+        "rounded_reactant_amounts",
+        "reactant_volumes",
+        "rounded_reactant_volumes",
+        "reactant_masses",
+        "rounded_reactant_masses",
+        "reactant_hazards",
+        "reactant_physical_forms",
     ]
+
     reactant_dict = get_request_data_from_keys(request_data, keys)
     services.hazard_code.get_multiple_compounds_data(reactant_dict, "reactant")
 
     # Get sum values
-    reactant_dict["reactant_mass_sum"] = float(request_data["reactantMassSum"])
+    reactant_dict["reactant_mass_sum"] = float(request_data["reactant_mass_sum"])
     reactant_dict["reactant_molecular_weight_sum"] = float(
-        request_data["reactantMolecularWeightSum"]
+        request_data["reactant_molecular_weight_sum"]
     )
     # Joining primary keys and getting smiles
-    reactant_primary_keys_ls = auxiliary.get_data("reactantPrimaryKeys", request_data)
+    reactant_primary_keys_ls = auxiliary.get_data("reactant_primary_keys", request_data)
     reactant_dict["reactant_primary_keys_str"] = ", ".join(reactant_primary_keys_ls)
     reactant_dict["reactant_smiles_ls"] = services.all_compounds.get_smiles_list(
         reactant_primary_keys_ls
@@ -62,30 +64,31 @@ def get_reagent_data(request_data: Dict) -> Dict:
          Dictionary with reagent data stored as a list with one entry per reagent and single floats for sum values.
     """
     keys = [
-        "reagentTableNumbers",
+        "reagent_table_numbers",
         "reagents",
-        "reagentMolecularWeights",
-        "reagentDensities",
-        "reagentConcentrations",
-        "reagentEquivalents",
-        "reagentAmounts",
-        "roundedReagentAmounts",
-        "reagentVolumes",
-        "roundedReagentVolumes",
-        "reagentMasses",
-        "roundedReagentMasses",
-        "reagentHazards",
-        "reagentPhysicalForms",
+        "reagent_molecular_weights",
+        "reagent_densities",
+        "reagent_concentrations",
+        "reagent_equivalents",
+        "reagent_amounts",
+        "rounded_reagent_amounts",
+        "reagent_volumes",
+        "rounded_reagent_volumes",
+        "reagent_masses",
+        "rounded_reagent_masses",
+        "reagent_hazards",
+        "reagent_physical_forms",
     ]
+
     reagent_dict = get_request_data_from_keys(request_data, keys)
     services.hazard_code.get_multiple_compounds_data(reagent_dict, "reagent")
 
     # Get sum data
     reagent_dict["reagent_molecular_weight_sum"] = float(
-        request_data["reagentMolecularWeightSum"]
+        request_data["reagent_molecular_weight_sum"]
     )
     # Getting primary keys and format
-    reagent_primary_keys_ls = auxiliary.get_data("reagentPrimaryKeys", request_data)
+    reagent_primary_keys_ls = auxiliary.get_data("reagent_primary_keys", request_data)
     reagent_dict["reagent_primary_keys_str"] = ", ".join(reagent_primary_keys_ls)
     reagent_dict["reagent_primary_keys_list"] = reagent_primary_keys_ls
     reagent_dict["reagent_smiles_ls"] = services.all_compounds.get_smiles_list(
@@ -104,23 +107,23 @@ def get_solvent_data(request_data: Dict) -> Dict:
          Dictionary with solvent data stored as a list with one entry per solvent or a single value.
     """
     solvent_data_keys = [
-        "solventTableNumbers",
+        "solvent_table_numbers",
         "solvents",
-        "solventVolumes",
-        "solventHazards",
-        "solventPhysicalForms",
+        "solvent_volumes",
+        "solvent_hazards",
+        "solvent_physical_forms",
     ]
     solvent_dict = get_request_data_from_keys(request_data, solvent_data_keys)
     services.hazard_code.get_multiple_compounds_data(solvent_dict, "solvent")
 
     # Concurrency for if no solvents are chosen
-    solvent_dict["number_of_solvents"] = request_data["numberOfSolvents"]
+    solvent_dict["number_of_solvents"] = request_data["number_of_solvents"]
     if solvent_dict["number_of_solvents"] == "0":  # if no solvents have been chosen
         solvent_dict["number_of_solvents"] = 1  # then it shows only one empty cell
         solvent_dict["solvents"] = [" "]
 
     # handle solvent primary keys
-    solvent_primary_keys_ls = auxiliary.get_data("solventPrimaryKeys", request_data)
+    solvent_primary_keys_ls = auxiliary.get_data("solvent_primary_keys", request_data)
     solvent_dict["solvent_primary_keys_str"] = ", ".join(solvent_primary_keys_ls)
     solvent_dict["solvent_primary_keys_list"] = solvent_primary_keys_ls
     # get the smiles from the primary keys
@@ -140,29 +143,29 @@ def get_product_data(request_data: Dict) -> Dict:
          Dictionary with product data stored as a list with one entry per product or a single value.
     """
     product_data_keys = [
-        "productTableNumbers",
+        "product_table_numbers",
         "products",
-        "productMasses",
-        "roundedProductMasses",
-        "productMolecularWeights",
-        "productHazards",
-        "productPhysicalForms",
+        "product_masses",
+        "rounded_product_masses",
+        "product_molecular_weights",
+        "product_hazards",
+        "product_physical_forms",
     ]
     product_dict = get_request_data_from_keys(request_data, product_data_keys)
     services.hazard_code.get_multiple_compounds_data(product_dict, "product")
 
     # Primary keys and SMILES
     # Joining primary keys and getting smiles
-    product_primary_keys_ls = auxiliary.get_data("productPrimaryKeys", request_data)
+    product_primary_keys_ls = auxiliary.get_data("product_primary_keys", request_data)
     product_dict["product_primary_keys_str"] = ", ".join(product_primary_keys_ls)
     product_dict["product_smiles_ls"] = services.all_compounds.get_smiles_list(
         product_primary_keys_ls
     )
     # Table numbers
-    product_table_numbers = auxiliary.get_data("productTableNumbers", request_data)
+    product_table_numbers = auxiliary.get_data("product_table_numbers", request_data)
     product_dict["product_table_numbers"] = list(filter(None, product_table_numbers))
     product_dict["main_product_table_number"] = int(
-        request_data["mainProductTableNumber"]
+        request_data["main_product_table_number"]
     )
 
     for idx, product_table_num in enumerate(product_dict["product_table_numbers"]):
@@ -183,11 +186,11 @@ def get_unit_data(request_data: Dict) -> Dict:
     """
     # Gets selected units from the reaction table
     unit_dict = {
-        "amount_unit": str(request_data["amountUnit"]),
-        "volume_unit": str(request_data["volumeUnit"]),
-        "mass_unit": str(request_data["massUnit"]),
-        "solvent_volume_unit": str(request_data["solventVolumeUnit"]),
-        "product_mass_unit": str(request_data["productMassUnit"]),
+        "amount_unit": str(request_data["amount_unit"]),
+        "volume_unit": str(request_data["volume_unit"]),
+        "mass_unit": str(request_data["mass_unit"]),
+        "solvent_volume_unit": str(request_data["solvent_volume_unit"]),
+        "product_mass_unit": str(request_data["product_mass_unit"]),
     }
     return unit_dict
 
@@ -329,3 +332,84 @@ def get_risk_data(
         else "hazard-reset-hazard"
     )  # colour code for the hazard rating
     return risk_data
+
+
+def render_summary_template(summary_data: Dict):
+    return render_template(
+        "_summary_table.html",
+        amount_unit=summary_data["amount_unit"],
+        volume_unit=summary_data["volume_unit"],
+        mass_unit=summary_data["mass_unit"],
+        solvent_volume_unit=summary_data["solvent_volume_unit"],
+        product_mass_unit=summary_data["product_mass_unit"],
+        reactants=summary_data["reactants"],
+        reactant_primary_keys=summary_data["reactant_primary_keys_str"],
+        reagent_primary_keys=summary_data["reagent_primary_keys_str"],
+        reagents=summary_data["reagents"],
+        reagent_table_numbers=summary_data["reagent_table_numbers"],
+        reagent_molecular_weights=summary_data["reagent_molecular_weights"],
+        reagent_densities=summary_data["reagent_densities"],
+        reagent_concentrations=summary_data["reagent_concentrations"],
+        reagent_equivalents=summary_data["reagent_equivalents"],
+        reagent_hazards=summary_data["reagent_hazards"],
+        reagent_amounts=summary_data["reagent_amounts"],
+        rounded_reagent_amounts=summary_data["rounded_reagent_amounts"],
+        reagent_volumes=summary_data["reagent_volumes"],
+        rounded_reagent_volumes=summary_data["rounded_reagent_volumes"],
+        reagent_masses=summary_data["reagent_masses"],
+        rounded_reagent_masses=summary_data["rounded_reagent_masses"],
+        solvents=summary_data["solvents"],
+        solvent_volumes=summary_data["solvent_volumes"],
+        solvent_table_numbers=summary_data["solvent_table_numbers"],
+        solvent_flags=summary_data["solvent_flags"],
+        products=summary_data["products"],
+        product_table_numbers=summary_data["product_table_numbers"],
+        reactant_molecular_weights=summary_data["reactant_molecular_weights"],
+        reactant_densities=summary_data["reactant_densities"],
+        reactant_concentrations=summary_data["reactant_concentrations"],
+        reactant_equivalents=summary_data["reactant_equivalents"],
+        reactant_amounts=summary_data["reactant_amounts"],
+        rounded_reactant_amounts=summary_data["rounded_reactant_amounts"],
+        reactant_volumes=summary_data["reactant_volumes"],
+        rounded_reactant_volumes=summary_data["rounded_reactant_volumes"],
+        reactant_masses=summary_data["reactant_masses"],
+        rounded_reactant_masses=summary_data["rounded_reactant_masses"],
+        product_primary_keys=summary_data["product_primary_keys_str"],
+        main_product_table_number=summary_data["main_product_table_number"],
+        main_product_index=summary_data["main_product_index"],
+        product_molecular_weights=summary_data["product_molecular_weights"],
+        product_masses=summary_data["product_masses"],
+        rounded_product_masses=summary_data["rounded_product_masses"],
+        ae=summary_data["ae"],
+        ae_flag=summary_data["ae_flag"],
+        element_sustainability=summary_data["element_sustainability"],
+        element_sustainability_flag=summary_data["element_sustainability_flag"],
+        reactant_hazard_sentences=summary_data["reactant_hazard_sentences"],
+        reactant_hazard_ratings=summary_data["reactant_hazard_ratings"],
+        reactant_hazard_colors=summary_data["reactant_hazard_colours"],
+        reactant_risk_colors=summary_data["reactant_risk_colours"],
+        reactant_exposure_potentials=summary_data["reactant_exposure_potentials"],
+        reactant_risk_ratings=summary_data["reactant_risk_ratings"],
+        reagent_hazard_sentences=summary_data["reagent_hazard_sentences"],
+        reagent_hazard_ratings=summary_data["reagent_hazard_ratings"],
+        reagent_hazard_colors=summary_data["reagent_hazard_colours"],
+        reagent_risk_colors=summary_data["reagent_risk_colours"],
+        reagent_exposure_potentials=summary_data["reagent_exposure_potentials"],
+        reagent_risk_ratings=summary_data["reagent_risk_ratings"],
+        solvent_primary_keys=summary_data["solvent_primary_keys_str"],
+        solvent_hazard_sentences=summary_data["solvent_hazard_sentences"],
+        solvent_hazard_ratings=summary_data["solvent_hazard_ratings"],
+        solvent_exposure_potentials=summary_data["solvent_exposure_potentials"],
+        solvent_risk_ratings=summary_data["solvent_risk_ratings"],
+        solvent_hazard_colors=summary_data["solvent_hazard_colours"],
+        solvent_risk_colors=summary_data["solvent_risk_colours"],
+        product_hazard_sentences=summary_data["product_hazard_sentences"],
+        product_hazard_ratings=summary_data["product_hazard_ratings"],
+        product_exposure_potentials=summary_data["product_exposure_potentials"],
+        product_risk_ratings=summary_data["product_risk_ratings"],
+        product_hazard_colors=summary_data["product_hazard_colours"],
+        product_risk_colors=summary_data["product_risk_colours"],
+        risk_rating=summary_data["risk_rating"],
+        risk_color=summary_data["risk_colour"],
+        number_of_solvents=summary_data["number_of_solvents"],
+    )
