@@ -14,7 +14,7 @@ from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
-from .forms import LoginForm
+from sources.blueprints.auth.forms import LoginForm
 from sources import models, services
 from sources.auxiliary import (
     get_notification_number,
@@ -34,40 +34,29 @@ def index() -> Response:
     messages_from_redirects = (
         [request.args.get("message")] if request.args.get("message") else []
     )
-    # gets jinja variables if user is logged in to populate the homepage, else the non-logged in user homepage is loaded
+
+    # get default jinja variables for landing page
+    user_confirmed = None
+    form = LoginForm()
+    services.auth.verify_login(form)
+    user_role = None
+    workgroups = []
+    notification_number = 0
+    news_items = []
+
+    # update jinja variables if user is logged in to populate the homepage
     if current_user.is_authenticated:
-        # get the users role to determine if they can access the admin dashboard button or not
-        user = (
-            db.session.query(models.User)
-            .filter(models.User.email == current_user.email)
-            .first()
-        )
-        form=None
-        user_confirmed = user.is_verified
-        user_role = user.Role.name
+        user_role = current_user.Role
+        user_confirmed = current_user.is_verified
         workgroups = get_workgroups()
         notification_number = get_notification_number()
-        if request.method == "POST":
-            workgroup_selected = request.form["WG-select"]
-            if workgroup_selected != "-Select Workgroup-":
-                return redirect(
-                    url_for(
-                        "workgroup.workgroup", workgroup_selected=workgroup_selected
-                    )
-                )
+
         news_items = (
             db.session.query(models.NewsItem)
             .order_by(models.NewsItem.time.desc())
             .all()
         )
-    else:
-        # user not logged in
-        user_confirmed = None
-        form = LoginForm()
-        user_role = None
-        workgroups = []
-        notification_number = 0
-        news_items = []
+
     return render_template(
         "home.html",
         user_role=user_role,
@@ -99,7 +88,7 @@ def load_workbooks():
         reactions = services.reaction.list_active_in_workbook(
             workbook=selected, workgroup=data["activeWorkgroup"], sort_crit="time"
         )
-        icon_names = [i.reaction_id for i in reactions]
+        icon_names = [i.reaction_id for i in reactions[:11]]
         header = "Recent Reactions in " + selected
         load_type = "reaction"
         bootstrap_icon = "bi bi-eyedropper"
