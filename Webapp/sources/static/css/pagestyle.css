@@ -86,6 +86,36 @@ body {
   color: #777778;
 }
 
+.btn.btn-success:hover {
+  background-color: #62BA79;
+  border-color: #62BA79;
+  color: white
+}
+
+.btn.btn-info {
+  background-color: #83F5F2;
+  border-color: #83F5F2;
+  color: #777778;
+}
+
+.btn.btn-info:hover {
+  background-color: #63B1B9;
+  border-color: #63B1B9;
+  color: white
+}
+
+.btn.btn-danger{
+    background-color: #F58683;
+    border-color: #F58683;
+    color: #777778;
+}
+
+.btn.btn-danger:hover {
+  background-color: #BB6A61;
+  border-color: #BB6A61;
+  color: white
+}
+
 .navbar.navbar-expand-md.navbar-dark.fixed-top.bg-dark{
   background: linear-gradient(90deg, #777778 50%, #82F5A8)
 }
