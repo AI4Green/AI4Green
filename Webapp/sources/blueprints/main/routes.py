@@ -35,8 +35,6 @@ def index() -> Response:
         [request.args.get("message")] if request.args.get("message") else []
     )
 
-    print(current_user.is_authenticated)
-
     # get default jinja variables for landing page
     user_confirmed = None
     form = LoginForm()
