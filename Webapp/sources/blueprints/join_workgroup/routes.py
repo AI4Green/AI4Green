@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import redirect  # renders html templates
+from flask import redirect, request # renders html templates
 from flask import Response, flash, render_template, url_for
 from flask_login import (  # protects a view function against anonymous users
     current_user,
@@ -119,3 +119,12 @@ def join_workgroup() -> Response:
         workgroups=workgroups_dropdown,
         notification_number=notification_number,
     )
+
+@join_workgroup_bp.route("/add_user_by_email", methods=["GET", "POST"])
+@roles
+### ADD USER IS PI IN WORKGROUP SECURITY DECORATOR TO THIS FUNCTION
+def add_user_by_email():
+    email = request.args.get("email")
+    workgroup = request.args.get("workgroup")
+
+    print(email, workgroup)
