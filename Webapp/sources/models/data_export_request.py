@@ -55,10 +55,16 @@ class DataExportRequest(Model):
 
     __tablename__ = "DataExportRequest"
 
+    def __init__(self, **kwargs) -> None:
+        self.time_of_request = datetime.now(pytz.timezone("Europe/London")).replace(
+            tzinfo=None
+        )
+        super().__init__(**kwargs)
+        self.uuid = str(uuid.uuid4())
+
     time_of_request = db.Column(
         db.DateTime,
         nullable=False,
-        default=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -78,7 +84,7 @@ class DataExportRequest(Model):
 
     status = db.Column(db.Enum(ApprovalStatus), default=ApprovalStatus.PENDING.value)
 
-    uuid = db.Column(db.Text, default=str(uuid.uuid4()))  # Unique container name
+    uuid = db.Column(db.Text)  # Unique container name
     hash = db.Column(db.Text)  # to confirm zip download contents
 
     reactions = db.relationship("Reaction", backref="data_export_request")
