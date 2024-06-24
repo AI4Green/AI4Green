@@ -37,8 +37,12 @@
             <a class="nav-link" id="TopNavSketcherButton" href="{{ url_for('main.demo') }}">Demo <span class="sr-only">(current)</span></a>
           </li>
           {% if current_user.is_authenticated %}
-              <li {% if request.path == '/solvent_guide' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
-                <a class="nav-link" id="solvent-guide" href="{{ url_for('solvent_guide.solvent_guide') }}">Solvent Guide<span class="sr-only">(current)</span></a>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="solvent-guide-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Solvents</a>
+                <div class="dropdown-menu" aria-labelledby="solvent-guide-dropdown">
+                    <a class="dropdown-item" id="solvent-guide" href="{{ url_for('solvent_guide.solvent_guide') }}">Solvent Guide</a>
+                    <a class="dropdown-item" id="solvent-surfer" href="{{ url_for('solvent_surfer.solvent_PCA') }}">Solvent Surfer</a>
+                </div>
               </li>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Workgroup</a>
