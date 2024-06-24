@@ -78,7 +78,7 @@ class ReactionDataFileExport:
                 # try with full reaction smiles including agents
                 rxn = AllChem.ReactionFromSmarts(reaction_smiles, useSmiles=True)
             else:
-                raise ValueError  # Trigger the fallback if reaction_smiles is None
+                raise ValueError  # Use just reactants and products if agents fail
         except ValueError:
             try:
                 rxn = AllChem.ReactionFromSmarts(
