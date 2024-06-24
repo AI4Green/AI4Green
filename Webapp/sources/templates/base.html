@@ -88,7 +88,7 @@
     <div id="content">
         {% with messages = get_flashed_messages() + (messages_from_redirects or []) %}
             {% if messages %}
-                <div id="flash-messages">
+                <div id="flash-messages" class="jumbotron jumbotron-fluid home">
                     {% for message in messages %}
                         <div class="alert alert-danger" style="margin: auto; width: 50%" role="alert">
                             {{ message }}

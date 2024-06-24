@@ -51,7 +51,7 @@ def index() -> Response:
     # update jinja variables if user is logged in to populate the homepage
     if current_user.is_authenticated:
         form = None
-        user_role = current_user.Role
+        user_role = current_user.Role.name
         user_confirmed = current_user.is_verified
         workgroups = get_workgroups()
         notification_number = get_notification_number()
