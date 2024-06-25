@@ -24,7 +24,7 @@ def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> st
     """
     primary_key = (primary_key[0], int(primary_key[1]))
     workbook = services.workbook.get(primary_key[1])
-    if (person and person not in workbook.users) or (not person and current_user.Person not in workbook.Users):
+    if (person and person not in workbook.users) or (not person and current_user.Person not in workbook.users):
         abort(401)
 
     return (
