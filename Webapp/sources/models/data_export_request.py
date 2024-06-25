@@ -47,6 +47,14 @@ data_export_request_workbooks = db.Table(
     db.Column("workbook_id", db.Integer, db.ForeignKey("WorkBook.id")),
 )
 
+# Association table for the many-to-many relationship between DataExportRequest and Reaction
+data_export_request_reactions = db.Table(
+    "data_export_request_reactions",
+    db.Model.metadata,
+    db.Column("data_export_request_id", db.Integer, db.ForeignKey("DataExportRequest.id")),
+    db.Column("reaction_id", db.Integer, db.ForeignKey("Reaction.id"))
+)
+
 
 class DataExportRequest(Model):
     """
@@ -59,8 +67,8 @@ class DataExportRequest(Model):
         self.time_of_request = datetime.now(pytz.timezone("Europe/London")).replace(
             tzinfo=None
         )
-        super().__init__(**kwargs)
         self.uuid = str(uuid.uuid4())
+        super().__init__(**kwargs)
 
     time_of_request = db.Column(
         db.DateTime,
@@ -87,7 +95,11 @@ class DataExportRequest(Model):
     uuid = db.Column(db.Text)  # Unique container name
     hash = db.Column(db.Text)  # to confirm zip download contents
 
-    reactions = db.relationship("Reaction", backref="data_export_request")
+    reactions = db.relationship(
+        "Reaction",
+        secondary=data_export_request_reactions,
+        backref="data_export_request"
+    )
 
     # supports multiple workbooks if desired in future functionality
     workbooks = db.relationship(
