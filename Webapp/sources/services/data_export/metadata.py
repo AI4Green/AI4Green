@@ -445,7 +445,7 @@ class ReactionMetaData:
         if component == "solvent":
             compound_dict["volumes"] = self._get_volumes(component)
             compound_dict["smiles"] = services.all_compounds.get_smiles_list(
-                self.db_reaction.solvent
+                self.db_reaction.solvent, person=self.db_reaction.creator_person
             )
         else:  # for reactants/reagents/products
             compound_dict["smiles"] = self._get_compound_smiles(

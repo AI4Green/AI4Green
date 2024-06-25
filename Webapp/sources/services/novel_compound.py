@@ -12,21 +12,24 @@ from sources.extensions import db
 from sqlalchemy import func
 
 
-def get_smiles(primary_key: Tuple[str, int]) -> str:
+def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> str:
     """
     Gets the novel compound's SMILES string from the primary key if the entry has the SMILES attribute
+    Args:
+        primary_key - the primary key is a tuple in the format [compound_name, workgroup.id]
+        person - the person we are checking for access rights to the novel compound
 
     Returns:
         The SMILES string corresponding to the primary key or None
     """
     primary_key = (primary_key[0], int(primary_key[1]))
     workbook = services.workbook.get(primary_key[1])
-    if current_user.Person not in workbook.users:
+    if (person and person not in workbook.users) or (not person and current_user.Person not in workbook.Users):
         abort(401)
 
     return (
         db.session.query(models.NovelCompound.smiles)
-        .filter(models.NovelCompound.name == primary_key[0].lower())
+        .filter(func.lower(models.NovelCompound.name) == primary_key[0].lower())
         .join(models.WorkBook)
         .filter(models.WorkBook.id == primary_key[1])
         .first()
