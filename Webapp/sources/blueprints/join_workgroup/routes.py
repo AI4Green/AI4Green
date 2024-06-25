@@ -6,6 +6,7 @@ from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
+from decorators import principal_investigator_required
 from sources import models, services
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db
@@ -121,7 +122,7 @@ def join_workgroup() -> Response:
     )
 
 @join_workgroup_bp.route("/add_user_by_email", methods=["GET", "POST"])
-@roles
+@principal_investigator_required
 ### ADD USER IS PI IN WORKGROUP SECURITY DECORATOR TO THIS FUNCTION
 def add_user_by_email():
     email = request.args.get("email")

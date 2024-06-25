@@ -5,6 +5,7 @@ from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
+from decorators import principal_investigator_required
 from sources import models, services
 from sources.auxiliary import (
     duplicate_notification_check,
@@ -26,11 +27,12 @@ from . import manage_workgroup_bp
     "/manage_workgroup/<workgroup>/<has_request>", methods=["GET", "POST"]
 )
 @login_required
+@principal_investigator_required
 def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
     # must be logged in and a PI of the workgroup
-    if not security_pi_workgroup(workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
+    #if not security_pi_workgroup(workgroup):
+     #   flash("You do not have permission to view this page")
+      #  return redirect(url_for("main.index"))
     workgroups = get_workgroups()
     current_workgroup = workgroup
     notification_number = get_notification_number()
