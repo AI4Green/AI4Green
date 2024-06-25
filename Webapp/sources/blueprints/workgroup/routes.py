@@ -32,7 +32,7 @@ def workgroup(
     approval_status = workgroup_selected_obj.approved
     notification_number = get_notification_number()
 
-    user_type = services.workgroup.get_user_type_in_workbook(workgroup_selected)
+    user_type = services.workgroup.get_user_type(workgroup_selected)
 
     # get lists of workbooks, and the next reaction id for each workbooks
     workbooks = services.workbook.get_workbooks_from_user_group_combination(workgroup_selected)

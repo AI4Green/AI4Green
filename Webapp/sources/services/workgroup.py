@@ -122,7 +122,7 @@ def get_workgroup_sm(workgroup_name: str) -> List[models.User]:
     )
 
 
-def get_user_type_in_workbook(workgroup_name: str) -> str:
+def get_user_type(workgroup_name: str) -> str:
     """
     Returns the user type of the current user in the specified workgroup
     Args:
