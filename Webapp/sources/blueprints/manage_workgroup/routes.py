@@ -14,7 +14,6 @@ from sources.auxiliary import (
     get_workgroups,
     make_objects_inactive,
     security_member_workgroup,
-    security_pi_workgroup,
     workgroup_dict,
 )
 from sources.extensions import db
@@ -30,9 +29,6 @@ from . import manage_workgroup_bp
 @principal_investigator_required
 def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
     # must be logged in and a PI of the workgroup
-    #if not security_pi_workgroup(workgroup):
-     #   flash("You do not have permission to view this page")
-      #  return redirect(url_for("main.index"))
     workgroups = get_workgroups()
     current_workgroup = workgroup
     notification_number = get_notification_number()
@@ -87,13 +83,12 @@ def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
     methods=["GET", "POST"],
 )
 @login_required
+@principal_investigator_required
 def make_change_to_workgroup(
     workgroup: str, email: str, mode: str, current_status: str
 ) -> Response:
     # must be logged in and a PI of the workgroup
-    if not security_pi_workgroup(workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
+
     # find the person and workgroup objects that the change relates to
     wg = (
         db.session.query(models.WorkGroup)
@@ -218,20 +213,19 @@ def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
 
 # PI/SR status request decision
 @manage_workgroup_bp.route(
-    "/manage_workgroup/change_status_request/<current_workgroup>/<email>/<mode>/<decision>",
+    "/manage_workgroup/change_status_request/<workgroup>/<email>/<mode>/<decision>",
     methods=["GET", "POST"],
 )
 @login_required
+@principal_investigator_required
 def change_status_from_request(
-    current_workgroup: str, email: str, mode: str, decision: str
+    workgroup: str, email: str, mode: str, decision: str
 ) -> Response:
     # must be logged in and a PI of the workgroup
-    if not security_pi_workgroup(current_workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
+
     wg = (
         db.session.query(models.WorkGroup)
-        .filter(models.WorkGroup.name == current_workgroup)
+        .filter(models.WorkGroup.name == workgroup)
         .first()
     )
 
