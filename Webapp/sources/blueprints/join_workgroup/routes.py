@@ -6,7 +6,7 @@ from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
-from decorators import principal_investigator_required
+from sources.decorators import principal_investigator_required
 from sources import models, services
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db

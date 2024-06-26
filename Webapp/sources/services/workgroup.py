@@ -129,8 +129,10 @@ def get_user_type(workgroup_name: str) -> str:
         workgroup_name: str, name of workgroup to search
 
     Returns:
-        user_type: str, user membership type in specified workbook
+        user_type: str, user membership type in specified workgroup or None if user is not in workgroup
     """
+    user_type = None
+
     pi = get_workgroup_pi(workgroup_name)
     if current_user.email in [user.email for user in pi]:
         user_type = "principal_investigator"
@@ -142,4 +144,5 @@ def get_user_type(workgroup_name: str) -> str:
     sm = get_workgroup_sm(workgroup_name)
     if current_user.email in [user.email for user in sm]:
         user_type = "standard_member"
+
     return user_type
