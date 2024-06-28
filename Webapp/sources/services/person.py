@@ -25,3 +25,11 @@ def from_id(person_id: int) -> models.Person:
         .filter(models.Person.id == person_id)
         .first()
     )
+
+
+def from_email(person_email: str) -> models.Person:
+    return (
+        db.session.query(models.Person)
+        .filter(models.Person.id == person_email)
+        .first()
+    )

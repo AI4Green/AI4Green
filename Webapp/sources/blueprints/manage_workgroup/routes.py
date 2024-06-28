@@ -348,4 +348,23 @@ def add_user_by_email(workgroup):
     email = request.args.get("email")
     user_type = request.args.get("user_type")
 
+    print(workgroup_dict)
+
+    person = services.person.from_email(email)
+    wg = services.workgroup.get_workgroup_from_workgroup_name(workgroup)
+
+
+
+    # set variables according to new role and workgroup
+    new_role_display_string = workgroup_dict[new_role]["display_string"]
+    request_type = f"Request to become a {new_role_display_string}"
+    info = (
+        f"Your request to become a {new_role_display_string} in Workgroup, {wg.name}, "
+        f"has been approved!"
+    )
+    feedback = (
+        f"{person.user.fullname} has changed role from {workgroup_dict[old_role]['display_string']} "
+        f"to {workgroup_dict[new_role]['display_string']}"
+    )
+
     print(email, workgroup, user_type)
