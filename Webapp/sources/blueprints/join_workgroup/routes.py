@@ -120,12 +120,3 @@ def join_workgroup() -> Response:
         workgroups=workgroups_dropdown,
         notification_number=notification_number,
     )
-
-@join_workgroup_bp.route("/add_user_by_email", methods=["GET", "POST"])
-@principal_investigator_required
-### ADD USER IS PI IN WORKGROUP SECURITY DECORATOR TO THIS FUNCTION
-def add_user_by_email():
-    email = request.args.get("email")
-    workgroup = request.args.get("workgroup")
-
-    print(email, workgroup)

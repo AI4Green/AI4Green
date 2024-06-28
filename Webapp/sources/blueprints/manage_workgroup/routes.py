@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Response, flash, jsonify, redirect, render_template, url_for
+from flask import Response, flash, jsonify, redirect, render_template, url_for, request
 from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
@@ -340,3 +340,12 @@ def go_to_workgroup(workgroup: str) -> Response:
             "manage_workgroup.manage_workgroup", has_request="yes", workgroup=workgroup
         )
     )
+
+
+@manage_workgroup_bp.route("/add_user_by_email", methods=["GET", "POST"])
+@principal_investigator_required
+def add_user_by_email(workgroup):
+    email = request.args.get("email")
+    user_type = request.args.get("user_type")
+
+    print(email, workgroup, user_type)
