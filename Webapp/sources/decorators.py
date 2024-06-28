@@ -13,7 +13,7 @@ def _get_workgroup(workgroup):
 
 def principal_investigator_required(f):
     @wraps(f)
-    def decorated_function(workgroup, *args, **kwargs):
+    def decorated_function(workgroup=None, *args, **kwargs):
         workgroup = _get_workgroup(workgroup)
         if services.workgroup.get_user_type(workgroup) != "principal_investigator":
             flash("You do not have permission to view this page")

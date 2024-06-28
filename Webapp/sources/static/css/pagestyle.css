@@ -40,6 +40,7 @@ body {
     line-height: 80px;
     color: #777778;
     transition: all 0.3s linear;
+    font-size: 40;
 }
 
 .icon:hover {

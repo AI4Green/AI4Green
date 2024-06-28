@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
+<head>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/manage_workgroup.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/new_reaction.css') }}">
+</head>
 <div id="container" class="container">
     <h2>Manage Workgroup</h2>
     <br>
@@ -46,10 +50,10 @@
                         <button style="width:110px; visibility: hidden;"></button>
                     </td>
                     <td class="align-middle">
-                        <button id="pi-to-sr{{ loop.index }}" value="{{ pis.user.email }}" class="btn btn-secondary" onclick="make_change('pi-to-sr{{ loop.index }}', 'pi-to-sr', 'pi')" style="width:110px;">&#8595; PI to SR</button>
+                        <button id="pi-to-sr{{ loop.index }}" value="{{ pis.user.email }}" class="btn btn-secondary" onclick="makeChange('pi-to-sr{{ loop.index }}', 'pi-to-sr', 'pi')" style="width:110px;">&#8595; PI to SR</button>
                     </td>
                     <td class="align-middle">
-                        <button id="pi-remove{{ loop.index }}" value="{{ pis.user.email }}" class="btn btn-danger" onclick="make_change('pi-remove{{ loop.index }}', 'remove', 'pi')" style="width:250px;">Remove from Workgroup</button>
+                        <button id="pi-remove{{ loop.index }}" value="{{ pis.user.email }}" class="btn btn-danger" onclick="makeChange('pi-remove{{ loop.index }}', 'remove', 'pi')" style="width:250px;">Remove from Workgroup</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -67,13 +71,13 @@
                         {{ srs.user.email }}
                     </td>
                     <td class="align-middle">
-                        <button id="sr-to-pi{{ loop.index }}" value="{{ srs.user.email }}" class="btn btn-primary" onclick="make_change('sr-to-pi{{ loop.index }}', 'sr-to-pi', 'sr')" style="width:110px;">&#8593; SR to PI</button>
+                        <button id="sr-to-pi{{ loop.index }}" value="{{ srs.user.email }}" class="btn btn-primary" onclick="makeChange('sr-to-pi{{ loop.index }}', 'sr-to-pi', 'sr')" style="width:110px;">&#8593; SR to PI</button>
                     </td>
                     <td class="align-middle">
-                        <button id="sr-to-sm{{ loop.index }}" value="{{ srs.user.email }}" class="btn btn-secondary" onclick="make_change('sr-to-sm{{ loop.index }}', 'sr-to-sm', 'sr')" style="width:110px;">&#8595; SR to SM</button>
+                        <button id="sr-to-sm{{ loop.index }}" value="{{ srs.user.email }}" class="btn btn-secondary" onclick="makeChange('sr-to-sm{{ loop.index }}', 'sr-to-sm', 'sr')" style="width:110px;">&#8595; SR to SM</button>
                     </td>
                     <td class="align-middle">
-                        <button id="sr-remove{{ loop.index }}" value="{{ srs.user.email }}"  class="btn btn-danger" onclick="make_change('sr-remove{{ loop.index }}', 'remove', 'sr')" style="width:250px;">Remove from Workgroup</button>
+                        <button id="sr-remove{{ loop.index }}" value="{{ srs.user.email }}"  class="btn btn-danger" onclick="makeChange('sr-remove{{ loop.index }}', 'remove', 'sr')" style="width:250px;">Remove from Workgroup</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -91,12 +95,12 @@
                         {{ sms.user.email }}
                     </td>
                     <td class="align-middle">
-                        <button id="sm-to-sr{{ loop.index }}" value="{{ sms.user.email }}" class="btn btn-primary" onclick="make_change('sm-to-sr{{ loop.index }}', 'sm-to-sr', 'sm')" style="width:110px;">&#8593; SM to SR</button>
+                        <button id="sm-to-sr{{ loop.index }}" value="{{ sms.user.email }}" class="btn btn-primary" onclick="makeChange('sm-to-sr{{ loop.index }}', 'sm-to-sr', 'sm')" style="width:110px;">&#8593; SM to SR</button>
                     </td>
                     <td class="align-middle">
                     </td>
                     <td class="align-middle">
-                        <button id="sm-remove{{ loop.index }}" value="{{ sms.user.email }}" class="btn btn-danger" onclick="make_change('sm-to-sr{{ loop.index }}', 'remove', 'sm')" style="width:250px;">Remove from Workgroup</button>
+                        <button id="sm-remove{{ loop.index }}" value="{{ sms.user.email }}" class="btn btn-danger" onclick="makeChange('sm-to-sr{{ loop.index }}', 'remove', 'sm')" style="width:250px;">Remove from Workgroup</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -106,45 +110,68 @@
         <div class="tab-pane fade" id="requests" role="tabpanel">
             <br>
             <h4>Users can be added to workgroups by email or using the QR code</h4>
-            <form action="{{ url_for('join_workgroup.add_user_by_email') }}">
-              <label for="email-to-add">User Email:</label>
-              <input type="text" id="email-to-add" name="email">
-                <input type="text" id="workgroup-name" name="workgroup" hidden value="{{ current_workgroup }}">
-              <input type="submit" value="Submit" class="btn btn-primary">
-            </form>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-2">
+                      <button class="btn icon" onclick="addUserByEmailModal()" style="margin-left: 15px;"><i class="bi bi-envelope-plus"></i></button>
+                      <br>
+                      <b>Add by email</b>
+                    </div>
+
+                     <div class="col-2">
+                      <button class="btn icon" onclick="" style="margin-left: 20px;"><i class="bi bi-qr-code"></i></button>
+                      <br>
+                      <b>Add by QR Code</b>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
-<input type="hidden" id="current_workgroup" value="{{ current_workgroup }}">
-<script>
-    function make_change(id, mode, current_status){
 
-        if (mode === "remove"){
-            const completeConfirm = window.confirm("Are you sure you want to remove this user entirely from the Workgroup? They will also be removed from any Workbooks they are part of within this Workgroup.");
-            if (completeConfirm === false) {
-                return;
-            }
-        }
-        let email = $("#" + id).val()
-        let workgroup = $("#current_workgroup").val();
-        fetch('/manage_workgroup/make_change/' + workgroup + '/' + email + '/' + mode + '/' + current_status).then(function(response) {
-            response.json().then(function(data) {
-                alert(data.feedback);
-                window.location.href = "/manage_workgroup/" + workgroup;
-            });
-        });
-    }
-    function make_change_request(id, mode, decision){
-        let email = $("#" + id).val()
-        let workgroup = $("#current_workgroup").val();
-        fetch('/manage_workgroup/change_status_request/' + workgroup + '/' + email + '/' + mode + '/' + decision).then(function(response) {
-            response.json().then(function(data) {
-                alert(data.feedback);
-                window.location.href = "/manage_workgroup/" + workgroup + "/yes";
-            });
-        });
-    }
-</script>
+<!--ADD USER BY EMAIL MODAL-->
+    <div class="modal fade" id="add-user-modal" tabindex="-1" role="dialog" aria-labelledby="add-user-modal-title">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="add-user-modal-title">Add New User</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div id="add-user-body">
+              <div id="add-user-inner-body">
+                  <br>
+                  <form id="add-user-form" action="{{ url_for('manage_workgroup.add_user_by_email') }}">
+                      <label class="new-reaction-label">
+                          User email
+                          <input id="user-email" class="new-reaction-input" name="email">
+                      </label>
+                      <b style="margin-left: 20px;"> Add User as: </b>
+                      <label class="new-reaction-label">
+                          Standard Member
+                          <input value="standard_member" type="radio" class="radio-input" name="user_type">
+                      </label>
+                      <label class="new-reaction-label">
+                          Senior Researcher
+                          <input value="senior_researcher" type="radio" class="radio-input" name="user_type">
+                      </label>
+                      <label class="new-reaction-label">
+                          Principal Investigator
+                          <input value="principal_investigator" type="radio" class="radio-input" name="use_-type">
+                      </label>
+                      <input hidden id="workgroup" value="{{ current_workgroup }}" name="workgroup">
+                  </form>
+                  <div style="padding-left: 5px; color: red" id="error-warning-new-reaction"></div>
+              </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal" id="new-reaction-data-close">Cancel</button>
+            <button type="submit" form="add-user-form" class="btn btn-success" id="new-reaction-data-submit">Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
 {% endblock %}
 
 
