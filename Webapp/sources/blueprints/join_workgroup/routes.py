@@ -95,9 +95,3 @@ def join_workgroup(workgroup=None) -> Response:
         "Your membership has been requested. You will receive a notification when your request has been considered."
     )
     return redirect(url_for("main.index"))
-# return render_template(
-    #     "join_workgroup.html",
-    #     form=form,
-    #     workgroups=workgroups_dropdown,
-    #     notification_number=notification_number,
-    # )
