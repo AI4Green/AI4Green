@@ -46,9 +46,22 @@ function generateQRCode(){
     })
     .then(function(response) { return response.json() })
     .then(function(item) {
-        //$("#qr-code").setAttribute("src", "data:image/png;base64," + item)
         document.getElementById("qr-code").setAttribute("src", "data:image/png;base64," + item)
-        console.log("data:image/png;base64," + item)
-        modal = $("#qr-code-modal").modal("show")
+        $("#qr-code-modal").modal("show")
     })
+}
+
+function createQRCodeElement () {
+    const element = document.getElementById("print-container").cloneNode(true);
+
+    const elementToPrint = document.createElement("div");
+    elementToPrint.appendChild(element);
+
+    return elementToPrint
+}
+
+
+function printQRCode(){
+     const qrCode = createQRCodeElement()
+     window.print(qrCode)
 }

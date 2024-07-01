@@ -3,6 +3,7 @@
 <head>
     <script type="text/javascript" src="{{ url_for('static', filename='js/manage_workgroup.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/new_reaction.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
 </head>
 <div id="container" class="container">
     <h2>Manage Workgroup</h2>
@@ -254,15 +255,15 @@
           </div>
           <div id="qr-code-body">
               <div id="qr-code-inner-body">
-                  <div id="qr-container" class="container-fluid text-center">
+                  <div id="print-container" class="container-fluid text-center">
                     <img id="qr-code" width="300" height="300">
                   </div>
               </div>
 
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-danger" data-dismiss="modal" id="new-reaction-data-close">Cancel</button>
-            <button type="submit" form="add-user-form" class="btn btn-success" id="new-reaction-data-submit">Add</button>
+            <button type="button" class="btn btn-danger" data-dismiss="modal" id="qr-cancel">Cancel</button>
+              <button type="button" class="btn btn-success" id="qr-print" onclick="printQRCode()">Print</button>
           </div>
         </div>
       </div>
