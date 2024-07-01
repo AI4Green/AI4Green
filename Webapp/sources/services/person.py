@@ -30,6 +30,7 @@ def from_id(person_id: int) -> models.Person:
 def from_email(person_email: str) -> models.Person:
     return (
         db.session.query(models.Person)
-        .filter(models.Person.id == person_email)
+        .join(models.User)
+        .filter(models.User.email == person_email)
         .first()
     )

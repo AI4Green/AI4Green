@@ -10,6 +10,7 @@ function makeChange(id, mode, current_status){
     let workgroup = $("#current_workgroup").val();
     fetch('/manage_workgroup/make_change/' + workgroup + '/' + email + '/' + mode + '/' + current_status).then(function(response) {
         response.json().then(function(data) {
+            console.log(data)
             alert(data.feedback);
             window.location.href = "/manage_workgroup/" + workgroup;
         });
@@ -31,3 +32,23 @@ function addUserByEmailModal(){
     modal = $("#add-user-modal").modal("show")
 }
 
+function generateQRCode(){
+    let currentWorkgroup = $("#current_workgroup").val();
+
+    fetch("/generate_qr_code/" + currentWorkgroup, {
+        headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({
+        workgroup: currentWorkgroup
+        })
+    })
+    .then(function(response) { return response.json() })
+    .then(function(item) {
+        //$("#qr-code").setAttribute("src", "data:image/png;base64," + item)
+        document.getElementById("qr-code").setAttribute("src", "data:image/png;base64," + item)
+        console.log("data:image/png;base64," + item)
+        modal = $("#qr-code-modal").modal("show")
+    })
+}

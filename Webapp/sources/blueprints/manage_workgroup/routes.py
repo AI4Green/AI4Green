@@ -1,6 +1,8 @@
 from datetime import datetime
+from io import BytesIO
+import os
 
-from flask import Response, flash, jsonify, redirect, render_template, url_for, request
+from flask import Response, flash, jsonify, redirect, render_template, url_for, request, current_app
 from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
@@ -17,6 +19,9 @@ from sources.auxiliary import (
     workgroup_dict,
 )
 from sources.extensions import db
+
+import qrcode
+import base64
 
 from . import manage_workgroup_bp
 
@@ -348,23 +353,48 @@ def add_user_by_email(workgroup):
     email = request.args.get("email")
     user_type = request.args.get("user_type")
 
-    print(workgroup_dict)
-
     person = services.person.from_email(email)
+    if not person:
+        flash(f"User with email: {email} does not exist! Please try again.")
+        return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
+
     wg = services.workgroup.get_workgroup_from_workgroup_name(workgroup)
 
-
+    getattr(person, workgroup_dict[user_type]["person_to_wg_attr"]).add(wg)
+    db.session.commit()
 
     # set variables according to new role and workgroup
-    new_role_display_string = workgroup_dict[new_role]["display_string"]
-    request_type = f"Request to become a {new_role_display_string}"
+    new_role_display_string = workgroup_dict[user_type]["display_string"]
+
+    # set email to send to user added to workgroup
     info = (
         f"Your request to become a {new_role_display_string} in Workgroup, {wg.name}, "
         f"has been approved!"
     )
-    feedback = (
-        f"{person.user.fullname} has changed role from {workgroup_dict[old_role]['display_string']} "
-        f"to {workgroup_dict[new_role]['display_string']}"
-    )
 
-    print(email, workgroup, user_type)
+    flash(f"User with email: {email} has been added as {new_role_display_string}")
+    return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
+
+
+@manage_workgroup_bp.route("/generate_qr_code/<workgroup>", methods=["GET", "POST"])
+@principal_investigator_required
+def generate_qr_code(workgroup=None):
+    # qr = QRCode(version=3, box_size=20, border=10, error_correction=constants.ERROR_CORRECT_H)
+    token = services.email.get_encoded_token(1000000, {"workgroup": workgroup})
+    url = current_app.config["SERVER_NAME"] + "/qr_add_user/" + token
+    print(url)
+
+    qr = qrcode.make(url)
+    buffer = BytesIO()
+    qr.save(buffer, format="PNG")
+    qr_img = base64.b64encode(buffer.getvalue()).decode()
+
+    return jsonify(qr_img)
+
+
+@manage_workgroup_bp.route("/qr_add_user/<token>", methods=["GET", "POST"])
+def add_user_by_qr(token=None):
+
+    workgroup = services.email.verify_qr_code_for_add_user_token(token)
+    if workgroup:
+        return redirect(url_for("join_workgroup.join_workgroup", workgroup=workgroup))

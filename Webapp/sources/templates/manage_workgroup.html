@@ -192,7 +192,7 @@
                         </div>
 
                          <div class="col-2">
-                          <button class="btn icon" onclick="" style="margin-left: 20px;"><i class="bi bi-qr-code"></i></button>
+                          <button class="btn icon" onclick="generateQRCode()" style="margin-left: 20px;"><i class="bi bi-qr-code"></i></button>
                           <br>
                           <b>Add by QR Code</b>
                         </div>
@@ -244,6 +244,28 @@
         </div>
       </div>
     </div>
-</div>
+<!--ADD USER BY QR CODE MODAL-->
+    <div class="modal fade" id="qr-code-modal" tabindex="-1" role="dialog" aria-labelledby="add-user-modal-title">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="qr-code-modal-title">Add User by QR Code</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div id="qr-code-body">
+              <div id="qr-code-inner-body">
+                  <div id="qr-container" class="container-fluid text-center">
+                    <img id="qr-code" width="300" height="300">
+                  </div>
+              </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal" id="new-reaction-data-close">Cancel</button>
+            <button type="submit" form="add-user-form" class="btn btn-success" id="new-reaction-data-submit">Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
 {% endblock %}

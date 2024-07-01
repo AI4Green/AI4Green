@@ -3,8 +3,12 @@ from typing import Dict, Optional, Tuple
 
 import jwt
 from flask import current_app, render_template
+
+import sources.services.workgroup
 from sources import models
 from sources.extensions import mail
+
+from qrcode import QRCode
 
 
 def send_data_export_approval_request(
@@ -206,6 +210,27 @@ def verify_data_export_token(
         return user, data_export_request
 
     return None, None
+
+
+def verify_qr_code_for_add_user_token(
+    token: str,
+) -> Optional[str]:
+    """
+    Verify token link is valid and return workgroup to add user to.
+
+    Args:
+        token: Token to verify.
+
+    Returns:
+        models.Workgroup, workgroup to add user to
+    """
+    decoded_token = decode_token(token)
+
+    if decoded_token:
+        workgroup_name = decoded_token.get("workgroup")
+        return workgroup_name
+
+    return None
 
 
 def decode_token(token: str) -> Dict:
