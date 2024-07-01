@@ -397,7 +397,7 @@ def generate_qr_code(workgroup=None):
     qr.add_data(url)
     qr.make(fit=True)
 
-    img = qr.make_image(fill_color="#82F5A8", back_color="#777778")
+    img = qr.make_image(fill_color="#777778", back_color="white")
     pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
     img.paste(logo, pos)
 
