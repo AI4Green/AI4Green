@@ -17,7 +17,7 @@
             <a class="nav-link {% if has_request == "yes" %}active{% endif %}" role="tab" data-toggle="tab" href="#requests" aria-selected="{% if has_request == "no" %}false{% else %}true{% endif %}">Requests</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link {% if has_request == "yes" %}active{% endif %}" role="tab" data-toggle="tab" href="#add-users" aria-selected="{% if has_request == "no" %}false{% else %}true{% endif %}">Add Users</a>
+            <a class="nav-link" role="tab" data-toggle="tab" href="#add-users" aria-selected="{% if has_request == "no" %}false{% else %}true{% endif %}">Add Users</a>
         </li>
     </ul>
     <div class="tab-content">
@@ -180,7 +180,7 @@
             </div>
 
             <!--add users tab-->
-            <div class="tab-pane fade" id="add-users" role="tabpanel">
+            <div class="tab-pane fade in" id="add-users" role="tabpanel">
                 <br>
                 <h4>Users can be added to workgroups by email or using the QR code</h4>
                 <div class="container-fluid">

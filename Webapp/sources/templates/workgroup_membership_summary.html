@@ -10,7 +10,7 @@
         {{ form.workgroups }} <br><br>
         {{ form.submit(class_="btn btn-primary") }}<br>
     </form>
-    No workgroups shown? Click <a id="join-workgroup" href="{{ url_for('join_workgroup.join_workgroup') }}">here</a> to join a workgroup.<br><br>
+    No workgroups shown? Click <a id="join-workgroup" href="{{ url_for('create_workgroup.create_workgroup') }}">here</a> to create a workgroup.<br><br>
     {% if workbooks is defined %}
     Workgroup Selected:<br>
     <b>{{ workgroup }}</b><br><br>
