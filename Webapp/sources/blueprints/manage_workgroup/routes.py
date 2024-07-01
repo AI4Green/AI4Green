@@ -22,6 +22,7 @@ from sources.extensions import db
 
 import qrcode
 import base64
+from PIL import Image
 
 from . import manage_workgroup_bp
 
@@ -382,11 +383,26 @@ def generate_qr_code(workgroup=None):
     # qr = QRCode(version=3, box_size=20, border=10, error_correction=constants.ERROR_CORRECT_H)
     token = services.email.get_encoded_token(1000000, {"workgroup": workgroup})
     url = current_app.config["SERVER_NAME"] + "/qr_add_user/" + token
+    logo = Image.open(
+        "sources/static/img/favicon.ico"
+    )
+
     print(url)
 
-    qr = qrcode.make(url)
+    qr = qrcode.QRCode(
+        version=1,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(url)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="#82F5A8", back_color="#777778")
+    pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
+    img.paste(logo, pos)
+
     buffer = BytesIO()
-    qr.save(buffer, format="PNG")
+    img.save(buffer, kind="PNG")
     qr_img = base64.b64encode(buffer.getvalue()).decode()
 
     return jsonify(qr_img)
