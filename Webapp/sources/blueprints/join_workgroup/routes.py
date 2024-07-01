@@ -12,7 +12,6 @@ from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db
 
 from . import join_workgroup_bp  # imports the blueprint of the dummy route
-from .forms import JoinWorkgroupForm
 
 
 @join_workgroup_bp.route("/join_workgroup/<workgroup>", methods=["GET", "POST"])
