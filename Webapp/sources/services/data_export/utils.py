@@ -1,7 +1,7 @@
 import json
 from typing import List, Optional
 
-from sources import models
+from sources import models, services
 
 
 def validate_reaction(reaction: models.Reaction) -> bool:
@@ -12,7 +12,7 @@ def validate_reaction(reaction: models.Reaction) -> bool:
         True if the reaction is valid (user has entered a yield) and False if it is not.
     """
     yield_mass = json.loads(reaction.summary_table_data).get("real_product_mass")
-    if yield_mass and yield_mass.isdigit():
+    if yield_mass and services.utils.check_is_number(yield_mass):
         return True
     return False
 

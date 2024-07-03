@@ -35,3 +35,12 @@ def get_app_version() -> Tuple[str, str]:
             git_hash = f.read().strip()
 
     return app_version, git_hash
+
+
+def check_is_number(string: str) -> bool:
+    """Checks whether a string is a numerical value including decimals"""
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False

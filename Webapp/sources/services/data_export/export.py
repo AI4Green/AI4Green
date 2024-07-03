@@ -31,10 +31,12 @@ def make_sas_link(data_export_request: models.DataExportRequest) -> str:
         str: The SAS URL for accessing the blob with the generated SAS token appended as query parameters.
     """
     blob_service_client = services.file_attachments.connect_to_azure_blob_service()
+    blob_name = data_export_request.uuid + get_export_file_extension(
+        data_export_request.data_format.value
+    )
     blob_client = blob_service_client.get_blob_client(
         container="export-outputs",
-        blob=data_export_request.uuid
-        + get_export_file_extension(data_export_request.data_format.value),
+        blob=blob_name,
     )
     # Set the start time and expiry time for the SAS token
     start_time = datetime.utcnow()
@@ -42,7 +44,13 @@ def make_sas_link(data_export_request: models.DataExportRequest) -> str:
 
     # Define permissions for the SAS token
     permissions = BlobSasPermissions(read=True)
-    filename = services.data_export.eln_file.get_root_name(data_export_request) + ".eln"
+    # ELN file name should match the root folder name not the export uuid
+    if data_export_request.data_format.value == "ELN":
+        filename = (
+            services.data_export.eln_file.get_root_name(data_export_request) + ".eln"
+        )
+    else:
+        filename = blob_name
 
     # Generate the SAS token
     sas_token = generate_blob_sas(
@@ -355,10 +363,7 @@ def save_blob(container_name: str, filename: str, file_contents: bytearray):
     blob_client = services.file_attachments.get_blob_client(container_name, filename)
     # Upload the blob data
     upload = io.BytesIO(file_contents)
-    blob_client.upload_blob(
-        upload, blob_type="BlockBlob", overwrite=True
-    )  # todo overwrite=True is debugging dev code
-
+    blob_client.upload_blob(upload, blob_type="BlockBlob")
     # confirm upload
     if not blob_client.exists():
         print(f"blob {filename} upload failed")

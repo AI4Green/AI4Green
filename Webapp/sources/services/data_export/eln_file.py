@@ -10,6 +10,7 @@ from urllib.parse import quote
 
 import pytz
 import sources.services.data_export.export
+from bs4 import BeautifulSoup
 from flask import abort, render_template, url_for
 from rdkit.Chem import rdChemReactions
 from rdkit.Chem.Draw import ReactionToImage
@@ -70,7 +71,7 @@ class ELNFileExport:
                 abort(401)
 
     def _make_reaction_folders(self):
-        """Makes a directory in the ELN for each reaction being exported"""
+        """Makes a subdirectory in the .ELN zip export for each reaction being exported"""
         for reaction in self.reaction_list:
             # for each reaction make a folder named after the dataset (workbook) with all belonging files included
             subdirectory = reaction.reaction.reaction_id + "/"
@@ -102,11 +103,10 @@ class ELNFileExport:
     def _make_ro_crate_metadata_json(self):
         """Makes the metadata json file that describes the export contents."""
         ro_crate_graph = []
-        # these parts are common to all .eln files from AI4Green
         ro_crate_graph += get_constant_ro_crate_start()
-        ro_crate_graph.append(self._describe_root_directory())
-        # ro_crate_graph += [self._describe_root_directory()]
         # update the ro-crate with export specific data
+        ro_crate_graph.append(self._describe_root_directory())
+
         for rxn in self.reaction_list:
             ro_crate_graph.append(rxn.defined_dataset)
 
@@ -208,9 +208,8 @@ class ELNExportReaction:
         self.defined_comments = []
         self.defined_files = []
         self.defined_dataset = []
-        self.rxn_metadata = services.data_export.metadata.ReactionMetaData(
-            reaction
-        ).get_dict()
+        self.metadata = services.data_export.metadata.ReactionMetaData(reaction)
+        self.rxn_metadata = self.metadata.get_dict()
 
     def make_export_files(self):
         """Makes files which are included with the ELN File export. Includes: .rdf"""
@@ -332,103 +331,56 @@ class ELNExportReaction:
                 description = "Reaction data uploaded by user"
         return description
 
-    @staticmethod
-    def replace_inputs_with_values(html_code: str):
-        # Regular expression to find all <td><input ... value="..."></td> patterns
-        pattern = re.compile(r'<td><input[^>]*value="([^"]*)"[^>]*></td>')
+    def replace_inputs_with_values(self):
+        """
+        Replaces <td><input ... value="..."></td> patterns with <td>value</td> in the summary_soup.
+        """
+        for td in self.summary_soup.find_all("td"):
+            input_tag = td.find("input", {"value": True})
+            if input_tag:
+                td.string = input_tag["value"]
+                input_tag.decompose()
 
-        # Function to replace each match
-        def replace_match(match):
-            value = match.group(1)
-            return f"<td>{value}</td>"
+    def replace_inputs_with_dict(self, value_dict: Dict[str, str]):
+        """
+        Replaces <td><input ...></td> patterns with <td>value</td> based on a dictionary that maps input ids to values.
 
-        # Replace all matches in the HTML code
-        new_html_code = pattern.sub(replace_match, html_code)
+        Args:
+            value_dict (Dict[str, str]): A dictionary mapping input ids to their replacement values.
+        """
+        for td in self.summary_soup.find_all("td"):
+            input_tag = td.find("input", {"id": True})
+            if input_tag and input_tag["id"] in value_dict:
+                td.string = value_dict[input_tag["id"]]
+                input_tag.decompose()
 
-        return new_html_code
+    def remove_unselected_options(self, keep_dict: Dict[str, str]):
+        """
+        Removes unselected <option> elements from <select> tags, keeping only the specified options.
 
-    @staticmethod
-    def replace_inputs_with_dict(html_code: str, value_dict: Dict):
-        # Regular expression to find all <td><input ...></td> patterns
-        pattern = re.compile(r"<td([^>]*)><input([^>]*)></td>")
+        Args:
+            keep_dict (Dict[str, str]): A dictionary mapping select ids to the text of the option to keep.
+        """
+        for select in self.summary_soup.find_all("select", {"id": True}):
+            select_id = select["id"]
+            if select_id in keep_dict:
+                keep_text = keep_dict[select_id]
+                for option in select.find_all("option"):
+                    if option.text.strip() != keep_text:
+                        option.decompose()
 
-        def replace_match(match: re.Match):
-            td_attrs = match.group(1)
-            input_attrs = match.group(2)
-            # Extract the id or name from the input element
-            id_match = re.search(r'id="([^"]+)"', input_attrs)
-            # Get the value from the dictionary if it exists
-            key = id_match.group(1)
-            value = value_dict.get(key, "")
-            # Construct the new <td> element with the value
-            return f"<td{td_attrs}>{value}</td>"
+    def _remove_unchecked_checkboxes(self, id_list: List[str]) -> None:
+        """
+        Removes unchecked checkboxes from <td> tags based on a list of IDs.
 
-        # Replace all matches in the HTML code
-        new_html_code = pattern.sub(replace_match, html_code)
-
-        return new_html_code
-
-    @staticmethod
-    def remove_unselected_options(html_code: str, keep_dict: Dict[str, str]) -> str:
-        # Function to replace select options
-        def replace_select_options(match):
-            select_id = match.group(1)
-            select_attrs = match.group(2)
-            options_html = match.group(3)
-
-            # Find the text to keep for this select element
-            keep_text = keep_dict.get(select_id)
-
-            if keep_text is None:
-                return f'<select id="{select_id}"{select_attrs}></select>'
-
-            # Find all <option> elements
-            option_pattern = re.compile(r"<option[^>]*>(.*?)</option>", re.DOTALL)
-            new_options = []
-
-            for option_match in option_pattern.finditer(options_html):
-                option_text = option_match.group(1).strip()
-                if option_text == keep_text:
-                    new_options.append(option_match.group(0))
-
-            # Create the new <select> content with the filtered options
-            new_options_html = "".join(new_options)
-            return f'<select id="{select_id}"{select_attrs}>{new_options_html}</select>'
-
-        # Regular expression to find <select> elements with their id and options
-        select_pattern = re.compile(
-            r'<select\s+[^>]*id="([^"]+)"([^>]*)>(.*?)</select>', re.DOTALL
-        )
-
-        # Replace <select> elements based on the dictionary
-        new_html_code = select_pattern.sub(replace_select_options, html_code)
-
-        return new_html_code
-
-    @staticmethod
-    def _remove_unchecked_checkboxes(html_code: str, id_list: List[str]):
-        # Create a set from the id list for quick lookup
+        Args:
+            id_list (List[str]): A list of checkbox ids to keep.
+        """
         id_set = set(id_list)
-
-        # Regular expression to match <td> elements containing checkboxes and labels
-        pattern = re.compile(
-            r'<td><input\s+type="checkbox"([^>]*)\s+id="([^"]+)"([^>]*)><label\s+for="([^"]+)">([^<]+)</label></td>'
-        )
-
-        # Function to replace checkboxes based on the given id list
-        def filter_checkboxes(match: re.Match):
-            checkbox_id = match.group(2)
-            if checkbox_id in id_set:
-                # Return the original match if the id is in the id_list
-                return match.group(0)
-            else:
-                # Return an empty string if the id is not in the id_list
-                return ""
-
-        # Replace checkboxes in the HTML code
-        new_html_code = pattern.sub(filter_checkboxes, html_code)
-
-        return new_html_code
+        for td in self.summary_soup.find_all("td"):
+            checkbox = td.find("input", {"type": "checkbox", "id": True})
+            if checkbox and checkbox["id"] not in id_set:
+                td.decompose()
 
     def _get_summary_html(self):
         """Uses the template to generate the HTML summary table for the reaction."""
@@ -436,13 +388,16 @@ class ELNExportReaction:
         print("getting summary")
         summary_table_data = json.loads(self.reaction.summary_table_data)
         summary_table_html = summary_table_data["summary_to_print"]
+        self.summary_soup = BeautifulSoup(summary_table_html, "html.parser")
 
-        summary_table_html = self.replace_inputs_with_values(summary_table_html)
+        # self.summary_soup.find('input', {'id': 'js-risk-score'})['value'] = self.metadata.exported_from_js['risk-score']
+
+        summary_table_html = self.replace_inputs_with_values()
 
         reaction_data = json.loads(self.reaction.reaction_table_data)
         main_product_idx = int(reaction_data["main_product"]) - 1
         theoretical_yield = reaction_data["product_masses"][main_product_idx]
-        sustainability_metirc_value_dict = {
+        id_value_dict = {
             "js-ae": self.rxn_metadata["atom_economy"],
             "js-me": self.rxn_metadata["mass_efficiency"],
             "js-yield": self.rxn_metadata["percent_yield"],
@@ -454,10 +409,11 @@ class ELNExportReaction:
             "js-product-rounded-mass"
             + reaction_data["main_product"]: theoretical_yield,
             "js-temperature": self.rxn_metadata["temperature"],
+            "js-risk-score": self.metadata.exported_from_js["risk-score"],
+            "js-researcher": summary_table_data["researcher"],
+            "js-supervisor": summary_table_data["supervisor"],
         }
-        summary_table_html = self.replace_inputs_with_dict(
-            summary_table_html, sustainability_metirc_value_dict
-        )
+        self.replace_inputs_with_dict(id_value_dict)
 
         dropdowns_value_dict = {
             "js-elements": self.rxn_metadata["element_sustainability"],
@@ -466,20 +422,33 @@ class ELNExportReaction:
             "js-catalyst": self.rxn_metadata["catalyst_use"],
             "js-recovery": self.rxn_metadata["catalyst_recovery"],
         }
-        summary_table_html = self.remove_unselected_options(
-            summary_table_html, dropdowns_value_dict
-        )
+        self.remove_unselected_options(dropdowns_value_dict)
 
         checked_boxes = summary_table_data["radio_buttons"]
-        summary_table_html = self._remove_unchecked_checkboxes(
-            summary_table_html, checked_boxes
-        )
-        summary_table_html = re.sub(
-            r'href="[^"]*"',
-            'href="https://ai4green.app/element_sustainability"',
-            summary_table_html,
-        )
-        # todo get risk score and hazard boxes
+        self._remove_unchecked_checkboxes(checked_boxes)
+        # update the href from relative pass to absolute url
+        a_tag = self.summary_soup.find("a", href="/element_sustainability")
+        if a_tag:
+            a_tag["href"] = "https://ai4green.app/element_sustainability"
+        # get risk data
+        risk_boxes = [
+            "slight",
+            "serious",
+            "major",
+            "lowLikelihood",
+            "possible",
+            "frequentOccur",
+            "individual",
+            "localLabs",
+            "buildingWide",
+        ]
+        checked_risk_boxes = [
+            risk_box for risk_box in risk_boxes if risk_box in checked_boxes
+        ]
+        self._make_checked_risk_boxes_bold(checked_risk_boxes)
+
+        # add signatures
+
         # reaction = rdChemReactions.ReactionFromSmarts(self.reaction.reaction_smiles)
         # scheme_image_bytes = ReactionToImage(reaction, returnPNG=True)
         # scheme_image_base64 = base64.b64encode(scheme_image_bytes).decode("utf-8")
@@ -488,10 +457,30 @@ class ELNExportReaction:
         # )
         # encoded_svg = base64.b64encode(scheme_image.encode("utf-8")).decode("utf-8")
         # data_url = f"data:image/svg+xml;base64,{encoded_svg}"
-        image_element = '<img src="{data_url}" alt="Example SVG" />'
-        # image_element = f"<img src=data:image/png;base64,{scheme_image_base64}>"
-        summary_html = f"<h2>{self.reaction.reaction_id}</h2><div>{image_element}{summary_table_html}</div>"
+        summary_table_html = str(self.summary_soup)
+        summary_html = (
+            f"<h2>{self.reaction.reaction_id}</h2><div>{summary_table_html}</div>"
+        )
         return summary_html
+
+    def _make_checked_risk_boxes_bold(self, checked_risk_boxes: List[str]):
+        """
+        Makes the text of labels bold for the checkboxes specified in the checked_risk_boxes list.
+
+        This method finds all <label> tags in the summary_soup and checks if the 'for' attribute matches any id in the checked_risk_boxes list.
+        If there is a match, it wraps the label text in <b> tags to make it bold.
+
+        Args:
+            checked_risk_boxes (List[str]): A list of checkbox ids for which the associated label text should be made bold.
+        """
+        # Find all label tags
+        labels = self.summary_soup.find_all("label")
+
+        for label in labels:
+            # Check if the for attribute is in the id_list
+            if label["for"] in checked_risk_boxes:
+                # Make the text bold
+                label.string = f"<b>{label.string}</b>"
 
 
 def get_constant_ro_crate_start() -> List[Dict]:

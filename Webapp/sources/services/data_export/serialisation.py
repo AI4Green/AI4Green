@@ -82,10 +82,21 @@ class ReactionDataFileExport:
         """
         reaction_smiles = self._make_reaction_smiles()
         # return None if we cannot make a reaction_container from smiles - likely to be due to no smiles present.
-        if reaction_smiles:
-            rxn = AllChem.ReactionFromSmarts(reaction_smiles, useSmiles=True)
-            return AllChem.ReactionToRxnBlock(rxn, separateAgents=True)
-        return None
+        try:
+            if reaction_smiles:
+                # try with full reaction smiles including agents
+                rxn = AllChem.ReactionFromSmarts(reaction_smiles, useSmiles=True)
+            else:
+                raise ValueError  # Use just reactants and products if agents fail
+        except ValueError:
+            try:
+                rxn = AllChem.ReactionFromSmarts(
+                    self.db_reaction.reaction_smiles, useSmiles=True
+                )
+            except ValueError:
+                return None
+        x = AllChem.ReactionToRxnBlock(rxn, separateAgents=True)
+        return x
 
     def _make_reaction_smiles(self) -> Optional[str]:
         """
@@ -97,18 +108,23 @@ class ReactionDataFileExport:
         reactant_smiles = utils.remove_default_data(self.db_reaction.reactants)
         reagent_smiles = utils.remove_default_data(self.db_reaction.reagents)
         solvent_smiles = services.all_compounds.get_smiles_list(
-            self.db_reaction.solvent
+            self.db_reaction.solvent, self.db_reaction.creator_person
         )
         product_smiles = utils.remove_default_data(self.db_reaction.products)
         if reactant_smiles and product_smiles:
+            # if no reagents or solvents then the dot must be removed
             return (
-                ".".join(reactant_smiles)
-                + ">"
-                + ".".join(reagent_smiles)
-                + "."
-                + ".".join(solvent_smiles)
-                + ">"
-                + ".".join(product_smiles)
+                (
+                    ".".join(reactant_smiles)
+                    + ">"
+                    + ".".join(reagent_smiles)
+                    + "."
+                    + ".".join(solvent_smiles)
+                    + ">"
+                    + ".".join(product_smiles)
+                )
+                .replace(">.", ">")
+                .replace(".>", ">")
             )
         return None
 
