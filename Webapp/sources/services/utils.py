@@ -1,9 +1,8 @@
 import contextlib
-import os
-import re
 from typing import Tuple
 
 import toml
+from flask import current_app
 
 
 def camelCase_to_snake_case(string: str) -> str:
@@ -14,24 +13,24 @@ def camelCase_to_snake_case(string: str) -> str:
 
 
 def get_app_version() -> Tuple[str, str]:
-    app_directory = os.path.dirname(os.path.abspath(__file__))
+    """
+    Returns the current version of the application, with its git commit hash.
 
-    # Traverse up directories to reach the project root
-    project_root = os.path.abspath(os.path.join(app_directory, "..", "..", "..", ".."))
+    We use the relative path to the root from this file, as there are multiple entrypoints to run the application.
 
-    # Construct paths relative to the project root
-    pyproject_path = os.path.join(project_root, "pyproject.toml")
-    hash_file_path = os.path.join(project_root, "hash.txt")
-
+    Returns:
+        app_version - the current version of the app as specified in the pyproject.toml
+        git_hash - the git commit hash saved in hash.txt
+    """
     app_version = ""
     with contextlib.suppress(FileNotFoundError):
-        with open(pyproject_path, "r") as f:
+        with open(current_app.config["PYPROJECT_PATH"], "r") as f:
             config = toml.load(f)
             app_version = config["tool"]["poetry"]["version"]
 
     git_hash = ""
     with contextlib.suppress(FileNotFoundError):
-        with open(hash_file_path, "r") as f:
+        with open(current_app.config["HASH_FILE_PATH"], "r") as f:
             git_hash = f.read().strip()
 
     return app_version, git_hash

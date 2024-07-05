@@ -63,9 +63,7 @@ class ELNFileExport:
             blob_client = self.blob_service_client.get_blob_client(
                 container=self.container_name, blob=blob["name"]
             )
-            blob_client.delete_blob()
-            if blob_client.exists():
-                abort(401)
+            services.file_attachments.delete_blob(blob_client)
 
     def _make_reaction_folders(self):
         """Makes a subdirectory in the .ELN zip export for each reaction being exported"""

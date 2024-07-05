@@ -43,8 +43,8 @@ class BaseConfig(object):  # class to store configuration variables
     MARVIN_JS_API_KEY = os.getenv("MARVIN_JS_API_KEY", "")
 
     # reCaptcha Keys - Change to your own
-    RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY', "")
-    RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY', "")
+    RECAPTCHA_PUBLIC_KEY = os.getenv("RECAPTCHA_PUBLIC_KEY", "")
+    RECAPTCHA_PRIVATE_KEY = os.getenv("RECAPTCHA_PRIVATE_KEY", "")
 
     # Azurite file storage
     AZURE_STORAGE_CONNECTION_STRING = os.getenv(
@@ -53,8 +53,6 @@ class BaseConfig(object):  # class to store configuration variables
     )
     STORAGE_CONTAINER = os.getenv("STORAGE_CONTAINER", "experiment-data")
 
-    # Database Settings
-    database_type = os.getenv("active_db", "postgres")
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/ai4green"
     )
@@ -62,6 +60,15 @@ class BaseConfig(object):  # class to store configuration variables
         "db": SQLALCHEMY_DATABASE_URI,
         "update": "sqlite:///temp_update.sqlite",
     }
+
+    APP_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+
+    # Traverse up directories to reach the project root
+    PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIRECTORY, "..", "..", "..", ".."))
+
+    # Construct paths relative to the project root
+    PYPROJECT_PATH = os.path.join(PROJECT_ROOT, "pyproject.toml")
+    HASH_FILE_PATH = os.path.join(PROJECT_ROOT, "hash.txt")
 
 
 class TestConfig(BaseConfig):
