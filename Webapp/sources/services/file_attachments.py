@@ -249,14 +249,10 @@ class UploadExperimentDataFiles:
 
     def save_validated_files(self):
         for file in self.validated_files:
-            # file name must be unique - needs workgroup/book/reaction_id/filename. Check for uniqueness of filename.
+            # give the filename is a unique identifier and file.filename is the user supplied identifier they see
             filename = str(uuid.uuid4())
             self.save_blob(file, filename)
             print("blob uploaded")
-            # save file details to database, and shorten filename if too long.
-            name, extension = os.path.splitext(file.filename)
-            if len(name) > 21:
-                file.filename = name[0:10] + "..." + name[-10:-1] + extension
             self.save_file_details_to_database(file, filename)
             self.uploaded_files.append(
                 {
