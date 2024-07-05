@@ -226,7 +226,7 @@ class DataExport:
             "export-outputs", zip_blob_name
         )
         upload_blob = io.BytesIO(zip_stream.getvalue())
-        blob_client.upload_blob(upload_blob, overwrite=True)
+        blob_client.upload_blob(upload_blob)
         return blob_client
 
     @staticmethod
@@ -254,7 +254,6 @@ class DataExport:
             self.data_export_request,
         )
         eln_export.make_eln_file()
-        print(eln_export)
         self._make_zip()
 
     def _make_rdf_export(self):

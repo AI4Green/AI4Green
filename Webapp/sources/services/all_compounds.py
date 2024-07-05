@@ -27,8 +27,6 @@ def get_smiles_list(
     for primary_key in primary_key_ls:
         if validate_primary_key(primary_key):
             primary_key = primary_key_resolver(primary_key)
-            # smiles = smiles_from_primary_key(primary_key, person=person)
-
             smiles_ls.append(smiles_from_primary_key(primary_key, person=person))
     return smiles_ls
 
