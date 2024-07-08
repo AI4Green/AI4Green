@@ -9,6 +9,27 @@ from rdkit.Chem.Draw import rdMolDraw2D
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
+from sqlalchemy import func
+
+
+def get_from_name_and_workbook_id(name: str, workbook_id: int) -> models.Reaction:
+    """
+    Retrieves a reaction based on its name and workbook ID.
+
+    Args:
+        name (str): The name of the reaction.
+        workbook_id (int): The ID of the workbook to which the reaction belongs.
+
+    Returns:
+        models.Reaction: The reaction object matching the name and workbook ID.
+    """
+    return (
+        db.session.query(models.Reaction)
+        .filter(func.lower(models.Reaction.name) == name.lower())
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook_id)
+        .first()
+    )
 
 
 def get_current_from_request() -> models.Reaction:
@@ -112,6 +133,9 @@ def get_from_reaction_id_and_workbook_id(
     Args:
         reaction_id - in format WB1-001
         workbook - The workbook the reaction belongs to
+
+    Returns:
+        models.Reaction: The reaction object matching the reaction ID and workbook ID.
     """
     return (
         db.session.query(models.Reaction)
@@ -152,6 +176,16 @@ def list_active_in_workbook(
     elif sort_crit == "AZ":
         reaction_list = query.order_by(models.Reaction.name.asc()).all()
     return reaction_list
+
+
+def from_export_request(reaction_request) -> models.Reaction:
+    return (
+        db.session.query(models.Reaction)
+        .filter(models.Reaction.reaction_id == reaction_request.reaction_id)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == reaction_request.workbook_id)
+        .first()
+    )
 
 
 def make_scheme_list(reaction_list: List[models.Reaction], size: str) -> List[str]:
