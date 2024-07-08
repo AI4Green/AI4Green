@@ -10,7 +10,9 @@ which is from the NovelCompound table and associated with a specific workgroup
 """
 
 
-def get_smiles_list(primary_key_ls: List[Union[Tuple[str, int], int]], person: models.Person = None) -> List[str]:
+def get_smiles_list(
+    primary_key_ls: List[Union[Tuple[str, int], int]], person: models.Person = None
+) -> List[str]:
     """
     Gets SMILES of compounds that could be type Compound (pk is int) or type NovelCompound (pk is Tuple[str, int])
 
@@ -29,7 +31,9 @@ def get_smiles_list(primary_key_ls: List[Union[Tuple[str, int], int]], person: m
     return smiles_ls
 
 
-def smiles_from_primary_key(primary_key: Union[int, Tuple, str], person: models.Person = None) -> str:
+def smiles_from_primary_key(
+    primary_key: Union[int, Tuple, str], person: models.Person = None
+) -> str:
     """
     Gets the SMILES for a compound or a novel compound from the primary key
 

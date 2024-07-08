@@ -331,7 +331,6 @@ async function showSummary(mode) {
       solventPhysicalForms: solventPhysicalForms,
       productHazards: productHazards,
       productPhysicalForms: productPhysicalForms,
-      js_summary_table_data: "no data",
       reactionSmiles: reactionSmiles,
       print: "not to print",
       workgroup: workgroup,

@@ -23,7 +23,6 @@ from sources.auxiliary import (
 from . import export_data_bp
 
 
-# ### structure - 1 route per format
 @export_data_bp.route("/export_data/home", methods=["GET", "POST"])
 @login_required
 def export_data_home():

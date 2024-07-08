@@ -2,12 +2,11 @@
 import datetime
 import io
 import json
+import os
 from typing import Optional
 
-import azure.core.exceptions
 import pytz
 import sources.services.data_export.export
-from flask import abort
 from rdkit.Chem import AllChem
 from sources import models, services
 
@@ -51,15 +50,25 @@ class ReactionDataFileExport:
         self.memory_file = None
         self.file_contents = None
         self.file_hash = None
+        self.mime_type = None
+        self.content_size = None
 
-    def save(self):
+    def save(self, extension=True):
         """Calls the appropriate method to save the data. Can't use .RDF without a reaction_container object"""
         if self.reaction_object:
-            self.filename += ".rdf"
+            if extension is True:
+                self.filename += ".rdf"
             self._save_as_rdf()
+            self.mime_type = "chemical/x-mdl-rdfile"
         else:
-            self.filename += ".json"
+            if extension is True:
+                self.filename += ".json"
             self._save_as_json()
+            self.mime_type = "application/json"
+
+        self.file_hash = services.file_attachments.sha256_from_file_contents(
+            self.file_contents
+        )
         sources.services.data_export.export.save_blob(
             self.container_name, self.filename, self.file_contents
         )
@@ -141,14 +150,19 @@ class ReactionDataFileExport:
             f.write(rdf_contents)
             # add dict / extra data
             self.file_contents = bytearray(f.getvalue(), "utf-8")
+            self.content_size = f.seek(0, os.SEEK_END)
 
     def _save_as_json(self):
-        """Saves a JSON as a bytearray to self.memory_file. This is used over rdf when no reaction smiles are present"""
+        """
+        Saves a JSON as a bytearray to self.memory_file.
+        This is used instead of rdf if there is an error with the reaction SMILES
+        """
         self.memory_file = io.StringIO()
 
         with self.memory_file as f:
             json.dump(self.metadata, f)
             self.file_contents = bytearray(f.getvalue(), "utf-8")
+            self.content_size = f.seek(0, os.SEEK_END)
 
 
 class JsonExport:
@@ -178,12 +192,15 @@ class JsonExport:
     def save(self):
         self._save_json()
         self.filename += ".json"
+        self.file_hash = services.file_attachments.sha256_from_file_contents(
+            self.file_contents
+        )
         sources.services.data_export.export.save_blob(
             self.container_name, self.filename, self.file_contents
         )
 
     def _save_json(self):
-        """Saves a JSON as a bytearray to self.memory_file. This is used over rdf when no reaction smiles are present"""
+        """Saves a JSON as a bytearray to self.memory_file."""
         self.memory_file = io.StringIO()
 
         with self.memory_file as f:
