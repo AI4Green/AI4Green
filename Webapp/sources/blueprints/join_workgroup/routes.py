@@ -8,7 +8,7 @@ from flask_login import (  # protects a view function against anonymous users
 )
 from sources.decorators import principal_investigator_required
 from sources import models, services
-from sources.auxiliary import get_notification_number, get_workgroups
+from sources.auxiliary import get_notification_number, get_workgroups, make_objects_inactive, workgroup_dict
 from sources.extensions import db
 
 from . import join_workgroup_bp  # imports the blueprint of the dummy route
@@ -95,3 +95,43 @@ def join_workgroup(workgroup=None) -> Response:
         "Your membership has been requested. You will receive a notification when your request has been considered."
     )
     return redirect(url_for("main.index"))
+
+
+@join_workgroup_bp.route("/join_workgroup_response/<notification>/<decision>", methods=["GET", "POST"])
+def join_workgroup_response(notification=None, decision=None):
+
+    if notification:
+        notification = (
+            db.session.query(models.Notification)
+            .filter(models.Notification.id == notification)
+            .first()
+        )
+        make_objects_inactive([notification])
+        workgroup = services.workgroup.get_workgroup_from_workgroup_name(notification.wg)
+        if decision == "accept":
+            person = services.person.from_current_user_email()
+
+            wg_request = (
+                db.session.query(models.WGStatusRequest)
+                .join(models.Person, models.WGStatusRequest.person == models.Person.id)
+                .filter(models.WGStatusRequest.notification == notification.id)
+                .join(models.User)
+                .filter(models.User.email == current_user.email)
+                .join(models.WorkGroup)
+                .filter(models.WorkGroup.id == workgroup.id)
+                .first()
+            )
+            make_objects_inactive([wg_request])
+
+            user_type = wg_request.new_role
+
+            getattr(person, workgroup_dict[user_type]["person_to_wg_attr"]).add(workgroup)
+            db.session.commit()
+            flash(f"You have been successfully added to the Workgroup: {workgroup.name}")
+            return redirect(url_for("main.index"))
+        else:
+            flash(f"You have not been added to the Workgroup: {workgroup.name}")
+            return redirect(url_for("main.index"))
+
+
+
