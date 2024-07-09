@@ -107,7 +107,7 @@ def join_workgroup_response(notification=None, decision=None):
             .first()
         )
         make_objects_inactive([notification])
-        workgroup = services.workgroup.get_workgroup_from_workgroup_name(notification.wg)
+        workgroup = services.workgroup.from_name(notification.wg)
         if decision == "accept":
             person = services.person.from_current_user_email()
 

@@ -361,7 +361,9 @@ def add_user_by_email(workgroup):
         flash(f"User with email: {email} does not exist! Please try again.")
         return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
 
-    wg = services.workgroup.get_workgroup_from_workgroup_name(workgroup)
+    wg = services.workgroup.from_name(workgroup)
+
+
 
     notification = models.Notification(
         person=added_person.id,

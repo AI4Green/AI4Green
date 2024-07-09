@@ -28,7 +28,7 @@ def workgroup(
     workgroups = get_workgroups()
 
     # finds workgroup object (needs institution later)
-    workgroup_selected_obj = services.workgroup.get_workgroup_from_workgroup_name(workgroup_selected)
+    workgroup_selected_obj = services.workgroup.from_name(workgroup_selected)
     approval_status = workgroup_selected_obj.approved
     notification_number = get_notification_number()
 
