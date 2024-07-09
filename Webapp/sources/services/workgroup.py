@@ -46,22 +46,6 @@ def get_new_workgroup_requests() -> List[models.WorkGroupRequest]:
     )
 
 
-def get_workgroup_from_workgroup_name(workgroup_name: str) -> models.WorkGroup:
-    """
-    Gets models.WorkGroup object from workgroup name
-    Args:
-        workgroup_name: str, name of workgroup to return
-
-    Returns:
-        models.WorkGroup with matching name
-    """
-    return (
-        db.session.query(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_name)
-        .first()
-    )
-
-
 def get_workgroup_pi(workgroup_name: str) -> List[models.User]:
     """
     Gets a list of all Principal Investigator users for the specified workgroup
