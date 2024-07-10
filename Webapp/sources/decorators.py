@@ -15,7 +15,7 @@ def principal_investigator_required(f):
     @wraps(f)
     def decorated_function(workgroup=None, *args, **kwargs):
         workgroup = _get_workgroup(workgroup)
-        if services.workgroup.get_user_type(workgroup) != "principal_investigator":
+        if services.workgroup.get_user_type(workgroup, current_user) != "principal_investigator":
             flash("You do not have permission to view this page")
             return redirect(url_for("main.index"))
         return f(workgroup, *args, **kwargs)

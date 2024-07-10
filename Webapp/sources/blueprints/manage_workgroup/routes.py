@@ -354,6 +354,8 @@ def add_user_by_email(workgroup):
     email = request.args.get("email")
     user_type = request.args.get("user_type")
 
+    user = services.user.from_email(email)
+
     new_role_display_string = workgroup_dict[user_type]["display_string"]
 
     added_person = services.person.from_email(email)
@@ -362,49 +364,46 @@ def add_user_by_email(workgroup):
         return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
 
     wg = services.workgroup.from_name(workgroup)
+    if not services.workgroup.get_user_type(workgroup, user):
+
+        notification = models.Notification(
+            person=added_person.id,
+            type="You Have Been Added to a Workgroup",
+            info="A Principal Investigator has added you to the Workgroup, "
+                 + workgroup
+                 + ", as a "
+                 + new_role_display_string
+                 + ". Please respond below.",
+            time=datetime.now(),
+            status="active",
+            wg=wg.name,
+            wb="",
+            wg_request="added",
+        )
+        services.email.send_notification(added_person)
+        db.session.add(notification)
+        db.session.commit()
+
+        wg_request = models.WGStatusRequest(
+            principal_investigator=current_user.id,
+            person=added_person.id,
+            wg=wg.id,
+            current_role="Non-Member",
+            new_role=user_type,
+            time=datetime.now(),
+            status="active",
+            notification=notification.id,
+        )
+        db.session.add(wg_request)
+        db.session.commit()
+        flash(f"A request has been send to User with email: {email} for this Workgroup!")
+        return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
+
+    else:
+        flash("This user is already a member of this Workgroup!")
+        return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
 
 
-
-    notification = models.Notification(
-        person=added_person.id,
-        type="You Have Been Added to a Workgroup",
-        info="A Principal Investigator has added you to the Workgroup, "
-             + workgroup
-             + ", as a "
-             + new_role_display_string
-             + ". Please respond below.",
-        time=datetime.now(),
-        status="active",
-        wg=wg.name,
-        wb="",
-        wg_request="added",
-    )
-    services.email.send_notification(added_person)
-    db.session.add(notification)
-    db.session.commit()
-
-    wg_request = models.WGStatusRequest(
-        principal_investigator=current_user.id,
-        person=added_person.id,
-        wg=wg.id,
-        current_role="Non-Member",
-        new_role=user_type,
-        time=datetime.now(),
-        status="active",
-        notification=notification.id,
-    )
-    db.session.add(wg_request)
-    db.session.commit()
-
-
-    #getattr(added_person, workgroup_dict[user_type]["person_to_wg_attr"]).add(wg)
-    #db.session.commit()
-
-    # set variables according to new role and workgroup
-    new_role_display_string = workgroup_dict[user_type]["display_string"]
-
-    flash(f"A request has been send to User with email: {email} for this Workgroup!")
-    return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
 
 
 @manage_workgroup_bp.route("/generate_qr_code/<workgroup>", methods=["GET", "POST"])

@@ -106,11 +106,12 @@ def get_workgroup_sm(workgroup_name: str) -> List[models.User]:
     )
 
 
-def get_user_type(workgroup_name: str) -> str:
+def get_user_type(workgroup_name: str, user: models.User) -> str:
     """
     Returns the user type of the current user in the specified workgroup
     Args:
         workgroup_name: str, name of workgroup to search
+        user: models.User, the user for which to check membership
 
     Returns:
         user_type: str, user membership type in specified workgroup or None if user is not in workgroup
@@ -118,15 +119,15 @@ def get_user_type(workgroup_name: str) -> str:
     user_type = None
 
     pi = get_workgroup_pi(workgroup_name)
-    if current_user.email in [user.email for user in pi]:
+    if user.email in [user.email for user in pi]:
         user_type = "principal_investigator"
 
     sr = get_workgroup_sr(workgroup_name)
-    if current_user.email in [user.email for user in sr]:
+    if user.email in [user.email for user in sr]:
         user_type = "senior_researcher"
 
     sm = get_workgroup_sm(workgroup_name)
-    if current_user.email in [user.email for user in sm]:
+    if user.email in [user.email for user in sm]:
         user_type = "standard_member"
 
     return user_type
