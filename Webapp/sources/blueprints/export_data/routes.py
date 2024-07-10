@@ -11,7 +11,7 @@ from flask import (
     request,
     url_for,
 )
-from flask_login import current_user, login_required
+from flask_login import login_required
 from sources import models, services
 from sources.auxiliary import (
     get_notification_number,
@@ -27,6 +27,9 @@ from . import export_data_bp
 @login_required
 def export_data_home():
     workgroups = get_workgroups()
+    print(workgroups)
+    workgroups.reverse()
+    print(workgroups)
     notification_number = get_notification_number()
     return render_template(
         "data_export/data_export_home.html",
@@ -136,9 +139,9 @@ def export_permission():
     The requestor must be either a workbook member or a workgroup PI
     """
     if security_pi_workgroup(
-        request.json["workgroup"]
+        request.json.get("workgroup") and request.json.get("workbook")
     ) or security_member_workgroup_workbook(
-        request.form["workgroup"], request.form["workbook"]
+        request.json.get("workgroup"), request.json.get("workbook")
     ):
         return jsonify("permission accepted")
     else:
@@ -151,10 +154,13 @@ def get_reaction_id_list():
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         request.json["workgroup"], request.json["workbook"]
     )
-    validated_reactions = [
-        rxn
-        for rxn in workbook.reactions
-        if services.data_export.utils.validate_reaction(rxn)
-    ]
-    reaction_ids = [rxn.reaction_id for rxn in validated_reactions]
+    if workbook:
+        validated_reactions = [
+            rxn
+            for rxn in workbook.reactions
+            if services.data_export.utils.validate_reaction(rxn)
+        ]
+        reaction_ids = [rxn.reaction_id for rxn in validated_reactions]
+    else:
+        reaction_ids = []
     return jsonify(reaction_ids)
