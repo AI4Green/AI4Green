@@ -394,11 +394,6 @@ class ELNExportReaction:
             )
             if input_tag:
                 input_tag["value"] = value  # Set the new value
-                input_tag.attrs = {
-                    key: value
-                    for key, value in input_tag.attrs.items()
-                    if key != "placeholder"
-                }
 
     def _get_summary_html(self):
         """Creates a html summary of the pdf from the summary_to_print value and adapts for ELN import"""

@@ -27,9 +27,6 @@ from . import export_data_bp
 @login_required
 def export_data_home():
     workgroups = get_workgroups()
-    print(workgroups)
-    workgroups.reverse()
-    print(workgroups)
     notification_number = get_notification_number()
     return render_template(
         "data_export/data_export_home.html",
