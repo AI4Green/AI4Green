@@ -175,9 +175,7 @@
                 <tr>
                     <td id="js-safety-cell" class="{{ risk_color }}">{{ risk_rating }}</td>
                     <td id="js-temperature-cell"><input type="number" id="js-temperature" placeholder="-" style="width: 80px;"></td>
-{#                    <td id="js-me-cell"><input type="number" id="js-me" class="to-export" name="Mass Efficiency" style="width: 80px; border:none;" readonly></td>#}
                     <td id="js-elements-cell" class="{{ element_sustainability_flag }}"><select size="1" id="js-elements" class="{{ element_sustainability_flag }}">
-{#
                         <option class='hazard-reset-hazard' selected>-select-</option>
                         <option class="hazard-hazardous" {{'selected' if element_sustainability == '5-50 years'}}>5-50 years</option>
                         <option class="hazard-warning" {{'selected' if element_sustainability == '50-500 years'}}>50-500 years</option>
