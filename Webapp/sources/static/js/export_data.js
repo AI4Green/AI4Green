@@ -85,7 +85,7 @@ function checkExportPermissions() {
         );
       } else if (permissionResult === "permission denied") {
         $("#export-permission-result").html(
-          'Only a principal investigator of a workgroup has permission to export data from a workbook. <i class="bi bi-x" style="color:red"></i>',
+          'Please select a valid workbook <i class="bi bi-x" style="color:red"></i>',
         );
       } else {
         $("#export-permission-result").html();
