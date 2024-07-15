@@ -379,29 +379,47 @@ def add_user_by_email(workgroup):
             wb="",
             wg_request="added",
         )
-        services.email.send_notification(added_person)
-        db.session.add(notification)
-        db.session.commit()
 
-        wg_request = models.WGStatusRequest(
-            principal_investigator=current_user.id,
-            person=added_person.id,
-            wg=wg.id,
-            current_role="Non-Member",
-            new_role=user_type,
-            time=datetime.now(),
-            status="active",
-            notification=notification.id,
+        duplicates = (
+            db.session.query(models.WGStatusRequest)
+            .join(models.Person, models.WGStatusRequest.person == models.Person.id)
+            .join(models.User)
+            .filter(models.User.email == user.email)
+            .join(models.WorkGroup)
+            .filter(models.WorkGroup.id == wg.id)
+            .filter(models.WGStatusRequest.status == 'active')
+            .all()
         )
-        db.session.add(wg_request)
-        db.session.commit()
-        flash(f"A request has been send to User with email: {email} for this Workgroup!")
+
+        if duplicates:
+            flash(
+                "This User's membership has already been requested for this Workgroup."
+            )
+
+        else:
+
+            services.email.send_notification(added_person)
+            db.session.add(notification)
+            db.session.commit()
+
+            wg_request = models.WGStatusRequest(
+                principal_investigator=current_user.id,
+                person=added_person.id,
+                wg=wg.id,
+                current_role="Non-Member",
+                new_role=user_type,
+                time=datetime.now(),
+                status="active",
+                notification=notification.id,
+            )
+            db.session.add(wg_request)
+            db.session.commit()
+            flash(f"A request has been send to User with email: {email} for this Workgroup!")
 
     else:
         flash("This user is already a member of this Workgroup!")
 
     return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
-
 
 
 @manage_workgroup_bp.route("/generate_qr_code/<workgroup>", methods=["GET", "POST"])

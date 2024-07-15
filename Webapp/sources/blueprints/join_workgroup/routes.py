@@ -101,37 +101,40 @@ def join_workgroup(workgroup=None) -> Response:
 def join_workgroup_response(notification=None, decision=None):
 
     if notification:
+
         notification = (
             db.session.query(models.Notification)
             .filter(models.Notification.id == notification)
             .first()
         )
+
         make_objects_inactive([notification])
+
         workgroup = services.workgroup.from_name(notification.wg)
+
+        wg_request = (
+            db.session.query(models.WGStatusRequest)
+            .join(models.Person, models.WGStatusRequest.person == models.Person.id)
+            .filter(models.WGStatusRequest.notification == notification.id)
+            .join(models.User)
+            .filter(models.User.email == current_user.email)
+            .join(models.WorkGroup)
+            .filter(models.WorkGroup.id == workgroup.id)
+            .first()
+        )
+        make_objects_inactive([wg_request])
+
         if decision == "accept":
             person = services.person.from_current_user_email()
-
-            wg_request = (
-                db.session.query(models.WGStatusRequest)
-                .join(models.Person, models.WGStatusRequest.person == models.Person.id)
-                .filter(models.WGStatusRequest.notification == notification.id)
-                .join(models.User)
-                .filter(models.User.email == current_user.email)
-                .join(models.WorkGroup)
-                .filter(models.WorkGroup.id == workgroup.id)
-                .first()
-            )
-            make_objects_inactive([wg_request])
 
             user_type = wg_request.new_role
 
             getattr(person, workgroup_dict[user_type]["person_to_wg_attr"]).add(workgroup)
-            db.session.commit()
             flash(f"You have been successfully added to the Workgroup: {workgroup.name}")
-            return redirect(url_for("main.index"))
+
         else:
             flash(f"You have not been added to the Workgroup: {workgroup.name}")
-            return redirect(url_for("main.index"))
 
+        db.session.commit()
 
-
+        return redirect(url_for("main.index"))

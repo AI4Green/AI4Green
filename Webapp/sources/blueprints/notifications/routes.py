@@ -24,6 +24,7 @@ def notifications() -> Response:
         .order_by(models.Notification.time.desc())
         .all()
     )
+    print([i.type for i in notifications_obj])
     for notification in notifications_obj:
         notification.status = "read"
     db.session.commit()
