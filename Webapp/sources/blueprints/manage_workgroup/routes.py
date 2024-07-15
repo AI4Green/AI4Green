@@ -400,6 +400,7 @@ def add_user_by_email(workgroup):
 
             services.email.send_notification(added_person)
             db.session.add(notification)
+            db.session.commit()
 
             wg_request = models.WGStatusRequest(
                 principal_investigator=current_user.id,
