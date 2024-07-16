@@ -426,7 +426,6 @@ def add_user_by_email(workgroup):
 @manage_workgroup_bp.route("/generate_qr_code/<workgroup>", methods=["GET", "POST"])
 @principal_investigator_required
 def generate_qr_code(workgroup=None):
-    # qr = QRCode(version=3, box_size=20, border=10, error_correction=constants.ERROR_CORRECT_H)
     token = services.email.get_encoded_token(31536000, {"workgroup": workgroup})
     url = current_app.config["SERVER_NAME"] + "/qr_add_user/" + token
     logo = Image.open(
@@ -458,3 +457,7 @@ def add_user_by_qr(token=None):
     workgroup = services.email.verify_qr_code_for_add_user_token(token)
     if workgroup:
         return redirect(url_for("join_workgroup.join_workgroup", workgroup=workgroup))
+
+    else:
+        flash("This QR code has expired.")
+        return redirect(url_for("main.index"))
