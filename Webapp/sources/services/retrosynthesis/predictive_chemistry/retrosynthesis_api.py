@@ -25,7 +25,7 @@ def retrosynthesis_api_call(
     except requests.exceptions.ConnectionError:
         return (
             "failed",
-            "Retrosynthesis server is down. If this problem persists you can report to admin@ai4green.app",
+            "Retrosynthesis server is down. If this problem persists please report this error to admin@ai4green.app",
             "",
         )
     if response.status_code == 500:
@@ -92,12 +92,10 @@ def determine_retrosynthesis_error(retrosynthesis_base_url: str) -> str:
         response = requests.get(url)
         response_content = json.loads(response.content["Message"])
     except Exception:
-        return "Retrosynthesis server is down. If this problem persists you can report to admin@ai4green.app"
+        return "Retrosynthesis server is down. If this problem persists please report this error to admin@ai4green.app"
     if not response_content == "Retrosynthesis service is running":
         return (
-            "retrosynthesis service is currently having technical issues. If this problem persists you can report "
-            "to admin@ai4green.app"
+            "retrosynthesis service is currently having technical issues. If this problem persists please report this "
+            "error to admin@ai4green.app"
         )
-    return (
-        "Error with retrosynthesis. You can report this problem to admin@ai4green.app"
-    )
+    return "Error with retrosynthesis. Please report this error to admin@ai4green.app"

@@ -1,8 +1,8 @@
 from typing import List
 
+from flask_login import current_user
 from sources import models
 from sources.extensions import db
-from flask_login import current_user
 
 
 def list_all() -> List[models.WorkBook]:
@@ -77,7 +77,9 @@ def get_workbook_from_group_book_name_combination(
     )
 
 
-def get_newest_reaction_in_workbooks(workbooks: List[models.WorkBook]) -> models.Reaction:
+def get_newest_reaction_in_workbooks(
+    workbooks: List[models.WorkBook],
+) -> models.Reaction:
     """
     Finds the most recent reaction in specified workbooks.
     Args:
@@ -118,3 +120,26 @@ def get_next_reaction_id_in_workbook(workbook: models.WorkBook) -> str:
         int(most_recent_reaction_id.split("-")[-1].lstrip("0")) + 1
     ).zfill(3)
     return f"{workbook_abbreviation}-{new_reaction_id_number}"
+
+
+def workbooks_from_workgroup(workgroup_name: str) -> List[models.WorkBook]:
+    """
+    Get a list of workbooks for a given workgroup, for the current user.
+
+    Args:
+        workgrou_namep: name of the workgroup
+
+    Returns:
+        List of workbooks
+    """
+    workbooks = (
+        db.session.query(models.WorkBook)
+        .join(models.WorkGroup)
+        .join(models.t_Person_WorkBook)
+        .join(models.Person)
+        .join(models.User)
+        .filter(models.WorkGroup.name == workgroup_name)
+        .filter(models.User.email == current_user.email)
+        .all()
+    )
+    return [x for x in workbooks if current_user.Person in x.users]

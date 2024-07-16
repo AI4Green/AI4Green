@@ -71,10 +71,15 @@ def smiles_str_to_list(compound_smiles: str) -> List[str]:
     if ion_check(compound_smiles):
         if "O=C([O-])[O-]" in compound_smiles:
             compound_smiles = fix_carbonates(compound_smiles)
-
+        # same ion method as used elsewhere
         smiles_list = services.ions.update_ion_containing_list(
             compound_smiles.split(".")
         )
+        # todo remove ion function if the services code works
+        # older ion method written for this code
+        # smiles_list = services.ions.update_ion_containing_list(
+        #     compound_smiles.split(".")
+        # )
     else:
         smiles_list = compound_smiles.split(".")
     return smiles_list

@@ -60,19 +60,19 @@ def update_ion_containing_list(compounds_list: List[str]) -> List[str]:
     Returns:
         List[str]: Updated list of compounds.
     """
-    ion_reactants = [
+    ion_compounds = [
         (idx, reactant)
         for idx, reactant in enumerate(compounds_list)
         if "+" in reactant or "-" in reactant
     ]
-    ionic_reactants = ions_to_ionic_compounds(ion_reactants)
+    ionic_compounds = ions_to_ionic_compounds(ion_compounds)
 
-    for idx, ionic_compound in enumerate(ionic_reactants):
+    for idx, ionic_compound in enumerate(ionic_compounds):
         compounds_list.insert(
             ionic_compound["idx_list"][0] + idx, ionic_compound["string"]
         )
 
-    for ionic_compound in ionic_reactants:
+    for ionic_compound in ionic_compounds:
         for ion in ionic_compound["component_ions"]:
             compounds_list.remove(ion)
 

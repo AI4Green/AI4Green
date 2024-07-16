@@ -42,6 +42,19 @@ $(async function () {
 });
 
 /**
+ * Event listener for the retrosynthesis-export button click
+ * Exports the SMILES of either a single structure or the product to the retrosynthesis page
+ * @return {Promise<void>}
+ */
+async function exportDataToRetrosynthesis() {
+  let smiles = await exportSmilesFromActiveEditor();
+  if (smiles.includes(">>")) {
+    smiles = smiles.split(">>")[1];
+  }
+  window.location.href = `/retrosynthesis/${smiles}`;
+}
+
+/**
  * Event listener for the "Example" button click
  * Calls a function to load example smiles into the selected sketcher.
  */

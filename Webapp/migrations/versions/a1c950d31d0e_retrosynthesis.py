@@ -1,15 +1,15 @@
 """retrosynthesis
 
-Revision ID: fcfa97d95a79
+Revision ID: a1c950d31d0e
 Revises: 5f8506546718
-Create Date: 2024-07-15 11:45:46.084626
+Create Date: 2024-07-15 13:52:23.135520
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "fcfa97d95a79"
+revision = "a1c950d31d0e"
 down_revision = "5f8506546718"
 branch_labels = None
 depends_on = None

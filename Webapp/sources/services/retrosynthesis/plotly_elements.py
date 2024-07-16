@@ -443,7 +443,3 @@ references = html.Div(
         ),
     ]
 )
-
-#         <p><b>References:</b></p>
-#         <p>[1] CHEM21 selection guide of classical- and less classical-solvents <i>Green Chem.</i>, 2016, <b>18</b>, 288-296.</p>
-#         <p>[2] Green chemistry tools to influence a medicinal chemistry and research chemistry based organisation <i>Green Chem.</i>, 2008, <b>10</b>, 31-36.</p>

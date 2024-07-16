@@ -32,9 +32,6 @@ def rdkit_smiles_to_image(smiles: str):
     """
     mol = Chem.MolFromSmiles(smiles)
     d = rdMolDraw2D.MolDraw2DCairo(350, 300)
-    d.drawOptions().minFontSize = 22
-    d.drawOptions().maxFontSize = 22
-    d.drawOptions().fixedBondLength = 500
     d.DrawMolecule(mol)
     d.FinishDrawing()
     img_data = d.GetDrawingText()

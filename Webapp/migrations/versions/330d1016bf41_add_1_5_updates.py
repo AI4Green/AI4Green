@@ -54,66 +54,66 @@ def upgrade():
             batch_op.f("ix_ReactionNote_reaction"), ["reaction"], unique=False
         )
 
-    with op.batch_alter_table("Compound", schema=None) as batch_op:
-       batch_op.drop_index("idx_compound__solvent")
-       batch_op.create_index(
-           batch_op.f("ix_Compound_solvent"), ["solvent"], unique=False
-        )
-
-    with op.batch_alter_table("CompoundDataErrorReport", schema=None) as batch_op:
-       batch_op.drop_index("idx_compounddataerrorreport__compound")
-       batch_op.create_index(
-           batch_op.f("ix_CompoundDataErrorReport_compound"),
-           ["compound"],
-           unique=False,
-        )
+    # with op.batch_alter_table("Compound", schema=None) as batch_op:
+    #    batch_op.drop_index("idx_compound__solvent")
+    #    batch_op.create_index(
+    #        batch_op.f("ix_Compound_solvent"), ["solvent"], unique=False
+    #     )
+    #
+    # with op.batch_alter_table("CompoundDataErrorReport", schema=None) as batch_op:
+    #    batch_op.drop_index("idx_compounddataerrorreport__compound")
+    #    batch_op.create_index(
+    #        batch_op.f("ix_CompoundDataErrorReport_compound"),
+    #        ["compound"],
+    #        unique=False,
+    #     )
 
     with op.batch_alter_table("Institution", schema=None) as batch_op:
         batch_op.add_column(sa.Column("time_of_creation", sa.DateTime(), nullable=True))
 
-    with op.batch_alter_table("Notification", schema=None) as batch_op:
-       batch_op.drop_index("idx_notification__person")
-       batch_op.create_index(
-           batch_op.f("ix_Notification_person"), ["person"], unique=False
-        )
+    # with op.batch_alter_table("Notification", schema=None) as batch_op:
+    #    batch_op.drop_index("idx_notification__person")
+    #    batch_op.create_index(
+    #        batch_op.f("ix_Notification_person"), ["person"], unique=False
+    #     )
 
     with op.batch_alter_table("NovelCompound", schema=None) as batch_op:
         batch_op.add_column(sa.Column("time_of_creation", sa.DateTime(), nullable=True))
-        batch_op.drop_index("idx_novelcompound__solvent")
-        batch_op.drop_index("idx_novelcompound__workbook")
-        batch_op.create_index(
-            batch_op.f("ix_NovelCompound_solvent"), ["solvent"], unique=False
-        )
-        batch_op.create_index(
-            batch_op.f("ix_NovelCompound_workbook"), ["workbook"], unique=False
-        )
+        # batch_op.drop_index("idx_novelcompound__solvent")
+        # batch_op.drop_index("idx_novelcompound__workbook")
+        # batch_op.create_index(
+        #     batch_op.f("ix_NovelCompound_solvent"), ["solvent"], unique=False
+        # )
+        # batch_op.create_index(
+        #     batch_op.f("ix_NovelCompound_workbook"), ["workbook"], unique=False
+        # )
 
     with op.batch_alter_table("Person", schema=None) as batch_op:
         batch_op.add_column(sa.Column("time_of_creation", sa.DateTime(), nullable=True))
 
-    with op.batch_alter_table("Person_WorkBook", schema=None) as batch_op:
-        batch_op.drop_index("idx_person_workbook")
-        batch_op.create_index(
-            batch_op.f("ix_Person_WorkBook_workbook"), ["workbook"], unique=False
-        )
+    # with op.batch_alter_table("Person_WorkBook", schema=None) as batch_op:
+    #     batch_op.drop_index("idx_person_workbook")
+    #     batch_op.create_index(
+    #         batch_op.f("ix_Person_WorkBook_workbook"), ["workbook"], unique=False
+    #     )
 
-    with op.batch_alter_table("Person_WorkGroup", schema=None) as batch_op:
-        batch_op.drop_index("idx_person_workgroup")
-        batch_op.create_index(
-            batch_op.f("ix_Person_WorkGroup_workgroup"), ["workgroup"], unique=False
-        )
+    # with op.batch_alter_table("Person_WorkGroup", schema=None) as batch_op:
+    #     batch_op.drop_index("idx_person_workgroup")
+    #     batch_op.create_index(
+    #         batch_op.f("ix_Person_WorkGroup_workgroup"), ["workgroup"], unique=False
+    #     )
 
-    with op.batch_alter_table("Person_WorkGroup_2", schema=None) as batch_op:
-        batch_op.drop_index("idx_person_workgroup_2")
-        batch_op.create_index(
-            batch_op.f("ix_Person_WorkGroup_2_workgroup"), ["workgroup"], unique=False
-        )
+    # with op.batch_alter_table("Person_WorkGroup_2", schema=None) as batch_op:
+    #     batch_op.drop_index("idx_person_workgroup_2")
+    #     batch_op.create_index(
+    #         batch_op.f("ix_Person_WorkGroup_2_workgroup"), ["workgroup"], unique=False
+    #     )
 
-    with op.batch_alter_table("Person_WorkGroup_3", schema=None) as batch_op:
-        batch_op.drop_index("idx_person_workgroup_3")
-        batch_op.create_index(
-            batch_op.f("ix_Person_WorkGroup_3_workgroup"), ["workgroup"], unique=False
-        )
+    # with op.batch_alter_table("Person_WorkGroup_3", schema=None) as batch_op:
+    #     batch_op.drop_index("idx_person_workgroup_3")
+    #     batch_op.create_index(
+    #         batch_op.f("ix_Person_WorkGroup_3_workgroup"), ["workgroup"], unique=False
+    #     )
 
     with op.batch_alter_table("Reaction", schema=None) as batch_op:
         batch_op.alter_column(
@@ -128,16 +128,16 @@ def upgrade():
             type_=sa.JSON(),
             existing_nullable=False,
         )
-        batch_op.drop_index("idx_reaction__creator")
-        batch_op.create_index(
-            batch_op.f("ix_Reaction_creator"), ["creator"], unique=False
-        )
+        # batch_op.drop_index("idx_reaction__creator")
+        # batch_op.create_index(
+        #     batch_op.f("ix_Reaction_creator"), ["creator"], unique=False
+        # )
 
-    with op.batch_alter_table("Reaction_Reaction", schema=None) as batch_op:
-        batch_op.drop_index("idx_reaction_reaction")
-        batch_op.create_index(
-            batch_op.f("ix_Reaction_Reaction_reaction_2"), ["reaction_2"], unique=False
-        )
+    # with op.batch_alter_table("Reaction_Reaction", schema=None) as batch_op:
+    #     batch_op.drop_index("idx_reaction_reaction")
+    #     batch_op.create_index(
+    #         batch_op.f("ix_Reaction_Reaction_reaction_2"), ["reaction_2"], unique=False
+    #     )
 
     with op.batch_alter_table("Solvent", schema=None) as batch_op:
         batch_op.add_column(sa.Column("time_of_creation", sa.DateTime(), nullable=True))
@@ -150,78 +150,78 @@ def upgrade():
             type_=sa.JSON(),
             existing_nullable=False,
         )
-        batch_op.drop_index("idx_user__person")
-        batch_op.drop_index("idx_user__role")
-        batch_op.create_index(batch_op.f("ix_User_person"), ["person"], unique=False)
-        batch_op.create_index(batch_op.f("ix_User_role"), ["role"], unique=False)
+        # batch_op.drop_index("idx_user__person")
+        # batch_op.drop_index("idx_user__role")
+        # batch_op.create_index(batch_op.f("ix_User_person"), ["person"], unique=False)
+        # batch_op.create_index(batch_op.f("ix_User_role"), ["role"], unique=False)
 
-    with op.batch_alter_table("WBStatusRequest", schema=None) as batch_op:
-        batch_op.drop_index("idx_wbstatusrequest__notification")
-        batch_op.drop_index("idx_wbstatusrequest__person")
-        batch_op.drop_index("idx_wbstatusrequest__pi_sr")
-        batch_op.drop_index("idx_wbstatusrequest__wb")
-        batch_op.create_index(
-            batch_op.f("ix_WBStatusRequest_notification"),
-            ["notification"],
-            unique=False,
-        )
-        batch_op.create_index(
-            batch_op.f("ix_WBStatusRequest_person"), ["person"], unique=False
-        )
-        batch_op.create_index(
-            batch_op.f("ix_WBStatusRequest_pi_sr"), ["pi_sr"], unique=False
-        )
-        batch_op.create_index(batch_op.f("ix_WBStatusRequest_wb"), ["wb"], unique=False)
+    # with op.batch_alter_table("WBStatusRequest", schema=None) as batch_op:
+    #     batch_op.drop_index("idx_wbstatusrequest__notification")
+    #     batch_op.drop_index("idx_wbstatusrequest__person")
+    #     batch_op.drop_index("idx_wbstatusrequest__pi_sr")
+    #     batch_op.drop_index("idx_wbstatusrequest__wb")
+    #     batch_op.create_index(
+    #         batch_op.f("ix_WBStatusRequest_notification"),
+    #         ["notification"],
+    #         unique=False,
+    #     )
+    #     batch_op.create_index(
+    #         batch_op.f("ix_WBStatusRequest_person"), ["person"], unique=False
+    #     )
+    #     batch_op.create_index(
+    #         batch_op.f("ix_WBStatusRequest_pi_sr"), ["pi_sr"], unique=False
+    #     )
+    #     batch_op.create_index(batch_op.f("ix_WBStatusRequest_wb"), ["wb"], unique=False)
 
-    with op.batch_alter_table("WGStatusRequest", schema=None) as batch_op:
-        batch_op.drop_index("idx_wgstatusrequest__notification")
-        batch_op.drop_index("idx_wgstatusrequest__person")
-        batch_op.drop_index("idx_wgstatusrequest__principal_investigator")
-        batch_op.drop_index("idx_wgstatusrequest__wg")
-        batch_op.create_index(
-            batch_op.f("ix_WGStatusRequest_notification"),
-            ["notification"],
-            unique=False,
-        )
-        batch_op.create_index(
-            batch_op.f("ix_WGStatusRequest_person"), ["person"], unique=False
-        )
-        batch_op.create_index(
-            batch_op.f("ix_WGStatusRequest_principal_investigator"),
-            ["principal_investigator"],
-            unique=False,
-        )
-        batch_op.create_index(batch_op.f("ix_WGStatusRequest_wg"), ["wg"], unique=False)
+    # with op.batch_alter_table("WGStatusRequest", schema=None) as batch_op:
+    #     batch_op.drop_index("idx_wgstatusrequest__notification")
+    #     batch_op.drop_index("idx_wgstatusrequest__person")
+    #     batch_op.drop_index("idx_wgstatusrequest__principal_investigator")
+    #     batch_op.drop_index("idx_wgstatusrequest__wg")
+    #     batch_op.create_index(
+    #         batch_op.f("ix_WGStatusRequest_notification"),
+    #         ["notification"],
+    #         unique=False,
+    #     )
+    #     batch_op.create_index(
+    #         batch_op.f("ix_WGStatusRequest_person"), ["person"], unique=False
+    #     )
+    #     batch_op.create_index(
+    #         batch_op.f("ix_WGStatusRequest_principal_investigator"),
+    #         ["principal_investigator"],
+    #         unique=False,
+    #     )
+    #     batch_op.create_index(batch_op.f("ix_WGStatusRequest_wg"), ["wg"], unique=False)
 
     with op.batch_alter_table("WorkBook", schema=None) as batch_op:
         batch_op.add_column(sa.Column("time_of_creation", sa.DateTime(), nullable=True))
-        batch_op.drop_index("idx_workbook__group")
-        batch_op.create_index(batch_op.f("ix_WorkBook_group"), ["group"], unique=False)
+        # batch_op.drop_index("idx_workbook__group")
+        # batch_op.create_index(batch_op.f("ix_WorkBook_group"), ["group"], unique=False)
 
     with op.batch_alter_table("WorkGroup", schema=None) as batch_op:
         batch_op.add_column(sa.Column("time_of_creation", sa.DateTime(), nullable=True))
-        batch_op.drop_index("idx_workgroup__institution")
-        batch_op.create_index(
-            batch_op.f("ix_WorkGroup_institution"), ["institution"], unique=False
-        )
+        # batch_op.drop_index("idx_workgroup__institution")
+        # batch_op.create_index(
+        #     batch_op.f("ix_WorkGroup_institution"), ["institution"], unique=False
+        # )
 
-    with op.batch_alter_table("WorkGroup_request", schema=None) as batch_op:
-        batch_op.drop_index("idx_workgroup_request__institution")
-        batch_op.drop_index("idx_workgroup_request__principal_investigator")
-        batch_op.drop_index("idx_workgroup_request__workgroup")
-        batch_op.create_index(
-            batch_op.f("ix_WorkGroup_request_institution"),
-            ["institution"],
-            unique=False,
-        )
-        batch_op.create_index(
-            batch_op.f("ix_WorkGroup_request_principal_investigator"),
-            ["principal_investigator"],
-            unique=False,
-        )
-        batch_op.create_index(
-            batch_op.f("ix_WorkGroup_request_workgroup"), ["workgroup"], unique=False
-       )
+    # with op.batch_alter_table("WorkGroup_request", schema=None) as batch_op:
+    #     batch_op.drop_index("idx_workgroup_request__institution")
+    #     batch_op.drop_index("idx_workgroup_request__principal_investigator")
+    #     batch_op.drop_index("idx_workgroup_request__workgroup")
+    #     batch_op.create_index(
+    #         batch_op.f("ix_WorkGroup_request_institution"),
+    #         ["institution"],
+    #         unique=False,
+    #     )
+    #     batch_op.create_index(
+    #         batch_op.f("ix_WorkGroup_request_principal_investigator"),
+    #         ["principal_investigator"],
+    #         unique=False,
+    #     )
+    #     batch_op.create_index(
+    #         batch_op.f("ix_WorkGroup_request_workgroup"), ["workgroup"], unique=False
+    #    )
 
     # ### end Alembic commands ###
 
