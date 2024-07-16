@@ -255,12 +255,19 @@
           </div>
           <div id="qr-code-body">
               <div id="qr-code-inner-body">
-                  <div id="print-container" class="container-fluid text-center">
-                      <br>
-                      <h3 class="text-grey">{{ current_workgroup }} </h3>
-                    <img id="qr-code" width="300" height="300">
-                      <h5 class="text-grey">Scan the QR Code to be added to the Workgroup!</h5>
-                      <p class="text-grey">This QR Code will expire on {{ qr_code_expiration }}</p>
+                  <div id="qr-print-container" class="container-fluid text-center">
+                      <div class="container-fluid">
+                          <div class="row justify-content-center">
+                            <h3 id="qr-title" class="text-grey">{{ current_workgroup }} </h3>
+                          </div>
+                          <div class="row justify-content-center">
+                            <img id="qr-code" width="300" height="300">
+                          </div>
+                          <div class="row justify-content-center">
+                              <h5 id="qr-prompt" class="text-grey">Scan here to be added to the Workgroup!</h5>
+                              <p id="qr-expiry" class="text-grey">Expires on: {{ qr_code_expiration }}</p>
+                          </div>
+                      </div>
                   </div>
               </div>
 

@@ -16,7 +16,6 @@ function make_change(id, mode, current_status){
     });
 }
 
-
 function make_change_request(id, mode, decision) {
     let email = $("#" + id).val()
     let workgroup = $("#current_workgroup").val();
@@ -51,17 +50,6 @@ function generateQRCode(){
     })
 }
 
-function createQRCodeElement () {
-    const element = document.getElementById("print-container").cloneNode(true);
-
-    const elementToPrint = document.createElement("div");
-    elementToPrint.appendChild(element);
-
-    return elementToPrint
-}
-
-
 function printQRCode(){
-     const qrCode = createQRCodeElement()
-     window.print(qrCode)
+    window.print()
 }
