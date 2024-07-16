@@ -188,3 +188,8 @@ def solvent_sustainability(primary_key: int) -> int:
         .filter(models.Compound.id == primary_key)
         .scalar()
     )
+
+
+def chem21_solvent_from_name(name: str) -> Optional[models.Solvent]:
+    """Returns a solvent if name is present in database solvent table (CHEM21). Else returns None"""
+    return db.session.query(models.Solvent).filter(models.Solvent.name == name).first()

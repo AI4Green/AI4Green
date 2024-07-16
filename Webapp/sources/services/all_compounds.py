@@ -120,3 +120,17 @@ def cas_from_smiles(smiles: str) -> Optional[str]:
         if novel_compound:
             cas = novel_compound.cas
     return cas if cas else None
+
+
+def smiles_to_inchi(smiles: str) -> str:
+    """
+    Get the corresponding InChi from a SMILES string. Returns None if the smiles string is invalid
+
+    Args:
+       smiles: The compound's smiles string
+
+    Returns:
+        The compound's InChI string
+    """
+    mol = Chem.MolFromSmiles(smiles)
+    return None if mol is None else Chem.MolToInchi(mol)
