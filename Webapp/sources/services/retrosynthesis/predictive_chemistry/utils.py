@@ -4,8 +4,6 @@ from typing import Dict, List, Literal, Union
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
-from sources import models
-from sources.extensions import db
 
 from ..style_sheets import CytoscapeStyles as cytoStyles
 

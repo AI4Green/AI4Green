@@ -105,7 +105,6 @@ class RetrosynthesisCytoscape:
                 500 / number_of_elements_in_row / 2 * row_position
             )  # if 1 elem 400/1 = 400 400/2=200
             y = depth * 50
-            # print(f'{node_id=}, {x=}, {y=}')
             x_ls.append(x)
             y_ls.append(y)
 
