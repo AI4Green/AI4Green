@@ -178,16 +178,6 @@ def list_active_in_workbook(
     return reaction_list
 
 
-def from_export_request(reaction_request) -> models.Reaction:
-    return (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.reaction_id == reaction_request.reaction_id)
-        .join(models.WorkBook)
-        .filter(models.WorkBook.id == reaction_request.workbook_id)
-        .first()
-    )
-
-
 def make_scheme_list(reaction_list: List[models.Reaction], size: str) -> List[str]:
     """
     Makes a list of reaction schemes from a list of reactions using the reaction SMILES

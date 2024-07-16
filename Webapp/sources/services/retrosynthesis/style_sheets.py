@@ -11,19 +11,13 @@ class WebElementsStyles(object):
         "top": 0,
         "left": 0,
         "bottom": 0,
-        # "width": "28rem",
         "min-height": "100vh",
         "height": "100%",
-        # "margin": 0,
-        # "z-index": 1,
         "overflow-x": "hidden",
-        # "transition": "all 0.5s",
         "padding": "0.5rem",
         "padding-left": "0.5rem",
         "padding-bottom": "1rem",
-        # "background-color": "#f8f9fa",
         "box - sizing": "border - box",
-        # "flex-wrap": "wrap"
     }
 
     SIDEBAR_HIDDEN = {
@@ -43,20 +37,7 @@ class WebElementsStyles(object):
 
     CONTENT_STYLE = {
         "overflow-x": "clip",
-        # "height": "auto"
     }
-
-    # LOADING_STYLE = {
-    #     # loading:after{
-    #     'content': 'Loading text',
-    #     # 'display': 'block',
-    #     'color': 'red'
-    #
-    #     # 'position': 'absolute',
-    #     # 'top': '50 %',
-    #     # 'left': '50 %',
-    #     # 'transform': 'translate(-50 %, -50 %)'
-    # }
 
 
 class CytoscapeStyles(object):
@@ -65,12 +46,10 @@ class CytoscapeStyles(object):
             "selector": "node",
             "style": {
                 "shape": "rectangle",
-                # 'border-width': 2,  # no border that would increase node size
                 "background-width": "100%",
                 "background-height": "100%",
                 "height": "100%",
                 "width": "100%",
-                # 'border-style': 'solid',
             },
         },
         {

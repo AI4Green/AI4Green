@@ -15,8 +15,6 @@ def get_conditions(solved_routes: dict) -> Dict[str, dict]:
 
     Args:
         solved_routes - retrosynthetic routes
-        conditions_api_key - key required to access the conditions api
-        conditions_base_url - the url to access the conditions api
 
     Returns:
         List of conditions with a dictionary for each route.
