@@ -433,8 +433,6 @@ def generate_qr_code(workgroup=None):
         "sources/static/img/favicon.ico"
     )
 
-    print(url)
-
     qr = qrcode.QRCode(
         version=1,
         box_size=10,
