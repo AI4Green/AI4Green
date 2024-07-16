@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
 from io import BytesIO
-import os
 
 from flask import Response, flash, jsonify, redirect, render_template, url_for, request, current_app
 from flask_login import (  # protects a view function against anonymous users
@@ -81,6 +81,7 @@ def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
         requests=requests,
         has_request=has_request,
         notification_number=notification_number,
+        qr_code_expiration = date.today() + relativedelta(years=1)
     )
 
 
@@ -426,7 +427,7 @@ def add_user_by_email(workgroup):
 @principal_investigator_required
 def generate_qr_code(workgroup=None):
     # qr = QRCode(version=3, box_size=20, border=10, error_correction=constants.ERROR_CORRECT_H)
-    token = services.email.get_encoded_token(1000000, {"workgroup": workgroup})
+    token = services.email.get_encoded_token(31536000, {"workgroup": workgroup})
     url = current_app.config["SERVER_NAME"] + "/qr_add_user/" + token
     logo = Image.open(
         "sources/static/img/favicon.ico"
