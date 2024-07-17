@@ -15,12 +15,14 @@ from rdkit.Chem import Descriptors
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
 from sources.dto import ReactionNoteSchema
+from sources.decorators import workbook_member_required
 
 from . import reaction_table_bp
 
 
 # Processing data from Marvin JS and creating reaction table
 @reaction_table_bp.route("/_process", methods=["GET"])
+@workbook_member_required
 def process():
     # must be logged in
     """This function receives reagents and product from browser, finds
@@ -29,9 +31,10 @@ def process():
 
     # get user workbook
     demo = request.args.get("demo")
+    tutorial = request.args.get("tutorial")
     reaction = None
     workbook = None
-    if demo != "demo":
+    if demo != "demo" and tutorial == "tutorial":
         workgroup = request.args.get("workgroup")
         workbook_name = request.args.get("workbook")
         workbook = services.workbook.get_workbook_from_group_book_name_combination(
