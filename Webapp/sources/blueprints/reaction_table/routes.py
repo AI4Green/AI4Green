@@ -40,7 +40,6 @@ def process():
         workbook = services.workbook.get_workbook_from_group_book_name_combination(
             workgroup, workbook_name
         )
-        abort_if_user_not_in_workbook(workgroup, workbook_name, workbook)
         reaction_id = request.args.get("reaction_id")
         reaction = services.reaction.get_from_reaction_id_and_workbook_id(
             reaction_id, workbook.id
