@@ -573,103 +573,6 @@ docs = ["ipython", "matplotlib", "numpydoc", "sphinx"]
 tests = ["pytest", "pytest-cov", "pytest-xdist"]
 
 [[package]]
-name = "dash"
-version = "2.17.1"
-description = "A Python framework for building reactive web-apps. Developed by Plotly."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "dash-2.17.1-py3-none-any.whl", hash = "sha256:3eefc9ac67003f93a06bc3e500cae0a6787c48e6c81f6f61514239ae2da414e4"},
-    {file = "dash-2.17.1.tar.gz", hash = "sha256:ee2d9c319de5dcc1314085710b72cd5fa63ff994d913bf72979b7130daeea28e"},
-]
-
-[package.dependencies]
-dash-core-components = "2.0.0"
-dash-html-components = "2.0.0"
-dash-table = "5.0.0"
-Flask = ">=1.0.4,<3.1"
-importlib-metadata = "*"
-nest-asyncio = "*"
-plotly = ">=5.0.0"
-requests = "*"
-retrying = "*"
-setuptools = "*"
-typing-extensions = ">=4.1.1"
-Werkzeug = "<3.1"
-
-[package.extras]
-celery = ["celery[redis] (>=5.1.2)", "redis (>=3.5.3)"]
-ci = ["black (==22.3.0)", "dash-dangerously-set-inner-html", "dash-flow-example (==0.0.5)", "flake8 (==7.0.0)", "flaky (==3.8.1)", "flask-talisman (==1.0.0)", "jupyterlab (<4.0.0)", "mimesis (<=11.1.0)", "mock (==4.0.3)", "numpy (<=1.26.3)", "openpyxl", "orjson (==3.10.3)", "pandas (>=1.4.0)", "pyarrow", "pylint (==3.0.3)", "pytest-mock", "pytest-rerunfailures", "pytest-sugar (==0.9.6)", "pyzmq (==25.1.2)", "xlrd (>=2.0.1)"]
-compress = ["flask-compress"]
-dev = ["PyYAML (>=5.4.1)", "coloredlogs (>=15.0.1)", "fire (>=0.4.0)"]
-diskcache = ["diskcache (>=5.2.1)", "multiprocess (>=0.70.12)", "psutil (>=5.8.0)"]
-testing = ["beautifulsoup4 (>=4.8.2)", "cryptography", "dash-testing-stub (>=0.0.2)", "lxml (>=4.6.2)", "multiprocess (>=0.70.12)", "percy (>=2.0.2)", "psutil (>=5.8.0)", "pytest (>=6.0.2)", "requests[security] (>=2.21.0)", "selenium (>=3.141.0,<=4.2.0)", "waitress (>=1.4.4)"]
-
-[[package]]
-name = "dash-bootstrap-components"
-version = "1.6.0"
-description = "Bootstrap themed components for use in Plotly Dash"
-optional = false
-python-versions = "<4,>=3.8"
-files = [
-    {file = "dash_bootstrap_components-1.6.0-py3-none-any.whl", hash = "sha256:97f0f47b38363f18863e1b247462229266ce12e1e171cfb34d3c9898e6e5cd1e"},
-    {file = "dash_bootstrap_components-1.6.0.tar.gz", hash = "sha256:960a1ec9397574792f49a8241024fa3cecde0f5930c971a3fc81f016cbeb1095"},
-]
-
-[package.dependencies]
-dash = ">=2.0.0"
-
-[package.extras]
-pandas = ["numpy", "pandas"]
-
-[[package]]
-name = "dash-core-components"
-version = "2.0.0"
-description = "Core component suite for Dash"
-optional = false
-python-versions = "*"
-files = [
-    {file = "dash_core_components-2.0.0-py3-none-any.whl", hash = "sha256:52b8e8cce13b18d0802ee3acbc5e888cb1248a04968f962d63d070400af2e346"},
-    {file = "dash_core_components-2.0.0.tar.gz", hash = "sha256:c6733874af975e552f95a1398a16c2ee7df14ce43fa60bb3718a3c6e0b63ffee"},
-]
-
-[[package]]
-name = "dash-cytoscape"
-version = "0.3.0"
-description = "A Component Library for Dash aimed at facilitating network visualization in Python, wrapped around Cytoscape.js"
-optional = false
-python-versions = "*"
-files = [
-    {file = "dash_cytoscape-0.3.0-py3-none-any.whl", hash = "sha256:718dc1568b9e7bfe7f64376aa903c64a1a1fe6daed4e559b254456f18dd3135f"},
-    {file = "dash_cytoscape-0.3.0.tar.gz", hash = "sha256:a71ad4fe095570b71d4ad7c0d29199e9780c2e6796173d3b25fccc2cc58c855f"},
-]
-
-[package.dependencies]
-dash = "*"
-
-[[package]]
-name = "dash-html-components"
-version = "2.0.0"
-description = "Vanilla HTML components for Dash"
-optional = false
-python-versions = "*"
-files = [
-    {file = "dash_html_components-2.0.0-py3-none-any.whl", hash = "sha256:b42cc903713c9706af03b3f2548bda4be7307a7cf89b7d6eae3da872717d1b63"},
-    {file = "dash_html_components-2.0.0.tar.gz", hash = "sha256:8703a601080f02619a6390998e0b3da4a5daabe97a1fd7a9cebc09d015f26e50"},
-]
-
-[[package]]
-name = "dash-table"
-version = "5.0.0"
-description = "Dash table"
-optional = false
-python-versions = "*"
-files = [
-    {file = "dash_table-5.0.0-py3-none-any.whl", hash = "sha256:19036fa352bb1c11baf38068ec62d172f0515f73ca3276c79dee49b95ddc16c9"},
-    {file = "dash_table-5.0.0.tar.gz", hash = "sha256:18624d693d4c8ef2ddec99a6f167593437a7ea0bf153aa20f318c170c5bc7308"},
-]
-
-[[package]]
 name = "distlib"
 version = "0.3.8"
 description = "Distribution utilities"
@@ -1706,17 +1609,6 @@ files = [
 ]
 
 [[package]]
-name = "nest-asyncio"
-version = "1.6.0"
-description = "Patch asyncio to allow nested event loops"
-optional = false
-python-versions = ">=3.5"
-files = [
-    {file = "nest_asyncio-1.6.0-py3-none-any.whl", hash = "sha256:87af6efd6b5e897c81050477ef65c62e2b2f35d51703cae01aff2905b1852e1c"},
-    {file = "nest_asyncio-1.6.0.tar.gz", hash = "sha256:6f172d5449aca15afd6c646851f4e31e02c598d553a667e38cafa997cfec55fe"},
-]
-
-[[package]]
 name = "nodeenv"
 version = "1.9.1"
 description = "Node.js virtual environment builder"
@@ -2427,34 +2319,36 @@ files = [
 
 [[package]]
 name = "rdkit"
-version = "2023.9.6"
+version = "2023.9.5"
 description = "A collection of chemoinformatics and machine-learning software written in C++ and Python"
 optional = false
 python-versions = "*"
 files = [
-    {file = "rdkit-2023.9.6-cp310-cp310-macosx_10_13_x86_64.whl", hash = "sha256:a2b47368c0eb12d8ecbccbb8afb752f149fdc182a9841a192cdb1dc4ea141741"},
-    {file = "rdkit-2023.9.6-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:780035c7bc024fa093fa05794b507316068e383f063c16b1a1239243a70ba010"},
-    {file = "rdkit-2023.9.6-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:209c2b0049c019bd3b9f17e5d947cf94a221ce61222016528dad6deed4da2de9"},
-    {file = "rdkit-2023.9.6-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9b6dbed06f61efd5d293b8397d5719944dc8fa3f2b6704c43d9f50d851a0f2db"},
-    {file = "rdkit-2023.9.6-cp310-cp310-win_amd64.whl", hash = "sha256:2a0aed7070c725e660f9bfbbd77678b3dda7b4a975342371559b98fb0179967e"},
-    {file = "rdkit-2023.9.6-cp311-cp311-macosx_10_13_x86_64.whl", hash = "sha256:07b49918d5ab68ea12c91fccc0bc5733f191cc4937775c72e7dd46c136610d51"},
-    {file = "rdkit-2023.9.6-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:9c0eb1bbfe19a2441b24bfa8bde1dff405e8394691fd27f8e6310db8db42e96d"},
-    {file = "rdkit-2023.9.6-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:07a9e45b88a08cfb857afa523c23ddcaf79a1b783e5ab40ecd28050addaaa3e4"},
-    {file = "rdkit-2023.9.6-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3d674a280fe84b9048c07cfa0aee546c5b21394ea38a689d37481790fc0d996b"},
-    {file = "rdkit-2023.9.6-cp311-cp311-win_amd64.whl", hash = "sha256:33db7a021ce3406386a6bc9fd5bd25f387e6bef63239cd00a534cad250dba9ab"},
-    {file = "rdkit-2023.9.6-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:8dc279618e32a33164b9ceef13f2094d4cf6bf4d55c63b70ae669181538c9f79"},
-    {file = "rdkit-2023.9.6-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:155f83476846a88b5c31efe6369ce16477b093a0c8f525d20107c1442cfd0d88"},
-    {file = "rdkit-2023.9.6-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bb5ec50177537382d9273bbce04f259b504931d7a6f33ebee0cfe3921b094951"},
-    {file = "rdkit-2023.9.6-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:dc43b8af98866d851467cb9eea8e636c9c192c589476ed0e4930db204e9e8b98"},
-    {file = "rdkit-2023.9.6-cp312-cp312-win_amd64.whl", hash = "sha256:e6e09f47df092511d756b3b1a38a98e66e9a6944e0ed09b8d989381148fa4b7f"},
-    {file = "rdkit-2023.9.6-cp38-cp38-macosx_10_13_x86_64.whl", hash = "sha256:797a1cba4ccfe518ead7271080fc40aeb1798949898825ae3a10869c22acc1a1"},
-    {file = "rdkit-2023.9.6-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:022b46d1f6f2b7fb4a30fd97bf1fd5d9f1bceabfd7ae297e0988db7b9fe5dbdb"},
-    {file = "rdkit-2023.9.6-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:59ee17711909f62ed888febf68fba9a67920bca1f2040a4ccc0676f2f59467dd"},
-    {file = "rdkit-2023.9.6-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:413e88dcab175b65fa122df38b2a9c8de162d87e68bc82d8c9f09c3f8cb6eb9e"},
-    {file = "rdkit-2023.9.6-cp38-cp38-win_amd64.whl", hash = "sha256:09407635736b8b84bbf4791a8024b8fe36bd64dcefe230dd868371a27c2b65ee"},
-    {file = "rdkit-2023.9.6-cp39-cp39-macosx_10_13_x86_64.whl", hash = "sha256:9cc210e3cdad79ce13e571a532d0cdf07b11ccfd231f160eb54065f5a01dfb46"},
-    {file = "rdkit-2023.9.6-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:8876e33e393f500f9593f560b1df8cd67c7108615767eb5565678a17b8bdfe33"},
-    {file = "rdkit-2023.9.6-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5091976a6c631fa8d563bbf48480b01917b0ff94a1ffce7d586131cf848d41d8"},
+    {file = "rdkit-2023.9.5-cp310-cp310-macosx_10_13_x86_64.whl", hash = "sha256:0cc1f623284962e5763bc0e67b1b4e9667a7bbd5e1ed22f205d2980100c2e779"},
+    {file = "rdkit-2023.9.5-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:de0a7162423fe33dcb588a2048829db81bfff929a206793e83a52292fb86be0f"},
+    {file = "rdkit-2023.9.5-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:ef0b02d12b883fa3d09b82f75db1c8baea96f4a941a84402c90a9c51243a92c5"},
+    {file = "rdkit-2023.9.5-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9cf95598a285bd90fb730e5dbf5cc31407ce39e39638b667961e1bc024968aa1"},
+    {file = "rdkit-2023.9.5-cp310-cp310-win_amd64.whl", hash = "sha256:2a3f1363bfeb89862e15fd3f88bea4e4d5036c469d389f2b615f30783ff7d1fd"},
+    {file = "rdkit-2023.9.5-cp311-cp311-macosx_10_13_x86_64.whl", hash = "sha256:e7462b739d720bcb85cd0a633e5ae008ded73a38bbfa4302bea9e068a1bbe888"},
+    {file = "rdkit-2023.9.5-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:80ee3cbf31f1808cd18b0e442c2a2d75de0a9837bcb1ac8009c2280e35c8018a"},
+    {file = "rdkit-2023.9.5-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c56cef89057a83c4392d792c5e617b5bb0c2ad35ae2d7d2fec3cd77b2af94c3a"},
+    {file = "rdkit-2023.9.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1fc360a266b83c19c7dcf85b5c67dbe4372c1e0cb0cc2580f3b3cf6af6819a98"},
+    {file = "rdkit-2023.9.5-cp311-cp311-win_amd64.whl", hash = "sha256:fcf3a4447eff8abbd405029e840f2560f1773cde585af818a74947c5fba7e10f"},
+    {file = "rdkit-2023.9.5-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:c03ddac22acaaff28f66091f8d31128c0734c1e4f97ea8cb8d85edeee3e16176"},
+    {file = "rdkit-2023.9.5-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:0c44d467f4a234a3682235a03825db916d35caeeaf7d2b0c73a6a5be85e0a476"},
+    {file = "rdkit-2023.9.5-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:04abe69371077a6daf419b6ed25c3ec86c8f858a468fb53508170467b799ef13"},
+    {file = "rdkit-2023.9.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0620912f43019986b859d0c1a63dbf2ff339264ce796483ad7fd01bcb1fa0634"},
+    {file = "rdkit-2023.9.5-cp312-cp312-win_amd64.whl", hash = "sha256:6f1cb9e295ebe77e8e70485adc78dda35c687bc3ac2063fb88202aba11148ae3"},
+    {file = "rdkit-2023.9.5-cp38-cp38-macosx_10_13_x86_64.whl", hash = "sha256:7b43a43fd819de90dc3c81ad10b0bb25351351b36b20e63b6af4efb3fb0f3e30"},
+    {file = "rdkit-2023.9.5-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:64c55039fd3861355176406c3385f5e81e17aefdfebd123e97909b63fc451dbc"},
+    {file = "rdkit-2023.9.5-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6859310b7b04c0e6b46bbaf68d9137079a857ca1afe2b2c3beadfa4724515536"},
+    {file = "rdkit-2023.9.5-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a7bfda62f45eec82527e501ce74f08d514c22fd925bbf9631189fbff41e6280b"},
+    {file = "rdkit-2023.9.5-cp38-cp38-win_amd64.whl", hash = "sha256:7e8078d01f4bb9aa77da5ef2087df1cbae6919de5b0f90b983ef920ec8792229"},
+    {file = "rdkit-2023.9.5-cp39-cp39-macosx_10_13_x86_64.whl", hash = "sha256:4b848fbdc44f26d817963f90389af55b294d6b9efd07f20146255443fbcf6718"},
+    {file = "rdkit-2023.9.5-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:443593f5e0ab119f09c63aed00b6739f5e6c8f617a0028e1e81036784fe96e47"},
+    {file = "rdkit-2023.9.5-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c267b5a6135b58c2cbd2846d61b4663b75496a883e1ccd46eb3bff1098f53bf7"},
+    {file = "rdkit-2023.9.5-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8a7b39f1a98505017d6dd6876a592449cf76d718f370efd00e0ca6d80479812c"},
+    {file = "rdkit-2023.9.5-cp39-cp39-win_amd64.whl", hash = "sha256:1b99cca22cad650392b25db1f8f86cae619fa62c6a710eb173d0e10faec9d2e5"},
 ]
 
 [package.dependencies]
@@ -2481,20 +2375,6 @@ urllib3 = ">=1.21.1,<3"
 [package.extras]
 socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
-
-[[package]]
-name = "retrying"
-version = "1.3.4"
-description = "Retrying"
-optional = false
-python-versions = "*"
-files = [
-    {file = "retrying-1.3.4-py3-none-any.whl", hash = "sha256:8cc4d43cb8e1125e0ff3344e9de678fefd85db3b750b81b2240dc0183af37b35"},
-    {file = "retrying-1.3.4.tar.gz", hash = "sha256:345da8c5765bd982b1d1915deb9102fd3d1f7ad16bd84a9700b85f64d24e8f3e"},
-]
-
-[package.dependencies]
-six = ">=1.7.0"
 
 [[package]]
 name = "scikit-learn"
@@ -2601,21 +2481,6 @@ trio-websocket = ">=0.9,<1.0"
 typing_extensions = ">=4.9.0"
 urllib3 = {version = ">=1.26,<3", extras = ["socks"]}
 websocket-client = ">=1.8.0"
-
-[[package]]
-name = "setuptools"
-version = "70.3.0"
-description = "Easily download, build, install, upgrade, and uninstall Python packages"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "setuptools-70.3.0-py3-none-any.whl", hash = "sha256:fe384da74336c398e0d956d1cae0669bc02eed936cdb1d49b57de1990dc11ffc"},
-    {file = "setuptools-70.3.0.tar.gz", hash = "sha256:f171bab1dfbc86b132997f26a119f6056a57950d058587841a0082e8830f9dc5"},
-]
-
-[package.extras]
-doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "pyproject-hooks (!=1.1)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-favicon", "sphinx-inline-tabs", "sphinx-lint", "sphinx-notfound-page (>=1,<2)", "sphinx-reredirects", "sphinxcontrib-towncrier"]
-test = ["build[virtualenv] (>=1.0.3)", "filelock (>=3.4.0)", "importlib-metadata", "ini2toml[lite] (>=0.14)", "jaraco.develop (>=7.21)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "jaraco.test", "mypy (==1.10.0)", "packaging (>=23.2)", "pip (>=19.1)", "pyproject-hooks (!=1.1)", "pytest (>=6,!=8.1.*)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-home (>=0.5)", "pytest-mypy", "pytest-perf", "pytest-ruff (>=0.3.2)", "pytest-subprocess", "pytest-timeout", "pytest-xdist (>=3)", "tomli", "tomli-w (>=1.0.0)", "virtualenv (>=13.0.0)", "wheel"]
 
 [[package]]
 name = "six"
@@ -3052,4 +2917,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "53a8847e29cd46ff1d08e730e4a17c1e4d849f10f66100de052127c027dca795"
+content-hash = "f47e42fd33b074879216390a042321a80382b2607393602c94acce7ad8894197"
