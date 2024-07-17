@@ -51,7 +51,7 @@ async function exportDataToRetrosynthesis() {
   if (smiles.includes(">>")) {
     smiles = smiles.split(">>")[1];
   }
-  window.location.href = `/retrosynthesis/${smiles}`;
+  window.open(`/retrosynthesis/${smiles}`, "_blank");
 }
 
 /**
