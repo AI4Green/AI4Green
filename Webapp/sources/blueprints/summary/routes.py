@@ -10,7 +10,6 @@ import json
 from flask import Response, abort, jsonify, render_template, request
 from flask_login import login_required
 from sources import auxiliary, services
-from sources.decorators import workbook_member_required
 
 from . import summary_bp
 
