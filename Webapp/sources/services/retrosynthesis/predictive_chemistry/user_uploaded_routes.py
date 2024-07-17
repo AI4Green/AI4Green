@@ -34,7 +34,7 @@ def read_user_route_file(contents: str, filename: str) -> Union[Tuple[Dict, Dict
     # make the routes dictionary
     route_object = RetroRoute(route_df)
     unique_identifier = str(uuid.uuid4())
-    route_data, condition_data = route_object.to_dict_arrays()
+    route_data, condition_data = route_object.get_routes_and_conditions()
     route_dict = {
         "routes": {"Route 1": {"steps": route_data, "score": 1}},
         "uuid": unique_identifier,
@@ -72,25 +72,8 @@ class Conditions:
         self.reactants_smiles = reactants_smiles
         self.product_smiles = product_smiles
 
-    def to_dicts(self) -> Dict:
-        step_df = self.step_df
-        conditions_set = {
-            "temperature": step_df[step_df["role"] == "temperature"]["value"].squeeze(),
-            "solvent": step_df[step_df["role"] == "solvents"]["value"]
-            .squeeze()
-            .replace(";", "."),
-            "catalyst": step_df[step_df["role"] == "catalyst"]["value"]
-            .squeeze()
-            .replace(";", "."),
-            "reagents": step_df[step_df["role"] == "reagents"]["value"]
-            .squeeze()
-            .replace(";", "."),
-        }
-        self.predicted_conditions = {"Condition Set 1": conditions_set}
-        self.process_conditions()
-        return self.predicted_conditions
-
-    def to_dicts2(self):
+    def to_dict(self) -> Dict:
+        """Returns a dictionary with the inputted conditions to display in the reaction table"""
         step_df = self.step_df
         conditions_set = {
             "temperature": step_df["temperature"],
@@ -128,8 +111,16 @@ class Conditions:
                 sig_figs_on_numbers(condition_set)
 
     @staticmethod
-    def add_compound_to_dict(smiles, condition_set, compound_type):
-        """Adds smiles as a string delimited by '.'"""
+    def add_compound_to_dict(
+        smiles: Union[str, List], condition_set: Dict, compound_type: str
+    ):
+        """
+        Adds smiles as a string delimited by '.' or list
+        Args:
+            smiles - the SMILES string being added as either a delimited string or a list
+            condition_set - the dictionary we are adding the SMILES to.
+            compound_type - whether the SMILES are reactants, reagents, solvents, catalysts, or products.
+        """
         if type(smiles) is str:
             condition_set[compound_type] = smiles
         elif type(smiles) is list:
@@ -141,7 +132,13 @@ class Conditions:
             print("unexpected type")
 
     @staticmethod
-    def add_name_keys_to_dict(condition_set, compound_keys):
+    def add_name_keys_to_dict(condition_set: dict, compound_keys: List[str]):
+        """
+        Initialises keys for the condition set dictionary
+        Args:
+            condition_set - the dictionary we are initialising keys for.
+            compound_keys - whether the compound is type reactant, reagent, solvent, product.
+        """
         for key in compound_keys:
             condition_set[f"{key}_names"] = ""
             condition_set[f"{key}_ids"] = ""
@@ -149,27 +146,40 @@ class Conditions:
 
     @staticmethod
     def update_conditions_dict(
-        name_list, id_list, smiles_list, condition_set, compound_type
+        name_list: List[str],
+        id_list: List[int],
+        smiles_list: List[str],
+        condition_set: Dict,
+        compound_type: str,
     ):
-        # add name and id for each compound
+        """
+        Adds the names, ids, and SMILEs for each compound to the dictionary
+        Args:
+            name_list - the list of compound names
+            id_list - the list of primary key database ids of the compounds
+            smiles_list - the list of SMILES strings of the compounds
+            condition_set - the dictionary being updated
+            compound_type - whether the compounds are reactants, reagents, solvents, products, or catalysts.
+        """
         condition_set[f"{compound_type}_names"] = name_list
         condition_set[f"{compound_type}_ids"] = id_list
         condition_set[f"{compound_type}_smiles"] = smiles_list
 
-    def smiles_str_to_list(self, compound_smiles: str):
+    @staticmethod
+    def smiles_str_to_list(compound_smiles: str) -> List[str]:
         """Takes the smiles string with '.' delimiter and makes a list. Checking for ions and handling them"""
         if ion_check(compound_smiles):
             # function to process ions then convert to list, eg na+.oh-.cco > [na.oh, cco]
             smiles_list = services.retrosynthesis.predictive_chemistry.compounds.smiles_str_to_list(
                 compound_smiles
             )
-            print(smiles_list)
         else:
-            print(compound_smiles)
             smiles_list = compound_smiles.split(".")
         return smiles_list
 
-    def smiles_list_to_compounds(self, smiles_list: List):
+    @staticmethod
+    def smiles_list_to_compounds(smiles_list: List) -> List:
+        """Returns a list of compounds if their SMILES string is found in the database"""
         compound_ls = []
         for smiles in smiles_list:
             compound = services.compound.get_compound_from_smiles(smiles)
@@ -177,7 +187,8 @@ class Conditions:
         return compound_ls
 
     @staticmethod
-    def get_compound_name_list(compound_list, compound_type):
+    def get_compound_name_list(compound_list: List, compound_type: str) -> List:
+        """Returns a list of compound names if they are found in the database"""
         name_list = []
         for compound in compound_list:
             if compound == "Not Found":
@@ -197,7 +208,8 @@ class Conditions:
         return name_list
 
     @staticmethod
-    def get_compound_id_list(compound_list, compound_type):
+    def get_compound_id_list(compound_list: List):
+        """Returns a list of compound IDs if they are found in the database"""
         id_list = []
         for compound in compound_list:
             if compound == "Not Found":
@@ -213,7 +225,8 @@ class Conditions:
 class RetroRoute:
     """For a route dictionary, extracts the reaction routes"""
 
-    def __init__(self, route_dataframe):
+    def __init__(self, route_dataframe: pd.DataFrame):
+        """Creates an instance of the RetroRoute class which creates the tree structure required to form the cytoscape."""
         self.reactions = []
         self.depth = 0
         self.previous_depth = 0
@@ -224,36 +237,33 @@ class RetroRoute:
         self.retrosynthesis_nodes = []
         self.condition_sets = {}
 
-    def to_dict_arrays(self):
+    def get_routes_and_conditions(self) -> Tuple[List[Dict], Dict]:
+        """Outputs a list of route nodes and associated conditions"""
         route_df = self.route_df
         products = route_df["product"]
         # go through each product and process each step into the data format used
         for product in products:
             step_df = route_df[route_df["product"] == product].squeeze()
             reactants = step_df["reactants"].split(";")
-            # reactants_list = reactants.split(';')
-
             # retrosynthesis
-            # self.make_node_dict(step_df)
-            self.make_node_dict2(step_df)
+            self.make_node_dict(step_df)
             # conditions
             conditions_object = Conditions(step_df, reactants, product)
             self.condition_sets.update(
-                {self.node_id_ls[-1]: conditions_object.to_dicts2()}
+                {self.node_id_ls[-1]: conditions_object.to_dict()}
             )
-            print(type(reactants), reactants)
+
             terminal_node_reactants = list(set(reactants) - set(products))
             if terminal_node_reactants:
                 for reactant in terminal_node_reactants:
                     self.make_terminal_node_dict(reactant)
 
-            # condition_step = format_condition_data(step_df)
-        print(self.node_id_ls)
         return self.retrosynthesis_nodes, self.condition_sets
 
         # self.add_terminal_nodes()
 
-    def make_terminal_node_dict(self, reactant):
+    def make_terminal_node_dict(self, reactant: str):
+        """Makes a dictionary for a terminal node of a stock compound and adds to the node list"""
         node_dict = {
             "node_id": self.node_id(),
             "smiles": reactant,
@@ -266,31 +276,8 @@ class RetroRoute:
         }
         self.retrosynthesis_nodes.append(node_dict)
 
-    def make_node_dict(self, step_df):
-        """ """
-
-        node_dict = {
-            "node_id": self.node_id(),
-            "smiles": step_df[step_df["role"] == "product"]["value"].squeeze(),
-            "node": None,
-            "depth": self.depth,
-            "parent": self.parent,
-            "parent_smiles": self.parent_smiles,
-            "child_smiles": step_df[step_df["role"] == "reactants"]["value"]
-            .squeeze()
-            .split(";"),
-            "reaction_class": step_df.get("reaction_class"),
-        }
-        print(node_dict)
-        self.retrosynthesis_nodes.append(node_dict)
-        self.parent = node_dict
-        self.parent_smiles = node_dict["smiles"]
-        self.depth += 1
-
-    def make_node_dict2(self, step_df):
-        """ """
-        print()
-
+    def make_node_dict(self, step_df: pd.DataFrame):
+        """Makes a dictionary for non-terminal nodes and adds it to the node list"""
         node_dict = {
             "node_id": self.node_id(),
             "smiles": step_df["product"],
@@ -301,14 +288,15 @@ class RetroRoute:
             "child_smiles": step_df["reactants"].split(";"),
             "reaction_class": step_df.get("reaction_class"),
         }
-        print(node_dict)
         self.retrosynthesis_nodes.append(node_dict)
         self.parent = node_dict
         self.parent_smiles = node_dict["smiles"]
         self.depth += 1
 
-    def node_id(self):
-        """Creates an id for the node"""
+    def node_id(self) -> str:
+        """
+        Returns an id for the node. Node-0 is the top/target molecule.
+        Second row will have nodes node-1-0 and node-1-1. etc."""
         if self.node_id_ls:
             id_ls = [x.split("node-")[-1] for x in self.node_id_ls]
             # 0-1

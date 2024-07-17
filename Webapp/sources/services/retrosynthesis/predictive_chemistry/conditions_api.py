@@ -77,7 +77,6 @@ class ReactionConditions:
     """
 
     def __init__(self, node):
-        # super().__init__(route_conditions.base_url)
         self.reactants_smiles = node["child_smiles"]
         self.product_smiles = node["smiles"]
         self.reaction_smiles = encodings_to_smiles_symbols(
