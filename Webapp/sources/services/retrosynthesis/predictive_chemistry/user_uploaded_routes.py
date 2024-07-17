@@ -260,8 +260,6 @@ class RetroRoute:
 
         return self.retrosynthesis_nodes, self.condition_sets
 
-        # self.add_terminal_nodes()
-
     def make_terminal_node_dict(self, reactant: str):
         """Makes a dictionary for a terminal node of a stock compound and adds to the node list"""
         node_dict = {
