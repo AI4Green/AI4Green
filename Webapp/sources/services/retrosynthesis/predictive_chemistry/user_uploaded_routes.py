@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from sources import services
 
-from .compounds import IonicCompounds, get_compound_data, ion_check
+from .compounds import get_compound_data, ion_check
 from .utils import sig_figs_on_numbers
 
 
@@ -160,7 +160,9 @@ class Conditions:
         """Takes the smiles string with '.' delimiter and makes a list. Checking for ions and handling them"""
         if ion_check(compound_smiles):
             # function to process ions then convert to list, eg na+.oh-.cco > [na.oh, cco]
-            smiles_list = IonicCompounds(compound_smiles).get_smiles_list()
+            smiles_list = services.retrosynthesis.predictive_chemistry.compounds.smiles_str_to_list(
+                compound_smiles
+            )
             print(smiles_list)
         else:
             print(compound_smiles)

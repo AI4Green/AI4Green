@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Tuple, Union
 from dash import html
 from flask_login import current_user
 from sources import services
-from sources.auxiliary import get_workbooks, get_workgroups
+from sources.auxiliary import get_workgroups
 
 
 def make_workbooks_dropdown_options() -> Optional[Tuple[List[Dict], int]]:

@@ -76,7 +76,6 @@ class BaseConfig(object):  # class to store configuration variables
     RETROSYNTHESIS_API_KEY = os.getenv("RETROSYNTHESIS_API_KEY", "retro_key")
 
     CONDITIONS_API_URL = os.getenv("CONDITIONS_API_URL", "http://127.0.0.1:9901")
-    CONDITIONS_API_KEY = os.getenv("CONDITIONS_API_KEY", "conditions_key")
 
 
 class TestConfig(BaseConfig):

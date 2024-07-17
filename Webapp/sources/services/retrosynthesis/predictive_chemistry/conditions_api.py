@@ -7,6 +7,8 @@ from flask import current_app
 from .compounds import get_compound_data
 from .utils import encodings_to_smiles_symbols, sig_figs_on_numbers
 
+BASE_URL = current_app.config["CONDITIONS_API_URL"]
+
 
 def get_conditions(solved_routes: dict) -> Dict[str, dict]:
     """
@@ -38,9 +40,6 @@ class RouteConditions:
     Class to handle conditions for a specific route.
     """
 
-    base_url = current_app.config["CONDITIONS_API_URL"]
-    api_key = current_app.config["CONDITIONS_API_KEY"]
-
     def __init__(self, route_label: str, route: dict):
         self.route_label = route_label
         self.route = route
@@ -58,7 +57,7 @@ class RouteConditions:
             if self._not_terminal(node):
                 # get the conditions or make note of the failed api call
                 api_status, reaction_conditions = ReactionConditions(
-                    node, self
+                    node
                 ).get_reaction_conditions()
 
                 if api_status == "failed":
@@ -74,13 +73,13 @@ class RouteConditions:
         return node.get("child_smiles")
 
 
-class ReactionConditions(RouteConditions):
+class ReactionConditions:
     """
     Class to handle conditions for a specific reaction.
     """
 
-    def __init__(self, node, route_conditions):
-        super().__init__(route_conditions.base_url, route_conditions.api_key)
+    def __init__(self, node):
+        # super().__init__(route_conditions.base_url)
         self.reactants_smiles = node["child_smiles"]
         self.product_smiles = node["smiles"]
         self.reaction_smiles = encodings_to_smiles_symbols(
@@ -108,7 +107,7 @@ class ReactionConditions(RouteConditions):
         """
         Makes the api call to the condition prediction url to get the conditions data
         """
-        url = f"{self.base_url}/api/v1/condition_cleaned/"
+        url = f"{BASE_URL}/api/v1/condition_cleaned/"
         smiles = self.reaction_smiles
         data = {"smiles": smiles, "n_conditions": 10}
 
