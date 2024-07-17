@@ -104,7 +104,7 @@ class ReactionConditions:
         """
         Makes the api call to the condition prediction url to get the conditions data
         """
-        url = f"{BASE_URL}/api/v1/condition_cleaned/"
+        url = f"{BASE_URL}/api/v1/condition_cleaned"
         smiles = self.reaction_smiles
         data = {"smiles": smiles, "n_conditions": 10}
 
