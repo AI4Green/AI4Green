@@ -49,6 +49,10 @@ def init_dashboard(server: Flask) -> classes.Dash:
             dbc.Row(
                 className="g-0",
                 children=[
+                    html.Div(
+                        "Quick: O=C(Nc1cncc(Oc2cncc(F)c2)n1)c1ccccn1",
+                        style={"display": "none"},
+                    ),
                     # narrow column for sidebar and larger column for remainder of page
                     dbc.Col(
                         plotly_elements.tabs,
@@ -217,13 +221,14 @@ def init_dashboard(server: Flask) -> classes.Dash:
     """
 
     @dash_app.callback(
-        Output("loading-output-1", "loading_state"),
+        Output("loading-output-1", "loading_state", allow_duplicate=True),
         Output("computed-retrosynthesis-routes", "data"),  # store
         Output("user-message", "children"),
         Output("computed-retrosynthesis-uuid", "data"),
         State("validated-smiles", "data"),
         State("smiles-input", "pattern"),
         Input("btn-retrosynthesis", "n_clicks"),
+        prevent_initial_call=True,
     )
     def start_new_retrosynthesis(
         validated_smiles: str, smiles_regex: str, n_clicks: int
@@ -249,7 +254,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         changed_ids = [p["prop_id"] for p in dash.callback_context.triggered][0]
         if "btn-retrosynthesis" in changed_ids:
             if utils.smiles_not_valid(smiles_regex):
-                return True, {}, "Please enter a valid SMILES", ""
+                return False, {}, "Please enter a valid SMILES", ""
             # if valid smiles then continue with the process
             validated_smiles = utils.encodings_to_smiles_symbols(validated_smiles)
             request_url = f"{retrosynthesis_base_url}/retrosynthesis_api/?key={retrosynthesis_api_key}&smiles={validated_smiles}"
@@ -262,10 +267,10 @@ def init_dashboard(server: Flask) -> classes.Dash:
             )
             unique_identifier = str(uuid.uuid4())
             if retro_api_status == "failed":
-                return True, {}, api_message, ""
+                return False, {}, api_message, ""
             retrosynthesis_output = {"uuid": unique_identifier, "routes": solved_routes}
             return (
-                True,
+                False,
                 retrosynthesis_output,
                 f"Interactive display for retrosynthesis of {validated_smiles}",
                 unique_identifier,
@@ -273,10 +278,11 @@ def init_dashboard(server: Flask) -> classes.Dash:
         return dash.no_update
 
     @dash_app.callback(
-        Output("conditions-loader", "loading_state"),
+        Output("loading-output-1", "loading_state", allow_duplicate=True),
         Output("computed-conditions-data", "data"),
         State("computed-retrosynthesis-uuid", "data"),
         Input("computed-retrosynthesis-routes", "data"),
+        prevent_initial_call=True,
     )
     def new_conditions(
         unique_identifier: str, solved_routes: dict

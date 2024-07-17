@@ -29,7 +29,7 @@ retro_tree = cyto.Cytoscape(
 """
 Loading circle
 """
-loading_circles = html.Div(
+loading_circle = html.Div(
     id="loading-div",
     children=[
         dcc.Loading(
@@ -41,17 +41,6 @@ loading_circles = html.Div(
                 "component_name": "retrosynthesis-tree",
                 "is_loading": False,
                 "prop_name": "retro",
-            },
-        ),
-        dcc.Loading(
-            id="conditions-loader1",
-            children=html.Div(id="conditions-loader"),
-            type="circle",
-            fullscreen=True,
-            loading_state={
-                "component_name": "computed-conditions-data",
-                "is_loading": False,
-                "prop_name": "conditions",
             },
         ),
     ],
@@ -129,13 +118,12 @@ smiles_field_and_retrosynthesis_button = dbc.Row(
 header_and_inputs = html.Div(
     children=[
         html.H2("Retrosynthesis"),
-        html.P("Quick: O=C(Nc1cncc(Oc2cncc(F)c2)n1)c1ccccn1"),
         smiles_field_and_retrosynthesis_button,
         # user_route,
         html.H6(
             "Interactive Retrosynthesis Display", id="user-message", className="mt-3"
         ),
-        html.Div([loading_circles]),
+        html.Div([loading_circle]),
     ]
 )
 
