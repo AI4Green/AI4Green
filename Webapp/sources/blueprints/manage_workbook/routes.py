@@ -16,6 +16,7 @@ from sources.auxiliary import (
     security_member_workgroup,
     security_pi_sr_workgroup,
 )
+from sources.decorators import workgroup_member_required
 from sources.extensions import db
 from wtforms import SelectField, SubmitField
 from wtforms.validators import Optional
@@ -276,11 +277,8 @@ def manage_workbook_request(
 
 @manage_workbook_bp.route("/join_workbook/<workgroup>", methods=["GET", "POST"])
 @login_required
+@workgroup_member_required
 def join_workbook(workgroup: str) -> Response:
-    # must be logged in and a member of the workgroup
-    if not security_member_workgroup(workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
     workgroups = get_workgroups()
     notification_number = get_notification_number()
 

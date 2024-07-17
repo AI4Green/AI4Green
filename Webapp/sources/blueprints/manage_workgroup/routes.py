@@ -7,7 +7,7 @@ from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
-from sources.decorators import principal_investigator_required
+from sources.decorators import principal_investigator_required, workgroup_member_required
 from sources import models, services
 from sources.auxiliary import (
     duplicate_notification_check,
@@ -151,6 +151,7 @@ def make_change_to_workgroup(
     "/SR_status_request/<user_type>/<new_role>/<workgroup>", methods=["GET", "POST"]
 )
 @login_required
+@workgroup_member_required
 def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
     # must be logged in and a member of the workgroup
     if not security_member_workgroup(workgroup):
