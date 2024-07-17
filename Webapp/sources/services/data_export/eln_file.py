@@ -271,7 +271,7 @@ class ELNExportReaction:
             "comment": [comment["@id"] for comment in self.defined_comments],
             "hasPart": [{"@id": file["@id"]} for file in self.defined_files],
             "description": self.reaction.description,
-            "text": self._get_summary_html(),  # todo restore after debugging
+            "text": self._get_summary_html(),
             "encodingFormat": "text/html",
             "url": url_for("main.index", _external=True)
             + quote(
@@ -287,7 +287,7 @@ class ELNExportReaction:
                 {
                     "@id": f"comment-id/{self.reaction.reaction_id}/{comment.id}",
                     "@type": "Comment",
-                    "dateCreated": comment.time_of_creation,
+                    "dateCreated": comment.time_of_creation.isoformat(),
                     "text": comment.text,
                     "author": {"@id": f"./author/{self.reaction.creator_person.id}"},
                 }
@@ -328,33 +328,34 @@ class ELNExportReaction:
         """
         # check all td tags (table cells) and move any input tag values into text within the td tag
         for td in self.summary_soup.find_all("td"):
-            # Check if there is an <input> element inside the <td>
-            if td.find("input"):
-                input_tag = td.find("input")
-                # Ensure the <input> tag has a 'value' attribute and is not a radio or checkbox
-                if (
-                    input_tag.has_attr("value")
-                    and input_tag["value"]
-                    and not input_tag.attrs.get("type") in ["radio", "checkbox"]
-                ):
-                    # Extract the value from the <input> field and then remove it from the tree
-                    input_value = input_tag["value"]
-                    # Create a new text node with the extracted value
-                    new_string = BeautifulSoup(input_value, "html.parser").text
+            # Check if the <td> has an <input> element as a direct child
+            input_tag = td.find(recursive=False)
+            # Ensure the <input> tag has a 'value' attribute and is not a radio or checkbox
+            if (
+                input_tag
+                and input_tag.has_attr("value")
+                and input_tag["value"]
+                and not input_tag.attrs.get("type") in ["radio", "checkbox"]
+            ):
+                # Extract the value from the <input> field and then remove it from the tree
+                input_value = input_tag["value"]
+                input_tag.decompose()
+                # Create a new text node with the extracted value
+                new_string = BeautifulSoup(input_value, "html.parser").text
 
-                    # Add the new text node to the <td> while preserving existing content and child elements
-                    if td.contents:
-                        # Iterate over existing content and add new text node
-                        for content in td.contents:
-                            # If it's a NavigableString or whitespace, add the new string
-                            if content.name is None or content.name == "br":
-                                content.replace_with(new_string)
-                            else:
-                                # Append new text node before or after elements as needed
-                                td.insert(td.contents.index(content) + 1, new_string)
-                    else:
-                        # If there are no existing contents, just set the new text value
-                        td.string = new_string
+                # Add the new text node to the <td> while preserving existing content and child elements
+                if td.contents:
+                    # Iterate over existing content and add new text node
+                    for content in td.contents:
+                        # If it's a NavigableString or whitespace, add the new string
+                        if content.name is None or content.name == "br":
+                            content.replace_with(new_string)
+                        else:
+                            # Append new text node before or after elements as needed
+                            td.insert(td.contents.index(content) + 1, new_string)
+                else:
+                    # If there are no existing contents, just set the new text value
+                    td.string = new_string
 
     def _remove_unselected_options(self, keep_dict: Dict[str, str]):
         """

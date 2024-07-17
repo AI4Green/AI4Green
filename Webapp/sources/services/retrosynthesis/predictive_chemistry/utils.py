@@ -23,10 +23,12 @@ def sig_figs_on_numbers(condition_set: Dict):
             condition_set[key] = round(value, keys_to_replace[key])
 
 
-def rdkit_smiles_to_image(smiles: str):
+def rdkit_smiles_to_image(smiles: str) -> str:
     """Single molecule image
     Args:
         smiles - SMILES string for the compound we are making an image of.
+    Returns:
+        a string to render a png image of the molecule
     """
     mol = Chem.MolFromSmiles(smiles)
     d = rdMolDraw2D.MolDraw2DCairo(350, 300)
@@ -53,8 +55,6 @@ def reaction_smiles_to_image(window_width: int, smiles: str) -> str:
     height = round(width / 2.5)
     drawer = rdMolDraw2D.MolDraw2DCairo(width, height)
     drawer.drawOptions().padding = 0.0
-    drawer.SetFontSize(6)
-    drawer.maxFontSize = 6
     drawer.DrawReaction(rxn)
     drawer.FinishDrawing()
     image_file = drawer.GetDrawingText()
