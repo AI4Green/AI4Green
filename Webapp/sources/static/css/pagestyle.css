@@ -119,4 +119,14 @@ body.loading .loading-bar{
     display: block; /* when body has loading class, display tha loader */
 }
 
+#retrosynthesis-cytoscape {
+  border-color: #333333;
+  border-width: thick;
+  border-style: dashed;
 
+
+}
+
+.btn-toolbar .btn-label {
+  float: left;
+}

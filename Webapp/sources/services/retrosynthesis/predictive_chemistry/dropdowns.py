@@ -2,10 +2,11 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from dash import html
 from flask_login import current_user
-from sources.auxiliary import get_workbooks, get_workgroups
+from sources import services
+from sources.auxiliary import get_workgroups
 
 
-def make_workbooks_dropdown_options() -> Tuple[List[Dict], int]:
+def make_workbooks_dropdown_options() -> Optional[Tuple[List[Dict], int]]:
     """
     Makes the workbooks dropdown with all workbooks the active user belongs to
     Returns:
@@ -14,7 +15,9 @@ def make_workbooks_dropdown_options() -> Tuple[List[Dict], int]:
 
     """
     workgroups = get_workgroups()
-    workbooks = [get_workbooks(wg, "object") for wg in workgroups]
+    workbooks = [
+        services.workbook.workbooks_from_workgroup(wg_name) for wg_name in workgroups
+    ]
     # flatten nested lists
     workbooks = [workbook for sublist in workbooks for workbook in sublist]
     workbook_names = [wb.name for wb in workbooks]

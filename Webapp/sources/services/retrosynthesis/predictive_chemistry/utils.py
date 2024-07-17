@@ -51,7 +51,7 @@ def reaction_smiles_to_image(window_width: int, smiles: str) -> str:
         base64 png image string to show in HTML
     """
     rxn = AllChem.ReactionFromSmarts(smiles, useSmiles=True)
-    width = round(window_width / 3.1)
+    width = round(window_width / 3.4)
     height = round(width / 2.5)
     drawer = rdMolDraw2D.MolDraw2DCairo(width, height)
     drawer.drawOptions().padding = 0.0

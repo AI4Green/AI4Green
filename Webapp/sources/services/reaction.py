@@ -298,3 +298,48 @@ def add_addendum(
     db.session.add(new_addendum)
     db.session.commit()
     return new_addendum
+
+
+def most_recent_in_workbook(workbook_id: int) -> models.Reaction:
+    """
+    Retrieves the most recent reaction in a given workbook.
+
+    Args:
+        workbook_id (int): The ID of the workbook.
+
+    Returns:
+        models.Reaction: The most recent reaction object in the workbook.
+    """
+    return (
+        db.session.query(models.Reaction)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook_id)
+        .order_by(models.Reaction.reaction_id.desc())
+        .first()
+    )
+
+
+def get_next_reaction_id_for_workbook(workbook_id: int) -> str:
+    """
+    Generates the next reaction ID for a given workbook in format WB1-001
+
+    Args:
+        workbook_id (int): The ID of the workbook.
+
+    Returns:
+        str: The next reaction ID for the workbook.
+    """
+    workbook_obj = services.workbook.get(workbook_id)
+    workbook_abbreviation = workbook_obj.abbreviation
+    # find the newest reaction and then +1 to the id and return
+    newest_reaction = most_recent_in_workbook(workbook_id)
+    if not newest_reaction:
+        # if no reactions in workbook yet, then start with 001
+        return workbook_abbreviation + "-001"
+    most_recent_reaction_id = newest_reaction.reaction_id
+    # take the number on the rhs of the reaction id, remove the 0s, convert to int, add 1, convert to str, add 0s
+    new_reaction_id_number = str(
+        int(most_recent_reaction_id.split("-")[-1].lstrip("0")) + 1
+    ).zfill(3)
+    new_reaction_id = workbook_abbreviation + "-" + new_reaction_id_number
+    return new_reaction_id

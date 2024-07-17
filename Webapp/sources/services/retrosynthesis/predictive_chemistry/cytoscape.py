@@ -161,32 +161,22 @@ class RetrosynthesisCytoscape:
     def _make_chemical_image_stylesheet(self) -> List[Dict]:
         """This returns the stylesheet which matches the node id to the png string to show the molecule image"""
         img_ls = []
-        width_ls = []
-        height_ls = []
         for smiles in self.node_df["smiles"]:
-            img_data, width, height = rdkit_smiles_to_image(smiles)
+            img_data = rdkit_smiles_to_image(smiles)
             img_ls.append(img_data)
-            width_ls.append(width)
-            height_ls.append(height)
         chemical_image_stylesheet = [
             {
                 "selector": "#" + node_id,
                 "style": {
                     "background-image": rxn_image,
-                    "width": width * 0.75,
-                    "height": height * 0.75,
-                    "background-width": width,
-                    "background-height": height,
                     "border-color": node_border_dict[node_type]["colour"],
                     "border-style": node_border_dict[node_type]["style"],
                     "border-width": node_border_dict[node_type]["width"],
                 },
             }
-            for node_id, rxn_image, width, height, node_type in zip(
+            for node_id, rxn_image, node_type in zip(
                 self.node_df.index,
                 img_ls,
-                width_ls,
-                height_ls,
                 self.node_df["node_type"],
             )
         ]

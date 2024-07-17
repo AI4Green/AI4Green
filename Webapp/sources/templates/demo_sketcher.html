@@ -35,7 +35,17 @@
     <input type="hidden" id="js-reaction-scheme-image" value="0" style="{'width': 600, 'height': 400}">
     <p><button id="demo-button" type="button" class="btn btn-primary" onclick="loadExampleSmiles()" style="width: 100px;">Example</button></p>
     <p><button id="action-button-submit" type="button" class="btn btn-primary" onclick="createReactionTable()">Submit</button></p>
+    {% if current_user.is_authenticated %}
+        <a>
+            <button id="retrosynthesis-export" type="button" class="btn btn-primary" onclick="exportDataToRetrosynthesis()">Retrosynthesis</button>
+        </a>
+    {% else %}
+        <a>
+            <button id="retrosynthesis-export" type="button" title="Requires an account" class="btn btn-primary" disabled onclick="exportDataToRetrosynthesis()">Retrosynthesis</button>
+        </a>
+    {%  endif %}
 
+    <br>
        <!--The loading bar div-->
     <div class="loading-bar"></div>
 

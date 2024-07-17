@@ -1,6 +1,6 @@
 import re
 import uuid
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Literal, Tuple, Union
 from urllib.parse import quote
 
 import dash
@@ -16,11 +16,11 @@ from .predictive_chemistry import (
     conditions_api,
     cytoscape,
     dropdowns,
-    process_user_route_file,
     retrosynthesis_api,
     saved_retrosyntheses,
     sustainability,
     tables,
+    user_uploaded_routes,
     utils,
 )
 
@@ -145,7 +145,9 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Output("open-new-reaction-modal", "disabled"),
         Input("save-functionality-status", "data"),
     )
-    def save_features_handler(save_functionality_status: str) -> [bool, bool]:
+    def save_features_handler(
+        save_functionality_status: Union[Literal["disabled"], Literal["enabled"]]
+    ) -> [bool, bool]:
         """
         Called on page load after function: 'load_user_workbooks'
         Disables or enables the save buttons
@@ -710,7 +712,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         sustainability_data: dict,
         workbook_id: int,
         new_retrosynthesis_saved_tracker: int,
-        functionality_status: str,
+        functionality_status: Union[Literal["disabled"], Literal["enabled"]],
         retrosynthesis_uuid: str,
         click_save: int,
     ) -> [str, int]:
@@ -762,7 +764,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
     def show_retrosynthesis_list(
         selected_workbook_id: int,
         new_retrosynthesis_saved: int,
-        functionality_status: str,
+        functionality_status: Union[Literal["disabled"], Literal["enabled"]],
     ):
         """
         Called when there is a change to the workbook dropdown or a new retrosynthesis is saved
@@ -811,7 +813,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
     def reload_retrosynthesis(
         reload_id_values: List[int],
         reload_button_clicks: List[int],
-        functionality_status: str,
+        functionality_status: Union[Literal["disabled"], Literal["enabled"]],
     ) -> Tuple[dict, dict, dict, str]:
         """
         Called when a 'reload' button is clicked
@@ -1088,7 +1090,10 @@ def init_dashboard(server: Flask) -> classes.Dash:
         State("save-functionality-status", "data"),
         Input("new-reaction-workbook-dropdown", "value"),
     )
-    def update_new_reaction_id(functionality_status: str, workbook_id: int) -> str:
+    def update_new_reaction_id(
+        functionality_status: Union[Literal["disabled"], Literal["enabled"]],
+        workbook_id: int,
+    ) -> str:
         """
         Called when changing the workbook dropdown and finds the next reaction ID. This is needed to make a new reaction
 
@@ -1102,9 +1107,9 @@ def init_dashboard(server: Flask) -> classes.Dash:
             the next auto-incremented reaction_id value as a string. e.g., WB1-001
 
         """
-        if utils.functionality_disabled_check(functionality_status):
+        if utils.functionality_disabled_check(functionality_status) or not workbook_id:
             return dash.no_update
-        return services.reaction.next_reaction_id_for_workbook(workbook_id)
+        return services.reaction.get_next_reaction_id_for_workbook(workbook_id)
 
     @dash_app.callback(
         Output("new-reaction-url", "data"),
@@ -1123,7 +1128,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         reaction_name: str,
         reaction_id: str,
         reaction_smiles: str,
-        functionality_status: str,
+        functionality_status: Union[Literal["disabled"], Literal["enabled"]],
         n_clicks: int,
     ) -> Tuple[str, str]:
         """
@@ -1173,7 +1178,10 @@ def init_dashboard(server: Flask) -> classes.Dash:
         State("save-functionality-status", "data"),
         Input("new-reaction-url", "data"),
     )
-    def go_to_new_reaction(functionality_status: str, new_url: str) -> str:
+    def go_to_new_reaction(
+        functionality_status: Union[Literal["disabled"], Literal["enabled"]],
+        new_url: str,
+    ) -> str:
         """
         Called when a new reaction is successfully made
         Opens a new reaction in a new tab. Checks url is present first.
@@ -1219,7 +1227,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             (
                 processed_route,
                 processed_conditions,
-            ) = process_user_route_file.read_user_route_file(contents, filename)
+            ) = user_uploaded_routes.read_user_route_file(contents, filename)
             sustainability_data = sustainability.AllRouteSustainability(
                 processed_conditions["routes"]
             ).get()
