@@ -55,26 +55,26 @@ def upgrade():
         )
 
     with op.batch_alter_table("Compound", schema=None) as batch_op:
-        batch_op.drop_index("idx_compound__solvent")
-        batch_op.create_index(
-            batch_op.f("ix_Compound_solvent"), ["solvent"], unique=False
+       batch_op.drop_index("idx_compound__solvent")
+       batch_op.create_index(
+           batch_op.f("ix_Compound_solvent"), ["solvent"], unique=False
         )
 
     with op.batch_alter_table("CompoundDataErrorReport", schema=None) as batch_op:
-        batch_op.drop_index("idx_compounddataerrorreport__compound")
-        batch_op.create_index(
-            batch_op.f("ix_CompoundDataErrorReport_compound"),
-            ["compound"],
-            unique=False,
+       batch_op.drop_index("idx_compounddataerrorreport__compound")
+       batch_op.create_index(
+           batch_op.f("ix_CompoundDataErrorReport_compound"),
+           ["compound"],
+           unique=False,
         )
 
     with op.batch_alter_table("Institution", schema=None) as batch_op:
         batch_op.add_column(sa.Column("time_of_creation", sa.DateTime(), nullable=True))
 
     with op.batch_alter_table("Notification", schema=None) as batch_op:
-        batch_op.drop_index("idx_notification__person")
-        batch_op.create_index(
-            batch_op.f("ix_Notification_person"), ["person"], unique=False
+       batch_op.drop_index("idx_notification__person")
+       batch_op.create_index(
+           batch_op.f("ix_Notification_person"), ["person"], unique=False
         )
 
     with op.batch_alter_table("NovelCompound", schema=None) as batch_op:
@@ -221,7 +221,7 @@ def upgrade():
         )
         batch_op.create_index(
             batch_op.f("ix_WorkGroup_request_workgroup"), ["workgroup"], unique=False
-        )
+       )
 
     # ### end Alembic commands ###
 
