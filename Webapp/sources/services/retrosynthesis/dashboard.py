@@ -1109,7 +1109,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         """
         if utils.functionality_disabled_check(functionality_status) or not workbook_id:
             return dash.no_update
-        return services.reaction.next_reaction_id_for_workbook(workbook_id)
+        return services.reaction.get_next_reaction_id_for_workbook(workbook_id)
 
     @dash_app.callback(
         Output("new-reaction-url", "data"),

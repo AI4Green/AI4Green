@@ -20,9 +20,9 @@ def get_compound_data(compound_smiles: str, role: str) -> Tuple[List, List, List
     Returns:
         A tuple containing lists of:
         - SMILES for each compound
-        - Compound objects or "No Compound" if not found
-        - Names of each compound or "No Compound" if not found
-        - IDs of each compound or "No Compound" if not found
+        - Compound objects or "Not Found" if not found
+        - Names of each compound or "Not Found" if not found
+        - IDs of each compound or "Not Found" if not found
     """
     smiles_list = smiles_str_to_list(compound_smiles)
     compound_data = {"smiles": [], "compound_object": [], "name": [], "id": []}

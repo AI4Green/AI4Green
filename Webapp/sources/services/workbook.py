@@ -98,30 +98,6 @@ def get_newest_reaction_in_workbooks(
     )
 
 
-def get_next_reaction_id_in_workbook(workbook: models.WorkBook) -> str:
-    """
-    Gets the Id for the next reaction to be added to the workbook
-    Args:
-        workbook: models.Workbook, workbook reaction will be added to
-
-    Returns:
-        Reaction ID: Next reaction ID in the form: workbook_abbreviation-reaction_number
-    """
-    workbook_abbreviation = workbook.abbreviation
-    # find the newest reaction and then +1 to the id and return
-    newest_reaction = get_newest_reaction_in_workbooks([workbook])
-
-    if not newest_reaction:
-        # if no reactions in workbook yet, then start with 001
-        return f"{workbook_abbreviation}-001"
-    most_recent_reaction_id = newest_reaction.reaction_id
-    # take the number on the rhs of the reaction id, remove the 0s, convert to int, add 1, convert to str, add 0s
-    new_reaction_id_number = str(
-        int(most_recent_reaction_id.split("-")[-1].lstrip("0")) + 1
-    ).zfill(3)
-    return f"{workbook_abbreviation}-{new_reaction_id_number}"
-
-
 def workbooks_from_workgroup(workgroup_name: str) -> List[models.WorkBook]:
     """
     Get a list of workbooks for a given workgroup, for the current user.

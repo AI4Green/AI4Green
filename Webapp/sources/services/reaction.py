@@ -319,7 +319,7 @@ def most_recent_in_workbook(workbook_id: int) -> models.Reaction:
     )
 
 
-def next_reaction_id_for_workbook(workbook_id: int) -> str:
+def get_next_reaction_id_for_workbook(workbook_id: int) -> str:
     """
     Generates the next reaction ID for a given workbook in format WB1-001
 
