@@ -103,7 +103,7 @@ def workbooks_from_workgroup(workgroup_name: str) -> List[models.WorkBook]:
     Get a list of workbooks for a given workgroup, for the current user.
 
     Args:
-        workgrou_namep: name of the workgroup
+        workgroup_name: name of the workgroup
 
     Returns:
         List of workbooks
