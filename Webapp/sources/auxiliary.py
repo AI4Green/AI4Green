@@ -297,6 +297,7 @@ def duplicate_notification_check(
                 check = (
                     db.session.query(models.Notification)
                     .filter(models.Notification.wg == WG)
+                    .filter(models.Notification.status == status)
                     .join(models.WGStatusRequest)
                     .join(
                         models.Person, models.WGStatusRequest.person == models.Person.id
