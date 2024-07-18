@@ -25,10 +25,11 @@ def _is_demo():
 def principal_investigator_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        workgroup = _get_from_request(kwargs["workgroup"], "workgroup")
+        workgroup = _get_from_request(kwargs.get("workgroup"), "workgroup")
         if services.workgroup.get_user_type(workgroup, current_user) != "principal_investigator":
             flash("You do not have permission to view this page")
             return redirect(url_for("main.index"))
+        kwargs["workgroup"] = workgroup
         return f(*args, **kwargs)
     return decorated_function
 
@@ -36,7 +37,7 @@ def principal_investigator_required(f):
 def principal_investigator_or_senior_researcher_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        workgroup = _get_from_request(kwargs["workgroup"], "workgroup")
+        workgroup = _get_from_request(kwargs.get("workgroup"), "workgroup")
         if services.workgroup.get_user_type(workgroup, current_user) not in ["principal_investigator", "senior_researcher"]:
             flash("You do not have permission to view this page")
             return redirect(url_for("main.index"))

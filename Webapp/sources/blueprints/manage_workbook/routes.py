@@ -16,7 +16,7 @@ from sources.auxiliary import (
     security_member_workgroup,
     security_pi_sr_workgroup,
 )
-from sources.decorators import workgroup_member_required
+from sources.decorators import workgroup_member_required, principal_investigator_or_senior_researcher_required
 from sources.extensions import db
 from wtforms import SelectField, SubmitField
 from wtforms.validators import Optional
@@ -48,13 +48,11 @@ class JoinWorkbookForm(FlaskForm):
     "/manage_workbook/<workgroup>/<has_request>/<workbook>", methods=["GET", "POST"]
 )
 @login_required
+@principal_investigator_or_senior_researcher_required
 def manage_workbook(
     workgroup: str, has_request: str = "no", workbook: OptionalType[str] = None
 ) -> Response:
-    # must be logged in and a PI or SR of the workgroup
-    if not security_pi_sr_workgroup(workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
+
     current_workgroup = workgroup
     workgroups = get_workgroups()
     notification_number = get_notification_number()
@@ -178,13 +176,11 @@ def manage_workbook(
     "/manage_workbook/<workgroup>/<workbook>/<email>/<mode>", methods=["GET", "POST"]
 )
 @login_required
+@principal_investigator_or_senior_researcher_required
 def add_remove_user_from_workbook(
     workgroup: str, workbook: str, email: str, mode: str
 ) -> Response:
-    # must be logged in and a PI or SR of the workgroup
-    if not security_pi_sr_workgroup(workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
+
     user = (
         db.session.query(models.Person)
         .join(models.User)
@@ -209,6 +205,7 @@ def add_remove_user_from_workbook(
     methods=["GET", "POST"],
 )
 @login_required
+@principal_investigator_or_senior_researcher_required
 def manage_workbook_request(
     workgroup: str, workbook: str, email: str, mode: str
 ) -> Response:
@@ -355,6 +352,7 @@ def join_workbook(workgroup: str) -> Response:
                 "You have already submitted a membership request for this workbook. You will receive a notification "
                 "when your request has been considered."
             )
+            return redirect(url_for("main.index"))
         for p in pi_sr:
             notification = models.Notification(
                 person=p.id,
