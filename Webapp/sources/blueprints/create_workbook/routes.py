@@ -15,6 +15,7 @@ from sources.auxiliary import (
     remove_spaces_and_dashes,
     security_pi_sr_workgroup,
 )
+from sources.decorators import principal_investigator_or_senior_researcher_required
 from sources.extensions import db
 from sqlalchemy import func
 from wtforms import StringField, SubmitField
@@ -35,11 +36,12 @@ class CreateWorkbookForm(FlaskForm):
 
 @create_workbook_bp.route("/create_workbook/<workgroup>", methods=["GET", "POST"])
 @login_required
+@principal_investigator_or_senior_researcher_required
 def create_workbook(workgroup: str) -> Response:
     # must be logged in and a SR or PI of the workgroup
-    if not security_pi_sr_workgroup(workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
+    # if not security_pi_sr_workgroup(workgroup):
+    #     flash("You do not have permission to view this page")
+    #     return redirect(url_for("main.index"))
     """Creates a workbook using a FlaskForm. The book is created by a PI or SR and they must provide the name
     and workgroup the workbook should belong to"""
     workgroups = get_workgroups()

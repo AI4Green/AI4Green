@@ -33,6 +33,17 @@ def principal_investigator_required(f):
     return decorated_function
 
 
+def principal_investigator_or_senior_researcher_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        workgroup = _get_from_request(kwargs["workgroup"], "workgroup")
+        if services.workgroup.get_user_type(workgroup, current_user) not in ["principal_investigator", "senior_researcher"]:
+            flash("You do not have permission to view this page")
+            return redirect(url_for("main.index"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 def workgroup_member_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
