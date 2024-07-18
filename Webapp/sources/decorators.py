@@ -1,11 +1,22 @@
 from functools import wraps
 from flask import redirect, url_for, flash, request
-from flask_login import current_user, login_required
+from flask_login import current_user
+from typing import Union
 from sources import services
 from sources.auxiliary import get_workgroups, get_workbooks
 
 
-def _get_from_request(input_value, search_str):
+def _get_from_request(input_value: Union[str, None], search_str: str) -> Union[str, None]:
+    """
+    Used for decorators. Searches request.args or request.form for search_str. If that value exists in the request it is returned, else the
+    input_value is returned
+    Args:
+        input_value: Value for variable from decorator function to return if request returns None
+        search_str: Variable name to search in request (either workbook or workgroup)
+
+    Returns:
+        request.args.get(search_str) or request.form.get(search_str) if either is not None else input_value
+    """
     if search_str in request.args:
         return request.args.get(search_str)
     elif search_str in request.form.keys():
@@ -16,8 +27,10 @@ def _get_from_request(input_value, search_str):
 
 def _is_demo() -> bool:
     """
+    checks whether demo or tutorial mode is active
 
     Returns:
+        Bool: True if demo or tutorial is active else False
 
     """
     if request.form.get("demo") == "demo" or request.form.get("tutorial") == "tutorial":
