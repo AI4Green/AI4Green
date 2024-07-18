@@ -14,7 +14,12 @@ def _get_from_request(input_value, search_str):
         return input_value
 
 
-def _is_demo():
+def _is_demo() -> bool:
+    """
+
+    Returns:
+
+    """
     if request.form.get("demo") == "demo" or request.form.get("tutorial") == "tutorial":
         return True
     if request.args.get("demo") is None and request.args.get("tutorial") is None:
@@ -23,6 +28,18 @@ def _is_demo():
 
 
 def principal_investigator_required(f):
+    """
+        decorates function f to check whether user is a Principal Investigator in the workgroup,
+        and redirects to homepage if they are not.
+
+        The workgroup to search is passed either through a URL variable (eg: url/<workgroup>/...) or extracted from a
+        request using the _get_from_request function.
+
+        NOTE: redirect may fail if f returns json to front end
+
+        Returns:
+            redirect to home if user is not PI or SR else f
+        """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         workgroup = _get_from_request(kwargs.get("workgroup"), "workgroup")
@@ -35,28 +52,66 @@ def principal_investigator_required(f):
 
 
 def principal_investigator_or_senior_researcher_required(f):
+    """
+    decorates function f to check whether user is a Principal Investigator or Senior Researcher in the workgroup,
+    and redirects to homepage if they are not.
+
+    The workgroup to search is passed either through a URL variable (eg: url/<workgroup>/...) or extracted from a
+    request using the _get_from_request function.
+
+    NOTE: redirect may fail if f returns json to front end
+
+    Returns:
+        redirect to home if user is not PI or SR else f
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         workgroup = _get_from_request(kwargs.get("workgroup"), "workgroup")
         if services.workgroup.get_user_type(workgroup, current_user) not in ["principal_investigator", "senior_researcher"]:
             flash("You do not have permission to view this page")
             return redirect(url_for("main.index"))
+        kwargs["workgroup"] = workgroup
         return f(*args, **kwargs)
     return decorated_function
 
 
 def workgroup_member_required(f):
+    """
+        decorates function f to check whether user is member of the workgroup, and redirects to homepage if they are
+        not.
+
+        The workgroup to search is passed either through a URL variable (eg: url/<workgroup>/...) or extracted from a
+        request using the _get_from_request function.
+
+        NOTE: redirect may fail if f returns json to front end
+
+        Returns:
+            redirect to home if user is not PI or SR else f
+        """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         workgroup = _get_from_request(kwargs["workgroup"], "workgroup")
         if workgroup not in get_workgroups():
             flash("You do not have permission to view this page")
             return redirect(url_for("main.index"))
+        kwargs["workgroup"] = workgroup
         return f(*args, **kwargs)
     return decorated_function
 
 
 def workbook_member_required(f):
+    """
+        decorates function f to check whether user is a member of the workbook,
+        and redirects to homepage if they are not.
+
+        The workgroup to search is passed either through a URL variable (eg: url/<workgroup>/...) or extracted from a
+        request using the _get_from_request function.
+
+        NOTE: redirect may fail if f returns json to front end
+
+        Returns:
+            redirect to home if user is not PI or SR else f
+        """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not _is_demo():
@@ -65,6 +120,7 @@ def workbook_member_required(f):
             if workbook not in get_workbooks(workgroup):
                 flash("You do not have permission to view this page")
                 return redirect((url_for("main.index")))
+            kwargs["workgroup"] = workgroup
+            kwargs["workbook"] = workbook
         return f(*args, **kwargs)
     return decorated_function
-
