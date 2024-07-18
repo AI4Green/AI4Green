@@ -13,7 +13,6 @@ from sources.auxiliary import (
     get_notification_number,
     get_workgroups,
     remove_spaces_and_dashes,
-    security_pi_sr_workgroup,
 )
 from sources.decorators import principal_investigator_or_senior_researcher_required
 from sources.extensions import db
