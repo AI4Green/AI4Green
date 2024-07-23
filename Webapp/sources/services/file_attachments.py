@@ -8,7 +8,7 @@ from typing import Optional
 
 import magic
 import pytz
-from azure.core.exceptions import ResourceExistsError
+from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
 from azure.storage.blob import BlobClient, BlobServiceClient, ContainerClient
 from flask import abort, current_app, request
 from sources import db, models, services
@@ -70,13 +70,24 @@ def delete_file_attachment(request_source: str, file_uuid: str = None):
     )
     # connect to blob to delete and then confirm this.
     blob_client = services.file_attachments.get_blob(file_uuid)
-    blob_client.delete_blob()
-    if blob_client.exists():
-        abort(401)
-
+    delete_blob(blob_client)
     # update database to reflect these changes
     db.session.delete(file_object)
     db.session.commit()
+
+
+def delete_blob(blob_client: BlobClient):
+    """
+    Tries to delete a blob, handles the error if the blob is not found but raises an error if the blob is not deleted
+
+    Args: blob_client - the client for the blob being deleted
+    """
+    try:
+        blob_client.delete_blob()
+        if blob_client.exists():
+            abort(401)
+    except ResourceNotFoundError:
+        pass
 
 
 def sha256_sum_from_file_uuid(file_uuid: str) -> str:
@@ -249,14 +260,9 @@ class UploadExperimentDataFiles:
 
     def save_validated_files(self):
         for file in self.validated_files:
-            # file name must be unique - needs workgroup/book/reaction_id/filename. Check for uniqueness of filename.
+            # give the filename is a unique identifier and file.filename is the user supplied identifier they see
             filename = str(uuid.uuid4())
             self.save_blob(file, filename)
-            print("blob uploaded")
-            # save file details to database, and shorten filename if too long.
-            name, extension = os.path.splitext(file.filename)
-            if len(name) > 21:
-                file.filename = name[0:10] + "..." + name[-10:-1] + extension
             self.save_file_details_to_database(file, filename)
             self.uploaded_files.append(
                 {

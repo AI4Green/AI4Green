@@ -2,7 +2,8 @@ from typing import Dict, List, Optional, Set
 
 import rdkit
 from flask import request
-from sources import db, models
+from sources import models
+from sources.extensions import db
 
 
 class SustainabilityMetrics:

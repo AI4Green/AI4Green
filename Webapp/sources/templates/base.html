@@ -30,6 +30,13 @@
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
+          {% if '/retrosynthesis/' in request.path %}
+            <li class="nav-item">
+                <a class="nav-link" href="" data-toggle="collapse" data-target="#retrosynthesis-sidebar-root" aria-controls="navbarToggleExternalContent" aria-expanded="true" aria-label="Toggle navigation">
+                    <i class="navbar-toggler-icon"></i>
+                </a>
+            </li>
+          {% endif %}
           <li {% if request.path == '/' or request.path == '/home' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
             <a class="nav-link" id="TopNavHomeButton" href="{{ url_for('main.index') }}"><i class="bi bi-house-door-fill"></i> Home <span class="sr-only">(current)</span></a>
           </li>
@@ -55,6 +62,11 @@
               <li {% if request.path == '/search' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
                 <a class="nav-link" id="TopNavSearchButton" href="{{ url_for('main.search') }}">Search <span class="sr-only">(current)</span></a>
               </li>
+
+              <li {% if request.path == '/retrosynthesis' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
+                <a class="nav-link" id="retrosynthesis" href="{{ url_for('retrosynthesis.retrosynthesis') }}">Retrosynthesis<span class="sr-only">(current)</span></a>
+              </li>
+
           {% endif %}
         </ul>
           <div id="reaction-saved-indicator" class="reaction-save-hidden">

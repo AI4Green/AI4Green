@@ -8,6 +8,7 @@ from typing import Dict
 
 from flask import Flask
 from sources import config, models
+from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db, login, ma, mail, migrate
 
 
@@ -41,6 +42,9 @@ def create_app(c: str = "dev") -> Flask:
     app.context_processor(lambda: inject_session_context(app))
 
     with app.app_context():
+        from sources.services.retrosynthesis.dashboard import init_dashboard
+
+        app = init_dashboard(app)
         return run_app(app)
 
 
@@ -222,6 +226,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(search_bp)
 
+    from sources.blueprints.retrosynthesis import retrosynthesis_bp
+
+    app.register_blueprint(retrosynthesis_bp)
+
     from sources.blueprints.version import version_bp
 
     app.register_blueprint(version_bp)
@@ -236,9 +244,18 @@ def inject_session_context(app: Flask) -> Dict[str, str]:
     This hides the footer in testing mode through a jinja variable sent to base html for every rendered template
 
     """
+    workgroups = get_workgroups()
+    notification_number = get_notification_number()
     if "UNIT_TEST" in os.environ:
         return dict(
-            session_type="UNIT_TEST", marvin_js_key=app.config["MARVIN_JS_API_KEY"]
+            session_type="UNIT_TEST",
+            marvin_js_key=app.config["MARVIN_JS_API_KEY"],
+            workgroups=workgroups,
+            notification_number=notification_number,
         )
     else:
-        return dict(session_type="", marvin_js_key=app.config["MARVIN_JS_API_KEY"])
+        return dict(
+            session_type="",
+            marvin_js_key=app.config["MARVIN_JS_API_KEY"],
+            workgroups=workgroups,
+        )

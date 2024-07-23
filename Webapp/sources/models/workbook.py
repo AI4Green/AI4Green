@@ -30,3 +30,4 @@ class WorkBook(Model):
         cascade="all, delete",
     )
     users = db.relationship("Person", secondary="Person_WorkBook")
+    retrosynthesis = db.relationship("Retrosynthesis", backref="WorkBook")

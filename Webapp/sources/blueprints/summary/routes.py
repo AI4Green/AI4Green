@@ -30,10 +30,6 @@ def summary() -> Response:
             workgroup_name, workbook_name
         ):
             abort(401)
-    # check there is data to get and if so get it
-    summary_table_data = str(request.form["js_summary_table_data"])
-    if summary_table_data != "no data":
-        summary_table_data = ast.literal_eval(summary_table_data)
 
     unit_data = services.summary.get_unit_data(request.form)
     reactant_data = services.summary.get_reactant_data(request.form)
@@ -138,7 +134,6 @@ def summary() -> Response:
             risk_rating=risk_data["risk_rating"],
             risk_color=risk_data["risk_colour"],
             number_of_solvents=solvent_data["number_of_solvents"],
-            summary_table_data=json.dumps(summary_table_data),
         )
         return jsonify({"summary": summary_table})
     else:

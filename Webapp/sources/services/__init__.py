@@ -13,6 +13,7 @@ from . import (
     person,
     reaction,
     reaction_classification,
+    retrosynthesis,
     solvent,
     solvent_surfer,
     summary,
