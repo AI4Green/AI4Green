@@ -346,9 +346,9 @@ def save_new_reaction_from_retrosynthesis(
             reaction_id,
             creator,
             workbook.id,
-            reaction_smiles,
             reaction_table,
             summary_table,
+            reaction_smiles,
         )
         # load sketcher
         return "New reaction made"
