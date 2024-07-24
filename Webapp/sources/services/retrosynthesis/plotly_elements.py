@@ -250,13 +250,21 @@ route_sidebar = html.Div(
     [
         html.H3("Routes"),
         html.Hr(),
-        dcc.Upload(
-            "Upload Route",
-            className="btn btn-outline-secondary m-1",
-            id="upload-route-button",
-            # title="Upload a route as spreadsheet a with 1 row per reaction in a route with "
-            # "required column headings: reactants, product, "
-            # "and optional headings solvents, reagents, catalyst, temperature.",
+        html.Div(
+            [
+                dcc.Upload(
+                    "Upload Route",
+                    className="btn btn-outline-secondary m-1",
+                    id="upload-route-button",
+                ),
+                html.Button(
+                    "Example Route File",
+                    id="btn-example-route-file",
+                    className="btn btn-outline-secondary m-1",
+                ),
+                dcc.Download(id="example-route-file-download"),
+            ],
+            style={"display": "flex", "justify-content": "space-between"},
         ),
         html.Hr(),
         html.Div(id="route-feedback"),

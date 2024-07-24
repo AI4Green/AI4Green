@@ -1,3 +1,4 @@
+import os
 import re
 import uuid
 from typing import Dict, List, Literal, Tuple, Union
@@ -6,8 +7,8 @@ from urllib.parse import quote
 import dash
 import dash_bootstrap_components as dbc
 import dash_cytoscape as cyto
-from dash import ALL, Input, Output, State, ctx, html
-from flask import Flask
+from dash import ALL, Input, Output, State, ctx, dcc, html
+from flask import Flask, current_app
 from rdkit import Chem
 from sources import services
 
@@ -171,23 +172,19 @@ def init_dashboard(server: Flask) -> classes.Dash:
     )
     def smiles_check(smiles_input: str) -> str:
         """
-        Called on changes to smiles input field
-        Validates SMILES as valid before proceeding to retrosynthesis and highlights input field red if invalid SMILES.
+        Validate SMILES input. If invalid, modify the pattern to highlight the input field.
 
         Args:
-            # Inputs
-            smiles_input: the target smiles string for retrosynthesis must translate to a valid molecule.
+            smiles_input: SMILES string for retrosynthesis.
 
         Returns:
-             pattern. Valid SMILES will remain unaltered. Invalid SMILES will have '_invalid' preceding and succeeding
+            Pattern string with '_invalid' if the input is invalid.
         """
-        smiles_input = "" if smiles_input is None else smiles_input
-        smiles_input = smiles_input.strip()
+        smiles_input = (smiles_input or "").strip()
         m = Chem.MolFromSmiles(smiles_input, sanitize=False)
-        pattern = re.escape(smiles_input)
-        if m is None or smiles_input == "":
-            pattern = "_invalid_" + smiles_input + "_invalid"
-        return pattern
+        if m is None or not smiles_input:
+            return f"_invalid_{re.escape(smiles_input)}_invalid"
+        return re.escape(smiles_input)
 
     @dash_app.callback(
         Output("validated-smiles", "data"),
@@ -196,17 +193,14 @@ def init_dashboard(server: Flask) -> classes.Dash:
     )
     def valid_smiles(smiles: str, smiles_regex: str) -> str:
         """
-        Called after change to smiles-input pattern from function 'smiles_check'
-        If SMILES is valid the SMILES is passed on to the validated smiles field to start retrosynthesis
+        Pass valid SMILES to the validated smiles field.
 
         Args:
-            # Input
-            smiles_regex: the string checking if the smiles is valid, contains '_invalid' if invalid
-            # State
-            smiles: the target smiles
+            smiles: Target SMILES string.
+            smiles_regex: String pattern to check if SMILES is valid.
 
         Returns:
-             smiles string to validated smiles data.Store if pattern is matched.
+            SMILES string if valid, otherwise no update.
         """
         if smiles and smiles_regex and "_invalid" not in smiles_regex:
             return smiles
@@ -1238,6 +1232,21 @@ def init_dashboard(server: Flask) -> classes.Dash:
                 processed_route["uuid"],
             )
         return dash.no_update
+
+    @dash_app.callback(
+        Output("example-route-file-download", "data"),
+        Input("btn-example-route-file", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def download_example_file(n_clicks):
+        return dcc.send_file(
+            os.path.join(
+                current_app.config["APP_DIRECTORY"],
+                "sources",
+                "static",
+                "retrosynthesis-route-example.csv",
+            )
+        )
 
     dash_app.clientside_callback(
         """
