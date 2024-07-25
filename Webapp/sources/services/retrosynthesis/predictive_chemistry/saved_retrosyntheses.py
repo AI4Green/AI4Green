@@ -232,7 +232,7 @@ def get_reloaded_retrosynthesis(
     """
     When user clicks reload on a saved retrosynthesis, this function returns the relevant data as JSON
     Args:
-        retrosynthesis_to_reload_id - the primary key integer id of the retrosynthesis being relaode.d
+        retrosynthesis_to_reload_id - the primary key integer id of the retrosynthesis being reloaded.
     Returns:
         The retrosynthetic routes
         The conditions data

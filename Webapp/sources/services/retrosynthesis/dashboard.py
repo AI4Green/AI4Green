@@ -169,6 +169,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
     @dash_app.callback(
         Output("smiles-input", "pattern"),
         Input("smiles-input", "value"),
+        prevent_initial_call=True,
     )
     def smiles_check(smiles_input: str) -> str:
         """
@@ -190,6 +191,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Output("validated-smiles", "data"),
         State("smiles-input", "value"),
         Input("smiles-input", "pattern"),
+        prevent_initial_call=True,
     )
     def valid_smiles(smiles: str, smiles_regex: str) -> str:
         """
@@ -218,6 +220,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         State("validated-smiles", "data"),
         State("smiles-input", "pattern"),
         Input("btn-retrosynthesis", "n_clicks"),
+        prevent_initial_call=True,
     )
     def start_new_retrosynthesis(
         validated_smiles: str, smiles_regex: str, n_clicks: int
@@ -240,37 +243,35 @@ def init_dashboard(server: Flask) -> classes.Dash:
             The generated uuid for the retrosynthesis
 
         """
-        changed_ids = [p["prop_id"] for p in dash.callback_context.triggered][0]
-        if "btn-retrosynthesis" in changed_ids:
-            if utils.smiles_not_valid(smiles_regex):
-                return True, {}, "Please enter a valid SMILES", ""
-            # if valid smiles then continue with the process
-            validated_smiles = utils.encodings_to_smiles_symbols(validated_smiles)
-            request_url = f"{retrosynthesis_base_url}/retrosynthesis_api/?key={retrosynthesis_api_key}&smiles={validated_smiles}"
-            (
-                retro_api_status,
-                api_message,
-                solved_routes,
-            ) = retrosynthesis_api.retrosynthesis_api_call(
-                request_url, retrosynthesis_base_url
-            )
-            unique_identifier = str(uuid.uuid4())
-            if retro_api_status == "failed":
-                return True, {}, api_message, ""
-            retrosynthesis_output = {"uuid": unique_identifier, "routes": solved_routes}
-            return (
-                True,
-                retrosynthesis_output,
-                f"Interactive display for retrosynthesis of {validated_smiles}",
-                unique_identifier,
-            )
-        return dash.no_update
+        if utils.smiles_not_valid(smiles_regex):
+            return True, {}, "Please enter a valid SMILES", ""
+        # if valid smiles then continue with the process
+        validated_smiles = utils.encodings_to_smiles_symbols(validated_smiles)
+        request_url = f"{retrosynthesis_base_url}/retrosynthesis_api/?key={retrosynthesis_api_key}&smiles={validated_smiles}"
+        (
+            retro_api_status,
+            api_message,
+            solved_routes,
+        ) = retrosynthesis_api.retrosynthesis_api_call(
+            request_url, retrosynthesis_base_url
+        )
+        unique_identifier = str(uuid.uuid4())
+        if retro_api_status == "failed":
+            return True, {}, api_message, ""
+        retrosynthesis_output = {"uuid": unique_identifier, "routes": solved_routes}
+        return (
+            True,
+            retrosynthesis_output,
+            f"Interactive display for retrosynthesis of {validated_smiles}",
+            unique_identifier,
+        )
 
     @dash_app.callback(
         Output("conditions-loader", "loading_state"),
         Output("computed-conditions-data", "data"),
         State("computed-retrosynthesis-uuid", "data"),
         Input("computed-retrosynthesis-routes", "data"),
+        prevent_initial_call=True,
     )
     def new_conditions(
         unique_identifier: str, solved_routes: dict
@@ -306,6 +307,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Input("computed-conditions-data", "data"),
         Input("reloaded-conditions-data", "data"),
         Input("user-uploaded-conditions-data", "data"),
+        prevent_initial_call=True,
     )
     def determine_active_conditions(
         computed_conditions: dict,
@@ -328,11 +330,11 @@ def init_dashboard(server: Flask) -> classes.Dash:
         condition_set = ctx.triggered[0]["value"]
         if condition_set:
             return condition_set
-        return dash.no_update
 
     @dash.callback(
         Output("computed-sustainability-data", "data"),
         Input("computed-conditions-data", "data"),
+        prevent_initial_call=True,
     )
     def sustainability_assessment(all_conditions: dict) -> dict:
         """
@@ -345,23 +347,23 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Returns:
             sustainability_for_all_routes - dictionary of sustainability data
         """
-        if all_conditions:
-            sustainability_for_all_routes = sustainability.AllRouteSustainability(
-                all_conditions["routes"]
-            ).get()
-            return sustainability_for_all_routes
-        return dash.no_update
+        sustainability_for_all_routes = sustainability.AllRouteSustainability(
+            all_conditions["routes"]
+        ).get()
+        return sustainability_for_all_routes
 
     @dash.callback(
         Output("active-sustainability-data", "data"),
         Input("computed-sustainability-data", "data"),
         Input("reloaded-sustainability-data", "data"),
         Input("user-uploaded-route-sustainability-data", "data"),
+        prevent_initial_call=True,
     )
     def determine_active_sustainability_data(
         sustainability_data: dict,
         reloaded_sustainability: dict,
         user_uploaded_sustainability: dict,
+        prevent_initial_call=True,
     ) -> dict:
         """
 
@@ -382,6 +384,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             component_id={"type": "sustainability-weighting-slider", "property": ALL},
             component_property="value",
         ),
+        prevent_initial_call=True,
     )
     def apply_weightings(
         unique_identifier: str,
@@ -403,30 +406,29 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Returns:
             An updated weighted sustainability dictionary.
         """
-        if sustainability_weightings and sustainability_data:
-            # apply weightings to each route to obtain a weighted median for each route as a whole.
-            for route_label, route in sustainability_data.items():
-                route_median = sustainability.weighted_median_for_route(
-                    route, sustainability_weightings
-                )
-                route["route_average"]["weighted_median"] = route_median
-            # 2) apply weighting to each step of the route
-            for route in sustainability_data.values():
-                sustainability.weighted_median_for_each_step(
-                    route, sustainability_weightings
-                )
-            weighted_sustainability_output = {
-                "uuid": unique_identifier,
-                "routes": sustainability_data,
-            }
-            return weighted_sustainability_output
-        return dash.no_update
+        # apply weightings to each route to obtain a weighted median for each route as a whole.
+        for route_label, route in sustainability_data.items():
+            route_median = sustainability.weighted_median_for_route(
+                route, sustainability_weightings
+            )
+            route["route_average"]["weighted_median"] = route_median
+        # 2) apply weighting to each step of the route
+        for route in sustainability_data.values():
+            sustainability.weighted_median_for_each_step(
+                route, sustainability_weightings
+            )
+        weighted_sustainability_output = {
+            "uuid": unique_identifier,
+            "routes": sustainability_data,
+        }
+        return weighted_sustainability_output
 
     @dash.callback(
         Output("active-retrosynthesis-uuid", "data"),
         Input("computed-retrosynthesis-uuid", "data"),
         Input("reloaded-retrosynthesis-uuid", "data"),
         Input("user-uploaded-route-uuid", "data"),
+        prevent_initial_call=True,
     )
     def determine_active_uuid(
         computed_uuid: str, reloaded_uuid: str, user_uploaded_uuid: str
@@ -454,6 +456,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Input("computed-retrosynthesis-routes", "data"),
         Input("reloaded-retrosynthesis-routes", "data"),
         Input("user-uploaded-route", "data"),
+        prevent_initial_call=True,
     )
     def determine_active_retrosynthesis_routes(
         computed_retrosynthesis_routes: dict,
@@ -481,9 +484,10 @@ def init_dashboard(server: Flask) -> classes.Dash:
     @dash_app.callback(
         Output("routes-dropdown", "value"),
         Output("routes-dropdown", "options"),
-        Input("active-retrosynthesis-routes", "data"),
-        Input("active-conditions-data", "data"),
+        State("active-retrosynthesis-routes", "data"),
+        State("active-conditions-data", "data"),
         Input("weighted-sustainability-data", "data"),
+        prevent_intial_call=True,
     )
     def populate_routes_dropdown(
         active_retrosynthesis: dict,
@@ -536,6 +540,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Output("routes-dropdown", "style"),
         State("routes-dropdown", "options"),
         Input("routes-dropdown", "value"),
+        prevent_initial_call=True,
     )
     def update_route_dropdown_background_colour(
         options: List[dict], active_route: str
@@ -553,22 +558,20 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Returns:
             a dict with the background colour reflective of the sustainability of the selected route
         """
-
-        if options and active_route:
-            # get background colour
-            for option in options:
-                if option["value"] == active_route:
-                    background_colour = option["label"]["props"]["style"][
-                        "background-color"
-                    ]
-                    return {"background-color": background_colour, "width": "100%"}
-        return dash.no_update
+        # get background colour
+        for option in options:
+            if option["value"] == active_route:
+                background_colour = option["label"]["props"]["style"][
+                    "background-color"
+                ]
+                return {"background-color": background_colour, "width": "100%"}
 
     @dash_app.callback(
         Output("retrosynthesis-cytoscape", "elements"),
         Output("retrosynthesis-cytoscape", "stylesheet"),
         State("active-retrosynthesis-routes", "data"),
         Input("routes-dropdown", "value"),
+        prevent_initial_call=True,
     )
     def display_retrosynthesis(
         active_retrosynthesis: dict, selected_route: str
@@ -588,24 +591,22 @@ def init_dashboard(server: Flask) -> classes.Dash:
             elements - a list of nodes and edges as dictionaries. node_id is used to identify nodes and connect nodes
 
         """
-        if active_retrosynthesis and selected_route:
-            retro_cytoscape = cytoscape.RetrosynthesisCytoscape(
-                active_retrosynthesis["routes"], selected_route
-            )
-            elements = retro_cytoscape.make_cytoscape_elements()
-            style_sheet = retro_cytoscape.make_cytoscape_stylesheet()
-            return (
-                elements,
-                style_sheet,
-            )
-        else:
-            return dash.no_update
+        retro_cytoscape = cytoscape.RetrosynthesisCytoscape(
+            active_retrosynthesis["routes"], selected_route
+        )
+        elements = retro_cytoscape.make_cytoscape_elements()
+        style_sheet = retro_cytoscape.make_cytoscape_stylesheet()
+        return (
+            elements,
+            style_sheet,
+        )
 
     @dash_app.callback(
         Output("route-feedback", "children"),
         State("active-retrosynthesis-routes", "data"),
         Input("weighted-sustainability-data", "data"),
         Input("routes-dropdown", "value"),  # dropdown
+        prevent_initial_call=True,
     )
     def generate_route_table(
         retrosynthesis_data: dict, weighted_sustainability: dict, selected_route: str
@@ -625,7 +626,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Returns:
             Two tables shown on the 'Routes' tab. One with general data and the other sustainability data.
         """
-        if retrosynthesis_data and selected_route and weighted_sustainability:
+        if retrosynthesis_data:
             route_tables = tables.routes(
                 retrosynthesis_data["routes"],
                 selected_route,
@@ -698,6 +699,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         State("save-functionality-status", "data"),
         State("active-retrosynthesis-uuid", "data"),
         Input("save-modal-save-button", "n_clicks"),
+        prevent_initial_call=True,
     )
     def save_retrosynthesis(
         name: str,
@@ -731,29 +733,26 @@ def init_dashboard(server: Flask) -> classes.Dash:
         """
         if utils.functionality_disabled_check(functionality_status):
             return dash.no_update
-        changed_ids = [p["prop_id"] for p in dash.callback_context.triggered][0]
-        if "save-modal-save-button" in changed_ids and solved_routes:
-            (
-                user_message,
-                retrosynthesis_saved_tracker,
-            ) = saved_retrosyntheses.SaveRetrosynthesis(
-                name,
-                solved_routes,
-                conditions,
-                sustainability_data,
-                workbook_id,
-                new_retrosynthesis_saved_tracker,
-                retrosynthesis_uuid,
-            ).save_process()
-            print(f"{retrosynthesis_saved_tracker=}{user_message=}")
-            return user_message, retrosynthesis_saved_tracker
-        return dash.no_update
+        (
+            user_message,
+            retrosynthesis_saved_tracker,
+        ) = saved_retrosyntheses.SaveRetrosynthesis(
+            name,
+            solved_routes,
+            conditions,
+            sustainability_data,
+            workbook_id,
+            new_retrosynthesis_saved_tracker,
+            retrosynthesis_uuid,
+        ).save_process()
+        return user_message, retrosynthesis_saved_tracker
 
     @dash_app.callback(
         Output("saved-results-list", "children"),
         Input("reload-workbook-dropdown", "value"),
         Input("new-retrosynthesis-saved-flag", "data"),
         State("save-functionality-status", "data"),
+        prevent_initial_call=True,
     )
     def show_retrosynthesis_list(
         selected_workbook_id: int,
@@ -778,16 +777,10 @@ def init_dashboard(server: Flask) -> classes.Dash:
         """
         if utils.functionality_disabled_check(functionality_status):
             return dash.no_update
-        changed_ids = [p["prop_id"] for p in dash.callback_context.triggered][0]
-        if (
-            "new-retrosynthesis-saved-flag" in changed_ids
-            or "reload-workbook-dropdown" in changed_ids
-        ):
-            card_group = saved_retrosyntheses.make_retrosynthesis_card_list(
-                selected_workbook_id
-            )
-            return card_group
-        return dash.no_update
+        card_group = saved_retrosyntheses.make_retrosynthesis_card_list(
+            selected_workbook_id
+        )
+        return card_group
 
     @dash_app.callback(
         Output("reloaded-retrosynthesis-routes", "data"),
@@ -803,6 +796,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             component_property="n_clicks",
         ),
         State("save-functionality-status", "data"),
+        prevent_initial_call=True,
     )
     def reload_retrosynthesis(
         reload_id_values: List[int],
@@ -825,27 +819,25 @@ def init_dashboard(server: Flask) -> classes.Dash:
         if utils.functionality_disabled_check(functionality_status):
             return dash.no_update
         # find the element that was clicked - if one was clicked
-        if reload_id_values and reload_button_clicks:
-            if saved_retrosyntheses.assert_button_clicked(reload_button_clicks):
-                retrosynthesis_to_reload_id = (
-                    saved_retrosyntheses.get_retrosynthesis_to_reload_id(
-                        reload_id_values
-                    )
-                )
-                (
-                    retrosynthesis_data,
-                    condition_data,
-                    sustainability_data,
-                    retrosynthesis_uuid,
-                ) = saved_retrosyntheses.get_reloaded_retrosynthesis(
-                    retrosynthesis_to_reload_id
-                )
-                return (
-                    retrosynthesis_data,
-                    condition_data,
-                    sustainability_data,
-                    retrosynthesis_uuid,
-                )
+
+        if saved_retrosyntheses.assert_button_clicked(reload_button_clicks):
+            retrosynthesis_to_reload_id = (
+                saved_retrosyntheses.get_retrosynthesis_to_reload_id(reload_id_values)
+            )
+            (
+                retrosynthesis_data,
+                condition_data,
+                sustainability_data,
+                retrosynthesis_uuid,
+            ) = saved_retrosyntheses.get_reloaded_retrosynthesis(
+                retrosynthesis_to_reload_id
+            )
+            return (
+                retrosynthesis_data,
+                condition_data,
+                sustainability_data,
+                retrosynthesis_uuid,
+            )
         return dash.no_update
 
     """
@@ -856,6 +848,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Output("compound-feedback", "children"),
         Output("tapped-compound-image", "src"),
         Input("retrosynthesis-cytoscape", "tapNodeData"),
+        prevent_initial_call=True,
     )
     def display_compound_node_data(
         tapped_node: dict,
@@ -890,14 +883,13 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Output("conditions-dropdown", "options"),
         State("routes-dropdown", "value"),
         State("active-conditions-data", "data"),
-        State("active-sustainability-data", "data"),
         Input("retrosynthesis-cytoscape", "tapNodeData"),
         Input("weighted-sustainability-data", "data"),
+        prevent_initial_call=True,
     )
     def fill_conditions_dropdown(
         route_label: str,
         conditions_data: Dict,
-        sustainability_data: Dict,
         tapped_node: Dict,
         weighted_sustainability_data: Dict,
     ) -> Tuple[List[Dict], List[Dict], str, List[Dict]]:
@@ -911,37 +903,15 @@ def init_dashboard(server: Flask) -> classes.Dash:
             # States
             route - The current route label - needed to look up current route
             conditions_data - The reaction conditions are extracted from this dictionary
-            sustainability_data - The reaction sustainability data are extracted from this dictionary
 
         Returns:
             rxn_conditions - conditions for the current reaction
-            rxn_sustainability - sustainability for the current reaction
+            rxn_sustainability - weighted sustainability for the current reaction
             'Condition Set 1' as the default active condition set
             dropdown_options - to populate the condition set dropdown.
 
         """
-        if route_label and conditions_data and sustainability_data and tapped_node:
-            if not tapped_node["reaction_smiles"]:
-                return (
-                    [{}],
-                    [{}],
-                    "Terminal node.",
-                    [
-                        {
-                            "label": html.Span(
-                                children=[],
-                                style={
-                                    "background-color": "#FFFFFF",
-                                    "color": "#000000",
-                                    "width": "250%",
-                                },
-                            ),
-                            "style": {"width": "150%"},
-                            "value": "Terminal node.",
-                            "width": "150%",
-                        }
-                    ],
-                )
+        if tapped_node and tapped_node.get("reaction_smiles"):
             (
                 rxn_conditions,
                 rxn_sustainability,
@@ -958,12 +928,20 @@ def init_dashboard(server: Flask) -> classes.Dash:
                 "Condition Set 1",
                 dropdown_options,
             )
-        return dash.no_update
+        # a terminal node has no reaction SMILES so return empty values
+        else:
+            return (
+                [{}],
+                [{}],
+                "Terminal node.",
+                dropdowns.make_terminal_node_dropdown(),
+            )
 
     @dash_app.callback(
         Output("conditions-dropdown", "style"),
         State("conditions-dropdown", "options"),
         Input("conditions-dropdown", "value"),
+        prevent_initial_call=True,
     )
     def update_conditions_dropdown_background_colour(
         options: List[dict], active_condition_set: str
@@ -982,12 +960,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             a dict with the background colour reflective of the sustainability of the selected condition set
         """
 
-        if (
-            options
-            and active_condition_set
-            and options != [{}]
-            and active_condition_set != "Terminal node"
-        ):
+        if active_condition_set != "Terminal node":
             # get background colour
             for option in options:
                 if option["value"] == active_condition_set:
@@ -999,13 +972,13 @@ def init_dashboard(server: Flask) -> classes.Dash:
                         "width": "100%",
                         "margin-bottom": "1rem",
                     }
-        if active_condition_set == "Terminal node":
+        # if a terminal node return empty values
+        else:
             return {
                 "background-color": "#FFFFFF",
                 "width": "100%",
                 "margin-bottom": "1rem",
             }
-        return dash.no_update
 
     @dash_app.callback(
         Output("reaction-conditions", "children"),
@@ -1013,10 +986,11 @@ def init_dashboard(server: Flask) -> classes.Dash:
         State("reaction-conditions-list", "data"),
         State("reaction-sustainability-list", "data"),
         Input("conditions-dropdown", "value"),
+        prevent_initial_call=True,
     )
     def generate_reaction_table(
-        conditions_options: List[dict],
-        sustainability_options: List[dict],
+        conditions_options: Dict[str, dict],
+        sustainability_options: Dict[str, dict],
         conditions_dropdown_value: str,
     ) -> Union[dbc.Table, str]:
         """
@@ -1052,6 +1026,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Output("reaction-class", "children"),
         State("window-width", "data"),
         Input("retrosynthesis-cytoscape", "tapNodeData"),
+        prevent_initial_call=True,
     )
     def display_reaction(window_width: int, tapped_node: dict) -> Tuple[str, str, str]:
         """
@@ -1067,8 +1042,6 @@ def init_dashboard(server: Flask) -> classes.Dash:
             img_data for the current reaction as a png string
             reaction_class of the active reaction.
         """
-        if not tapped_node:
-            return dash.no_update
         reaction_class = tapped_node["label"]
         reaction_smiles = tapped_node["reaction_smiles"]
         if reaction_smiles:
@@ -1083,6 +1056,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Output("new-reaction-id", "value"),
         State("save-functionality-status", "data"),
         Input("new-reaction-workbook-dropdown", "value"),
+        prevent_initial_call=True,
     )
     def update_new_reaction_id(
         functionality_status: Union[Literal["disabled"], Literal["enabled"]],
@@ -1115,6 +1089,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         State("reaction-smiles", "data"),
         State("save-functionality-status", "data"),
         Input("new-reaction-data-submit", "n_clicks"),
+        prevent_initial_call=True,
     )
     def new_reaction(
         current_url: str,
@@ -1147,30 +1122,29 @@ def init_dashboard(server: Flask) -> classes.Dash:
         """
         if utils.functionality_disabled_check(functionality_status):
             return dash.no_update
-        changed_ids = [p["prop_id"] for p in dash.callback_context.triggered][0]
-        if "new-reaction-data-submit" in changed_ids:
-            if not reaction_smiles:
-                return "", "Cannot make a new reaction from a terminal node."
-            # check if - name is unique
-            workbook_object = services.workbook.get(workbook_id)
-            result = saved_retrosyntheses.save_new_reaction_from_retrosynthesis(
-                workbook_object, reaction_name, reaction_id, reaction_smiles
+        if not reaction_smiles:
+            return "", "Cannot make a new reaction from a terminal node."
+        # get workbook and make a reaction from it
+        workbook_object = services.workbook.get(workbook_id)
+        result = saved_retrosyntheses.save_new_reaction_from_retrosynthesis(
+            workbook_object, reaction_name, reaction_id, reaction_smiles
+        )
+        # if this is successful make the url and redirect the user
+        if result == "New reaction made":
+            workgroup_name = workbook_object.WorkGroup.name
+            workbook_name = workbook_object.name
+            base_url = current_url.split("retrosynthesis")[0]
+            new_url = quote(
+                f"{base_url}sketcher/{workgroup_name}/{workbook_name}/{reaction_id}/no"
             )
-            if result == "New reaction made":
-                workgroup_name = workbook_object.WorkGroup.name
-                workbook_name = workbook_object.name
-                base_url = current_url.split("retrosynthesis")[0]
-                new_url = quote(
-                    f"{base_url}sketcher/{workgroup_name}/{workbook_name}/{reaction_id}/no"
-                )
-                return new_url, "New reaction made!"
-            return "", result
-        return dash.no_update
+            return new_url, "New reaction made!"
+        return "", result
 
     @dash_app.callback(
         Output("url", "pathname"),
         State("save-functionality-status", "data"),
         Input("new-reaction-url", "data"),
+        prevent_initial_call=True,
     )
     def go_to_new_reaction(
         functionality_status: Union[Literal["disabled"], Literal["enabled"]],
@@ -1197,12 +1171,15 @@ def init_dashboard(server: Flask) -> classes.Dash:
     @dash_app.callback(
         Output("user-uploaded-route", "data"),
         Output("user-uploaded-conditions-data", "data"),
-        Output("user-uploaded-route-sustainability-data", "data"),
         Output("user-uploaded-route-uuid", "data"),
+        Output("uploaded-route-message", "children"),
         Input("upload-route-button", "contents"),
         State("upload-route-button", "filename"),
+        prevent_initial_call=True,
     )
-    def update_output(contents: str, filename: str) -> Tuple[dict, dict, dict, str]:
+    def upload_user_route_file(
+        contents: str, filename: str
+    ) -> Tuple[dict, dict, str, str]:
         """
         Called when a user clicks 'Upload Route'
         Uploads the route from the user selected file and shows in the cytoscape
@@ -1214,24 +1191,53 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Returns:
             processed_route - the dict with route data from the uploaded file
             processed_conditions - the dict with condition data from the uploaded file
-            sustainability - the dict with sustainability data from the uploaded file
             uuid for the uploaded retrosynthesis.
+            user feedback - string indicating upload status
         """
-        if contents is not None:
-            (
-                processed_route,
-                processed_conditions,
-            ) = user_uploaded_routes.read_user_route_file(contents, filename)
-            sustainability_data = sustainability.AllRouteSustainability(
-                processed_conditions["routes"]
-            ).get()
+
+        try:
+            if contents is not None:
+                (
+                    processed_route,
+                    processed_conditions,
+                ) = user_uploaded_routes.read_user_route_file(contents, filename)
+
+                return (
+                    processed_route,
+                    processed_conditions,
+                    processed_route["uuid"],
+                    "File successfully uploaded",
+                )
+        except Exception as e:
+            print(e)
             return (
-                processed_route,
-                processed_conditions,
-                sustainability_data,
-                processed_route["uuid"],
+                {},
+                {},
+                "",
+                "Error with the file upload.This may occur if the file extension was changed or an incorrect format "
+                "was used.\nPlease refer to the example file for the correct format and upload as .csv, .xslx or .ods.",
             )
         return dash.no_update
+
+    @dash_app.callback(
+        Output("user-uploaded-route-sustainability-data", "data"),
+        Input("user-uploaded-conditions-data", "data"),
+        prevent_initial_call=True,
+    )
+    def process_user_route_sustainability(conditions: dict) -> dict:
+        """
+        Get the sustainability data for a user uploaded route after the UUID is available
+
+        Args:
+            conditions - the dict with condition data from the uploaded file
+
+        Returns:
+            sustainability - the dict with sustainability data from the uploaded file
+        """
+        sustainability_data = sustainability.AllRouteSustainability(
+            conditions["routes"]
+        ).get()
+        return sustainability_data
 
     @dash_app.callback(
         Output("example-route-file-download", "data"),
@@ -1239,6 +1245,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         prevent_initial_call=True,
     )
     def download_example_file(n_clicks):
+        """Downloads the example route file when user"""
         return dcc.send_file(
             os.path.join(
                 current_app.config["APP_DIRECTORY"],

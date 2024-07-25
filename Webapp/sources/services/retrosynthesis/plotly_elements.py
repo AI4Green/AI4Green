@@ -129,7 +129,6 @@ smiles_field_and_retrosynthesis_button = dbc.Row(
 header_and_inputs = html.Div(
     children=[
         html.H2("Retrosynthesis"),
-        html.P("Quick: O=C(Nc1cncc(Oc2cncc(F)c2)n1)c1ccccn1"),
         smiles_field_and_retrosynthesis_button,
         # user_route,
         html.H6(
@@ -266,6 +265,7 @@ route_sidebar = html.Div(
             ],
             style={"display": "flex", "justify-content": "space-between"},
         ),
+        html.P(id="uploaded-route-message"),
         html.Hr(),
         html.Div(id="route-feedback"),
         html.Div(id="sustainability-feedback"),
