@@ -9,16 +9,7 @@ Nc1ncnc2[nH]nc(Br)c12;OB(O)c1ccc(Oc2ccccc2)cc1,Na+].[Na+].[O-]C([O-])=O,O1CCOCC1
 Formatting method:
 Enter compounds SMILES strings separated by a semi colon.
 Enter the reaction to make the target molecule on top and continue in route order after that.
-Temperature is in Celsius ",,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
+Temperature is in Celsius
+Use existing headings as they are
+Values must be provided for reactants, products, and temperature.
+Catalyst, solvents, and reagents may be left blank",,,,,

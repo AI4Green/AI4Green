@@ -626,7 +626,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Returns:
             Two tables shown on the 'Routes' tab. One with general data and the other sustainability data.
         """
-        if retrosynthesis_data:
+        if retrosynthesis_data and selected_route:
             route_tables = tables.routes(
                 retrosynthesis_data["routes"],
                 selected_route,
