@@ -31,61 +31,57 @@ def reagents() -> Response:
     novel_compound = False
     number = request.form["number"]  # gets the reagent number from the browser
     cas_regex = r"\b[1-9]{1}[0-9]{1,6}-\d{2}-\d\b"
-    cas_number = re.findall(cas_regex, reagent)
-    if cas_number:
-        reagent = cas_number[0]
-        found_reagent = (
-            db.session.query(models.Compound)
-            .filter(models.Compound.cas == reagent)
-            .first()
-        )
-        if (
-            found_reagent is None and workbook
-        ):  # check the novel compound db for the cas number
-            found_reagent = (
-                db.session.query(models.NovelCompound)
-                .filter(models.NovelCompound.cas == reagent)
-                .join(models.WorkBook)
-                .filter(models.WorkBook.id == workbook.id)
-                .first()
-            )
+    cas_match = re.findall(cas_regex, reagent)
+    if cas_match:
+        cas_number = cas_match[0]
+        found_reagent = services.all_compounds.from_cas(cas_number, workbook)
         if found_reagent is None:
             # if it's a cas but not in database then return for adding novel compound redirect
             return jsonify({"cas_not_found": True, "reagent": reagent})
     else:  # non-cas entry. We search reagent common names
-        found_reagent = (
-            db.session.query(models.Compound)
-            .filter(func.lower(models.Compound.name) == reagent.lower())
-            .first()
-        )
-        if found_reagent is None and workbook:  # check novel compound db
-            found_reagent = (
-                db.session.query(models.NovelCompound)
-                .filter(func.lower(models.NovelCompound.name) == reagent.lower())
-                .join(models.WorkBook)
-                .filter(models.WorkBook.id == workbook.id)
-                .first()
-            )
-            if found_reagent:
-                novel_compound = True
-        if (
-            found_reagent is None
-        ):  # If still no match find a list of partial matches and send to the frontend
-            reagent_list = (
+        found_reagent = services.all_compounds.from_name(reagent, workbook)
+        if isinstance(found_reagent, models.NovelCompound):
+            novel_compound = True
+
+    # If still no match find a list of partial matches and send to the frontend
+    if found_reagent is None:
+        # Get novel compounds and recently used compounds
+        remaining_spaces = 100
+        reagent_names = []
+        if workbook:
+            print(reagent)
+            novel_compound_list = services.novel_compound.all_from_workbook(workbook)
+            full_reagent_list = novel_compound_list + workbook.recent_compounds
+
+            # Take the first 100 elements from the combined list
+            reagent_list = full_reagent_list[:100]
+
+            # Extract names that contain the reagent substring
+            reagent_names = [
+                x.name for x in reagent_list if reagent.lower() in x.name.lower()
+            ]
+
+            # Calculate remaining spaces needed to fill up to 100
+            remaining_spaces -= len(reagent_names)
+
+        # Query for additional generic reagents if needed
+        if remaining_spaces > 0 and reagent:
+            additional_reagents = (
                 db.session.query(models.Compound)
                 .filter(func.lower(models.Compound.name).startswith(reagent.lower()))
                 .order_by(models.Compound.name.asc())
-                .limit(100)
+                .limit(remaining_spaces)
                 .all()
             )
-            reagent_names = [x.name for x in reagent_list]
-            return jsonify(
-                {
-                    "identifiers": reagent_names,
-                    "reagent_not_found": True,
-                    "reagent": reagent,
-                }
-            )
+            reagent_names.extend([x.name for x in additional_reagents])
+
+        return jsonify(
+            {
+                "identifiers": reagent_names,
+                "reagent_not_found": True,
+                "reagent": reagent,
+            }
+        )
     if found_reagent is not None:
         reagent_name = found_reagent.name  # assign reagent to name
         # then its hazard phrase, density, molar weight,

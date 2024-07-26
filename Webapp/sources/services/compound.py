@@ -50,23 +50,6 @@ def get(primary_key: int) -> models.Compound:
     )
 
 
-def get_compound_from_name(name: str) -> models.Compound:
-    """
-    Retrieves a compound by name.
-
-    Args:
-        name: Compound name.
-
-    Returns:
-        Compound model.
-    """
-    return (
-        db.session.query(models.Compound)
-        .filter(func.lower(models.Compound.name) == name.lower())
-        .first()
-    )
-
-
 def get_compound_from_smiles(smiles: str) -> Optional[models.Compound]:
     """
     Retrieve a compound from the database by converting SMILES to InChI.
@@ -83,19 +66,6 @@ def get_compound_from_smiles(smiles: str) -> Optional[models.Compound]:
     return get_compound_from_inchi(inchi)
 
 
-def get_compound_from_cas(cas: str) -> models.Compound:
-    """
-    Retrieves a compound by CAS.
-
-    Args:
-        cas: CAS number.
-
-    Returns:
-        Compound model.
-    """
-    return db.session.query(models.Compound).filter(models.Compound.cas == cas).first()
-
-
 def get_compound_from_inchi(inchi: str) -> models.Compound:
     """
     Retrieve a compound from the database based on its InChI.
@@ -109,4 +79,36 @@ def get_compound_from_inchi(inchi: str) -> models.Compound:
     """
     return (
         db.session.query(models.Compound).filter(models.Compound.inchi == inchi).first()
+    )
+
+
+def from_cas(cas: str) -> models.Compound:
+    """
+    Retrieve a compound from the database based on its CAS number
+
+    Args:
+        CAS - the chemical abstract service registry number of a compound
+
+    Returns:
+        models.Compound: The compound object retrieved from the database.
+                        Returns None if no matching compound is found.
+    """
+    return db.session.query(models.Compound).filter(models.Compound.cas == cas).first()
+
+
+def from_name(name: str) -> models.Compound:
+    """
+    Retrieve a compound from the database based on its name
+
+    Args:
+        name - the name of a compound
+
+    Returns:
+        models.Compound: The compound object retrieved from the database.
+                        Returns None if no matching compound is found.
+    """
+    return (
+        db.session.query(models.Compound)
+        .filter(func.lower(models.Compound.name) == name.lower())
+        .first()
     )

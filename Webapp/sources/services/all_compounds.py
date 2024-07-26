@@ -149,3 +149,46 @@ def mol_weight_from_smiles(smiles: str) -> float:
     """
     # MolWt accounts for the average across isotopes but ExactMolWt only takes the most abundant isotope.
     return round(Descriptors.MolWt(Chem.MolFromSmiles(smiles)), 2)
+
+
+def from_cas(
+    cas: str, workbook: models.WorkBook = None
+) -> Union[models.Compound, models.NovelCompound]:
+    """
+    Returns a compound or novel compound from a cas string
+
+    Args:
+        cas - cas number of a compound
+        workbook - if looking for a novel compound, the workbook we look in
+
+    Returns:
+        models.Compound or models.NovelCompound: The compound object retrieved from the database.
+                                                 Returns None if no matching compound is found.
+    """
+    compound = services.compound.from_cas(cas)
+    if not compound and workbook:
+        compound = services.novel_compound.from_cas_and_workbook(cas, workbook)
+    return compound
+
+
+def from_name(
+    name: str, workbook: models.WorkBook = None
+) -> Union[models.Compound, models.NovelCompound]:
+    """
+    Returns a compound or novel compound from a name
+
+    Args:
+        name - name of a compound
+        workbook - if looking for a novel compound, the workbook we look in
+
+    Returns:
+        models.Compound or models.NovelCompound: The compound object retrieved from the database.
+                                                 Returns None if no matching compound is found.
+    """
+    compound = services.compound.from_name(name)
+    if not compound and workbook:
+        compound = services.novel_compound.from_name_and_workbook(name, workbook)
+    return compound
+
+
+# def get_substring_list()

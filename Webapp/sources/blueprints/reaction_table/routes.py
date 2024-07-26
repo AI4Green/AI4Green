@@ -81,11 +81,7 @@ def process():
             if demo == "demo":  # if in demo mode don't search novel compounds
                 return jsonify({"reactionTable": "demo", "novelCompound": ""})
 
-            reactant = (
-                services.novel_compound.get_novel_compound_from_inchi_and_workbook(
-                    inchi, workbook
-                )
-            )
+            reactant = services.novel_compound.from_inchi_and_workbook(inchi, workbook)
             novel_compound = True
 
             # if no match is found we inform the user the compound is not in the database
@@ -125,11 +121,7 @@ def process():
             if demo == "demo":  # if in demo mode don't search novel compounds
                 return jsonify({"reactionTable": "demo", "novelCompound": ""})
 
-            product = (
-                services.novel_compound.get_novel_compound_from_inchi_and_workbook(
-                    inchi, workbook
-                )
-            )
+            product = services.novel_compound.from_inchi_and_workbook(inchi, workbook)
             novel_compound = True
 
             # if no match is found we inform the user the compound is not in the database
