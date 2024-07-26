@@ -4,6 +4,7 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 from sources import models, services
 from sources.extensions import db
+from sqlalchemy import func
 
 """
 Contains functions for when it is unknown if a compound is from the Compound table and from PubChem or a Novel compound
@@ -191,4 +192,34 @@ def from_name(
     return compound
 
 
-# def get_substring_list()
+def populate_reagent_dropdown(
+    reagent_substring: str, workbook: models.WorkBook = None
+) -> List[str]:
+    remaining_spaces = 100
+    reagent_names = []
+    # make a combined list of 100 elements with priority to novel compounds and then recently used compounds
+    if workbook:
+        novel_compound_list = services.novel_compound.all_from_workbook(workbook)
+        full_reagent_list = novel_compound_list + workbook.recent_compounds
+        reagent_list = services.utils.remove_duplicates_keep_first(full_reagent_list)
+
+        # Get the first 100 which match the substring
+        reagent_names = [
+            x.name for x in reagent_list if reagent_substring.lower() in x.name.lower()
+        ][0:100]
+        # Calculate remaining spaces needed to fill up to 100
+        remaining_spaces -= len(reagent_names)
+
+    # Query for additional generic reagents to fill up the list to 100
+    if remaining_spaces > 0 and reagent_substring:
+        additional_reagents = (
+            db.session.query(models.Compound)
+            .filter(
+                func.lower(models.Compound.name).startswith(reagent_substring.lower())
+            )
+            .order_by(models.Compound.name.asc())
+            .limit(remaining_spaces)
+            .all()
+        )
+        reagent_names.extend([x.name for x in additional_reagents])
+    return reagent_names

@@ -45,36 +45,10 @@ def reagents() -> Response:
 
     # If still no match find a list of partial matches and send to the frontend
     if found_reagent is None:
-        # Get novel compounds and recently used compounds
-        remaining_spaces = 100
-        reagent_names = []
-        if workbook:
-            print(reagent)
-            novel_compound_list = services.novel_compound.all_from_workbook(workbook)
-            full_reagent_list = novel_compound_list + workbook.recent_compounds
-
-            # Take the first 100 elements from the combined list
-            reagent_list = full_reagent_list[:100]
-
-            # Extract names that contain the reagent substring
-            reagent_names = [
-                x.name for x in reagent_list if reagent.lower() in x.name.lower()
-            ]
-
-            # Calculate remaining spaces needed to fill up to 100
-            remaining_spaces -= len(reagent_names)
-
-        # Query for additional generic reagents if needed
-        if remaining_spaces > 0 and reagent:
-            additional_reagents = (
-                db.session.query(models.Compound)
-                .filter(func.lower(models.Compound.name).startswith(reagent.lower()))
-                .order_by(models.Compound.name.asc())
-                .limit(remaining_spaces)
-                .all()
-            )
-            reagent_names.extend([x.name for x in additional_reagents])
-
+        # If working in a workbook, get its novel compounds and recently used compounds
+        reagent_names = services.all_compounds.populate_reagent_dropdown(
+            reagent, workbook
+        )
         return jsonify(
             {
                 "identifiers": reagent_names,
@@ -83,6 +57,8 @@ def reagents() -> Response:
             }
         )
     if found_reagent is not None:
+        if workbook and not novel_compound:
+            services.workbook.add_recent_compound(workbook, found_reagent)
         reagent_name = found_reagent.name  # assign reagent to name
         # then its hazard phrase, density, molar weight,
         # and concentration are selected from the reagent

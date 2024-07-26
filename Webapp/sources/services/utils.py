@@ -43,3 +43,22 @@ def check_is_number(string: str) -> bool:
         return True
     except ValueError:
         return False
+
+
+def remove_duplicates_keep_first(lst: list) -> list:
+    """
+    Removes duplicates from a list but keeps the order and only removes the non-first duplicates
+    Args:
+        lst - a list potentially containing duplicates
+    Returns:
+        a list without duplicates
+    """
+    seen_items = set()
+    new_list = []
+
+    for item in lst:
+        if item not in seen_items:
+            new_list.append(item)
+            seen_items.add(item)
+
+    return new_list
