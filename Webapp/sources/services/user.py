@@ -12,7 +12,11 @@ def list_all() -> List[models.User]:
     Returns:
          List of all users
     """
-    return db.session.query(models.User).all()
+    return (
+        db.session.query(models.User)
+        .order_by(models.User.time_of_creation.desc())
+        .all()
+    )
 
 
 def person_from_current_user() -> models.Person:
