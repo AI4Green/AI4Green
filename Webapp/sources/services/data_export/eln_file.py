@@ -289,10 +289,7 @@ class ELNExportReaction:
             "author": {"@id": f"./author/{self.reaction.creator_person.id}"},
             "dateCreated": self.reaction.time_of_creation.strftime("%Y-%m-%d %H:%M:%S"),
             "dateModified": self.reaction.time_of_update.strftime("%Y-%m-%d %H:%M:%S"),
-            "comment": [
-                {"@id": f'comment-id/{comment["@id"]}'}
-                for comment in self.defined_comments
-            ],
+            "comment": [{"@id": comment["@id"]} for comment in self.defined_comments],
             # "comment": [{"@id": "comment-id/AI4-001/5"}],
             "hasPart": [{"@id": file["@id"]} for file in self.defined_files],
             "description": self.reaction.description,
@@ -529,17 +526,19 @@ def get_constant_ro_crate_start() -> List[Dict]:
             "dateCreated": datetime.now(pytz.timezone("Europe/London"))
             .replace(tzinfo=None)
             .strftime("%Y-%m-%d %H:%M:%S"),
+            "parentOrganization": {
+                "@id": "#university-of-nottingham",
+                "@type": "Organization",
+                "name": "University of Nottingham",
+                "logo": "https://www.nottingham.ac.uk/Brand/LegacyAssets/images-multimedia/2022/Logos/BrandEvolution-NottinghamBlue-Cropped-450x173.png",
+                "url": "https://www.nottingham.ac.uk/",
+            },
             "sdPublisher": {
                 "@type": "Organization",
                 "name": "AI4Green",
                 "slogan": "AI for Green Chemistry. Electronic Lab Notebook with Machine Learning Support.",
                 "url": "https://www.ai4green.app",
-                "parentOrganization": {
-                    "@type": "Organization",
-                    "name": "University of Nottingham",
-                    "logo": "https://www.nottingham.ac.uk/Brand/LegacyAssets/images-multimedia/2022/Logos/BrandEvolution-NottinghamBlue-Cropped-450x173.png",
-                    "url": "https://www.nottingham.ac.uk/",
-                },
+                "parentOrganization": "#university-of-nottingham",
             },
             "version": "1.0",
         },
