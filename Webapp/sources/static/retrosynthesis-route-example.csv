@@ -1,0 +1,15 @@
+﻿reactants,reagents,solvents,product,temperature,catalyst
+ClC(=O)C=C;Nc1ncnc2c1c(-c1ccc(Oc3ccccc3)cc1)nn2[C@@H]1CCCNC1,CCN(CC)CC,ClCCl,C=CC(=O)N1CCC[C@H](C1)N2C3=C(C(=N2)C4=CC=C(C=C4)OC5=CC=CC=C5)C(=NC=N3)N,10,
+O[C@H]1CCCNC1;Nc1ncnc2[nH]nc(-c3ccc(Oc4ccccc4)cc3)c12,c1ccccc1P(c2ccccc2)c3ccccc3;CC(C)OC(=O)N=NC(=O)OC(C)C,C1CCOC1,Nc1ncnc2c1c(-c1ccc(Oc3ccccc3)cc1)nn2[C@@H]1CCCNC1,20,
+Nc1ncnc2[nH]nc(Br)c12;OB(O)c1ccc(Oc2ccccc2)cc1,Na+].[Na+].[O-]C([O-])=O,O1CCOCC1;O,Nc1ncnc2[nH]nc(-c3ccc(Oc4ccccc4)cc3)c12,108,
+,,,,,
+,,,,,
+,,,,,
+"Delete this cell from template before uploading.
+Formatting method:
+Enter compounds SMILES strings separated by a semi colon.
+Enter the reaction to make the target molecule on top and continue in route order after that.
+Temperature is in Celsius
+Use existing headings as they are
+Values must be provided for reactants, products, and temperature.
+Catalyst, solvents, and reagents may be left blank",,,,,

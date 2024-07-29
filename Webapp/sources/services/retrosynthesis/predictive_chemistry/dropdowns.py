@@ -32,6 +32,25 @@ def make_workbooks_dropdown_options() -> Optional[Tuple[List[Dict], int]]:
     return workbook_options, None
 
 
+def make_terminal_node_dropdown() -> List[dict]:
+    """If a terminal node is selected it has conditions. Then we return an empty dropdown"""
+    return [
+        {
+            "label": html.Span(
+                children=[],
+                style={
+                    "background-color": "#FFFFFF",
+                    "color": "#000000",
+                    "width": "250%",
+                },
+            ),
+            "style": {"width": "150%"},
+            "value": "Terminal node.",
+            "width": "150%",
+        }
+    ]
+
+
 def make_conditions_dropdown(
     route_label: str,
     conditions_data: Dict[str, dict],

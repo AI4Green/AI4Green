@@ -11,17 +11,18 @@ node_border_dict = cytoStyle.node_border_dict
 class RetrosynthesisCytoscape:
     """Class for making the cytoscape which is the interactive visual tool that displays the retrosynthesis"""
 
-    def __init__(self, solved_routes: Dict, selected_route: str):
+    def __init__(self, active_retrosynthesis: Dict, selected_route: str):
         """
         Creates a new instance of the RetrosynthesisCytoscape class
         Args:
-            solved_routes - the dictionary containing the solved routes
+            solved_routes - the dictionary containing the solved routes and uuid
             selected_route - the key used to access the selected route format e.g., 'Route 1'
         """
 
-        self.solved_routes = solved_routes
+        self.uuid = active_retrosynthesis["uuid"]
+        self.solved_routes = active_retrosynthesis["routes"]
         self.selected_route_idx = int(selected_route[-1]) - 1
-        self.displayed_route = solved_routes[selected_route]
+        self.displayed_route = self.solved_routes[selected_route]
         self.node_df = self._make_node_dataframe()
 
     def make_cytoscape_elements(self):
@@ -117,8 +118,8 @@ class RetrosynthesisCytoscape:
                     "reaction_smiles": reaction_smiles,
                     "label": reaction_class,
                     "type": node_type,
+                    "uuid": self.uuid,
                 },
-                # 'position': {'x': x, 'y': y},
             }
             for node_id, smiles, reaction_smiles, reaction_class, node_type in zip(
                 self.node_df.index,

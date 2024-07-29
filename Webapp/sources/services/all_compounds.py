@@ -1,6 +1,7 @@
 from typing import List, Optional, Tuple, Union
 
 from rdkit import Chem
+from rdkit.Chem import Descriptors
 from sources import models, services
 from sources.extensions import db
 
@@ -134,3 +135,17 @@ def smiles_to_inchi(smiles: str) -> str:
     """
     mol = Chem.MolFromSmiles(smiles)
     return None if mol is None else Chem.MolToInchi(mol)
+
+
+def mol_weight_from_smiles(smiles: str) -> float:
+    """
+    Uses RDKit to calculate the molecular weight for a compound from its SMILES string
+
+    Args:
+        smiles - the SMILES of the compound of interest
+
+    Returns:
+        The molecular weight of the compound.
+    """
+    # MolWt accounts for the average across isotopes but ExactMolWt only takes the most abundant isotope.
+    return round(Descriptors.MolWt(Chem.MolFromSmiles(smiles)), 2)

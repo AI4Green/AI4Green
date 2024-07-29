@@ -232,7 +232,7 @@ def get_reloaded_retrosynthesis(
     """
     When user clicks reload on a saved retrosynthesis, this function returns the relevant data as JSON
     Args:
-        retrosynthesis_to_reload_id - the primary key integer id of the retrosynthesis being relaode.d
+        retrosynthesis_to_reload_id - the primary key integer id of the retrosynthesis being reloaded.
     Returns:
         The retrosynthetic routes
         The conditions data
@@ -346,9 +346,9 @@ def save_new_reaction_from_retrosynthesis(
             reaction_id,
             creator,
             workbook.id,
-            reaction_smiles,
             reaction_table,
             summary_table,
+            reaction_smiles,
         )
         # load sketcher
         return "New reaction made"
@@ -433,3 +433,17 @@ def list_from_workbook(selected_workbook_id: int):
         .filter(models.WorkBook.id == selected_workbook_id)
         .all()
     )
+
+
+def list_all() -> List[models.Retrosynthesis]:
+    """
+    Gets a list of all Retrosynthesis saved. For the admin_dashboard
+
+    Returns:
+         List of all Retrosynthesis sorted by date
+    """
+    return (
+        db.session.query(models.Retrosynthesis).order_by(
+            models.Retrosynthesis.time_of_creation.desc()
+        )
+    ).all()

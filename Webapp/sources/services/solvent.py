@@ -190,6 +190,12 @@ def solvent_sustainability(primary_key: int) -> int:
     )
 
 
-def chem21_solvent_from_name(name: str) -> Optional[models.Solvent]:
+def chem21_solvent_from_smiles(smiles: str) -> Optional[models.Solvent]:
     """Returns a solvent if name is present in database solvent table (CHEM21). Else returns None"""
-    return db.session.query(models.Solvent).filter(models.Solvent.name == name).first()
+    inchi = services.all_compounds.smiles_to_inchi(smiles)
+    return (
+        db.session.query(models.Solvent)
+        .join(models.Compound)
+        .filter(models.Compound.inchi == inchi)
+        .first()
+    )
