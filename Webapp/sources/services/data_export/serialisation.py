@@ -13,21 +13,8 @@ from sources import models, services
 from . import utils
 
 
-class ReactionDataFileExport:
-    """For exporting files as reaction data file (.RDF) Consisting of RXN and MOL blocks."""
-
-    # needed for reading files in, currently only used in testing but in future will want to implement ourselves
-    non_string_types_inside_metadata = [
-        "reagents",
-        "reactants",
-        "solvents",
-        "products",
-        "standard_protocols_used",
-        "file_attachment_names",
-        "addenda",
-        "solvent_sustainability",
-        "sustainability_data",
-    ]
+class RXNFileExport:
+    """For exporting files as .rxn files"""
 
     def __init__(
         self, db_reaction: models.Reaction, filename: str, container_name: str
@@ -54,24 +41,19 @@ class ReactionDataFileExport:
         self.content_size = None
 
     def save(self, extension=True):
-        """Calls the appropriate method to save the data. Can't use .RDF without a reaction_container object"""
+        """Calls the appropriate method to save the data. Can't use .rxn without a reaction object"""
         if self.reaction_object:
             if extension is True:
-                self.filename += ".rdf"
-            self._save_as_rdf()
-            self.mime_type = "chemical/x-mdl-rdfile"
-        else:
-            if extension is True:
-                self.filename += ".json"
-            self._save_as_json()
-            self.mime_type = "application/json"
+                self.filename += ".rxn"
+            self._save_as_rxn()
+            self.mime_type = "chemical/x-mdl-rxn"
 
-        self.file_hash = services.file_attachments.sha256_from_file_contents(
-            self.file_contents
-        )
-        sources.services.data_export.export.save_blob(
-            self.container_name, self.filename, self.file_contents
-        )
+            self.file_hash = services.file_attachments.sha256_from_file_contents(
+                self.file_contents
+            )
+            sources.services.data_export.export.save_blob(
+                self.container_name, self.filename, self.file_contents
+            )
 
     def _make_rxn_block(self) -> Optional[str]:
         """
@@ -95,8 +77,8 @@ class ReactionDataFileExport:
                 )
             except ValueError:
                 return None
-        x = AllChem.ReactionToRxnBlock(rxn, separateAgents=True)
-        return x
+        rxn_block = AllChem.ReactionToRxnBlock(rxn, separateAgents=True)
+        return rxn_block
 
     def _make_reaction_smiles(self) -> Optional[str]:
         """
@@ -127,6 +109,76 @@ class ReactionDataFileExport:
                 .replace(".>", ">")
             )
         return None
+
+    def _save_as_rxn(self):
+        """Saves the file contents as a bytearray to self.memory_file to be uploaded to Azure"""
+        self.memory_file = io.StringIO()
+        with self.memory_file as f:
+            f.write(self.reaction_object)
+            # add dict / extra data
+            self.file_contents = bytearray(f.getvalue(), "utf-8")
+            self.content_size = f.seek(0, os.SEEK_END)
+
+
+class ReactionDataFileExport:
+    """For exporting files as reaction data file (.RDF) Consisting of RXN and MOL blocks."""
+
+    # needed for reading files in, currently only used in testing but in future will want to implement ourselves
+    non_string_types_inside_metadata = [
+        "reagents",
+        "reactants",
+        "solvents",
+        "products",
+        "standard_protocols_used",
+        "file_attachment_names",
+        "addenda",
+        "solvent_sustainability",
+        "sustainability_data",
+    ]
+
+    def __init__(
+        self, db_reaction: models.Reaction, filename: str, container_name: str
+    ):
+        """
+        Creates an instance of the ReactionDataFileExport class
+
+        Args:
+             db_reaction - the database entry for the reaction
+             filename - the filename for the blob without the file extension. Normally the reaction_id e.g., DW1-001
+             container_name - the name of the export container.
+        """
+        self.db_reaction = db_reaction
+        self.reaction_object = RXNFileExport(db_reaction, None, None).reaction_object
+        self.metadata = services.data_export.metadata.ReactionMetaData(
+            db_reaction
+        ).get_dict()
+        self.container_name = container_name
+        self.filename = filename
+        self.memory_file = None
+        self.file_contents = None
+        self.file_hash = None
+        self.mime_type = None
+        self.content_size = None
+
+    def save(self, extension=True):
+        """Calls the appropriate method to save the data. Can't use .RDF without a reaction_container object"""
+        if self.reaction_object:
+            if extension is True:
+                self.filename += ".rdf"
+            self._save_as_rdf()
+            self.mime_type = "chemical/x-mdl-rdfile"
+        else:
+            if extension is True:
+                self.filename += ".json"
+            self._save_as_json()
+            self.mime_type = "application/json"
+
+        self.file_hash = services.file_attachments.sha256_from_file_contents(
+            self.file_contents
+        )
+        sources.services.data_export.export.save_blob(
+            self.container_name, self.filename, self.file_contents
+        )
 
     def _make_rdf_contents(self) -> str:
         """Makes a .RDF reaction data file contents from a RXN block and metadata"""
@@ -188,10 +240,14 @@ class JsonExport:
         self.memory_file = None
         self.file_contents = None
         self.file_hash = None
+        self.mime_type = None
+        self.content_size = None
 
-    def save(self):
+    def save(self, extension=True):
         self._save_json()
-        self.filename += ".json"
+        if extension is True:
+            self.filename += ".json"
+        self.mime_type = "application/json"
         self.file_hash = services.file_attachments.sha256_from_file_contents(
             self.file_contents
         )
@@ -206,3 +262,4 @@ class JsonExport:
         with self.memory_file as f:
             json.dump(self.metadata, f)
             self.file_contents = bytearray(f.getvalue(), "utf-8")
+            self.content_size = f.seek(0, os.SEEK_END)
