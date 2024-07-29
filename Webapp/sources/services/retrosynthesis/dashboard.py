@@ -213,7 +213,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
     """
 
     @dash_app.callback(
-        Output("loading-output-1", "loading_state"),
+        Output("loading-output-1", "loading_state", allow_duplicate=True),
         Output("computed-retrosynthesis-routes", "data"),  # store
         Output("user-message", "children"),
         Output("computed-retrosynthesis-uuid", "data"),
@@ -267,7 +267,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         )
 
     @dash_app.callback(
-        Output("conditions-loader", "loading_state"),
+        Output("loading-output-1", "loading_state", allow_duplicate=True),
         Output("computed-conditions-data", "data"),
         State("computed-retrosynthesis-uuid", "data"),
         Input("computed-retrosynthesis-routes", "data"),

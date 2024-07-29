@@ -86,16 +86,17 @@ class ReactionSustainabilityFlags:
         # Solvent flags - but reverse default order, so most hazardous is 4 and least is 1
         # flag rate dictionary. 5 is non chem21 and has average score of 2 - as is uncategorised.
         solvent_flag_rate = {1: 4, 2: 3, 3: 2, 4: 1, 5: 2}
-        solvents = self.conditions["solvent_names"]
+        solvent_names = self.conditions["solvent_names"]
+        solvent_smiles = self.conditions["solvent_smiles"]
         solvent_flags = []  # solvent flag list
-        for solvent_name in solvents:
+        for name, smiles in zip(solvent_names, solvent_smiles):
             # no solvent used is sustainable and gives a score of 1.
-            if solvent_name == "No solvent":
+            if name == "No solvent":
                 solvent_flag_score = 1
 
             # if a solvent is used, try and find it in the database.
             else:
-                solvent = services.solvent.chem21_solvent_from_name(solvent_name)
+                solvent = services.solvent.chem21_solvent_from_smiles(smiles)
                 # If a solvent has been found, take its flag score, if not assign non-chem21 value of 5.
                 if isinstance(solvent, models.Solvent):
                     solvent_flag = solvent.flag
