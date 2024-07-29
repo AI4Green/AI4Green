@@ -22,7 +22,11 @@ class BaseConfig(object):  # class to store configuration variables
     WTF_CSRF_ENABLED = False
     LIVESERVER_TIMEOUT = 10
     MAX_CONTENT_LENGTH = 1024 * 1024
-    UPLOAD_EXTENSIONS = [".jpg", ".png", ".pdf"]
+    UPLOAD_EXTENSIONS = [
+        ".arw", "cif", ".cdf", ".cdx", ".csv", ".D", ".dat", ".DTA", ".dx", ".fid", ".gz", ".jpg", ".jdx", ".jcamp",
+        ".mnova", ".pdf",  ".pkl", ".png", ".pdb", ".pssession", ".qgd", ".raw", ".res", ".topspin", ".txt", ".vrml",
+        ".xlsx", "xls",  ".xyz", ".zip"
+    ]
     UPLOAD_MIME_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/jpg"]
 
     # the number of molecules to take from PubChem
