@@ -28,6 +28,8 @@ def structure_search_handler() -> Response:
     search_type = request.form["searchType"]
     if search_type == "exact_structure":
         return search.exact_structure_search()
+    elif search_type == "sub_structure":
+        return search.sub_structure_search()
 
 
 class SearchHandler:
@@ -82,6 +84,53 @@ class SearchHandler:
             reaction for sublist in self.reactions for reaction in sublist
         ]
 
+    #
+    # def sub_structure_search(self) -> Response:
+    #     """Performs a substructure structure search on the reaction list"""
+    #     # get search smiles and convert to inchi
+    #     smiles_substructure = request.form["smiles"]
+    #
+    #     # target_inchi = services.all_compounds.smiles_to_inchi(smiles)
+    #     # iterate through reactant, reagent, and product for each reaction and check for a match
+    #     for reaction in self.reactions:
+    #         self.substructure_match_loop(reaction, smiles_substructure)
+    #         # self.exact_structure_match_loop(reaction, target_inchi)
+    #     self.sort_matches()
+    #     if self.matches:
+    #         self.render_results_template()
+    #         return jsonify(
+    #             {
+    #                 "status": "success",
+    #                 "message": f"{len(self.matches)} results found",
+    #                 "search_results": self.search_results,
+    #                 "schemes": self.schemes,
+    #             }
+    #         )
+    #     else:
+    #         return jsonify({"status": "fail", "message": "No results found"})
+
+    # def substructure_structure_match_loop(self, reaction: models.Reaction, smiles_substructure: str) -> None:
+    #     """substructure structure search looking for matches in reactants, reagents, and products"""
+    #     if reaction.reaction_smiles:
+    #         reactants1, products1 = reaction.reaction_smiles.split(">>")
+    #         reactants1, products1 = reactants1.split("."), products1.split(".")
+    #         reactants2, reagents, products2 = (
+    #             reaction.reactants,
+    #             reaction.reagents,
+    #             reaction.products,
+    #         )
+    #         reactants, products = list(set(reactants1 + reactants2)), list(
+    #             set(products1 + products2)
+    #         )
+    #         components = [reactants, reagents, products]
+    #         for component_type in components:
+    #             for component_smiles in component_type:
+    #                 if component_smiles:
+    #                     inchi = services.all_compounds.smiles_to_inchi(component_smiles)
+    #                     if inchi == target_inchi:
+    #                         self.matches.append(reaction)
+    #                         return
+
     def exact_structure_search(self) -> Response:
         """Performs an exact structure search on the reaction list"""
         # get search smiles and convert to inchi
@@ -104,7 +153,9 @@ class SearchHandler:
         else:
             return jsonify({"status": "fail", "message": "No results found"})
 
-    def exact_structure_match_loop(self, reaction, target_inchi) -> None:
+    def exact_structure_match_loop(
+        self, reaction: models.Reaction, target_inchi: str
+    ) -> None:
         """Exact structure search looking for matches in reactants, reagents, and products"""
         if reaction.reaction_smiles:
             reactants1, products1 = reaction.reaction_smiles.split(">>")
