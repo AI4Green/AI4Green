@@ -211,10 +211,10 @@ class ELNExportReaction:
 
     def make_export_files(self):
         """Makes files which are included with the ELN File export. Includes: .rxn and .json"""
-        rdf_uuid = str(uuid.uuid4())
-        rdf_blob_name = "temp/" + rdf_uuid
-        rxn = services.data_export.serialisation.ReactionDataFileExport(
-            self.reaction, rdf_blob_name, self.container_name
+        rxn_uuid = str(uuid.uuid4())
+        rxn_blob_name = "temp/" + rxn_uuid
+        rxn = services.data_export.serialisation.RXNFileExport(
+            self.reaction, rxn_blob_name, self.container_name
         )
         rxn.save(extension=False)
         rxn_dict = {
@@ -226,8 +226,8 @@ class ELNExportReaction:
             "sha256": rxn.file_hash,
             "mimetype": rxn.mime_type,
             "time_of_creation": self.time,
-            "uuid": rdf_blob_name,
-            "ro-crate-id": rdf_uuid,
+            "uuid": rxn_blob_name,
+            "ro-crate-id": rxn_uuid,
         }
         self.files.append(rxn_dict)
         json_uuid = str(uuid.uuid4())
