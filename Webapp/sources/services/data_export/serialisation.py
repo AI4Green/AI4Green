@@ -13,7 +13,34 @@ from sources import models, services
 from . import utils
 
 
-class RXNFileExport:
+class SerialisationExport:
+    """Parent class for serialisation export formats"""
+
+    def __init__(
+        self, db_reaction: models.Reaction, filename: str, container_name: str
+    ):
+        """
+        Creates a serialisation export format and sets up the variables common across all of them.
+
+        Args:
+             db_reaction - the database entry for the reaction
+             filename - the filename for the blob without the file extension. Normally the reaction_id e.g., DW1-001
+             container_name - the name of the export container.
+        """
+        self.db_reaction = db_reaction
+        self.container_name = container_name
+        self.filename = filename
+        self.metadata = services.data_export.metadata.ReactionMetaData(
+            db_reaction
+        ).get_dict()
+        self.memory_file = None
+        self.file_contents = None
+        self.file_hash = None
+        self.mime_type = None
+        self.content_size = None
+
+
+class RXNFileExport(SerialisationExport):
     """For exporting files as .rxn files"""
 
     def __init__(
@@ -27,18 +54,8 @@ class RXNFileExport:
              filename - the filename for the blob without the file extension. Normally the reaction_id e.g., DW1-001
              container_name - the name of the export container.
         """
-        self.db_reaction = db_reaction
+        super().__init__(db_reaction, filename, container_name)
         self.reaction_object = self._make_rxn_block()
-        self.metadata = services.data_export.metadata.ReactionMetaData(
-            db_reaction
-        ).get_dict()
-        self.container_name = container_name
-        self.filename = filename
-        self.memory_file = None
-        self.file_contents = None
-        self.file_hash = None
-        self.mime_type = None
-        self.content_size = None
 
     def save(self, extension=True):
         """Calls the appropriate method to save the data. Can't use .rxn without a reaction object"""
@@ -115,12 +132,11 @@ class RXNFileExport:
         self.memory_file = io.StringIO()
         with self.memory_file as f:
             f.write(self.reaction_object)
-            # add dict / extra data
             self.file_contents = bytearray(f.getvalue(), "utf-8")
             self.content_size = f.seek(0, os.SEEK_END)
 
 
-class ReactionDataFileExport:
+class ReactionDataFileExport(SerialisationExport):
     """For exporting files as reaction data file (.RDF) Consisting of RXN and MOL blocks."""
 
     # needed for reading files in, currently only used in testing but in future will want to implement ourselves
@@ -147,18 +163,13 @@ class ReactionDataFileExport:
              filename - the filename for the blob without the file extension. Normally the reaction_id e.g., DW1-001
              container_name - the name of the export container.
         """
-        self.db_reaction = db_reaction
-        self.reaction_object = RXNFileExport(db_reaction, None, None).reaction_object
+        super().__init__(db_reaction, filename, container_name)
+        self.reaction_object = RXNFileExport(
+            self.db_reaction, None, None
+        ).reaction_object
         self.metadata = services.data_export.metadata.ReactionMetaData(
-            db_reaction
+            self.db_reaction
         ).get_dict()
-        self.container_name = container_name
-        self.filename = filename
-        self.memory_file = None
-        self.file_contents = None
-        self.file_hash = None
-        self.mime_type = None
-        self.content_size = None
 
     def save(self, extension=True):
         """Calls the appropriate method to save the data. Can't use .RDF without a reaction_container object"""
@@ -210,14 +221,13 @@ class ReactionDataFileExport:
         This is used instead of rdf if there is an error with the reaction SMILES
         """
         self.memory_file = io.StringIO()
-
         with self.memory_file as f:
             json.dump(self.metadata, f)
             self.file_contents = bytearray(f.getvalue(), "utf-8")
             self.content_size = f.seek(0, os.SEEK_END)
 
 
-class JsonExport:
+class JsonExport(SerialisationExport):
     """Class for exporting files as .JSON."""
 
     def __init__(
@@ -231,17 +241,7 @@ class JsonExport:
              filename - the filename for the blob without the file extension. Normally the reaction_id e.g., DW1-001
              container_name - the name of the export container.
         """
-        self.db_reaction = db_reaction
-        self.metadata = services.data_export.metadata.ReactionMetaData(
-            db_reaction
-        ).get_dict()
-        self.container_name = container_name
-        self.filename = filename
-        self.memory_file = None
-        self.file_contents = None
-        self.file_hash = None
-        self.mime_type = None
-        self.content_size = None
+        super().__init__(db_reaction, filename, container_name)
 
     def save(self, extension=True):
         self._save_json()
