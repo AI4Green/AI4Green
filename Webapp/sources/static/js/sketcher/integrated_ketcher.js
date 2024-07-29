@@ -5,6 +5,7 @@
 function setupNewKetcherSketcher(width = "1020px") {
   let ketcherHTML = `<iframe id="ketcher-editor" src=/static/ketcher/index.html width=${width} height="480px"></iframe>`;
   $("#ketcher-sketcher").empty().append(ketcherHTML).hide();
+  $("#ketcher-select").prop("disabled", false);
 }
 
 /**
