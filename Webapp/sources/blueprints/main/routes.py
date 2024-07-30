@@ -79,8 +79,8 @@ def load_icons() -> Response:
     header = None
     bootstrap_icon = ""
     if load_type == "workgroup":
-        workgroups = services.workbook.get_workbooks_from_user_group_combination(selected)
-        icon_names = [i.name for i in workgroups]
+        workbooks = services.workbook.get_workbooks_from_user_group_combination(selected)
+        icon_names = [i.name for i in workbooks]
         header = "Workbooks in " + selected
         load_type = "workbook"
         bootstrap_icon = "bi bi-journal-text"
