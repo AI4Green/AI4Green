@@ -333,13 +333,13 @@ save_modal = html.Div(
                         dbc.Button(
                             "Close",
                             id="close-save-modal",
-                            className="btn-secondary",
+                            className="btn-danger",
                             n_clicks=0,
                         ),
                         dbc.Button(
                             "Save",
                             id="save-modal-save-button",
-                            className="btn-primary",
+                            className="btn btn-success",
                             n_clicks=0,
                         ),
                     ]
