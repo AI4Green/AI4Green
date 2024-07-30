@@ -5,13 +5,6 @@ function focusIcon(type, btnId) {
 
     button = document.getElementById(btnId)
     button.classList.add("focused")
-
-    if (type == 'workgroup') {
-        $("#active-workgroup").val(button.id)
-    }
-    else if (type == 'workbook') {
-        $("#active-workbook").val(button.id)
-    }
 }
 
 function blurIcon(button) {
