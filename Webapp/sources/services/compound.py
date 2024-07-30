@@ -1,9 +1,12 @@
-from typing import List
+from typing import List, Optional
 
-from rdkit import Chem
-from sources import models
+from sources import models, services
 from sources.extensions import db
 from sqlalchemy import func
+
+"""
+For all things associated with the Compound table in the database
+"""
 
 
 def count() -> int:
@@ -38,6 +41,15 @@ def get_smiles(primary_key: int) -> str:
     )[0]
 
 
+def get(primary_key: int) -> models.Compound:
+    """Returns the Compound record that matches the primary key ID"""
+    return (
+        db.session.query(models.Compound)
+        .filter(models.Compound.id == primary_key)
+        .first()
+    )
+
+
 def get_compound_from_name(name: str) -> models.Compound:
     """
     Retrieves a compound by name.
@@ -55,33 +67,20 @@ def get_compound_from_name(name: str) -> models.Compound:
     )
 
 
-def get_compound_from_inchi(inchi: str) -> models.Compound:
+def get_compound_from_smiles(smiles: str) -> Optional[models.Compound]:
     """
-    Retrieves a compound by InChI
+    Retrieve a compound from the database by converting SMILES to InChI.
 
     Args:
-        inchi: compound's InChI (structurally derived identifier)
+        smiles (str): The SMILES representation of the compound.
 
     Returns:
-        compound model.
+        models.Compound: A Compound object corresponding to the provided SMILES.
     """
-    return (
-        db.session.query(models.Compound).filter(models.Compound.inchi == inchi).first()
-    )
-
-
-def get_compound_from_smiles(smiles: str) -> models.Compound:
-    """
-    Retrieves a compound from SMILES by converting to InChI via an RDKit mol object
-
-    :param smiles:
-    :return:
-    """
-    mol = Chem.MolFromSmiles(smiles)
-    inchi = Chem.MolToInchi(mol)
-    return (
-        db.session.query(models.Compound).filter(models.Compound.inchi == inchi).first()
-    )
+    inchi = services.all_compounds.smiles_to_inchi(smiles)
+    if not inchi:
+        return None
+    return get_compound_from_inchi(inchi)
 
 
 def get_compound_from_cas(cas: str) -> models.Compound:
@@ -95,3 +94,19 @@ def get_compound_from_cas(cas: str) -> models.Compound:
         Compound model.
     """
     return db.session.query(models.Compound).filter(models.Compound.cas == cas).first()
+
+
+def get_compound_from_inchi(inchi: str) -> models.Compound:
+    """
+    Retrieve a compound from the database based on its InChI.
+
+    Args:
+        inchi (str): The InChI (International Chemical Identifier) of the compound.
+
+    Returns:
+        models.Compound: The compound object retrieved from the database.
+                        Returns None if no matching compound is found.
+    """
+    return (
+        db.session.query(models.Compound).filter(models.Compound.inchi == inchi).first()
+    )

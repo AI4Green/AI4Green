@@ -47,6 +47,14 @@ data_export_request_workbooks = db.Table(
     db.Column("workbook_id", db.Integer, db.ForeignKey("WorkBook.id")),
 )
 
+# Association table for the many-to-many relationship between DataExportRequest and Reaction
+data_export_request_reactions = db.Table(
+    "data_export_request_reactions",
+    db.Model.metadata,
+    db.Column("data_export_request_id", db.Integer, db.ForeignKey("DataExportRequest.id")),
+    db.Column("reaction_id", db.Integer, db.ForeignKey("Reaction.id"))
+)
+
 
 class DataExportRequest(Model):
     """
@@ -55,10 +63,16 @@ class DataExportRequest(Model):
 
     __tablename__ = "DataExportRequest"
 
+    def __init__(self, **kwargs) -> None:
+        self.time_of_request = datetime.now(pytz.timezone("Europe/London")).replace(
+            tzinfo=None
+        )
+        self.uuid = str(uuid.uuid4())
+        super().__init__(**kwargs)
+
     time_of_request = db.Column(
         db.DateTime,
         nullable=False,
-        default=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -78,10 +92,14 @@ class DataExportRequest(Model):
 
     status = db.Column(db.Enum(ApprovalStatus), default=ApprovalStatus.PENDING.value)
 
-    uuid = db.Column(db.Text, default=str(uuid.uuid4()))  # Unique container name
+    uuid = db.Column(db.Text)  # Unique container name
     hash = db.Column(db.Text)  # to confirm zip download contents
 
-    reactions = db.relationship("Reaction", backref="data_export_request")
+    reactions = db.relationship(
+        "Reaction",
+        secondary=data_export_request_reactions,
+        backref="data_export_request"
+    )
 
     # supports multiple workbooks if desired in future functionality
     workbooks = db.relationship(

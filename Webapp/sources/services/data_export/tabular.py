@@ -130,9 +130,9 @@ class SurfExport:
         data["time_h"] = None
         data["atmosphere"] = None
         data["stirring_shaking"] = None
-        data["scale_mol"] = round(self._get_mol_scale(reaction_data), 2)
-        data["concentration_mol_l"] = round(
-            self._get_concentration(reaction_data.get("solvent_concentrations")), 2
+        data["scale_mol"] = self._get_mol_scale(reaction_data)
+        data["concentration_mol_l"] = self._get_concentration(
+            reaction_data.get("solvent_concentrations")
         )
         self._add_reagent_and_catalyst_data(data, reaction, reaction_data)
         self._add_solvent_data(data, reaction, reaction_data)
@@ -264,7 +264,8 @@ class SurfExport:
         if not solvent_concentrations:
             return
         solvent_concentrations = [float(x) for x in solvent_concentrations]
-        return math.prod(solvent_concentrations)
+        rxn_concentration = math.prod(solvent_concentrations)
+        return round(rxn_concentration, 2)
 
     def _get_mol_scale(self, reaction_data: Dict) -> Optional[float]:
         """
@@ -284,7 +285,8 @@ class SurfExport:
             # convert to mol scale
             reactant_amount_unit = reaction_data["amount_units"]
             amount_factor = self.amount_factor_dict[reactant_amount_unit]
-            return limiting_reactant_amount * amount_factor
+            mol_scale = limiting_reactant_amount * amount_factor
+            return round(mol_scale, 2)
         return None
 
     @staticmethod
