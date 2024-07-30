@@ -24,21 +24,8 @@ function toggleIcon(input, type, btnId) {
             loadIcons(input, type)
         }
         else {
-            // Select all elements with both 'icon' and 'focused' classes
-            var focusedIcons = document.querySelectorAll('.icon.focused');
-            var workgroup, workbook;
-
-            // Iterate through the focused icons and check their classes
-            focusedIcons.forEach(function(icon) {
-                if (icon.classList.contains('workgroup')) {
-                    workgroup = icon.id;
-                }
-                if (icon.classList.contains('workbook')) {
-                    workbook = icon.id;
-                }
-            });
-
-           window.location.href = "/sketcher/" + workgroup + "/" + workbook + "/" + input +"/no";
+           var activeIcons = findActiveWorGroupAndWorkbook()
+           window.location.href = "/sketcher/" + activeIcons[0] + "/" + activeIcons[1] + "/" + input +"/no";
         }
     }
 }
@@ -55,10 +42,27 @@ function unloadIconPanel(type){
 
 }
 
+function findActiveWorGroupAndWorkbook() {
+    // Select all elements with both 'icon' and 'focused' classes
+            var focusedIcons = document.querySelectorAll('.icon.focused');
+            var workgroup, workbook;
+
+            // Iterate through the focused icons and check their classes
+            focusedIcons.forEach(function(icon) {
+                if (icon.classList.contains('workgroup')) {
+                    workgroup = icon.id;
+                }
+                if (icon.classList.contains('workbook')) {
+                    workbook = icon.id;
+                }
+            });
+            return [workgroup, workbook]
+}
+
 function loadIcons(selected, type){
     // loads workbooks in workgroup selected in homepage
     // only needs selected workgroup to load active reactions
-    let selectedWorkgroup = $("#active-workgroup").val()
+    var activeIcons = findActiveWorGroupAndWorkbook()
     fetch("/load_icons", {
     headers: {
         "Content-Type": "application/json",
@@ -67,7 +71,7 @@ function loadIcons(selected, type){
       body: JSON.stringify({
         input: selected,
         load_type: type,
-        activeWorkgroup: selectedWorkgroup
+        activeWorkgroup: activeIcons[0]
       })
     })
     .then(function(response) {return response.json()} )
@@ -83,8 +87,7 @@ function loadIcons(selected, type){
 }
 
 function newReactionSetup() {
-    activeWorkgroup = $("#active-workgroup").val()
-    activeWorkbook = $("#active-workbook").val()
+    activeIcons = findActiveWorGroupAndWorkbook()
 
     fetch("/get_new_reaction_id", {
     headers: {
@@ -92,8 +95,8 @@ function newReactionSetup() {
       },
       method: "POST",
       body: JSON.stringify({
-        workgroup: activeWorkgroup,
-        workbook: activeWorkbook,
+        workgroup: activeIcons[0],
+        workbook: activeIcons[1],
       })
     })
     .then(function (response) { return response.json() })
