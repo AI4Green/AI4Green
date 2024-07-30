@@ -31,8 +31,8 @@ function toggleIcon(input, type, btnId) {
             loadIcons(input, type)
         }
         else {
-            workgroup = $("#active-workgroup").val();
-            workbook = $("#active-workbook").val();
+            workgroup = $.find("#active-workgroup").val();
+            workbook = $.find("#active-workbook").val();
             window.location.href = "/sketcher/" + workgroup + "/" + workbook + "/" + input +"/no";
         }
     }
