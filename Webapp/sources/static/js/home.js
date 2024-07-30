@@ -24,7 +24,7 @@ function toggleIcon(input, type, btnId) {
             loadIcons(input, type)
         }
         else {
-           var activeIcons = findActiveWorGroupAndWorkbook()
+           var activeIcons = findActiveWorkgroupAndWorkbook()
            window.location.href = "/sketcher/" + activeIcons[0] + "/" + activeIcons[1] + "/" + input +"/no";
         }
     }
@@ -42,7 +42,7 @@ function unloadIconPanel(type){
 
 }
 
-function findActiveWorGroupAndWorkbook() {
+function findActiveWorkgroupAndWorkbook() {
     // Select all elements with both 'icon' and 'focused' classes
             var focusedIcons = document.querySelectorAll('.icon.focused');
             var workgroup, workbook;
@@ -62,7 +62,7 @@ function findActiveWorGroupAndWorkbook() {
 function loadIcons(selected, type){
     // loads workbooks in workgroup selected in homepage
     // only needs selected workgroup to load active reactions
-    var activeIcons = findActiveWorGroupAndWorkbook()
+    var activeIcons = findActiveWorkgroupAndWorkbook()
     fetch("/load_icons", {
     headers: {
         "Content-Type": "application/json",
@@ -87,7 +87,7 @@ function loadIcons(selected, type){
 }
 
 function newReactionSetup() {
-    activeIcons = findActiveWorGroupAndWorkbook()
+    activeIcons = findActiveWorkgroupAndWorkbook()
 
     fetch("/get_new_reaction_id", {
     headers: {
