@@ -31,9 +31,21 @@ function toggleIcon(input, type, btnId) {
             loadIcons(input, type)
         }
         else {
-            workgroup = $.find("#active-workgroup").val();
-            workbook = $.find("#active-workbook").val();
-            window.location.href = "/sketcher/" + workgroup + "/" + workbook + "/" + input +"/no";
+            // Select all elements with both 'icon' and 'focused' classes
+            var focusedIcons = document.querySelectorAll('.icon.focused');
+            var workgroup, workbook;
+
+            // Iterate through the focused icons and check their classes
+            focusedIcons.forEach(function(icon) {
+                if (icon.classList.contains('workgroup')) {
+                    workgroup = icon.id;
+                }
+                if (icon.classList.contains('workbook')) {
+                    workbook = icon.id;
+                }
+            });
+
+           window.location.href = "/sketcher/" + workgroup + "/" + workbook + "/" + input +"/no";
         }
     }
 }
