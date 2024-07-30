@@ -11,7 +11,6 @@ from urllib.request import urlopen
 from flask import jsonify, render_template, request
 from flask_login import login_required
 from rdkit import Chem
-from rdkit.Chem import Descriptors
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
 from sources.dto import ReactionNoteSchema
@@ -93,7 +92,9 @@ def process():
             if reactant is None:
                 reactant_name = iupac_convert(reactant_smiles)
                 # generate molweight
-                reactant_mol_wt = round(mol_weight_generate(reactant_smiles), 2)
+                reactant_mol_wt = services.all_compounds.mol_weight_from_smiles(
+                    reactant_smiles
+                )
                 novel_reactant_html = render_template(
                     "_novel_compound.html",
                     component="Reactant",
@@ -135,7 +136,9 @@ def process():
             if product is None:
                 product_name = iupac_convert(product_smiles)
                 # generate molweight
-                product_mol_wt = round(mol_weight_generate(product_smiles), 2)
+                product_mol_wt = services.all_compounds.mol_weight_from_smiles(
+                    product_smiles
+                )
                 novel_product_html = render_template(
                     "_novel_compound.html",
                     component="Product",
@@ -313,17 +316,3 @@ def iupac_convert(smiles: str) -> str:
     except Exception:
         print("failed CIR")
     return ""
-
-
-def mol_weight_generate(smiles: str) -> float:
-    """
-    Uses RDKit to calculate the molecular weight for a compound from its SMILES string
-
-    Args:
-        smiles - the SMILES of the compound of interest
-
-    Returns:
-        The molecular weight of the compound.
-    """
-    # MolWt accounts for the average across isotopes but ExactMolWt only takes the most abundant isotope.
-    return Descriptors.MolWt(Chem.MolFromSmiles(smiles))

@@ -29,7 +29,7 @@ retro_tree = cyto.Cytoscape(
 """
 Loading circle
 """
-loading_circles = html.Div(
+loading_circle = html.Div(
     id="loading-div",
     children=[
         dcc.Loading(
@@ -41,17 +41,6 @@ loading_circles = html.Div(
                 "component_name": "retrosynthesis-tree",
                 "is_loading": False,
                 "prop_name": "retro",
-            },
-        ),
-        dcc.Loading(
-            id="conditions-loader1",
-            children=html.Div(id="conditions-loader"),
-            type="circle",
-            fullscreen=True,
-            loading_state={
-                "component_name": "computed-conditions-data",
-                "is_loading": False,
-                "prop_name": "conditions",
             },
         ),
     ],
@@ -129,13 +118,12 @@ smiles_field_and_retrosynthesis_button = dbc.Row(
 header_and_inputs = html.Div(
     children=[
         html.H2("Retrosynthesis"),
-        html.P("Quick: O=C(Nc1cncc(Oc2cncc(F)c2)n1)c1ccccn1"),
         smiles_field_and_retrosynthesis_button,
         # user_route,
         html.H6(
             "Interactive Retrosynthesis Display", id="user-message", className="mt-3"
         ),
-        html.Div([loading_circles]),
+        html.Div([loading_circle]),
     ]
 )
 
@@ -250,14 +238,23 @@ route_sidebar = html.Div(
     [
         html.H3("Routes"),
         html.Hr(),
-        dcc.Upload(
-            "Upload Route",
-            className="btn btn-outline-secondary m-1",
-            id="upload-route-button",
-            # title="Upload a route as spreadsheet a with 1 row per reaction in a route with "
-            # "required column headings: reactants, product, "
-            # "and optional headings solvents, reagents, catalyst, temperature.",
+        html.Div(
+            [
+                dcc.Upload(
+                    "Upload Route",
+                    className="btn btn-outline-secondary m-1",
+                    id="upload-route-button",
+                ),
+                html.Button(
+                    "Example Route File",
+                    id="btn-example-route-file",
+                    className="btn btn-outline-secondary m-1",
+                ),
+                dcc.Download(id="example-route-file-download"),
+            ],
+            style={"display": "flex", "justify-content": "space-between"},
         ),
+        html.P(id="uploaded-route-message"),
         html.Hr(),
         html.Div(id="route-feedback"),
         html.Div(id="sustainability-feedback"),
