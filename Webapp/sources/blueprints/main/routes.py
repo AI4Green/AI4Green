@@ -39,8 +39,6 @@ def index() -> Response:
     user_confirmed = None
     form = LoginForm()
     user_role = None
-    workgroups = []
-    notification_number = 0
     news_items = []
 
     if request.method == "POST":
@@ -53,8 +51,6 @@ def index() -> Response:
         form = None
         user_role = current_user.Role.name
         user_confirmed = current_user.is_verified
-        workgroups = get_workgroups()
-        notification_number = get_notification_number()
 
         news_items = (
             db.session.query(models.NewsItem)
@@ -66,8 +62,6 @@ def index() -> Response:
         "home.html",
         user_role=user_role,
         user_confirmed=user_confirmed,
-        workgroups=workgroups,
-        notification_number=notification_number,
         news_items=news_items,
         messages_from_redirects=messages_from_redirects,
         form=form
