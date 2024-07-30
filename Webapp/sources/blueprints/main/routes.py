@@ -75,10 +75,12 @@ def index() -> Response:
 
 
 @main_bp.route("/load_icons", methods=["GET", "POST"])
-def load_workbooks():
-    data = request.get_json()
-    selected = data["input"]
-    load_type = data["load_type"]
+def load_icons() -> Response:
+    """
+    This function renders the icon macro from macros.html for the quick access panel
+    """
+    selected = request.json.get("input")
+    load_type = request.json.get("load_type")
     icon_names = []
     header = None
     bootstrap_icon = ""
@@ -91,13 +93,14 @@ def load_workbooks():
 
     elif load_type == "workbook":
         reactions = services.reaction.list_active_in_workbook(
-            workbook=selected, workgroup=data["activeWorkgroup"], sort_crit="time"
+            workbook=selected, workgroup=request.json.get("activeWorkgroup"), sort_crit="time"
         )
         icon_names = [i.reaction_id for i in reactions[:11]]
         header = "Recent Reactions in " + selected
         load_type = "reaction"
         bootstrap_icon = "bi bi-eyedropper"
 
+    # load macro template with assigned variables
     icon_macro = get_template_attribute("macros.html", "icon_panel")
     return jsonify(icon_macro(icon_names, load_type, header, bootstrap_icon))
 
