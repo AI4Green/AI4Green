@@ -39,8 +39,6 @@ def index() -> Response:
     user_confirmed = None
     form = LoginForm()
     user_role = None
-    workgroups = []
-    notification_number = 0
     news_items = []
 
     if request.method == "POST":
@@ -53,8 +51,6 @@ def index() -> Response:
         form = None
         user_role = current_user.Role.name
         user_confirmed = current_user.is_verified
-        workgroups = get_workgroups()
-        notification_number = get_notification_number()
 
         news_items = (
             db.session.query(models.NewsItem)
@@ -66,8 +62,6 @@ def index() -> Response:
         "home.html",
         user_role=user_role,
         user_confirmed=user_confirmed,
-        workgroups=workgroups,
-        notification_number=notification_number,
         news_items=news_items,
         messages_from_redirects=messages_from_redirects,
         form=form
@@ -75,29 +69,32 @@ def index() -> Response:
 
 
 @main_bp.route("/load_icons", methods=["GET", "POST"])
-def load_workbooks():
-    data = request.get_json()
-    selected = data["input"]
-    load_type = data["load_type"]
+def load_icons() -> Response:
+    """
+    This function renders the icon macro from macros.html for the quick access panel
+    """
+    selected = request.json.get("input")
+    load_type = request.json.get("load_type")
     icon_names = []
     header = None
     bootstrap_icon = ""
     if load_type == "workgroup":
-        workgroups = services.workbook.get_workbooks_from_user_group_combination(selected)
-        icon_names = [i.name for i in workgroups]
+        workbooks = services.workbook.get_workbooks_from_user_group_combination(selected)
+        icon_names = [i.name for i in workbooks]
         header = "Workbooks in " + selected
         load_type = "workbook"
         bootstrap_icon = "bi bi-journal-text"
 
     elif load_type == "workbook":
         reactions = services.reaction.list_active_in_workbook(
-            workbook=selected, workgroup=data["activeWorkgroup"], sort_crit="time"
+            workbook=selected, workgroup=request.json.get("activeWorkgroup"), sort_crit="time"
         )
         icon_names = [i.reaction_id for i in reactions[:11]]
         header = "Recent Reactions in " + selected
         load_type = "reaction"
         bootstrap_icon = "bi bi-eyedropper"
 
+    # load macro template with assigned variables
     icon_macro = get_template_attribute("macros.html", "icon_panel")
     return jsonify(icon_macro(icon_names, load_type, header, bootstrap_icon))
 

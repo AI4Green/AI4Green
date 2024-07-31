@@ -31,12 +31,13 @@
         </div>
         <div class="col-md-9">
             <h4>Select Export Format</h4>
-            <h6>Human-Readable Formats:</h6>
-            <div class="row">
-                <div class="col-sm-3">
-                    <button id="pdf-button" onclick="makeDataExportRequest('PDF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Portable Document Format (PDF) - suitable for printing and viewing.">PDF</button>
-                </div>
-            </div>
+<!--            Not yet implemented-->
+<!--            <h6>Human-Readable Formats:</h6>-->
+<!--            <div class="row">-->
+<!--                <div class="col-sm-3">-->
+<!--                    <button id="pdf-button" onclick="makeDataExportRequest('PDF')" class="btn btn-primary mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Portable Document Format (PDF) - suitable for printing and viewing.">PDF</button>-->
+<!--                </div>-->
+<!--            </div>-->
             <h6>Machine-Readable Formats:</h6>
             <div class="row">
                 <div class="col-sm-3">
@@ -47,12 +48,11 @@
 "Reaction Data File (RDF) - Format for storing chemical reaction data, including reactants, products, agents, and metadata.">RDF</button>
                 </div>
             </div>
-{#            Not implemented yet#}
-{#            <div class="row mt-3">#}
-{#                <div class="col-sm-3">#}
-{#                    <button id="eln-button" onclick="makeDataExportRequest('ELN')" class="btn btn-primary text-white mb-2 btn-block" id="eln-button" data-toggle="tooltip" data-placement="top" title="Electronic Lab Notebook (ELN) - A file format based on research object crates and designed to be interoperable with other ELNs.">.ELN</button>#}
-{#                </div>#}
-{#            </div>#}
+            <div class="row mt-3">
+                <div class="col-sm-3">
+                    <button id="eln-button" onclick="makeDataExportRequest('ELN')" class="btn btn-primary text-white mb-2 btn-block" data-toggle="tooltip" data-placement="top" title="Electronic Lab Notebook (ELN) - A file format based on research object crates and designed to be interoperable with other ELNs.">.ELN</button>
+                </div>
+            </div>
             <h6>Human- and Machine-Readable Formats:</h6>
             <div class="row">
                 <div class="col-sm-3">

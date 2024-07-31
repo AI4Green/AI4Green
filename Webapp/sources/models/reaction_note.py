@@ -23,5 +23,5 @@ class ReactionNote(Model):
         return {
             "time_of_creation": self.time_of_creation.isoformat(),
             "text": self.text,
-            "author": self.author.username,
+            "author": self.Author.user.username,
         }

@@ -72,6 +72,8 @@ def get_workgroups() -> List[str]:
     Returns:
         A list of Workgroup names.
     """
+    if not current_user.is_authenticated:
+        return []
     workgroups = []
     pi = (
         db.session.query(models.WorkGroup.name)
@@ -139,6 +141,8 @@ def get_notification_number() -> int:
     Returns:
         Number of notifications
     """
+    if not current_user.is_authenticated:
+        return 0
     return (
         db.session.query(models.Notification)
         .filter(models.Notification.status == "active")
@@ -443,24 +447,6 @@ def get_smiles(ids: List[str]) -> List[str]:
             )
         smiles.append(compound.smiles)
     return smiles
-
-
-def smiles_to_inchi(smiles: str) -> Optional[str]:
-    """
-    Convert a smiles string to an InChI string using RDKit.
-
-    Args:
-        smiles: The input SMILES string to convert.
-
-    Returns:
-        The InChI string if the conversion is successful,
-        or None if the conversion fails.
-    """
-    mol = Chem.MolFromSmiles(smiles)
-    try:
-        return Chem.MolToInchi(mol)
-    except Exception:
-        return None
 
 
 def remove_spaces_and_dashes(name: str) -> str:

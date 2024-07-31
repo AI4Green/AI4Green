@@ -9,6 +9,27 @@ from rdkit.Chem.Draw import rdMolDraw2D
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
+from sqlalchemy import func
+
+
+def get_from_name_and_workbook_id(name: str, workbook_id: int) -> models.Reaction:
+    """
+    Retrieves a reaction based on its name and workbook ID.
+
+    Args:
+        name (str): The name of the reaction.
+        workbook_id (int): The ID of the workbook to which the reaction belongs.
+
+    Returns:
+        models.Reaction: The reaction object matching the name and workbook ID.
+    """
+    return (
+        db.session.query(models.Reaction)
+        .filter(func.lower(models.Reaction.name) == name.lower())
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook_id)
+        .first()
+    )
 
 
 def get_current_from_request() -> models.Reaction:
@@ -112,6 +133,9 @@ def get_from_reaction_id_and_workbook_id(
     Args:
         reaction_id - in format WB1-001
         workbook - The workbook the reaction belongs to
+
+    Returns:
+        models.Reaction: The reaction object matching the reaction ID and workbook ID.
     """
     return (
         db.session.query(models.Reaction)
@@ -171,25 +195,37 @@ def make_scheme_list(reaction_list: List[models.Reaction], size: str) -> List[st
         # if there are no smiles use a blank string to maintain correct list length
         if re.search("[a-zA-Z]", reaction_smiles):
             # we test to see if ions are present in which case further logic is needed
-            # first we see if it is from marvin js and contains ions
-            if len(reaction_smiles.split(" |")) > 1:
-                rxn = services.ions.reaction_from_ionic_cx_smiles(reaction_smiles)
-            elif "+" in reaction_smiles or "-" in reaction_smiles:
-                rxn = services.ions.reaction_from_ionic_smiles(reaction_smiles)
-                # reactions with no ions - make rxn object directly from string
-            else:
-                rxn = AllChem.ReactionFromSmarts(reaction_smiles, useSmiles=True)
-            if size == "small":
-                d2d = rdMolDraw2D.MolDraw2DSVG(400, 150)
-            else:
-                d2d = rdMolDraw2D.MolDraw2DSVG(600, 225)
-            d2d.DrawReaction(rxn)
-            # return drawing text
-            scheme = d2d.GetDrawingText()
-            scheme_list.append(scheme)
+            scheme_list.append(make_reaction_scheme_image(reaction_smiles, size))
         else:
             scheme_list.append("")
     return scheme_list
+
+
+def make_reaction_scheme_image(reaction_smiles: str, size: str) -> str:
+    """
+    Makes a reaction scheme from a reaction smiles according to the size parameter.
+    Args:
+        reaction_smiles - the SMILES we are making an image of.
+        size: whether the image is small or not.
+    Returns:
+        the image of the reaction scheme as an svg
+
+    """
+    # first we see if it is from marvin js and contains ions
+    if len(reaction_smiles.split(" |")) > 1:
+        rxn = services.ions.reaction_from_ionic_cx_smiles(reaction_smiles)
+    elif "+" in reaction_smiles or "-" in reaction_smiles:
+        rxn = services.ions.reaction_from_ionic_smiles(reaction_smiles)
+        # reactions with no ions - make rxn object directly from string
+    else:
+        rxn = AllChem.ReactionFromSmarts(reaction_smiles, useSmiles=True)
+    if size == "small":
+        d2d = rdMolDraw2D.MolDraw2DSVG(400, 150)
+    else:
+        d2d = rdMolDraw2D.MolDraw2DSVG(600, 225)
+    d2d.DrawReaction(rxn)
+    # return drawing text
+    return d2d.GetDrawingText()
 
 
 def to_dict(reaction_list: List[models.Reaction]) -> List[Dict]:
@@ -262,3 +298,88 @@ def add_addendum(
     db.session.add(new_addendum)
     db.session.commit()
     return new_addendum
+
+
+def most_recent_in_workbook(workbook_id: int) -> models.Reaction:
+    """
+    Retrieves the most recent reaction in a given workbook.
+
+    Args:
+        workbook_id (int): The ID of the workbook.
+
+    Returns:
+        models.Reaction: The most recent reaction object in the workbook.
+    """
+    return (
+        db.session.query(models.Reaction)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook_id)
+        .order_by(models.Reaction.reaction_id.desc())
+        .first()
+    )
+
+
+def get_next_reaction_id_for_workbook(workbook_id: int) -> str:
+    """
+    Generates the next reaction ID for a given workbook in format WB1-001
+
+    Args:
+        workbook_id (int): The ID of the workbook.
+
+    Returns:
+        str: The next reaction ID for the workbook.
+    """
+    workbook_obj = services.workbook.get(workbook_id)
+    workbook_abbreviation = workbook_obj.abbreviation
+    # find the newest reaction and then +1 to the id and return
+    newest_reaction = most_recent_in_workbook(workbook_id)
+    if not newest_reaction:
+        # if no reactions in workbook yet, then start with 001
+        return workbook_abbreviation + "-001"
+    most_recent_reaction_id = newest_reaction.reaction_id
+    # take the number on the rhs of the reaction id, remove the 0s, convert to int, add 1, convert to str, add 0s
+    new_reaction_id_number = str(
+        int(most_recent_reaction_id.split("-")[-1].lstrip("0")) + 1
+    ).zfill(3)
+    new_reaction_id = workbook_abbreviation + "-" + new_reaction_id_number
+    return new_reaction_id
+
+
+def add(
+    name: str,
+    reaction_id: str,
+    creator: models.Person,
+    workbook_id: int,
+    reaction_table: Dict[str, any],
+    summary_table: Dict[str, any],
+    reaction_smiles: str = "",
+) -> models.Reaction:
+    """
+    Adds a reaction to the database.
+
+    Args:
+        name (str): The name of the reaction.
+        reaction_id (str): The generated id for the reaction in format WB1-001
+        creator (models.Person): The creator of the reaction.
+        workbook_id (int): The ID of the workbook to which the reaction belongs.
+        reaction_table (Dict[str, any]): Data for the reaction table.
+        summary_table (Dict[str, any]): Data for the summary table.
+        reaction_smiles Optional(str): The SMILES representation of the reaction.
+
+    Returns:
+        models.Reaction: The newly added reaction object.
+    """
+    reaction = models.Reaction(
+        name=name,
+        reaction_id=reaction_id,
+        creator=creator.id,
+        workbooks=workbook_id,
+        status="active",
+        complete="not complete",
+        reaction_smiles=reaction_smiles,
+        reaction_table_data=reaction_table,
+        summary_table_data=summary_table,
+    )
+    db.session.add(reaction)
+    db.session.commit()
+    return reaction

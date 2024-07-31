@@ -42,11 +42,11 @@
     <div class="row">
         <div class="col-12">
             <div class="row text-center" style="background-color: #777778;height: 50">
-                <header class="text-primary-green"><h3> {{ header_text }}</h3> </header>
+                <header class="text-primary-green"><h3> &nbsp;&nbsp;{{ header_text }}</h3> </header>
             </div>
                 <div class="row text-center">
                     <div class="col-3">
-                         <button id="new-workgroup" class="btn icon" onclick="newType('{{ type }}')">
+                         <button id="new-{{ type }}" class="btn icon" onclick="newType('{{ type }}')">
                                    <i class="bi bi-plus icon-img" style="font-size: 40"></i>
                          </button><br> New {{ type.capitalize() }}
                     </div>

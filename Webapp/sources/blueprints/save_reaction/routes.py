@@ -7,7 +7,8 @@ from datetime import datetime
 
 import pytz
 from flask import Response, json, jsonify, request
-from flask_login import current_user, login_required
+from flask_api import status
+from flask_login import login_required
 from sources import models, services
 from sources.auxiliary import (
     abort_if_user_not_in_workbook,
@@ -15,7 +16,6 @@ from sources.auxiliary import (
     get_smiles,
     sanitise_user_input,
 )
-from flask_api import status
 from sources.extensions import db
 from sqlalchemy import func
 
@@ -29,29 +29,17 @@ def new_reaction() -> Response:
     workbook_name = request.form["workbook"]
     workgroup_name = request.form["workgroup"]
 
-    # finds workgroup object (needs institution later)
-    workgroup_selected_obj = (
-        db.session.query(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_name)
-        .first()
+    # finds workbook object (needs institution later)
+    workbook_object = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
     )
-    workbook_object = (
-        db.session.query(models.WorkBook)
-        .filter(models.WorkBook.name == workbook_name)
-        .filter(models.WorkBook.group == workgroup_selected_obj.id)
-        .first()
-    )
+
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook_object)
     reaction_name = sanitise_user_input(request.form["reactionName"])
     reaction_id = request.form["reactionID"]
 
-    creator = (
-        db.session.query(models.Person)
-        .join(models.User)
-        .filter(models.User.email == current_user.email)
-        .first()
-    )
-    current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
+    creator = services.person.from_current_user_email()
+
     # check for reaction id - catches errors caused if user has 2 tabs open
     reaction_id_check = (
         db.session.query(models.Reaction)
@@ -129,21 +117,15 @@ def new_reaction() -> Response:
                 "radio_buttons": [],
             }
         )
-
         # add reaction to database
-        reaction = models.Reaction(
-            creator=creator.id,
-            reaction_id=reaction_id,
-            time_of_creation=current_time,
-            name=reaction_name,
-            workbooks=workbook_object.id,
-            status="active",
-            complete="not complete",
-            reaction_table_data=reaction_table,
-            summary_table_data=summary_table,
+        services.reaction.add(
+            reaction_name,
+            reaction_id,
+            creator,
+            workbook_object.id,
+            reaction_table,
+            summary_table,
         )
-        db.session.add(reaction)
-        db.session.commit()
         # load sketcher
         feedback = "New reaction made"
         return jsonify({"feedback": feedback})
@@ -409,45 +391,43 @@ def clone_reaction() -> Response:
 
     old_reaction = services.reaction.get_current_from_request_form()
 
-    new_reaction_name = request.form.get('reactionName')
+    new_reaction_name = request.form.get("reactionName")
     workbook_name = request.form.get("workbook")
     workgroup_name = request.form.get("workgroup")
-    new_reaction_id = request.form.get('newReactionID')
+    new_reaction_id = request.form.get("newReactionID")
 
     if None in [new_reaction_name, workbook_name, workgroup_name, new_reaction_id]:
         return status.HTTP_400_BAD_REQUEST
 
-    workbook_object = services.workbook.get_workbook_from_group_book_name_combination(workgroup_name, workbook_name)
+    workbook_object = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook_object)
 
     creator = services.person.from_current_user_email()
-    current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
 
     remove_yield_dict = json.loads(old_reaction.summary_table_data)
     remove_yield_dict.update({"real_product_mass": "", "unreacted_reactant_mass": ""})
 
     # check for reaction id - catches errors caused if user has 2 tabs open
-    reaction_id_check = services.reaction.get_from_reaction_id_and_workbook_id(new_reaction_id, workbook_object.id)
+    reaction_id_check = services.reaction.get_from_reaction_id_and_workbook_id(
+        new_reaction_id, workbook_object.id
+    )
     if reaction_id_check:
         feedback = "A reaction with this ID already exists. Please refresh the page and try again."
         return jsonify({"feedback": feedback})
 
     name_check = check_reaction_name()
     if b"This reaction name is unique" in name_check.data:
-        reaction = models.Reaction(
-            creator=creator.id,
-            reaction_id=new_reaction_id,
-            time_of_creation=current_time,
-            name=new_reaction_name,
-            workbooks=workbook_object.id,
-            status="active",
-            complete="not complete",
-            reaction_table_data=old_reaction.reaction_table_data,
-            summary_table_data=json.dumps(remove_yield_dict),
-            reaction_smiles=old_reaction.reaction_smiles
+        services.reaction.add(
+            new_reaction_name,
+            new_reaction_id,
+            creator,
+            workbook_object.id,
+            old_reaction.reaction_table_data,
+            json.dumps(remove_yield_dict),
+            old_reaction.reaction_smiles,
         )
-        db.session.add(reaction)
-        db.session.commit()
         feedback = "New reaction made"
         return jsonify({"feedback": feedback})
     else:
