@@ -14,8 +14,14 @@
         <p>{{ notification.info | safe }}</p>
         {% if notification.wb %}
         <a id="wb{{ loop.index }}" href='/manage_workbook/go_to_workbook/{{ notification.wb }}/{{ notification.wg }}' class="btn btn-primary">See Request</a>
+
         {% elif notification.wg %}
-        <a id="wg{{ loop.index }}" href='/manage_workgroup/go_to_workgroup/{{ notification.wg }}' class="btn btn-primary">See Request</a>
+            {% if notification.wg_request == "added" %}
+            <a id="wg" href='/join_workgroup_response/{{ notification.id }}/accept' class="btn btn-success">Accept</a>
+            <a id="deny-{{ loop.index }}" href='/join_workgroup_response/{{ notification.id }}/deny' class="btn btn-danger">Deny</a>
+            {% else %}
+                <a id="wg{{ loop.index }}" href='/manage_workgroup/go_to_workgroup/{{ notification.wg }}' class="btn btn-primary">See Request</a>
+            {% endif %}
         {% endif %}
         <hr>
         <p style="font-size:12px">{{ notification.time }}</p>

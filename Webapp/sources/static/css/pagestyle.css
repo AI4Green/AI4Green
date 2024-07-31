@@ -53,6 +53,7 @@ body {
     line-height: 80px;
     color: var(--primary-grey);
     transition: all 0.3s linear;
+    font-size: 40;
 }
 
 .icon:hover {

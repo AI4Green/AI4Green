@@ -1,10 +1,13 @@
-from datetime import datetime
+from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
+from io import BytesIO
 
-from flask import Response, flash, jsonify, redirect, render_template, url_for
+from flask import Response, flash, jsonify, redirect, render_template, url_for, request, current_app
 from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
+from sources.decorators import principal_investigator_required
 from sources import models, services
 from sources.auxiliary import (
     duplicate_notification_check,
@@ -13,10 +16,13 @@ from sources.auxiliary import (
     get_workgroups,
     make_objects_inactive,
     security_member_workgroup,
-    security_pi_workgroup,
     workgroup_dict,
 )
 from sources.extensions import db
+
+import qrcode
+import base64
+from PIL import Image
 
 from . import manage_workgroup_bp
 
@@ -26,11 +32,9 @@ from . import manage_workgroup_bp
     "/manage_workgroup/<workgroup>/<has_request>", methods=["GET", "POST"]
 )
 @login_required
+@principal_investigator_required
 def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
     # must be logged in and a PI of the workgroup
-    if not security_pi_workgroup(workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
     workgroups = get_workgroups()
     current_workgroup = workgroup
     notification_number = get_notification_number()
@@ -77,6 +81,7 @@ def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
         requests=requests,
         has_request=has_request,
         notification_number=notification_number,
+        qr_code_expiration = date.today() + relativedelta(years=1)
     )
 
 
@@ -85,13 +90,12 @@ def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
     methods=["GET", "POST"],
 )
 @login_required
+@principal_investigator_required
 def make_change_to_workgroup(
     workgroup: str, email: str, mode: str, current_status: str
 ) -> Response:
     # must be logged in and a PI of the workgroup
-    if not security_pi_workgroup(workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
+
     # find the person and workgroup objects that the change relates to
     wg = (
         db.session.query(models.WorkGroup)
@@ -216,20 +220,19 @@ def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
 
 # PI/SR status request decision
 @manage_workgroup_bp.route(
-    "/manage_workgroup/change_status_request/<current_workgroup>/<email>/<mode>/<decision>",
+    "/manage_workgroup/change_status_request/<workgroup>/<email>/<mode>/<decision>",
     methods=["GET", "POST"],
 )
 @login_required
+@principal_investigator_required
 def change_status_from_request(
-    current_workgroup: str, email: str, mode: str, decision: str
+    workgroup: str, email: str, mode: str, decision: str
 ) -> Response:
     # must be logged in and a PI of the workgroup
-    if not security_pi_workgroup(current_workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
+
     wg = (
         db.session.query(models.WorkGroup)
-        .filter(models.WorkGroup.name == current_workgroup)
+        .filter(models.WorkGroup.name == workgroup)
         .first()
     )
 
@@ -344,3 +347,117 @@ def go_to_workgroup(workgroup: str) -> Response:
             "manage_workgroup.manage_workgroup", has_request="yes", workgroup=workgroup
         )
     )
+
+
+@manage_workgroup_bp.route("/add_user_by_email", methods=["GET", "POST"])
+@principal_investigator_required
+def add_user_by_email(workgroup):
+    email = request.args.get("email")
+    user_type = request.args.get("user_type")
+
+    user = services.user.from_email(email)
+
+    new_role_display_string = workgroup_dict[user_type]["display_string"]
+
+    added_person = services.person.from_email(email)
+    if not added_person:
+        flash(f"User with email: {email} does not exist! Please try again.")
+
+    wg = services.workgroup.from_name(workgroup)
+    if not services.workgroup.get_user_type(workgroup, user):
+
+        notification = models.Notification(
+            person=added_person.id,
+            type="You Have Been Added to a Workgroup",
+            info="A Principal Investigator has added you to the Workgroup, "
+                 + workgroup
+                 + ", as a "
+                 + new_role_display_string
+                 + ". Please respond below.",
+            time=datetime.now(),
+            status="active",
+            wg=wg.name,
+            wb="",
+            wg_request="added",
+        )
+
+        duplicates = (
+            db.session.query(models.WGStatusRequest)
+            .join(models.Person, models.WGStatusRequest.person == models.Person.id)
+            .join(models.User)
+            .filter(models.User.email == user.email)
+            .join(models.WorkGroup)
+            .filter(models.WorkGroup.id == wg.id)
+            .filter(models.WGStatusRequest.status == 'active')
+            .all()
+        )
+
+        if duplicates:
+            flash(
+                "This User's membership has already been requested for this Workgroup."
+            )
+
+        else:
+
+            services.email.send_notification(added_person)
+            db.session.add(notification)
+            db.session.commit()
+
+            wg_request = models.WGStatusRequest(
+                principal_investigator=current_user.id,
+                person=added_person.id,
+                wg=wg.id,
+                current_role="Non-Member",
+                new_role=user_type,
+                time=datetime.now(),
+                status="active",
+                notification=notification.id,
+            )
+            db.session.add(wg_request)
+            db.session.commit()
+            flash(f"A request has been send to User with email: {email} for this Workgroup!")
+
+    else:
+        flash("This user is already a member of this Workgroup!")
+
+    return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
+
+
+@manage_workgroup_bp.route("/generate_qr_code/<workgroup>", methods=["GET", "POST"])
+@principal_investigator_required
+def generate_qr_code(workgroup=None):
+    token = services.email.get_encoded_token(31536000, {"workgroup": workgroup})
+    url = current_app.config["SERVER_NAME"] + "/qr_add_user/" + token
+    logo = Image.open(
+        "sources/static/img/favicon.ico"
+    )
+
+    qr = qrcode.QRCode(
+        version=1,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(url)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="#777778", back_color="white")
+    pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
+    img.paste(logo, pos)
+
+    buffer = BytesIO()
+    img.save(buffer, kind="PNG")
+    qr_img = base64.b64encode(buffer.getvalue()).decode()
+
+    return jsonify(qr_img)
+
+
+@manage_workgroup_bp.route("/qr_add_user/<token>", methods=["GET", "POST"])
+def add_user_by_qr(token=None):
+
+    workgroup = services.email.verify_qr_code_for_add_user_token(token)
+    if workgroup:
+        return redirect(url_for("join_workgroup.join_workgroup", workgroup=workgroup))
+
+    else:
+        flash("This QR code has expired.")
+        return redirect(url_for("main.index"))

@@ -48,3 +48,15 @@ def from_id(user_id: int) -> models.User:
     """
 
     return db.session.query(models.User).filter(models.User.id == user_id).first()
+
+
+def from_email(user_email: str) -> models.User:
+    """
+        Gets user from User email
+        Args:
+            user_email: email of user to search for
+
+        Returns:
+            models.User with matching email
+        """
+    return db.session.query(models.User).filter(models.User.email == user_email).first()
