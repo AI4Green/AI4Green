@@ -6,8 +6,8 @@ function make_change(id, mode, current_status){
             return;
         }
     }
-    let email = $("#" + id).val()
-    let workgroup = $("#current_workgroup").val();
+    let email = getVal($("#" + id))
+    let workgroup = getVal($("#current_workgroup"));
     fetch('/manage_workgroup/make_change/' + workgroup + '/' + email + '/' + mode + '/' + current_status).then(function(response) {
         response.json().then(function(data) {
             alert(data.feedback);
@@ -17,8 +17,8 @@ function make_change(id, mode, current_status){
 }
 
 function make_change_request(id, mode, decision) {
-    let email = $("#" + id).val()
-    let workgroup = $("#current_workgroup").val();
+    let email = getVal($("#" + id))
+    let workgroup = getval($("#current_workgroup"));
     fetch('/manage_workgroup/change_status_request/' + workgroup + '/' + email + '/' + mode + '/' + decision).then(function(response) {
         response.json().then(function(data) {
             alert(data.feedback);
