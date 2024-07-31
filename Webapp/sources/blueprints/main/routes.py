@@ -8,15 +8,16 @@ from flask import (
     request,
     send_file,
     url_for,
+    get_template_attribute
 )
 from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
-from sources import models
+from sources.blueprints.auth.forms import LoginForm
+from sources import models, services
 from sources.auxiliary import (
     get_notification_number,
-    get_workbooks,
     get_workgroups,
     security_member_workgroup_workbook,
 )
@@ -33,47 +34,69 @@ def index() -> Response:
     messages_from_redirects = (
         [request.args.get("message")] if request.args.get("message") else []
     )
-    # gets jinja variables if user is logged in to populate the homepage, else the non-logged in user homepage is loaded
+
+    # get default jinja variables for landing page
+    user_confirmed = None
+    form = LoginForm()
+    user_role = None
+    news_items = []
+
+    if request.method == "POST":
+        # return redirects from login verification to prevent form resubmission
+        page_redirect = services.auth.verify_login(form)
+        return page_redirect
+
+    # update jinja variables if user is logged in to populate the homepage
     if current_user.is_authenticated:
-        # get the users role to determine if they can access the admin dashboard button or not
-        user = (
-            db.session.query(models.User)
-            .filter(models.User.email == current_user.email)
-            .first()
-        )
-        user_confirmed = user.is_verified
-        user_role = user.Role.name
-        workgroups = get_workgroups()
-        notification_number = get_notification_number()
-        if request.method == "POST":
-            workgroup_selected = request.form["WG-select"]
-            if workgroup_selected != "-Select Workgroup-":
-                return redirect(
-                    url_for(
-                        "workgroup.workgroup", workgroup_selected=workgroup_selected
-                    )
-                )
+        form = None
+        user_role = current_user.Role.name
+        user_confirmed = current_user.is_verified
+
         news_items = (
             db.session.query(models.NewsItem)
             .order_by(models.NewsItem.time.desc())
             .all()
         )
-    else:
-        # user not logged in
-        user_confirmed = None
-        user_role = None
-        workgroups = []
-        notification_number = 0
-        news_items = []
+
     return render_template(
         "home.html",
         user_role=user_role,
         user_confirmed=user_confirmed,
-        workgroups=workgroups,
-        notification_number=notification_number,
         news_items=news_items,
         messages_from_redirects=messages_from_redirects,
+        form=form
     )
+
+
+@main_bp.route("/load_icons", methods=["GET", "POST"])
+def load_icons() -> Response:
+    """
+    This function renders the icon macro from macros.html for the quick access panel
+    """
+    selected = request.json.get("input")
+    load_type = request.json.get("load_type")
+    icon_names = []
+    header = None
+    bootstrap_icon = ""
+    if load_type == "workgroup":
+        workbooks = services.workbook.get_workbooks_from_user_group_combination(selected)
+        icon_names = [i.name for i in workbooks]
+        header = "Workbooks in " + selected
+        load_type = "workbook"
+        bootstrap_icon = "bi bi-journal-text"
+
+    elif load_type == "workbook":
+        reactions = services.reaction.list_active_in_workbook(
+            workbook=selected, workgroup=request.json.get("activeWorkgroup"), sort_crit="time"
+        )
+        icon_names = [i.reaction_id for i in reactions[:11]]
+        header = "Recent Reactions in " + selected
+        load_type = "reaction"
+        bootstrap_icon = "bi bi-eyedropper"
+
+    # load macro template with assigned variables
+    icon_macro = get_template_attribute("macros.html", "icon_panel")
+    return jsonify(icon_macro(icon_names, load_type, header, bootstrap_icon))
 
 
 @main_bp.route("/get_marvinjs_key", methods=["POST"])

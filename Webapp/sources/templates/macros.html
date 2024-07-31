@@ -36,3 +36,36 @@
       </div>
     </div>
 {%- endmacro %}
+
+{% macro icon_panel(inputs, type, header_text, bootstrap_icon) -%}
+<div class="container" style="background-color: #F5F5F5;">
+    <div class="row">
+        <div class="col-12">
+            <div class="row text-center" style="background-color: #777778;height: 50">
+                <header class="text-primary-green"><h3> &nbsp;&nbsp;{{ header_text }}</h3> </header>
+            </div>
+                <div class="row text-center">
+                    <div class="col-3">
+                         <button id="new-{{ type }}" class="btn icon" onclick="newType('{{ type }}')">
+                                   <i class="bi bi-plus icon-img" style="font-size: 40"></i>
+                         </button><br> New {{ type.capitalize() }}
+                    </div>
+                    {% for input in inputs -%}
+                        <div class="col-3">
+                            <button type="submit" id="{{ input }}" class="btn icon {{type}}" onclick="toggleIcon('{{ input }}', '{{ type }}', this.id)">
+                               <i class="{{ bootstrap_icon }}" style="font-size: 40"></i>
+                            </button><br>
+                            <div class="text-center">
+                            {{ input }} <br>
+                            </div>
+                        </div>
+                    {%- endfor %}
+
+
+            </div>
+        </div>
+    </div>
+    <br>
+</div>
+
+{%- endmacro %}
