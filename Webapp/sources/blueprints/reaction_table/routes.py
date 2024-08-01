@@ -33,7 +33,7 @@ def process():
     tutorial = request.args.get("tutorial")
     reaction = None
     workbook = None
-    if demo != "demo" and tutorial != "tutorial":
+    if demo != "demo" and tutorial != "yes":
         workgroup = request.args.get("workgroup")
         workbook_name = request.args.get("workbook")
         workbook = services.workbook.get_workbook_from_group_book_name_combination(

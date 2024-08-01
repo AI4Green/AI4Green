@@ -80,11 +80,12 @@ async function createReactionTable() {
     reactionSmilesToReactantsAndProductsSmiles(smiles);
   $(".loading-bar").css("display", "block");
   let smilesNew = removeReagentsFromSmiles(smiles);
-  $("#js-reaction-smiles").val(smilesNew);
-  let workgroup = $("#js-active-workgroup").val();
-  let workbook = $("#js-active-workbook").val();
-  let reaction_id = $("#js-reaction-id").val();
-  let demo_mode = $("#js-demo").val();
+  getVal($("#js-reaction-smiles"));
+  let workgroup = getVal($("#js-active-workgroup"));
+  let workbook = getVal($("#js-active-workbook"));
+  let reaction_id = getVal($("#js-reaction-id"));
+  let demo_mode = getVal($("#js-demo"));
+  let tutorial = getVal($("#js-tutorial"))
   smiles = replaceSmilesSymbols(smiles);
 
   // Asynchronous request to _process in routes.py
@@ -101,6 +102,8 @@ async function createReactionTable() {
       smiles +
       "&demo=" +
       demo_mode +
+      "&tutorial=" +
+      tutorial +
       "&workgroup=" +
       workgroup +
       "&workbook=" +
