@@ -24,4 +24,4 @@ jobs:
         AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
       run: |
         git remote add azure "https://$AZURE_DEVOPS_PAT@dev.azure.com/UniversityOfNottingham/DRS/_git/DR000327%20-%20Machines%20Learning%20Chemistry"
-        git push azure main --force
+        git push azure main:main
