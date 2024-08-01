@@ -83,6 +83,7 @@ def deny_sr_status_request(person: models.Person, workgroup: models.WorkGroup) -
 
     send_and_commit(notification, person)
 
+
 def add_user_by_email_request(person: models.Person, workgroup: models.WorkGroup, role: str) -> models.Notification:
     """
     sends request to user when they have been added to a workgroup by email.
