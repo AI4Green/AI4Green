@@ -10,7 +10,6 @@ from flask_login import (  # protects a view function against anonymous users
 from sources.decorators import principal_investigator_required, workgroup_member_required
 from sources import models, services
 from sources.auxiliary import (
-    duplicate_notification_check,
     get_all_workgroup_members,
     get_notification_number,
     get_workgroups,
@@ -146,7 +145,7 @@ def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
     # find the person
     person = services.person.from_current_user_email()
 
-    if duplicate_notification_check(
+    if services.notifications.duplicate_notification_check(
         [person], "New Workgroup Role Reassignment Request", "active", wg.name
     ):
         flash(

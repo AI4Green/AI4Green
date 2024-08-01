@@ -9,7 +9,6 @@ from flask_login import (  # protects a view function against anonymous users
 from flask_wtf import FlaskForm
 from sources import models, services
 from sources.auxiliary import (
-    duplicate_notification_check,
     get_all_workgroup_members,
     get_notification_number,
     get_workgroups,
@@ -314,7 +313,7 @@ def join_workbook(workgroup: str) -> Response:
             .first()
         )
         # set up notification and request for each one
-        if duplicate_notification_check(
+        if services.notifications.duplicate_notification_check(
             [person],
             "New Workbook Membership Request",
             "active",
