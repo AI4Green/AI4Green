@@ -287,7 +287,7 @@ def add_user_by_email(workgroup):
 
         notification = services.notifications.add_user_by_email_request(added_person, wg, new_role_display_string)
 
-        duplicates = services.requests.find_workgroup_duplicates(email, wg)
+        duplicates = services.requests.find_workgroup_duplicates_for_user(user, wg)
 
         if duplicates:
             flash(

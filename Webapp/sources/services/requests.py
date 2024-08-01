@@ -17,17 +17,17 @@ def get_from_email_and_workgroup(email: str, workgroup: models.WorkGroup) -> Lis
     )
 
 
-def find_workgroup_duplicates(email: str, workgroup: models.WorkGroup) -> List[models.WGStatusRequest]:
+def find_workgroup_duplicates_for_user(user: models.User, workgroup: models.WorkGroup) -> List[models.WGStatusRequest]:
     return (
-        db.session.query(models.WGStatusRequest)
-        .join(models.Person, models.WGStatusRequest.person == models.Person.id)
-        .join(models.User)
-        .filter(models.User.email == email)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.id == workgroup)
-        .filter(models.WGStatusRequest.status == 'active')
-        .all()
-    )
+            db.session.query(models.WGStatusRequest)
+            .join(models.Person, models.WGStatusRequest.person == models.Person.id)
+            .join(models.User)
+            .filter(models.User.email == user.email)
+            .join(models.WorkGroup)
+            .filter(models.WorkGroup.id == workgroup.id)
+            .filter(models.WGStatusRequest.status == 'active')
+            .all()
+        )
 
 
 def get_active_in_workgroup(user, workgroup):
