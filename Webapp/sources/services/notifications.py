@@ -8,7 +8,7 @@ from sources.extensions import db
 
 def send_and_commit(notification: models.Notification, person: models.Person) -> None:
     """
-    sends notification email to user and commits notification to database
+    Sends notification email to user and commits notification to database
     Args:
         notification: models.Notification, notification to commit
         person: models.Person, who to send the email to
