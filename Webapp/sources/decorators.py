@@ -28,7 +28,7 @@ def _get_from_request(input_value: Union[str, None], search_str: str) -> Union[s
 
 def _is_demo() -> bool:
     """
-    checks whether demo or tutorial mode is active
+    Checks whether demo or tutorial mode is active
 
     Returns:
         Bool: True if demo or tutorial is active else False
