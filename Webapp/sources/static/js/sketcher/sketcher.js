@@ -80,7 +80,7 @@ async function createReactionTable() {
     reactionSmilesToReactantsAndProductsSmiles(smiles);
   $(".loading-bar").css("display", "block");
   let smilesNew = removeReagentsFromSmiles(smiles);
-  getVal($("#js-reaction-smiles"));
+ $("#js-reaction-smiles").val(smilesNew);
   let workgroup = getVal($("#js-active-workgroup"));
   let workbook = getVal($("#js-active-workbook"));
   let reaction_id = getVal($("#js-reaction-id"));
