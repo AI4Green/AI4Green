@@ -43,7 +43,7 @@ def _is_demo() -> bool:
 
 def principal_investigator_required(f: Callable[..., Response]) -> Callable[..., Response]:
     """
-        decorates function f to check whether user is a Principal Investigator in the workgroup,
+        Decorates function f to check whether user is a Principal Investigator in the workgroup,
         and redirects to homepage if they are not.
 
         The workgroup to search is passed either through a URL variable (eg: url/<workgroup>/...) or extracted from a
