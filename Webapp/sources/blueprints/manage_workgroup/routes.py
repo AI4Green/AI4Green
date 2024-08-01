@@ -54,7 +54,7 @@ def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
         .first()
     )
 
-    requests = services.requests.get_active_in_workgroup(user, wg)
+    requests = services.requests.get_active_in_workgroup_for_pi(user, wg)
 
     return render_template(
         "manage_workgroup.html",
@@ -212,11 +212,11 @@ def change_status_from_request(
     if decision == "deny":
         # send new notification
         if mode == "to-sm":
-            services.notifications.deny_sm_status_request(person)
+            services.notifications.deny_sm_status_request(person, wg)
         elif mode == "sr-to-pi" or "sm-to-pi":
-            services.notifications.deny_pi_status_request(person)
+            services.notifications.deny_pi_status_request(person, wg)
         else:
-            services.notifications.deny_sr_status_request(person)
+            services.notifications.deny_sr_status_request(person, wg)
 
         return jsonify({"feedback": "This request has been denied!"})
     # decision is to approve user
