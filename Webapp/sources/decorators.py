@@ -115,7 +115,7 @@ def workgroup_member_required(f: Callable[..., Response]) -> Callable[..., Respo
 
 def workbook_member_required(f: Callable[..., Response]) -> Callable[..., Response]:
     """
-        decorates function f to check whether user is a member of the workbook,
+        Decorates function f to check whether user is a member of the workbook,
         and redirects to homepage if they are not.
 
         The workgroup to search is passed either through a URL variable (eg: url/<workgroup>/...) or extracted from a
