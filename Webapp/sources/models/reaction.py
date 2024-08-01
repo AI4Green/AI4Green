@@ -1,3 +1,6 @@
+from datetime import datetime
+
+import pytz
 from sources.extensions import db
 
 from .base import Model
@@ -23,6 +26,13 @@ class Reaction(Model):
     """
 
     __tablename__ = "Reaction"
+
+    def __init__(self, **kwargs) -> None:
+        self.time_of_creation = datetime.now(pytz.timezone("Europe/London")).replace(
+            tzinfo=None
+        )
+        super().__init__(**kwargs)
+
     __table_args__ = (
         db.UniqueConstraint("workbooks", "name"),
         db.UniqueConstraint("workbooks", "reaction_id"),

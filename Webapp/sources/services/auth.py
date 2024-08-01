@@ -11,7 +11,15 @@ from sqlalchemy import func
 from datetime import datetime
 
 
-def verify_login(form):
+def verify_login(form) -> redirect:
+    """
+    Logic to validate login request.
+    Args:
+        form: Form with login credentials
+
+    Returns:
+        redirect to home page or previous page that required login
+    """
     if form.validate_on_submit():
         """The form.validate_on_submit returns True when the browser sends the POST
         request as a result of the user pressing the submit button and if all the fields

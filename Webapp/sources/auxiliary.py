@@ -451,24 +451,6 @@ def get_smiles(ids: List[str]) -> List[str]:
     return smiles
 
 
-def smiles_to_inchi(smiles: str) -> Optional[str]:
-    """
-    Convert a smiles string to an InChI string using RDKit.
-
-    Args:
-        smiles: The input SMILES string to convert.
-
-    Returns:
-        The InChI string if the conversion is successful,
-        or None if the conversion fails.
-    """
-    mol = Chem.MolFromSmiles(smiles)
-    try:
-        return Chem.MolToInchi(mol)
-    except Exception:
-        return None
-
-
 def remove_spaces_and_dashes(name: str) -> str:
     return name.replace(" ", "").replace("-", "")
 

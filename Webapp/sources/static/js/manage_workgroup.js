@@ -1,3 +1,11 @@
+/**
+ * Handles changes to a user's status in a workgroup, including removal of the user.
+ *
+ * @param {string} id - The ID of the HTML element containing the user's email.
+ * @param {string} mode - The mode of change to apply, such as "remove".
+ * @param {string} current_status - The current status of the user within the workgroup.
+ *
+ */
 function make_change(id, mode, current_status){
 
     if (mode === "remove"){
@@ -6,8 +14,8 @@ function make_change(id, mode, current_status){
             return;
         }
     }
-    let email = $("#" + id).val()
-    let workgroup = $("#current_workgroup").val();
+    let email = getVal($("#" + id))
+    let workgroup = getVal($("#current_workgroup"));
     fetch('/manage_workgroup/make_change/' + workgroup + '/' + email + '/' + mode + '/' + current_status).then(function(response) {
         response.json().then(function(data) {
             alert(data.feedback);
@@ -16,9 +24,17 @@ function make_change(id, mode, current_status){
     });
 }
 
+/**
+ * Handles a request to change a user's status in a workgroup.
+ *
+ * @param {string} id - The ID of the HTML element containing the user's email.
+ * @param {string} mode - The mode of change to apply, such as "approve" or "reject".
+ * @param {string} decision - The decision to be made regarding the user's status.
+ *
+ */
 function make_change_request(id, mode, decision) {
-    let email = $("#" + id).val()
-    let workgroup = $("#current_workgroup").val();
+    let email = getVal($("#" + id))
+    let workgroup = getval($("#current_workgroup"));
     fetch('/manage_workgroup/change_status_request/' + workgroup + '/' + email + '/' + mode + '/' + decision).then(function(response) {
         response.json().then(function(data) {
             alert(data.feedback);
@@ -27,12 +43,19 @@ function make_change_request(id, mode, decision) {
     });
 }
 
+/**
+ * Displays the modal for adding a user by email.
+ */
 function addUserByEmailModal(){
     modal = $("#add-user-modal").modal("show")
 }
 
+/**
+ * Generates a QR code for the current workgroup and displays it in a modal.
+ *
+ */
 function generateQRCode(){
-    let currentWorkgroup = $("#current_workgroup").val();
+    let currentWorkgroup = getVal($("#current_workgroup"));
 
     fetch("/generate_qr_code/" + currentWorkgroup, {
         headers: {
@@ -50,6 +73,9 @@ function generateQRCode(){
     })
 }
 
+/**
+ * Initiates the print dialog to print the QR code.
+ */
 function printQRCode(){
     window.print()
 }

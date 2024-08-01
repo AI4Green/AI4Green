@@ -68,9 +68,6 @@ def reaction(
     Returns:
         dbc.Table: Table containing reaction conditions and sustainability information.
     """
-    # selected_condition_idx = (
-    #         int(condition_set_label[-1]) - 1
-    # )  # minus 1 to use zero-based index
     conditions_data = conditions_options[condition_set_label]
     sustainability = sustainability_options[condition_set_label]
     # update both dictionaries in preparation of making the table

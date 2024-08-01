@@ -19,7 +19,6 @@ from . import join_workgroup_bp  # imports the blueprint of the dummy route
 def join_workgroup(workgroup=None) -> Response:
     # must be logged in
     workgroups_dropdown = get_workgroups()
-    notification_number = get_notification_number()
 
     if workgroup in workgroups_dropdown:
         flash("You are already a member of this workgroup!")

@@ -343,3 +343,43 @@ def get_next_reaction_id_for_workbook(workbook_id: int) -> str:
     ).zfill(3)
     new_reaction_id = workbook_abbreviation + "-" + new_reaction_id_number
     return new_reaction_id
+
+
+def add(
+    name: str,
+    reaction_id: str,
+    creator: models.Person,
+    workbook_id: int,
+    reaction_table: Dict[str, any],
+    summary_table: Dict[str, any],
+    reaction_smiles: str = "",
+) -> models.Reaction:
+    """
+    Adds a reaction to the database.
+
+    Args:
+        name (str): The name of the reaction.
+        reaction_id (str): The generated id for the reaction in format WB1-001
+        creator (models.Person): The creator of the reaction.
+        workbook_id (int): The ID of the workbook to which the reaction belongs.
+        reaction_table (Dict[str, any]): Data for the reaction table.
+        summary_table (Dict[str, any]): Data for the summary table.
+        reaction_smiles Optional(str): The SMILES representation of the reaction.
+
+    Returns:
+        models.Reaction: The newly added reaction object.
+    """
+    reaction = models.Reaction(
+        name=name,
+        reaction_id=reaction_id,
+        creator=creator.id,
+        workbooks=workbook_id,
+        status="active",
+        complete="not complete",
+        reaction_smiles=reaction_smiles,
+        reaction_table_data=reaction_table,
+        summary_table_data=summary_table,
+    )
+    db.session.add(reaction)
+    db.session.commit()
+    return reaction

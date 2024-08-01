@@ -49,6 +49,7 @@ def workgroup(
         workbook_new_reaction_ids_dic[workbook.name] = next_reaction_id
     # select workbook with newest reaction in as active workbook to be selected by default
     if workbooks:
+
         newest_reaction = services.workbook.get_newest_reaction_in_workbooks(workbooks)
 
         # if there is a newest reaction in the workbook collection, set to default and set the new reaction id

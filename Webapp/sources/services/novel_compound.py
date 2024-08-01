@@ -24,7 +24,9 @@ def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> st
     """
     primary_key = (primary_key[0], int(primary_key[1]))
     workbook = services.workbook.get(primary_key[1])
-    if (person and person not in workbook.users) or (not person and current_user.Person not in workbook.users):
+    if (person and person not in workbook.users) or (
+        not person and current_user.Person not in workbook.users
+    ):
         abort(401)
 
     return (
@@ -189,10 +191,11 @@ class NewNovelCompound:
             if request.form["molWeight"] != ""
             else None
         )
+
         self.hazard_codes = sanitise_user_input(request.form["hPhrase"])
         self.smiles = sanitise_user_input(request.form["smiles"])
         self.cas = sanitise_user_input(request.form["cas"])
-
+        self.mol_weight = self._get_mol_weight()
         self.feedback = ""
         self.validation = ""
         self.validation_functions = [
@@ -211,6 +214,15 @@ class NewNovelCompound:
         self.inchi = None
         self.inchi_key = None
         self.calculate_molecule_identifiers()
+
+    def _get_mol_weight(self) -> Optional[float]:
+        """Gets molecular weight from the request form or calculate from smiles if not provided"""
+        if request.form["molWeight"] and request.form["molWeight"] != "":
+            return float(request.form["molWeight"])
+        elif request.form["smiles"] and Chem.MolFromSmiles(self.smiles):
+            return services.all_compounds.mol_weight_from_smiles(self.smiles)
+        else:
+            return None
 
     def validate(self):
         for validation_function in self.validation_functions:
