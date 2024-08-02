@@ -13,8 +13,8 @@ from flask_login import login_required
 from rdkit import Chem
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
-from sources.dto import ReactionNoteSchema
 from sources.decorators import workbook_member_required
+from sources.dto import ReactionNoteSchema
 
 from . import reaction_table_bp
 
@@ -76,7 +76,7 @@ def process():
         if mol is None:
             return jsonify({"error": f"Cannot process Reactant {idx} structure"})
         inchi = Chem.MolToInchi(mol)
-        reactant = services.compound.get_compound_from_inchi(inchi)
+        reactant = services.compound.from_inchi(inchi)
 
         # if no match, then check the workbook collection of novel compounds
         if reactant is None:
@@ -116,7 +116,7 @@ def process():
         if mol is None:
             return jsonify({"error": f"Cannot process product {idx} structure"})
         inchi = Chem.MolToInchi(mol)
-        product = services.compound.get_compound_from_inchi(inchi)
+        product = services.compound.from_inchi(inchi)
 
         # if no match, then check the workbook collection of novel compounds
         if product is None:

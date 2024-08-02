@@ -210,7 +210,7 @@ def populate_reagent_dropdown(
         # Calculate remaining spaces needed to fill up to 100
         remaining_spaces -= len(reagent_names)
 
-    # Query for additional generic reagents to fill up the list to 100
+    # Query for additional reagent from the Compounds Table to fill up the list to 100
     if remaining_spaces > 0 and reagent_substring:
         additional_reagents = (
             db.session.query(models.Compound)

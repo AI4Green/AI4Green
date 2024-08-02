@@ -301,7 +301,7 @@ class NewNovelCompound:
         """
         if not self.inchi:
             return
-        check_in_compound_db = services.compound.get_compound_from_inchi(self.inchi)
+        check_in_compound_db = services.compound.from_inchi(self.inchi)
         if check_in_compound_db:
             self.feedback = f"There is already a compound with this structure in the Compound database with the name: {check_in_compound_db.name}"
             self.validation = "failed"
