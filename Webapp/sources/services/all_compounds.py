@@ -211,7 +211,7 @@ def populate_reagent_dropdown(
     """
     remaining_spaces = 100
     reagent_names = []
-    # make a combined list of 100 elements with priority to novel compounds and then recently used compounds
+    # if the user is making a reaction in a workbook, get its novel compounds and recent reagents
     if workbook:
         novel_compound_list = services.novel_compound.all_from_workbook(workbook)
         full_reagent_list = novel_compound_list + workbook.recent_compounds
