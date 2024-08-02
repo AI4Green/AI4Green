@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from flask_login import current_user
 from sources import models
 from sources.extensions import db
@@ -31,6 +32,6 @@ def from_email(person_email: str) -> models.Person:
     return (
         db.session.query(models.Person)
         .join(models.User)
-        .filter(models.User.email == person_email)
+        .filter(func.lower(models.User.email) == person_email.lower())
         .first()
     )
