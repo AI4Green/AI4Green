@@ -195,6 +195,20 @@ def from_name(
 def populate_reagent_dropdown(
     reagent_substring: str, workbook: models.WorkBook = None
 ) -> List[str]:
+    """
+    Makes the dropdown for the reagent input field in the reaction constructor.
+    When a user first clicks the reagent input, the substring will be an empty string
+    and only novel compounds/recent reagents will populate the list.
+    Once the user starts typing the list will filter by the substring for novel compounds/recent reagents first
+    and the rest of the list up to 100 is completed by compounds from the Compound Table.
+
+    Args:
+        reagent_substring - used to filter by substring. An empty substring is ignored
+        workbook - the active workbook
+    Returns:
+        A list of names of novel compounds/compounds.
+
+    """
     remaining_spaces = 100
     reagent_names = []
     # make a combined list of 100 elements with priority to novel compounds and then recently used compounds
