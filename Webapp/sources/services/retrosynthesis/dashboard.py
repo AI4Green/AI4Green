@@ -213,7 +213,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
     """
 
     @dash_app.callback(
-        Output("loading-output-1", "loading_state"),
+        Output("loading-output-1", "loading_state", allow_duplicate=True),
         Output("computed-retrosynthesis-routes", "data"),  # store
         Output("user-message", "children"),
         Output("computed-retrosynthesis-uuid", "data"),
@@ -267,7 +267,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         )
 
     @dash_app.callback(
-        Output("conditions-loader", "loading_state"),
+        Output("loading-output-1", "loading_state", allow_duplicate=True),
         Output("computed-conditions-data", "data"),
         State("computed-retrosynthesis-uuid", "data"),
         Input("computed-retrosynthesis-routes", "data"),
@@ -592,7 +592,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
 
         """
         retro_cytoscape = cytoscape.RetrosynthesisCytoscape(
-            active_retrosynthesis["routes"], selected_route
+            active_retrosynthesis, selected_route
         )
         elements = retro_cytoscape.make_cytoscape_elements()
         style_sheet = retro_cytoscape.make_cytoscape_stylesheet()
@@ -911,7 +911,11 @@ def init_dashboard(server: Flask) -> classes.Dash:
             dropdown_options - to populate the condition set dropdown.
 
         """
-        if tapped_node and tapped_node.get("reaction_smiles"):
+        if (
+            tapped_node
+            and tapped_node.get("reaction_smiles")
+            and tapped_node["uuid"] == conditions_data["uuid"]
+        ):
             (
                 rxn_conditions,
                 rxn_sustainability,
@@ -1009,7 +1013,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             Either the colour-coded conditions table for the forward reaction or a string explaining terminal node
             has no reaction.
         """
-        if conditions_dropdown_value != "Terminal node.":
+        if conditions_dropdown_value and conditions_dropdown_value != "Terminal node.":
             conditions_table = tables.reaction(
                 conditions_options, sustainability_options, conditions_dropdown_value
             )

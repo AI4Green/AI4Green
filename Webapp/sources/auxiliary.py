@@ -262,71 +262,6 @@ def security_pi_workgroup(workgroup_name: str) -> bool:
     return workgroup_name in [i.name for i in workgroups]
 
 
-def duplicate_notification_check(
-    people_ls: List[models.Person],
-    request_type: str,
-    status,
-    WG: str,
-    WB: models.WorkBook = None,
-) -> bool:
-    """
-    Check if the request has already been made - if someone already has received your request they will be
-    removed from the list of people to be sent the request
-    """
-    refined_people_ls = []
-    for person in people_ls:
-        if WB:
-            check = (
-                db.session.query(models.Notification)
-                .filter(models.Notification.wb == WB and models.Notification.wg == WG)
-                .join(models.WBStatusRequest)
-                .join(models.Person, models.WBStatusRequest.person == models.Person.id)
-                .filter(models.Person.id == person.id)
-                .first()
-            )
-        else:
-            if request_type == "New Workgroup Membership Request":
-                # check for person applying to join workgroup - 1 PI may have many requests from different users
-                check = (
-                    db.session.query(models.Notification)
-                    .filter(models.Notification.wg == WG)
-                    .join(models.WGStatusRequest)
-                    .join(
-                        models.Person, models.WGStatusRequest.person == models.Person.id
-                    )
-                    .filter(models.Person == person.id)
-                    .first()
-                )
-            elif request_type == "New Workgroup Role Reassignment Request":
-                check = (
-                    db.session.query(models.Notification)
-                    .filter(models.Notification.wg == WG)
-                    .join(models.WGStatusRequest)
-                    .join(
-                        models.Person, models.WGStatusRequest.person == models.Person.id
-                    )
-                    .filter(models.Person.id == person.id)
-                    .first()
-                )
-            else:
-                check = (
-                    db.session.query(models.Notification)
-                    .filter(models.Notification.wg == WG)
-                    .filter(models.Notification.status == status)
-                    .filter(models.Notification.type == request_type)
-                    .join(models.WGStatusRequest)
-                    .join(
-                        models.Person, models.WGStatusRequest.person == models.Person.id
-                    )
-                    .filter(models.Person.id == person.id)
-                    .first()
-                )
-
-        if check is None:
-            refined_people_ls.append(person)
-    return not refined_people_ls
-
-
 def get_all_workgroup_members(
     workgroup: models.WorkGroup,
 ) -> Tuple[List[models.Person], List[models.Person], List[models.Person]]:
@@ -447,24 +382,6 @@ def get_smiles(ids: List[str]) -> List[str]:
             )
         smiles.append(compound.smiles)
     return smiles
-
-
-def smiles_to_inchi(smiles: str) -> Optional[str]:
-    """
-    Convert a smiles string to an InChI string using RDKit.
-
-    Args:
-        smiles: The input SMILES string to convert.
-
-    Returns:
-        The InChI string if the conversion is successful,
-        or None if the conversion fails.
-    """
-    mol = Chem.MolFromSmiles(smiles)
-    try:
-        return Chem.MolToInchi(mol)
-    except Exception:
-        return None
 
 
 def remove_spaces_and_dashes(name: str) -> str:

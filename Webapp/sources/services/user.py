@@ -12,7 +12,11 @@ def list_all() -> List[models.User]:
     Returns:
          List of all users
     """
-    return db.session.query(models.User).all()
+    return (
+        db.session.query(models.User)
+        .order_by(models.User.time_of_creation.desc())
+        .all()
+    )
 
 
 def person_from_current_user() -> models.Person:
@@ -48,3 +52,15 @@ def from_id(user_id: int) -> models.User:
     """
 
     return db.session.query(models.User).filter(models.User.id == user_id).first()
+
+
+def from_email(user_email: str) -> models.User:
+    """
+        Gets user from User email
+        Args:
+            user_email: email of user to search for
+
+        Returns:
+            models.User with matching email
+        """
+    return db.session.query(models.User).filter(models.User.email == user_email).first()
