@@ -13,3 +13,12 @@
   flex: 0 0 200px;
   margin-left: 10px;
 }
+
+.radio-input {
+    display: inline-block;
+    text-align: center;
+    width: 100px;
+    flex: 0 0 150px;
+}
+
+

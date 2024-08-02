@@ -8,7 +8,7 @@ from datetime import datetime
 import pytz
 from flask import Response, json, jsonify, request
 from flask_api import status
-from flask_login import current_user, login_required
+from flask_login import login_required
 from sources import models, services
 from sources.auxiliary import (
     abort_if_user_not_in_workbook,

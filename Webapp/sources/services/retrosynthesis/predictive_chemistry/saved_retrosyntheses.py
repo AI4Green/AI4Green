@@ -175,7 +175,7 @@ def make_retrosynthesis_card_list(selected_workbook_id: int) -> html.Div:
                     ),
                     html.Button(
                         "Reload",
-                        className="btn-primary",
+                        className="btn btn-primary",
                         value=retrosynthesis.id,
                         n_clicks=0,
                         id={"type": "retrosynthesis-reload", "index": idx},
@@ -433,3 +433,17 @@ def list_from_workbook(selected_workbook_id: int):
         .filter(models.WorkBook.id == selected_workbook_id)
         .all()
     )
+
+
+def list_all() -> List[models.Retrosynthesis]:
+    """
+    Gets a list of all Retrosynthesis saved. For the admin_dashboard
+
+    Returns:
+         List of all Retrosynthesis sorted by date
+    """
+    return (
+        db.session.query(models.Retrosynthesis).order_by(
+            models.Retrosynthesis.time_of_creation.desc()
+        )
+    ).all()

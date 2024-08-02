@@ -46,8 +46,10 @@ def admin_dashboard(
     all_workgroups = services.workgroup.list_all()
     all_workbooks = services.workbook.list_all()
     all_solvent_surfers = services.PCA_graph.list_all()
+    all_retrosynthesis = (
+        services.retrosynthesis.predictive_chemistry.saved_retrosyntheses.list_all()
+    )
     recent_reactions = services.reaction.list_recent()
-
 
     return render_template(
         "admin_dashboard.html",
@@ -62,13 +64,13 @@ def admin_dashboard(
         wgs=all_workgroups,
         workbooks=all_workbooks,
         recent_reactions=recent_reactions,
-        all_solvent_surfers=all_solvent_surfers
+        all_solvent_surfers=all_solvent_surfers,
+        all_retrosynthesis=all_retrosynthesis,
     )
 
 
 @admin_dashboard_bp.route("/admin_delete_user/<user_id>", methods=["GET", "POST"])
 def delete_user(user_id=None):
-
     user = services.user.from_id(user_id)
 
     if user:
@@ -85,7 +87,9 @@ def delete_user(user_id=None):
             flash("User deleted!")
 
         else:
-            flash("This user is a member of a workgroup and cannot be deleted at this time.")
+            flash(
+                "This user is a member of a workgroup and cannot be deleted at this time."
+            )
 
     return redirect(url_for("admin_dashboard.admin_dashboard"))
 
