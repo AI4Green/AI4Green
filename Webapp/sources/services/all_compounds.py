@@ -167,7 +167,7 @@ def from_cas(
                                                  Returns None if no matching compound is found.
     """
     compound = services.compound.from_cas(cas)
-    if not compound and workbook:
+    if workbook and not compound:
         compound = services.novel_compound.from_cas_and_workbook(cas, workbook)
     return compound
 
@@ -187,7 +187,7 @@ def from_name(
                                                  Returns None if no matching compound is found.
     """
     compound = services.compound.from_name(name)
-    if not compound and workbook:
+    if workbook and not compound:
         compound = services.novel_compound.from_name_and_workbook(name, workbook)
     return compound
 
