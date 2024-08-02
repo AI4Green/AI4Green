@@ -50,7 +50,7 @@ def find_workgroup_duplicates_for_user(user: models.User, workgroup: models.Work
 
 def get_active_in_workgroup_for_pi(user: models.User, workgroup: models.WorkGroup) -> List[models.WGStatusRequest]:
     """
-    finds active requests for principal investigators in a workgroup
+    Finds active requests for principal investigators in a workgroup
     Args:
         user: models.User, user to search for
         workgroup: models.WorkGroup, workgroup to search for

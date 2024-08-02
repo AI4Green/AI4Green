@@ -28,7 +28,7 @@ def _get_from_request(input_value: Union[str, None], search_str: str) -> Union[s
 
 def _is_demo() -> bool:
     """
-    checks whether demo or tutorial mode is active
+    Checks whether demo or tutorial mode is active
 
     Returns:
         Bool: True if demo or tutorial is active else False
@@ -43,7 +43,7 @@ def _is_demo() -> bool:
 
 def principal_investigator_required(f: Callable[..., Response]) -> Callable[..., Response]:
     """
-        decorates function f to check whether user is a Principal Investigator in the workgroup,
+        Decorates function f to check whether user is a Principal Investigator in the workgroup,
         and redirects to homepage if they are not.
 
         The workgroup to search is passed either through a URL variable (eg: url/<workgroup>/...) or extracted from a
@@ -67,7 +67,7 @@ def principal_investigator_required(f: Callable[..., Response]) -> Callable[...,
 
 def principal_investigator_or_senior_researcher_required(f: Callable[..., Response]) -> Callable[..., Response]:
     """
-    decorates function f to check whether user is a Principal Investigator or Senior Researcher in the workgroup,
+    Decorates function f to check whether user is a Principal Investigator or Senior Researcher in the workgroup,
     and redirects to homepage if they are not.
 
     The workgroup to search is passed either through a URL variable (eg: url/<workgroup>/...) or extracted from a
@@ -91,7 +91,7 @@ def principal_investigator_or_senior_researcher_required(f: Callable[..., Respon
 
 def workgroup_member_required(f: Callable[..., Response]) -> Callable[..., Response]:
     """
-        decorates function f to check whether user is member of the workgroup, and redirects to homepage if they are
+        Decorates function f to check whether user is member of the workgroup, and redirects to homepage if they are
         not.
 
         The workgroup to search is passed either through a URL variable (eg: url/<workgroup>/...) or extracted from a
@@ -115,7 +115,7 @@ def workgroup_member_required(f: Callable[..., Response]) -> Callable[..., Respo
 
 def workbook_member_required(f: Callable[..., Response]) -> Callable[..., Response]:
     """
-        decorates function f to check whether user is a member of the workbook,
+        Decorates function f to check whether user is a member of the workbook,
         and redirects to homepage if they are not.
 
         The workgroup to search is passed either through a URL variable (eg: url/<workgroup>/...) or extracted from a
