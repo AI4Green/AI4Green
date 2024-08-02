@@ -1,6 +1,15 @@
+from sources import models
 from sources.extensions import db
 
 from .base import Model
+
+# Association table for the many-to-many relationship between WorkBook and Compound
+recently_used_compounds = db.Table(
+    "recently_used_compounds",
+    db.Model.metadata,
+    db.Column("workbook_id", db.Integer, db.ForeignKey("WorkBook.id")),
+    db.Column("compound_id", db.Integer, db.ForeignKey("Compound.id")),
+)
 
 
 class WorkBook(Model):
@@ -29,5 +38,11 @@ class WorkBook(Model):
         backref="WorkBook",
         cascade="all, delete",
     )
+    recent_compounds = db.relationship(
+        "Compound",
+        secondary=recently_used_compounds,
+        backref="workbooks_recently_used_in",
+    )
+
     users = db.relationship("Person", secondary="Person_WorkBook")
     retrosynthesis = db.relationship("Retrosynthesis", backref="WorkBook")

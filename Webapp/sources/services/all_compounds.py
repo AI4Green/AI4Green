@@ -4,6 +4,7 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 from sources import models, services
 from sources.extensions import db
+from sqlalchemy import func
 
 """
 Contains functions for when it is unknown if a compound is from the Compound table and from PubChem or a Novel compound
@@ -149,3 +150,90 @@ def mol_weight_from_smiles(smiles: str) -> float:
     """
     # MolWt accounts for the average across isotopes but ExactMolWt only takes the most abundant isotope.
     return round(Descriptors.MolWt(Chem.MolFromSmiles(smiles)), 2)
+
+
+def from_cas(
+    cas: str, workbook: models.WorkBook = None
+) -> Union[models.Compound, models.NovelCompound]:
+    """
+    Returns a compound or novel compound from a cas string
+
+    Args:
+        cas - cas number of a compound
+        workbook - if looking for a novel compound, the workbook we look in
+
+    Returns:
+        models.Compound or models.NovelCompound: The compound object retrieved from the database.
+                                                 Returns None if no matching compound is found.
+    """
+    compound = services.compound.from_cas(cas)
+    if workbook and not compound:
+        compound = services.novel_compound.from_cas_and_workbook(cas, workbook)
+    return compound
+
+
+def from_name(
+    name: str, workbook: models.WorkBook = None
+) -> Union[models.Compound, models.NovelCompound]:
+    """
+    Returns a compound or novel compound from a name
+
+    Args:
+        name - name of a compound
+        workbook - if looking for a novel compound, the workbook we look in
+
+    Returns:
+        models.Compound or models.NovelCompound: The compound object retrieved from the database.
+                                                 Returns None if no matching compound is found.
+    """
+    compound = services.compound.from_name(name)
+    if workbook and not compound:
+        compound = services.novel_compound.from_name_and_workbook(name, workbook)
+    return compound
+
+
+def populate_reagent_dropdown(
+    reagent_substring: str, workbook: models.WorkBook = None
+) -> List[str]:
+    """
+    Makes the dropdown for the reagent input field in the reaction constructor.
+    When a user first clicks the reagent input, the substring will be an empty string
+    and only novel compounds/recent reagents will populate the list.
+    Once the user starts typing the list will filter by the substring for novel compounds/recent reagents first
+    and the rest of the list up to 100 is completed by compounds from the Compound Table.
+
+    Args:
+        reagent_substring - used to filter by substring. An empty substring is ignored
+        workbook - the active workbook
+    Returns:
+        A list of names of novel compounds/compounds.
+
+    """
+    remaining_spaces = 100
+    reagent_names = []
+    # if the user is making a reaction in a workbook, get its novel compounds and recent reagents
+    if workbook:
+        novel_compound_list = services.novel_compound.all_from_workbook(workbook)
+        full_reagent_list = novel_compound_list + workbook.recent_compounds
+        reagent_list = services.utils.remove_duplicates_keep_first(full_reagent_list)
+
+        # Get the first 100 which match the substring
+        reagent_names = [
+            x.name for x in reagent_list if reagent_substring.lower() in x.name.lower()
+        ][0:100]
+        # Calculate remaining spaces needed to fill up to 100
+        remaining_spaces -= len(reagent_names)
+
+    # Query for additional reagent from the Compounds Table to fill up the list to 100
+    if remaining_spaces > 0 and reagent_substring:
+        additional_reagents = (
+            db.session.query(models.Compound)
+            .filter(
+                func.lower(models.Compound.name).startswith(reagent_substring.lower())
+            )
+            .order_by(models.Compound.name.asc())
+            .limit(remaining_spaces)
+            .all()
+        )
+        reagent_names.extend([x.name for x in additional_reagents])
+    return reagent_names

@@ -1,6 +1,5 @@
 import re
-from datetime import datetime
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from flask import abort, request
 from flask_login import current_user
@@ -38,7 +37,7 @@ def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> st
     )[0]
 
 
-def get_novel_compound_from_name_and_workbook(
+def from_name_and_workbook(
     name: str, workbook: models.WorkBook
 ) -> models.NovelCompound:
     """
@@ -60,7 +59,7 @@ def get_novel_compound_from_name_and_workbook(
     )
 
 
-def get_novel_compound_from_inchi_and_workbook(
+def from_inchi_and_workbook(
     inchi: str, workbook: models.WorkBook
 ) -> models.NovelCompound:
     """
@@ -82,15 +81,13 @@ def get_novel_compound_from_inchi_and_workbook(
     )
 
 
-def get_novel_compound_from_cas_and_workbook(
-    cas: str, workbook: models.WorkBook
-) -> models.NovelCompound:
+def from_cas_and_workbook(cas: str, workbook: models.WorkBook) -> models.NovelCompound:
     """
     Retrieves a novel compound by CAS and workbook.
 
     Args:
-        cas: CAS number.
-        workbook: Workbook model.
+        cas - the chemical abstract service registry number of a novel compound
+        workbook - Workbook model.
 
     Returns:
         NovelCompound model.
@@ -132,7 +129,6 @@ def add(
         inchi: InChI notation.
         inchi_key: InChIKey.
         workbook_id: Workbook ID.
-        current_time: Current timestamp.
 
     Returns:
         NovelCompound model.
@@ -249,17 +245,15 @@ class NewNovelCompound:
         """
         Checks if the compound name is unique within the compound database and the given workbook.
         """
-        check_in_compound_database = services.compound.get_compound_from_name(self.name)
+        check_in_compound_database = services.compound.from_name(self.name)
         if check_in_compound_database:
             self.feedback = (
                 "There is already a compound with this name in the compound database"
             )
             self.validation = "failed"
 
-        check_in_workbook = (
-            services.novel_compound.get_novel_compound_from_name_and_workbook(
-                self.name, self.workbook
-            )
+        check_in_workbook = services.novel_compound.from_name_and_workbook(
+            self.name, self.workbook
         )
         if check_in_workbook:
             self.feedback = (
@@ -284,17 +278,15 @@ class NewNovelCompound:
         """
         if not self.cas:
             return
-        check_in_compound_database = services.compound.get_compound_from_cas(self.cas)
+        check_in_compound_database = services.compound.from_cas(self.cas)
         if check_in_compound_database:
             self.feedback = (
                 "A compound with this CAS number is already in the compound database"
             )
             self.validation = "failed"
 
-        check_in_workbook = (
-            services.novel_compound.get_novel_compound_from_cas_and_workbook(
-                self.cas, self.workbook
-            )
+        check_in_workbook = services.novel_compound.from_cas_and_workbook(
+            self.cas, self.workbook
         )
         if check_in_workbook:
             self.feedback = (
@@ -309,15 +301,13 @@ class NewNovelCompound:
         """
         if not self.inchi:
             return
-        check_in_compound_db = services.compound.get_compound_from_inchi(self.inchi)
+        check_in_compound_db = services.compound.from_inchi(self.inchi)
         if check_in_compound_db:
             self.feedback = f"There is already a compound with this structure in the Compound database with the name: {check_in_compound_db.name}"
             self.validation = "failed"
 
-        check_in_workbook = (
-            services.novel_compound.get_novel_compound_from_inchi_and_workbook(
-                self.inchi, self.workbook
-            )
+        check_in_workbook = services.novel_compound.from_inchi_and_workbook(
+            self.inchi, self.workbook
         )
         if check_in_workbook:
             self.feedback = f"There is already a compound with this structure saved in this workbook with the name: {check_in_workbook.name}"
@@ -330,7 +320,8 @@ class NewNovelCompound:
         """
         numerical_values = [self.density, self.concentration, self.mol_weight]
         if all(
-            entry is None or check_positive_number(entry) for entry in numerical_values
+            entry is None or services.utils.check_positive_number(entry)
+            for entry in numerical_values
         ):
             return
         self.feedback = "Molecular weight, density, and concentration must be empty or a positive number"
@@ -375,9 +366,19 @@ class NewNovelCompound:
                 self.validation = "failed"
 
 
-def check_positive_number(s: float) -> bool:
-    """Checks the entry is a positive number."""
-    try:
-        return s >= 0
-    except (ValueError, TypeError):
-        return False
+def all_from_workbook(workbook: models.WorkBook) -> List[models.NovelCompound]:
+    """
+    Retrieves all novel compounds in a workbook.
+
+    Args:
+        workbook: Workbook model.
+
+    Returns:
+        A list of novel compounds.
+    """
+    return (
+        db.session.query(models.NovelCompound)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook.id)
+        .all()
+    )

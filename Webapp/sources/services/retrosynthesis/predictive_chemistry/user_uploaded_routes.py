@@ -182,7 +182,7 @@ class Conditions:
         """Returns a list of compounds if their SMILES string is found in the database"""
         compound_ls = []
         for smiles in smiles_list:
-            compound = services.compound.get_compound_from_smiles(smiles)
+            compound = services.compound.from_smiles(smiles)
             compound_ls.append(compound)
         return compound_ls
 

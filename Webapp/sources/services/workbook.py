@@ -119,3 +119,15 @@ def workbooks_from_workgroup(workgroup_name: str) -> List[models.WorkBook]:
         .all()
     )
     return [x for x in workbooks if current_user.Person in x.users]
+
+
+def add_compound_to_recent_list(
+    workbook: models.WorkBook, compound: models.Compound, max_length: int = 100
+):
+    """Adds a compound to the recent compound list"""
+    if compound not in workbook.recent_compounds:
+        workbook.recent_compounds.append(compound)
+    if len(workbook.recent_compounds) > max_length:
+        oldest_compound = workbook.recent_compounds[0]
+        workbook.recent_compounds.remove(oldest_compound)
+    db.session.commit()

@@ -13,8 +13,8 @@ from flask_login import login_required
 from rdkit import Chem
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook, smiles_symbols
-from sources.dto import ReactionNoteSchema
 from sources.decorators import workbook_member_required
+from sources.dto import ReactionNoteSchema
 
 from . import reaction_table_bp
 
@@ -76,18 +76,14 @@ def process():
         if mol is None:
             return jsonify({"error": f"Cannot process Reactant {idx} structure"})
         inchi = Chem.MolToInchi(mol)
-        reactant = services.compound.get_compound_from_inchi(inchi)
+        reactant = services.compound.from_inchi(inchi)
 
         # if no match, then check the workbook collection of novel compounds
         if reactant is None:
             if demo == "demo":  # if in demo mode don't search novel compounds
                 return jsonify({"reactionTable": "demo", "novelCompound": ""})
 
-            reactant = (
-                services.novel_compound.get_novel_compound_from_inchi_and_workbook(
-                    inchi, workbook
-                )
-            )
+            reactant = services.novel_compound.from_inchi_and_workbook(inchi, workbook)
             novel_compound = True
 
             # if no match is found we inform the user the compound is not in the database
@@ -120,18 +116,14 @@ def process():
         if mol is None:
             return jsonify({"error": f"Cannot process product {idx} structure"})
         inchi = Chem.MolToInchi(mol)
-        product = services.compound.get_compound_from_inchi(inchi)
+        product = services.compound.from_inchi(inchi)
 
         # if no match, then check the workbook collection of novel compounds
         if product is None:
             if demo == "demo":  # if in demo mode don't search novel compounds
                 return jsonify({"reactionTable": "demo", "novelCompound": ""})
 
-            product = (
-                services.novel_compound.get_novel_compound_from_inchi_and_workbook(
-                    inchi, workbook
-                )
-            )
+            product = services.novel_compound.from_inchi_and_workbook(inchi, workbook)
             novel_compound = True
 
             # if no match is found we inform the user the compound is not in the database

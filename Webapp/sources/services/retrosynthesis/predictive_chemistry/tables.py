@@ -19,7 +19,7 @@ def compound(smiles: str) -> Union[dbc.Table, str]:
     inchi = services.all_compounds.smiles_to_inchi(smiles)
     if inchi is None:
         return "Cannot parse structure to InChI"
-    compound_object = services.compound.get_compound_from_inchi(inchi)
+    compound_object = services.compound.from_inchi(inchi)
     if compound_object is None:
         return f"Compound with SMILES {smiles} is not in the database"
     compound_table = make_compound_table(compound_object)
