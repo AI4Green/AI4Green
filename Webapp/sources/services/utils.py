@@ -45,6 +45,14 @@ def check_is_number(string: str) -> bool:
         return False
 
 
+def check_positive_number(s: float) -> bool:
+    """Checks the entry is a positive number."""
+    try:
+        return s >= 0
+    except (ValueError, TypeError):
+        return False
+
+
 def remove_duplicates_keep_first(lst: list) -> list:
     """
     Removes duplicates from a list but keeps the order and only removes the non-first duplicates
