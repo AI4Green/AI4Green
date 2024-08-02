@@ -7,10 +7,9 @@ from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
-from sources.decorators import principal_investigator_required
+from sources.decorators import principal_investigator_required, workgroup_member_required
 from sources import models, services
 from sources.auxiliary import (
-    duplicate_notification_check,
     get_all_workgroup_members,
     get_notification_number,
     get_workgroups,
@@ -39,11 +38,7 @@ def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
     current_workgroup = workgroup
     notification_number = get_notification_number()
     # get all the pis, srs, and sms in the group
-    wg = (
-        db.session.query(models.WorkGroup)
-        .filter(models.WorkGroup.name == current_workgroup)
-        .first()
-    )
+    wg = services.workgroup.from_name(current_workgroup)
     pi, sr, sm = get_all_workgroup_members(wg)
 
     # get requests for this workgroup
@@ -58,19 +53,8 @@ def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
         .first()
     )
 
-    requests = (
-        db.session.query(models.WGStatusRequest)
-        .filter(models.WGStatusRequest.status == "active")
-        .join(
-            models.Person,
-            models.WGStatusRequest.principal_investigator == models.Person.id,
-        )
-        .join(models.User)
-        .filter(models.WGStatusRequest.principal_investigator == user.id)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.id == wg.id)
-        .all()
-    )
+    requests = services.requests.get_active_in_workgroup_for_pi(user, wg)
+
     return render_template(
         "manage_workgroup.html",
         workgroups=workgroups,
@@ -97,17 +81,8 @@ def make_change_to_workgroup(
     # must be logged in and a PI of the workgroup
 
     # find the person and workgroup objects that the change relates to
-    wg = (
-        db.session.query(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
-        .first()
-    )
-    person = (
-        db.session.query(models.Person)
-        .join(models.User)
-        .filter(models.User.email == email)
-        .first()
-    )
+    wg = services.workgroup.from_name(workgroup)
+    person = services.person.from_email(email)
     # mode is either remove user from workgroup or change role in workgroup
     if mode == "remove":
         if current_status == "pi" and len(wg.principal_investigator) < 2:
@@ -151,6 +126,7 @@ def make_change_to_workgroup(
     "/SR_status_request/<user_type>/<new_role>/<workgroup>", methods=["GET", "POST"]
 )
 @login_required
+@workgroup_member_required
 def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
     # must be logged in and a member of the workgroup
     if not security_member_workgroup(workgroup):
@@ -164,21 +140,12 @@ def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
         .filter(models.WorkGroup.name == workgroup)
         .all()
     )
-    wg = (
-        db.session.query(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
-        .first()
-    )
+    wg = services.workgroup.from_name(workgroup)
 
     # find the person
-    person = (
-        db.session.query(models.Person)
-        .join(models.User)
-        .filter(models.User.email == current_user.email)
-        .first()
-    )
+    person = services.person.from_current_user_email()
 
-    if duplicate_notification_check(
+    if services.notifications.duplicate_notification_check(
         [person], "New Workgroup Role Reassignment Request", "active", wg.name
     ):
         flash(
@@ -230,73 +197,26 @@ def change_status_from_request(
 ) -> Response:
     # must be logged in and a PI of the workgroup
 
-    wg = (
-        db.session.query(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
-        .first()
-    )
+    wg = services.workgroup.from_name(workgroup)
 
     # change request to inactive
-    request_objs = (
-        db.session.query(models.WGStatusRequest)
-        .join(models.Person, models.WGStatusRequest.person == models.Person.id)
-        .join(models.User)
-        .filter(models.User.email == email)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.id == wg.id)
-        .all()
-    )
+    request_objs = services.requests.get_from_email_and_workgroup(email, wg)
     make_objects_inactive(request_objs)
 
-    # change initial notification to inactive
-    notification_objs = (
-        db.session.query(models.WGStatusRequest)
-        .join(models.Person, models.WGStatusRequest.person == models.Person.id)
-        .join(models.User)
-        .filter(models.User.email == email)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.id == wg.id)
-        .all()
-    )
-    notification_objs = [x.Notification for x in notification_objs]
+    notification_objs = [x.Notification for x in request_objs]
     make_objects_inactive(notification_objs)
 
-    person = (
-        db.session.query(models.Person)
-        .join(models.User)
-        .filter(models.User.email == email)
-        .first()
-    )
+    person = services.person.from_email(email)
 
     if decision == "deny":
         # send new notification
         if mode == "to-sm":
-            notification = models.Notification(
-                person=person.id,
-                type=f"Your Request to join {wg.name}",
-                info=f"Your request to join Workgroup, {wg.name} has been denied.",
-                time=datetime.now(),
-                status="active",
-            )
+            services.notifications.deny_sm_status_request(person, wg)
         elif mode == "sr-to-pi" or "sm-to-pi":
-            notification = models.Notification(
-                person=person.id,
-                type="Your Request to become a Principal Investigator",
-                info=f"Your request to become a Principal Investigator in Workgroup, {wg.name}, has been denied.",
-                time=datetime.now(),
-                status="active",
-            )
+            services.notifications.deny_pi_status_request(person, wg)
         else:
-            notification = models.Notification(
-                person=person.id,
-                type="Your Request to become a Senior Researcher",
-                info=f"You request to become a Senior Researcher in Workgroup, {wg.name}, has been denied.",
-                time=datetime.now(),
-                status="active",
-            )
-        services.email.send_notification(person)
-        db.session.add(notification)
-        db.session.commit()
+            services.notifications.deny_sr_status_request(person, wg)
+
         return jsonify({"feedback": "This request has been denied!"})
     # decision is to approve user
     else:
@@ -330,9 +250,7 @@ def change_status_from_request(
             time=datetime.now(),
             status="active",
         )
-        db.session.add(notification)
-        db.session.commit()
-        services.email.send_notification(person)
+        services.notifications.send_and_commit(notification, person)
         return jsonify({"feedback": feedback})
 
 
@@ -366,31 +284,9 @@ def add_user_by_email(workgroup):
     wg = services.workgroup.from_name(workgroup)
     if not services.workgroup.get_user_type(workgroup, user):
 
-        notification = models.Notification(
-            person=added_person.id,
-            type="You Have Been Added to a Workgroup",
-            info="A Principal Investigator has added you to the Workgroup, "
-                 + workgroup
-                 + ", as a "
-                 + new_role_display_string
-                 + ". Please respond below.",
-            time=datetime.now(),
-            status="active",
-            wg=wg.name,
-            wb="",
-            wg_request="added",
-        )
+        notification = services.notifications.add_user_by_email_request(added_person, wg, new_role_display_string)
 
-        duplicates = (
-            db.session.query(models.WGStatusRequest)
-            .join(models.Person, models.WGStatusRequest.person == models.Person.id)
-            .join(models.User)
-            .filter(models.User.email == user.email)
-            .join(models.WorkGroup)
-            .filter(models.WorkGroup.id == wg.id)
-            .filter(models.WGStatusRequest.status == 'active')
-            .all()
-        )
+        duplicates = services.requests.find_workgroup_duplicates_for_user(user, wg)
 
         if duplicates:
             flash(
@@ -399,9 +295,7 @@ def add_user_by_email(workgroup):
 
         else:
 
-            services.email.send_notification(added_person)
-            db.session.add(notification)
-            db.session.commit()
+            services.notifications.send_and_commit(notification, added_person)
 
             wg_request = models.WGStatusRequest(
                 principal_investigator=current_user.id,
@@ -431,7 +325,6 @@ def generate_qr_code(workgroup=None):
     logo = Image.open(
         "sources/static/img/favicon.ico"
     )
-
     qr = qrcode.QRCode(
         version=1,
         box_size=10,

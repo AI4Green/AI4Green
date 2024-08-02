@@ -34,7 +34,7 @@ function make_change(id, mode, current_status){
  */
 function make_change_request(id, mode, decision) {
     let email = getVal($("#" + id))
-    let workgroup = getval($("#current_workgroup"));
+    let workgroup = getVal($("#current_workgroup"));
     fetch('/manage_workgroup/change_status_request/' + workgroup + '/' + email + '/' + mode + '/' + decision).then(function(response) {
         response.json().then(function(data) {
             alert(data.feedback);

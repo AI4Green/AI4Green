@@ -14,6 +14,7 @@ from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
+from sources.decorators import workbook_member_required
 from sources.blueprints.auth.forms import LoginForm
 from sources import models, services
 from sources.auxiliary import (
@@ -109,13 +110,11 @@ def get_marvinjs_key():
     "/sketcher/<workgroup>/<workbook>/<reaction_id>/<tutorial>", methods=["GET", "POST"]
 )
 @login_required
+@workbook_member_required
 def sketcher(
     workgroup: str, workbook: str, reaction_id: str, tutorial: str
 ) -> Response:
-    # validates the user is a member of the workgroup and workbook by checking the database
-    if not security_member_workgroup_workbook(workgroup, workbook):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
+
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     workbook_object = (
