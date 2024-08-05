@@ -121,7 +121,7 @@ def workbooks_from_workgroup(workgroup_name: str) -> List[models.WorkBook]:
     return [x for x in workbooks if current_user.Person in x.users]
 
 
-def add_recent_compound(
+def add_compound_to_recent_list(
     workbook: models.WorkBook, compound: models.Compound, max_length: int = 100
 ):
     """Adds a compound to the recent compound list"""

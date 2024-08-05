@@ -50,7 +50,7 @@ def get(primary_key: int) -> models.Compound:
     )
 
 
-def get_compound_from_smiles(smiles: str) -> Optional[models.Compound]:
+def from_smiles(smiles: str) -> Optional[models.Compound]:
     """
     Retrieve a compound from the database by converting SMILES to InChI.
 
@@ -63,10 +63,10 @@ def get_compound_from_smiles(smiles: str) -> Optional[models.Compound]:
     inchi = services.all_compounds.smiles_to_inchi(smiles)
     if not inchi:
         return None
-    return get_compound_from_inchi(inchi)
+    return from_inchi(inchi)
 
 
-def get_compound_from_inchi(inchi: str) -> models.Compound:
+def from_inchi(inchi: str) -> models.Compound:
     """
     Retrieve a compound from the database based on its InChI.
 

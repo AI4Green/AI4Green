@@ -58,7 +58,7 @@ def reagents() -> Response:
         )
     if found_reagent is not None:
         if workbook and not novel_compound:
-            services.workbook.add_recent_compound(workbook, found_reagent)
+            services.workbook.add_compound_to_recent_list(workbook, found_reagent)
         reagent_name = found_reagent.name  # assign reagent to name
         # then its hazard phrase, density, molar weight,
         # and concentration are selected from the reagent

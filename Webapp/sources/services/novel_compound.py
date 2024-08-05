@@ -301,7 +301,7 @@ class NewNovelCompound:
         """
         if not self.inchi:
             return
-        check_in_compound_db = services.compound.get_compound_from_inchi(self.inchi)
+        check_in_compound_db = services.compound.from_inchi(self.inchi)
         if check_in_compound_db:
             self.feedback = f"There is already a compound with this structure in the Compound database with the name: {check_in_compound_db.name}"
             self.validation = "failed"
@@ -320,7 +320,8 @@ class NewNovelCompound:
         """
         numerical_values = [self.density, self.concentration, self.mol_weight]
         if all(
-            entry is None or check_positive_number(entry) for entry in numerical_values
+            entry is None or services.utils.check_positive_number(entry)
+            for entry in numerical_values
         ):
             return
         self.feedback = "Molecular weight, density, and concentration must be empty or a positive number"
@@ -365,14 +366,6 @@ class NewNovelCompound:
                 self.validation = "failed"
 
 
-def check_positive_number(s: float) -> bool:
-    """Checks the entry is a positive number."""
-    try:
-        return s >= 0
-    except (ValueError, TypeError):
-        return False
-
-
 def all_from_workbook(workbook: models.WorkBook) -> List[models.NovelCompound]:
     """
     Retrieves all novel compounds in a workbook.
@@ -381,7 +374,7 @@ def all_from_workbook(workbook: models.WorkBook) -> List[models.NovelCompound]:
         workbook: Workbook model.
 
     Returns:
-        NovelCompound model.
+        A list of novel compounds.
     """
     return (
         db.session.query(models.NovelCompound)
