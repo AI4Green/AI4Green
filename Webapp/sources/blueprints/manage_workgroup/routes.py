@@ -304,7 +304,7 @@ def add_user_by_email(workgroup):
                 person=added_person.id,
                 wg=wg.id,
                 current_role="Non-Member",
-                new_role=user_type,
+                new_role=new_role_display_string,
                 time=datetime.now(),
                 status="active",
                 notification=notification.id,
