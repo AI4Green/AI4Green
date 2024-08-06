@@ -223,10 +223,14 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Output("computed-retrosynthesis-uuid", "data"),
         State("validated-smiles", "data"),
         State("smiles-input", "pattern"),
+        State("stock-dropdown", "value"),
         Input("btn-retrosynthesis", "n_clicks"),
     )
     def start_new_retrosynthesis(
-        validated_smiles: str, smiles_regex: str, n_clicks: int
+        validated_smiles: str,
+        smiles_regex: str,
+        stock: str,
+        n_clicks: int,
     ) -> Tuple[bool, dict, str, str]:
         """
         Called when the user clicks the retrosynthesis button
@@ -238,6 +242,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             # States
             validated_smiles - the validated smiles string
             smiles_regex - contains 'invalid' if smiles are not valid and prompts user to enter valid smiles
+            stock - the chosen stockfile from the dropdown list
 
         Returns:
             bool -True to hide loading circle
@@ -252,7 +257,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
                 return True, {}, "Please enter a valid SMILES", ""
             # if valid smiles then continue with the process
             validated_smiles = utils.encodings_to_smiles_symbols(validated_smiles)
-            request_url = f"{retrosynthesis_base_url}/retrosynthesis_api/?key={retrosynthesis_api_key}&smiles={validated_smiles}"
+            request_url = f"{retrosynthesis_base_url}/retrosynthesis_api/?key={retrosynthesis_api_key}&smiles={validated_smiles}&stock={stock}"
             (
                 retro_api_status,
                 api_message,

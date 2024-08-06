@@ -122,6 +122,19 @@ smiles_field_and_retrosynthesis_button = dbc.Row(
                 )
             ]
         ),
+        dbc.Col(
+            dcc.Dropdown(
+                id="stock-dropdown",
+                options=[
+                    {"label": "Zinc", "value": "zinc"},
+                    {"label": "eMolecules", "value": "emolecules"},
+                ],
+                value="zinc",  # Default value
+                clearable=False,
+                className="mr-3",
+                # placeholder=
+            )
+        ),
     ],
 )
 
