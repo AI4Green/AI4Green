@@ -25,13 +25,13 @@ $(async function () {
     setupSketcherAutosave();
   }
   hideSketcherLoadingCircle();
-  // Use Promise.race to give setupNewMarvinSketcher() a maximum of 5 seconds
+  // Use Promise.race to give setupNewMarvinSketcher() a maximum of 2 seconds
   try {
     await Promise.race([
       setupNewMarvinSketcher(),
       new Promise((_, reject) => {
         setTimeout(() => {
-          reject(new Error("Timeout after 5 seconds"));
+          reject(new Error("Timeout after 2 seconds"));
         }, 2000);
       }),
     ]);
@@ -81,12 +81,12 @@ async function createReactionTable() {
     reactionSmilesToReactantsAndProductsSmiles(smiles);
   $(".loading-bar").css("display", "block");
   let smilesNew = removeReagentsFromSmiles(smiles);
- $("#js-reaction-smiles").val(smilesNew);
+  $("#js-reaction-smiles").val(smilesNew);
   let workgroup = getVal($("#js-active-workgroup"));
   let workbook = getVal($("#js-active-workbook"));
   let reaction_id = getVal($("#js-reaction-id"));
   let demo_mode = getVal($("#js-demo"));
-  let tutorial = getVal($("#js-tutorial"))
+  let tutorial = getVal($("#js-tutorial"));
   smiles = replaceSmilesSymbols(smiles);
 
   // Asynchronous request to _process in routes.py
