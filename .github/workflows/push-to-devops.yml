@@ -11,7 +11,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
-        fetch-depth: 0  # Fetch all history for main branch
+        fetch-depth: 0  # Fetch all of the history for main branch
         ref: main
 
     - name: Set up Git
