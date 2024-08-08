@@ -309,7 +309,7 @@ save_modal = html.Div(
     [
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Save Retrosynthesis")),
+                dbc.ModalHeader(dbc.ModalTitle("Save Retrosynthesis"), close_button=False),
                 dbc.ModalBody(
                     children=[
                         dbc.Label("Workbook", html_for="save-modal-workbook-dropdown"),
@@ -333,13 +333,13 @@ save_modal = html.Div(
                         dbc.Button(
                             "Close",
                             id="close-save-modal",
-                            className="btn-secondary",
+                            className="btn-danger",
                             n_clicks=0,
                         ),
                         dbc.Button(
                             "Save",
                             id="save-modal-save-button",
-                            className="btn-primary",
+                            className="btn btn-success",
                             n_clicks=0,
                         ),
                     ]
@@ -355,7 +355,7 @@ new_reaction_modal = html.Div(
     [
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("New Reaction")),
+                dbc.ModalHeader(dbc.ModalTitle("New Reaction"), close_button=False),
                 dbc.ModalBody(
                     children=[
                         html.Form(

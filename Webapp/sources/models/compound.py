@@ -1,14 +1,12 @@
 from sources.extensions import db
+
 from .base import Model
 
 
 class Compound(Model):
     __tablename__ = "Compound"
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
+    id = db.Column(db.Integer, primary_key=True)
     cid = db.Column(db.Integer, unique=True)
     cas = db.Column(db.Text, nullable=False, unique=True)
     name = db.Column(db.Text, nullable=False)
@@ -32,3 +30,4 @@ class Compound(Model):
     econom_score = db.Column(db.Float(53))
     solvent = db.Column(db.ForeignKey("Solvent.name", ondelete="SET NULL"), index=True)
     error_report = db.relationship("CompoundDataErrorReport")
+    workbooks_recently_used_in_id = db.Column(db.Integer, db.ForeignKey("WorkBook.id"))

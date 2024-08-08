@@ -258,4 +258,5 @@ def inject_session_context(app: Flask) -> Dict[str, str]:
             session_type="",
             marvin_js_key=app.config["MARVIN_JS_API_KEY"],
             workgroups=workgroups,
+            notification_number=notification_number
         )

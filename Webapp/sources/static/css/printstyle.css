@@ -10,6 +10,34 @@
     left: 0;
     top: 0;
   }
+  #qr-print-container * {
+    visibility: visible;
+  }
+  #qr-title {
+    display: block
+    margin-left: 0;
+    font-size: 60;
+    white-space: nowrap
+  }
+  #qr-code {
+    display: block;
+    margin-left: 0;
+    width: 700;
+    height: 700;
+  }
+  #qr-prompt {
+    margin-left: 0;
+    margin-right: 0;
+    font-size: 40;
+    white-space: nowrap
+  }
+  #qr-expiry {
+    margin-left: 0;
+    margin-right: 0;
+    font-size: 30;
+    white-space: nowrap
+  }
+
 }
 
 tr {

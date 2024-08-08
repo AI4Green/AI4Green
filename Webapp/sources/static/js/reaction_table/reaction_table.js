@@ -400,6 +400,7 @@ function postReagentData(reagentName, x) {
           resolve("Reagent not found");
         } else {
           // if reagent found then apply styling and populate fields
+          $("#js1-reagent" + x).empty();
           $("#js2-reagent" + x).empty(); // empties the list when a reagent is found
           $reagentID.val(response.name);
           $reagentID
@@ -489,6 +490,7 @@ function addNewReagent() {
   updateProductTableNumber();
   // update solvent table numbers
   updateSolventTableNumbers();
+  postReagentData("", reagentNumber);
 }
 
 async function removeReagent(removedReagentNumber) {
@@ -829,7 +831,7 @@ function postSolventData(solventName, x, reload = false) {
           return;
         }
         if (!reload) {
-            checkPCASolvents(solventName, x);
+          checkPCASolvents(solventName, x);
         }
         let y = response.num;
         let solvent = response.solvent;

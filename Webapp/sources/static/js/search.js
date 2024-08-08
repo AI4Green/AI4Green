@@ -1,7 +1,7 @@
 $(async function () {
   showSketcherLoadingCircle();
   await setupNewKetcherSketcher("100%");
-  await setupNewMarvinSketcher();
+
   // sleep used to allow sketchers to load scripts and make js Objects
   await sleep(1000);
   // sketcher changes when user clicks radio button
@@ -11,12 +11,12 @@ $(async function () {
   });
   hideSketcherLoadingCircle();
   updateSelectedWorkGroup();
+  await setupNewMarvinSketcher();
 });
 
-async function structureSearch() {
+async function structureSearch(searchType) {
   let workgroup = $("#active-workgroup").val();
   let workbook = $("#active-workbook").val();
-  let searchType = "exact_structure";
   let smiles = await exportSmilesFromActiveEditor();
   $.ajax({
     url: "/structure_search_handler",

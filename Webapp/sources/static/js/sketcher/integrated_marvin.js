@@ -44,7 +44,7 @@ async function newMarvinSketcher(IDSelector, marvinKey) {
     }
     return null;
   }
-
+  $("#marvin-select").prop("disabled", false);
   return ChemicalizeMarvinJs.createEditor(IDSelector);
 }
 
@@ -82,9 +82,19 @@ async function switchToMarvinSketcher() {
  */
 function abortMarvinSketcherCreation() {
   // runs when
-  alert("Marvin JS is temporarily unavailable");
+  flashMarvinDownMessage();
   $("#ketcher-select").prop("checked", true);
   $("#marvin-select").prop("disabled", true);
+}
+
+function flashMarvinDownMessage() {
+  let $userMessageElement = $("#reaction-saved-indicator");
+  $userMessageElement.text("Marvin JS unavailable");
+  $userMessageElement
+    .removeClass()
+    .addClass("reaction-save-success")
+    .fadeIn("fast");
+  setTimeout(fade_save_message, 3000);
 }
 
 /**

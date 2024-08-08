@@ -22,8 +22,32 @@ class BaseConfig(object):  # class to store configuration variables
     WTF_CSRF_ENABLED = False
     LIVESERVER_TIMEOUT = 10
     MAX_CONTENT_LENGTH = 1024 * 1024
-    UPLOAD_EXTENSIONS = [".jpg", ".png", ".pdf"]
-    UPLOAD_MIME_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/jpg"]
+    UPLOAD_EXTENSIONS = [
+        ".arw", "cif", ".cdf", ".cdx", ".csv", ".D", ".dat", ".DTA", ".dx", ".fid", ".gz", ".jpg", ".jdx", ".jcamp",
+        ".mnova", ".pdf",  ".pkl", ".png", ".pdb", ".pssession", ".qgd", ".raw", ".res", ".topspin", ".txt", ".vrml",
+        ".xlsx", "xls",  ".xyz", ".zip"
+    ]
+    UPLOAD_MIME_TYPES = [
+                        "image/x-sony-arw",
+                        "chemical/x-cif",
+                        "application/x-netcdf",
+                        "chemical/x-cdx",
+                        "text/csv",
+                        "text/plain",
+                        "application/octet-stream",
+                        "chemical/x-jcamp-dx",
+                        "application/gzip",
+                        "image/jpeg",
+                        "application/pdf",
+                        "image/png",
+                        "chemical/x-pdb",
+                        "model/vrml",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "application/vnd.ms-excel",
+                        "chemical/x-xyz",
+                        "application/zip"
+                        ]
+
 
     # the number of molecules to take from PubChem
     COMPOUND_LIMIT = os.getenv("COMPOUND_LIMIT", 10000)

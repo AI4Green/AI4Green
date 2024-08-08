@@ -59,12 +59,12 @@
             <div id="sketchers-div">
                 <div>
                     Selected Reaction Sketcher:
-                    <label> MarvinJS
-                        <input type="radio" id="marvin-select" name="sketcher-select" checked="checked">
-                    </label>
-                    <label> Ketcher
-                        <input type="radio" id="ketcher-select" name="sketcher-select">
-                    </label>
+                <label> MarvinJS
+                    <input type="radio" id="marvin-select" name="sketcher-select" disabled>
+                </label>
+                <label> Ketcher
+                    <input type="radio" id="ketcher-select" name="sketcher-select" checked="checked" disabled>
+                </label>
                 </div>
                 <div class="loading-circle"></div>
                 <div id="ketcher-sketcher"></div>
@@ -86,7 +86,8 @@
 <!--                </div>-->
                 <!--                end of radio buttons-->
                 <div class="col d-flex align-items-end py-2">
-                    <button id="structure-search-btn" class="btn btn-success ml-auto" onclick="structureSearch()">Structure Search</button>
+{#                    <button id="substructure-search-btn" class="btn btn-primary ml-auto" onclick="structureSearch('sub_structure')">Substructure Search</button>#}
+                    <button id="structure-search-btn" class="btn btn-success ml-auto" onclick="structureSearch('exact_structure')">Structure Search</button>
                 </div>
             </div>
 <!--            end of structure search-->

@@ -17,6 +17,7 @@ class ApprovalStatus(Enum):
 
 class ExportFormat(Enum):
     RDF = "RDF"
+    RXN = "RXN"
     PDF = "PDF"
     ELN = "ELN"
     SURF = "SURF"
@@ -51,8 +52,10 @@ data_export_request_workbooks = db.Table(
 data_export_request_reactions = db.Table(
     "data_export_request_reactions",
     db.Model.metadata,
-    db.Column("data_export_request_id", db.Integer, db.ForeignKey("DataExportRequest.id")),
-    db.Column("reaction_id", db.Integer, db.ForeignKey("Reaction.id"))
+    db.Column(
+        "data_export_request_id", db.Integer, db.ForeignKey("DataExportRequest.id")
+    ),
+    db.Column("reaction_id", db.Integer, db.ForeignKey("Reaction.id")),
 )
 
 
@@ -98,7 +101,7 @@ class DataExportRequest(Model):
     reactions = db.relationship(
         "Reaction",
         secondary=data_export_request_reactions,
-        backref="data_export_request"
+        backref="data_export_request",
     )
 
     # supports multiple workbooks if desired in future functionality

@@ -33,10 +33,8 @@ def test_novel_compound_sketcher(app: Flask, client: FlaskClient):
             "Test-Workgroup", "Test-Workbook"
         )
 
-        new_compound = (
-            services.novel_compound.get_novel_compound_from_inchi_and_workbook(
-                "InChI=1S/C2H7N/c1-2-3/h2-3H2,1H3", workbook
-            )
+        new_compound = services.novel_compound.from_inchi_and_workbook(
+            "InChI=1S/C2H7N/c1-2-3/h2-3H2,1H3", workbook
         )
         assert new_compound.name == "A Novel compound"
 
@@ -107,10 +105,8 @@ def test_novel_compound_table_all_data(app: Flask, client: FlaskClient):
             "Test-Workgroup", "Test-Workbook"
         )
 
-        new_compound = (
-            services.novel_compound.get_novel_compound_from_inchi_and_workbook(
-                "InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3", workbook
-            )
+        new_compound = services.novel_compound.from_inchi_and_workbook(
+            "InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3", workbook
         )
         assert new_compound.name == "A Novel Reagent"
         assert new_compound.hphrase == "H900-H901"

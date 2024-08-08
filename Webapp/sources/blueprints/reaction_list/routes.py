@@ -17,6 +17,7 @@ from sources.auxiliary import (
     security_member_workgroup_workbook,
 )
 from sources.extensions import db
+from sources.decorators import workbook_member_required
 
 from . import reaction_list_bp
 
@@ -26,11 +27,9 @@ from . import reaction_list_bp
     "/delete_reaction/<reaction_id>/<workgroup>/<workbook>", methods=["GET", "POST"]
 )
 @login_required
+@workbook_member_required
 def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response:
-    # must be logged in a member of the workgroup and workbook
-    if not security_member_workgroup_workbook(workgroup, workbook):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
+    # must be logged in, a member of the workgroup and workbook and the creator of the reaction
     # find reaction
     reaction = (
         db.session.query(models.Reaction)

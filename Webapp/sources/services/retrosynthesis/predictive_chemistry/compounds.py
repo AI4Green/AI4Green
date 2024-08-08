@@ -34,7 +34,7 @@ def get_compound_data(compound_smiles: str, role: str) -> Tuple[List, List, List
             compound_data["id"].append(None)
             compound_data["smiles"].append(None)
         else:
-            compound_object = services.compound.get_compound_from_smiles(smiles)
+            compound_object = services.compound.from_smiles(smiles)
 
             compound_data["smiles"].append(smiles)
             if compound_object:

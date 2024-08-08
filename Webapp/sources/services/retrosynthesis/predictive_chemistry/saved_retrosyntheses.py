@@ -175,7 +175,7 @@ def make_retrosynthesis_card_list(selected_workbook_id: int) -> html.Div:
                     ),
                     html.Button(
                         "Reload",
-                        className="btn-primary",
+                        className="btn btn-primary",
                         value=retrosynthesis.id,
                         n_clicks=0,
                         id={"type": "retrosynthesis-reload", "index": idx},

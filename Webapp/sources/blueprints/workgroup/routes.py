@@ -30,13 +30,11 @@ def workgroup(
     workgroups = get_workgroups()
 
     # finds workgroup object (needs institution later)
-    workgroup_selected_obj = services.workgroup.get_workgroup_from_workgroup_name(
-        workgroup_selected
-    )
+    workgroup_selected_obj = services.workgroup.from_name(workgroup_selected)
     approval_status = workgroup_selected_obj.approved
     notification_number = get_notification_number()
 
-    user_type = services.workgroup.get_user_type_in_workbook(workgroup_selected)
+    user_type = services.workgroup.get_user_type(workgroup_selected, current_user)
 
     # get lists of workbooks, and the next reaction id for each workbooks
     workbooks = services.workbook.get_workbooks_from_user_group_combination(
@@ -51,6 +49,7 @@ def workgroup(
         workbook_new_reaction_ids_dic[workbook.name] = next_reaction_id
     # select workbook with newest reaction in as active workbook to be selected by default
     if workbooks:
+
         newest_reaction = services.workbook.get_newest_reaction_in_workbooks(workbooks)
 
         # if there is a newest reaction in the workbook collection, set to default and set the new reaction id

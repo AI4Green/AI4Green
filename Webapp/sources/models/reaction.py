@@ -83,11 +83,9 @@ class Reaction(Model):
     creator_person = db.relationship("Person", foreign_keys=[creator])
     workbook = db.relationship("WorkBook", foreign_keys=[workbooks])
 
-    # data_export_request_id = db.Column(db.Integer, db.ForeignKey('Reaction.id'))
     data_export_request_id = db.Column(
         db.Integer, db.ForeignKey("DataExportRequest.id")
     )
-    # data_export_request = db.relationship("DataExportRequest", backref="reactions")
 
 
 t_Reaction_Reaction = db.Table(

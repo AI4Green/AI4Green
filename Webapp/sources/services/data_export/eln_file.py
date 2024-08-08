@@ -10,7 +10,7 @@ from urllib.parse import quote
 import pytz
 import sources.services.data_export.export
 from bs4 import BeautifulSoup
-from flask import abort, url_for
+from flask import request
 from sources import models, services
 
 
@@ -138,7 +138,7 @@ class ELNFileExport:
         """Describes the root directory by listing the reaction IDs in hasPart for the metadata json"""
         return {
             "@id": "./",
-            "@type": "Dataset",
+            "@type": ["Dataset"],
             "hasPart": [{"@id": part["@id"]} for part in self.root_parts],
         }
 
@@ -169,16 +169,18 @@ class ELNFileExport:
             author = {
                 "@id": f"./author/{person.id}",
                 "@type": "Person",
-                "fullName": person.user.fullname,
-                "emailAddress": person.user.email,
+                "givenName": person.user.fullname.split(" ")[:-1],
+                "familyName": person.user.fullname.split(" ")[-1],
+                "email": person.user.email,
             }
         # if the user has deleted their account then no personal details are included, only a unique ID is provided
         else:
             author = {
                 "@id": f"./author/{person.id}",
                 "@type": "Person",
-                "fullName": "deleted",
-                "emaiLAddress": "deleted",
+                "givenName": "deleted",
+                "familyName": "deleted",
+                "email": "deleted",
             }
         return author
 
@@ -208,26 +210,45 @@ class ELNExportReaction:
         self.summary_soup = None
 
     def make_export_files(self):
-        """Makes files which are included with the ELN File export. Includes: .rdf"""
-        file_uuid = str(uuid.uuid4())
-        blob_name = "temp/" + file_uuid
-        rdf = services.data_export.serialisation.ReactionDataFileExport(
-            self.reaction, blob_name, self.container_name
+        """Makes files which are included with the ELN File export. Includes: .rxn and .json"""
+        rxn_uuid = str(uuid.uuid4())
+        rxn_blob_name = "temp/" + rxn_uuid
+        rxn = services.data_export.serialisation.RXNFileExport(
+            self.reaction, rxn_blob_name, self.container_name
         )
-        rdf.save(extension=False)
-        rdf_dict = {
-            "filetype": "RDF",
+        rxn.save(extension=False)
+        rxn_dict = {
+            "filetype": "RXN",
             "made_for_export": True,
-            "display_name": self.reaction.reaction_id + ".rdf",
-            "container_name": rdf.container_name,
-            "content_size": rdf.content_size,
-            "sha256": rdf.file_hash,
-            "mimetype": rdf.mime_type,
+            "display_name": self.reaction.reaction_id + ".rxn",
+            "container_name": rxn.container_name,
+            "content_size": rxn.content_size,
+            "sha256": rxn.file_hash,
+            "mimetype": rxn.mime_type,
             "time_of_creation": self.time,
-            "uuid": blob_name,
-            "ro-crate-id": file_uuid,
+            "uuid": rxn_blob_name,
+            "ro-crate-id": rxn_uuid,
         }
-        self.files.append(rdf_dict)
+        self.files.append(rxn_dict)
+        json_uuid = str(uuid.uuid4())
+        json_blob_name = "temp/" + json_uuid
+        json_file = services.data_export.serialisation.JsonExport(
+            self.reaction, json_blob_name, self.container_name
+        )
+        json_file.save(extension=False)
+        json_dict = {
+            "filetype": "JSON",
+            "made_for_export": True,
+            "display_name": self.reaction.reaction_id + ".json",
+            "container_name": self.container_name,
+            "content_size": json_file.content_size,
+            "sha256": json_file.file_hash,
+            "mimetype": json_file.mime_type,
+            "time_of_creation": self.time,
+            "uuid": json_blob_name,
+            "ro-crate-id": json_uuid,
+        }
+        self.files.append(json_dict)
 
     def get_files(self):
         """Gets the file details for the reaction being exported"""
@@ -262,18 +283,19 @@ class ELNExportReaction:
     def _define_reaction_dataset(self):
         """One reaction is its own dataset within the ELN file export and is defined here."""
         self.defined_dataset = {
-            "@id": f"./{self.reaction.reaction_id}",
+            "@id": f"./{self.reaction.reaction_id}/",
             "@type": "Dataset",
             "name": self.reaction.name,  # experiment title
             "author": {"@id": f"./author/{self.reaction.creator_person.id}"},
             "dateCreated": self.reaction.time_of_creation.strftime("%Y-%m-%d %H:%M:%S"),
             "dateModified": self.reaction.time_of_update.strftime("%Y-%m-%d %H:%M:%S"),
-            "comment": [comment["@id"] for comment in self.defined_comments],
+            "comment": [{"@id": comment["@id"]} for comment in self.defined_comments],
+            # "comment": [{"@id": "comment-id/AI4-001/5"}],
             "hasPart": [{"@id": file["@id"]} for file in self.defined_files],
             "description": self.reaction.description,
             "text": self._get_summary_html(),
             "encodingFormat": "text/html",
-            "url": url_for("main.index", _external=True)
+            "url": "https://www.ai4green.app"
             + quote(
                 f"/{self.reaction.workbook.WorkGroup.name}/{self.reaction.workbook.name}/{self.reaction.reaction_id}/no"
             ),
@@ -314,8 +336,10 @@ class ELNExportReaction:
         """Gets the description for a file attachment of a reaction"""
         if file["made_for_export"] is True:
             export_file_type_description_dict = {
-                "RDF": "A Chemistry specific format with serialized metadata and molecules represented in a "
-                "Chemical Table format and assigned as reactants, products, or agents"
+                "RXN": "A Chemistry specific format with molecules represented in a "
+                "Chemical Table format and assigned as reactants, products, or agents",
+                "JSON": "A structured data format commonly used for exchanging information between "
+                "servers and web applications. Keys and values are used to describe reaction metadata",
             }
             description = export_file_type_description_dict[file["filetype"]]
         else:
@@ -502,18 +526,19 @@ def get_constant_ro_crate_start() -> List[Dict]:
             "dateCreated": datetime.now(pytz.timezone("Europe/London"))
             .replace(tzinfo=None)
             .strftime("%Y-%m-%d %H:%M:%S"),
+            "parentOrganization": {
+                "@id": "#university-of-nottingham",
+                "@type": "Organization",
+                "name": "University of Nottingham",
+                "logo": "https://www.nottingham.ac.uk/Brand/LegacyAssets/images-multimedia/2022/Logos/BrandEvolution-NottinghamBlue-Cropped-450x173.png",
+                "url": "https://www.nottingham.ac.uk/",
+            },
             "sdPublisher": {
                 "@type": "Organization",
                 "name": "AI4Green",
                 "slogan": "AI for Green Chemistry. Electronic Lab Notebook with Machine Learning Support.",
                 "url": "https://www.ai4green.app",
-                "parentOrganization": {
-                    "@type": "Organization",
-                    "name": "University of Nottingham",
-                    "logo": "https://www.nottingham.ac.uk/Brand/LegacyAssets/images-multimedia/2022/Logos/BrandEvolution-NottinghamBlue-Cropped-450x173.png",
-                    # "slogan": "Open Source software for research labs.",
-                    "url": "https://www.nottingham.ac.uk/",
-                },
+                "parentOrganization": "#university-of-nottingham",
             },
             "version": "1.0",
         },

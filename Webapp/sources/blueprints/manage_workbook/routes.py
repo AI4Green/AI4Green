@@ -9,13 +9,11 @@ from flask_login import (  # protects a view function against anonymous users
 from flask_wtf import FlaskForm
 from sources import models, services
 from sources.auxiliary import (
-    duplicate_notification_check,
     get_all_workgroup_members,
     get_notification_number,
     get_workgroups,
-    security_member_workgroup,
-    security_pi_sr_workgroup,
 )
+from sources.decorators import workgroup_member_required, principal_investigator_or_senior_researcher_required
 from sources.extensions import db
 from wtforms import SelectField, SubmitField
 from wtforms.validators import Optional
@@ -47,39 +45,15 @@ class JoinWorkbookForm(FlaskForm):
     "/manage_workbook/<workgroup>/<has_request>/<workbook>", methods=["GET", "POST"]
 )
 @login_required
+@principal_investigator_or_senior_researcher_required
 def manage_workbook(
     workgroup: str, has_request: str = "no", workbook: OptionalType[str] = None
 ) -> Response:
-    # must be logged in and a PI or SR of the workgroup
-    if not security_pi_sr_workgroup(workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
+
     current_workgroup = workgroup
     workgroups = get_workgroups()
     notification_number = get_notification_number()
-    # check if user is PI or SR and able to access this page
-    pi = (
-        db.session.query(models.User)
-        .join(models.Person)
-        .join(models.t_Person_WorkGroup)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == current_workgroup)
-        .all()
-    )
-    pi_check = [x.email for x in pi]
-    sr = (
-        db.session.query(models.User)
-        .join(models.Person)
-        .join(models.t_Person_WorkGroup_2)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == current_workgroup)
-        .all()
-    )
-    sr_check = [x.email for x in sr]
 
-    if current_user.email not in pi_check and current_user.email not in sr_check:
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
     """This function provides the initial dropdown choices for a user and then handles submission of the form"""
     # Initiate form
     form = SelectWorkbookForm()
@@ -177,13 +151,11 @@ def manage_workbook(
     "/manage_workbook/<workgroup>/<workbook>/<email>/<mode>", methods=["GET", "POST"]
 )
 @login_required
+@principal_investigator_or_senior_researcher_required
 def add_remove_user_from_workbook(
     workgroup: str, workbook: str, email: str, mode: str
 ) -> Response:
-    # must be logged in and a PI or SR of the workgroup
-    if not security_pi_sr_workgroup(workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
+
     user = (
         db.session.query(models.Person)
         .join(models.User)
@@ -208,13 +180,11 @@ def add_remove_user_from_workbook(
     methods=["GET", "POST"],
 )
 @login_required
+@principal_investigator_or_senior_researcher_required
 def manage_workbook_request(
     workgroup: str, workbook: str, email: str, mode: str
 ) -> Response:
     # must be logged in and a PI or SR of the workgroup
-    if not security_pi_sr_workgroup(workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
     wb = db.session.query(models.WorkBook).get(workbook)
 
     # change request to inactive
@@ -276,11 +246,8 @@ def manage_workbook_request(
 
 @manage_workbook_bp.route("/join_workbook/<workgroup>", methods=["GET", "POST"])
 @login_required
+@workgroup_member_required
 def join_workbook(workgroup: str) -> Response:
-    # must be logged in and a member of the workgroup
-    if not security_member_workgroup(workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
     workgroups = get_workgroups()
     notification_number = get_notification_number()
 
@@ -346,7 +313,7 @@ def join_workbook(workgroup: str) -> Response:
             .first()
         )
         # set up notification and request for each one
-        if duplicate_notification_check(
+        if services.notifications.duplicate_notification_check(
             [person],
             "New Workbook Membership Request",
             "active",
@@ -357,6 +324,7 @@ def join_workbook(workgroup: str) -> Response:
                 "You have already submitted a membership request for this workbook. You will receive a notification "
                 "when your request has been considered."
             )
+            return redirect(url_for("main.index"))
         for p in pi_sr:
             notification = models.Notification(
                 person=p.id,

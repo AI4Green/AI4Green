@@ -9,21 +9,7 @@ $(async function () {
      */
   showSketcherLoadingCircle();
   await setupNewKetcherSketcher();
-  // Use Promise.race to give setupNewMarvinSketcher() a maximum of 5 seconds
-  try {
-    await Promise.race([
-      setupNewMarvinSketcher(),
-      new Promise((_, reject) => {
-        setTimeout(() => {
-          reject(new Error("Timeout after 5 seconds"));
-        }, 5000);
-      }),
-    ]);
-  } catch (error) {
-    abortMarvinSketcherCreation();
-    console.error(error);
-    // Handle errors or take appropriate action
-  }
+
   // sleep used to allow sketchers to load scripts and make js Objects
   await sleep(1000);
   // sketcher changes when user clicks radio button
@@ -39,6 +25,21 @@ $(async function () {
     setupSketcherAutosave();
   }
   hideSketcherLoadingCircle();
+  // Use Promise.race to give setupNewMarvinSketcher() a maximum of 2 seconds
+  try {
+    await Promise.race([
+      setupNewMarvinSketcher(),
+      new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("Timeout after 2 seconds"));
+        }, 2000);
+      }),
+    ]);
+  } catch (error) {
+    abortMarvinSketcherCreation();
+    console.error(error);
+    // Handle errors or take appropriate action
+  }
 });
 
 /**
@@ -81,10 +82,11 @@ async function createReactionTable() {
   $(".loading-bar").css("display", "block");
   let smilesNew = removeReagentsFromSmiles(smiles);
   $("#js-reaction-smiles").val(smilesNew);
-  let workgroup = $("#js-active-workgroup").val();
-  let workbook = $("#js-active-workbook").val();
-  let reaction_id = $("#js-reaction-id").val();
-  let demo_mode = $("#js-demo").val();
+  let workgroup = getVal($("#js-active-workgroup"));
+  let workbook = getVal($("#js-active-workbook"));
+  let reaction_id = getVal($("#js-reaction-id"));
+  let demo_mode = getVal($("#js-demo"));
+  let tutorial = getVal($("#js-tutorial"));
   smiles = replaceSmilesSymbols(smiles);
 
   // Asynchronous request to _process in routes.py
@@ -101,6 +103,8 @@ async function createReactionTable() {
       smiles +
       "&demo=" +
       demo_mode +
+      "&tutorial=" +
+      tutorial +
       "&workgroup=" +
       workgroup +
       "&workbook=" +
