@@ -1,5 +1,6 @@
 from typing import List
 
+from sqlalchemy import func
 from flask_login import current_user
 from sources import models
 from sources.extensions import db
@@ -63,4 +64,4 @@ def from_email(user_email: str) -> models.User:
         Returns:
             models.User with matching email
         """
-    return db.session.query(models.User).filter(models.User.email == user_email).first()
+    return db.session.query(models.User).filter(func.lower(models.User.email) == user_email.lower()).first()

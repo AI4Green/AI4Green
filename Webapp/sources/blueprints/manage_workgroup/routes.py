@@ -280,6 +280,7 @@ def add_user_by_email(workgroup):
     added_person = services.person.from_email(email)
     if not added_person:
         flash(f"User with email: {email} does not exist! Please try again.")
+        return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
 
     wg = services.workgroup.from_name(workgroup)
     if not services.workgroup.get_user_type(workgroup, user):
@@ -292,6 +293,7 @@ def add_user_by_email(workgroup):
             flash(
                 "This User's membership has already been requested for this Workgroup."
             )
+            return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
 
         else:
 
@@ -302,7 +304,7 @@ def add_user_by_email(workgroup):
                 person=added_person.id,
                 wg=wg.id,
                 current_role="Non-Member",
-                new_role=user_type,
+                new_role=new_role_display_string,
                 time=datetime.now(),
                 status="active",
                 notification=notification.id,

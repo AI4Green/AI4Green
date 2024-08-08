@@ -33,7 +33,6 @@ def structure_search_handler() -> Response:
 class SearchHandler:
     def __init__(self):
         """On initialisation creates the list 'reactions'"""
-        print("making search handler")
         self.workgroup = [request.form["workgroup"]]
         self.workbook = [request.form["workbook"]]
         self.reactions = []
@@ -104,7 +103,9 @@ class SearchHandler:
         else:
             return jsonify({"status": "fail", "message": "No results found"})
 
-    def exact_structure_match_loop(self, reaction, target_inchi) -> None:
+    def exact_structure_match_loop(
+        self, reaction: models.Reaction, target_inchi: str
+    ) -> None:
         """Exact structure search looking for matches in reactants, reagents, and products"""
         if reaction.reaction_smiles:
             reactants1, products1 = reaction.reaction_smiles.split(">>")

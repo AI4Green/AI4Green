@@ -84,6 +84,7 @@ def get_export_file_extension(
     return {
         "ELN": ".eln",
         "RDF": ".zip",
+        "RXN": ".zip",
         "JSON": ".zip",
         "CSV": ".csv",
         "SURF": ".txt",
@@ -151,6 +152,7 @@ class DataExport:
     def _get_export_function(self) -> Callable:
         """Returns the function which matches the requested data export format"""
         export_function_dict = {
+            "RXN": self._make_rxn_export,
             "RDF": self._make_rdf_export,
             "CSV": self._make_csv_export,
             "JSON": self._make_json_export,
@@ -265,6 +267,17 @@ class DataExport:
                 reaction, reaction.reaction_id, self.data_export_request.uuid
             )
             rdf.save()
+        self._make_zip()
+
+    def _make_rxn_export(self):
+        """Creates a zip file of reactions saved as RXNs if SMILES are present"""
+        # iterate through the reactions and save each as an azure blob
+        for reaction in self.data_export_request.reactions:
+            # save all files to the container
+            rxn = services.data_export.serialisation.RXNFileExport(
+                reaction, reaction.reaction_id, self.data_export_request.uuid
+            )
+            rxn.save()
         self._make_zip()
 
     def _make_json_export(self):

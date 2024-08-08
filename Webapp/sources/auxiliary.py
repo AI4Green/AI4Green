@@ -72,7 +72,7 @@ def get_workgroups() -> List[str]:
     Returns:
         A list of Workgroup names.
     """
-    if not current_user.is_authenticated:
+    if not current_user or not current_user.is_authenticated:
         return []
     workgroups = []
     pi = (
@@ -141,7 +141,7 @@ def get_notification_number() -> int:
     Returns:
         Number of notifications
     """
-    if not current_user.is_authenticated:
+    if not current_user or not current_user.is_authenticated:
         return 0
     return (
         db.session.query(models.Notification)
