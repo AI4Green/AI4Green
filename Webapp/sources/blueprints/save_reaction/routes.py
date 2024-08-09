@@ -2,7 +2,6 @@
 This module receives a reaction name from the reaction
 table and saves it in the reaction database
 """
-import base64
 from datetime import datetime
 
 import pytz
@@ -41,11 +40,8 @@ def new_reaction() -> Response:
     creator = services.person.from_current_user_email()
 
     # check for reaction id - catches errors caused if user has 2 tabs open
-    reaction_id_check = (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.reaction_id == reaction_id)
-        .filter(models.Reaction.workbooks == workbook_object.id)
-        .first()
+    reaction_id_check = services.reaction.get_from_reaction_id_and_workbook_id(
+        reaction_id, workbook_object.id
     )
     if reaction_id_check:
         feedback = "A reaction with this ID already exists. Please refresh the page and try again."
