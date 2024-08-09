@@ -150,6 +150,8 @@ function loadIcons(selected, type){
  */
 function newReactionSetup() {
     activeIcons = findActiveWorkgroupAndWorkbook()
+    $("#active-workgroup").val(activeIcons[0])
+    $("#active-workbook").val(activeIcons[1])
 
     fetch("/get_new_reaction_id", {
     headers: {
