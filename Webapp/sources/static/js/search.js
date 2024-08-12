@@ -30,12 +30,10 @@ async function structureSearch(searchType) {
     },
     success: function (response) {
       $("#search-results-message").text(response.message);
-
       if (response.status === "success") {
         showSearchReactions(response);
-      } else if (response.status === "failure") {
-        alert("testing if this still appears");
-        // show failure message
+      } else if (response.status === "fail") {
+        $("#search-results-contents").empty();
       }
     },
   });

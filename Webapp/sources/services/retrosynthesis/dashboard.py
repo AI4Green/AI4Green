@@ -1,7 +1,8 @@
 import os
 import re
+import threading
 import uuid
-from typing import Dict, List, Literal, Tuple, Union
+from typing import Dict, List, Literal, Optional, Tuple, Union
 from urllib.parse import quote
 
 import dash
@@ -212,11 +213,28 @@ def init_dashboard(server: Flask) -> classes.Dash:
     Retrosynthesis process
     """
 
+    # Global store for task results (you can use a more sophisticated store like Redis for production)
+    task_results = {}
+
+    # Retrosynthesis process wrapper
+    def retrosynthesis_process_wrapper(
+        app_context, request_url, retrosynthesis_base_url, task_id
+    ):
+        with app_context:
+            (
+                retro_api_status,
+                api_message,
+                solved_routes,
+            ) = retrosynthesis_api.retrosynthesis_api_call(
+                request_url, retrosynthesis_base_url
+            )
+            task_results[task_id] = (retro_api_status, api_message, solved_routes)
+
     @dash_app.callback(
-        Output("loading-output-1", "loading_state", allow_duplicate=True),
-        Output("computed-retrosynthesis-routes", "data"),  # store
-        Output("user-message", "children"),
+        Output("user-message", "children", allow_duplicate=True),
         Output("computed-retrosynthesis-uuid", "data"),
+        Output("interval-container", "children", allow_duplicate=True),
+        Output("loading-display", "display", allow_duplicate=True),
         State("validated-smiles", "data"),
         State("smiles-input", "pattern"),
         Input("btn-retrosynthesis", "n_clicks"),
@@ -224,50 +242,97 @@ def init_dashboard(server: Flask) -> classes.Dash:
     )
     def start_new_retrosynthesis(
         validated_smiles: str, smiles_regex: str, n_clicks: int
-    ) -> Tuple[bool, dict, str, str]:
+    ) -> Tuple[str, str, Optional[dcc.Interval]]:
         """
-        Called when the user clicks the retrosynthesis button
-        Starts the retrosynthesis process
+        Called when the user clicks the retrosynthesis button.
+        Starts the retrosynthesis process in a background thread.
 
         Args:
-            # Inputs
-            n_clicks - increments when the user clicks the retrosynthesis button
-            # States
-            validated_smiles - the validated smiles string
-            smiles_regex - contains 'invalid' if smiles are not valid and prompts user to enter valid smiles
+            n_clicks - increments when the user clicks the retrosynthesis button and calls the function
+            validated_smiles - the validated SMILES string
+            smiles_regex - contains 'invalid' if SMILES are not valid and prompts user to enter valid SMILES
 
         Returns:
-            bool -True to hide loading circle
-            retrosynthesis routes as a dict
-            a message to give the user feeedback
-            The generated uuid for the retrosynthesis
-
+            a message to give the user feedback
+            The generated UUID for the retrosynthesis
+            children for the dcc.Interval container element
         """
+        print("hello joe")
         if utils.smiles_not_valid(smiles_regex):
-            return True, {}, "Please enter a valid SMILES", ""
-        # if valid smiles then continue with the process
+            print("invalid smiles")
+            return "Please enter a valid SMILES", "", None, "hide"
+
+        # If valid SMILES, continue with the process
         validated_smiles = utils.encodings_to_smiles_symbols(validated_smiles)
         request_url = f"{retrosynthesis_base_url}/retrosynthesis_api/?key={retrosynthesis_api_key}&smiles={validated_smiles}"
-        (
-            retro_api_status,
-            api_message,
-            solved_routes,
-        ) = retrosynthesis_api.retrosynthesis_api_call(
-            request_url, retrosynthesis_base_url
-        )
+
         unique_identifier = str(uuid.uuid4())
-        if retro_api_status == "failed":
-            return True, {}, api_message, ""
-        retrosynthesis_output = {"uuid": unique_identifier, "routes": solved_routes}
+
+        # Start the retrosynthesis process in a background thread
+        thread = threading.Thread(
+            target=retrosynthesis_process_wrapper,
+            args=[
+                current_app.app_context(),
+                request_url,
+                retrosynthesis_base_url,
+                unique_identifier,
+            ],
+        )
+        thread.start()
+        # set up an interval element to check every 15 seconds if it is complete
+        interval = dcc.Interval(id="interval-component", interval=15000, n_intervals=0)
+        print("here")
         return (
-            True,
-            retrosynthesis_output,
-            f"Interactive display for retrosynthesis of {validated_smiles}",
+            "Retrosynthesis process started. Please wait...",
             unique_identifier,
+            interval,
+            "show",
         )
 
     @dash_app.callback(
-        Output("loading-output-1", "loading_state", allow_duplicate=True),
+        Output("computed-retrosynthesis-routes", "data"),
+        Output("user-message", "children", allow_duplicate=True),
+        Output("interval-container", "children", allow_duplicate=True),
+        # Output("btn-retrosynthesis", "disabled", allow_duplicate=True),
+        Output("loading-display", "display", allow_duplicate=True),
+        Input("interval-component", "n_intervals"),
+        State("computed-retrosynthesis-uuid", "data"),
+        prevent_initial_call=True,
+    )
+    def check_retrosynthesis_status(
+        n_intervals: int, task_id: str
+    ) -> Tuple[dict, str, None]:
+        """
+        Check the status of the retrosynthesis process and return results if completed.
+
+        Args:
+            n_intervals - calls the function at the interval specified in the element.
+            task_id - the UUID of the retrosynthesis task
+
+        Returns:
+            retrosynthesis routes as a dict if completed
+            a message to give the user feedback
+            children for the dcc.Interval container element
+        """
+        print("checking")
+        if not task_id or task_id not in task_results:
+            return dash.no_update, "Processing...", dash.no_update, dash.no_update
+
+        retro_api_status, api_message, solved_routes = task_results.pop(task_id)
+
+        if retro_api_status == "failed":
+            return dash.no_update, f"Retrosynthesis failed: {api_message}", None, "hide"
+
+        retrosynthesis_output = {"uuid": task_id, "routes": solved_routes}
+        return (
+            retrosynthesis_output,
+            "Interactive display for retrosynthesis completed.",
+            None,
+            dash.no_update,
+        )
+
+    @dash_app.callback(
+        Output("loading-display", "display", allow_duplicate=True),
         Output("computed-conditions-data", "data"),
         State("computed-retrosynthesis-uuid", "data"),
         Input("computed-retrosynthesis-routes", "data"),
@@ -287,7 +352,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             unique_identifier - the uuid for the retrosynthesis
 
         Returns:
-            a bool, True to quit the loading circle.
+            a string to hide the loading screen if no routes to find conditions for
             A dbc table containing the conditions data
 
         Fires on completion of new retrosynthesis routes
@@ -299,8 +364,9 @@ def init_dashboard(server: Flask) -> classes.Dash:
         if solved_routes and solved_routes != {}:
             conditions = conditions_api.get_conditions(solved_routes["routes"])
             conditions_output = {"uuid": unique_identifier, "routes": conditions}
-            return True, conditions_output
-        return dash.no_update
+            return dash.no_update, conditions_output
+        print("con hide")
+        return "hide", dash.no_update
 
     @dash_app.callback(
         Output("active-conditions-data", "data"),
@@ -567,6 +633,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
                 return {"background-color": background_colour, "width": "100%"}
 
     @dash_app.callback(
+        Output("loading-display", "display", allow_duplicate=True),
         Output("retrosynthesis-cytoscape", "elements"),
         Output("retrosynthesis-cytoscape", "stylesheet"),
         State("active-retrosynthesis-routes", "data"),
@@ -597,6 +664,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         elements = retro_cytoscape.make_cytoscape_elements()
         style_sheet = retro_cytoscape.make_cytoscape_stylesheet()
         return (
+            "hide",
             elements,
             style_sheet,
         )

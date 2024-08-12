@@ -214,9 +214,10 @@ class SurfExport:
                 total_solvent_volume = sum(
                     [float(x) for x in reaction_data["solvent_volumes"]]
                 )
-                data[f"solvent_{idx}_fraction"] = (
+                data[f"solvent_{idx}_fraction"] = round(
                     float(reaction_data["solvent_volumes"][idx - 1])
-                    / total_solvent_volume
+                    / total_solvent_volume,
+                    2,
                 )
                 data[
                     f"solvent_{idx}_smiles"
@@ -261,6 +262,7 @@ class SurfExport:
         Returns:
             The overall concentration of the reaction considering all solvents present relative to the mol scale.
         """
+        solvent_concentrations = [x for x in solvent_concentrations if x.isdigit()]
         if not solvent_concentrations:
             return
         solvent_concentrations = [float(x) for x in solvent_concentrations]
