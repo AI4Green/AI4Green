@@ -262,7 +262,9 @@ class SurfExport:
         Returns:
             The overall concentration of the reaction considering all solvents present relative to the mol scale.
         """
-        solvent_concentrations = [x for x in solvent_concentrations if x.isdigit()]
+        solvent_concentrations = [
+            x for x in solvent_concentrations if services.utils.check_is_number(x)
+        ]
         if not solvent_concentrations:
             return
         solvent_concentrations = [float(x) for x in solvent_concentrations]
