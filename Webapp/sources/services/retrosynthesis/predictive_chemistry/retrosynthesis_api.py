@@ -2,27 +2,7 @@ import json
 from typing import Dict, List, Tuple, Union
 
 import requests
-from flask.ctx import AppContext
 from requests import Response
-
-
-def retrosynthesis_process_wrapper(
-    app_context: AppContext,
-    request_url: str,
-    retrosynthesis_base_url: str,
-    result_queue: str,
-):
-    """
-    Args:
-        app_context - enables use of app context such as the database in the threaded process
-        request_url - the url with the target smiles and api key
-        retrosynthesis_base_url - the base url for the api
-        result_queue - the unique identifier
-    """
-    with app_context:
-        result = retrosynthesis_api_call(request_url, retrosynthesis_base_url)
-        print(result_queue)
-        result_queue.put(result)  # Put the result into the queue
 
 
 def retrosynthesis_api_call(

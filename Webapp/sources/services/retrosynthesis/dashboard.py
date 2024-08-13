@@ -10,6 +10,7 @@ import dash_bootstrap_components as dbc
 import dash_cytoscape as cyto
 from dash import ALL, Input, Output, State, ctx, dcc, html
 from flask import Flask, current_app
+from flask.ctx import AppContext
 from rdkit import Chem
 from sources import services
 
@@ -213,13 +214,22 @@ def init_dashboard(server: Flask) -> classes.Dash:
     Retrosynthesis process
     """
 
-    # Global store for task results (you can use a more sophisticated store like Redis for production)
+    # Global store for task results
     task_results = {}
 
-    # Retrosynthesis process wrapper
     def retrosynthesis_process_wrapper(
-        app_context, request_url, retrosynthesis_base_url, task_id
+        app_context: AppContext,
+        request_url: str,
+        retrosynthesis_base_url: str,
+        task_id: str,
     ):
+        """
+        Args:
+            app_context - enables use of app context such as the database in the threaded process
+            request_url - the url with the target smiles and api key
+            retrosynthesis_base_url - the base url for the api
+            task_id - the unique identifier
+        """
         with app_context:
             (
                 retro_api_status,
@@ -242,7 +252,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
     )
     def start_new_retrosynthesis(
         validated_smiles: str, smiles_regex: str, n_clicks: int
-    ) -> Tuple[str, str, Optional[dcc.Interval]]:
+    ) -> Tuple[str, str, Optional[dcc.Interval], str]:
         """
         Called when the user clicks the retrosynthesis button.
         Starts the retrosynthesis process in a background thread.
@@ -281,7 +291,6 @@ def init_dashboard(server: Flask) -> classes.Dash:
         thread.start()
         # set up an interval element to check every 15 seconds if it is complete
         interval = dcc.Interval(id="interval-component", interval=15000, n_intervals=0)
-        print("here")
         return (
             "Retrosynthesis process started. Please wait...",
             unique_identifier,
@@ -293,7 +302,6 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Output("computed-retrosynthesis-routes", "data"),
         Output("user-message", "children", allow_duplicate=True),
         Output("interval-container", "children", allow_duplicate=True),
-        # Output("btn-retrosynthesis", "disabled", allow_duplicate=True),
         Output("loading-display", "display", allow_duplicate=True),
         Input("interval-component", "n_intervals"),
         State("computed-retrosynthesis-uuid", "data"),
@@ -301,7 +309,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
     )
     def check_retrosynthesis_status(
         n_intervals: int, task_id: str
-    ) -> Tuple[dict, str, None]:
+    ) -> Tuple[Optional[dict], str, Optional[None], str]:
         """
         Check the status of the retrosynthesis process and return results if completed.
 
@@ -313,6 +321,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             retrosynthesis routes as a dict if completed
             a message to give the user feedback
             children for the dcc.Interval container element
+            string to set the display setting for the loading wheel.
         """
         print("checking")
         if not task_id or task_id not in task_results:
@@ -340,7 +349,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
     )
     def new_conditions(
         unique_identifier: str, solved_routes: dict
-    ) -> Tuple[bool, dict]:
+    ) -> Tuple[Optional[str], Optional[dict]]:
         """
         Called upon completion of a new retrosynthesis routes
         Generates conditions for each corresponding forward reaction in the retrosynthetic routes
@@ -352,7 +361,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             unique_identifier - the uuid for the retrosynthesis
 
         Returns:
-            a string to hide the loading screen if no routes to find conditions for
+            a string to hide the loading screen if there are no routes to find conditions for
             A dbc table containing the conditions data
 
         Fires on completion of new retrosynthesis routes
@@ -365,7 +374,6 @@ def init_dashboard(server: Flask) -> classes.Dash:
             conditions = conditions_api.get_conditions(solved_routes["routes"])
             conditions_output = {"uuid": unique_identifier, "routes": conditions}
             return dash.no_update, conditions_output
-        print("con hide")
         return "hide", dash.no_update
 
     @dash_app.callback(
@@ -642,7 +650,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
     )
     def display_retrosynthesis(
         active_retrosynthesis: dict, selected_route: str
-    ) -> Tuple[List[dict], List[dict]]:
+    ) -> Tuple[str, List[dict], List[dict]]:
         """
         Called when there is a change to the routes dropdown or active routes
         Create the nodes, edges, and stylesheet to generate the interactive cytoscape
@@ -654,6 +662,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             active_retrosynthesis - the active retrosynthetic routes
 
         Returns:
+            string to control the display of the loading wheel
             style_sheet - a list of styles as dictionaries. Each has a selector and a style
             elements - a list of nodes and edges as dictionaries. node_id is used to identify nodes and connect nodes
 
