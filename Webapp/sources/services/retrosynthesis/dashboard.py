@@ -220,14 +220,12 @@ def init_dashboard(server: Flask) -> classes.Dash:
     def retrosynthesis_process_wrapper(
         app_context: AppContext,
         request_url: str,
-        retrosynthesis_base_url: str,
         task_id: str,
     ):
         """
         Args:
             app_context - enables use of app context such as the database in the threaded process
             request_url - the url with the target smiles and api key
-            retrosynthesis_base_url - the base url for the api
             task_id - the unique identifier
         """
         with app_context:
@@ -267,9 +265,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             The generated UUID for the retrosynthesis
             children for the dcc.Interval container element
         """
-        print("hello joe")
         if utils.smiles_not_valid(smiles_regex):
-            print("invalid smiles")
             return "Please enter a valid SMILES", "", None, "hide"
 
         # If valid SMILES, continue with the process
@@ -284,7 +280,6 @@ def init_dashboard(server: Flask) -> classes.Dash:
             args=[
                 current_app.app_context(),
                 request_url,
-                retrosynthesis_base_url,
                 unique_identifier,
             ],
         )
@@ -311,7 +306,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         n_intervals: int, task_id: str
     ) -> Tuple[Optional[dict], str, Optional[None], str]:
         """
-        Check the status of the retrosynthesis process and return results if completed.
+        Check the status of the retrosynthesis process and remove interval element and return results if completed.
 
         Args:
             n_intervals - calls the function at the interval specified in the element.
@@ -323,7 +318,6 @@ def init_dashboard(server: Flask) -> classes.Dash:
             children for the dcc.Interval container element
             string to set the display setting for the loading wheel.
         """
-        print("checking")
         if not task_id or task_id not in task_results:
             return dash.no_update, "Processing...", dash.no_update, dash.no_update
 

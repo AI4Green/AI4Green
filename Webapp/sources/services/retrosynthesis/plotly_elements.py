@@ -34,15 +34,9 @@ loading_circle = html.Div(
     children=[
         dcc.Loading(
             id="loading-display",
-            # className="",
             children=html.Div(id="loading-output-1"),
-            type="spinner",
+            type="circle",
             fullscreen=True,
-            # loading_state={
-            #     "component_name": "retrosynthesis-tree",
-            #     # "is_loading": False,
-            #     "prop_name": "retro",
-            # },
         ),
     ],
 )
