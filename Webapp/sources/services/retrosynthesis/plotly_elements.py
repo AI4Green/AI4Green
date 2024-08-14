@@ -33,15 +33,10 @@ loading_circle = html.Div(
     id="loading-div",
     children=[
         dcc.Loading(
-            id="loading-output",
+            id="loading-display",
             children=html.Div(id="loading-output-1"),
             type="circle",
             fullscreen=True,
-            loading_state={
-                "component_name": "retrosynthesis-tree",
-                "is_loading": False,
-                "prop_name": "retro",
-            },
         ),
     ],
 )
@@ -193,6 +188,7 @@ reaction_sidebar = html.Div(
         dcc.Store(id="reaction-smiles", data="", storage_type="memory"),
         html.Div(id="reaction-feedback"),
         dcc.Store(id="reaction-conditions-list", data="", storage_type="memory"),
+        html.Div(id="interval-container"),
         dcc.Store(id="reaction-sustainability-list", data="", storage_type="memory"),
         dcc.Dropdown(id="conditions-dropdown"),
         html.Div(id="reaction-conditions"),
@@ -309,7 +305,9 @@ save_modal = html.Div(
     [
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Save Retrosynthesis"), close_button=False),
+                dbc.ModalHeader(
+                    dbc.ModalTitle("Save Retrosynthesis"), close_button=False
+                ),
                 dbc.ModalBody(
                     children=[
                         dbc.Label("Workbook", html_for="save-modal-workbook-dropdown"),
