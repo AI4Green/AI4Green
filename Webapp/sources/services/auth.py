@@ -25,11 +25,16 @@ def verify_login(form) -> redirect:
         request as a result of the user pressing the submit button and if all the fields
         passes validation. It returns False when the browser sends the GET request to
         receive the web page with the form or if at least one field fails validation."""
+        input_data = form.username.data.lower()
         user = (
             db.session.query(models.User)
-            .filter(func.lower(models.User.username) == form.username.data.lower())
+            .filter(
+                (func.lower(models.User.username) == input_data) |
+                (func.lower(models.User.email) == input_data)
+            )
             .first()
         )
+
         """The select function will search through all of the User entities in the
         database and will return a query that only includes the objects that have
         a matching username. Since there is only one or zero results, the query is

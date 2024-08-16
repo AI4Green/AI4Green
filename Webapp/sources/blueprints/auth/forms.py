@@ -29,7 +29,7 @@ class LoginForm(FlaskForm):  # this class defines the login form fields
     username = StringField(
         "Username",
         validators=[DataRequired()],
-        render_kw={"placeholder": "Username", "class": "form-control form-control-lg"},
+        render_kw={"placeholder": "Username or email", "class": "form-control form-control-lg"},
     )
     password = PasswordField(
         "Password",
