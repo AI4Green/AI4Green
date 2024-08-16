@@ -523,6 +523,7 @@ async function removeReagent(removedReagentNumber) {
     "js-reagent-volume",
     "js-reagent-mass",
     "js-reagent-smiles",
+    "js-reagent-primary-key"
   ];
   // skip if it is the reagent being removed
   if (reagentNumber !== removedReagentNumber) {
@@ -755,6 +756,7 @@ async function removeSolvent(removedSolventNumber) {
     "js-solvent-datalist",
     "js-solvent-rounded-concentration",
     "go-to-solvent-guide",
+    "js-solvent-primary-key"
   ];
   // skip if it is the reagent being removed
   if (solventNumber !== removedSolventNumber) {
