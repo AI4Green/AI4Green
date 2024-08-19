@@ -321,7 +321,7 @@ def update_db_entries(compounds: Iterable[models.Compound]) -> None:
         compounds: Compounds to update that exist in both databases.
     """
     print(f"Compounds in both dbs to check for updates: {len(compounds)}")
-    excluded_fields = ["id", "solvent", "error_report"]
+    excluded_fields = ["id", "solvent", "error_report", "workbooks_recently_used_in_id"]
 
     for c in compounds:
         new = (
