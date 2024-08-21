@@ -57,7 +57,7 @@ def process_optional_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     optional_string_columns = ["reagents", "catalyst", "solvents"]
     df[optional_string_columns] = df[optional_string_columns].replace(np.nan, "")
-    return df
+    return df.dropna()
 
 
 class Conditions:

@@ -10,7 +10,6 @@ import dash_bootstrap_components as dbc
 import dash_cytoscape as cyto
 from dash import ALL, Input, Output, State, ctx, dcc, html
 from flask import Flask, current_app
-from flask.ctx import AppContext
 from rdkit import Chem
 from sources import services
 
@@ -218,25 +217,22 @@ def init_dashboard(server: Flask) -> classes.Dash:
     task_results = {}
 
     def retrosynthesis_process_wrapper(
-        app_context: AppContext,
         request_url: str,
         task_id: str,
     ):
         """
         Args:
-            app_context - enables use of app context such as the database in the threaded process
             request_url - the url with the target smiles and api key
             task_id - the unique identifier
         """
-        with app_context:
-            (
-                retro_api_status,
-                api_message,
-                solved_routes,
-            ) = retrosynthesis_api.retrosynthesis_api_call(
-                request_url, retrosynthesis_base_url
-            )
-            task_results[task_id] = (retro_api_status, api_message, solved_routes)
+        (
+            retro_api_status,
+            api_message,
+            solved_routes,
+        ) = retrosynthesis_api.retrosynthesis_api_call(
+            request_url, retrosynthesis_base_url
+        )
+        task_results[task_id] = (retro_api_status, api_message, solved_routes)
 
     @dash_app.callback(
         Output("user-message", "children", allow_duplicate=True),
@@ -278,7 +274,6 @@ def init_dashboard(server: Flask) -> classes.Dash:
         thread = threading.Thread(
             target=retrosynthesis_process_wrapper,
             args=[
-                current_app.app_context(),
                 request_url,
                 unique_identifier,
             ],

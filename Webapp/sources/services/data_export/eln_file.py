@@ -169,7 +169,7 @@ class ELNFileExport:
             author = {
                 "@id": f"./author/{person.id}",
                 "@type": "Person",
-                "givenName": person.user.fullname.split(" ")[:-1],
+                "givenName": " ".join(person.user.fullname.split(" ")[:-1]),
                 "familyName": person.user.fullname.split(" ")[-1],
                 "email": person.user.email,
             }

@@ -323,7 +323,7 @@ def add_user_by_email(workgroup):
 @principal_investigator_required
 def generate_qr_code(workgroup=None):
     token = services.email.get_encoded_token(31536000, {"workgroup": workgroup})
-    url = current_app.config["SERVER_NAME"] + "/qr_add_user/" + token
+    url = f"https://{current_app.config['SERVER_NAME']}/qr_add_user/{token}"
     logo = Image.open(
         "sources/static/img/favicon.ico"
     )
