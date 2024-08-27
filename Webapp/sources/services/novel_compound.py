@@ -178,11 +178,11 @@ def extract_compound_name(primary_key: str) -> Optional[str]:
     Uses two regex patterns to handle both single and double quotes.
     example formats - : "('compound name', 1)" or '("compound's name", 1)'
 
-    Parameters:
-    primary_key (str): The input string containing the compound name.
+    Args:
+        primary_key (str): The input string containing the compound name.
 
     Returns:
-    str or None: The extracted compound name, or None if no match is found.
+        str or None: The extracted compound name, or None if no match is found.
     """
     # One regex for single quotes and one for double quotes
     pattern_single = r"\('((?:\\'|[^'])*)', \d"
