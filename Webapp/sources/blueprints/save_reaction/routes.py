@@ -12,7 +12,6 @@ from sources import models, services
 from sources.auxiliary import (
     abort_if_user_not_in_workbook,
     get_data,
-    get_smiles,
     sanitise_user_input,
 )
 from sources.extensions import db
@@ -149,7 +148,9 @@ def autosave() -> Response:
     # reactants data from the ajax post
     reactant_primary_keys = get_data("reactantPrimaryKeys")
     reactant_primary_keys_ls = list(filter(None, reactant_primary_keys))
-    reactant_smiles_ls = get_smiles(reactant_primary_keys_ls)
+    reactant_smiles_ls = services.all_compounds.get_smiles_list(
+        reactant_primary_keys_ls
+    )
     reactant_masses = get_data("reactantMasses")[:-1]
     reactant_masses_raw = get_data("reactantMassesRaw")[:-1]
     reactant_amounts = get_data("reactantAmounts")[:-1]
@@ -193,7 +194,7 @@ def autosave() -> Response:
     main_product = str(request.form["mainProductTableNumber"])
     product_primary_keys = get_data("productPrimaryKeys")
     product_primary_keys_ls = list(filter(None, product_primary_keys))
-    product_smiles_ls = get_smiles(product_primary_keys_ls)
+    product_smiles_ls = services.all_compounds.get_smiles_list(product_primary_keys_ls)
     product_physical_form = get_data("productPhysicalForms")[:-1]
     product_amounts = get_data("productAmounts")[:-1]
     product_amounts_raw = get_data("productAmountsRaw")[:-1]

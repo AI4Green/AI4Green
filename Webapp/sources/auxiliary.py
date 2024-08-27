@@ -4,12 +4,10 @@
 This module contains auxiliary variables and functions used throughout the app
 """
 import os.path  # module for pathname manipulates
-import re
 from typing import Dict, List, Optional, Tuple, Type, Union
 
 from flask import abort, request
 from flask_login import current_user
-from rdkit import Chem  # Used for converting smiles to inchi
 from sources import models
 from sources.extensions import db
 
@@ -349,39 +347,6 @@ def make_objects_inactive(
 
 
 workgroup_dict = make_workgroup_dict()
-
-
-def get_smiles(ids: List[str]) -> List[str]:
-    """
-    Get the smiles from a list of Compound Ids.
-
-    Args:
-       ids: The List of compound ids
-
-    Returns:
-        A list of smiles :)
-    """
-    smiles = []
-    for id_value in ids:
-        if id_value.isdigit():
-            compound = (
-                db.session.query(models.Compound)
-                .filter(models.Compound.id == id_value)
-                .first()
-            )
-        else:
-            # novel compound id values in format: "('compound name', workbook_id_integer)"
-            # find compound name via regex and workbook id via regular expressions then query database
-            compound_name = re.search(r"'([^']+)'", id_value).group().strip("'")
-            workbook_id = int(re.search(r"'.*?'\s*,\s*(\d+)", id_value).group(1))
-            compound = (
-                db.session.query(models.NovelCompound)
-                .filter(models.NovelCompound.name == compound_name)
-                .filter(models.NovelCompound.workbook == workbook_id)
-                .first()
-            )
-        smiles.append(compound.smiles)
-    return smiles
 
 
 def remove_spaces_and_dashes(name: str) -> str:
