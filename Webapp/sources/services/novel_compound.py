@@ -165,7 +165,6 @@ def reform_novel_compound_primary_key(primary_key: str) -> Tuple:
         abort(
             413
         )  # content too large. Exceeds max workbook name length + max novel compound name length
-    print(primary_key)
     # extract the name from between either the single quotes or double quotes.
     compound_name = extract_compound_name(primary_key)
     # extract the workbook id from after the end of the single or double quote then comma
@@ -177,7 +176,7 @@ def extract_compound_name(primary_key: str) -> Optional[str]:
     """
     Extracts and unescapes the compound name from the primary_key string.
     Uses two regex patterns to handle both single and double quotes.
-    example format - : "('compound name', 1)"
+    example formats - : "('compound name', 1)" or '("compound's name", 1)'
 
     Parameters:
     primary_key (str): The input string containing the compound name.
@@ -185,7 +184,7 @@ def extract_compound_name(primary_key: str) -> Optional[str]:
     Returns:
     str or None: The extracted compound name, or None if no match is found.
     """
-    # Define two regex patterns: one for single quotes and one for double quotes
+    # One regex for single quotes and one for double quotes
     pattern_single = r"\('((?:\\'|[^'])*)', \d"
     pattern_double = r'\("((?:\\"|[^"])*)", \d'
 
@@ -195,8 +194,6 @@ def extract_compound_name(primary_key: str) -> Optional[str]:
         compound_name = name_match.group(1)
         unescaped_compound_name = bytes(compound_name, "utf-8").decode("unicode_escape")
         return unescaped_compound_name
-        # print(name_match.group(1))
-        # return name_match.group(1)
 
     # Try matching with double quotes pattern if single quotes pattern fails
     name_match = re.search(pattern_double, primary_key)
