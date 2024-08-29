@@ -51,9 +51,11 @@ We recommend using Anaconda to set up the python environment, available at [anac
 
 `cd AI4Green`
 
-`conda create --name ai4green python==3.10 poetry==1.8.3`
+`conda create --name ai4green python==3.10`
 
 `conda activate ai4green`
+
+`pip install poetry==1.8.3`
 
 `poetry install`
 
