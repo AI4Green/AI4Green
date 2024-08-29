@@ -37,6 +37,8 @@ We recommend using Anaconda to set up the python environment, available at [anac
 
 This will install all the dependencies listed in pyproject.toml into the current conda environment.
 
+Error with lib magic? [See here](#python-magic)
+
 ### Step 3 - App Configuration
 
 Configuration of AI4Green is controlled by `AI4Green/Webapp/sources/config.py`, the default values are included, but can be overridden by setting environment variables.
@@ -166,3 +168,15 @@ A previous version of the PubChem compound data can be obtained by emailing [ai4
 ### Marvin JS Sketcher Error
 
 - If there is a problem with Marvin JS or you are deploying AI4Green to another url rather than running it locally, you may need a new Marvin JS API key and register the domain. You can find these at [pro.chemicalize.com/app](https://pro.chemicalize.com/app/marvin/settings). Please note you will have to register for a ChemAxon account to use this service. The Marvin JS api key can then be replaced in `AI4Green/Webapp/config.py`.
+
+
+### Python Magic
+
+- There have been reports of python magic not being installed correctly using poetry, giving this error
+
+`ImportError: failed to find libmagic. Check your installation`
+
+- This can often be fixed by
+
+`pip install python-magic-bin`
+
