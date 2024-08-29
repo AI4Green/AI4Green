@@ -54,13 +54,7 @@ We use `Flask-Mail`, which can be set up by providing the email address and pass
 
 `MARVIN_JS_API_KEY`: API key for Marvin JS is specified here. If not provided an alternative sketcher is available.
 
-### Step 4 - Set up Postgres (Optional)
-
-Information is provided at [postgresql.org/download](https://www.postgresql.org/download/) on how to set up Postgres on your distribution.
-Note that Window users may have to add Postgres to their system variables. To use PGAdmin, the port, username and password should match the connection string in `AI4Green/config.py`.
-
-
-### Step 5 - Build the Database
+### Step 4 - Build the Database
 
 The AI4Green database can be built with docker. This required docker to be installed on your system. From the AI4Green directory run
 
@@ -103,7 +97,7 @@ Otherwise, you can create a new user through the CLI, by running
 
 and following the prompts.
 
-### Step 6 - Run AI4Green
+### Step 5 - Run AI4Green
 
 The flask app can now be run locally.
 
@@ -113,9 +107,9 @@ The flask app can now be run locally.
 
 `flask run`
 
-AI4Green can now be accessed via your browser at [127.0.0.1:5000/home/](http://127.0.0.1:5000/home).
+AI4Green can now be accessed via your browser at [127.0.0.1:80/home/](http://127.0.0.1:80/home).
 
-### Step 7 - Deploy to Server (Optional)
+### Step 6 - Deploy to Server (Optional)
 
 It is possible to deploy an instance of AI4Green to a remote server for increased data security and privacy. 
 
@@ -136,7 +130,7 @@ For developers running the application locally.
 This is similar to the default setup, but you must also install the pre-commit hooks:
 1. Install the dependencies: `poetry install`
 2. Install pre-commit hooks: `pre-commit install`
-3. Use the CLI to update the database, follow [step 5](#step-5---build-the-database)
+3. Use the CLI to update the database, follow [step 4](#step-4---build-the-database)
 4. Run the app `flask run`
 
 ### Database Migrations
