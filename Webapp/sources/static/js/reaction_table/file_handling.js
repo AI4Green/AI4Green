@@ -181,11 +181,6 @@ function showFileAttachmentButtons(uploadedFiles) {
 }
 
 function validateFile(file) {
-  let fileExtensionValidation = validateFileExtension(file);
-  if (fileExtensionValidation === "failed") {
-    alert("Files must be of type 'pdf', 'jpeg', or 'png'");
-    return false;
-  }
   let fileSizeValidation = validateFileSize(file);
   if (fileSizeValidation === "failed") {
     alert("Files must be  below 1 mb");
@@ -197,15 +192,6 @@ function validateFile(file) {
 function validateFileSize(file) {
   // if larger than 1 mb
   if (file.size > 1000000) {
-    return "failed";
-  }
-  return "success";
-}
-
-function validateFileExtension(file) {
-  let acceptedFileExtensions = ["pdf", "jpeg", "jpg", "png"];
-  let fileExtension = file.name.split(".").slice(-1)[0];
-  if (!acceptedFileExtensions.includes(fileExtension)) {
     return "failed";
   }
   return "success";
