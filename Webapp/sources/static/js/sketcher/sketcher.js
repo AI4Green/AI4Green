@@ -216,8 +216,16 @@ async function reloadSketcher() {
       marvin.importStructure("cxsmiles", reloadedReaction);
       await sleep(500);
     } else if (selectedSketcher === "ketcher-select") {
-      let ketcher = getKetcher();
-      ketcher.setMolecule(reloadedReaction);
+      // wait for ketcher to load and if it has loaded then reload the scheme
+      for (let i = 0; i < 5; i++) {
+        let ketcher = getKetcher();
+        if (ketcher !== undefined) {
+          ketcher.setMolecule(reloadedReaction);
+          break;
+        } else {
+          await sleep(250);
+        }
+      }
       // sleep used to allow ketcher to load smiles before proceeding
       await sleep(2000);
     }
