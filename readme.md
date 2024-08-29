@@ -11,34 +11,10 @@ ___
 ## Option 1: _Via_ Our Web Application
 
 Visit [ai4green.app](https://ai4green.app/) for more information and to register for a free account.
+
 ___
 
-## Option 2: _Via_ Docker
-
-### Step 1 - Install Docker
-
-Download [Docker Desktop](https://docs.docker.com/get-docker/) for your distribution.
-
-### Step 2 - Run Docker Image
-
-From your terminal pull and run the ai4green image:
-
-`docker run --rm -p 80:80 ai4green/ai4green`
-
-An instance of AI4Green is now running locally on your machine.
-
-This can be accessed via your browser at [127.0.0.1:80/home/](127.0.0.1:80/home/). If port 80 is already in use, you may change this by running e.g. `-p 2000:80` from Docker then accessing the app at the corresponding port.
-
-Within the docker image there is an admin account with the following credentials:
-
-Username: `admin`
-
-Password: `admin_login`
-
-The database is built with SQLite and contains information from 100,000 compounds from PubChem. It is not possible to interrogate or update the database using this docker image. Note that this option is primarily for evaluation. All data is lost when the container is stopped.
-___
-
-## Option 3: Build from source _via_ Conda
+## Option 2: Build from source _via_ Conda
 
 ### Step 1 - Download Source Code
 
@@ -84,7 +60,7 @@ Note that Window users may have to add Postgres to their system variables. To us
 
 ### Step 5 - Build the Database
 
-The AI4Green database can be built with docker. From the AI4Green directory run
+The AI4Green database can be built with docker. This required docker to be installed on your system. From the AI4Green directory run
 
 `docker-compose up -d`
 
@@ -158,10 +134,8 @@ For developers running the application locally.
 This is similar to the default setup, but you must also install the pre-commit hooks:
 1. Install the dependencies: `poetry install`
 2. Install pre-commit hooks: `pre-commit install`
-3. Start Postgres docker: `docker-compose up -d`
-4. Change directory to Webapp `cd Webapp`
-5. Use the CLI to update the database, follow [step 5](#step-5---build-the-database)
-6. Run the app `flask run`
+3. Use the CLI to update the database, follow [step 5](#step-5---build-the-database)
+4. Run the app `flask run`
 
 ### Database Migrations
 
