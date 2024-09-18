@@ -19,6 +19,9 @@ def insert_test_data():
     services.user.add(
         "test_username", "test_user@test.com", "Gloria Testeban", "test_pw", p1
     )
+    user = services.user.from_email("test_user@test.com")
+    user.is_verified = True
+    user.verified_on = time_of_creation
     db.session.commit()
 
     # Make an institution, workgroup and workbook
