@@ -2,27 +2,51 @@ import json
 from datetime import datetime
 
 import pytz
+from sqlalchemy import Boolean
+
 from compound_database import Compound_database_extraction as CDE
 from rdkit import Chem
 from sources import models, services
 from sources.extensions import db
 
 
+def add_test_user(username: str, email: str, fullname: str, password: str, verified: bool = False):
+    # create and add person
+    p = models.Person()
+    db.session.add(p)
+
+    # specify and add user
+    services.user.add(
+        username, email, fullname, password, p
+    )
+
+    if verified:
+        user = services.user.from_email("test_user@test.com")
+        user.is_verified = True
+
+    db.session.commit()
+
+    return p
+
+
+
 def insert_test_data():
     time_of_creation = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
     # make a person and a user
     CDE.seed_role_types()
-    p1 = models.Person()
-    # Capitalize unique fields for consistency
-    db.session.add(p1)
 
-    services.user.add(
-        "test_username", "test_user@test.com", "Gloria Testeban", "test_pw", p1
+    # add verified user
+    # create and add person
+    p1 = add_test_user(
+        username="test_username", email="test_user@test.com", fullname="Gloria Testeban", password="test_pw",
+        verified=True
     )
-    user = services.user.from_email("test_user@test.com")
-    user.is_verified = True
-    user.verified_on = time_of_creation
-    db.session.commit()
+
+    # add unverified user
+    p2 = add_test_user(
+        username="not_verified", email="not_verified@test.com", fullname="Test Daley", password="not_verified",
+        verified=False
+    )
 
     # Make an institution, workgroup and workbook
     institution1 = models.Institution.create(
