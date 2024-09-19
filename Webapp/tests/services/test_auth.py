@@ -1,14 +1,8 @@
-import pytest
-import os
-
 from flask.testing import FlaskClient
 from flask import Flask
-
-import app
 from tests.utils import login, login_response
 from sources import services, db
 
-IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 def test_login(client: FlaskClient):
     """Tests we log in successfully and are redirected to the homepage"""
