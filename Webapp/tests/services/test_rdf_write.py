@@ -3,6 +3,7 @@ import os
 import pickle
 import tempfile
 from typing import Dict, List
+from pathlib import Path
 
 import pytest
 import pytest_mock
@@ -29,9 +30,7 @@ def test_export_reaction_as_rdf(client: FlaskClient, app: Flask, mocker: pytest_
 
     """
     with open(
-        os.path.join(
-            os.getcwd(), "Webapp\\tests\\data", "reaction_database_object.pickle"
-        ),
+        Path(__file__).resolve().parent.parent / "data" / "reaction_database_object.pickle",
         "rb",
     ) as f:
         serialized_data = f.read()
