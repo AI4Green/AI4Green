@@ -50,12 +50,7 @@ jobs:
 
       - name: Test with pytest Poetry
         run: |
-          poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=sources Webapp/tests | tee pytest-coverage.txt
-          exit_code=$?
-          if [ $exit_code -ne 0 ]; then
-            echo "Tests failed with exit code $exit_code"
-            exit $exit_code
-          fi
+           poetry run pytest --exitfirst --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=sources Webapp/tests | tee pytest-coverage.txt
 
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
