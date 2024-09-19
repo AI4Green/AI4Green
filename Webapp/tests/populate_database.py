@@ -2,8 +2,6 @@ import json
 from datetime import datetime
 
 import pytz
-from sqlalchemy import Boolean
-
 from compound_database import Compound_database_extraction as CDE
 from rdkit import Chem
 from sources import models, services
