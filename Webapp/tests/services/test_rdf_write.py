@@ -30,7 +30,7 @@ def test_export_reaction_as_rdf(client: FlaskClient, app: Flask, mocker: pytest_
     """
     with open(
         os.path.join(
-            os.getcwd(), "data", "reaction_database_object.pickle"
+            os.getcwd(), "Webapp\\tests\\data", "reaction_database_object.pickle"
         ),
         "rb",
     ) as f:
