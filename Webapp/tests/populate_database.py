@@ -21,7 +21,7 @@ def add_test_user(username: str, email: str, fullname: str, password: str, verif
     )
 
     if verified:
-        user = services.user.from_email("test_user@test.com")
+        user = services.user.from_email(email)
         user.is_verified = True
 
     db.session.commit()
@@ -46,6 +46,11 @@ def insert_test_data():
     p2 = add_test_user(
         username="not_verified", email="not_verified@test.com", fullname="Test Daley", password="not_verified",
         verified=False
+    )
+
+    p3 = add_test_user(
+        username="password_reset", email="password_reset@test.com", fullname="TEST", password="password_reset",
+        verified=True
     )
 
     # Make an institution, workgroup and workbook
