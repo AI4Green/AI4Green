@@ -59,6 +59,8 @@ jobs:
           pytest-coverage-path: pytest-coverage.txt
           junitxml-path: pytest.xml
 
-      - name: Fail the job if pytest failed
-        if: steps.pytest.outcome != 'success'
-        run: exit 1
+      - name: Check if pytest failed and fail the job
+        if: failure()  # Run this step only if pytest failed
+        run: |
+          echo "Pytest failed, marking job as failed"
+          exit 1
