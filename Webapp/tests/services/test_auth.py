@@ -1,8 +1,13 @@
-from bokeh.models import Markup
+import pytest
+import os
+
 from flask.testing import FlaskClient
 from flask import Flask
+
 from tests.utils import login, login_response
 from sources import services, db
+
+IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 def test_login(client: FlaskClient):
     """Tests we log in successfully and are redirected to the homepage"""
@@ -65,3 +70,61 @@ def test_failed_login_not_validated(client: FlaskClient):
     with (client.session_transaction() as session):
         assert "_user_id" not in session, "user should not be logged in"
         assert "Please verify your email address before logging in. Didn't receive an email? <a href='/email_verification_request/2' class='alert-link'>Click here</a> to resend." in session["_flashes"][0], "user was not notified "
+
+
+def test_password_reset_request(client: FlaskClient):
+    """ Tests user can request password reset """
+    request = client.post(
+        "/reset_password_request",
+        data = {
+            "email": "test_user@test.com",
+            "submit": True
+        }
+    )
+    assert request.status_code == 302 and request.location == "/auth/login"
+    with client.session_transaction() as session:
+        assert "Please check your email for instructions on how to change your password" in session["_flashes"][0]
+
+
+def test_password_reset(client: FlaskClient, app: Flask):
+    # mimic password reset
+    with app.app_context():
+        user = services.user.from_email("test_user@test.com")
+        token = services.email.get_encoded_token(600, {"reset_password": user.id})
+
+        client.post(
+            "/reset_password/" + token,
+            data = {
+                "password": "updated_password",
+                "password2": "updated_password",
+                "submit": True
+            }
+        )
+        # test login with new credentials
+        login(client, username="test_username", password="updated_password")
+
+
+
+
+
+
+
+def test_password_rest(client: FlaskClient):
+    login(client, username="testq_username", password="test_pw")
+
+    client.post("auth/register",
+        data={
+            "username": "new_test_user",
+            "email": "new_test_user@mail.com",
+            "fullname": "George Test",
+            "password": "new_password",
+            "password2": "new_password",
+            "privacy": True,
+            "hazard_disclaimer": True,
+            "submit": True,
+        }
+    )
+    # mimic password reset
+    with app.app_context():
+        user = services.user.from_email("test_user@test.com")
+        token = services.email.get_encoded_token()
