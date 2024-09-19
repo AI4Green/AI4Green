@@ -48,7 +48,6 @@ def test_register(client: FlaskClient, app: Flask):
     login(client, username="new_test_user", password="new_password")
 
 
-
 def test_failed_login_invalid_credentials(client: FlaskClient):
     """Tests login is unsuccessful with incorrect credentials"""
 
