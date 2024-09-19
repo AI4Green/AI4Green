@@ -4,6 +4,7 @@ import os
 from flask.testing import FlaskClient
 from flask import Flask
 
+import app
 from tests.utils import login, login_response
 from sources import services, db
 
@@ -92,13 +93,36 @@ def test_password_reset(client: FlaskClient, app: Flask):
         user = services.user.from_email("password_reset@test.com")
         token = services.email.get_encoded_token(600, {"reset_password": user.id})
 
-        client.post(
-            "/reset_password/" + token,
-            data = {
-                "password": "updated_password",
-                "password2": "updated_password",
-                "submit": True
-            }
-        )
-        # test login with new credentials
-        login(client, username="password_reset", password="updated_password")
+    client.post(
+        "/reset_password/" + token,
+        data = {
+            "password": "updated_password",
+            "password2": "updated_password",
+            "submit": True
+        }
+    )
+    # test login with new credentials
+    login(client, username="password_reset", password="updated_password")
+
+
+def test_update_email(client: FlaskClient, app: Flask):
+    login(client, username="test_username", password="test_pw")
+    response = client.post(
+        "/update_email",
+        data={
+            "old_password": "test_pw",
+            "email": "updated_mail@mail.com",
+            "email2": "updated_mail@mail.com",
+            "submit": True
+        }
+    )
+    assert response.status_code == 302 and response.location == "/home"
+
+    with app.app_context():
+        user = services.user.from_email("updated_mail@mail.com")
+        # need to ensure user is verified after changing email
+        user.is_verified = True
+        db.session.commit()
+        assert user is not None
+        assert user.email == "updated_mail@mail.com"
+
