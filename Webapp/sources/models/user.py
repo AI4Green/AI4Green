@@ -51,6 +51,8 @@ class User(Model, UserMixin):
         nullable=False,
     )
     time_of_creation = db.Column(db.DateTime)
+    registration_location = db.Column(db.Text)
+    most_recent_login_location = db.Column(db.Text)
     Role = db.relationship("Role")
 
     is_verified = db.Column(db.Boolean, nullable=True, server_default=sa.sql.false(), default=False)
