@@ -1,6 +1,7 @@
 from typing import List
 
 from sqlalchemy import func
+from flask import request
 from flask_login import current_user
 from sources import models
 from sources.extensions import db
@@ -33,12 +34,14 @@ def person_from_current_user() -> models.Person:
 def add(
     username: str, email: str, fullname: str, password_data: str, person: models.Person
 ):
+    location = get_location()
     models.User.create(
         username=username,
         email=email,
         fullname=fullname,
         Person=person,
         password_hash=models.User.set_password(password_data),
+        registration_location=location
     )
 
 
@@ -65,3 +68,13 @@ def from_email(user_email: str) -> models.User:
             models.User with matching email
         """
     return db.session.query(models.User).filter(func.lower(models.User.email) == user_email.lower()).first()
+
+
+def get_ip():
+    return request.remote_addr
+
+
+def get_location():
+    ip = get_ip()
+
+    return "THE FICTIONAL PROVINCE OF GELDERLAND"
