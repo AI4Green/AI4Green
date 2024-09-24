@@ -30,7 +30,7 @@ def test_export_reaction_as_rdf(client: FlaskClient, app: Flask, mocker: pytest_
 
     """
     with open(
-        Path(__file__).resolve().parent.parent / "data" / "reaction_database_object.pickle",
+        Path(__file__).resolve().parent.parent / "data" / "reaction_database_object_v1_5.pickle",
         "rb",
     ) as f:
         serialized_data = f.read()

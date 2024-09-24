@@ -158,6 +158,7 @@ def insert_test_data():
         reaction_id="TW1-001",
         name="a test reaction",
         description="testing a reaction involving compounds from the test family",
+        reaction_class="Amide bond formation",
         reactants=["C", "CC"],
         products=["CP", "CPP"],
         reagents=["CCC", "CCCCC"],
@@ -222,6 +223,7 @@ def reaction_table_json_contents():
         "reaction_smiles": "C.CC>>CP.CCP",
         "reaction_name": "test reaction name",
         "reaction_description": "testing routes and services",
+        "reaction_class": "Amide bond formation",
         # reactant data
         "reactant_ids": [-1, -2],
         "reactant_masses": ["123", "101"],

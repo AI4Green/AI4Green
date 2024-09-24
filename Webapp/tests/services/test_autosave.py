@@ -12,6 +12,7 @@ def test_autosave(client: FlaskClient):
     assert (
         response.status_code == 200 and response.json["feedback"] == "Reaction Updated!"
     )
+    assert "need to test time of update" == float
 
 
 def make_autosave_form():
