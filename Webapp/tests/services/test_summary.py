@@ -38,18 +38,18 @@ def assert_summary_table_html_formed(response):
     assert (
         """<td id="js-elements-cell" class="hazard-acceptable"><select size="1" id="js-elements" class="hazard-acceptable">"""
         in response.json["summary"]
-    )
+    ), "Element sustainability has not been calculated"
     # atom economy
     assert (
-        """<td id="js-ae-cell" class="hazard-hazardous"><input type="number" class="hazard-hazardous to-export" name="Atom Efficiency" value="40.4" style="width: 80px; border:none;" readonly></td>"""
+        """<td id="js-ae-cell" class="hazard-hazardous"><input id="js-ae" type="number" class="hazard-hazardous to-export" name="Atom Efficiency" value="40.4" style="width: 80px; border:none;" readonly></td>"""
         in response.json["summary"]
-    )
+    ), "Atom economy has not been calculated"
     # theoretical yield
     assert (
         """<td colspan="2"><input type="number" id="js-product-rounded-mass1"
                                value="93.0" style="width:80px; border:none" readonly></td>"""
         in response.json["summary"]
-    )
+    ), "Theoretical yield has not been calculated"
 
 
 def make_demo_summary_form():

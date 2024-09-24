@@ -1,14 +1,20 @@
 from typing import Dict
+from flask.testing import FlaskClient
 
 
-def login(client, username: str = "test_username", password: str = "test_pw"):
+def login_response(client: FlaskClient, username: str, password: str):
+    """Function to make login call to test client"""
+    return client.post(
+        "/home", data={"username": username, "password": password, "submit": True}
+    )
+
+
+def login(client: FlaskClient, username: str = "test_username", password: str = "test_pw"):
     """Frequently used function to log a user in to gain access to test @login_required functions."""
 
-    login_response = client.post(
-        "auth/login", data={"username": username, "password": password, "submit": True}
-    )
+    response = login_response(client, username, password)
     assert (
-        login_response.status_code == 302 and login_response.location == "/home"
+        response.status_code == 302 and response.location == "/home"
     ), "login failed"
 
     # Ensure that the user is logged in by checking if the session contains user information

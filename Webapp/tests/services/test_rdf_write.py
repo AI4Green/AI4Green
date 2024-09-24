@@ -3,19 +3,21 @@ import os
 import pickle
 import tempfile
 from typing import Dict, List
+from pathlib import Path
 
 import pytest
 import pytest_mock
 from flask import Flask
+from flask.testing import FlaskClient
 from rdkit import Chem
 from rdkit.Chem import AllChem
-from sources import services
+from sources import services, db
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Local temp files don't work in CI")
-def test_export_reaction_as_rdf(app: Flask, mocker: pytest_mock.MockerFixture):
+def test_export_reaction_as_rdf(client: FlaskClient, app: Flask, mocker: pytest_mock.MockerFixture):
     """
     Test saving an exported reaction data file locally and reloading it and checking for data changes
 
@@ -28,9 +30,7 @@ def test_export_reaction_as_rdf(app: Flask, mocker: pytest_mock.MockerFixture):
 
     """
     with open(
-        os.path.join(
-            os.path.dirname(os.getcwd()), "data", "reaction_database_object.pickle"
-        ),
+        Path(__file__).resolve().parent.parent / "data" / "reaction_database_object_v1_5.pickle",
         "rb",
     ) as f:
         serialized_data = f.read()
@@ -39,6 +39,8 @@ def test_export_reaction_as_rdf(app: Flask, mocker: pytest_mock.MockerFixture):
 
     reaction = pickle.loads(serialized_data)
     with app.app_context():
+        session = db.session()
+        session.add(reaction)
         # making a temporary directory to save the output file
         local_path = tempfile.gettempdir()
         file_path = os.path.join(local_path, "test_rdf")
@@ -120,27 +122,27 @@ def make_mocks(mocker: pytest_mock.MockerFixture):
     mock_get_smiles_from_db.return_value = "CO"
 
     mock_read_username = mocker.patch(
-        "sources.services.data_export.metadata.ReactionMetaData.read_creator_username"
+        "sources.services.data_export.metadata.ReactionMetaData._read_creator_username"
     )
     mock_read_username.return_value = "Al Forgreen"
 
     mock_read_workbook = mocker.patch(
-        "sources.services.data_export.metadata.ReactionMetaData.read_workbook"
+        "sources.services.data_export.metadata.ReactionMetaData._read_workbook"
     )
     mock_read_workbook.return_value = "Alchemical aspirations"
 
     mock_read_workgroup = mocker.patch(
-        "sources.services.data_export.metadata.ReactionMetaData.read_workgroup"
+        "sources.services.data_export.metadata.ReactionMetaData._read_workgroup"
     )
     mock_read_workgroup.return_value = "AI4Alchemy"
 
     mock_read_file_attachments = mocker.patch(
-        "sources.services.data_export.metadata.ReactionMetaData.read_file_attachment_names"
+        "sources.services.data_export.metadata.ReactionMetaData._read_file_attachment_names"
     )
     mock_read_file_attachments.return_value = ["AI1-001-summary.pdf"]
 
     mock_read_addenda = mocker.patch(
-        "sources.services.data_export.metadata.ReactionMetaData.read_addenda"
+        "sources.services.data_export.metadata.ReactionMetaData._read_addenda"
     )
     mock_read_addenda.return_value = None
 
