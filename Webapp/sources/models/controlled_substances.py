@@ -1,18 +1,21 @@
 from .base import Model
 from sources.extensions import db
 
+
 class ControlledSubstanceUsage(Model):
     """
     Database table to track usages of controlled chemical substances
     """
     __tablename__ = 'controlled_substance_usage'
 
+    id = db.Column(db.Integer, primary_key=True)
+
     creator = db.Column(
-        db.ForeignKey("Person.id", ondelete="CASCADE"), nullable=False, index=True
+        db.ForeignKey("Person.id", ondelete="CASCADE"), nullable=False
     )
 
     workgroup = db.Column(
-        db.ForeignKey("WorkGroup.id", ondelete="CASCADE"), nullable=False, index=False
+        db.ForeignKey("WorkGroup.id", ondelete="CASCADE"), nullable=False
     )
 
     workbook = db.Column(
