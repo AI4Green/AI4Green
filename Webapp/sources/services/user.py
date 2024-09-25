@@ -68,13 +68,3 @@ def from_email(user_email: str) -> models.User:
             models.User with matching email
         """
     return db.session.query(models.User).filter(func.lower(models.User.email) == user_email.lower()).first()
-
-
-def get_ip():
-    return request.remote_addr
-
-
-def get_location():
-    ip = get_ip()
-
-    return "THE FICTIONAL PROVINCE OF GELDERLAND"
