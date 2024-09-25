@@ -82,8 +82,18 @@ def get_location() -> Dict[str, str]:
     handler = ipinfo.getHandler(current_app.config["IPINFO_API_KEY"])
     ip = get_ip_address()
     location = handler.getDetails(ip)
-
-    return {
-        "country": location.country_name,
-        "city": location.city,
-    }
+    try:
+        # This will fail if running on local host
+        return {
+            "IP_address": ip,
+            "country": location.country_name,
+            "city": location.city,
+        }
+    except AttributeError:
+        # If running on local host use default values that point to Nottingham
+        print("Local Host IP is not findable with IPInfo. Using Nottingham as default...")
+        return {
+            "IP_address": "NOTTINGHAM_IP_ADDRESS",
+            "country": "United Kingdom",
+            "city": "Nottingham",
+        }
