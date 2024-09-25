@@ -1,9 +1,8 @@
 from typing import List
 
 from sqlalchemy import func
-from flask import request
 from flask_login import current_user
-from sources import models
+from sources import models, services
 from sources.extensions import db
 
 
@@ -34,7 +33,7 @@ def person_from_current_user() -> models.Person:
 def add(
     username: str, email: str, fullname: str, password_data: str, person: models.Person
 ):
-    location = get_location()
+    location = services.utils.get_location()
     models.User.create(
         username=username,
         email=email,

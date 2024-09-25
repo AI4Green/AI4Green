@@ -1,8 +1,9 @@
 import contextlib
-from typing import Tuple
+from typing import Tuple, Dict
 
 import toml
-from flask import current_app
+from flask import current_app, request
+import ipinfo
 
 
 def camelCase_to_snake_case(string: str) -> str:
@@ -70,3 +71,19 @@ def remove_duplicates_keep_first(lst: list) -> list:
             seen_items.add(item)
 
     return new_list
+
+
+def get_ip_address() -> str:
+    """Returns current IP address"""
+    return request.remote_addr
+
+
+def get_location() -> Dict[str, str]:
+    handler = ipinfo.getHandler(current_app.config["IPINFO_API_KEY"])
+    ip = get_ip_address()
+    location = handler.getDetails(ip)
+
+    return {
+        "country": location.country_name,
+        "city": location.city,
+    }

@@ -371,6 +371,7 @@ def autosave() -> Response:
         "summary_table_data": summary_table,
     }
     reaction.update(**update_dict)
+    services.controlled_substances.check_reaction_for_controlled_substances(reaction)
     return jsonify({"feedback": feedback})
 
 
