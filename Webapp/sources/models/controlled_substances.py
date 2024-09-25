@@ -1,11 +1,11 @@
 from .base import Model
 from sources.extensions import db
 
-class ExportControl(Model):
+class ControlledSubstanceUsage(Model):
     """
     Database table to track usages of controlled chemical substances
     """
-    __tablename__ = 'export_control'
+    __tablename__ = 'controlled_substance_usage'
 
     creator = db.Column(
         db.ForeignKey("Person.id", ondelete="CASCADE"), nullable=False, index=True
@@ -25,7 +25,7 @@ class ExportControl(Model):
 
     date_used = db.Column(db.DateTime)
 
-    restricted_chemical_name = db.Column(db.Text, nullable=False)
-    restricted_chemical_smiles = db.Column(db.Text, nullable=False)
-    restricted_chemical_cas = db.Column(db.Text, nullable=False)
+    controlled_substance_name = db.Column(db.Text, nullable=False)
+    controlled_substance_smiles = db.Column(db.Text, nullable=False)
+    controlled_substance_cas = db.Column(db.Text, nullable=False)
 
