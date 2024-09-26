@@ -1,8 +1,8 @@
 """controlled_substances
 
-Revision ID: b8221f88c228
+Revision ID: 63e25b54c2cb
 Revises: 70fd97efd6c4
-Create Date: 2024-09-25 13:49:36.980129
+Create Date: 2024-09-26 10:10:05.613573
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'b8221f88c228'
+revision = '63e25b54c2cb'
 down_revision = '70fd97efd6c4'
 branch_labels = None
 depends_on = None
@@ -24,7 +24,8 @@ def upgrade():
     sa.Column('workgroup', sa.Integer(), nullable=False),
     sa.Column('workbook', sa.Integer(), nullable=False),
     sa.Column('reaction', sa.Integer(), nullable=False),
-    sa.Column('date_used', sa.DateTime(), nullable=True),
+    sa.Column('date_created', sa.DateTime(), nullable=True),
+    sa.Column('last_edited', sa.DateTime(), nullable=True),
     sa.Column('controlled_substance_name', sa.Text(), nullable=False),
     sa.Column('controlled_substance_smiles', sa.Text(), nullable=False),
     sa.Column('controlled_substance_cas', sa.Text(), nullable=False),

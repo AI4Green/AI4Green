@@ -26,7 +26,8 @@ class ControlledSubstanceUsage(Model):
         db.ForeignKey("Reaction.id", ondelete="CASCADE"), nullable=False
     )
 
-    date_used = db.Column(db.DateTime)
+    date_created = db.Column(db.DateTime)
+    last_edited = db.Column(db.DateTime)
 
     controlled_substance_name = db.Column(db.Text, nullable=False)
     controlled_substance_smiles = db.Column(db.Text, nullable=False)
