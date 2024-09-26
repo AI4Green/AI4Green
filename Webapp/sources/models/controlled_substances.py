@@ -21,22 +21,34 @@ class ControlledSubstanceUsage(Model):
     creator = db.Column(
         db.ForeignKey("Person.id", ondelete="CASCADE"), nullable=False
     )
+    creator_person = db.relationship(
+        "Person", foreign_keys=[creator]
+    )
 
-    workgroup = db.Column(
+    workgroups = db.Column(
         db.ForeignKey("WorkGroup.id", ondelete="CASCADE"), nullable=False
     )
+    workgroup = db.relationship(
+        "WorkGroup", foreign_keys=[workgroups]
+    )
 
-    workbook = db.Column(
+    workbooks = db.Column(
         db.ForeignKey("WorkBook.id", ondelete="CASCADE"), nullable=False
     )
+    workbook = db.relationship(
+        "WorkBook", foreign_keys=[workbooks]
+    )
 
-    reaction = db.Column(
+    reactions = db.Column(
         db.ForeignKey("Reaction.id", ondelete="CASCADE"), nullable=False
     )
+    reaction = db.relationship("Reaction", foreign_keys=[reactions])
 
     time_of_creation = db.Column(db.DateTime)
 
     last_edited = db.Column(db.DateTime)
+
+    last_location = db.Column(db.Text, nullable=False)
 
     controlled_substance_name = db.Column(db.Text, nullable=False)
 
@@ -45,4 +57,3 @@ class ControlledSubstanceUsage(Model):
     controlled_substance_cas = db.Column(db.Text, nullable=False)
 
     controlled_substance_inchi = db.Column(db.Text, nullable=False)
-
