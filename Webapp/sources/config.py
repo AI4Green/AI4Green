@@ -101,7 +101,7 @@ class BaseConfig(object):  # class to store configuration variables
 
     CONDITIONS_API_URL = os.getenv("CONDITIONS_API_URL", "http://127.0.0.1:9901")
 
-    IPINFO_API_KEY = os.getenv("IPINFO_API_URL", "3af90e1e25b75c")
+    IPINFO_API_KEY = os.getenv("IPINFO_API_URL", "") # change to your own
 
 
 class TestConfig(BaseConfig):
