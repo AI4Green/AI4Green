@@ -221,6 +221,25 @@ def from_name(
     return compound
 
 
+def from_inchi(
+    inchi: str, workbook: models.WorkBook = None
+) -> Union[models.Compound, models.NovelCompound]:
+    """
+    Returns a compound or novel compound from an inchi
+
+    Args:
+        inchi - inchi of a compound
+        workbook - if looking for a novel compound, the workbook we look in
+
+    Returns:
+        models.Compound or models.NovelCompound: The compound object retrieved from the database.
+                                                 Returns None if no matching compound is found.
+    """
+    compound = services.compound.from_inchi(inchi)
+    if workbook and not compound:
+        compound = services.novel_compound.from_inchi_and_workbook(inchi, workbook)
+    return compound
+
 def populate_reagent_dropdown(
     reagent_substring: str, workbook: models.WorkBook = None
 ) -> List[str]:
