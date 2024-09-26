@@ -124,6 +124,35 @@ def cas_from_smiles(smiles: str) -> Optional[str]:
     return cas if cas else None
 
 
+def name_from_smiles(smiles: str) -> Optional[str]:
+    """
+
+    Look in compound and novel compound database. Return Name if present in either else None
+
+    Args:
+        smiles - the SMILES string of the compound we want the CAS number for
+
+    Returns:
+        The name of the compound or None if no name is provided
+
+
+    """
+    name = None
+    compound = services.compound.from_smiles(smiles)
+    if compound:
+        name = compound.name
+    else:
+        inchi = smiles_to_inchi(smiles)
+        novel_compound = (
+            db.session.query(models.Compound)
+            .filter(models.NovelCompound.inchi == inchi)
+            .first()
+        )
+        if novel_compound:
+            name = novel_compound.name
+    return name if name else None
+
+
 def smiles_to_inchi(smiles: str) -> str:
     """
     Get the corresponding InChi from a SMILES string. Returns None if the smiles string is invalid

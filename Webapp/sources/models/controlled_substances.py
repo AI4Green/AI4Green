@@ -1,12 +1,20 @@
 from .base import Model
 from sources.extensions import db
+from datetime import datetime
+import pytz
 
 
 class ControlledSubstanceUsage(Model):
     """
     Database table to track usages of controlled chemical substances
     """
-    __tablename__ = 'controlled_substance_usage'
+    __tablename__ = "controlled_substance_usage"
+
+    def __init__(self, **kwargs) -> None:
+        self.time_of_creation = datetime.now(pytz.timezone("Europe/London")).replace(
+            tzinfo=None
+        )
+        super().__init__(**kwargs)
 
     id = db.Column(db.Integer, primary_key=True)
 
@@ -26,7 +34,7 @@ class ControlledSubstanceUsage(Model):
         db.ForeignKey("Reaction.id", ondelete="CASCADE"), nullable=False
     )
 
-    date_created = db.Column(db.DateTime)
+    time_of_creation = db.Column(db.DateTime)
 
     last_edited = db.Column(db.DateTime)
 
