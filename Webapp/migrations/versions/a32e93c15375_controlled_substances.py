@@ -1,8 +1,8 @@
 """controlled_substances
 
-Revision ID: 6e8cc8d07e0e
+Revision ID: a32e93c15375
 Revises: 70fd97efd6c4
-Create Date: 2024-09-26 10:21:01.834544
+Create Date: 2024-09-26 11:57:47.051610
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6e8cc8d07e0e'
+revision = 'a32e93c15375'
 down_revision = '70fd97efd6c4'
 branch_labels = None
 depends_on = None
@@ -24,27 +24,18 @@ def upgrade():
     sa.Column('workgroup', sa.Integer(), nullable=False),
     sa.Column('workbook', sa.Integer(), nullable=False),
     sa.Column('reaction', sa.Integer(), nullable=False),
-    sa.Column('date_created', sa.DateTime(), nullable=True),
+    sa.Column('time_of_creation', sa.DateTime(), nullable=True),
     sa.Column('last_edited', sa.DateTime(), nullable=True),
     sa.Column('controlled_substance_name', sa.Text(), nullable=False),
     sa.Column('controlled_substance_smiles', sa.Text(), nullable=False),
     sa.Column('controlled_substance_cas', sa.Text(), nullable=False),
+    sa.Column('controlled_substance_inchi', sa.Text(), nullable=False),
     sa.ForeignKeyConstraint(['creator'], ['Person.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['reaction'], ['Reaction.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['workbook'], ['WorkBook.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['workgroup'], ['WorkGroup.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('recently_used_compounds',
-    sa.Column('workbook_id', sa.Integer(), nullable=True),
-    sa.Column('compound_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['compound_id'], ['Compound.id'], ),
-    sa.ForeignKeyConstraint(['workbook_id'], ['WorkBook.id'], )
-    )
-    with op.batch_alter_table('Compound', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('workbooks_recently_used_in_id', sa.Integer(), nullable=True))
-        batch_op.create_foreign_key(None, 'WorkBook', ['workbooks_recently_used_in_id'], ['id'])
-
     with op.batch_alter_table('User', schema=None) as batch_op:
         batch_op.add_column(sa.Column('registration_location', sa.JSON(), nullable=True))
         batch_op.add_column(sa.Column('most_recent_login_location', sa.JSON(), nullable=True))
@@ -58,10 +49,5 @@ def downgrade():
         batch_op.drop_column('most_recent_login_location')
         batch_op.drop_column('registration_location')
 
-    with op.batch_alter_table('Compound', schema=None) as batch_op:
-        batch_op.drop_constraint(None, type_='foreignkey')
-        batch_op.drop_column('workbooks_recently_used_in_id')
-
-    op.drop_table('recently_used_compounds')
     op.drop_table('controlled_substance_usage')
     # ### end Alembic commands ###

@@ -44,3 +44,5 @@ class ControlledSubstanceUsage(Model):
 
     controlled_substance_cas = db.Column(db.Text, nullable=False)
 
+    controlled_substance_inchi = db.Column(db.Text, nullable=False)
+
