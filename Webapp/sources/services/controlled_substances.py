@@ -2,7 +2,10 @@ from sources import services, models
 from sources.extensions import db
 from typing import List, Optional, Dict, Union
 from flask import current_app
+from flask_login import current_user
 import os
+from datetime import datetime
+import pytz
 
 def check_reaction_for_controlled_substances(reaction: models.Reaction) -> Union[List[List[str]], None]:
     """
@@ -33,12 +36,12 @@ def check_reaction_for_controlled_substances(reaction: models.Reaction) -> Union
     if all(not sublist for sublist in checks):
         return None
 
-    unique_structures = [
+    unique_structures = {
         inchi
         for sublist in checks  # flatten the list of lists
         for inchi in sublist
         if not check_duplicate(reaction, inchi)  # filter out duplicates
-    ]
+    }
 
     if not unique_structures:
         return None
@@ -65,41 +68,77 @@ def check_smiles_in_controlled_substances(smiles_list: List[str]) -> List[str]:
 
 def check_duplicate(reaction: models.Reaction, inchi: str) -> bool:
     """
-    Checks db ControlledSubstanceUsage table for entries containing this smiles string
+    Checks db ControlledSubstanceUsage table for entries containing this reaction and InChI and updates the last_edited
+    attribute of the entry if duplicate is found
 
     Args:
         reaction (models.Reaction): The reaction being checked.
         inchi (str): The InChI to check.
 
+    Returns:
+        bool, True if duplicate is found, else False
+
     """
     duplicate = (
         db.session.query(models.ControlledSubstanceUsage)
-        .filter(models.ControlledSubstanceUsage.reaction == reaction.id)
+        .filter(models.ControlledSubstanceUsage.reactions == reaction.id)
         .filter(models.ControlledSubstanceUsage.controlled_substance_inchi == inchi)
+        .first()
     )
 
     if duplicate:
+        duplicate.last_edited = datetime.now(pytz.timezone("Europe/London")).replace(
+            tzinfo=None
+        )
+        db.session.commit()
         return True
 
     return False
 
 
 def add(reaction: models.Reaction, inchi: str) -> None:
+    """
+    Adds instance of controlled substance use to the ControlledSubstanceUsage table.
+
+    Args:
+        reaction (models.Reaction): The reaction in which the controlled substance is used
+        inchi (str): The InChI of the controlled substance
+
+    """
     compound = services.all_compounds.from_inchi(inchi, reaction.workbook)
-    models.ControlledSubstanceUsage.create(
+    usage = models.ControlledSubstanceUsage(
         creator=reaction.creator,
-        workgroup=reaction.workgroup,
-        workbook=reaction.workbook,
-        reaction=reaction.id,
+        workgroups=reaction.workbook.WorkGroup.id,
+        workbooks=reaction.workbook.id,
+        reactions=reaction.id,
         controlled_substance_name=compound.name,
         controlled_substance_smiles=compound.smiles,
         controlled_substance_cas=compound.cas,
-        controlled_substance_inchi=compound.inchi
+        controlled_substance_inchi=compound.inchi,
+        last_location=current_user.most_recent_login_location["country"]
+    )
+    db.session.add(usage)
+    db.session.commit()
+
+
+def list_all() -> List[models.Reaction]:
+    """
+    Gets a list of all controlled substance usages. For the admin_dashboard
+
+    Returns:
+         List of all controlled substance usages
+    """
+    return (
+        (
+            db.session.query(models.ControlledSubstanceUsage)
+        )
+        .order_by(models.ControlledSubstanceUsage.time_of_creation.desc())
+        .all()
     )
 
 
 def controlled_substance_inchi():
-    """Returns list of CAS numbers for controlled chemicals"""
+    """Returns list of InChI for controlled chemicals that are stores in controlled_substances_inchi.txt"""
     print("150 MISSING INCHI IN THE CONTROLLED SUBSTANCE LIST")
     with open(
             os.path.join(
