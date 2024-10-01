@@ -106,6 +106,7 @@ def add(reaction: models.Reaction, inchi: str) -> None:
 
     """
     compound = services.all_compounds.from_inchi(inchi, reaction.workbook)
+    location = current_user.most_recent_login_location["country"]
     usage = models.ControlledSubstanceUsage(
         creator=reaction.creator,
         workgroups=reaction.workbook.WorkGroup.id,
@@ -115,10 +116,14 @@ def add(reaction: models.Reaction, inchi: str) -> None:
         controlled_substance_smiles=compound.smiles,
         controlled_substance_cas=compound.cas,
         controlled_substance_inchi=compound.inchi,
-        last_location=current_user.most_recent_login_location["country"]
+        last_location=location
     )
     db.session.add(usage)
     db.session.commit()
+
+    if location in current_app.config["EMBARGOED_COUNTRIES"]:
+        services.email.send_controlled_substance_alert(inchi, location, reaction)
+
 
 
 def list_all() -> List[models.Reaction]:
@@ -151,5 +156,21 @@ def controlled_substance_inchi():
     ) as f:
         return set(f.read().splitlines())
 
+
+def uk_arms_embargoes():
+    with open(
+            os.path.join(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.abspath(__file__)
+                    )
+                ), "static", "UK_arms_embargoed_countries.txt"
+            ), "r"
+    ) as f:
+        return set(f.read().splitlines())
+
 # Add controlled substance list to configs
 current_app.config["CONTROLLED_SUBSTANCES"] = controlled_substance_inchi()
+
+# Add embargoed countries list config
+current_app.config["EMBARGOED_COUNTRIES"] = uk_arms_embargoes()
