@@ -1,0 +1,11 @@
+Controlled Substance Use in Embargoed Country Detected!
+
+
+    A User in {{ country }} has been detected using controlled substance {{ substance }}
+
+    Please alert your export control team as soon as possible.
+
+
+Sincerely,
+
+The AI4Green Team

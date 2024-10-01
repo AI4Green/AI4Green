@@ -260,6 +260,30 @@ def send_password_reset_test(user: models.User) -> Tuple[str, str]:
     )
 
 
+def send_controlled_substance_alert(substance: str, country: str, reaction: models.Reaction) -> str:
+    """
+    Send an email to AI4Green admin if use of a controlled substance has been detected in a country with
+    a UK arms embargo.
+
+    Args:
+        substance: str, the substance that has been used
+        country: str, the country where the substance has been used
+
+    """
+    mail.send_email(
+        "You have a new AI4Green notification",
+        sender=current_app.config["MAIL_ADMIN_SENDER"],
+        recipients=["admin@ai4green.app"],
+        text_body=render_template(
+            "email/controlled_substance_alert.txt", country=country, substance=substance
+        ),
+        html_body=render_template(
+            "email/controlled_substance_alert.html", country=country, substance=substance
+        ),
+    )
+
+
+
 # send reset email test
 def send_notification_test(person: models.Person) -> str:
     """
