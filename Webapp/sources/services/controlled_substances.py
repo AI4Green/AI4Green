@@ -106,7 +106,7 @@ def add(reaction: models.Reaction, inchi: str) -> None:
 
     """
     compound = services.all_compounds.from_inchi(inchi, reaction.workbook)
-    location = current_user.most_recent_login_location["country"]
+    location = current_user.most_recent_login_location
     usage = models.ControlledSubstanceUsage(
         creator=reaction.creator,
         workgroups=reaction.workbook.WorkGroup.id,
@@ -116,12 +116,12 @@ def add(reaction: models.Reaction, inchi: str) -> None:
         controlled_substance_smiles=compound.smiles,
         controlled_substance_cas=compound.cas,
         controlled_substance_inchi=compound.inchi,
-        last_location=location
+        last_location=location["country"]
     )
     db.session.add(usage)
     db.session.commit()
 
-    if location in current_app.config["EMBARGOED_COUNTRIES"]:
+    if location["country"] in current_app.config["EMBARGOED_COUNTRIES"]:
         services.email.send_controlled_substance_alert(inchi, location, reaction)
 
 
