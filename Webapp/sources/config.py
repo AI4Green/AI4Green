@@ -103,6 +103,8 @@ class BaseConfig(object):  # class to store configuration variables
 
     IPINFO_API_KEY = os.getenv("IPINFO_API_URL", "") # change to your own
 
+    EXPORT_CONTROL_EMAIL_ADDRESS = os.getenv("EXPORT_CONTROL_EMAIL_ADDRESS", "") # who to alert for controlled substance usage
+
 
 class TestConfig(BaseConfig):
     TESTING = True

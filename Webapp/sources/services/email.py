@@ -275,7 +275,10 @@ def send_controlled_substance_alert(substance: str, location: Dict[str,str], rea
     mail.send_email(
         "Controlled Substance Alert",
         sender=current_app.config["MAIL_ADMIN_SENDER"],
-        recipients=["admin@ai4green.app"],
+        recipients=[
+            current_app.config["CONTROLLED_SUBSTANCE_ALERT_EMAIL_ADDRESS"],
+            current_app.config["MAIL_ADMIN_SENDER"]
+        ],
         text_body=render_template(
             "email/controlled_substance_alert.txt",
             country=location["country"],
