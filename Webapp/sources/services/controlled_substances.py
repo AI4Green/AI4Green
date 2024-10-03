@@ -144,7 +144,6 @@ def list_all() -> List[models.Reaction]:
 
 def controlled_substance_inchi():
     """Returns list of InChI for controlled chemicals that are stores in controlled_substances_inchi.txt"""
-    print("150 MISSING INCHI IN THE CONTROLLED SUBSTANCE LIST")
     with open(
             os.path.join(
                 os.path.dirname(
