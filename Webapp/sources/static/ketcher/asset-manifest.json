@@ -1,13 +1,14 @@
 {
   "files": {
-    "main.css": "./static/css/main.72005bf6.css",
-    "main.js": "./static/js/main.fd276b03.js",
-    "static/js/34.aac75d43.chunk.js": "./static/js/34.aac75d43.chunk.js",
-    "index.html": "./index.html",
-    "static/media/overlay.svg": "./static/media/overlay.8faf238632c16c841197.svg"
+    "main.css": "./static/css/main.e770f74b.css",
+    "main.js": "./static/js/main.20814628.js",
+    "static/js/58.d4158b49.chunk.js": "./static/js/58.d4158b49.chunk.js",
+    "indigo-ketcher-1.23.0.wasm": "./indigo-ketcher-1.23.0.wasm",
+    "indigo-ketcher-norender-1.23.0.wasm": "./indigo-ketcher-norender-1.23.0.wasm",
+    "index.html": "./index.html"
   },
   "entrypoints": [
-    "static/css/main.72005bf6.css",
-    "static/js/main.fd276b03.js"
+    "static/css/main.e770f74b.css",
+    "static/js/main.20814628.js"
   ]
 }
