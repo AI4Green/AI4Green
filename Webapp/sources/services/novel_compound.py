@@ -191,7 +191,7 @@ def extract_compound_name(primary_key: str) -> Optional[str]:
     # Try matching with single quotes pattern
     name_match = re.search(pattern_single, primary_key)
     if name_match:
-        compound_name = name_match.group(1)  # bug fix
+        compound_name = name_match.group(1)
         return compound_name
 
     # Try matching with double quotes pattern if single quotes pattern fails
