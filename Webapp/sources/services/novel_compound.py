@@ -184,20 +184,12 @@ def extract_compound_name(primary_key: str) -> Optional[str]:
     Returns:
         str or None: The extracted compound name, or None if no match is found.
     """
-    # One regex for single quotes and one for double quotes
-    pattern_single = r"\('((?:\\'|[^'])*)', \d"
-    pattern_double = r'\("((?:\\"|[^"])*)", \d'
+    # Regex to extract compound name from quotes in tuple string
+    pattern = r"([\"\'])(.+?)\1,\s*\d+"
 
-    # Try matching with single quotes pattern
-    name_match = re.search(pattern_single, primary_key)
+    name_match = re.search(pattern, primary_key)
     if name_match:
-        compound_name = name_match.group(1)
-        return compound_name
-
-    # Try matching with double quotes pattern if single quotes pattern fails
-    name_match = re.search(pattern_double, primary_key)
-    if name_match:
-        compound_name = name_match.group(1)
+        compound_name = name_match.group(2)
         return compound_name
 
     # Return None if no match is found
