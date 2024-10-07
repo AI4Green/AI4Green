@@ -186,7 +186,9 @@ def extract_compound_name(primary_key: str) -> Optional[str]:
     """
     # Regex to extract compound name from quotes in tuple string
     pattern = r"([\"\'])(.+?)\1,\s*\d+"
-
+    # do not process long strings from user input
+    if len(primary_key) > 210:
+        abort(403)
     name_match = re.search(pattern, primary_key)
     if name_match:
         compound_name = name_match.group(2)
