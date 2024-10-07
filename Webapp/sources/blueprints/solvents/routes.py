@@ -129,7 +129,7 @@ def solvents() -> Response:
                 else:
                     primary_key = 0
             else:
-                primary_key = f"('{solvent_dropdown_match.novel_compound[0].name}', {workbook.id})"
+                primary_key = str((solvent_dropdown_match.name, workbook.id))
         if (
             solvent_dropdown_match is None
         ):  # if not in the solvent dropdown then check the compound database for the name
