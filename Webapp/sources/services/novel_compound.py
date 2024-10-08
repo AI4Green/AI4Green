@@ -177,21 +177,24 @@ def extract_compound_name(primary_key: str) -> Optional[str]:
     Extracts and unescapes the compound name from the primary_key string.
     Uses two regex patterns to handle both single and double quotes.
     example formats - : "('compound name', 1)" or '("compound's name", 1)'
-
     Args:
         primary_key (str): The input string containing the compound name.
-
     Returns:
         str or None: The extracted compound name, or None if no match is found.
     """
-    # Regex to extract compound name from quotes in tuple string
-    pattern = r"([\"\'])(.+?)\1,\s*\d+"
-    # do not process long strings from user input
-    if len(primary_key) > 210:
-        abort(403)
-    name_match = re.search(pattern, primary_key)
+    # One regex for single quotes and one for double quotes
+    pattern_single = r"\('((?:\\'|[^'])*)', \d"
+    pattern_double = r'\("((?:\\"|[^"])*)", \d'
+    # Try matching with single quotes pattern
+    name_match = re.search(pattern_single, primary_key)
     if name_match:
-        compound_name = name_match.group(2)
+        compound_name = name_match.group(1)
+        return compound_name
+
+    # Try matching with double quotes pattern if single quotes pattern fails
+    name_match = re.search(pattern_double, primary_key)
+    if name_match:
+        compound_name = name_match.group(1)
         return compound_name
 
     # Return None if no match is found
@@ -274,7 +277,9 @@ class NewNovelCompound:
         # only certain symbols allowed
         if not re.fullmatch(r"[A-Za-z0-9α-ωΑ-Ω+\-.,/(){}\[\]·'\s]+", self.name):
             invalid_symbols = self.find_invalid_symbols(self.name)
-            self.feedback = f"Name contains invalid symbols {', '.join(invalid_symbols)}"
+            self.feedback = (
+                f"Name contains invalid symbols {', '.join(invalid_symbols)}"
+            )
             self.validation = "failed"
 
     @staticmethod
@@ -288,14 +293,14 @@ class NewNovelCompound:
             A set of invalid symbols found in the chemical name.
         """
         valid_symbols = set(
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789αβγδεζηθικλμνξοπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ+-.,/(){}[]·' ")
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789αβγδεζηθικλμνξοπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ+-.,/(){}[]·' "
+        )
 
         invalid_symbols = set()
         for char in chemical_name:
             if char not in valid_symbols:
                 invalid_symbols.add(char)
         return invalid_symbols
-
 
     def validate_name_is_unique(self):
         """
