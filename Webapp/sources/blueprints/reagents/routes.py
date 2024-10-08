@@ -71,7 +71,7 @@ def reagents() -> Response:
         # assigns 0 if the reagent density is not found in the database
         hazards = found_reagent.hphrase  # reagent hazards
         if novel_compound is True:
-            primary_key = f"('{found_reagent.name}', {found_reagent.workbook})"
+            primary_key = str((found_reagent.name, found_reagent.workbook))
         else:
             primary_key = found_reagent.id
 
