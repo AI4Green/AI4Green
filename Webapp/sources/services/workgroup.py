@@ -1,7 +1,6 @@
 import re
 from typing import List
 
-from flask_login import current_user
 from sources import models
 from sources.extensions import db
 from sqlalchemy import func

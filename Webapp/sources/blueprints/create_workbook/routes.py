@@ -8,7 +8,7 @@ from flask_login import (  # protects a view function against anonymous users
     login_required,
 )
 from flask_wtf import FlaskForm
-from sources import auxiliary, models
+from sources import auxiliary, models, services
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.decorators import principal_investigator_or_senior_researcher_required
 from sources.extensions import db
@@ -16,7 +16,6 @@ from sqlalchemy import func
 from wtforms import StringField, SubmitField
 from wtforms.validators import Length
 
-from ...services.utils import remove_spaces_and_dashes
 from . import create_workbook_bp  # imports the blueprint of the dummy route
 
 
@@ -49,7 +48,9 @@ def create_workbook(workgroup: str) -> Response:
     if request.method == "POST" and form.validate_on_submit():
         # validates against special characters in workbook name
         workbook_name = auxiliary.sanitise_user_input(form.workbook.data)
-        workbook_name_delimiters_removed = remove_spaces_and_dashes(workbook_name)
+        workbook_name_delimiters_removed = services.utils.remove_spaces_and_dashes(
+            workbook_name
+        )
         if not workbook_name.replace(" ", "").replace("-", "").isalnum():
             flash("Workgroup names cannot contain special characters!")
             return render_template(
@@ -66,7 +67,7 @@ def create_workbook(workgroup: str) -> Response:
         if [
             x
             for x in existing_workbook_names
-            if remove_spaces_and_dashes(x.name).lower()
+            if services.utils.remove_spaces_and_dashes(x.name).lower()
             == workbook_name_delimiters_removed.lower()
         ]:
             flash("A workbook of this name already exists!")

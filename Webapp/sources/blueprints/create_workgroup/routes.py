@@ -15,7 +15,6 @@ from sqlalchemy import func
 from wtforms import SelectField, StringField, SubmitField, TextAreaField
 from wtforms.validators import Length
 
-from ...services.utils import remove_spaces_and_dashes
 from . import create_workgroup_bp  # imports the blueprint of the dummy route
 
 
@@ -69,7 +68,9 @@ def create_workgroup() -> Response:
             .all()
         )
 
-        workgroup_name_delimiters_removed = remove_spaces_and_dashes(workgroup_name)
+        workgroup_name_delimiters_removed = services.utils.remove_spaces_and_dashes(
+            workgroup_name
+        )
         if other_workgroups_waiting_approval:
             flash(
                 "You cannot create another workgroup until your first workgroup has been approved"
@@ -100,7 +101,7 @@ def create_workgroup() -> Response:
         if [
             x
             for x in existing_workgroup_names
-            if remove_spaces_and_dashes(x).lower()
+            if services.utils.remove_spaces_and_dashes(x).lower()
             == workgroup_name_delimiters_removed.lower()
         ]:
             flash(
