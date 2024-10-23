@@ -1,8 +1,10 @@
+import re
 from typing import List
 
 from flask_login import current_user
 from sources import models
 from sources.extensions import db
+from sqlalchemy import func
 
 
 def list_all() -> List[models.WorkGroup]:
@@ -131,3 +133,42 @@ def get_user_type(workgroup_name: str, user: models.User) -> str:
         user_type = "standard_member"
 
     return user_type
+
+
+def verify_wg_name(workgroup_name: str, new_name: str) -> str:
+    """
+    Verifies a name input is unique, is not empty, and contains only alphanumeric characters.
+        the new name is stripped of spaces, and lowered to be entirely lowercase. Likewise, all
+        names in database are lowered to check for duplicates.
+    Args:
+            workgroup_name: str, the current workgroup name
+            new_name: str, the user input name which requires verification
+    Returns:
+            name: str, if passes all checks, the name is returned for use
+            feedback: str, if check is flagged, feedback is returned with info
+    """
+    feedback = None
+    name_without_spaces = new_name.replace(" ", "")
+    duplicates = (
+        db.session.query(models.WorkGroup)
+        .filter(
+            func.lower(func.replace(models.WorkGroup.name, " ", ""))
+            == func.lower(name_without_spaces),
+            models.WorkGroup.name != workgroup_name,
+        )
+        .first()
+    )
+    if duplicates:
+        feedback = "Workgroup name already exists"
+
+    elif (
+        not new_name.strip()
+    ):  # checks if the string is empty or contains only whitespace
+        feedback = "Error: Name cannot be empty."
+
+    elif re.search(
+        r"[^a-zA-Z0-9 ]", new_name
+    ):  # checks for any non-alphanumeric characters in string.
+        feedback = "Error: Name contains invalid symbols."
+
+    return feedback if feedback else new_name

@@ -9,12 +9,13 @@ from flask_login import (  # protects a view function against anonymous users
 )
 from flask_wtf import FlaskForm
 from sources import auxiliary, models, services
-from sources.auxiliary import get_workgroups, remove_spaces_and_dashes
+from sources.auxiliary import get_workgroups
 from sources.extensions import db
 from sqlalchemy import func
 from wtforms import SelectField, StringField, SubmitField, TextAreaField
 from wtforms.validators import Length
 
+from ...services.utils import remove_spaces_and_dashes
 from . import create_workgroup_bp  # imports the blueprint of the dummy route
 
 

@@ -70,3 +70,7 @@ def remove_duplicates_keep_first(lst: list) -> list:
             seen_items.add(item)
 
     return new_list
+
+
+def remove_spaces_and_dashes(name: str) -> str:
+    return name.replace(" ", "").replace("-", "")
