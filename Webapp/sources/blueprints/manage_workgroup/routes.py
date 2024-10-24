@@ -1,13 +1,24 @@
-from datetime import datetime, date
-from dateutil.relativedelta import relativedelta
+import base64
+from datetime import date, datetime
 from io import BytesIO
 
-from flask import Response, flash, jsonify, redirect, render_template, url_for, request, current_app
+import qrcode
+from dateutil.relativedelta import relativedelta
+from flask import (
+    Response,
+    current_app,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
-from sources.decorators import principal_investigator_required, workgroup_member_required
+from PIL import Image
 from sources import models, services
 from sources.auxiliary import (
     get_all_workgroup_members,
@@ -17,11 +28,11 @@ from sources.auxiliary import (
     security_member_workgroup,
     workgroup_dict,
 )
+from sources.decorators import (
+    principal_investigator_required,
+    workgroup_member_required,
+)
 from sources.extensions import db
-
-import qrcode
-import base64
-from PIL import Image
 
 from . import manage_workgroup_bp
 
@@ -65,7 +76,7 @@ def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
         requests=requests,
         has_request=has_request,
         notification_number=notification_number,
-        qr_code_expiration = date.today() + relativedelta(years=1)
+        qr_code_expiration=date.today() + relativedelta(years=1),
     )
 
 
@@ -280,12 +291,19 @@ def add_user_by_email(workgroup):
     added_person = services.person.from_email(email)
     if not added_person:
         flash(f"User with email: {email} does not exist! Please try again.")
-        return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
+        return redirect(
+            url_for(
+                "manage_workgroup.manage_workgroup",
+                workgroup=workgroup,
+                has_request="no",
+            )
+        )
 
     wg = services.workgroup.from_name(workgroup)
     if not services.workgroup.get_user_type(workgroup, user):
-
-        notification = services.notifications.add_user_by_email_request(added_person, wg, new_role_display_string)
+        notification = services.notifications.add_user_by_email_request(
+            added_person, wg, new_role_display_string
+        )
 
         duplicates = services.requests.find_workgroup_duplicates_for_user(user, wg)
 
@@ -293,10 +311,15 @@ def add_user_by_email(workgroup):
             flash(
                 "This User's membership has already been requested for this Workgroup."
             )
-            return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
+            return redirect(
+                url_for(
+                    "manage_workgroup.manage_workgroup",
+                    workgroup=workgroup,
+                    has_request="no",
+                )
+            )
 
         else:
-
             services.notifications.send_and_commit(notification, added_person)
 
             wg_request = models.WGStatusRequest(
@@ -311,12 +334,18 @@ def add_user_by_email(workgroup):
             )
             db.session.add(wg_request)
             db.session.commit()
-            flash(f"A request has been send to User with email: {email} for this Workgroup!")
+            flash(
+                f"A request has been send to User with email: {email} for this Workgroup!"
+            )
 
     else:
         flash("This user is already a member of this Workgroup!")
 
-    return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"))
+    return redirect(
+        url_for(
+            "manage_workgroup.manage_workgroup", workgroup=workgroup, has_request="no"
+        )
+    )
 
 
 @manage_workgroup_bp.route("/generate_qr_code/<workgroup>", methods=["GET", "POST"])
@@ -324,9 +353,7 @@ def add_user_by_email(workgroup):
 def generate_qr_code(workgroup=None):
     token = services.email.get_encoded_token(31536000, {"workgroup": workgroup})
     url = f"https://{current_app.config['SERVER_NAME']}/qr_add_user/{token}"
-    logo = Image.open(
-        "sources/static/img/favicon.ico"
-    )
+    logo = Image.open("sources/static/img/favicon.ico")
     qr = qrcode.QRCode(
         version=1,
         box_size=10,
@@ -348,7 +375,6 @@ def generate_qr_code(workgroup=None):
 
 @manage_workgroup_bp.route("/qr_add_user/<token>", methods=["GET", "POST"])
 def add_user_by_qr(token=None):
-
     workgroup = services.email.verify_qr_code_for_add_user_token(token)
     if workgroup:
         return redirect(url_for("join_workgroup.join_workgroup", workgroup=workgroup))
@@ -356,3 +382,35 @@ def add_user_by_qr(token=None):
     else:
         flash("This QR code has expired.")
         return redirect(url_for("main.index"))
+
+
+@manage_workgroup_bp.route(
+    "/change_workgroup_name/<workgroup_name>/<new_name>", methods=["POST"]
+)
+def change_name(workgroup_name: str, new_name: str):
+    """
+    Calls a verify workgroup name function in /manage_workgroup/routes.py, verifies the output is the same as the user
+    input. If so,the new name is committed to the database. If error, the feedback is returned with a 400 error.
+
+    Args:
+        workgroup_name: str, the current workgroup name
+        new_name: str, the new name input by the user
+    Returns:
+        JSON message of either success or failure
+
+    """
+    verify_name = services.workgroup.verify_wg_name(workgroup_name, new_name)
+
+    if verify_name == new_name:
+        wg_object = services.workgroup.from_name(workgroup_name)
+        wg_object.name = new_name
+        db.session.commit()
+        return (
+            jsonify(
+                {"message": "Workgroup name successfully changed", "new_name": new_name}
+            ),
+            200,
+        )
+
+    else:
+        return jsonify({"error": verify_name}), 400

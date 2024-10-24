@@ -8,7 +8,26 @@
 <div id="container" class="container">
     <h2>Manage Workgroup</h2>
     <br>
-    <p><b>Workgroup Name: {{ current_workgroup }}</b></p>
+    <p>
+        <b>Workgroup Name: {{ current_workgroup }}</b>
+        <!-- Add an icon for editing (using FontAwesome for the pencil icon) -->
+        <i title="Rename" class="fas fa-edit" id="edit-icon" style="cursor:pointer;" onclick="showNameInput()"></i>
+    </p>
+
+    <!-- Hidden input field and label for new name -->
+    <div id="name-input-container" style="display:none;">
+        <label for="new-name">Enter new name:</label>
+        <input type="text" id="new-name" value="{{ current_workgroup }}">
+        <button class="btn btn-primary" onclick="showConfirmation()">Change</button>
+    </div>
+
+    <!-- Hidden confirmation modal (will be shown when "Change" is clicked) -->
+    <div id="confirmation-modal" style="display:none;">
+        <p>Confirm you want to change workgroup name from "<b>{{ current_workgroup }}</b>" to "<b id="new-workgroup-name"></b>".</p>
+        <button class="btn btn-danger" onclick="hideConfirmation()">Cancel</button>
+        <button class="btn btn-success" onclick="submitNameChange()">Confirm</button>
+    </div>
+
     <br>
     <ul id="myTab" class="nav nav-tabs" role="tablist">
         <li class="nav-item">
