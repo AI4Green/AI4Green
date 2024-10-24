@@ -9,7 +9,7 @@
 function make_change(id, mode, current_status) {
   if (mode === "remove") {
     const completeConfirm = window.confirm(
-      "Are you sure you want to remove this user entirely from the Workgroup? They will also be removed from any Workbooks they are part of within this Workgroup.",
+      "Are you sure you want to remove this user entirely from the Workgroup? They will also be removed from any Workbooks that are part of this Workgroup.",
     );
     if (completeConfirm === false) {
       return;
