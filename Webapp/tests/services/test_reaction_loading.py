@@ -2,6 +2,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 from sources import services, models
 from sources.extensions import db
+from test_reaction_table import make_url, assert_reaction_table_response_for_test_compounds
 from pathlib import Path
 from tests.utils import login
 import pickle
@@ -19,13 +20,20 @@ def test_reload_reaction_v1_6(app: Flask, client: FlaskClient):
             db.session.add(reaction)
             db.session.commit()
 
+            # test sketcher load
             sketcher_url = f"sketcher/{reaction.workbook.WorkGroup.name}/{reaction.workbook.name}/{reaction.reaction_id}/no"
             response = client.get(sketcher_url)
             assert response.status_code == 200
 
+            # test reaction table: use only one product as reaction.products[-1] is not in database
+            table_url = make_url(reactants=",".join(reaction.reactants), products=reaction.products[0] + "," + reaction.products[0])
+            response = client.get(table_url)
+            assert_reaction_table_response_for_test_compounds(response)
+
 
 def test_clone_reaction():
     pass
+
 
 def test_delete_reaction():
     pass
