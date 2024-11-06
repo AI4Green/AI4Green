@@ -1,12 +1,28 @@
+from flask import Flask
+from flask.testing import FlaskClient
 from sources import services, models
 from sources.extensions import db
+from pathlib import Path
+from tests.utils import login
 import pickle
 
-def test_reload_reaction_v1_5():
+def test_reload_reaction_v1_5(app):
     pass
 
-def test_reload_reaction_v1_6():
-    pass
+
+def test_reload_reaction_v1_6(app: Flask, client: FlaskClient):
+    login(client)
+    with app.app_context():
+        reaction_file = Path(__file__).resolve().parent.parent / "data" / "reaction_database_object_v1_6.pickle"
+        with open(reaction_file, "rb") as f:
+            reaction = pickle.load(f)
+            db.session.add(reaction)
+            db.session.commit()
+
+            sketcher_url = f"sketcher/{reaction.workbook.WorkGroup.name}/{reaction.workbook.name}/{reaction.reaction_id}/no"
+            response = client.get(sketcher_url)
+            assert response.status_code == 200
+
 
 def test_clone_reaction():
     pass
