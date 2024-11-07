@@ -47,7 +47,12 @@ def test_clone_reaction(app: Flask, client: FlaskClient, mocker: MockFixture):
         })
         assert response.status_code == 200
         assert response.json["feedback"] == "New reaction made"
-        assert services.reaction.get_from_reaction_id_and_workbook_id("TW1-002", 1) is not None
+        new_reaction = services.reaction.get_from_reaction_id_and_workbook_id("TW1-002", 1)
+        assert new_reaction is not None
+
+        # delete cloned reaction for future tests
+        db.session.delete(new_reaction)
+        db.session.commit()
 
 
 def test_delete_reaction(client: FlaskClient, app: Flask):
@@ -57,6 +62,10 @@ def test_delete_reaction(client: FlaskClient, app: Flask):
         response = client.get(f"delete_reaction/{reaction.reaction_id}/{reaction.workbook.WorkGroup.name}/{reaction.workbook.name}")
         assert response.status_code == 302
         assert reaction.status == "inactive"
+
+        # undo delete for later tests
+        reaction.status = "active"
+        db.session.commit()
 
 
 def save_reaction_version(app: Flask):
