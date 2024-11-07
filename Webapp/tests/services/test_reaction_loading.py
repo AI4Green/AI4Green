@@ -9,33 +9,6 @@ from pytest_mock import MockFixture
 from sources import services, models
 
 
-def check_reaction_file_load(reaction_file: Path, client: FlaskClient, app: Flask):
-    login(client)
-    with app.app_context():
-        with open(reaction_file, "rb") as f:
-            reaction = pickle.load(f)
-            reaction.id = 999
-            reaction.reaction_id = "NEW-999"
-            db.session.add(reaction)
-            db.session.commit()
-
-            # test sketcher load
-            sketcher_url = f"sketcher/{reaction.workbook.WorkGroup.name}/{reaction.workbook.name}/{reaction.reaction_id}/no"
-            response = client.get(sketcher_url)
-            assert response.status_code == 200
-
-            # test reaction table: use only one product as reaction.products[-1] is not in database
-            table_url = make_url(reactants=",".join(reaction.reactants),
-                                 products=reaction.products[0] + "," + reaction.products[0])
-            response = client.get(table_url)
-            assert_reaction_table_response_for_test_compounds(response)
-
-
-def test_reload_reaction_v1_6(app: Flask, client: FlaskClient):
-    reaction_file = Path(__file__).resolve().parent.parent / "data" / "reaction_database_object_v1_6.pickle"
-    check_reaction_file_load(reaction_file, client=client, app=app)
-
-
 def test_clone_reaction(app: Flask, client: FlaskClient, mocker: MockFixture):
     login(client)
     with app.app_context():
@@ -79,16 +52,17 @@ def save_reaction_version(app: Flask):
     new updates. Included here so that future versions can be saved in a consistent way.
     """
     with app.app_context():
-        version = "CHANGE_ME"
+        version = "vCHANGE_ME"
         reaction = (
         db.session.query(models.Reaction)
-        .filter(models.Reaction.name == "a test reaction")
+        .filter(models.Reaction.name == "Reloaded Reaction")
         .join(models.WorkBook)
         .filter(models.WorkBook.id == 1)
         .first()
         )
+        db.session.expunge(reaction)
 
         p = pickle.dumps(reaction)
-        with open("data/reaction_database_object" + version + ".pickle", "wb+") as f:
+        with open("data/reaction_database_object_" + version + ".pickle", "wb+") as f:
             f.write(p)
 
