@@ -60,6 +60,16 @@
             </div>
                 </div>
         </div>
+
+    <!-- Privacy Policy Overlay -->
+    <div id="privacy-overlay">
+        <div id="privacy-popup">
+            <p>We have updated our <a href="auth/privacy_notice" target="_blank">Privacy Policy</a>.</p>
+            <button onclick="updatePrivacyPolicyAgreement()" class="btn btn-success reload-btn">I Accept</button>
+            <a href={{url_for("auth.logout")}}><button onclick=href="/logout" class="btn btn-danger">No Thanks</button></a>
+        </div>
+    </div>
+
     {% else %}
         <!--    current user is not logged in-->
         <div class="jumbotron jumbotron-fluid home">
