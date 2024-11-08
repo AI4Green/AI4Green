@@ -81,6 +81,7 @@ def test_password_reset_request(client: FlaskClient):
 
 
 def test_password_reset(client: FlaskClient, app: Flask):
+    """Tests password reset"""
     # mimic password reset
     with app.app_context():
         user = services.user.from_email("password_reset@test.com")
@@ -99,6 +100,7 @@ def test_password_reset(client: FlaskClient, app: Flask):
 
 
 def test_update_email(client: FlaskClient, app: Flask):
+    """Tests email update"""
     login(client, username="test_username", password="test_pw")
     response = client.post(
         "/update_email",

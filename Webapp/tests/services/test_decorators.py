@@ -23,6 +23,7 @@ from sources.decorators import (
     ("default_value", "workgroup", {}, {}, "default_value"),
 ])
 def test_get_from_request(input_value, search_str, request_args, request_form, expected, app):
+    """Tests _get_from_request from decorators.py. Uses parameters defined above"""
     with app.test_request_context(query_string=request_args, data=request_form):
         assert _get_from_request(input_value, search_str) == expected
 
@@ -37,25 +38,36 @@ def test_get_from_request(input_value, search_str, request_args, request_form, e
     ]
 )
 def test_is_demo(request_args, request_form, expected, app):
+    """Tests _is_demo from decorators.py. Uses parameters defined above"""
     with app.test_request_context(query_string=request_args, data=request_form):
         assert _is_demo() == expected
 
 
 def mock_function(workgroup, workbook):
+    """Mock function used to test security decorators"""
     return jsonify("Access Granted")
 
 
 def setup_user_type_mocker(mocker: MockFixture, user_type: str):
+    """
+    Sets up mocker for sources.services.workgroup.get_user_type function
+    Args:
+        mocker (MockFixture): Fixture for mocking
+        user_type (str): return value for function, "principal_investigator", "senior_researcher" or "standard_member"
+    """
     mock_get_user_type = mocker.patch("sources.services.workgroup.get_user_type")
     mock_get_user_type.return_value = user_type
 
 
-def setup_get_workgroups_mocker(mocker: MockFixture, workgroups: List[str]):
-    mock_get_workgroups = mocker.patch("sources.auxiliary.get_workgroups")
-    mock_get_workgroups.return_value = workgroups
-
-
-def check_response_success(app: Flask, decorated_function, workgroup="Test-Workgroup", workbook=None):
+def check_response_success(app: Flask, decorated_function: mock_function, workgroup="Test-Workgroup", workbook=None):
+    """
+    Checks that the decorator applied to the mock function allows user through
+    Args:
+        app (Flask): Flask application
+        decorated_function (mock_function): instance of mock_function() with applied security decorator
+        workgroup (str): name of workgroup
+        workbook (str): name of workbook
+    """
     with app.test_request_context():
         response = decorated_function(workgroup=workgroup, workbook=workbook)
         assert response.status_code == 200
@@ -63,6 +75,14 @@ def check_response_success(app: Flask, decorated_function, workgroup="Test-Workg
 
 
 def check_response_failed(app: Flask, decorated_function: mock_function, workgroup="Test-Workgroup", workbook=None):
+    """
+    Checks that the decorator applied to the mock function redirects user to homepage
+    Args:
+        app (Flask): Flask application
+        decorated_function (mock_function): instance of mock_function() with applied security decorator
+        workgroup (str): name of workgroup
+        workbook (str): name of workbook
+    """
     with app.test_request_context():
         response = decorated_function(workgroup=workgroup, workbook=workbook)
         assert response.status_code == 302
@@ -70,6 +90,7 @@ def check_response_failed(app: Flask, decorated_function: mock_function, workgro
 
 
 def test_principal_investigator_required(client: FlaskClient, mocker: MockFixture, app: Flask):
+    """Tests principal_investigator_required decorator"""
     decorated_function = principal_investigator_required(mock_function)
 
     # test user is PI
@@ -82,6 +103,7 @@ def test_principal_investigator_required(client: FlaskClient, mocker: MockFixtur
 
 
 def test_principal_investigator_or_senior_researcher_required(client: FlaskClient, mocker: MockFixture, app: Flask):
+    """Tests principal_investigator_or_senior_researcher_required decorator"""
     decorated_function = principal_investigator_or_senior_researcher_required(mock_function)
 
     # mock user is PI
@@ -98,6 +120,7 @@ def test_principal_investigator_or_senior_researcher_required(client: FlaskClien
 
 
 def test_workgroup_member_required(client: FlaskClient, app: Flask):
+    """Tests workgroup_member_required decorator"""
     with client:
         login(client)
         decorated_function = workgroup_member_required(mock_function)
@@ -110,6 +133,7 @@ def test_workgroup_member_required(client: FlaskClient, app: Flask):
 
 
 def test_workbook_member_required(client: FlaskClient,app: Flask):
+    """Tests workbook_member_required decorator"""
     with app.app_context():
         with client:
             login(client)

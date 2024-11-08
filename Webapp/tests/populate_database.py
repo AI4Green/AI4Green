@@ -9,6 +9,17 @@ from sources.extensions import db
 
 
 def add_test_user(username: str, email: str, fullname: str, password: str, verified: bool = False):
+    """
+    Adds a test user to the database.
+    Args:
+        username (str): The username of the test user.
+        email (str): The email address of the test user.
+        fullname (str): The full name of the test user.
+        password (str): The password of the test user.
+        verified (bool): Whether the test user is verified.
+    Returns:
+        p (models.Person): The added user
+    """
     # create and add person
     p = models.Person()
     db.session.add(p)

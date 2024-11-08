@@ -10,6 +10,7 @@ from sources import services, models
 
 
 def test_clone_reaction(app: Flask, client: FlaskClient, mocker: MockFixture):
+    """Tests clone_reaction functionality. Cloned reaction is removed from database at end of test."""
     login(client)
     with app.app_context():
         reaction = services.reaction.get_from_reaction_id_and_workbook_id("TW1-001", 1)
@@ -33,6 +34,7 @@ def test_clone_reaction(app: Flask, client: FlaskClient, mocker: MockFixture):
 
 
 def test_delete_reaction(client: FlaskClient, app: Flask):
+    """Tests delete_reaction functionality. Deleted reaction is labelled as active again at end of test."""
     login(client)
     with app.app_context():
         reaction = services.reaction.get_from_reaction_id_and_workbook_id("TW1-001", 1)
@@ -47,7 +49,7 @@ def test_delete_reaction(client: FlaskClient, app: Flask):
 
 def save_reaction_version(app: Flask):
     """
-    function to save a test Reaction from the database. Reactions from each major version of
+    Function to save a test Reaction from the database. Reactions from each major version of
     AI4Green should be saved and tested for reload to ensure old reactions are compatible with
     new updates. Included here so that future versions can be saved in a consistent way.
     """
