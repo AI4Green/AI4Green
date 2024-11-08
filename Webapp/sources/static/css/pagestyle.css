@@ -267,3 +267,33 @@ body.loading .loading-bar{
 .btn-toolbar .btn-label {
   float: left;
 }
+
+/* Fullscreen overlay styling */
+#privacy-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Grey-out background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+}
+
+/* Pop-up styling */
+#privacy-popup {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 300px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#privacy-popup a {
+    color: #007bff;
+    text-decoration: none;
+}
