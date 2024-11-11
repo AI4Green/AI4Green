@@ -120,13 +120,11 @@ class SearchHandler:
             reactants, products = list(set(reactants1 + reactants2)), list(
                 set(products1 + products2)
             )
-            components = [reactants1, reagents, products1]
+            components = [reactants, reagents, products]
             for component_type in components:
                 for component_smiles in component_type:
                     if component_smiles:
                         inchi = services.all_compounds.smiles_to_inchi(component_smiles)
-                        if not inchi:
-                            print(component_smiles, component_type)
                         if inchi == target_inchi:
                             self.matches.append(reaction)
                             return
