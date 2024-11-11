@@ -86,6 +86,8 @@ class SearchHandler:
         # get search smiles and convert to inchi
         smiles = request.form["smiles"]
         target_inchi = services.all_compounds.smiles_to_inchi(smiles)
+        if not target_inchi:
+            return jsonify({"status": "fail", "message": f"Invalid structure, please try again!"})
         # iterate through reactant, reagent, and product for each reaction and check for a match
         for reaction in self.reactions:
             self.exact_structure_match_loop(reaction, target_inchi)
@@ -118,11 +120,13 @@ class SearchHandler:
             reactants, products = list(set(reactants1 + reactants2)), list(
                 set(products1 + products2)
             )
-            components = [reactants, reagents, products]
+            components = [reactants1, reagents, products1]
             for component_type in components:
                 for component_smiles in component_type:
                     if component_smiles:
                         inchi = services.all_compounds.smiles_to_inchi(component_smiles)
+                        if not inchi:
+                            print(component_smiles, component_type)
                         if inchi == target_inchi:
                             self.matches.append(reaction)
                             return
