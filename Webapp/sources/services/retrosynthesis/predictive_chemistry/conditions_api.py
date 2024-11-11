@@ -7,8 +7,6 @@ from flask import current_app
 from .compounds import get_compound_data
 from .utils import encodings_to_smiles_symbols, sig_figs_on_numbers
 
-BASE_URL = current_app.config["CONDITIONS_API_URL"]
-
 
 def get_conditions(solved_routes: dict) -> Dict[str, dict]:
     """
@@ -104,6 +102,7 @@ class ReactionConditions:
         """
         Makes the api call to the condition prediction url to get the conditions data
         """
+        BASE_URL = current_app.config["CONDITIONS_API_URL"]
         url = f"{BASE_URL}/api/v1/condition_cleaned"
         smiles = self.reaction_smiles
         data = {"smiles": smiles, "n_conditions": 10}

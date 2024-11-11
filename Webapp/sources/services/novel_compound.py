@@ -177,30 +177,25 @@ def extract_compound_name(primary_key: str) -> Optional[str]:
     Extracts and unescapes the compound name from the primary_key string.
     Uses two regex patterns to handle both single and double quotes.
     example formats - : "('compound name', 1)" or '("compound's name", 1)'
-
     Args:
         primary_key (str): The input string containing the compound name.
-
     Returns:
         str or None: The extracted compound name, or None if no match is found.
     """
     # One regex for single quotes and one for double quotes
     pattern_single = r"\('((?:\\'|[^'])*)', \d"
     pattern_double = r'\("((?:\\"|[^"])*)", \d'
-
     # Try matching with single quotes pattern
     name_match = re.search(pattern_single, primary_key)
     if name_match:
         compound_name = name_match.group(1)
-        unescaped_compound_name = bytes(compound_name, "utf-8").decode("unicode_escape")
-        return unescaped_compound_name
+        return compound_name
 
     # Try matching with double quotes pattern if single quotes pattern fails
     name_match = re.search(pattern_double, primary_key)
     if name_match:
         compound_name = name_match.group(1)
-        unescaped_compound_name = bytes(compound_name, "utf-8").decode("unicode_escape")
-        return unescaped_compound_name
+        return compound_name
 
     # Return None if no match is found
     return None
@@ -270,12 +265,42 @@ class NewNovelCompound:
         """
         Validates and sanitizes the compound name from the request.
         """
-        if len(self.name) > 200:
-            self.feedback = "Name must be under 200 characters long"
-            self.validation = "failed"
         if not self.name:
             self.feedback = "Compound requires a name"
             self.validation = "failed"
+
+        # maximum name length
+        elif len(self.name) > 200:
+            self.feedback = "Name must be under 200 characters long"
+            self.validation = "failed"
+
+        # only certain symbols allowed
+        if not re.fullmatch(r"[A-Za-z0-9α-ωΑ-Ω+\-.,/(){}\[\]·'\s]+", self.name):
+            invalid_symbols = self.find_invalid_symbols(self.name)
+            self.feedback = (
+                f"Name contains invalid symbols {', '.join(invalid_symbols)}"
+            )
+            self.validation = "failed"
+
+    @staticmethod
+    def find_invalid_symbols(chemical_name: str):
+        """
+        Identify the invalid symbols in the provided chemical name.
+
+        Args:
+             chemical_name: The chemical name we are finding invalid symbols in.
+        Returns:
+            A set of invalid symbols found in the chemical name.
+        """
+        valid_symbols = set(
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789αβγδεζηθικλμνξοπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ+-.,/(){}[]·' "
+        )
+
+        invalid_symbols = set()
+        for char in chemical_name:
+            if char not in valid_symbols:
+                invalid_symbols.add(char)
+        return invalid_symbols
 
     def validate_name_is_unique(self):
         """

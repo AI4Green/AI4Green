@@ -8,18 +8,59 @@ from sources import models, services
 from sources.extensions import db
 
 
+def add_test_user(username: str, email: str, fullname: str, password: str, verified: bool = False):
+    """
+    Adds a test user to the database.
+    Args:
+        username (str): The username of the test user.
+        email (str): The email address of the test user.
+        fullname (str): The full name of the test user.
+        password (str): The password of the test user.
+        verified (bool): Whether the test user is verified.
+    Returns:
+        p (models.Person): The added user
+    """
+    # create and add person
+    p = models.Person()
+    db.session.add(p)
+
+    # specify and add user
+    services.user.add(
+        username, email, fullname, password, p
+    )
+
+    if verified:
+        user = services.user.from_email(email)
+        user.is_verified = True
+
+    db.session.commit()
+
+    return p
+
+
+
 def insert_test_data():
     time_of_creation = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
     # make a person and a user
     CDE.seed_role_types()
-    p1 = models.Person()
-    # Capitalize unique fields for consistency
-    db.session.add(p1)
 
-    services.user.add(
-        "test_username", "test_user@test.com", "Gloria Testeban", "test_pw", p1
+    # add verified user
+    # create and add person
+    p1 = add_test_user(
+        username="test_username", email="test_user@test.com", fullname="Gloria Testeban", password="test_pw",
+        verified=True
     )
-    db.session.commit()
+
+    # add unverified user
+    p2 = add_test_user(
+        username="not_verified", email="not_verified@test.com", fullname="Test Daley", password="not_verified",
+        verified=False
+    )
+
+    p3 = add_test_user(
+        username="password_reset", email="password_reset@test.com", fullname="TEST", password="password_reset",
+        verified=True
+    )
 
     # Make an institution, workgroup and workbook
     institution1 = models.Institution.create(
@@ -128,6 +169,7 @@ def insert_test_data():
         reaction_id="TW1-001",
         name="a test reaction",
         description="testing a reaction involving compounds from the test family",
+        reaction_class="Amide bond formation",
         reactants=["C", "CC"],
         products=["CP", "CPP"],
         reagents=["CCC", "CCCCC"],
@@ -192,6 +234,7 @@ def reaction_table_json_contents():
         "reaction_smiles": "C.CC>>CP.CCP",
         "reaction_name": "test reaction name",
         "reaction_description": "testing routes and services",
+        "reaction_class": "Amide bond formation",
         # reactant data
         "reactant_ids": [-1, -2],
         "reactant_masses": ["123", "101"],
