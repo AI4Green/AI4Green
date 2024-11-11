@@ -107,7 +107,7 @@ def test_structure_search_handler_invalid_smiles(client: FlaskClient):
     # Assert that the response is as expected
     assert response.status_code == 200
     assert (
-        response.json.get("message") == "No results found"
+        response.json.get("message") == "Invalid structure, please try again!"
         and response.json.get("status") == "fail"
     ), "No matching results should be found"
     assert response.json.get("schemes") is None, "SVG image should not be made"
