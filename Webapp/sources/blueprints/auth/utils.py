@@ -3,7 +3,8 @@ from functools import wraps
 from flask import current_app, redirect, request, url_for
 from flask_login import config, current_user
 
-from sources import login, models
+from sources import models
+from sources.extensions import login
 
 
 def login_not_allowed(func):

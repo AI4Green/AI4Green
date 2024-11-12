@@ -11,7 +11,8 @@ import pytz
 from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
 from azure.storage.blob import BlobClient, BlobServiceClient, ContainerClient
 from flask import abort, current_app, request
-from sources import db, models, services
+from sources.extensions import db
+from sources import models, services
 from werkzeug.utils import secure_filename
 
 
