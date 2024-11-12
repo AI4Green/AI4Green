@@ -168,8 +168,3 @@ def uk_arms_embargoes():
     ) as f:
         return set(f.read().splitlines())
 
-# Add controlled substance list to configs
-current_app.config["CONTROLLED_SUBSTANCES"] = controlled_substance_inchi()
-
-# Add embargoed countries list config
-current_app.config["EMBARGOED_COUNTRIES"] = uk_arms_embargoes()
