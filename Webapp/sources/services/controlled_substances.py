@@ -47,7 +47,7 @@ def check_reaction_for_controlled_substances(reaction: models.Reaction) -> Union
         return None
 
     for substance in unique_structures:
-        add(reaction, substance)
+        services.controlled_substances.add(reaction, substance)
 
     return checks
 
@@ -167,4 +167,3 @@ def uk_arms_embargoes():
             ), "r"
     ) as f:
         return set(f.read().splitlines())
-
