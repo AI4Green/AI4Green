@@ -1,7 +1,7 @@
 import re
 from typing import List
 
-from sources import models
+from sources import models, services
 from sources.extensions import db
 from sqlalchemy import func
 
@@ -58,7 +58,7 @@ def get_workgroup_pi(workgroup_name: str) -> List[models.User]:
     """
 
     return (
-        db.session.query(models.User.email)
+        db.session.query(models.User)
         .join(models.Person)
         .join(models.t_Person_WorkGroup)
         .join(models.WorkGroup)
@@ -119,16 +119,16 @@ def get_user_type(workgroup_name: str, user: models.User) -> str:
     """
     user_type = None
 
-    pi = get_workgroup_pi(workgroup_name)
-    if user.email in [user.email for user in pi]:
+    pi_list = get_workgroup_pi(workgroup_name)
+    if user.email in [user.email for user in pi_list]:
         user_type = "principal_investigator"
 
-    sr = get_workgroup_sr(workgroup_name)
-    if user.email in [user.email for user in sr]:
+    sr_list = get_workgroup_sr(workgroup_name)
+    if user.email in [user.email for user in sr_list]:
         user_type = "senior_researcher"
 
-    sm = get_workgroup_sm(workgroup_name)
-    if user.email in [user.email for user in sm]:
+    sm_list = get_workgroup_sm(workgroup_name)
+    if user.email in [user.email for user in sm_list]:
         user_type = "standard_member"
 
     return user_type
@@ -166,8 +166,27 @@ def verify_wg_name(workgroup_name: str, new_name: str) -> str:
         feedback = "Error: Name cannot be empty."
 
     elif re.search(
-        r"[^a-zA-Z0-9 ]", new_name
+        r"[^a-zA-Z0-9- ]", new_name
     ):  # checks for any non-alphanumeric characters in string.
         feedback = "Error: Name contains invalid symbols."
 
     return feedback if feedback else new_name
+
+
+def list_all_members(workgroup: models.workgroup) -> List[models.Person]:
+    """
+    Lists all members of a given workgroup by compiling data from three categories: senior researchers,
+    standard members, and the principal investigator.
+    Args:
+        workgroup: models.workgroup, the workgroup from which members will be listed
+    Returns:
+        List[models.Person], a list of all persons associated with the workgroup
+    """
+
+    senior_researchers = get_workgroup_sr(workgroup.name)
+    standard_members = get_workgroup_sm(workgroup.name)
+    principal_investigator = get_workgroup_pi(workgroup.name)
+    all_users = senior_researchers + standard_members + principal_investigator
+    all_persons = [services.person.from_id(x.person) for x in all_users]
+
+    return all_persons

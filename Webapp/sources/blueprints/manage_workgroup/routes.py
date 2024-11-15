@@ -387,6 +387,7 @@ def add_user_by_qr(token=None):
 @manage_workgroup_bp.route(
     "/change_workgroup_name/<workgroup_name>/<new_name>", methods=["POST"]
 )
+@principal_investigator_required
 def change_name(workgroup_name: str, new_name: str):
     """
     Calls a verify workgroup name function in /manage_workgroup/routes.py, verifies the output is the same as the user
@@ -405,6 +406,11 @@ def change_name(workgroup_name: str, new_name: str):
         wg_object = services.workgroup.from_name(workgroup_name)
         wg_object.name = new_name
         db.session.commit()
+        all_members = services.workgroup.list_all_members(wg_object)
+
+        for member in all_members:
+            services.notifications.new(member, workgroup_name, new_name)
+
         return (
             jsonify(
                 {"message": "Workgroup name successfully changed", "new_name": new_name}
