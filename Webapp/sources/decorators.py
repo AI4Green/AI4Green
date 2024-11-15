@@ -34,7 +34,7 @@ def _is_demo() -> bool:
         Bool: True if demo or tutorial is active else False
 
     """
-    if request.form.get("demo") == "demo" or request.form.get("tutorial") == "tutorial":
+    if request.form.get("demo") == "demo" or request.form.get("tutorial") == "yes":
         return True
     if request.args.get("demo") is None and request.args.get("tutorial") is None:
         return False
