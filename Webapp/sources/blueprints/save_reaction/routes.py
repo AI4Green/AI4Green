@@ -86,6 +86,7 @@ def new_reaction() -> Response:
                 "solvent_concentrations": [],
                 "solvent_hazards": [],
                 "solvent_physical_forms": [],
+                "product_intended_dps": [],
                 "product_amounts": [],
                 "product_amounts_raw": [],
                 "product_masses": [],
@@ -98,6 +99,16 @@ def new_reaction() -> Response:
             {
                 "real_product_mass": "",
                 "unreacted_reactant_mass": "",
+                "polymer_mn": "",
+                "polymer_mw": "",
+                "polymer_dispersity": "",
+                "polymer_mass_method": "-select-",
+                "polymer_mass_calibration": "",
+                "polymer_tg": "",
+                "polymer_tm": "",
+                "polymer_tc": "",
+                "polymer_thermal_method": "-select-",
+                "polymer_thermal_calibration": "",
                 "reaction_temperature": "",
                 "batch_flow": "-select-",
                 "element_sustainability": "undefined",
@@ -135,6 +146,11 @@ def autosave() -> Response:
     reaction_description = str(request.form["reactionDescription"])
     reaction = services.reaction.get_current_from_request()
     reaction_name = reaction.name
+    reaction_image = str(request.form["reactionImage"])
+    polymer_mode = request.form["polymerMode"]
+    polymer_mode = polymer_mode.lower() == "true"  # convert string to boolean
+    polymer_indices = json.loads(request.form.get("polymerIndices"))
+    polymerisation_type = str(request.form["polymerisationType"])
 
     services.auth.edit_reaction(reaction)
 
@@ -149,7 +165,7 @@ def autosave() -> Response:
     reactant_primary_keys = get_data("reactantPrimaryKeys")
     reactant_primary_keys_ls = list(filter(None, reactant_primary_keys))
     reactant_smiles_ls = services.all_compounds.get_smiles_list(
-        reactant_primary_keys_ls
+        reactant_primary_keys_ls, polymer_indices
     )
     reactant_masses = get_data("reactantMasses")[:-1]
     reactant_masses_raw = get_data("reactantMassesRaw")[:-1]
@@ -194,7 +210,11 @@ def autosave() -> Response:
     main_product = str(request.form["mainProductTableNumber"])
     product_primary_keys = get_data("productPrimaryKeys")
     product_primary_keys_ls = list(filter(None, product_primary_keys))
-    product_smiles_ls = services.all_compounds.get_smiles_list(product_primary_keys_ls)
+    product_smiles_ls = services.all_compounds.get_smiles_list(
+        product_primary_keys_ls,
+        polymer_indices,
+        number_of_reactants=len(reactant_smiles_ls),
+    )
     product_physical_form = get_data("productPhysicalForms")[:-1]
     product_amounts = get_data("productAmounts")[:-1]
     product_amounts_raw = get_data("productAmountsRaw")[:-1]
@@ -204,6 +224,7 @@ def autosave() -> Response:
     product_molecular_weights = get_data("productMolecularWeights")
     product_hazards = get_data("productHazards")
     product_physical_forms_text = get_data("productPhysicalFormsText")
+    product_intended_dps = get_data("productIntendedDPs")
     amount_units = str(request.form["amountUnits"])
     mass_units = str(request.form["massUnits"])
     volume_units = str(request.form["volumeUnits"])
@@ -216,6 +237,8 @@ def autosave() -> Response:
             "reaction_smiles": reaction_smiles,
             "reaction_name": reaction_name,
             "reaction_description": reaction_description,
+            "reaction_image": reaction_image,
+            "polymerisation_type": polymerisation_type,
             # reactant data
             "reactant_smiles": reactant_smiles_ls,
             "reactant_masses": reactant_masses,
@@ -272,6 +295,7 @@ def autosave() -> Response:
             "product_molecular_weights": product_molecular_weights,
             "product_hazards": product_hazards,
             "product_physical_forms_text": product_physical_forms_text,
+            "product_intended_dps": product_intended_dps,
         }
     )
 
@@ -279,6 +303,17 @@ def autosave() -> Response:
     # product masses and unreacted reactant masses
     real_product_mass = request.form["realProductMass"]
     unreacted_reactant_mass = request.form["unreactedReactantMass"]
+    # polymer mode stuff
+    polymer_mn = request.form["polymerMn"]
+    polymer_mw = request.form["polymerMw"]
+    polymer_dispersity = request.form["polymerDispersity"]
+    polymer_mass_method = request.form["polymerMassMethod"]
+    polymer_mass_calibration = request.form["polymerMassCalibration"]
+    polymer_tg = request.form["polymerTg"]
+    polymer_tm = request.form["polymerTm"]
+    polymer_tc = request.form["polymerTc"]
+    polymer_thermal_method = request.form["polymerThermalMethod"]
+    polymer_thermal_calibration = request.form["polymerThermalCalibration"]
     # sustainability data
     reaction_temperature = request.form["reactionTemperature"]
     element_sustainability = request.form["elementSustainability"]
@@ -303,6 +338,16 @@ def autosave() -> Response:
         {
             "real_product_mass": real_product_mass,
             "unreacted_reactant_mass": unreacted_reactant_mass,
+            "polymer_mn": polymer_mn,
+            "polymer_mw": polymer_mw,
+            "polymer_dispersity": polymer_dispersity,
+            "polymer_mass_method": polymer_mass_method,
+            "polymer_mass_calibration": polymer_mass_calibration,
+            "polymer_tg": polymer_tg,
+            "polymer_tm": polymer_tm,
+            "polymer_tc": polymer_tc,
+            "polymer_thermal_method": polymer_thermal_method,
+            "polymer_thermal_calibration": polymer_thermal_calibration,
             "reaction_temperature": reaction_temperature,
             "element_sustainability": element_sustainability,
             "batch_flow": batch_flow,
@@ -363,12 +408,15 @@ def autosave() -> Response:
         "complete": complete,
         "reaction_smiles": reaction_smiles,
         "description": reaction_description,
+        "reaction_image": reaction_image,
         "reactants": reactant_smiles_ls,
         "products": product_smiles_ls,
         "reagents": reagent_smiles_ls,
         "solvent": solvent_primary_keys_ls,
         "reaction_table_data": reaction_table,
         "summary_table_data": summary_table,
+        "polymer_mode": polymer_mode,
+        "polymerisation_type": polymerisation_type,
     }
     reaction.update(**update_dict)
     return jsonify({"feedback": feedback})
@@ -441,11 +489,57 @@ def autosave_sketcher() -> Response:
 
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
     reaction_smiles = str(request.form["reactionSmiles"])
+    reaction_rxn = str(request.form["reactionRXN"])
 
-    update_dict = {"time_of_update": current_time, "reaction_smiles": reaction_smiles}
+    update_dict = {
+        "time_of_update": current_time,
+        "reaction_smiles": reaction_smiles,
+        "reaction_rxn": reaction_rxn,
+    }
     reaction.update(**update_dict)
     feedback = "Reaction Updated!"
     return jsonify({"feedback": feedback})
+
+
+@save_reaction_bp.route("/_save_polymer_mode", methods=["POST"])
+@login_required
+def save_polymer_mode():
+    """Updates reaction dict with polymer mode"""
+    reaction = services.reaction.get_current_from_request()
+    services.auth.edit_reaction(reaction)
+
+    polymer_mode = request.form["polymerMode"]
+    polymer_mode = polymer_mode.lower() == "true"  # convert string to boolean
+    update_dict = {"polymer_mode": polymer_mode}
+    reaction.update(**update_dict)
+    feedback = "Reaction Updated!"
+    return jsonify({"feedback": feedback})
+
+
+@save_reaction_bp.route("/_get_polymer_mode", methods=["GET"])
+@login_required
+def get_polymer_mode():
+    """Read reaction dict to get polymer mode"""
+    reaction_id = str(request.args.get("reactionID"))
+    workgroup_name = str(request.args.get("workgroup"))
+    workbook_name = str(request.args.get("workbook"))
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
+    reaction = (
+        db.session.query(models.Reaction)
+        .filter(models.Reaction.reaction_id == reaction_id)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook.id)
+        .join(models.WorkGroup)
+        .filter(models.WorkGroup.name == workgroup_name)
+        .first()
+    )
+
+    polymer_mode = reaction.polymer_mode
+
+    return jsonify(polymer_mode)
 
 
 @save_reaction_bp.route("/_check_reaction", methods=["POST"])

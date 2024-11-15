@@ -200,6 +200,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(novel_compound_bp)
 
+    from sources.blueprints.polymer_novel_compound import polymer_novel_compound_bp
+
+    app.register_blueprint(polymer_novel_compound_bp)
+
     from sources.blueprints.compound_data_error_report import (
         compound_data_error_report_bp,
     )
@@ -258,5 +262,5 @@ def inject_session_context(app: Flask) -> Dict[str, str]:
             session_type="",
             marvin_js_key=app.config["MARVIN_JS_API_KEY"],
             workgroups=workgroups,
-            notification_number=notification_number
+            notification_number=notification_number,
         )

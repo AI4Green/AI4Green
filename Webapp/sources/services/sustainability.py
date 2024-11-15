@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, Set
 import rdkit
 from flask import request
 from sources import models
+from sources.auxiliary import clean_polymer_smiles
 from sources.extensions import db
 
 
@@ -127,6 +128,12 @@ def element_sustainability_from_set(element_sustainability_set: Set[str]) -> str
 def get_element_set(reaction_smiles_list: List):
     element_symbols = set()
     for component in reaction_smiles_list:
+        if "*" in component:  # in polymer mode  # TODO: check
+            component = clean_polymer_smiles(component)
+            component = component.replace(
+                "*", ""
+            )  # not necessary to keep polymer * in smiles here
+            component = component.replace("()", "")
         mol = rdkit.Chem.MolFromSmiles(component)
         for atom in mol.GetAtoms():
             symbol = atom.GetSymbol()

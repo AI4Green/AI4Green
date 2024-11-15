@@ -107,7 +107,8 @@ class RXNFileExport(SerialisationExport):
         reactant_smiles = utils.remove_default_data(self.db_reaction.reactants)
         reagent_smiles = utils.remove_default_data(self.db_reaction.reagents)
         solvent_smiles = services.all_compounds.get_smiles_list(
-            self.db_reaction.solvent, self.db_reaction.creator_person
+            primary_key_ls=self.db_reaction.solvent,
+            person=self.db_reaction.creator_person,
         )
         product_smiles = utils.remove_default_data(self.db_reaction.products)
         if reactant_smiles and product_smiles:
