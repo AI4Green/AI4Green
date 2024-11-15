@@ -137,7 +137,7 @@ def get_user_type(workgroup_name: str, user: models.User) -> str:
 def verify_wg_name(workgroup_name: str, new_name: str) -> str:
     """
     Verifies a name input is unique, is not empty, and contains only alphanumeric characters.
-        the new name is stripped of spaces, and lowered to be entirely lowercase. Likewise, all
+        The new name is stripped of spaces, and lowered to be entirely lowercase. Likewise, all
         names in database are lowered to check for duplicates.
     Args:
             workgroup_name: str, the current workgroup name
