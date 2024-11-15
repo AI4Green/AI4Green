@@ -1,25 +1,30 @@
-from unittest.mock import patch
-
+import pytest_mock
+from flask import Flask
 from flask.testing import FlaskClient
 from sources import models
 from sources.extensions import db
 from tests.utils import login
 
 
-def test_change_workgroup_name_success(client: FlaskClient):
+def test_change_workgroup_name_success(
+    app: Flask, client: FlaskClient, mocker: pytest_mock.MockerFixture
+):
     """
     Tests the successful change of a workgroup's name when the new name verification matches the user input.
     """
     login(client)
     original_name = "Test-Workgroup"
     new_name = "New-Workgroup"
+    mock_pi_access = mocker.patch("sources.decorators.services.workgroup.get_user_type")
+    mock_pi_access.return_value = "principal_investigator"
     response = client.post(f"/change_workgroup_name/{original_name}/{new_name}")
-    new_name_wg = (
-        db.session.query(models.WorkGroup)
-        .filter(models.WorkGroup.name == new_name)
-        .first()
-    )
-    assert new_name_wg
+    with app.app_context():
+        new_name_wg = (
+            db.session.query(models.WorkGroup)
+            .filter(models.WorkGroup.name == new_name)
+            .first()
+        )
+    assert new_name_wg is not None, "check the new workgroup name is not a null value"
     assert response.status_code == 200
     assert response.json == {
         "message": "Workgroup name successfully changed",
