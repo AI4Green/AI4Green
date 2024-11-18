@@ -19,8 +19,8 @@ def novel_compound() -> Response:
         Flask Response with feedback about the operation.
     """
     # get the active workbook and verify user belongs
-    workgroup_name = str(request.form["workgroup"])
-    workbook_name = str(request.form["workbook"])
+    workgroup_name = str(request.form.get("workgroup"))
+    workbook_name = str(request.form.get("workbook"))
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )

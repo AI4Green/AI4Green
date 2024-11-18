@@ -64,9 +64,9 @@ def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response
 @login_required
 def get_reactions() -> Response:
     """Gets a list of reactions for the active workbook. Reaction data is sent as a list of dictionaries."""
-    sort_crit = str(request.form["sortCriteria"])
-    workbook_name = str(request.form["workbook"])
-    workgroup_name = str(request.form["workgroup"])
+    sort_crit = str(request.form.get("sortCriteria"))
+    workbook_name = str(request.form.get("workbook"))
+    workgroup_name = str(request.form.get("workgroup"))
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
@@ -92,13 +92,13 @@ def get_reaction_images() -> Response:
     """
     Gets a list of reaction images for the active workbook.
     """
-    workbook_name = str(request.form["workbook"])
-    workgroup_name = str(request.form["workgroup"])
+    workbook_name = str(request.form.get("workbook"))
+    workgroup_name = str(request.form.get("workgroup"))
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
-    sort_crit = str(request.form["sortCriteria"])
+    sort_crit = str(request.form.get("sortCriteria"))
     reaction_list = services.reaction.list_active_in_workbook(
         workbook_name, workgroup_name, sort_crit
     )
@@ -113,13 +113,13 @@ def get_smiles() -> Response:
     Gets a list of reaction smiles for the active workbook.
     """
     # must be logged in
-    workbook_name = str(request.form["workbook"])
-    workgroup_name = str(request.form["workgroup"])
+    workbook_name = str(request.form.get("workbook"))
+    workgroup_name = str(request.form.get("workgroup"))
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
-    sort_crit = str(request.form["sortCriteria"])
+    sort_crit = str(request.form.get("sortCriteria"))
     reaction_list = services.reaction.list_active_in_workbook(
         workbook_name, workgroup_name, sort_crit
     )
@@ -134,13 +134,13 @@ def get_rxns() -> Response:
     Gets a list of reaction RXNs for the active workbook.
     """
     # must be logged in
-    workbook_name = str(request.form["workbook"])
-    workgroup_name = str(request.form["workgroup"])
+    workbook_name = str(request.form.get("workbook"))
+    workgroup_name = str(request.form.get("workgroup"))
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
-    sort_crit = str(request.form["sortCriteria"])
+    sort_crit = str(request.form.get("sortCriteria"))
     reaction_list = services.reaction.list_active_in_workbook(
         workbook_name, workgroup_name, sort_crit
     )
@@ -153,13 +153,13 @@ def get_rxns() -> Response:
 def save_new_images():
     """Updates reaction dict with images"""
     # must be logged in
-    workbook_name = str(request.form["workbook"])
-    workgroup_name = str(request.form["workgroup"])
+    workbook_name = str(request.form.get("workbook"))
+    workgroup_name = str(request.form.get("workgroup"))
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
-    sort_crit = str(request.form["sortCriteria"])
+    sort_crit = str(request.form.get("sortCriteria"))
     reaction_list = services.reaction.list_active_in_workbook(
         workbook_name, workgroup_name, sort_crit
     )
