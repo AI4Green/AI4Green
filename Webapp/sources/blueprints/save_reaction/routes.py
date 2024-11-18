@@ -147,7 +147,7 @@ def autosave() -> Response:
     reaction = services.reaction.get_current_from_request()
     reaction_name = reaction.name
     reaction_image = str(request.form["reactionImage"])
-    polymer_mode = request.form["polymerMode"]
+    polymer_mode = request.form.get("polymerMode")
     polymer_mode = polymer_mode.lower() == "true"  # convert string to boolean
     polymer_indices = json.loads(request.form.get("polymerIndices"))
     polymerisation_type = str(request.form["polymerisationType"])
@@ -304,16 +304,16 @@ def autosave() -> Response:
     real_product_mass = request.form["realProductMass"]
     unreacted_reactant_mass = request.form["unreactedReactantMass"]
     # polymer mode stuff
-    polymer_mn = request.form["polymerMn"]
-    polymer_mw = request.form["polymerMw"]
-    polymer_dispersity = request.form["polymerDispersity"]
-    polymer_mass_method = request.form["polymerMassMethod"]
-    polymer_mass_calibration = request.form["polymerMassCalibration"]
-    polymer_tg = request.form["polymerTg"]
-    polymer_tm = request.form["polymerTm"]
-    polymer_tc = request.form["polymerTc"]
-    polymer_thermal_method = request.form["polymerThermalMethod"]
-    polymer_thermal_calibration = request.form["polymerThermalCalibration"]
+    polymer_mn = request.form.get("polymerMn")
+    polymer_mw = request.form.get("polymerMw")
+    polymer_dispersity = request.form.get("polymerDispersity")
+    polymer_mass_method = request.form.get("polymerMassMethod")
+    polymer_mass_calibration = request.form.get("polymerMassCalibration")
+    polymer_tg = request.form.get("polymerTg")
+    polymer_tm = request.form.get("polymerTm")
+    polymer_tc = request.form.get("polymerTc")
+    polymer_thermal_method = request.form.get("polymerThermalMethod")
+    polymer_thermal_calibration = request.form.get("polymerThermalCalibration")
     # sustainability data
     reaction_temperature = request.form["reactionTemperature"]
     element_sustainability = request.form["elementSustainability"]
