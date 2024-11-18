@@ -1,12 +1,7 @@
 from flask import Response, jsonify, render_template, request
 from flask_login import login_required
 from sources import models, services
-from sources.auxiliary import (
-    canonicalise,
-    clean_polymer_smiles,
-    get_workbooks,
-    get_workgroups,
-)
+from sources.auxiliary import get_workbooks, get_workgroups
 from sources.extensions import db
 
 from . import search_bp
@@ -97,7 +92,7 @@ class SearchHandler:
         target_inchi = services.all_compounds.smiles_to_inchi(smiles)
         if not target_inchi:
             return jsonify(
-                {"status": "fail", "message": f"Invalid structure, please try again!"}
+                {"status": "fail", "message": "Invalid structure, please try again!"}
             )
         # iterate through reactant, reagent, and product for each reaction and check for a match
         for reaction in self.reactions:
@@ -146,7 +141,7 @@ class SearchHandler:
         smiles = request.form["smiles"]
         smiles = smiles.split(" |")[0]
         if smiles.count("*") == 2:
-            smiles = canonicalise(smiles)
+            smiles = services.polymer_novel_compound.canonicalise(smiles)
         else:
             return jsonify(
                 {
@@ -195,7 +190,11 @@ class SearchHandler:
                 for component_smiles in component_type:
                     if component_smiles:
                         component_smiles = component_smiles.split(" |")[0]
-                        component_smiles = clean_polymer_smiles(component_smiles)
+                        component_smiles = (
+                            services.polymer_novel_compound.clean_polymer_smiles(
+                                component_smiles
+                            )
+                        )
                         if component_smiles == target_smiles:
                             self.matches.append(reaction)
                             return

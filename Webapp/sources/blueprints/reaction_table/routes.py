@@ -12,13 +12,7 @@ from flask import jsonify, render_template, request
 from flask_login import login_required
 from rdkit import Chem
 from sources import models, services
-from sources.auxiliary import (
-    abort_if_user_not_in_workbook,
-    canonicalise,
-    clean_polymer_smiles,
-    find_polymer_repeat_unit,
-    smiles_symbols,
-)
+from sources.auxiliary import smiles_symbols
 from sources.decorators import workbook_member_required
 from sources.dto import ReactionNoteSchema
 
@@ -92,10 +86,16 @@ def process():
 
         if idx in polymer_indices:
             polymer = True
-            repeat_unit = find_polymer_repeat_unit(reactant_smiles)
-            reactant_smiles = clean_polymer_smiles(reactant_smiles)
+            repeat_unit = services.polymer_novel_compound.find_polymer_repeat_unit(
+                reactant_smiles
+            )
+            reactant_smiles = services.polymer_novel_compound.clean_polymer_smiles(
+                reactant_smiles
+            )
             if reactant_smiles.count("*") == 2:
-                reactant_smiles = canonicalise(reactant_smiles)
+                reactant_smiles = services.polymer_novel_compound.canonicalise(
+                    reactant_smiles
+                )
 
         # finds the first compound with a matching inchi
         mol = Chem.MolFromSmiles(reactant_smiles)  # will fail for polymers
@@ -157,10 +157,16 @@ def process():
 
         if (idx + number_of_reactants) in polymer_indices:  # if polymer:
             polymer = True
-            repeat_unit = find_polymer_repeat_unit(product_smiles)
-            product_smiles = clean_polymer_smiles(product_smiles)
+            repeat_unit = services.polymer_novel_compound.find_polymer_repeat_unit(
+                product_smiles
+            )
+            product_smiles = services.polymer_novel_compound.clean_polymer_smiles(
+                product_smiles
+            )
             if product_smiles.count("*") == 2:
-                product_smiles = canonicalise(product_smiles)
+                product_smiles = services.polymer_novel_compound.canonicalise(
+                    product_smiles
+                )
 
         # finds the first compound with a matching inchi
         mol = Chem.MolFromSmiles(product_smiles)  # will fail for polymers
