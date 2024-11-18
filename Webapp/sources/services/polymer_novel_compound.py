@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from typing import Optional, Tuple
 
@@ -38,7 +39,7 @@ def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> st
     )[0]
 
 
-def get_polymer_novel_compound_from_name_and_workbook(
+def from_name_and_workbook(
     name: str, workbook: models.WorkBook
 ) -> models.PolymerNovelCompound:
     """
@@ -60,7 +61,7 @@ def get_polymer_novel_compound_from_name_and_workbook(
     )
 
 
-def get_polymer_novel_compound_from_smiles_and_workbook(
+def from_smiles_and_workbook(
     smiles: str, workbook: models.WorkBook
 ) -> models.PolymerNovelCompound:
     """
@@ -191,7 +192,7 @@ class NewNovelCompound:
             )
             self.validation = "failed"
 
-        check_in_workbook = services.polymer_novel_compound.get_polymer_novel_compound_from_name_and_workbook(
+        check_in_workbook = services.polymer_novel_compound.from_name_and_workbook(
             self.name, self.workbook
         )
         if check_in_workbook:
@@ -208,7 +209,7 @@ class NewNovelCompound:
         """
         if not self.smiles:
             return
-        check_in_workbook = services.polymer_novel_compound.get_polymer_novel_compound_from_smiles_and_workbook(
+        check_in_workbook = services.polymer_novel_compound.from_smiles_and_workbook(
             self.smiles, self.workbook
         )
         if check_in_workbook:
@@ -386,7 +387,7 @@ def find_polymer_repeat_unit(
     # If both {-} and {+} are found
     if start_marker != -1 and end_marker != -1:
         # Reformat if end of SRU is treated as a branch. e.g. *C{-}(CC{+n}*)C where {+n} is within brackets
-        if is_within_brackets(compound, "{+n}"):
+        while is_within_brackets(compound, "{+n}"):
             compound = reformat_smiles(compound)
             start_marker = compound.find("{-}")
             end_marker = compound.find("{+n}")
@@ -426,3 +427,16 @@ def canonicalise(smiles):
     ps = PolymerSmiles(smiles)
     smiles = ps.canonicalize
     return str(smiles).replace("[", "").replace("]", "")
+
+
+def find_repeat_clean_canonicalise(smiles):
+    """
+    Find repeat unit, clean, and canonicalise a polymer smiles string.
+    """
+    repeat_unit = find_polymer_repeat_unit(smiles)
+    smiles = clean_polymer_smiles(smiles)
+    if smiles.count("*") == 2:
+        smiles = canonicalise(smiles)
+        # TODO: update repeat unit to after canonicalising?
+
+    return smiles, repeat_unit

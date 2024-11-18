@@ -86,65 +86,46 @@ def process():
 
         if idx in polymer_indices:
             polymer = True
-            repeat_unit = services.polymer_novel_compound.find_polymer_repeat_unit(
+            (
+                reactant_smiles,
+                repeat_unit,
+            ) = services.polymer_novel_compound.find_repeat_clean_canonicalise(
                 reactant_smiles
             )
-            reactant_smiles = services.polymer_novel_compound.clean_polymer_smiles(
-                reactant_smiles
-            )
-            if reactant_smiles.count("*") == 2:
-                reactant_smiles = services.polymer_novel_compound.canonicalise(
-                    reactant_smiles
-                )
 
-        # finds the first compound with a matching inchi
-        mol = Chem.MolFromSmiles(reactant_smiles)  # will fail for polymers
+        # check if valid SMILES
+        mol = Chem.MolFromSmiles(reactant_smiles)
         if mol is None:
             return jsonify({"error": f"Cannot process Reactant {idx} structure"})
-        if polymer:
-            reactant = None
-        else:
-            inchi = Chem.MolToInchi(mol)
-            reactant = services.compound.from_inchi(inchi)
 
-        # if no match by inchi, then check the workbook collection of novel compounds
+        # find compound in database
+        reactant, novel_compound = get_compound_all_tables(
+            reactant_smiles, workbook, polymer, demo
+        )
+
+        # if no match is found we inform the user the compound is not in the database
         if reactant is None:
-            if demo == "demo":  # if in demo mode don't search novel compounds
-                return jsonify({"reactionTable": "demo", "novelCompound": ""})
-
+            reactant_name = iupac_convert(reactant_smiles)
+            # generate molweight
+            reactant_mol_wt = services.all_compounds.mol_weight_from_smiles(
+                reactant_smiles
+            )
             if polymer:
-                reactant = services.polymer_novel_compound.get_polymer_novel_compound_from_smiles_and_workbook(
-                    reactant_smiles, workbook
-                )
-            else:
-                reactant = services.novel_compound.from_inchi_and_workbook(
-                    inchi, workbook
-                )
-            novel_compound = True
-
-            # if still no match is found we inform the user the compound is not in the database
-            if reactant is None:
-                reactant_name = iupac_convert(reactant_smiles)
-                # generate molweight
                 reactant_mol_wt = services.all_compounds.mol_weight_from_smiles(
-                    reactant_smiles
+                    "*" + repeat_unit + "*"
                 )
-                if polymer:
-                    reactant_mol_wt = services.all_compounds.mol_weight_from_smiles(
-                        "*" + repeat_unit + "*"
-                    )
-                novel_reactant_html = render_template(
-                    "_novel_compound.html",
-                    component="Reactant",
-                    name=reactant_name,
-                    number=idx,
-                    mw=reactant_mol_wt,
-                    smiles=reactant_smiles,
-                    polymer=polymer,
-                )
-                return jsonify(
-                    {"reactionTable": novel_reactant_html, "novelCompound": True}
-                )
+            novel_reactant_html = render_template(
+                "_novel_compound.html",
+                component="Reactant",
+                name=reactant_name,
+                number=idx,
+                mw=reactant_mol_wt,
+                smiles=reactant_smiles,
+                polymer=polymer,
+            )
+            return jsonify(
+                {"reactionTable": novel_reactant_html, "novelCompound": True}
+            )
 
         # now we have the compound/novel_compound object, we can get all the data and add to reactant_data dict
         get_compound_data(reactant_data, reactant, novel_compound)
@@ -152,71 +133,48 @@ def process():
 
     # Find products in database then add data to the dictionary
     for idx, product_smiles in enumerate(products_smiles_list, 1):
-        novel_compound = False  # false but change later if true
         polymer = False
 
         if (idx + number_of_reactants) in polymer_indices:  # if polymer:
             polymer = True
-            repeat_unit = services.polymer_novel_compound.find_polymer_repeat_unit(
+            (
+                product_smiles,
+                repeat_unit,
+            ) = services.polymer_novel_compound.find_repeat_clean_canonicalise(
                 product_smiles
             )
-            product_smiles = services.polymer_novel_compound.clean_polymer_smiles(
-                product_smiles
-            )
-            if product_smiles.count("*") == 2:
-                product_smiles = services.polymer_novel_compound.canonicalise(
-                    product_smiles
-                )
 
-        # finds the first compound with a matching inchi
-        mol = Chem.MolFromSmiles(product_smiles)  # will fail for polymers
+        # check if valid SMILES
+        mol = Chem.MolFromSmiles(product_smiles)
         if mol is None:
             return jsonify({"error": f"Cannot process Product {idx} structure"})
-        if polymer:
-            product = None
-        else:
-            inchi = Chem.MolToInchi(mol)
-            product = services.compound.from_inchi(inchi)
 
-        # if no match by inchi, then check the workbook collection of novel compounds
+        # find compound in database
+        product, novel_compound = get_compound_all_tables(
+            product_smiles, workbook, polymer, demo
+        )
+
+        # if no match is found we inform the user the compound is not in the database
         if product is None:
-            if demo == "demo":  # if in demo mode don't search novel compounds
-                return jsonify({"reactionTable": "demo", "novelCompound": ""})
-
-            if (idx + number_of_reactants) in polymer_indices:
-                polymer = True
-                product = services.polymer_novel_compound.get_polymer_novel_compound_from_smiles_and_workbook(
-                    product_smiles, workbook
-                )
-            else:
-                product = services.novel_compound.from_inchi_and_workbook(
-                    inchi, workbook
-                )
-            novel_compound = True
-
-            # if still no match is found we inform the user the compound is not in the database
-            if product is None:
-                product_name = iupac_convert(product_smiles)
-                # generate molweight
+            product_name = iupac_convert(product_smiles)
+            # generate molweight
+            product_mol_wt = services.all_compounds.mol_weight_from_smiles(
+                product_smiles
+            )
+            if polymer:
                 product_mol_wt = services.all_compounds.mol_weight_from_smiles(
-                    product_smiles
+                    repeat_unit
                 )
-                if polymer:
-                    product_mol_wt = services.all_compounds.mol_weight_from_smiles(
-                        repeat_unit
-                    )
-                novel_product_html = render_template(
-                    "_novel_compound.html",
-                    component="Product",
-                    name=product_name,
-                    number=idx,
-                    mw=product_mol_wt,
-                    smiles=product_smiles,
-                    polymer=polymer,
-                )
-                return jsonify(
-                    {"reactionTable": novel_product_html, "novelCompound": True}
-                )
+            novel_product_html = render_template(
+                "_novel_compound.html",
+                component="Product",
+                name=product_name,
+                number=idx,
+                mw=product_mol_wt,
+                smiles=product_smiles,
+                polymer=polymer,
+            )
+            return jsonify({"reactionTable": novel_product_html, "novelCompound": True})
 
         # now we have the compound/novel_compound object, we can get all the data and add to product_data dict
         get_compound_data(product_data, product, novel_compound)
@@ -320,6 +278,46 @@ def get_reactants_and_products_list(
             ","
         ), products_smiles.split(",")
     return reactants_smiles_list, products_smiles_list
+
+
+def get_compound_all_tables(smiles, workbook, polymer, demo):
+    """
+    Retrieves a compound from the database, checking the Compound, NovelCompound, and PolymerNovelCompound tables.
+
+    Args:
+        smiles (str): The SMILES string for the compound.
+        workbook (str):
+        polymer (bool): True if compound is a polymer.
+        demo (str): "demo" if in demo mode.
+
+    Returns:
+        compound: The database object for the compound or None if it cannot be found.
+        novel_compound (bool): True if compound not present in compound databases.
+
+
+    """
+    novel_compound = False  # false but change later if true
+    if polymer:
+        compound = None
+    else:
+        mol = Chem.MolFromSmiles(smiles)
+        inchi = Chem.MolToInchi(mol)
+        compound = services.compound.from_inchi(inchi)
+
+    # if no match by inchi, then check the workbook collection of novel compounds
+    if compound is None:
+        if demo == "demo":  # if in demo mode don't search novel compounds
+            return jsonify({"reactionTable": "demo", "novelCompound": ""})
+
+        if polymer:
+            compound = services.polymer_novel_compound.from_smiles_and_workbook(
+                smiles, workbook
+            )
+        else:
+            compound = services.novel_compound.from_inchi_and_workbook(inchi, workbook)
+        novel_compound = True
+
+    return compound, novel_compound
 
 
 def get_compound_data(

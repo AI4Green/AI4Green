@@ -68,7 +68,7 @@ def test_polymer_novel_compound_sketcher(app: Flask, client: FlaskClient):
             "Test-Workgroup", "Test-Workbook"
         )
 
-        new_compound = services.polymer_novel_compound.get_polymer_novel_compound_from_smiles_and_workbook(
+        new_compound = services.polymer_novel_compound.from_smiles_and_workbook(
             "PC(CC(C)P)C", workbook
         )
         assert new_compound.name == "A Polymer Novel compound"
