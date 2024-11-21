@@ -136,7 +136,7 @@ def get_user_type(workgroup_name: str, user: models.User) -> str:
 
 def verify_wg_name(workgroup_name: str, new_name: str) -> str:
     """
-    Verifies a name input is unique, is not empty, and contains only alphanumeric characters.
+    Verifies a name input is unique, and contains only alphanumeric characters.
         The new name is stripped of spaces, and lowered to be entirely lowercase. Likewise, all
         names in database are lowered to check for duplicates.
     Args:
@@ -160,11 +160,6 @@ def verify_wg_name(workgroup_name: str, new_name: str) -> str:
     if duplicates:
         feedback = "Workgroup name already exists"
 
-    # elif (
-    #     not new_name.strip()
-    # ):  # checks if the string is empty or contains only whitespace
-    #     feedback = "Error: Name cannot be empty."
-
     elif re.search(
         r"[^a-zA-Z0-9- ]", new_name
     ):  # checks for any non-alphanumeric characters in string.
@@ -173,16 +168,15 @@ def verify_wg_name(workgroup_name: str, new_name: str) -> str:
     return feedback if feedback else new_name
 
 
-def list_all_members(workgroup: models.workgroup) -> List[models.Person]:
+def list_all_members(workgroup: models.WorkGroup) -> List[models.Person]:
     """
     Lists all members of a given workgroup by compiling data from three categories: senior researchers,
     standard members, and the principal investigator.
     Args:
-        workgroup: models.workgroup, the workgroup from which members will be listed
+        workgroup: models.WorkGroup, the workgroup from which members will be listed
     Returns:
         List[models.Person], a list of all persons associated with the workgroup
     """
-
     senior_researchers = get_workgroup_sr(workgroup.name)
     standard_members = get_workgroup_sm(workgroup.name)
     principal_investigator = get_workgroup_pi(workgroup.name)

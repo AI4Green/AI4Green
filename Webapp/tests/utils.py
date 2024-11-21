@@ -32,11 +32,17 @@ def assert_expected_values(actual_data: Dict, expected_data: Dict):
         ), f"{expected_value} not found in data for key: {key}"
 
 
-def add_workgroup(name):
+def add_workgroup(name: str) -> models.WorkGroup:
+    """Adds a workgroup with default parameters to the database.
+    Args:
+        name: str, the name of the workgroup to be created.
+    Returns:
+        workgroup: WorkGroup object, the created workgroup."""
+
     p1 = db.session.query(models.Person).first()
     institution1 = db.session.query(models.Institution).first()
-
-    models.WorkGroup.create(
+    workgroup = models.WorkGroup.create(
         name=name, institution=institution1.id, principal_investigator=[p1]
     )
     db.session.commit()
+    return workgroup
