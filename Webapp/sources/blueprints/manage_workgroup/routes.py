@@ -385,10 +385,10 @@ def add_user_by_qr(token=None):
 
 
 @manage_workgroup_bp.route(
-    "/change_workgroup_name/<workgroup_name>/<new_name>", methods=["POST"]
+    "/change_workgroup_name/<workgroup>/<new_name>", methods=["POST"]
 )
 @principal_investigator_required
-def change_name(workgroup_name: str, new_name: str):
+def change_name(workgroup: str, new_name: str):
     """
     Calls a verify workgroup name function in /manage_workgroup/routes.py, verifies the output is the same as the user
     input. If so,the new name is committed to the database. If error, the feedback is returned with a 400 error.
@@ -400,16 +400,16 @@ def change_name(workgroup_name: str, new_name: str):
         JSON message of either success or failure
 
     """
-    verify_name = services.workgroup.verify_wg_name(workgroup_name, new_name)
+    verify_name = services.workgroup.verify_wg_name(workgroup, new_name)
 
     if verify_name == new_name:
-        wg_object = services.workgroup.from_name(workgroup_name)
+        wg_object = services.workgroup.from_name(workgroup)
         wg_object.name = new_name
         db.session.commit()
         all_members = services.workgroup.list_all_members(wg_object)
 
         for member in all_members:
-            services.notifications.new(member, workgroup_name, new_name)
+            services.notifications.new(member, workgroup, new_name)
 
         return (
             jsonify(

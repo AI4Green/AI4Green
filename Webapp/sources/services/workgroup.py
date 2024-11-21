@@ -160,10 +160,10 @@ def verify_wg_name(workgroup_name: str, new_name: str) -> str:
     if duplicates:
         feedback = "Workgroup name already exists"
 
-    elif (
-        not new_name.strip()
-    ):  # checks if the string is empty or contains only whitespace
-        feedback = "Error: Name cannot be empty."
+    # elif (
+    #     not new_name.strip()
+    # ):  # checks if the string is empty or contains only whitespace
+    #     feedback = "Error: Name cannot be empty."
 
     elif re.search(
         r"[^a-zA-Z0-9- ]", new_name

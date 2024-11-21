@@ -142,6 +142,11 @@ function submitNameChange() {
   const newName = document.getElementById("new-name").value;
   const workgroupName = document.getElementById("current_workgroup").value;
 
+  if (!newName) {
+    alert("Error: Workgroup name cannot be empty.");
+    return;
+  }
+
   fetch(`/change_workgroup_name/${workgroupName}/${newName}`, {
     method: "POST",
     headers: {
@@ -153,7 +158,6 @@ function submitNameChange() {
       if (response.ok) {
         response.json().then((data) => {
           alert("Workgroup name successfully changed!");
-          // Redirect to the new workgroup URL
           const newUrl = `/manage_workgroup/${data.new_name}`;
           window.location.href = newUrl; // Redirect to the new workgroup page
         });
