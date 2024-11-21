@@ -14,6 +14,7 @@ from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
+from datetime import datetime
 from sources.decorators import workbook_member_required
 from sources.blueprints.auth.forms import LoginForm
 from sources import models, services
@@ -41,6 +42,7 @@ def index() -> Response:
     form = LoginForm()
     user_role = None
     news_items = []
+    privacy_policy_date = datetime(2024, 12, 1) # date privacy policy was updated to capture user location
 
     if request.method == "POST":
         # return redirects from login verification to prevent form resubmission
@@ -65,7 +67,8 @@ def index() -> Response:
         user_confirmed=user_confirmed,
         news_items=news_items,
         messages_from_redirects=messages_from_redirects,
-        form=form
+        form=form,
+        privacy_policy_date=privacy_policy_date,
     )
 
 
