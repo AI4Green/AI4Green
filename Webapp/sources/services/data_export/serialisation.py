@@ -55,7 +55,11 @@ class RXNFileExport(SerialisationExport):
              container_name - the name of the export container.
         """
         super().__init__(db_reaction, filename, container_name)
-        self.reaction_object = self._make_rxn_block()
+        # Use RXN file saved in database, or generate if not found
+        if self.db_reaction.reaction_rxn:
+            self.reaction_object = self.db_reaction.reaction_rxn
+        else:
+            self.reaction_object = self._make_rxn_block()
 
     def save(self, extension=True):
         """Calls the appropriate method to save the data. Can't use .rxn without a reaction object"""
