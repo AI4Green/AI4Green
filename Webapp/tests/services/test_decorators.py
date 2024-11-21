@@ -121,7 +121,7 @@ def test_principal_investigator_or_senior_researcher_required(client: FlaskClien
 
 def test_workgroup_member_required(client: FlaskClient, app: Flask):
     """Tests workgroup_member_required decorator"""
-    with client:
+    with app.app_context():
         login(client)
         decorated_function = workgroup_member_required(mock_function)
 
