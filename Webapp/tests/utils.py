@@ -36,6 +36,7 @@ def add_workgroup(name):
     p1 = db.session.query(models.Person).first()
     institution1 = db.session.query(models.Institution).first()
 
-    workgroup = models.WorkGroup.create(
+    models.WorkGroup.create(
         name=name, institution=institution1.id, principal_investigator=[p1]
-    )  # noqa: F841
+    )
+    db.session.commit()
