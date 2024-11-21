@@ -42,7 +42,7 @@ class Reaction(Model):
     reaction_id = db.Column(db.Text, nullable=False)
     name = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False, default="")
-    reaction_image = db.Column(db.Text, nullable=False, default="")
+    reaction_image = db.Column(db.Text, default="")
     polymer_mode = db.Column(db.Boolean, default=False)
     polymerisation_type = db.Column(db.Text, default="")
     reaction_class = db.Column(db.Text, nullable=False, default="")
