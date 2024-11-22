@@ -13,10 +13,7 @@ from flask import (
 from flask_api import status
 from flask_login import current_user, login_required
 from sources import models, services
-from sources.auxiliary import (
-    abort_if_user_not_in_workbook,
-    security_member_workgroup_workbook,
-)
+from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.decorators import workbook_member_required
 from sources.extensions import db
 
@@ -88,19 +85,14 @@ def get_reactions() -> Response:
 
 @reaction_list_bp.route("/get_reaction_images", methods=["GET", "POST"])
 @login_required
-def get_reaction_images() -> Response:
+@workbook_member_required
+def get_reaction_images(workgroup, workbook) -> Response:
     """
     Gets a list of reaction images for the active workbook.
     """
-    workbook_name = str(request.form.get("workbook"))
-    workgroup_name = str(request.form.get("workgroup"))
-    workbook = services.workbook.get_workbook_from_group_book_name_combination(
-        workgroup_name, workbook_name
-    )
-    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
     sort_crit = str(request.form.get("sortCriteria"))
     reaction_list = services.reaction.list_active_in_workbook(
-        workbook_name, workgroup_name, sort_crit
+        workbook, workgroup, sort_crit
     )
     reaction_images = services.reaction.make_reaction_image_list(reaction_list)
     return {"reaction_images": reaction_images, "sort_crit": escape(sort_crit)}
@@ -108,20 +100,14 @@ def get_reaction_images() -> Response:
 
 @reaction_list_bp.route("/get_smiles", methods=["GET", "POST"])
 @login_required
-def get_smiles() -> Response:
+@workbook_member_required
+def get_smiles(workgroup, workbook) -> Response:
     """
     Gets a list of reaction smiles for the active workbook.
     """
-    # must be logged in
-    workbook_name = str(request.form.get("workbook"))
-    workgroup_name = str(request.form.get("workgroup"))
-    workbook = services.workbook.get_workbook_from_group_book_name_combination(
-        workgroup_name, workbook_name
-    )
-    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
     sort_crit = str(request.form.get("sortCriteria"))
     reaction_list = services.reaction.list_active_in_workbook(
-        workbook_name, workgroup_name, sort_crit
+        workbook, workgroup, sort_crit
     )
     smiles_list = [r.reaction_smiles for r in reaction_list]
     return {"smiles": smiles_list, "sort_crit": escape(sort_crit)}
@@ -129,20 +115,14 @@ def get_smiles() -> Response:
 
 @reaction_list_bp.route("/get_rxns", methods=["GET", "POST"])
 @login_required
-def get_rxns() -> Response:
+@workbook_member_required
+def get_rxns(workgroup, workbook) -> Response:
     """
     Gets a list of reaction RXNs for the active workbook.
     """
-    # must be logged in
-    workbook_name = str(request.form.get("workbook"))
-    workgroup_name = str(request.form.get("workgroup"))
-    workbook = services.workbook.get_workbook_from_group_book_name_combination(
-        workgroup_name, workbook_name
-    )
-    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
     sort_crit = str(request.form.get("sortCriteria"))
     reaction_list = services.reaction.list_active_in_workbook(
-        workbook_name, workgroup_name, sort_crit
+        workbook, workgroup, sort_crit
     )
     rxn_list = [r.reaction_rxn for r in reaction_list]
     return {"rxns": rxn_list, "sort_crit": escape(sort_crit)}

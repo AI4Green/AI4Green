@@ -520,22 +520,13 @@ def save_polymer_mode():
 @login_required
 def get_polymer_mode():
     """Read reaction dict to get polymer mode"""
-    reaction_id = str(request.args.get("reactionID"))
     workgroup_name = str(request.args.get("workgroup"))
     workbook_name = str(request.args.get("workbook"))
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
-    reaction = (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.reaction_id == reaction_id)
-        .join(models.WorkBook)
-        .filter(models.WorkBook.id == workbook.id)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_name)
-        .first()
-    )
+    reaction = services.reaction.get_current_from_request()
 
     polymer_mode = reaction.polymer_mode
 
