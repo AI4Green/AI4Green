@@ -28,7 +28,7 @@ def structure_search_handler() -> Response:
     search_type = request.form["searchType"]
     if search_type == "exact_structure":
         mol = request.form["mol"]
-        if "SMT" in mol:  # polymer found
+        if "SRU" in mol:  # polymer found
             return search.exact_polymer_structure_search()
         else:
             return search.exact_structure_search()

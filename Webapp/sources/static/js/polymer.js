@@ -161,7 +161,7 @@ function getExamplePolymer() {
 }
 
 /**
- * Reads RXN files to identify polymer(s) by "SMT" tag
+ * Reads RXN files to identify polymer(s) by "SRU" tag
  *
  * @param {string} rxn The reaction RXN string
  * @returns {list} indices where polymer is.
@@ -177,14 +177,14 @@ function identifyPolymers(rxn) {
 
   let indices = [];
   for (let i = 0; i < num_reactants; i++) {
-    if (array[i + 1].includes("SMT")) {
+    if (array[i + 1].includes("SRU")) {
       //if mol contains SRU group
       indices.push(i + 1);
     }
   }
 
   for (let h = 0; h < num_products; h++) {
-    if (array[h + num_reactants + 1].includes("SMT")) {
+    if (array[h + num_reactants + 1].includes("SRU")) {
       //if mol contains SRU group
       indices.push(h + num_reactants + 1);
     }
