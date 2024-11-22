@@ -349,10 +349,6 @@ def make_objects_inactive(
 workgroup_dict = make_workgroup_dict()
 
 
-def remove_spaces_and_dashes(name: str) -> str:
-    return name.replace(" ", "").replace("-", "")
-
-
 def abort_if_user_not_in_workbook(
     workgroup_name: str, workbook_name: str, workbook: models.WorkBook
 ):

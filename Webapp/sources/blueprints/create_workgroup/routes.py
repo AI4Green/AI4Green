@@ -9,7 +9,7 @@ from flask_login import (  # protects a view function against anonymous users
 )
 from flask_wtf import FlaskForm
 from sources import auxiliary, models, services
-from sources.auxiliary import get_workgroups, remove_spaces_and_dashes
+from sources.auxiliary import get_workgroups
 from sources.extensions import db
 from sqlalchemy import func
 from wtforms import SelectField, StringField, SubmitField, TextAreaField
@@ -68,7 +68,9 @@ def create_workgroup() -> Response:
             .all()
         )
 
-        workgroup_name_delimiters_removed = remove_spaces_and_dashes(workgroup_name)
+        workgroup_name_delimiters_removed = services.utils.remove_spaces_and_dashes(
+            workgroup_name
+        )
         if other_workgroups_waiting_approval:
             flash(
                 "You cannot create another workgroup until your first workgroup has been approved"
@@ -99,7 +101,7 @@ def create_workgroup() -> Response:
         if [
             x
             for x in existing_workgroup_names
-            if remove_spaces_and_dashes(x).lower()
+            if services.utils.remove_spaces_and_dashes(x).lower()
             == workgroup_name_delimiters_removed.lower()
         ]:
             flash(

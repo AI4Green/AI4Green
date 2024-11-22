@@ -1,8 +1,9 @@
+import re
 from typing import List
 
-from flask_login import current_user
-from sources import models
+from sources import models, services
 from sources.extensions import db
+from sqlalchemy import func
 
 
 def list_all() -> List[models.WorkGroup]:
@@ -57,7 +58,7 @@ def get_workgroup_pi(workgroup_name: str) -> List[models.User]:
     """
 
     return (
-        db.session.query(models.User.email)
+        db.session.query(models.User)
         .join(models.Person)
         .join(models.t_Person_WorkGroup)
         .join(models.WorkGroup)
@@ -118,16 +119,68 @@ def get_user_type(workgroup_name: str, user: models.User) -> str:
     """
     user_type = None
 
-    pi = get_workgroup_pi(workgroup_name)
-    if user.email in [user.email for user in pi]:
+    pi_list = get_workgroup_pi(workgroup_name)
+    if user.email in [user.email for user in pi_list]:
         user_type = "principal_investigator"
 
-    sr = get_workgroup_sr(workgroup_name)
-    if user.email in [user.email for user in sr]:
+    sr_list = get_workgroup_sr(workgroup_name)
+    if user.email in [user.email for user in sr_list]:
         user_type = "senior_researcher"
 
-    sm = get_workgroup_sm(workgroup_name)
-    if user.email in [user.email for user in sm]:
+    sm_list = get_workgroup_sm(workgroup_name)
+    if user.email in [user.email for user in sm_list]:
         user_type = "standard_member"
 
     return user_type
+
+
+def verify_wg_name(workgroup_name: str, new_name: str) -> str:
+    """
+    Verifies a name input is unique, and contains only alphanumeric characters.
+        The new name is stripped of spaces, and lowered to be entirely lowercase. Likewise, all
+        names in database are lowered to check for duplicates.
+    Args:
+            workgroup_name: str, the current workgroup name
+            new_name: str, the user input name which requires verification
+    Returns:
+            name: str, if passes all checks, the name is returned for use
+            feedback: str, if check is flagged, feedback is returned with info
+    """
+    feedback = None
+    name_without_spaces = new_name.replace(" ", "")
+    duplicates = (
+        db.session.query(models.WorkGroup)
+        .filter(
+            func.lower(func.replace(models.WorkGroup.name, " ", ""))
+            == func.lower(name_without_spaces),
+            models.WorkGroup.name != workgroup_name,
+        )
+        .first()
+    )
+    if duplicates:
+        feedback = "Workgroup name already exists"
+
+    elif re.search(
+        r"[^a-zA-Z0-9- ]", new_name
+    ):  # checks for any non-alphanumeric characters in string.
+        feedback = "Error: Name contains invalid symbols."
+
+    return feedback if feedback else new_name
+
+
+def list_all_members(workgroup: models.WorkGroup) -> List[models.Person]:
+    """
+    Lists all members of a given workgroup by compiling data from three categories: senior researchers,
+    standard members, and the principal investigator.
+    Args:
+        workgroup: models.WorkGroup, the workgroup from which members will be listed
+    Returns:
+        List[models.Person], a list of all persons associated with the workgroup
+    """
+    senior_researchers = get_workgroup_sr(workgroup.name)
+    standard_members = get_workgroup_sm(workgroup.name)
+    principal_investigator = get_workgroup_pi(workgroup.name)
+    all_users = senior_researchers + standard_members + principal_investigator
+    all_persons = [services.person.from_id(x.person) for x in all_users]
+
+    return all_persons

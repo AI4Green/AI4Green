@@ -97,3 +97,14 @@ def get_location() -> Dict[str, str]:
             "country": "United Kingdom",
             "city": "Nottingham",
         }
+
+
+def remove_spaces_and_dashes(name: str) -> str:
+    """
+    Removes spaces and dashes from input string
+    Args:
+        name: str, the name of the group which needs white space removed.
+    Returns:
+        name: str, the name without spaces.
+    """
+    return name.replace(" ", "").replace("-", "")

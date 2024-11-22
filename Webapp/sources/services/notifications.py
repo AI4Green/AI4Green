@@ -1,5 +1,5 @@
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
 
 from flask_login import current_user
 from sources import models, services
@@ -53,38 +53,40 @@ def deny_pi_status_request(person: models.Person, workgroup: models.WorkGroup) -
         None
     """
     notification = models.Notification(
-                person=person.id,
-                type="Your Request to become a Principal Investigator",
-                info=f"Your request to become a Principal Investigator in Workgroup, {workgroup.name}, has been denied.",
-                time=datetime.now(),
-                status="active",
-            )
+        person=person.id,
+        type="Your Request to become a Principal Investigator",
+        info=f"Your request to become a Principal Investigator in Workgroup, {workgroup.name}, has been denied.",
+        time=datetime.now(),
+        status="active",
+    )
 
     send_and_commit(notification, person)
 
 
 def deny_sr_status_request(person: models.Person, workgroup: models.WorkGroup) -> None:
     """
-        Creates notification denying a users request for senior researcher status
-        Args:
-            person: models.Person, Person to send the notification to
-            workgroup: models.WorkGroup, Workgroup they are trying to join
+    Creates notification denying a users request for senior researcher status
+    Args:
+        person: models.Person, Person to send the notification to
+        workgroup: models.WorkGroup, Workgroup they are trying to join
 
-        Returns:
-            None
-        """
+    Returns:
+        None
+    """
     notification = models.Notification(
-                person=person.id,
-                type="Your Request to become a Senior Researcher",
-                info=f"You request to become a Senior Researcher in Workgroup, {workgroup.name}, has been denied.",
-                time=datetime.now(),
-                status="active",
-            )
+        person=person.id,
+        type="Your Request to become a Senior Researcher",
+        info=f"You request to become a Senior Researcher in Workgroup, {workgroup.name}, has been denied.",
+        time=datetime.now(),
+        status="active",
+    )
 
     send_and_commit(notification, person)
 
 
-def add_user_by_email_request(person: models.Person, workgroup: models.WorkGroup, role: str) -> models.Notification:
+def add_user_by_email_request(
+    person: models.Person, workgroup: models.WorkGroup, role: str
+) -> models.Notification:
     """
     Sends request to user when they have been added to a workgroup by email.
     Args:
@@ -97,19 +99,19 @@ def add_user_by_email_request(person: models.Person, workgroup: models.WorkGroup
         Note that this is not committed or sent in this function.
     """
     return models.Notification(
-            person=person.id,
-            type="You Have Been Added to a Workgroup",
-            info="A Principal Investigator has added you to the Workgroup, "
-                 + workgroup.name
-                 + ", as a "
-                 + role
-                 + ". Please respond below.",
-            time=datetime.now(),
-            status="active",
-            wg=workgroup.name,
-            wb="",
-            wg_request="added",
-        )
+        person=person.id,
+        type="You Have Been Added to a Workgroup",
+        info="A Principal Investigator has added you to the Workgroup, "
+        + workgroup.name
+        + ", as a "
+        + role
+        + ". Please respond below.",
+        time=datetime.now(),
+        status="active",
+        wg=workgroup.name,
+        wb="",
+        wg_request="added",
+    )
 
 
 def duplicate_notification_check(
@@ -177,3 +179,25 @@ def duplicate_notification_check(
         if check is None:
             refined_people_ls.append(person)
     return not refined_people_ls
+
+
+def new(person: models.Person, old_name: str, new_name: str) -> None:
+    """
+    Sends notification on AI4Green to user and commits notification to database
+    Args:
+        person: models.Person, person to whose sent information regarding workgroup name change
+        old_name: str, the old name of the workgroup
+        new_name: str, the new name of the workgroup
+    Returns:
+        None
+    """
+    notification = models.Notification(
+        person=person.id,
+        type="Your Workgroup has been renamed",
+        info=f"The Workgroup name: {old_name} has been changed to {new_name}",
+        time=datetime.now(),
+        status="active",
+    )
+
+    db.session.add(notification)
+    db.session.commit()
