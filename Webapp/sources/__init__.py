@@ -200,10 +200,6 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(novel_compound_bp)
 
-    from sources.blueprints.polymer_novel_compound import polymer_novel_compound_bp
-
-    app.register_blueprint(polymer_novel_compound_bp)
-
     from sources.blueprints.compound_data_error_report import (
         compound_data_error_report_bp,
     )
