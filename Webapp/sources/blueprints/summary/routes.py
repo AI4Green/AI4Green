@@ -53,10 +53,17 @@ def summary() -> Response:
         reactant_data, reagent_data, solvent_data, product_data
     )
 
+    polymer_mode = request.form["polymerMode"]
+    # change summary table in polymer mode
+    if polymer_mode == "true":
+        summary_table_html = "_polymer_summary_table.html"
+    else:
+        summary_table_html = "_summary_table.html"
+
     # if product mass and reactant mass sum are calculated, then it forms a summary table
     if product_data and reactant_data:
         summary_table = render_template(
-            "_summary_table.html",
+            summary_table_html,
             amount_unit=unit_data["amount_unit"],
             volume_unit=unit_data["volume_unit"],
             mass_unit=unit_data["mass_unit"],

@@ -62,6 +62,7 @@ class CsvExport:
             "conversion",
             "selectivity",
             "sustainability_data",
+            "polymer_data",
         ]
         for key in metadata_keys_to_include:
             data.update({key: metadata_dict[key]})

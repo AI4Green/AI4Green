@@ -42,6 +42,9 @@ class Reaction(Model):
     reaction_id = db.Column(db.Text, nullable=False)
     name = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False, default="")
+    reaction_image = db.Column(db.Text, default="")
+    polymer_mode = db.Column(db.Boolean, default=False)
+    polymerisation_type = db.Column(db.Text, default="")
     reaction_class = db.Column(db.Text, nullable=False, default="")
     creator = db.Column(
         db.ForeignKey("Person.id", ondelete="CASCADE"), nullable=False, index=True
@@ -62,6 +65,7 @@ class Reaction(Model):
     reaction_table_data = db.Column(db.JSON, nullable=False)
     summary_table_data = db.Column(db.JSON, nullable=False)
     reaction_smiles = db.Column(db.Text, nullable=False, default="")
+    reaction_rxn = db.Column(db.Text, default="")
     complete = db.Column(db.Text, nullable=False)
     status = db.Column(db.Text, nullable=False)
     precursor_reaction = db.relationship(

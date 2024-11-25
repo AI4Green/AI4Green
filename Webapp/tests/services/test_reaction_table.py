@@ -62,6 +62,42 @@ def test_reaction_table_ion_reactions(client: FlaskClient):
     )
 
 
+def test_reaction_table_polymer_reactions(client: FlaskClient):
+    """
+    Tests the reaction table /_process when the compounds used are polymers not present in the database
+    """
+    login(client)
+    # with all polymers in
+    url = make_url(
+        reactants="PC{minus}(CCC{plusn}(C)P)C",
+        products="C",
+        reaction_smiles="PC{minus}(CCC{plusn}(C)P)C>>C%20|$;;;;;;;;*;;;*;$|",
+        polymer="true",
+        polymerIndices="1",
+    )
+    response = client.get(url)
+    assert response.status_code == 200
+    assert (
+        response.json["novelCompound"] is True
+        and "Reactant 1 not in database" in response.json["reactionTable"]
+    )
+
+    # replace first polymer with database compound
+    url = make_url(
+        reactants="C,PC{minus}(CCCC{plusn}(C)P)C",
+        products="*C{minus}(C{plusn}*)S",
+        reaction_smiles="C.PC{minus}(CCCC{plusn}(C)P)C>>*C{minus}(C{plusn}*)S%20|$;;;;;;;;*;;;*;$|",
+        polymer="true",
+        polymerIndices="2,3",
+    )
+    response = client.get(url)
+    assert response.status_code == 200
+    assert (
+        response.json["novelCompound"] is True
+        and "Reactant 2 not in database" in response.json["reactionTable"]
+    )
+
+
 def test_reaction_table_compounds_not_present(client: FlaskClient):
     """Tests the reaction table /_process response when using neutral reactants and products not in the database"""
     login(client)
@@ -104,6 +140,8 @@ def make_url(
     reaction_smiles: Optional[str] = None,
     workbook: str = "Test-Workbook",
     reaction_id: str = "TW1-001",
+    polymer: str = "false",
+    polymerIndices: str = "",
 ) -> str:
     """
     Constructs a URL for making a GET request based on reactants, products, demo, workgroup, workbook, and reaction ID.
@@ -113,8 +151,11 @@ def make_url(
         products (str): The products of the chemical reaction, separated by commas.
         demo (str, optional): Whether it's a demo or not. Defaults to "not%20demo".
         workgroup (str, optional): The workgroup associated with the reaction. Defaults to "Test-Workgroup".
+        reaction_smiles (str, optional): The SMILES string for the reaction. Defaults to None.
         workbook (str, optional): The workbook associated with the reaction. Defaults to "Test-Workbook".
         reaction_id (str, optional): The ID of the reaction. Defaults to "TW1-001".
+        polymer (str, optional): Whether polymer mode is on. Defaults to "false".
+        polymerIndices (str, optional): Indices of polymers present. Defaults to "".
 
     Returns:
         str: The constructed URL for making a GET request.
@@ -129,7 +170,7 @@ def make_url(
     endpoint = "/_process"
 
     # Constructing the URL with the arguments
-    url = f"{endpoint}?reactants={reactants}&products={products}&reactionSmiles={reaction_smiles}&demo={demo}&workgroup={workgroup}&workbook={workbook}&reaction_id={reaction_id}"
+    url = f"{endpoint}?reactants={reactants}&products={products}&reactionSmiles={reaction_smiles}&demo={demo}&workgroup={workgroup}&workbook={workbook}&reaction_id={reaction_id}&polymer={polymer}&polymerIndices={polymerIndices}"
 
     return url
 
