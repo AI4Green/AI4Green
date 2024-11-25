@@ -76,9 +76,6 @@ function loadExampleSmiles() {
  */
 async function createReactionTable() {
   let smiles = await exportSmilesFromActiveEditor();
-  let rxn = await exportRXNFromActiveEditor();
-  $("#js-reaction-rxn").val(rxn);
-  await exportImageFromActiveEditor();
   sketcherDataLossHandler();
   let [reactants, products] =
     reactionSmilesToReactantsAndProductsSmiles(smiles);
@@ -90,8 +87,6 @@ async function createReactionTable() {
   let reaction_id = getVal($("#js-reaction-id"));
   let demo_mode = getVal($("#js-demo"));
   let tutorial = getVal($("#js-tutorial"));
-  let polymer_mode = $('input[id="polymer-mode-select"]').prop("checked");
-  let polymer_indices = identifyPolymers(await exportRXNFromActiveEditor());
   smiles = replaceSmilesSymbols(smiles);
 
   // Asynchronous request to _process in routes.py
@@ -115,11 +110,7 @@ async function createReactionTable() {
       "&workbook=" +
       workbook +
       "&reaction_id=" +
-      reaction_id +
-      "&polymer=" +
-      polymer_mode +
-      "&polymerIndices=" +
-      polymer_indices,
+      reaction_id,
   }).done(function (data) {
     $(".loading-bar").css("display", "none");
     if (data.novelCompound) {
@@ -199,13 +190,7 @@ async function reloadReaction() {
   // disable select sketcher buttons until SMILES are loaded into sketcher
   let $sketcherSelectRadioButtons = $('input[name="sketcher-select"]');
   $sketcherSelectRadioButtons.prop("disabled", true);
-
-  const response = await getPolymerMode();
-  if (response === true) {
-    await reloadSketcherFromRXN();
-  } else {
-    await reloadSketcherFromSmiles();
-  }
+  await reloadSketcher();
   $sketcherSelectRadioButtons.prop("disabled", false);
   $("#js-load-status").val("loaded");
   // show compound if reloading a reaction where the reaction table has previously been loaded and description is in json
@@ -220,7 +205,7 @@ async function reloadReaction() {
 /**
  * Loads the reloaded reaction smiles to the active sketcher
  */
-async function reloadSketcherFromSmiles() {
+async function reloadSketcher() {
   let $reactionSmiles = $("#js-reaction-smiles");
   let reloadedReaction = $reactionSmiles.val();
   if (reloadedReaction) {
@@ -241,28 +226,6 @@ async function reloadSketcherFromSmiles() {
           await sleep(250);
         }
       }
-      // sleep used to allow ketcher to load smiles before proceeding
-      await sleep(2000);
-    }
-  }
-}
-
-/**
- * Loads the reloaded RXN file to the active sketcher
- */
-async function reloadSketcherFromRXN() {
-  let $reactionRXN = $("#js-reaction-rxn");
-  let reloadedReaction = $reactionRXN.val();
-  if (reloadedReaction) {
-    let selectedSketcher = $('input[name="sketcher-select"]:checked').attr(
-      "id",
-    );
-    if (selectedSketcher === "marvin-select") {
-      marvin.importStructure("rxn", reloadedReaction);
-      await sleep(500);
-    } else if (selectedSketcher === "ketcher-select") {
-      let ketcher = getKetcher();
-      ketcher.setMolecule(reloadedReaction);
       // sleep used to allow ketcher to load smiles before proceeding
       await sleep(2000);
     }

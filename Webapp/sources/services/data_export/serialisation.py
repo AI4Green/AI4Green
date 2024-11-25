@@ -55,11 +55,7 @@ class RXNFileExport(SerialisationExport):
              container_name - the name of the export container.
         """
         super().__init__(db_reaction, filename, container_name)
-        # Use RXN file saved in database, or generate if not found
-        if self.db_reaction.reaction_rxn:
-            self.reaction_object = self.db_reaction.reaction_rxn
-        else:
-            self.reaction_object = self._make_rxn_block()
+        self.reaction_object = self._make_rxn_block()
 
     def save(self, extension=True):
         """Calls the appropriate method to save the data. Can't use .rxn without a reaction object"""
@@ -111,8 +107,7 @@ class RXNFileExport(SerialisationExport):
         reactant_smiles = utils.remove_default_data(self.db_reaction.reactants)
         reagent_smiles = utils.remove_default_data(self.db_reaction.reagents)
         solvent_smiles = services.all_compounds.get_smiles_list(
-            primary_key_ls=self.db_reaction.solvent,
-            person=self.db_reaction.creator_person,
+            self.db_reaction.solvent, self.db_reaction.creator_person
         )
         product_smiles = utils.remove_default_data(self.db_reaction.products)
         if reactant_smiles and product_smiles:

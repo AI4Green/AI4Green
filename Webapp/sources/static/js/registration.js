@@ -14,11 +14,7 @@ $(function () {
 
 // enable the submit button once both checkboxes are enabled.
 function enableSubmit() {
-  if (
-    $("#hazard_disclaimer").is(":checked") &&
-    $("#privacy").is(":checked") &&
-    !$("#agree-terms").is(":checked")
-  ) {
+  if ($("#hazard_disclaimer").is(":checked") && $("#privacy").is(":checked") && !$("#agree-terms").is(":checked")) {
     $("#submit").removeAttr("disabled");
   } else {
     $("#submit").prop("disabled", true);

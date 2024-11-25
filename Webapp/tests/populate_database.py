@@ -8,9 +8,7 @@ from sources import models, services
 from sources.extensions import db
 
 
-def add_test_user(
-    username: str, email: str, fullname: str, password: str, verified: bool = False
-):
+def add_test_user(username: str, email: str, fullname: str, password: str, verified: bool = False):
     """
     Adds a test user to the database.
     Args:
@@ -27,7 +25,9 @@ def add_test_user(
     db.session.add(p)
 
     # specify and add user
-    services.user.add(username, email, fullname, password, p)
+    services.user.add(
+        username, email, fullname, password, p
+    )
 
     if verified:
         user = services.user.from_email(email)
@@ -38,6 +38,7 @@ def add_test_user(
     return p
 
 
+
 def insert_test_data():
     time_of_creation = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
     # make a person and a user
@@ -46,28 +47,19 @@ def insert_test_data():
     # add verified user
     # create and add person
     p1 = add_test_user(
-        username="test_username",
-        email="test_user@test.com",
-        fullname="Gloria Testeban",
-        password="test_pw",
-        verified=True,
+        username="test_username", email="test_user@test.com", fullname="Gloria Testeban", password="test_pw",
+        verified=True
     )
 
     # add unverified user
     p2 = add_test_user(
-        username="not_verified",
-        email="not_verified@test.com",
-        fullname="Test Daley",
-        password="not_verified",
-        verified=False,
+        username="not_verified", email="not_verified@test.com", fullname="Test Daley", password="not_verified",
+        verified=False
     )
 
     p3 = add_test_user(
-        username="password_reset",
-        email="password_reset@test.com",
-        fullname="TEST",
-        password="password_reset",
-        verified=True,
+        username="password_reset", email="password_reset@test.com", fullname="TEST", password="password_reset",
+        verified=True
     )
 
     # Make an institution, workgroup and workbook
@@ -190,27 +182,6 @@ def insert_test_data():
         status="active",
     )
 
-    # add a polymer reaction
-    models.Reaction.create(
-        creator=p1.id,
-        time_of_creation=time_of_creation,
-        reaction_id="TW1-002",
-        name="a test polymer reaction",
-        description="testing a reaction involving compounds from the test family",
-        reaction_class="",
-        reactants=["*C*", "CC"],
-        products=["CP", "CPP"],
-        reagents=["CCC", "CCCCC"],
-        solvent=[-5],
-        reaction_smiles="*C*.CC>>CP.CPP",
-        workbooks=workbook.id,
-        reaction_table_data=reaction_table,
-        summary_table_data=summary_table,
-        complete="not complete",
-        status="active",
-        polymer_mode=True,
-    )
-
     # add a novel compound
     inchi_1 = "InChI=1S/C21H15NO/c23-21(15-8-2-1-3-9-15)22-20-18-12-6-4-10-16(18)14-17-11-5-7-13-19(17)20/h1-14H,(H,22,23)"
     models.NovelCompound.create(
@@ -226,19 +197,6 @@ def insert_test_data():
         inchi=inchi_1,
         inchikey="MRGYEWYAVKQUEA-UHFFFAOYSA-N",
     )
-
-    # add a polymer novel compound
-    models.PolymerNovelCompound.create(
-        name="Polymer Compound",
-        workbook=workbook.id,
-        molec_formula="C",
-        hphrase="Unknown",
-        density=None,
-        concentration=None,
-        molec_weight=12.01,
-        smiles="*C*",
-    )
-
     seed_limited_element_sustainability_data()
 
     print("Database populated with test data")

@@ -75,14 +75,11 @@ function ifCurrentUserIsNotCreator() {
 async function sketcherAutoSave() {
   // autosave for when the sketcher has been updated
   let smiles;
-  let rxn;
   let selectedSketcher = $('input[name="sketcher-select"]:checked').attr("id");
   if (selectedSketcher === "marvin-select") {
     smiles = await exportSmilesFromMarvin();
-    rxn = await exportRXNFromMarvin(); // needed for polymer mode
   } else if (selectedSketcher === "ketcher-select") {
     smiles = await exportSmilesFromKetcher();
-    rxn = await exportRXNFromKetcher();
   }
   if (smiles === ">>" || smiles === "" || smiles === undefined) {
     // catches if autosave occurs during a sketcher crash
@@ -90,7 +87,6 @@ async function sketcherAutoSave() {
   }
   let smilesNew = removeReagentsFromSmiles(smiles);
   $("#js-reaction-smiles").val(smilesNew);
-  $("#js-reaction-rxn").val(rxn);
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
   let reactionID = $("#js-reaction-id").val();
@@ -104,7 +100,6 @@ async function sketcherAutoSave() {
       reactionID: reactionID,
       userEmail: userEmail,
       reactionSmiles: smilesNew,
-      reactionRXN: rxn,
     },
     dataType: "json",
     success: function () {
@@ -119,18 +114,13 @@ async function sketcherAutoSave() {
 function postReactionData(complete = "not complete") {
   // this function posts data to the backend for saving and then updates the save indicator
   let {
-    polymerMode,
-    polymerIndices,
-    polymerisationType,
     reactionID,
     workgroup,
     workbook,
     reactionSmiles,
-    reactionRXN,
     userEmail,
     reactionName,
     reactionDescription,
-    reactionImage,
     reactantPrimaryKeys,
     productPrimaryKeys,
     reagentPrimaryKeys,
@@ -181,16 +171,6 @@ function postReactionData(complete = "not complete") {
     // summary table elements
     realProductMass,
     unreactedReactantMass,
-    polymerMn,
-    polymerMw,
-    polymerDispersity,
-    polymerMassMethod,
-    polymerMassCalibration,
-    polymerTg,
-    polymerTm,
-    polymerTc,
-    polymerThermalMethod,
-    polymerThermalCalibration,
     reactionTemperature,
     elementSustainability,
     batchFlow,
@@ -214,7 +194,6 @@ function postReactionData(complete = "not complete") {
     productMolecularWeights,
     productHazards,
     productPhysicalFormsText,
-    productIntendedDPs,
     massEfficiency,
     conversion,
     selectivity,
@@ -231,17 +210,12 @@ function postReactionData(complete = "not complete") {
     url: "/_autosave",
     type: "post",
     data: {
-      polymerMode: polymerMode,
-      polymerIndices: polymerIndices,
-      polymerisationType: polymerisationType,
       workgroup: workgroup,
       workbook: workbook,
       reactionID: reactionID,
       reactionSmiles: reactionSmiles,
-      reactionRXN: reactionRXN,
       userEmail: userEmail,
       reactionName: reactionName,
-      reactionImage: reactionImage,
       reactionDescription: reactionDescription,
       reactantPrimaryKeys: reactantPrimaryKeys,
       productPrimaryKeys: productPrimaryKeys,
@@ -292,16 +266,6 @@ function postReactionData(complete = "not complete") {
       productMassUnits: productMassUnits,
       realProductMass: realProductMass,
       unreactedReactantMass: unreactedReactantMass,
-      polymerMn: polymerMn,
-      polymerMw: polymerMw,
-      polymerDispersity: polymerDispersity,
-      polymerMassMethod: polymerMassMethod,
-      polymerMassCalibration: polymerMassCalibration,
-      polymerTg: polymerTg,
-      polymerTm: polymerTm,
-      polymerTc: polymerTc,
-      polymerThermalMethod: polymerThermalMethod,
-      polymerThermalCalibration: polymerThermalCalibration,
       reactionTemperature: reactionTemperature,
       elementSustainability: elementSustainability,
       batchFlow: batchFlow,
@@ -325,7 +289,6 @@ function postReactionData(complete = "not complete") {
       productMolecularWeights: productMolecularWeights,
       productHazards: productHazards,
       productPhysicalFormsText: productPhysicalFormsText,
-      productIntendedDPs: productIntendedDPs,
       summary_to_print: summary_to_print,
       massEfficiency: massEfficiency,
       conversion: conversion,
@@ -421,11 +384,6 @@ function controlLockedReactionFunctionality() {
 }
 
 function getFieldData() {
-  let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
-  let polymerisationType = $("#js-polymerisation-type").val();
-  if (!polymerisationType) {
-    polymerisationType = "";
-  }
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
   let reactionID = $("#js-reaction-id").val();
@@ -433,14 +391,8 @@ function getFieldData() {
   // variables in the reaction table stage
   // reactant data
   let reactionSmiles = $("#js-reaction-smiles").val();
-  let reactionRXN = $("#js-reaction-rxn").val();
-  let polymerIndices = JSON.stringify(identifyPolymers(reactionRXN));
   let reactionName = $("#js-reaction-name").val();
   let reactionDescription = $("#js-reaction-description").val();
-  let reactionImage = $("#image").attr("src");
-  if (!reactionImage) {
-    reactionImage = "";
-  }
   let limitingReactantTableNumber = $(
     "#js-limiting-reactant-table-number",
   ).val();
@@ -583,7 +535,6 @@ function getFieldData() {
   let productPhysicalFormID;
   let productPhysicalForms = "";
   let productPhysicalFormsText = "";
-  let productIntendedDPs = "";
   let productMassesRaw = "";
   let productAmounts = "";
   let productAmountsRaw = "";
@@ -601,8 +552,6 @@ function getFieldData() {
     let productPhysicalForm = $(productPhysicalFormID).prop("selectedIndex");
     productPhysicalForms += productPhysicalForm + ";";
     productPhysicalFormsText += $(productPhysicalFormID).val() + ";";
-    let productIntendedDPID = "#js-product-intended-dp" + i;
-    productIntendedDPs += $(productIntendedDPID).val() + ";";
     let productMassFormID = "#js-product-rounded-mass" + i;
     productMasses += $(productMassFormID).val() + ";";
     let productMassRawFormID = "#js-product-mass" + i;
@@ -624,22 +573,6 @@ function getFieldData() {
   let summaryTableData = JSON.parse($("#js-summary-table-data").val());
   let realProductMass = summaryInput("#js-real-product-mass", "");
   let unreactedReactantMass = summaryInput("#js-unreacted-reactant-mass", "");
-  let polymerMn = summaryInput("#js-polymer-mn", "");
-  let polymerMw = summaryInput("#js-polymer-mw", "");
-  let polymerDispersity = summaryInput("#js-polymer-dispersity", "");
-  let polymerMassMethod = summaryInput("#js-polymer-mass-method", "-select-");
-  let polymerMassCalibration = summaryInput("#js-polymer-mass-calibration", "");
-  let polymerTg = summaryInput("#js-polymer-tg", "");
-  let polymerTm = summaryInput("#js-polymer-tm", "");
-  let polymerTc = summaryInput("#js-polymer-tc", "");
-  let polymerThermalMethod = summaryInput(
-    "#js-polymer-thermal-method",
-    "-select-",
-  );
-  let polymerThermalCalibration = summaryInput(
-    "#js-polymer-thermal-calibration",
-    "",
-  );
   let reactionTemperature = summaryInput("#js-temperature", "");
   let elementSustainability = summaryDropDown(
     "#js-elements",
@@ -744,18 +677,13 @@ function getFieldData() {
     }
   }
   return {
-    polymerMode: polymerMode,
-    polymerIndices: polymerIndices,
-    polymerisationType: polymerisationType,
     reactionID: reactionID,
     workgroup: workgroup,
     workbook: workbook,
     reactionSmiles: reactionSmiles,
-    reactionRXN: reactionRXN,
     userEmail: userEmail,
     reactionName: reactionName,
     reactionDescription: reactionDescription,
-    reactionImage: reactionImage,
     reactantPrimaryKeys: reactantPrimaryKeys,
     productPrimaryKeys: productPrimaryKeys,
     reagentPrimaryKeys: reagentPrimaryKeys,
@@ -805,16 +733,6 @@ function getFieldData() {
     productMassUnits: productMassUnits,
     realProductMass: realProductMass,
     unreactedReactantMass: unreactedReactantMass,
-    polymerMn: polymerMn,
-    polymerMw: polymerMw,
-    polymerDispersity: polymerDispersity,
-    polymerMassMethod: polymerMassMethod,
-    polymerMassCalibration: polymerMassCalibration,
-    polymerTg: polymerTg,
-    polymerTm: polymerTm,
-    polymerTc: polymerTc,
-    polymerThermalMethod: polymerThermalMethod,
-    polymerThermalCalibration: polymerThermalCalibration,
     reactionTemperature: reactionTemperature,
     elementSustainability: elementSustainability,
     batchFlow: batchFlow,
@@ -837,7 +755,6 @@ function getFieldData() {
     productMolecularWeights: productMolecularWeights,
     productHazards: productHazards,
     productPhysicalFormsText: productPhysicalFormsText,
-    productIntendedDPs: productIntendedDPs,
     massEfficiency: mass_efficiency,
     conversion: conversion,
     selectivity: selectivity,
