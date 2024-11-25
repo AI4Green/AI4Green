@@ -54,29 +54,6 @@ function reloadSummary() {
     // refill selectivity
     flagSelectivity();
   }
-  // polymer mode stuff
-  if ($("#polymer-mode-select").prop("checked") === true) {
-    $("#js-polymer-mn").val(js_summary_table_data["polymer_mn"]);
-    $("#js-polymer-mw").val(js_summary_table_data["polymer_mw"]);
-    $("#js-polymer-dispersity").val(
-      js_summary_table_data["polymer_dispersity"],
-    );
-    $("#js-polymer-mass-method").val(
-      js_summary_table_data["polymer_mass_method"],
-    );
-    $("#js-polymer-mass-calibration").val(
-      js_summary_table_data["polymer_mass_calibration"],
-    );
-    $("#js-polymer-tg").val(js_summary_table_data["polymer_tg"]);
-    $("#js-polymer-tm").val(js_summary_table_data["polymer_tm"]);
-    $("#js-polymer-tc").val(js_summary_table_data["polymer_tc"]);
-    $("#js-polymer-thermal-method").val(
-      js_summary_table_data["polymer_thermal_method"],
-    );
-    $("#js-polymer-thermal-calibration").val(
-      js_summary_table_data["polymer_thermal_calibration"],
-    );
-  }
   // reaction temperature
   $("#js-temperature").val(js_summary_table_data["reaction_temperature"]);
   if (js_summary_table_data["reaction_temperature"] !== "") {

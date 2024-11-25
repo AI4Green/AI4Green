@@ -13,7 +13,7 @@ function setupNewKetcherSketcher(width = "1020px") {
  * @return {Promise<void>}
  */
 async function switchToKetcherSketcher() {
-  await exportReactionFromMarvinToKetcher();
+  await exportSmilesFromMarvinToKetcher();
   displayKetcher();
 }
 
@@ -37,21 +37,15 @@ function setupKetcherAutosave() {
 }
 
 /**
- * Exports structures from Marvin to Ketcher vin via SMILES (or RXN in polymer mode)
+ * Exports structures from Marvin to Ketcher vin via SMILES
  */
-async function exportReactionFromMarvinToKetcher() {
-  let reaction;
+async function exportSmilesFromMarvinToKetcher() {
   if (marvin) {
-    const polymerMode = await getPolymerMode();
-    if (polymerMode === true) {
-      reaction = await exportRXNFromMarvin();
-    } else {
-      reaction = await exportSmilesFromMarvin();
-    }
-    if (reaction) {
+    let smiles = await exportSmilesFromMarvin();
+    if (smiles) {
       let ketcher = getKetcher();
 
-      ketcher.setMolecule(reaction);
+      ketcher.setMolecule(smiles);
     }
   }
 }
@@ -67,47 +61,12 @@ async function exportSmilesFromKetcher() {
 }
 
 /**
- * Exports the current contents of Ketcher as RXN
- * @return {Promise<string>} RXN file
- */
-async function exportRXNFromKetcher() {
-  let ketcher = getKetcher();
-  await sleep(2000);
-  try {
-    return await ketcher.getRxn();
-  } catch (error) {
-    return "";
-  }
-}
-
-/**
- * Exports the current contents of Ketcher as MOL
- * @return {Promise<string>} MOL file
- */
-async function exportMOLFromKetcher() {
-  let ketcher = getKetcher();
-  await sleep(2000);
-  try {
-    return await ketcher.getMolfile();
-  } catch (error) {
-    return "";
-  }
-}
-
-/**
  * Enters the example reaction into the Ketcher editor
  */
 function ketcherExampleSmiles() {
   let smiles = "OC(=O)C1=CC=CC=C1.CCN>>CCNC(=O)C1=CC=CC=C1";
   let ketcher = getKetcher();
-
-  getPolymerMode().then((polymerMode) => {
-    if (polymerMode === true) {
-      ketcher.setMolecule(getExamplePolymer());
-    } else {
-      ketcher.setMolecule(smiles);
-    }
-  });
+  ketcher.setMolecule(smiles);
 }
 
 /**

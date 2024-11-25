@@ -39,41 +39,6 @@ def test_novel_compound_sketcher(app: Flask, client: FlaskClient):
         assert new_compound.name == "A Novel compound"
 
 
-def test_polymer_novel_compound_sketcher(app: Flask, client: FlaskClient):
-    """Tests the response when adding a novel compound from the sketcher"""
-    login(client)
-    # Define form data to send in the request
-    form_data = {
-        "workgroup": "Test-Workgroup",
-        "workbook": "Test-Workbook",
-        "name": "A Polymer Novel compound",
-        "source": "sketcher",
-        "smiles": "PC(CC(C)P)C",
-        "density": "",
-        "concentration": "",
-        "hPhrase": "",
-        "cas": "",
-        "molWeight": "45.08",
-        "component": "component",
-    }
-    # Send a POST request to the route with the form data and confirm response
-    response = client.post("/_polymer_novel_compound", data=form_data)
-    assert (
-        response.status_code == 200
-        and response.json["feedback"] == "Compound added to the database"
-    )
-    # confirm compound is in database
-    with app.app_context():
-        workbook = services.workbook.get_workbook_from_group_book_name_combination(
-            "Test-Workgroup", "Test-Workbook"
-        )
-
-        new_compound = services.polymer_novel_compound.from_smiles_and_workbook(
-            "PC(CC(C)P)C", workbook
-        )
-        assert new_compound.name == "A Polymer Novel compound"
-
-
 def test_novel_compound_solvent(app: Flask, client: FlaskClient):
     """Tests the response when adding a novel compound from the sketcher"""
     login(client)
