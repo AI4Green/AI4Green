@@ -338,6 +338,86 @@ class ReactionMetaData:
             ),
         }
 
+    def _read_reaction_type(self) -> Optional[str]:
+        """Returns whether the reaction is in polymer mode"""
+        return self.db_reaction.reaction_type
+
+    def _read_polymerisation_type(self) -> Optional[str]:
+        """Returns the user entered polymerisation type"""
+        polymerisation_type = self.db_reaction.polymerisation_type
+        return polymerisation_type if polymerisation_type != "" else None
+
+    def _read_polymer_mn(self) -> Optional[str]:
+        """Returns the polymer_mn the user entered into the summary table"""
+        polymer_mn = self.summary_data.get("polymer_mn")
+        return polymer_mn if polymer_mn != "" else None
+
+    def _read_polymer_mw(self) -> Optional[str]:
+        """Returns the polymer_mw the user entered into the summary table"""
+        polymer_mw = self.summary_data.get("polymer_mw")
+        return polymer_mw if polymer_mw != "" else None
+
+    def _read_polymer_dispersity(self) -> Optional[str]:
+        """Returns the polymer_dispersity the user entered into the summary table"""
+        polymer_dispersity = self.summary_data.get("polymer_dispersity")
+        return polymer_dispersity if polymer_dispersity != "" else None
+
+    def _read_polymer_mass_method(self) -> Optional[str]:
+        """Returns the polymer_mass_method the user entered into the summary table"""
+        polymer_mass_method = self.summary_data.get("polymer_mass_method")
+        return polymer_mass_method if polymer_mass_method != "" else None
+
+    def _read_polymer_mass_calibration(self) -> Optional[str]:
+        """Returns the polymer_mass_calibration the user entered into the summary table"""
+        polymer_mass_calibration = self.summary_data.get("polymer_mass_calibration")
+        return polymer_mass_calibration if polymer_mass_calibration != "" else None
+
+    def _read_polymer_tg(self) -> Optional[str]:
+        """Returns the polymer_tg the user entered into the summary table"""
+        polymer_tg = self.summary_data.get("polymer_tg")
+        return polymer_tg if polymer_tg != "" else None
+
+    def _read_polymer_tm(self) -> Optional[str]:
+        """Returns the polymer_tm the user entered into the summary table"""
+        polymer_tm = self.summary_data.get("polymer_tm")
+        return polymer_tm if polymer_tm != "" else None
+
+    def _read_polymer_tc(self) -> Optional[str]:
+        """Returns the reaction temperature the user entered into the summary table"""
+        polymer_tc = self.summary_data.get("polymer_tc")
+        return polymer_tc if polymer_tc != "" else None
+
+    def _read_polymer_thermal_method(self) -> Optional[str]:
+        """Returns the polymer_thermal_method the user entered into the summary table"""
+        polymer_thermal_method = self.summary_data.get("polymer_thermal_method")
+        return polymer_thermal_method if polymer_thermal_method != "" else None
+
+    def _read_polymer_thermal_calibration(self) -> Optional[str]:
+        """Returns the reaction temperature the user entered into the summary table"""
+        polymer_thermal_calibration = self.summary_data.get(
+            "polymer_thermal_calibration"
+        )
+        return (
+            polymer_thermal_calibration if polymer_thermal_calibration != "" else None
+        )
+
+    def _format_polymer_data(self) -> Dict:
+        """Formats polymer data into a dictionary."""
+        return {
+            "reaction_type": self._read_reaction_type(),
+            "polymerisation_type": self._read_polymerisation_type(),
+            "polymer_mn": self._read_polymer_mn(),
+            "polymer_mw": self._read_polymer_mw(),
+            "polymer_dispersity": self._read_polymer_dispersity(),
+            "polymer_mass_method": self._read_polymer_mass_method(),
+            "polymer_mass_calibration": self._read_polymer_mass_calibration(),
+            "polymer_tg": self._read_polymer_tg(),
+            "polymer_tm": self._read_polymer_tm(),
+            "polymer_tc": self._read_polymer_tc(),
+            "polymer_thermal_method": self._read_polymer_thermal_method(),
+            "polymer_thermal_calibration": self._read_polymer_thermal_calibration(),
+        }
+
     def _initialise_units(self):
         """Updates the units dictionary with all units used in the reaction."""
         self.units["reactant_mass"] = self.rxn_data["mass_units"]
@@ -530,6 +610,8 @@ class ReactionMetaData:
             "conversion": self._read_conversion,
             "selectivity": self._read_selectivity,
             "sustainability_data": self._read_sustainability_flags,
+            # polymer
+            "polymer_data": self._format_polymer_data,
         }
 
     @staticmethod

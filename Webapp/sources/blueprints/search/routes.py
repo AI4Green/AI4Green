@@ -27,7 +27,11 @@ def structure_search_handler() -> Response:
     # get the search type - only exact_structure currently.
     search_type = request.form["searchType"]
     if search_type == "exact_structure":
-        return search.exact_structure_search()
+        mol = request.form["mol"]
+        if "SRU" in mol:  # polymer found
+            return search.exact_polymer_structure_search()
+        else:
+            return search.exact_structure_search()
 
 
 class SearchHandler:
@@ -38,7 +42,7 @@ class SearchHandler:
         self.reactions = []
         self.matches = []
         self.search_results = ""
-        self.schemes = []
+        self.images = []
         self.get_search_workgroups()
         self.get_search_workbooks()
         self.get_reactions()
@@ -87,7 +91,9 @@ class SearchHandler:
         smiles = request.form["smiles"]
         target_inchi = services.all_compounds.smiles_to_inchi(smiles)
         if not target_inchi:
-            return jsonify({"status": "fail", "message": f"Invalid structure, please try again!"})
+            return jsonify(
+                {"status": "fail", "message": "Invalid structure, please try again!"}
+            )
         # iterate through reactant, reagent, and product for each reaction and check for a match
         for reaction in self.reactions:
             self.exact_structure_match_loop(reaction, target_inchi)
@@ -99,7 +105,7 @@ class SearchHandler:
                     "status": "success",
                     "message": f"{len(self.matches)} results found",
                     "search_results": self.search_results,
-                    "schemes": self.schemes,
+                    "images": self.images,
                 }
             )
         else:
@@ -129,10 +135,74 @@ class SearchHandler:
                             self.matches.append(reaction)
                             return
 
+    def exact_polymer_structure_search(self) -> Response:  # different func if polymer
+        """Performs an exact structure search on the reaction list"""
+        # get search smiles and convert to inchi
+        smiles = request.form["smiles"]
+        smiles = smiles.split(" |")[0]
+        if smiles.count("*") == 2:
+            smiles = services.polymer_novel_compound.canonicalise(smiles)
+        else:
+            return jsonify(
+                {
+                    "status": "error message",
+                    "message": "Searching for polymers with known end groups is not yet supported",
+                }
+            )  # TODO: deal with end groups somehow
+
+        # iterate through reactant, reagent, and product for each reaction and check for a match
+        for reaction in self.reactions:
+            self.exact_polymer_structure_match_loop(reaction, smiles)
+        self.sort_matches()
+        if self.matches:
+            self.render_results_template()
+            return jsonify(
+                {
+                    "status": "success",
+                    "message": f"{len(self.matches)} results found",
+                    "search_results": self.search_results,
+                    "images": self.images,
+                }
+            )
+        else:
+            return jsonify({"status": "fail", "message": "No results found"})
+
+    def exact_polymer_structure_match_loop(
+        self, reaction: models.Reaction, target_smiles: str
+    ) -> None:
+        """Exact structure search looking for matches in reactants, reagents, and products"""
+        if not reaction.reaction_type == "polymer":  # skip non-polymer reactions
+            return
+
+        if reaction.reaction_smiles:
+            reactants1, products1 = reaction.reaction_smiles.split(">>")
+            reactants1, products1 = reactants1.split("."), products1.split(".")
+            reactants2, reagents, products2 = (
+                reaction.reactants,
+                reaction.reagents,
+                reaction.products,
+            )
+            reactants, products = list(set(reactants1 + reactants2)), list(
+                set(products1 + products2)
+            )
+            components = [reactants, reagents, products]
+            for component_type in components:
+                for component_smiles in component_type:
+                    if component_smiles:
+                        component_smiles = component_smiles.split(" |")[0]
+                        component_smiles = (
+                            services.polymer_novel_compound.clean_polymer_smiles(
+                                component_smiles
+                            )
+                        )
+                        if component_smiles == target_smiles:
+                            self.matches.append(reaction)
+                            return
+
     def render_results_template(self) -> None:
         """Makes the results list"""
         reactions = services.reaction.to_dict(self.matches)
-        self.schemes = services.reaction.make_scheme_list(self.matches, "small")
+        self.images = services.reaction.make_reaction_image_list(self.matches)
         self.search_results = render_template(
             "_saved_reactions.html", reactions=reactions, sort_crit="AZ"
         )

@@ -93,6 +93,30 @@ def get_current_from_request_json() -> models.Reaction:
     )
 
 
+def get_current_from_request_args() -> models.Reaction:
+    """
+    Gets the current reaction using the request.args variable
+    Returns:
+        Reaction that corresponds to data in request.args
+    """
+    reaction_id = str(request.args.get("reactionID"))
+    workgroup_name = str(request.args.get("workgroup"))
+    workbook_name = str(request.args.get("workbook"))
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
+    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
+    return (
+        db.session.query(models.Reaction)
+        .filter(models.Reaction.reaction_id == reaction_id)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook.id)
+        .join(models.WorkGroup)
+        .filter(models.WorkGroup.name == workgroup_name)
+        .first()
+    )
+
+
 def list_recent() -> List[models.Reaction]:
     """
     Gets a list of reactions created in the past 28 days. For the admin_dashboard
