@@ -523,7 +523,7 @@ async function removeReagent(removedReagentNumber) {
     "js-reagent-volume",
     "js-reagent-mass",
     "js-reagent-smiles",
-    "js-reagent-primary-key"
+    "js-reagent-primary-key",
   ];
   // skip if it is the reagent being removed
   if (reagentNumber !== removedReagentNumber) {
@@ -756,7 +756,7 @@ async function removeSolvent(removedSolventNumber) {
     "js-solvent-datalist",
     "js-solvent-rounded-concentration",
     "go-to-solvent-guide",
-    "js-solvent-primary-key"
+    "js-solvent-primary-key",
   ];
   // skip if it is the reagent being removed
   if (solventNumber !== removedSolventNumber) {
@@ -1034,12 +1034,14 @@ function autofillProductFields2() {
       "#js-product-amount-unit",
       "#js-product-mass-unit",
       ".js-reactant-limiting",
+      "#js-product-intended-dp",
     ];
     for (const param of productAmountParameters) {
       autofillAmount(component, param, i);
       autofillRoundedAmount(component, param, i);
       autofillMass(component, param, i);
       autofillRoundedMass(component, param, i);
+      autofillTotalMW(component, param, i);
     }
     autofillProductTableNumber(".js-add-reagent", i);
     autofillProductTableNumber(".js-remove-reagent", i);
@@ -1233,4 +1235,14 @@ function fillData(response, component, fieldList, y) {
       $(fieldID).val(response[field]);
     }
   }
+}
+
+function autofillTotalMW(component, changedParameter, loopValue) {
+  //for polymers
+  $(changedParameter).on("input change", function () {
+    let molecularWeight = $("#js-product-molecular-weight" + loopValue).val();
+    let intendedDP = $("#js-product-intended-dp").val(); //get intended DP from html input
+    let totalMW = parseFloat(molecularWeight) * parseFloat(intendedDP);
+    $("#js-polymer-total-weight").val(totalMW);
+  });
 }

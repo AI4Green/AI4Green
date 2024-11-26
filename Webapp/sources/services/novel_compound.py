@@ -154,6 +154,7 @@ def add(
 def reform_novel_compound_primary_key(primary_key: str) -> Tuple:
     """
     Converts a novel primary key to a tuple from the string returned from the frontend HTML
+    Used for polymers too
 
     Args:
         primary_key - the primary key as a string. e.g., ('pixie dust', 1)
