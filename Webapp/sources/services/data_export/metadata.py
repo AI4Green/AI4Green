@@ -338,9 +338,9 @@ class ReactionMetaData:
             ),
         }
 
-    def _read_polymer_mode(self) -> Optional[str]:
+    def _read_reaction_type(self) -> Optional[str]:
         """Returns whether the reaction is in polymer mode"""
-        return self.db_reaction.polymer_mode
+        return self.db_reaction.reaction_type
 
     def _read_polymerisation_type(self) -> Optional[str]:
         """Returns the user entered polymerisation type"""
@@ -404,7 +404,7 @@ class ReactionMetaData:
     def _format_polymer_data(self) -> Dict:
         """Formats polymer data into a dictionary."""
         return {
-            "polymer_mode": self._read_polymer_mode(),
+            "reaction_type": self._read_reaction_type(),
             "polymerisation_type": self._read_polymerisation_type(),
             "polymer_mn": self._read_polymer_mn(),
             "polymer_mw": self._read_polymer_mw(),

@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 
 import pytz
 from sources.extensions import db
@@ -6,6 +7,11 @@ from sources.extensions import db
 from .base import Model
 
 metadata = db.Model.metadata
+
+
+class ReactionType(Enum):
+    STANDARD = "STANDARD"
+    POLYMER = "POLYMER"
 
 
 class Reaction(Model):
@@ -43,7 +49,11 @@ class Reaction(Model):
     name = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False, default="")
     reaction_image = db.Column(db.Text, default="")
-    polymer_mode = db.Column(db.Boolean, default=False)
+    reaction_type = db.Column(
+        db.Enum(ReactionType),
+        server_default=ReactionType.STANDARD.value,
+        default=ReactionType.STANDARD.value,
+    )
     polymerisation_type = db.Column(db.Text, default="")
     reaction_class = db.Column(db.Text, nullable=False, default="")
     creator = db.Column(

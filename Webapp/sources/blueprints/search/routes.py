@@ -171,7 +171,7 @@ class SearchHandler:
         self, reaction: models.Reaction, target_smiles: str
     ) -> None:
         """Exact structure search looking for matches in reactants, reagents, and products"""
-        if not reaction.polymer_mode:  # skip non-polymer reactions
+        if not reaction.reaction_type == "polymer":  # skip non-polymer reactions
             return
 
         if reaction.reaction_smiles:

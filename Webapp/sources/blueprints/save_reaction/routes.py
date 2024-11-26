@@ -148,7 +148,10 @@ def autosave() -> Response:
     reaction_name = reaction.name
     reaction_image = str(request.form["reactionImage"])
     polymer_mode = request.form.get("polymerMode")
-    polymer_mode = polymer_mode.lower() == "true"  # convert string to boolean
+    if polymer_mode.lower() == "true":  # convert string to boolean
+        reaction_type = "POLYMER"
+    else:
+        reaction_type = "STANDARD"
     polymer_indices = json.loads(request.form.get("polymerIndices"))
     polymerisation_type = str(request.form["polymerisationType"])
 
@@ -415,7 +418,7 @@ def autosave() -> Response:
         "solvent": solvent_primary_keys_ls,
         "reaction_table_data": reaction_table,
         "summary_table_data": summary_table,
-        "polymer_mode": polymer_mode,
+        "reaction_type": reaction_type,
         "polymerisation_type": polymerisation_type,
     }
     reaction.update(**update_dict)
@@ -508,9 +511,8 @@ def save_polymer_mode():
     reaction = services.reaction.get_current_from_request()
     services.auth.edit_reaction(reaction)
 
-    polymer_mode = request.form["polymerMode"]
-    polymer_mode = polymer_mode.lower() == "true"  # convert string to boolean
-    update_dict = {"polymer_mode": polymer_mode}
+    reaction_type = request.form["reactionType"]
+    update_dict = {"reaction_type": reaction_type}
     reaction.update(**update_dict)
     feedback = "Reaction Updated!"
     return jsonify({"feedback": feedback})
@@ -526,9 +528,9 @@ def get_polymer_mode():
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
-    reaction = services.reaction.get_current_from_request()
+    reaction = services.reaction.get_current_from_request_args()
 
-    polymer_mode = reaction.polymer_mode
+    polymer_mode = [True if reaction.reaction_type == "POLYMER" else False]
 
     return jsonify(polymer_mode)
 

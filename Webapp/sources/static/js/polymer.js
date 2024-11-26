@@ -6,6 +6,13 @@ function savePolymerMode() {
   let workbook = $("#js-active-workbook").val();
   let reactionID = $("#js-reaction-id").val();
   let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
+  let reactionType;
+  if (polymerMode) {
+    reactionType = "POLYMER";
+  } else {
+    reactionType = "STANDARD";
+  }
+
   $.ajax({
     url: "/_save_polymer_mode",
     type: "post",
@@ -13,7 +20,7 @@ function savePolymerMode() {
       workgroup: workgroup,
       workbook: workbook,
       reactionID: reactionID,
-      polymerMode: polymerMode,
+      reactionType: reactionType,
     },
     success: function (response) {
       // Handle success
