@@ -192,7 +192,7 @@ def process():
         sol_rows = services.solvent.get_workbook_list(workbook)
 
     # change rxn table in polymer mode
-    if polymer_mode == "true":
+    if polymer_mode.lower() == "true":
         reaction_table_html = "_polymer_reaction_table.html"
         r_class = None
         r_classes = None

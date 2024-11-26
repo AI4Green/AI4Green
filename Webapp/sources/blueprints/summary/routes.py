@@ -55,7 +55,7 @@ def summary() -> Response:
 
     polymer_mode = request.form["polymerMode"]
     # change summary table in polymer mode
-    if polymer_mode == "true":
+    if polymer_mode.lower() == "true":
         summary_table_html = "_polymer_summary_table.html"
     else:
         summary_table_html = "_summary_table.html"
