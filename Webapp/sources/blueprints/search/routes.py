@@ -4,6 +4,10 @@ from sources import models, services
 from sources.auxiliary import get_workbooks, get_workgroups
 from sources.extensions import db
 
+#     workgroup = request.form["workgroup"]
+#     workbook = request.form["workbook"]
+from sources.models import reaction
+
 from . import search_bp
 
 # @search_bp.route("/text_search_handler", methods=["POST"])
@@ -12,8 +16,6 @@ from . import search_bp
 #     """Gets search options for text.
 #     **not yet implemented**
 #     """
-#     workgroup = request.form["workgroup"]
-#     workbook = request.form["workbook"]
 
 
 @search_bp.route("/structure_search_handler", methods=["POST"])
@@ -171,7 +173,7 @@ class SearchHandler:
         self, reaction: models.Reaction, target_smiles: str
     ) -> None:
         """Exact structure search looking for matches in reactants, reagents, and products"""
-        if not reaction.reaction_type == "polymer":  # skip non-polymer reactions
+        if not reaction.reaction_type.value == "POLYMER":  # skip non-polymer reactions
             return
 
         if reaction.reaction_smiles:

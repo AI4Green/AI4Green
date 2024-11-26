@@ -188,6 +188,7 @@ def insert_test_data():
         summary_table_data=summary_table,
         complete="not complete",
         status="active",
+        reaction_type="STANDARD",
     )
 
     # add a polymer reaction
@@ -208,7 +209,7 @@ def insert_test_data():
         summary_table_data=summary_table,
         complete="not complete",
         status="active",
-        polymer_mode=True,
+        reaction_type="POLYMER",
     )
 
     # add a novel compound

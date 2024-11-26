@@ -530,7 +530,7 @@ def get_polymer_mode():
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
     reaction = services.reaction.get_current_from_request_args()
 
-    polymer_mode = [True if reaction.reaction_type == "POLYMER" else False]
+    polymer_mode = [True if reaction.reaction_type.value == "POLYMER" else False]
 
     return jsonify(polymer_mode)
 

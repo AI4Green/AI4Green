@@ -340,7 +340,10 @@ class ReactionMetaData:
 
     def _read_reaction_type(self) -> Optional[str]:
         """Returns whether the reaction is in polymer mode"""
-        return self.db_reaction.reaction_type
+        if self.db_reaction.reaction_type is None:
+            return "STANDARD"
+        else:
+            return self.db_reaction.reaction_type.value
 
     def _read_polymerisation_type(self) -> Optional[str]:
         """Returns the user entered polymerisation type"""
