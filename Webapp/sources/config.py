@@ -21,7 +21,7 @@ class BaseConfig(object):  # class to store configuration variables
     SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
     WTF_CSRF_ENABLED = False
     LIVESERVER_TIMEOUT = 10
-    MAX_CONTENT_LENGTH = 1024 * 1024
+    MAX_CONTENT_LENGTH = 1024 * 1024 * 2
     UPLOAD_EXTENSIONS = [
         ".arw",
         "cif",

@@ -2,10 +2,11 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_list.css') }}">
     {% from "macros.html" import render_new_reaction_modal %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
 <script>
-    $(function() {
+    $(async function() {
         if (window.location.pathname.split("/")[1] !== 'search') {
-            showSavedReactionsSchemes()
+            await showSavedReactionsImages()
         }
     });
 </script>
@@ -30,7 +31,7 @@
             <div id="reaction-name{{ loop.index }}" class="reaction-name"><h4>{{ reaction.name }}</h4></div>
             <div id="reaction-id{{ loop.index }}"><h5>{{ reaction.reaction_id }}</h5></div>
             <div class="description">{{ reaction.description }}</div>
-            <div id="image{{ loop.index }}"></div>
+            <img id="image{{ loop.index }}" style="width: 100%; height: auto;"/>
             <div class="reaction-time">Created: {{ reaction.time_of_creation[:-7] }}</div>
             <div class="reaction-time">Edited: {{ reaction.time_of_update[:-7] }}</div>
             <button
@@ -67,3 +68,5 @@
 {{ render_new_reaction_modal() }}
 <input type="hidden" value="{{ reactions|length }}" id="js-number-of-reactions">
 <input type="hidden" value="{{ sort_crit }}" id="js-sort-crit">
+
+<iframe id="ketcher-editor" src="{{ url_for('static', filename='ketcher/index.html') }}" style="display: none"></iframe>
