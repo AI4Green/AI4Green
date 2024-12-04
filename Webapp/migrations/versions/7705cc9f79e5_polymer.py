@@ -55,7 +55,7 @@ def upgrade():
                 "reaction_type",
                 sa.Enum("STANDARD", "POLYMER", name="reactiontype"),
                 server_default="STANDARD",
-                nullable=True,
+                nullable=False,
             )
         )
         batch_op.add_column(sa.Column("polymerisation_type", sa.Text(), nullable=True))
