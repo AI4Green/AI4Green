@@ -63,8 +63,7 @@ def update_ion_containing_list(compounds_list: List[str]) -> List[str]:
     ion_compounds = [
         (idx, reactant)
         for idx, reactant in enumerate(compounds_list)
-        if re.findall(r"(?<!\{)\+", reactant) or re.findall(r"(?<!\{)-", reactant)
-        # find "+" or "-" in reaction_smiles but not {-} or {+n} for polymers
+        if "+" in reactant or "-" in reactant
     ]
     ionic_compounds = ions_to_ionic_compounds(ion_compounds)
 
@@ -143,9 +142,7 @@ def assess_neutrality(ion_string: str) -> str:
     """
     charge_balance = 0
     for idx, char in enumerate(ion_string):
-        if (char == "+" or char == "-") and (
-            idx == 0 or ion_string[idx - 1] != "{"
-        ):  # dont catch polymer {-} or {+n} as charge
+        if char == "+" or char == "-":
             charge_multiplier = (
                 int(ion_string[idx + 1])
                 if len(ion_string) > idx + 1 and ion_string[idx + 1].isdigit()

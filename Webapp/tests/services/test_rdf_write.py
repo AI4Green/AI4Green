@@ -2,8 +2,8 @@ import ast
 import os
 import pickle
 import tempfile
-from pathlib import Path
 from typing import Dict, List
+from pathlib import Path
 
 import pytest
 import pytest_mock
@@ -11,15 +11,13 @@ from flask import Flask
 from flask.testing import FlaskClient
 from rdkit import Chem
 from rdkit.Chem import AllChem
-from sources import db, services
+from sources import services, db
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Local temp files don't work in CI")
-def test_export_reaction_as_rdf(
-    client: FlaskClient, app: Flask, mocker: pytest_mock.MockerFixture
-):
+def test_export_reaction_as_rdf(client: FlaskClient, app: Flask, mocker: pytest_mock.MockerFixture):
     """
     Test saving an exported reaction data file locally and reloading it and checking for data changes
 
@@ -32,9 +30,7 @@ def test_export_reaction_as_rdf(
 
     """
     with open(
-        Path(__file__).resolve().parent.parent
-        / "data"
-        / "reaction_database_object_v1_5.pickle",
+        Path(__file__).resolve().parent.parent / "data" / "reaction_database_object_v1_5.pickle",
         "rb",
     ) as f:
         serialized_data = f.read()
@@ -104,7 +100,6 @@ def literal_eval_metadata(metadata: Dict):
         "addenda",
         "solvent_sustainability",
         "sustainability_data",
-        "polymer_data",
     ]
 
     for key in metadata.keys():
