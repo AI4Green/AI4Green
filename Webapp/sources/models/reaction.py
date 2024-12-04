@@ -53,7 +53,7 @@ class Reaction(Model):
         db.Enum(ReactionType),
         server_default=ReactionType.STANDARD.value,
         default=ReactionType.STANDARD.value,
-
+        nullable=False
     )
     polymerisation_type = db.Column(db.Text, default="")
     reaction_class = db.Column(db.Text, nullable=False, default="")
