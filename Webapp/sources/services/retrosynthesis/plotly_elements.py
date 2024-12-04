@@ -62,27 +62,10 @@ inputs = html.Div(
     ],
     style={"width": "auto"},
 )
+
 """
 Smiles field + Retrosynthesis button
 """
-enhancement_dropdown = html.Div(
-    className="input-group",
-    children=[
-        dcc.Dropdown(
-            id="enhancement-dropdown",
-            options=[
-                {"label": "Default Enhancement", "value": "default"},
-                {"label": "Custom Enhancement A", "value": "custom_a"},
-                {"label": "Custom Enhancement B", "value": "custom_b"},
-            ],
-            value="default",  # Default selection
-            placeholder="Select Enhancement Type",
-            style={"width": "100%", "border": "1px solid #9FA6B2"},
-        ),
-    ],
-    style={"width": "auto", "margin-top": "10px"},
-)
-
 smiles_field_and_retrosynthesis_button = dbc.Row(
     className="gx-2",
     children=[
