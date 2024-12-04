@@ -18,7 +18,6 @@ async function structureSearch(searchType) {
   let workgroup = $("#active-workgroup").val();
   let workbook = $("#active-workbook").val();
   let smiles = await exportSmilesFromActiveEditor();
-  let mol = await exportMOLFromActiveEditor();
   $.ajax({
     url: "/structure_search_handler",
     type: "post",
@@ -28,7 +27,6 @@ async function structureSearch(searchType) {
       workbook: workbook,
       searchType: searchType,
       smiles: smiles,
-      mol: mol,
     },
     success: function (response) {
       $("#search-results-message").text(response.message);
@@ -36,9 +34,6 @@ async function structureSearch(searchType) {
         showSearchReactions(response);
       } else if (response.status === "fail") {
         $("#search-results-contents").empty();
-      } else if (response.status === "error message") {
-        $("#search-results-contents").empty();
-        alert(response.message);
       }
     },
   });
@@ -46,9 +41,9 @@ async function structureSearch(searchType) {
 
 async function showSearchReactions(response) {
   $("#search-results-contents").html(response.search_results).show();
-  for (const [idx, imgSource] of response.images.entries()) {
+  for (const [idx, scheme] of response.schemes.entries()) {
     let idx1 = idx + 1;
-    $(`#image${idx1}`).attr("src", imgSource);
+    $(`#image${idx1}`).append($("<div>").html(scheme));
   }
   document.getElementById("export-div").style.display = "none";
 }

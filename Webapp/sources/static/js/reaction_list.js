@@ -175,87 +175,31 @@ function redirectToReloadReaction(reaction) {
 }
 
 /**
- * Get images of reaction scheme from database
+ *
  * @param sortCriteria {string} - the sort criteria, either a-z or time
  * @param workbook {string} - the active workbook name
  * @param workgroup {string} - the active workgroup name
- * @return {Promise<Array>} - array of reaction images formatted as base64 (text)
+ * @param size {string} - the size of the reaction scheme image
+ * @return {Promise<Array>} - array of reaction scheme images formatted as an svg
  */
-function getReactionImages(sortCriteria, workbook, workgroup) {
+function getSchemata(sortCriteria, workbook, workgroup, size) {
   return new Promise(function (resolve, reject) {
-    // post to get_reaction_images and get the reaction images
+    // post to get_schemata and get the schemes for reaction images
     $.ajax({
       method: "POST",
-      url: "/get_reaction_images",
+      url: "/get_schemata",
       dataType: "json",
       data: {
         sortCriteria: sortCriteria,
         workgroup: workgroup,
         workbook: workbook,
+        size: size,
       },
       success: function (data) {
-        resolve(data.reaction_images);
+        resolve(data.schemes);
       },
       error: function () {
-        reject("error accessing /get_reaction_images");
-      },
-    });
-  });
-}
-
-/**
- * Get reaction SMILES string from database
- * @param sortCriteria {string} - the sort criteria, either a-z or time
- * @param workbook {string} - the active workbook name
- * @param workgroup {string} - the active workgroup name
- * @return {Promise<Array>} - array of reaction smiles strings
- */
-function getSmiles(sortCriteria, workbook, workgroup) {
-  return new Promise(function (resolve, reject) {
-    // post to get_smiles and get the rxn smiles
-    $.ajax({
-      method: "POST",
-      url: "/get_smiles",
-      dataType: "json",
-      data: {
-        sortCriteria: sortCriteria,
-        workgroup: workgroup,
-        workbook: workbook,
-      },
-      success: function (data) {
-        resolve(data.smiles);
-      },
-      error: function () {
-        reject("error accessing /get_smiles");
-      },
-    });
-  });
-}
-
-/**
- * Get reaction RXN string from database
- * @param sortCriteria {string} - the sort criteria, either a-z or time
- * @param workbook {string} - the active workbook name
- * @param workgroup {string} - the active workgroup name
- * @return {Promise<Array>} - array of reaction RXN strings
- */
-function getRXNs(sortCriteria, workbook, workgroup) {
-  return new Promise(function (resolve, reject) {
-    // post to get_smiles and get the rxn smiles
-    $.ajax({
-      method: "POST",
-      url: "/get_rxns",
-      dataType: "json",
-      data: {
-        sortCriteria: sortCriteria,
-        workgroup: workgroup,
-        workbook: workbook,
-      },
-      success: function (data) {
-        resolve(data.rxns);
-      },
-      error: function () {
-        reject("error accessing /get_rxns");
+        reject("error accessing /get_schemata");
       },
     });
   });
@@ -280,23 +224,14 @@ function sortReactionsAlphabetically() {
 }
 
 /**
- * Parse dates in "Created: " format
- */
-function parseDate(dateString) {
-  // Remove "Created: " prefix and trim whitespace
-  const cleanDateString = dateString.replace("Created: ", "").trim();
-  return new Date(cleanDateString); // Parse as a date
-}
-
-/**
  * Sorts reactions in date order, reordering the cards in the list
  */
 function sortReactionsByTime() {
   let reactionCards = $(".reaction-card");
   reactionCards.sort(function (a, b) {
     return (
-      parseDate(b.querySelector(".reaction-time").innerHTML) -
-      parseDate(a.querySelector(".reaction-time").innerHTML)
+      new Date(b.querySelector(".reaction-time").innerHTML) -
+      new Date(a.querySelector(".reaction-time").innerHTML)
     );
   });
   $("#reaction-list").empty();
@@ -325,84 +260,16 @@ function getcsv() {
 }
 
 /**
- * Save images - updates reaction dict
- */
-function saveNewImages(sortCriteria, workbook, workgroup, images) {
-  $.ajax({
-    url: "/_save_new_images",
-    type: "post",
-    data: {
-      sortCriteria: sortCriteria,
-      workgroup: workgroup,
-      workbook: workbook,
-      images: JSON.stringify(images),
-    },
-    success: function (response) {
-      // Handle success
-      console.log(response);
-    },
-    error: function (error) {
-      // Handle error
-      console.error(error);
-    },
-  });
-}
-
-/**
- * Generate images with hidden ketcher element
- * Returns list of images
- */
-async function regenerateImages(sortCriteria, workbook, workgroup) {
-  let ketcherFrame = document.getElementById("ketcher-editor");
-  await new Promise((resolve) => {
-    ketcherFrame.onload = () => resolve();
-  });
-
-  let rxns = await getRXNs(sortCriteria, workbook, workgroup);
-  let smiles = await getSmiles(sortCriteria, workbook, workgroup);
-  let images = [];
-
-  for (const [idx, smile] of smiles.entries()) {
-    try {
-      let rxn = rxns[idx];
-      let source = await ketcherFrame.contentWindow.ketcher.generateImage(rxn);
-      const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 100);
-      let imgSource = await convertBlobToBase64(shrunkenBlob);
-      images.push(imgSource);
-    } catch (error) {
-      console.log("error");
-      // catch reactions with no rxn file, use smiles instead.
-      let source = await ketcherFrame.contentWindow.ketcher.generateImage(
-        smile,
-      );
-      const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 100);
-      let imgSource = await convertBlobToBase64(shrunkenBlob);
-      images.push(imgSource);
-    }
-  }
-  saveNewImages(sortCriteria, workbook, workgroup, images);
-  return images;
-}
-
-/**
- * Loads the saved reactions using the selected sort criteria, then gets images from database.
- * If no image in database, generate with ketcher.
+ * Loads the saved reactions using the selected sort criteria including images of reaction schemes
  * @return {Promise<void>}
  */
-async function showSavedReactionsImages() {
+async function showSavedReactionsSchemes() {
   let sortCriteria = getVal("#js-sort-crit");
   let workgroup = getVal("#active-workgroup");
   let workbook = getVal("#active-workbook");
-
-  let images = await getReactionImages(sortCriteria, workbook, workgroup);
-  if (images.some((entry) => entry === "")) {
-    // if any of the images arent in db, generate now
-    images = await regenerateImages(sortCriteria, workbook, workgroup);
-  }
-
-  for (const [idx, imgSource] of images.entries()) {
+  let schemes = await getSchemata(sortCriteria, workbook, workgroup, "small");
+  for (const [idx, scheme] of schemes.entries()) {
     let idx1 = idx + 1;
-    let $image = $(`#image${idx1}`);
-    $image.attr("src", imgSource);
+    $(`#image${idx1}`).append($("<div>").html(scheme));
   }
 }

@@ -1,15 +1,13 @@
+from typing import Callable, Any
 from functools import wraps
-from typing import Any, Callable, Union
-
-from flask import Response, flash, redirect, request, url_for
+from flask import redirect, url_for, flash, request, Response
 from flask_login import current_user
+from typing import Union
 from sources import services
-from sources.auxiliary import get_workbooks, get_workgroups
+from sources.auxiliary import get_workgroups, get_workbooks
 
 
-def _get_from_request(
-    input_value: Union[str, None], search_str: str
-) -> Union[str, None]:
+def _get_from_request(input_value: Union[str, None], search_str: str) -> Union[str, None]:
     """
     Used for decorators. Searches request.args or request.form for search_str. If that value exists in the request it is returned, else the
     input_value is returned
@@ -43,9 +41,7 @@ def _is_demo() -> bool:
     return True
 
 
-def principal_investigator_required(
-    f: Callable[..., Response]
-) -> Callable[..., Response]:
+def principal_investigator_required(f: Callable[..., Response]) -> Callable[..., Response]:
     """
         Decorates function f to check whether user is a Principal Investigator in the workgroup,
         and redirects to homepage if they are not.
@@ -55,28 +51,21 @@ def principal_investigator_required(
 
         NOTE: redirect may fail if f returns json to front end
 
-    Returns:
-        redirect to home if user is not PI else f
-    """
-
+        Returns:
+            redirect to home if user is not PI or SR else f
+        """
     @wraps(f)
     def decorated_function(*args: Any, **kwargs: Any):
         workgroup = _get_from_request(kwargs.get("workgroup"), "workgroup")
-        if (
-            services.workgroup.get_user_type(workgroup, current_user)
-            != "principal_investigator"
-        ):
+        if services.workgroup.get_user_type(workgroup, current_user) != "principal_investigator":
             flash("You do not have permission to view this page")
             return redirect(url_for("main.index"))
         kwargs["workgroup"] = workgroup
         return f(*args, **kwargs)
-
     return decorated_function
 
 
-def principal_investigator_or_senior_researcher_required(
-    f: Callable[..., Response]
-) -> Callable[..., Response]:
+def principal_investigator_or_senior_researcher_required(f: Callable[..., Response]) -> Callable[..., Response]:
     """
     Decorates function f to check whether user is a Principal Investigator or Senior Researcher in the workgroup,
     and redirects to homepage if they are not.
@@ -89,19 +78,14 @@ def principal_investigator_or_senior_researcher_required(
     Returns:
         redirect to home if user is not PI or SR else f
     """
-
     @wraps(f)
     def decorated_function(*args: Any, **kwargs: Any):
         workgroup = _get_from_request(kwargs.get("workgroup"), "workgroup")
-        if services.workgroup.get_user_type(workgroup, current_user) not in [
-            "principal_investigator",
-            "senior_researcher",
-        ]:
+        if services.workgroup.get_user_type(workgroup, current_user) not in ["principal_investigator", "senior_researcher"]:
             flash("You do not have permission to view this page")
             return redirect(url_for("main.index"))
         kwargs["workgroup"] = workgroup
         return f(*args, **kwargs)
-
     return decorated_function
 
 
@@ -115,10 +99,9 @@ def workgroup_member_required(f: Callable[..., Response]) -> Callable[..., Respo
 
         NOTE: redirect may fail if f returns json to front end
 
-    Returns:
-        redirect to home if user is not in workgroup else f
-    """
-
+        Returns:
+            redirect to home if user is not PI or SR else f
+        """
     @wraps(f)
     def decorated_function(*args: Any, **kwargs: Any):
         workgroup = _get_from_request(kwargs["workgroup"], "workgroup")
@@ -127,7 +110,6 @@ def workgroup_member_required(f: Callable[..., Response]) -> Callable[..., Respo
             return redirect(url_for("main.index"))
         kwargs["workgroup"] = workgroup
         return f(*args, **kwargs)
-
     return decorated_function
 
 
@@ -141,10 +123,9 @@ def workbook_member_required(f: Callable[..., Response]) -> Callable[..., Respon
 
         NOTE: redirect may fail if f returns json to front end
 
-    Returns:
-        redirect to home if user is not in workbook else f
-    """
-
+        Returns:
+            redirect to home if user is not PI or SR else f
+        """
     @wraps(f)
     def decorated_function(*args: Any, **kwargs: Any):
         if not _is_demo():
@@ -156,5 +137,4 @@ def workbook_member_required(f: Callable[..., Response]) -> Callable[..., Respon
             kwargs["workgroup"] = workgroup
             kwargs["workbook"] = workbook
         return f(*args, **kwargs)
-
     return decorated_function

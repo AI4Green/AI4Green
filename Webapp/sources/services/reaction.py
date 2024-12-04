@@ -93,30 +93,6 @@ def get_current_from_request_json() -> models.Reaction:
     )
 
 
-def get_current_from_request_args() -> models.Reaction:
-    """
-    Gets the current reaction using the request.args variable
-    Returns:
-        Reaction that corresponds to data in request.args
-    """
-    reaction_id = str(request.args.get("reactionID"))
-    workgroup_name = str(request.args.get("workgroup"))
-    workbook_name = str(request.args.get("workbook"))
-    workbook = services.workbook.get_workbook_from_group_book_name_combination(
-        workgroup_name, workbook_name
-    )
-    abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
-    return (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.reaction_id == reaction_id)
-        .join(models.WorkBook)
-        .filter(models.WorkBook.id == workbook.id)
-        .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup_name)
-        .first()
-    )
-
-
 def list_recent() -> List[models.Reaction]:
     """
     Gets a list of reactions created in the past 28 days. For the admin_dashboard
@@ -202,25 +178,54 @@ def list_active_in_workbook(
     return reaction_list
 
 
-def make_reaction_image_list(reaction_list: List[models.Reaction]) -> List[str]:
+def make_scheme_list(reaction_list: List[models.Reaction], size: str) -> List[str]:
     """
-    gets a list of reaction images from db
+    Makes a list of reaction schemes from a list of reactions using the reaction SMILES
     Args:
         reaction_list: list of Reactions objects that we are making scheme images for
+        size: the size of scheme image we are making.
 
     Returns:
-        A list of reaction images as strings
+        A list of reaction scheme images as strings
     """
-    reaction_image_list = []
-    # get images from db
+    scheme_list = []
+    # get rxn schemes
     for reaction in reaction_list:
-        reaction_image = reaction.reaction_image
-        # if there is no image use a blank string to maintain correct list length
-        if reaction_image:
-            reaction_image_list.append(reaction_image)
+        reaction_smiles = reaction.reaction_smiles
+        # if there are no smiles use a blank string to maintain correct list length
+        if re.search("[a-zA-Z]", reaction_smiles):
+            # we test to see if ions are present in which case further logic is needed
+            scheme_list.append(make_reaction_scheme_image(reaction_smiles, size))
         else:
-            reaction_image_list.append("")
-    return reaction_image_list
+            scheme_list.append("")
+    return scheme_list
+
+
+def make_reaction_scheme_image(reaction_smiles: str, size: str) -> str:
+    """
+    Makes a reaction scheme from a reaction smiles according to the size parameter.
+    Args:
+        reaction_smiles - the SMILES we are making an image of.
+        size: whether the image is small or not.
+    Returns:
+        the image of the reaction scheme as an svg
+
+    """
+    # first we see if it is from marvin js and contains ions
+    if len(reaction_smiles.split(" |")) > 1:
+        rxn = services.ions.reaction_from_ionic_cx_smiles(reaction_smiles)
+    elif "+" in reaction_smiles or "-" in reaction_smiles:
+        rxn = services.ions.reaction_from_ionic_smiles(reaction_smiles)
+        # reactions with no ions - make rxn object directly from string
+    else:
+        rxn = AllChem.ReactionFromSmarts(reaction_smiles, useSmiles=True)
+    if size == "small":
+        d2d = rdMolDraw2D.MolDraw2DSVG(400, 150)
+    else:
+        d2d = rdMolDraw2D.MolDraw2DSVG(600, 225)
+    d2d.DrawReaction(rxn)
+    # return drawing text
+    return d2d.GetDrawingText()
 
 
 def to_dict(reaction_list: List[models.Reaction]) -> List[Dict]:
