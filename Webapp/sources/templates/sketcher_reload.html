@@ -42,7 +42,7 @@
     <div>
         <form action="{{ url_for('reaction_table.process') }}" method="post">
             <label> Polymer Mode?
-                <input type="checkbox" id="polymer-mode-select" name="polymer-mode-select" onclick="savePolymerMode()" {% if reaction.reaction_type == "POLYMER" %} checked {% endif %}>
+                <input type="checkbox" id="polymer-mode-select" name="polymer-mode-select" onclick="savePolymerMode()" {% if reaction.reaction_type.value == "POLYMER" %} checked {% endif %}>
             </label>
         </form>
     </div>
