@@ -1,3 +1,4 @@
+import json
 from typing import Dict, List
 
 from sources import auxiliary, services
@@ -46,8 +47,10 @@ def get_reactant_data(request_data: Dict) -> Dict:
     # Joining primary keys and getting smiles
     reactant_primary_keys_ls = auxiliary.get_data("reactantPrimaryKeys", request_data)
     reactant_dict["reactant_primary_keys_str"] = ", ".join(reactant_primary_keys_ls)
+    polymer_indices = request_data["polymerIndices"]
+    polymer_indices = json.loads(polymer_indices)
     reactant_dict["reactant_smiles_ls"] = services.all_compounds.get_smiles_list(
-        reactant_primary_keys_ls
+        reactant_primary_keys_ls, polymer_indices
     )
     return reactant_dict
 
@@ -154,9 +157,15 @@ def get_product_data(request_data: Dict) -> Dict:
     # Primary keys and SMILES
     # Joining primary keys and getting smiles
     product_primary_keys_ls = auxiliary.get_data("productPrimaryKeys", request_data)
+
+    polymer_indices = json.loads(request_data["polymerIndices"])
+    polymer_indices = [
+        (int(item) - int(request_data["numberOfReactants"])) for item in polymer_indices
+    ]  # minus num reactants to update indexing
+
     product_dict["product_primary_keys_str"] = ", ".join(product_primary_keys_ls)
     product_dict["product_smiles_ls"] = services.all_compounds.get_smiles_list(
-        product_primary_keys_ls
+        product_primary_keys_ls, polymer_indices
     )
     # Table numbers
     product_table_numbers = auxiliary.get_data("productTableNumbers", request_data)

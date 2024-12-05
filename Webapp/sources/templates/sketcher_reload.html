@@ -7,7 +7,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher_page.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/addendum.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/file_handling.js') }}"></script>
-
+    <script type="text/javascript" src="{{ url_for('static', filename='js/polymer.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
@@ -39,6 +39,13 @@
         <p>Please sketch or upload your reaction to begin. Click <a target="_blank" href="{{ url_for('main.marvin_js_help') }}">here</a> to view our Marvin JS help guide.</p>
         <p>Please note compounds drawn above or underneath the arrow will not be recognised.</p>
     </div>
+    <div>
+        <form action="{{ url_for('reaction_table.process') }}" method="post">
+            <label> Polymer Mode?
+                <input type="checkbox" id="polymer-mode-select" name="polymer-mode-select" onclick="savePolymerMode()" {% if reaction.reaction_type == "POLYMER" %} checked {% endif %}>
+            </label>
+        </form>
+    </div>
     <div id="sketchers-div">
         <div>
             Selected Reaction Sketcher:
@@ -63,11 +70,14 @@
     <input type="hidden" id="js-reaction-id" value="{{ reaction.reaction_id }}">
     <input type="hidden" id="js-reaction-object" value="{{ reaction }}">
     <input type="hidden" id="js-reaction-smiles" value="{{ reaction.reaction_smiles }}">
+    <input type="hidden" id="js-reaction-rxn" value="{{ reaction.reaction_rxn }}">
     <input type="hidden" value="{{ reaction.reaction_table_data }}" id="js-reaction-table-data">
     <input type="hidden" value="{{ reaction.summary_table_data }}" id="js-summary-table-data">
-    <input type="hidden" id="js-reaction-scheme-image" value="0" style="{'width': 600, 'height': 400}">
+    <input type="hidden" id="js-reloaded-image" value="0" style="{'width': 600, 'height': 400}">
     <input type="hidden" value="{{ demo }}" id="js-demo">
     <input type="hidden" value="{{ reaction.complete }}" id="js-complete">
+    <input type="hidden" value="{{ marvin_js_key }}" id="marvin-js-key">
+    <input type="hidden" value="{{ url_for('static', filename='ketcher/index.html') }}" id="ketcher-source">
 
     {% if tutorial == 'no' %}
         <input type="hidden" value="{{ reaction.creator_person.user.email }}" id="js-creator-email">

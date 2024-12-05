@@ -3,6 +3,7 @@ from flask import (
     abort,
     escape,
     flash,
+    json,
     jsonify,
     redirect,
     render_template,
@@ -12,12 +13,9 @@ from flask import (
 from flask_api import status
 from flask_login import current_user, login_required
 from sources import models, services
-from sources.auxiliary import (
-    abort_if_user_not_in_workbook,
-    security_member_workgroup_workbook,
-)
-from sources.extensions import db
+from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.decorators import workbook_member_required
+from sources.extensions import db
 
 from . import reaction_list_bp
 
@@ -63,9 +61,9 @@ def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response
 @login_required
 def get_reactions() -> Response:
     """Gets a list of reactions for the active workbook. Reaction data is sent as a list of dictionaries."""
-    sort_crit = str(request.form["sortCriteria"])
-    workbook_name = str(request.form["workbook"])
-    workgroup_name = str(request.form["workgroup"])
+    sort_crit = str(request.form.get("sortCriteria"))
+    workbook_name = str(request.form.get("workbook"))
+    workgroup_name = str(request.form.get("workgroup"))
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
@@ -85,25 +83,75 @@ def get_reactions() -> Response:
     return jsonify({"reactionDetails": reaction_details})
 
 
-@reaction_list_bp.route("/get_schemata", methods=["GET", "POST"])
+@reaction_list_bp.route("/get_reaction_images", methods=["GET", "POST"])
 @login_required
-def get_schemata() -> Response:
+@workbook_member_required
+def get_reaction_images(workgroup, workbook) -> Response:
     """
-    Gets a list of reaction schemes for the active workbook. Images made from reaction SMILES using rdMolDraw2D (RDKit)
+    Gets a list of reaction images for the active workbook.
     """
-    workbook_name = str(request.form["workbook"])
-    workgroup_name = str(request.form["workgroup"])
+    sort_crit = str(request.form.get("sortCriteria"))
+    reaction_list = services.reaction.list_active_in_workbook(
+        workbook, workgroup, sort_crit
+    )
+    reaction_images = services.reaction.make_reaction_image_list(reaction_list)
+    return {"reaction_images": reaction_images, "sort_crit": escape(sort_crit)}
+
+
+@reaction_list_bp.route("/get_smiles", methods=["GET", "POST"])
+@login_required
+@workbook_member_required
+def get_smiles(workgroup, workbook) -> Response:
+    """
+    Gets a list of reaction smiles for the active workbook.
+    """
+    sort_crit = str(request.form.get("sortCriteria"))
+    reaction_list = services.reaction.list_active_in_workbook(
+        workbook, workgroup, sort_crit
+    )
+    smiles_list = [r.reaction_smiles for r in reaction_list]
+    return {"smiles": smiles_list, "sort_crit": escape(sort_crit)}
+
+
+@reaction_list_bp.route("/get_rxns", methods=["GET", "POST"])
+@login_required
+@workbook_member_required
+def get_rxns(workgroup, workbook) -> Response:
+    """
+    Gets a list of reaction RXNs for the active workbook.
+    """
+    sort_crit = str(request.form.get("sortCriteria"))
+    reaction_list = services.reaction.list_active_in_workbook(
+        workbook, workgroup, sort_crit
+    )
+    rxn_list = [r.reaction_rxn for r in reaction_list]
+    return {"rxns": rxn_list, "sort_crit": escape(sort_crit)}
+
+
+@reaction_list_bp.route("/_save_new_images", methods=["POST"])
+@login_required
+def save_new_images():
+    """Updates reaction dict with images"""
+    # must be logged in
+    workbook_name = str(request.form.get("workbook"))
+    workgroup_name = str(request.form.get("workgroup"))
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
-    size = str(request.form["size"])
-    sort_crit = str(request.form["sortCriteria"])
+    sort_crit = str(request.form.get("sortCriteria"))
     reaction_list = services.reaction.list_active_in_workbook(
         workbook_name, workgroup_name, sort_crit
     )
-    schemes = services.reaction.make_scheme_list(reaction_list, size)
-    return {"schemes": schemes, "sort_crit": escape(sort_crit)}
+    images = json.loads(request.form.get("images"))
+    for idx, reaction in enumerate(reaction_list):
+        services.auth.edit_reaction(
+            reaction, file_attachment=True
+        )  # allow changes of locked reactions
+        update_dict = {"reaction_image": images[idx]}
+        reaction.update(**update_dict)
+    feedback = "Reaction Updated!"
+    return jsonify({"feedback": feedback})
 
 
 @reaction_list_bp.route("/get_new_reaction_id", methods=["GET", "POST"])
