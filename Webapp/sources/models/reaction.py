@@ -1,5 +1,4 @@
 from datetime import datetime
-from enum import Enum
 
 import pytz
 from sources.extensions import db
@@ -7,11 +6,6 @@ from sources.extensions import db
 from .base import Model
 
 metadata = db.Model.metadata
-
-
-class ReactionType(Enum):
-    STANDARD = "STANDARD"
-    POLYMER = "POLYMER"
 
 
 class Reaction(Model):
@@ -76,7 +70,6 @@ class Reaction(Model):
     reaction_table_data = db.Column(db.JSON, nullable=False)
     summary_table_data = db.Column(db.JSON, nullable=False)
     reaction_smiles = db.Column(db.Text, nullable=False, default="")
-    reaction_rxn = db.Column(db.Text, default="")
     complete = db.Column(db.Text, nullable=False)
     status = db.Column(db.Text, nullable=False)
     precursor_reaction = db.relationship(

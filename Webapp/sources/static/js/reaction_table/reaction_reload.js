@@ -96,7 +96,6 @@ async function reactionTableReload() {
       let jsonID = "product_" + jsonField;
       fillInputField(productFieldID, jsonID, i);
     }
-    fillInputField("#js-product-intended-dp" + j, "product_intended_dps", i);
   }
   // iterate through and reload reagents data
   let numberOfReagents = js_reaction_table_data["reagent_names"].length;
@@ -154,10 +153,6 @@ async function reactionTableReload() {
   // reaction description
   $("#js-reaction-description").val(
     js_reaction_table_data["reaction_description"],
-  );
-  // polymerisation type
-  $("#js-polymerisation-type").val(
-    js_reaction_table_data["polymerisation_type"],
   );
   // get summary table
   let js_summary_table_data = JSON.parse($("#js-summary-table-data").val());
