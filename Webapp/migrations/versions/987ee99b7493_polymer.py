@@ -1,15 +1,15 @@
 """polymer
 
-Revision ID: 7705cc9f79e5
+Revision ID: 987ee99b7493
 Revises: 70fd97efd6c4
-Create Date: 2024-11-25 16:59:31.993346
+Create Date: 2024-12-05 11:16:29.116094
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "7705cc9f79e5"
+revision = "987ee99b7493"
 down_revision = "70fd97efd6c4"
 branch_labels = None
 depends_on = None
@@ -55,7 +55,7 @@ def upgrade():
                 "reaction_type",
                 sa.Enum("STANDARD", "POLYMER", name="reactiontype"),
                 server_default="STANDARD",
-                nullable=True,
+                nullable=False,
             )
         )
         batch_op.add_column(sa.Column("polymerisation_type", sa.Text(), nullable=True))
