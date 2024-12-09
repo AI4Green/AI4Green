@@ -23,6 +23,21 @@ body {
     position: relative;
 }
 
+.carousel-container {
+    display: flex;
+    justify-content: center; /* Center the carousel */
+    align-items: center;    /* Vertically center the carousel */
+    border: 2px solid black; /* Border similar to the grid container */
+    padding: 10px;          /* Add some padding inside the container */
+    margin-top: 20px;       /* Space above the carousel */
+    position: relative;     /* Relative positioning for the circular layout */
+    width: 400px;           /* Fixed width for the circular container */
+    height: 400px;          /* Fixed height for the circular container */
+    border-radius: 50%;     /* Makes the container circular */
+    overflow: hidden;       /* Ensures points don’t overflow */
+    background-color: #f9f9f9; /* Optional: Add a subtle background */
+}
+
 .grid-circle {
     width: 40px;
     height: 40px;

@@ -8,19 +8,35 @@
 <body>
     <div class="container">
         <div class="controls">
-            <label for="grid-size">Select Grid Size:</label>
-            <select id="grid-size" onchange="createGrid()">
-                <option value="8x12">8 x 12 (96 wells)</option>
-                <option value="6x8">6 x 8 (48 wells)</option>
-                <option value="4x6">4 x 6 (24 wells)</option>
-            </select>
+{#            <label for="column-size">Multiwell reaction with </label>#}
+{#                <select id="column-size" onchange="createGrid()">#}
+{#                      {% for i in range(1, 11) %}#}
+{#                        <option value="{{ i }}">{{ i }}</option>#}
+{#                      {% endfor %}#}
+{#                </select>#}
+{#            <label for="row-size"> columns and </label>#}
+{#                <select id="row-size" onchange="createGrid()">#}
+{#                      {% for i in range(1, 11) %}#}
+{#                        <option value="{{ i }}">{{ i }}</option>#}
+{#                      {% endfor %}#}
+{#                </select> rows#}
+
+        <label for="column-size">Multiwell reaction with </label>
+                <select id="carousel-reactions" onchange="createCarousel()">
+                      {% for i in range(1, 11) %}
+                        <option value="{{ i }}">{{ i }}</option>
+                      {% endfor %}
+                </select>
+
+                </select> rows
+
         </div>
-        <div class="container-fluid">
-            <div id="grid-wrapper" class="outer-rectangle">
-                <div id="grid" class="grid-container"></div>
+            <div class="container-fluid">
+                <div id="grid-wrapper" class="outer-rectangle">
+                    <div id="grid" class="grid-container"></div>
+                </div>
             </div>
         </div>
-    </div>
     <div id="side-panel" class="side-panel">
         <div class="reaction-header">Reaction Constructor</div>
         <p>This is a placeholder for the reaction constructor.</p>
