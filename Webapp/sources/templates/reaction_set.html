@@ -8,39 +8,57 @@
 <body>
     <div class="container">
         <div class="controls">
-{#            <label for="column-size">Multiwell reaction with </label>#}
-{#                <select id="column-size" onchange="createGrid()">#}
-{#                      {% for i in range(1, 11) %}#}
-{#                        <option value="{{ i }}">{{ i }}</option>#}
-{#                      {% endfor %}#}
-{#                </select>#}
-{#            <label for="row-size"> columns and </label>#}
-{#                <select id="row-size" onchange="createGrid()">#}
-{#                      {% for i in range(1, 11) %}#}
-{#                        <option value="{{ i }}">{{ i }}</option>#}
-{#                      {% endfor %}#}
-{#                </select> rows#}
-
-        <label for="column-size">Multiwell reaction with </label>
-                <select id="carousel-reactions" onchange="createCarousel()">
-                      {% for i in range(1, 11) %}
-                        <option value="{{ i }}">{{ i }}</option>
-                      {% endfor %}
+            <label for="reactor-type">Select Reactor Type: </label>
+                <select id="reactor-type" onchange="updateReactorType()">
+                    <option value="well-plate">Well plate</option>
+                    <option value="carousel">Carousel</option>
                 </select>
 
+            <!-- Multiwell reactor setup -->
+            <div id="wellplate-container" style="display: block;">
+                <label for="column-size">Well-plate reactor with </label>
+                <select id="column-size" onchange="createGrid()">
+                    {% for i in range(1, 11) %}
+                        <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                </select>
+                <label for="row-size"> columns and </label>
+                <select id="row-size" onchange="createGrid()">
+                    {% for i in range(1, 11) %}
+                        <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
                 </select> rows
-
-        </div>
-            <div class="container-fluid">
-                <div id="grid-wrapper" class="outer-rectangle">
-                    <div id="grid" class="grid-container"></div>
+                <div id="plate-reactor" class="container-fluid">
+                    <div id="grid-wrapper" class="outer-rectangle">
+                        <div id="grid" class="grid-container">
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <!-- Carousel reactor setup -->
+            <div id="carousel-container" style="display: none;">
+                <label for="carousel-reactions">Carousel reactor with </label>
+                <select id="carousel-reactions" onchange="createCarousel()">
+                    {% for i in range(1, 20) %}
+                        <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                </select> wells
+                <div id="carousel-reactor" class="container-fluid">
+                        <div id="carousel" class="carousel-container"></div>
+                    </div>
+            </div>
+
+
         </div>
-    <div id="side-panel" class="side-panel">
-        <div class="reaction-header">Reaction Constructor</div>
-        <p>This is a placeholder for the reaction constructor.</p>
-        <p>Details about the selected well will be displayed here.</p>
+
     </div>
+    </div>
+
+<div id="side-panel" class="side-panel">
+    <div class="reaction-header">Reaction Constructor</div>
+    <p>This is a placeholder for the reaction constructor.</p>
+    <p>Details about the selected well will be displayed here.</p>
+</div>
 </body>
 {% endblock %}

@@ -4,7 +4,7 @@ const getReactionDetails = (row, col) => {
     return `Reaction at row ${row + 1}, column ${col + 1}`;
 };
 
-const createGrid = () => {
+function createGrid() {
     const cols = document.getElementById("column-size").value;
     const rows = document.getElementById("row-size").value;
     const grid = document.getElementById('grid');
@@ -12,12 +12,9 @@ const createGrid = () => {
     grid.innerHTML = ''; // Clear existing grid
     grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
     grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-    console.log(cols, rows)
 
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
-            console.log("s")
-            console.log(row, col)
             const circle = document.createElement('div');
             circle.className = 'btn icon';
 
@@ -41,16 +38,15 @@ const createGrid = () => {
             grid.appendChild(circle);
         }
     }
+}
 
-    const createCarousel = () => {
+function createCarousel() {
     const numPoints = parseInt(document.getElementById("carousel-reactions").value, 10); // Get the number of points
     const carousel = document.getElementById('carousel');
     const sidePanel = document.getElementById('side-panel');
     carousel.innerHTML = ''; // Clear existing carousel
 
-    const radius = 150; // Radius of the circle in pixels
-    const centerX = 200; // X-coordinate of the center
-    const centerY = 200; // Y-coordinate of the center
+    const { centerX, centerY, radius } = getCarouselDimensions();
 
     for (let i = 0; i < numPoints; i++) {
         // Calculate angle for this point
@@ -62,10 +58,10 @@ const createGrid = () => {
 
         // Create the circle element
         const circle = document.createElement('div');
-        circle.className = 'carousel-circle';
+        circle.className = 'btn icon';
         circle.style.position = 'absolute';
-        circle.style.left = `${x}px`;
-        circle.style.top = `${y}px`;
+        circle.style.left = `${x - centerX + radius - 42}px`;
+        circle.style.top = `${y - centerY + radius - 42}px`;
 
         // Tooltip for reaction details
         const tooltip = document.createElement('div');
@@ -77,21 +73,49 @@ const createGrid = () => {
         circle.addEventListener('click', () => {
             // Populate the side panel with reaction details
             sidePanel.innerHTML = `
-                <div class="reaction-header">Reaction Constructor</div>
-                <p>Details for Point ${i + 1}:</p>
-                <p>This is a placeholder for the reaction constructor.</p>
-            `;
+            <div class="reaction-header">Reaction Constructor</div>
+            <p>Details for Point ${i + 1}:</p>
+            <p>This is a placeholder for the reaction constructor.</p>
+        `;
             sidePanel.classList.add('active');
         });
 
         carousel.appendChild(circle);
     }
-};
+}
 
-    // // Update grid on dropdown change
-    // gridSizeSelector.addEventListener('change', () => {
-    //     const [rows, cols] = gridSizeSelector.value.split('x').map(Number);
-    //     createGrid(rows, cols);
-    // });
+function getCarouselDimensions() {
+    const carousel = document.getElementById('carousel');
+    const rect = carousel.getBoundingClientRect(); // Get position and size of the container
+
+    const radius = Math.min(rect.width, rect.height) / 2; // Radius is half the smaller dimension
+    const centerX = rect.left + rect.width / 2; // X-coordinate of the center
+    const centerY = rect.top + rect.height / 2; // Y-coordinate of the center
+
+    return { centerX: centerX, centerY: centerY, radius: radius };
+}
+
+
+function updateReactorType() {
+    const reactorType = document.getElementById("reactor-type").value; // Get selected reactor type
+    const multiwellContainer = document.getElementById("wellplate-container");
+    const carouselContainer = document.getElementById("carousel-container");
+    if (reactorType === "well-plate") {
+        // Show multiwell setup and hide carousel setup
+        multiwellContainer.style.display = "block";
+        carouselContainer.style.display = "none";
+    } else if (reactorType === "carousel") {
+        console.log(carouselContainer)
+        // Show carousel setup and hide multiwell setup
+        multiwellContainer.style.display = "none";
+        carouselContainer.style.display = "block";
+        createCarousel()
+    }
+}
+
+// Initialize the page with the correct reactor type settings
+window.onload = function() {
+    createGrid(); // Ensure the page is loaded with the correct display settings
+
 };
 
