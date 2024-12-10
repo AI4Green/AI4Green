@@ -1,60 +1,51 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    display: flex;
-    gap: 20px;
-}
-
-.container {
-    flex: 2;
-}
-
-.controls {
-    margin-bottom: 20px;
-}
-
-.grid-container {
+.plate-reactor {
     display: grid;
     gap: 5px;
     justify-content: center;
     border: 2px solid black;
-    padding: 10px;
+    /*padding: 10px;*/
     margin-top: 20px;
     position: relative;
 }
 
-.carousel-container {
-    display: flex;
-    justify-content: center; /* Center the points inside the container */
-    align-items: center; /* Vertically center the points */
-    border: 2px solid black; /* Border for the circular container */
+.outer-rectangle {
+    border: 4px solid black;
     padding: 10px;
-    margin-top: 20px;
-    position: relative;
-    width: 400px; /* Fixed width for the circular container */
-    height: 400px; /* Fixed height for the circular container */
-    border-radius: 50%; /* Makes the container circular */
-    overflow: hidden; /* Prevents points from overflowing outside the circle */
-    background-color: #f9f9f9; /* Optional: Light background color */
+    margin: 10px;
 }
 
-.grid-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: lightblue;
+.carousel-wrapper {
     display: flex;
-    align-items: center;
     justify-content: center;
-    cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
+    align-items: center;
     position: relative;
+    width: 500px; /* Ensure it's the same size as outer-circle */
+    height: 500px; /* Ensure it's the same size as outer-circle */
 }
 
-.grid-circle:hover {
-    transform: scale(1.5);
-    background-color: deepskyblue;
+.outer-circle {
+    border: 4px solid black;
+    border-radius: 50%;
+    position: absolute; /* Absolute positioning relative to wrapper */
+    width: 500px; /* Fixed width for the circular container */
+    height: 500px; /* Fixed height for the circular container */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f9f9f9;
 }
+
+.carousel-reactor {
+    position: absolute; /* Absolute positioning relative to outer-circle */
+    width: 400px; /* Fixed width for the inner circular container */
+    height: 400px; /* Fixed height for the inner circular container */
+    border-radius: 50%; /* Makes the container circular */
+    background-color: #f9f9f9; /* Optional: Light background color */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 
 .tooltip {
     position: absolute;
@@ -71,12 +62,6 @@ body {
 
 .grid-circle:hover .tooltip {
     display: block;
-}
-
-.outer-rectangle {
-    border: 4px solid black;
-    padding: 10px;
-    margin: 10px;
 }
 
 .side-panel {
