@@ -11,12 +11,18 @@ function createGrid() {
     const sidePanel = document.getElementById('side-panel');
     grid.innerHTML = ''; // Clear existing grid
     grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`
+
+
 
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
             const circle = document.createElement('div');
             circle.className = 'btn icon';
+            circle.style.width = "30px";
+            circle.style.height = "30px";
+
+
 
             // Tooltip for reaction details
             const tooltip = document.createElement('div');
@@ -84,6 +90,7 @@ function createCarousel() {
     }
 }
 
+
 function getCarouselDimensions() {
     const carousel = document.getElementById('carousel');
     const rect = carousel.getBoundingClientRect(); // Get position and size of the container
@@ -98,24 +105,34 @@ function getCarouselDimensions() {
 
 function updateReactorType() {
     const reactorType = document.getElementById("reactor-type").value; // Get selected reactor type
-    const multiwellContainer = document.getElementById("wellplate-container");
-    const carouselContainer = document.getElementById("carousel-container");
+
+    // Get references to selectors and reactor containers
+    const wellplateContainer = document.getElementById("wellplate-selector");
+    const carouselContainer = document.getElementById("carousel-selector");
+    const multiwellReactor = document.getElementById("wellplate-container");
+    const carouselReactor = document.getElementById("carousel-container");
+
     if (reactorType === "well-plate") {
-        // Show multiwell setup and hide carousel setup
-        multiwellContainer.style.display = "block";
+        // Show multiwell setup and reactor, hide carousel
+        wellplateContainer.style.display = "block";
+        multiwellReactor.style.display = "block";
+
         carouselContainer.style.display = "none";
+        carouselReactor.style.display = "none";
     } else if (reactorType === "carousel") {
-        console.log(carouselContainer)
-        // Show carousel setup and hide multiwell setup
-        multiwellContainer.style.display = "none";
+        // Show carousel setup and reactor, hide multiwell
         carouselContainer.style.display = "block";
-        createCarousel()
+        carouselReactor.style.display = "block";
+
+        wellplateContainer.style.display = "none";
+        multiwellReactor.style.display = "none";
+
+        createCarousel(); // Ensure carousel is created/updated
     }
 }
 
 // Initialize the page with the correct reactor type settings
 window.onload = function() {
     createGrid(); // Ensure the page is loaded with the correct display settings
-
 };
 

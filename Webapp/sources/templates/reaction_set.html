@@ -6,54 +6,97 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_set.js') }}"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="controls">
-            <label for="reactor-type">Select Reactor Type: </label>
-                <select id="reactor-type" onchange="updateReactorType()">
-                    <option value="well-plate">Well plate</option>
-                    <option value="carousel">Carousel</option>
-                </select>
+   <div class="container-fluid">
+       <div class="row">
+            <div class="col-12">
+                <h1>Reaction Set Title Here</h1>
+            </div>
+       </div>
 
-            <!-- Multiwell reactor setup -->
-            <div id="wellplate-container" style="display: block;">
-                <label for="column-size">Well-plate reactor with </label>
-                <select id="column-size" onchange="createGrid()">
-                    {% for i in range(1, 11) %}
-                        <option value="{{ i }}">{{ i }}</option>
-                    {% endfor %}
-                </select>
-                <label for="row-size"> columns and </label>
-                <select id="row-size" onchange="createGrid()">
-                    {% for i in range(1, 11) %}
-                        <option value="{{ i }}">{{ i }}</option>
-                    {% endfor %}
-                </select> rows
-                <div id="plate-reactor" class="container-fluid">
-                    <div id="grid-wrapper" class="outer-rectangle">
-                        <div id="grid" class="plate-reactor">
+       <div class="row">
+           <div class="col-6">
+            <div class="row">
+                <div class="col-12">
+                    <div class="container-fluid">
+                        <br>
+                        <div class="controls">
+                            <!-- Combined Selectors on One Line -->
+                            <div class="row align-items-center">
+                                <!-- Reactor Type Selector -->
+                                <div class="col-auto">
+                                    <label for="reactor-type" class="me-2">Reactor type: </label>
+                                    <select id="reactor-type" class="form-select form-select-sm me-3" onchange="updateReactorType()">
+                                        <option value="well-plate">Well plate</option>
+                                        <option value="carousel">Carousel</option>
+                                    </select>
+                                </div>
+
+                                <!-- Multiwell Selectors -->
+                                <div id="wellplate-selector" class="col-auto">
+                                    <!-- Row and Column Selectors next to each other -->
+                                    <div class="row">
+                                        <div class="col-auto">
+                                            <label for="column-size" class="me-2">Number of columns: </label>
+                                            <select id="column-size" class="form-select form-select-sm me-2" onchange="createGrid()">
+                                                {% for i in range(1, 11) %}
+                                                    <option value="{{ i }}">{{ i }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-auto">
+                                            <label for="row-size" class="me-2">Number of rows: </label>
+                                            <select id="row-size" class="form-select form-select-sm me-3" onchange="createGrid()">
+                                                {% for i in range(1, 11) %}
+                                                    <option value="{{ i }}">{{ i }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                 <!-- Carousel Selector -->
+                                    <div class="col-auto" id="carousel-selector" style="display: none;">
+                                        <label for="carousel-reactions" class="me-2">Number of wells: </label>
+                                        <select id="carousel-reactions" class="form-select form-select-sm" onchange="createCarousel()">
+                                            {% for i in range(1, 20) %}
+                                                <option value="{{ i }}">{{ i }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Carousel reactor setup -->
-            <div id="carousel-container" style="display: none;">
-                <label for="carousel-reactions">Carousel reactor with </label>
-                <select id="carousel-reactions" onchange="createCarousel()">
-                    {% for i in range(1, 20) %}
-                        <option value="{{ i }}">{{ i }}</option>
-                    {% endfor %}
-                </select> wells
-                <div id="carousel-wrapper" class="carousel-wrapper">
-                    <div id="outer-circle" class="outer-circle">
-                        <div id="carousel" class="carousel-reactor"></div>
+            <div class="row">
+                <div class="col-12">
+                    <!-- Reactors Section -->
+                        <div id="wellplate-container" style="display: block;">
+                            <div id="plate-reactor" class="container-fluid">
+                                <div id="grid-wrapper" class="outer-rectangle">
+                                    <div id="grid" class="plate-reactor"></div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-        </div>
 
-    </div>
-    </div>
+                        <div id="carousel-container" style="display: none;">
+                            <div id="carousel-wrapper" class="carousel-wrapper">
+                                <div id="outer-circle" class="outer-circle">
+                                    <div id="carousel" class="carousel-reactor"></div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            AAAAA
+        </div>
+       </div>
+   </div>
+
+
+
+
 
 <div id="side-panel" class="side-panel">
     <div class="reaction-header">Reaction Constructor</div>
