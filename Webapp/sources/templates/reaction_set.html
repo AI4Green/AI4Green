@@ -3,6 +3,9 @@
 <head>
     <title>React Page</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_set.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_set.js') }}"></script>
 </head>
 <body>
@@ -14,7 +17,7 @@
        </div>
 
        <div class="row">
-           <div class="col-6">
+           <div class="col-5">
             <div class="row">
                 <div class="col-12">
                     <div class="container-fluid">
@@ -23,7 +26,7 @@
                             <!-- Combined Selectors on One Line -->
                             <div class="row align-items-center">
                                 <!-- Reactor Type Selector -->
-                                <div class="col-auto">
+                                <div class="col-4">
                                     <label for="reactor-type" class="me-2">Reactor type: </label>
                                     <select id="reactor-type" class="form-select form-select-sm me-3" onchange="updateReactorType()">
                                         <option value="well-plate">Well plate</option>
@@ -32,9 +35,9 @@
                                 </div>
 
                                 <!-- Multiwell Selectors -->
-                                <div id="wellplate-selector" class="col-auto">
+                                <div id="wellplate-selector" class="col-8">
                                     <!-- Row and Column Selectors next to each other -->
-                                    <div class="row">
+{#                                    <div class="row">#}
                                         <div class="col-auto">
                                             <label for="column-size" class="me-2">Number of columns: </label>
                                             <select id="column-size" class="form-select form-select-sm me-2" onchange="createGrid()">
@@ -42,7 +45,7 @@
                                                     <option value="{{ i }}">{{ i }}</option>
                                                 {% endfor %}
                                             </select>
-                                        </div>
+{#                                        </div>#}
                                         <div class="col-auto">
                                             <label for="row-size" class="me-2">Number of rows: </label>
                                             <select id="row-size" class="form-select form-select-sm me-3" onchange="createGrid()">
@@ -88,8 +91,56 @@
                 </div>
             </div>
         </div>
-        <div class="col-6">
-            AAAAA
+        <div class="col-7">
+            <div class="row">
+                <div class="col-12">
+                    <ul id="myTab" class="nav nav-tabs" role="tablist">
+                      <li class="nav-item">
+                          <a class="nav-link active" role="tab" data-toggle="tab" href="#setup" aria-selected="true">Set up</a>
+                      </li>
+                      <li class="nav-item">
+                          <a class="nav-link" role="tab" data-toggle="tab" href="#results" aria-selected="false">Results</a>
+                      </li>
+                    <li class="nav-item">
+                          <a class="nav-link" role="tab" data-toggle="tab" href="#export" aria-selected="false">Export?</a>
+                      </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="setup" role="tabpanel" style="overflow-y:auto;">
+                            <div id="sketchers-div" style="max-width: 100%; width: 100%;">
+                                <div>
+                                    Selected Reaction Sketcher:
+                                    <label> MarvinJS
+                                        <input type="radio" id="marvin-select" name="sketcher-select" disabled>
+                                    </label>
+                                    <label> Ketcher
+                                        <input type="radio" id="ketcher-select" name="sketcher-select" checked="checked" disabled>
+                                    </label>
+                                </div>
+                                <div class="loading-circle"></div>
+                                <div id="ketcher-sketcher" style="max-width: 100%; width: 100%;"></div>
+                                <div id="marvin-sketcher" style="max-width: 100%; width: 100%;"></div>
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-6">
+                                        <p><button id="demo-button" type="button" class="btn btn-primary" style="width: 100px;" onclick="loadExampleSmiles()">Example</button></p>
+                                        <p><button id="action-button-submit" type="button" class="btn btn-primary" onclick="createReactionTable()">Submit</button></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="results" class="tab-pane fade in" role="tabpanel" style="overflow-y:auto; max-height:550px">
+                            <div id="placeholder"><br><b>fancy graphs, maybe interactive stuff?</b></div>
+                        </div>
+                        <div id="export" class="tab-pane fade in" role="tabpanel" style="overflow-y:auto; max-height:550px">
+                            <br>
+                            <div id="no-graphs"><b>maybe users can export these reactions in various formats</b></div>
+                            <div class="scrollClass" id="saved-graph-list">
+                                <div id="graph-details"></div>
+                                </div>
+                        </div>
+
+                </div>
         </div>
        </div>
    </div>
