@@ -37,24 +37,25 @@
                                 <!-- Multiwell Selectors -->
                                 <div id="wellplate-selector" class="col-8">
                                     <!-- Row and Column Selectors next to each other -->
-{#                                    <div class="row">#}
-                                        <div class="col-auto">
-                                            <label for="column-size" class="me-2">Number of columns: </label>
-                                            <select id="column-size" class="form-select form-select-sm me-2" onchange="createGrid()">
-                                                {% for i in range(1, 11) %}
-                                                    <option value="{{ i }}">{{ i }}</option>
-                                                {% endfor %}
-                                            </select>
-{#                                        </div>#}
-                                        <div class="col-auto">
-                                            <label for="row-size" class="me-2">Number of rows: </label>
-                                            <select id="row-size" class="form-select form-select-sm me-3" onchange="createGrid()">
-                                                {% for i in range(1, 11) %}
-                                                    <option value="{{ i }}">{{ i }}</option>
-                                                {% endfor %}
-                                            </select>
+                                        <div class="row">
+                                            <div class="col-auto">
+                                                <label for="column-size" class="me-2">Number of columns: </label>
+                                                <select id="column-size" class="form-select form-select-sm me-2" onchange="createGrid()">
+                                                    {% for i in range(1, 11) %}
+                                                        <option value="{{ i }}">{{ i }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+
+                                            <div class="col-auto">
+                                                <label for="row-size" class="me-2">Number of rows: </label>
+                                                <select id="row-size" class="form-select form-select-sm me-3" onchange="createGrid()">
+                                                    {% for i in range(1, 11) %}
+                                                        <option value="{{ i }}">{{ i }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
                                         </div>
-                                    </div>
                                 </div>
                                  <!-- Carousel Selector -->
                                     <div class="col-auto" id="carousel-selector" style="display: none;">
@@ -90,8 +91,8 @@
                         </div>
                 </div>
             </div>
-        </div>
-        <div class="col-7">
+       </div>
+       <div class="col-7">
             <div class="row">
                 <div class="col-12">
                     <ul id="myTab" class="nav nav-tabs" role="tablist">
@@ -108,7 +109,7 @@
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="setup" role="tabpanel" style="overflow-y:auto;">
                             <div id="sketchers-div" style="max-width: 100%; width: 100%;">
-                                <div>
+                                 <div>
                                     Selected Reaction Sketcher:
                                     <label> MarvinJS
                                         <input type="radio" id="marvin-select" name="sketcher-select" disabled>
@@ -117,14 +118,19 @@
                                         <input type="radio" id="ketcher-select" name="sketcher-select" checked="checked" disabled>
                                     </label>
                                 </div>
+
                                 <div class="loading-circle"></div>
                                 <div id="ketcher-sketcher" style="max-width: 100%; width: 100%;"></div>
                                 <div id="marvin-sketcher" style="max-width: 100%; width: 100%;"></div>
                                 <div class="container-fluid">
                                     <div class="row">
-                                        <div class="col-6">
-                                        <p><button id="demo-button" type="button" class="btn btn-primary" style="width: 100px;" onclick="loadExampleSmiles()">Example</button></p>
-                                        <p><button id="action-button-submit" type="button" class="btn btn-primary" onclick="createReactionTable()">Submit</button></p>
+                                        <div class="col-2">
+                                        <p><button id="apply-to-well" type="button" class="btn btn-success" style="width: 100%;" onclick="applyToWellModal()">Apply to Well</button></p>
+                                        </div>
+                                        <div class="col-2">
+                                            <p><button id="apply-to-all" type="button" class="btn btn-success" style="width: 100%;">Apply to All</button></p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -132,27 +138,49 @@
                         <div id="results" class="tab-pane fade in" role="tabpanel" style="overflow-y:auto; max-height:550px">
                             <div id="placeholder"><br><b>fancy graphs, maybe interactive stuff?</b></div>
                         </div>
+
                         <div id="export" class="tab-pane fade in" role="tabpanel" style="overflow-y:auto; max-height:550px">
                             <br>
-                            <div id="no-graphs"><b>maybe users can export these reactions in various formats</b></div>
+                            <div id="no-graphs"><b>maybe users can export these reactions in various formats</b>
+                            </div>
                             <div class="scrollClass" id="saved-graph-list">
                                 <div id="graph-details"></div>
                                 </div>
                         </div>
 
+                    </div>
                 </div>
-        </div>
+            </div>
        </div>
+   </div>
    </div>
 
 
+    <!-- Add-to-well modal -->
+    <div class="modal fade" id="apply-to-well-modal" tabindex="-1" role="dialog" aria-labelledby="new-reaction-modal-title">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="new-reaction-modal-title">Select Wells</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div id="add-to-well-body">
+              <div id="add-to-well-reactor-container">
+                  <div id="add-to-well-reactor">
+                      placeholder
+                  </div>
+              </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal" id="new-reaction-data-close">Cancel</button>
+            <button type="button" class="btn btn-success" id="new-reaction-data-submit" onclick="newReactionCreate()">Create</button>
+
+          </div>
+        </div>
+      </div>
+    </div>
 
 
-
-<div id="side-panel" class="side-panel">
-    <div class="reaction-header">Reaction Constructor</div>
-    <p>This is a placeholder for the reaction constructor.</p>
-    <p>Details about the selected well will be displayed here.</p>
-</div>
 </body>
 {% endblock %}
