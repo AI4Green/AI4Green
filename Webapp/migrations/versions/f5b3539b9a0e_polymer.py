@@ -51,7 +51,7 @@ def upgrade():
     with op.batch_alter_table("Reaction", schema=None) as batch_op:
         batch_op.add_column(sa.Column("reaction_image", sa.Text(), nullable=True))
         batch_op.add_column(
-            sa.Column('reaction_type', sa.Enum('STANDARD', 'POLYMER', name='reactiontype'), server_default='STANDARD',
+            sa.Column("reaction_type", sa.Enum('STANDARD', 'POLYMER', name='reactiontype'), server_default='STANDARD',
                       nullable=False))
         batch_op.add_column(sa.Column("polymerisation_type", sa.Text(), nullable=True))
         batch_op.add_column(sa.Column("reaction_rxn", sa.Text(), nullable=True))
@@ -64,7 +64,7 @@ def downgrade():
     with op.batch_alter_table("Reaction", schema=None) as batch_op:
         batch_op.drop_column("reaction_rxn")
         batch_op.drop_column("polymerisation_type")
-        batch_op.drop_column('reaction_type')
+        batch_op.drop_column("reaction_type")
         batch_op.drop_column("reaction_image")
 
     with op.batch_alter_table("PolymerNovelCompound", schema=None) as batch_op:
