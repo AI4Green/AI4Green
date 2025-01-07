@@ -42,7 +42,8 @@ function createPDFElement(mode) {
   // if locking the reaction also include this in the summary
   if (mode === "locked") {
     const elementLockedTime = document.createElement("div");
-    elementLockedTime.innerHTML = `<br><br><b>Reaction locked on: ${dateTime}</b>`;
+    const creatorName = document.getElementById("creator-name").value;
+    elementLockedTime.innerHTML = `<br><br><b>Reaction locked by ${creatorName} on: ${dateTime}</b>`;
     elementToPrint.appendChild(elementLockedTime);
   }
   return elementToPrint;

@@ -78,6 +78,7 @@
     <input type="hidden" value="{{ reaction.complete }}" id="js-complete">
     <input type="hidden" value="{{ marvin_js_key }}" id="marvin-js-key">
     <input type="hidden" value="{{ url_for('static', filename='ketcher/index.html') }}" id="ketcher-source">
+    <input type="hidden" id="creator-name" value="{{ reaction.creator_person.user.fullname }}">
 
     {% if tutorial == 'no' %}
         <input type="hidden" value="{{ reaction.creator_person.user.email }}" id="js-creator-email">
@@ -131,9 +132,9 @@
 
 
     <div id="complete-reaction-div" style="display:none;">
-        <button id="complete-reaction-button" onclick="completeReaction()" class="btn btn-primary" style="width: fit-content;">Lock Reaction</button>
+        <button id="complete-reaction-button" onclick="completeReaction()" class="btn btn-primary" style="width: fit-content;">Lock & Sign Reaction</button>
         {% if reaction.complete == 'complete' %}
-            <b>Reaction locked: {{ (reaction.time_of_update|string)[:-7]  }}</b>
+            <b>Reaction locked by {{ reaction.creator_person.user.fullname }} at: {{ (reaction.time_of_update|string)[:-7]  }}</b>
         {% endif %}
     </div>
 
