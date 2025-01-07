@@ -62,13 +62,16 @@ inputs = html.Div(
     ],
     style={"width": "auto"},
 )
+
 """
 Smiles field + Retrosynthesis button
 """
 smiles_field_and_retrosynthesis_button = dbc.Row(
     className="gx-2",
     children=[
+        # Column 1: New Retrosynthesis Button and SMILES Input
         dbc.Col(
+            width=3,
             children=[
                 html.Div(
                     className="input-group",
@@ -92,10 +95,42 @@ smiles_field_and_retrosynthesis_button = dbc.Row(
                         ),
                     ],
                 ),
-            ]
+            ],
         ),
-        dbc.Col(children=[inputs, html.Div(id="route-score")]),
+        # Column 2: Route Dropdown
         dbc.Col(
+            width=3,
+            children=[
+                inputs,
+                html.Div(id="route-score"),
+            ],
+        ),
+        # Column 3: Enhancement Dropdown
+        dbc.Col(
+            width=3,
+            children=[
+                html.Div(
+                    className="input-group",
+                    children=[
+                        dcc.Dropdown(
+                            id="enhancement-dropdown",
+                            options=[
+                                {"label": "Default", "value": "Default"},
+                                {"label": "eUCT enhancement", "value": "eUCT"},
+                                {"label": "dUCT-v1 enhancement", "value": "dUCT-v1"},
+                                {"label": "dUCT-v2 enhancement", "value": "dUCT-v2"},
+                            ],
+                            value="default",
+                            placeholder="Select Enhancement Type",
+                            style={"width": "100%", "border": "1px solid #9FA6B2"},
+                        ),
+                    ],
+                ),
+            ],
+        ),
+        # Column 4: Save to Workbook Button
+        dbc.Col(
+            width=3,
             children=[
                 html.Button(
                     "Save To Workbook",
@@ -104,7 +139,7 @@ smiles_field_and_retrosynthesis_button = dbc.Row(
                     n_clicks=0,
                     className="btn btn-outline-primary m-1",
                 )
-            ]
+            ],
         ),
     ],
 )

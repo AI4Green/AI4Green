@@ -225,6 +225,8 @@ def init_dashboard(server: Flask) -> classes.Dash:
             request_url - the url with the target smiles and api key
             task_id - the unique identifier
         """
+        print(f"Generated Request URL: {request_url}")
+
         (
             retro_api_status,
             api_message,
@@ -241,11 +243,12 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Output("loading-display", "display", allow_duplicate=True),
         State("validated-smiles", "data"),
         State("smiles-input", "pattern"),
+        State("enhancement-dropdown", "value"),
         Input("btn-retrosynthesis", "n_clicks"),
         prevent_initial_call=True,
     )
     def start_new_retrosynthesis(
-        validated_smiles: str, smiles_regex: str, n_clicks: int
+        validated_smiles: str, smiles_regex: str, enhancement: str, n_clicks: int
     ) -> Tuple[str, str, Optional[dcc.Interval], str]:
         """
         Called when the user clicks the retrosynthesis button.
@@ -255,6 +258,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             n_clicks - increments when the user clicks the retrosynthesis button and calls the function
             validated_smiles - the validated SMILES string
             smiles_regex - contains 'invalid' if SMILES are not valid and prompts user to enter valid SMILES
+            enhancement - the selected enhancement type from the dropdown
 
         Returns:
             a message to give the user feedback
@@ -264,23 +268,20 @@ def init_dashboard(server: Flask) -> classes.Dash:
         if utils.smiles_not_valid(smiles_regex):
             return "Please enter a valid SMILES", "", None, "hide"
 
-        # If valid SMILES, continue with the process
         validated_smiles = utils.encodings_to_smiles_symbols(validated_smiles)
-        request_url = f"{retrosynthesis_base_url}/retrosynthesis_api/?key={retrosynthesis_api_key}&smiles={validated_smiles}"
+        request_url = (
+            f"{retrosynthesis_base_url}/retrosynthesis_api/"
+            f"?key={retrosynthesis_api_key}&smiles={validated_smiles}&enhancement={enhancement}"
+        )
 
         unique_identifier = str(uuid.uuid4())
-
-        # Start the retrosynthesis process in a background thread
         thread = threading.Thread(
             target=retrosynthesis_process_wrapper,
-            args=[
-                request_url,
-                unique_identifier,
-            ],
+            args=[request_url, unique_identifier],
         )
         thread.start()
-        # set up an interval element to check every 15 seconds if it is complete
         interval = dcc.Interval(id="interval-component", interval=15000, n_intervals=0)
+
         return (
             "Retrosynthesis process started. Please wait...",
             unique_identifier,
