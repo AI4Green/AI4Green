@@ -363,7 +363,7 @@ async function regenerateImages(sortCriteria, workbook, workgroup) {
     try {
       let rxn = rxns[idx];
       let source = await ketcherFrame.contentWindow.ketcher.generateImage(rxn);
-      const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 100);
+      const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 50);
       let imgSource = await convertBlobToBase64(shrunkenBlob);
       images.push(imgSource);
     } catch (error) {

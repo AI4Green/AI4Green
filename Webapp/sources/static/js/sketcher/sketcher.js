@@ -75,8 +75,9 @@ function loadExampleSmiles() {
  * prompts for compound data or alerts error
  */
 async function createReactionTable() {
+  let smiles;
   try {
-    let smiles = await exportSmilesFromActiveEditor();
+    smiles = await exportSmilesFromActiveEditor();
   } catch (error) {
     alert("An error occurred:\n\n" + error.message);
   }
