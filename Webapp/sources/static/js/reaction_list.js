@@ -337,10 +337,7 @@ function saveNewImages(sortCriteria, workbook, workgroup, images) {
       workbook: workbook,
       images: JSON.stringify(images),
     },
-    success: function (response) {
-      // Handle success
-      console.log(response);
-    },
+    success: function (response) {},
     error: function (error) {
       // Handle error
       console.error(error);
@@ -370,7 +367,6 @@ async function regenerateImages(sortCriteria, workbook, workgroup) {
       let imgSource = await convertBlobToBase64(shrunkenBlob);
       images.push(imgSource);
     } catch (error) {
-      console.log("error");
       // catch reactions with no rxn file, use smiles instead.
       let source = await ketcherFrame.contentWindow.ketcher.generateImage(
         smile,

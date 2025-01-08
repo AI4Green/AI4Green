@@ -22,10 +22,7 @@ function savePolymerMode() {
       reactionID: reactionID,
       reactionType: reactionType,
     },
-    success: function (response) {
-      // Handle success
-      console.log(response);
-    },
+    success: function (response) {},
     error: function (error) {
       // Handle error
       console.error(error);
