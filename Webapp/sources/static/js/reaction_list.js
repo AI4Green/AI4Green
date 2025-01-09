@@ -346,8 +346,12 @@ function saveNewImages(sortCriteria, workbook, workgroup, images) {
 }
 
 /**
- * Generate images with hidden ketcher element
- * Returns list of images
+ * Generate missing images with hidden ketcher element
+ * @param sortCriteria {string} - the sort criteria, either a-z or time
+ * @param workbook {string} - the active workbook name
+ * @param workgroup {string} - the active workgroup name
+ * @param images {Array} - incomplete list of image strings, where missing are ""
+ * @return {Promise<Array>} - Returns list of images
  */
 async function regenerateImages(sortCriteria, workbook, workgroup, images) {
   let ketcherFrame = document.getElementById("ketcher-editor");
