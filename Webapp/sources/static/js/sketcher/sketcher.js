@@ -75,7 +75,12 @@ function loadExampleSmiles() {
  * prompts for compound data or alerts error
  */
 async function createReactionTable() {
-  let smiles = await exportSmilesFromActiveEditor();
+  let smiles;
+  try {
+    smiles = await exportSmilesFromActiveEditor();
+  } catch (error) {
+    alert("An error occurred:\n\n" + error.message);
+  }
   let rxn = await exportRXNFromActiveEditor();
   $("#js-reaction-rxn").val(rxn);
   await exportImageFromActiveEditor();

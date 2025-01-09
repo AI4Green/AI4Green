@@ -1,14 +1,14 @@
+from datetime import datetime
 from typing import Dict
+from urllib.parse import urlparse
 
-from flask import flash, redirect, request, url_for, Markup, session
+from flask import Markup, abort, flash, redirect, request, session, url_for
 from flask_login import current_user, login_user
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
-from werkzeug.urls import url_parse
-from urllib.parse import urlparse
 from sqlalchemy import func
-from datetime import datetime
+from werkzeug.urls import url_parse
 
 
 def verify_login(form) -> redirect:
@@ -29,8 +29,8 @@ def verify_login(form) -> redirect:
         user = (
             db.session.query(models.User)
             .filter(
-                (func.lower(models.User.username) == input_data) |
-                (func.lower(models.User.email) == input_data)
+                (func.lower(models.User.username) == input_data)
+                | (func.lower(models.User.email) == input_data)
             )
             .first()
         )
@@ -53,7 +53,11 @@ def verify_login(form) -> redirect:
             return redirect(url_for("main.index"))
 
         # if user was added after 22/04/2024 their email needs to be verified before login
-        if user.time_of_creation and user.time_of_creation > datetime(2024, 4, 22) and not user.is_verified:
+        if (
+            user.time_of_creation
+            and user.time_of_creation > datetime(2024, 4, 22)
+            and not user.is_verified
+        ):
             verification_url = "/email_verification_request/" + str(user.id)
             flash(
                 Markup(
@@ -87,7 +91,7 @@ def verify_login(form) -> redirect:
             """If the login URL includes a next argument that is set
             to a relative path (a URL without the domain portion),
             then the user is redirected to that URL."""
-            next_page = next_page.replace('\\', '')
+            next_page = next_page.replace("\\", "")
             if not urlparse(next_page).netloc:
                 return redirect(next_page)
 
