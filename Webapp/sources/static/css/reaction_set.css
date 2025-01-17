@@ -88,3 +88,14 @@
     font-weight: bold;
     margin-bottom: 10px;
 }
+
+.drag-select {
+            background-color: rgba(119, 119, 120, 0.5);
+            border: 2px dashed #777778;
+            position: absolute;
+            pointer-events: none;
+        }
+
+.btn.icon.selected {
+            border: 2px solid black;
+        }
