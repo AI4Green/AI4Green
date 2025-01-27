@@ -163,7 +163,7 @@ def process():
             )
             if polymer:
                 product_mol_wt = services.all_compounds.mol_weight_from_smiles(
-                    repeat_unit
+                    "*" + repeat_unit + "*"
                 )
             novel_product_html = render_template(
                 "_novel_compound.html",
