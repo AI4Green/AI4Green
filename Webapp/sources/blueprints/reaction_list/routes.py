@@ -145,9 +145,6 @@ def save_new_images():
     )
     images = json.loads(request.form.get("images"))
     for idx, reaction in enumerate(reaction_list):
-        services.auth.edit_reaction(
-            reaction, file_attachment=True
-        )  # allow changes of locked reactions
         update_dict = {"reaction_image": images[idx]}
         reaction.update(**update_dict)
     feedback = "Reaction Updated!"
