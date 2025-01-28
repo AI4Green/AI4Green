@@ -86,6 +86,12 @@ def process():
 
         if idx in polymer_indices:
             polymer = True
+            if reactant_smiles.count("{+n}") > 1:
+                return jsonify(
+                    {
+                        "error": f"Cannot process Reactant {idx} structure: copolymers are not yet supported"
+                    }
+                )
             (
                 reactant_smiles,
                 repeat_unit,
@@ -137,6 +143,12 @@ def process():
 
         if (idx + number_of_reactants) in polymer_indices:  # if polymer:
             polymer = True
+            if product_smiles.count("{+n}") > 1:
+                return jsonify(
+                    {
+                        "error": f"Cannot process Product {idx} structure: copolymers are not yet supported"
+                    }
+                )
             (
                 product_smiles,
                 repeat_unit,

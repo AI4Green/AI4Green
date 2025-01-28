@@ -381,51 +381,36 @@ def find_polymer_repeat_unit(
     Must be done before smiles is cleaned.
     Uses {-} and {+n} to find repeat unit.
     """
-    unfinished = True
-    while unfinished:
-        start_marker = compound.find("{-}")
-        end_marker = compound.find("{+n}")
+    start_marker = compound.find("{-}")
+    end_marker = compound.find("{+n}")
 
-        # If both {-} and {+} are found
-        if start_marker != -1 and end_marker != -1:
-            # Reformat if end of SRU is treated as a branch. e.g. *C{-}(CC{+n}*)C where {+n} is within brackets
-            while is_within_brackets(compound, "{+n}") != is_within_brackets(
-                compound, "{-}"
-            ):
-                compound = reformat_smiles(compound)
-                start_marker = compound.find("{-}")
-                end_marker = compound.find("{+n}")
+    # If both {-} and {+} are found
+    if start_marker != -1 and end_marker != -1:
+        # Reformat if end of SRU is treated as a branch. e.g. *C{-}(CC{+n}*)C where {+n} is within brackets
+        while is_within_brackets(compound, "{+n}") != is_within_brackets(
+            compound, "{-}"
+        ):
+            compound = reformat_smiles(compound)
+            start_marker = compound.find("{-}")
+            end_marker = compound.find("{+n}")
 
-            # Start is the character just before {-}, and end is the character just before {+}
-            result = (
-                compound[start_marker - 1] + compound[start_marker + 3 : end_marker]
-            )
+        # Start is the character just before {-}, and end is the character just before {+}
+        result = compound[start_marker - 1] + compound[start_marker + 3 : end_marker]
 
-            # Check for branching: if the character after {+} is '('
-            if end_marker + 4 < len(compound) and compound[end_marker + 4] == "(":
-                branch, close_paren = extract_inside_brackets(compound, end_marker + 4)
+        # Check for branching: if the character after {+} is '('
+        if end_marker + 4 < len(compound) and compound[end_marker + 4] == "(":
+            branch, close_paren = extract_inside_brackets(compound, end_marker + 4)
+            if close_paren != -1:
+                result += branch
+
+            # check for more branching
+            while close_paren + 1 < len(compound) and compound[close_paren + 1] == "(":
+                branch, close_paren = extract_inside_brackets(compound, close_paren + 1)
                 if close_paren != -1:
                     result += branch
-
-                # check for more branching
-                while (
-                    close_paren + 1 < len(compound) and compound[close_paren + 1] == "("
-                ):
-                    branch, close_paren = extract_inside_brackets(
-                        compound, close_paren + 1
-                    )
-                    if close_paren != -1:
-                        result += branch
-            print(result)
-            compound = compound.replace("{+n}", "", 1).replace("{-}", "", 1)
-            print(compound)
-            if compound.count("{+n}") == 0:  # catch copolymers
-                # TODO: make result a list
-                unfinished = False
-        else:  # if either {-} or {+} is not found
-            return ""
-
-    return result
+        return result
+    # if either {-} or {+} is not found
+    return ""
 
 
 def clean_polymer_smiles(
