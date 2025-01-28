@@ -410,6 +410,7 @@ def find_polymer_repeat_unit(
                 branch, close_paren = extract_inside_brackets(compound, close_paren + 1)
                 if close_paren != -1:
                     result += branch
+        result = result.replace("/", "").replace("\\", "")  # ignore stereochemistry
         return result
     # if either {-} or {+} is not found
     return ""
