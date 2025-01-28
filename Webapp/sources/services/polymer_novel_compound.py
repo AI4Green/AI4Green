@@ -433,14 +433,13 @@ def canonicalise(smiles):
     return str(smiles).replace("[", "").replace("]", "")
 
 
-def find_repeat_clean_canonicalise(smiles):
+def find_canonical_repeat(smiles):
     """
-    Find repeat unit, clean, and canonicalise a polymer smiles string.
+    Find repeat unit, and canonicalise a polymer smiles string.
+    REMOVES END GROUPS
     """
     repeat_unit = find_polymer_repeat_unit(smiles)
-    smiles = clean_polymer_smiles(smiles)
-    if smiles.count("*") == 2:
-        smiles = canonicalise(smiles)
-        # TODO: update repeat unit to after canonicalising?
+    smiles = "*" + repeat_unit + "*"
+    smiles = canonicalise(smiles)
 
-    return smiles, repeat_unit
+    return smiles

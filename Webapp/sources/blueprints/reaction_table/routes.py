@@ -92,10 +92,7 @@ def process():
                         "error": f"Cannot process Reactant {idx} structure: copolymers are not yet supported"
                     }
                 )
-            (
-                reactant_smiles,
-                repeat_unit,
-            ) = services.polymer_novel_compound.find_repeat_clean_canonicalise(
+            reactant_smiles = services.polymer_novel_compound.find_canonical_repeat(
                 reactant_smiles
             )
 
@@ -116,10 +113,6 @@ def process():
             reactant_mol_wt = services.all_compounds.mol_weight_from_smiles(
                 reactant_smiles
             )
-            if polymer:
-                reactant_mol_wt = services.all_compounds.mol_weight_from_smiles(
-                    "*" + repeat_unit + "*"
-                )
             novel_reactant_html = render_template(
                 "_novel_compound.html",
                 component="Reactant",
@@ -149,10 +142,7 @@ def process():
                         "error": f"Cannot process Product {idx} structure: copolymers are not yet supported"
                     }
                 )
-            (
-                product_smiles,
-                repeat_unit,
-            ) = services.polymer_novel_compound.find_repeat_clean_canonicalise(
+            product_smiles = services.polymer_novel_compound.find_canonical_repeat(
                 product_smiles
             )
 
@@ -173,10 +163,6 @@ def process():
             product_mol_wt = services.all_compounds.mol_weight_from_smiles(
                 product_smiles
             )
-            if polymer:
-                product_mol_wt = services.all_compounds.mol_weight_from_smiles(
-                    "*" + repeat_unit + "*"
-                )
             novel_product_html = render_template(
                 "_novel_compound.html",
                 component="Product",
