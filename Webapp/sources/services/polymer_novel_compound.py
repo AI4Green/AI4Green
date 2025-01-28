@@ -391,6 +391,8 @@ def find_polymer_repeat_unit(
             compound, "{-}"
         ):
             compound = reformat_smiles(compound)
+            if compound == reformat_smiles(compound):
+                return ""  # avoid infinite loop
             start_marker = compound.find("{-}")
             end_marker = compound.find("{+n}")
 
