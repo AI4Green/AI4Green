@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <head>
+    <title>{{ reaction.reaction_id }}</title>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
@@ -49,9 +50,9 @@
     <div id="sketchers-div">
         <div>
             Selected Reaction Sketcher:
-            <label> MarvinJS
-                <input type="radio" id="marvin-select" name="sketcher-select" disabled>
-            </label>
+<!--            <label> MarvinJS-->
+<!--                <input type="radio" id="marvin-select" name="sketcher-select" disabled>-->
+<!--            </label>-->
             <label> Ketcher
                 <input type="radio" id="ketcher-select" name="sketcher-select" checked="checked" disabled>
             </label>

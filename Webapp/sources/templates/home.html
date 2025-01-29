@@ -4,6 +4,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/standard_user.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/home.js') }}"></script>
+    <title>AI4Green - Home</title>
     {% import "macros.html" as macro_templates %}
 </head>
 <body>
@@ -61,68 +62,59 @@
                 </div>
         </div>
     {% else %}
-        <!--    current user is not logged in-->
-        <div class="jumbotron jumbotron-fluid home">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-6" style="margin:auto;">
-                        <!--        welcome text and description of AI4Green-->
-                        <img src="/static/img/ai4green_logo.png" alt="AI4Green Logo" width="100%" >
-                    </div>
-                    <div class="col-6" style="margin:auto;"> <br><br>
-    <div class="container text-center">
-    <br><br>
-    <div class="form-outline mb-4" style="margin: auto; width: 50%">
-        <form action="" method="post" novalidate>
-            {{ form.hidden_tag() }}
-            {{ form.username }}<br>
-            {% for error in form.username.errors %}
-                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
-                    {{ error }}
-                </div>
-            <br>
-            {% endfor %}
-            {{ form.password }}<br>
-            {% for error in form.password.errors %}
-                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
-                    {{ error }}
-                </div>
-            <br>
-            {% endfor %}
-            {{ form.submit() }} <br><br>
-            {{ form.remember_me() }} {{ form.remember_me.label }}
 
-        </form>
-    </div>
-        New User? <a id="register" class="btn btn-link" href="{{ url_for('auth.register') }}">Click to Register!</a><br>
-        Forgotten Your Password? <a class="btn btn-link" id="reset-password" href="{{ url_for('reset_password.reset_password_request') }}">Click to Reset!</a>
-    </div></div>
-                    </div>
-                </div>
-            </div>
-            <!--    video and login/registration buttons-->
-            <div class="container-fluid text-center">
-                <div class="row">
-                <div class="col-6">
-                <h1>Welcome to AI4Green</h1>
-                <h5>
-                    AI4Green provides an ELN including collaboration tools, data archival and management and green and sustainability metrics for organic chemistry.<br><br>
-                </h5>
-                <p>It is accessible via a web interface and fully available on an open source basis.</p>
-                <b>Key features include:</b>
-                <ul>
-                  <li>Automatic calculations, hazard lookup and CAS database linkage</li>
-                  <li>Solvent selection guide</li>
-                  <li>Reaction summary including colour coding of solvent sustainability and hazards</li>
-                </ul>
-                <p>For any queries please contact us at <a id="email-link" href="mailto:ai4green@nottingham.ac.uk">ai4green@nottingham.ac.uk</a>.</p>
-                </div>
-            <div class="col-6">
-                <iframe id="help-video" width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PL7u_tOd0vTynC0tgWt0cb7jLlnEoDwiO4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            </div>
-            </div>
-                </div>
-        {% endif %}
+        <!--    cur        <div class="jumbotron jumbotron-fluid home">-->
+<!--            <div class="container-fluid">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-6" style="margin:auto;">-->
+<!--                        &lt;!&ndash;        welcome text and description of AI4Green&ndash;&gt;-->
+<!--                        <img src="/static/img/ai4green_logo.png" alt="AI4Green Logo" width="100%" >-->
+<!--                    </div>-->
+<!--                    <div class="col-6" style="margin:auto;"> <br><br>-->
+<!--    <div class="container text-center">-->
+<!--    <br><br>-->
+<!--    <div class="form-outline mb-4" style="margin: auto; width: 50%">-->
+<!--        <form action="" method="post" novalidate>-->
+<!--            {{ form.hidden_tag() }}-->
+<!--            {{ form.username }}<br>-->
+<!--            {% for error in form.username.errors %}-->
+<!--                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">-->
+<!--                    {{ error }}-->
+<!--                </div>-->
+<!--            <br>-->
+<!--            {% endfor %}-->
+<!--            {{ form.password }}<br>-->
+<!--            {% for error in form.password.errors %}-->
+<!--                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">-->
+<!--                    {{ error }}-->
+<!--                </div>-->
+<!--            <br>-->
+<!--            {% endfor %}-->
+<!--            {{ form.submit() }} <br><br>-->
+<!--            {{ form.remember_me() }} {{ form.remember_me.label }}-->
+
+<!--        </form>-->
+<!--    </div>-->
+<!--        New User? <a id="register" class="btn btn-link" href="{{ url_for('auth.register') }}">Click to Register!</a><br>-->
+<!--        Forgotten Your Password? <a class="btn btn-link" id="reset-password" href="{{ url_for('reset_password.reset_password_request') }}">Click to Reset!</a>-->
+<!--    </div></div>-->rent user is not logged in-->
+<!--
+<!--    </div>-->
+<!--        </div>-->
+<!--            </div>-->
+<!--            &lt;!&ndash;    video and login/registration buttons&ndash;&gt;-->
+<!--            <div class="container text-center">-->
+<!--&lt;!&ndash;                <div class="row">&ndash;&gt;-->
+<!--                    <div>-->
+<!--                        <h1>Welcome to AI4Green</h1>-->
+<!--                        <h5>-->
+<!--                            The ELN made by chemists for chemists to bring your lab into the 21st century-->
+<!--        &lt;!&ndash;                    AI4Green provides an ELN including collaboration tools, data archival and management and green and sustainability metrics for organic chemistry.<br><br>&ndash;&gt;-->
+<!--                        </h5>-->
+<!--                    </div>-->
+<!--            </div>-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+<!--            {% endif %}-->
     <input id="active-workgroup" type="hidden" >
     <input id="active-workbook" type="hidden">
     {{ macro_templates.render_new_reaction_modal() }}

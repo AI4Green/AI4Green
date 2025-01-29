@@ -12,11 +12,6 @@ body {
     margin-top: -2.5rem;
 }
 
-.jumbotron.jumbotron-fluid.home {
-  margin-top: -2.5rem;
-  background: linear-gradient(90deg, #777778 50%, #82F5A8)
-}
-
 :root {
 --primary-green: #82F5A8;
 --primary-green-hover: #62BA79;
@@ -30,6 +25,39 @@ body {
 --primary-red-hover: #BB6A61;
 }
 
+.jumbotron.jumbotron-fluid.home {
+  margin-top: -2.5rem;
+  /*background: linear-gradient(90deg, color: var(--primary-grey 50%), color: var(--primary-green))*/
+  background: linear-gradient(90deg, var(--primary-grey) 50%, var(--primary-green));
+
+}
+
+/*div.bg.landing.grey {*/
+/*    background: rgba(119, 119, 120, 0.8);*/
+/*}*/
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-30px);
+    }
+    60% {
+        transform: translateY(-15px);
+    }
+}
+
+.bounce {
+    animation: bounce 2s infinite;
+}
+
+.bg-grey {
+    background: var(--primary-grey);
+}
+
+.bg-green {
+    background: var(--primary-green);
+}
 .text-primary-green {
     color: var(--primary-green);
 }
