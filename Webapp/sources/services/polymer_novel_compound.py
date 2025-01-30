@@ -277,7 +277,7 @@ def check_positive_number(s: float) -> bool:
 def extract_inside_brackets(
     s: str,
     start_index: int,
-) -> str:
+) -> tuple[str, int]:
     """
     Extracts contents of brackets to identify branching in polymer SMILES.
     Handles nested branching.
@@ -364,7 +364,7 @@ def get_last_bracketed_expression(expression):
     return ""
 
 
-def reformat_smiles(smiles):
+def reformat_smiles(smiles: str) -> str:
     branch = smiles.split(")")[-1]
     smiles = smiles[: smiles.rfind(branch)]
     inner = get_last_bracketed_expression(smiles)
@@ -425,7 +425,7 @@ def clean_polymer_smiles(
     return compound.replace("{+n}", "").replace("{-}", "").replace("-", "")
 
 
-def canonicalise(smiles):
+def canonicalise(smiles: str) -> str:
     """
     Canonicalise a polymer SMILES string. Not for use when endgroups are known (must have two '*'s)
     """
@@ -434,10 +434,14 @@ def canonicalise(smiles):
     return str(smiles).replace("[", "").replace("]", "")
 
 
-def find_canonical_repeat(smiles):
+def find_canonical_repeat(smiles: str) -> str:
     """
     Find repeat unit, and canonicalise a polymer smiles string.
     REMOVES END GROUPS
+    Args:
+        smiles - the unedited smiles from ketcher output. e.g. CC{-}C{+n}C
+    Returns:
+        canon_smiles - the canonicalised repeat unit. e.g *C*
     """
     repeat_unit = find_polymer_repeat_unit(smiles)
     smiles = "*" + repeat_unit + "*"
