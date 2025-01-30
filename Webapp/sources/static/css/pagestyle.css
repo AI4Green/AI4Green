@@ -35,20 +35,12 @@ body {
 /*div.bg.landing.grey {*/
 /*    background: rgba(119, 119, 120, 0.8);*/
 /*}*/
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-    }
-    40% {
-        transform: translateY(-30px);
-    }
-    60% {
-        transform: translateY(-15px);
-    }
+.bg-faded-green {
+    background: linear-gradient(rgba(130, 245, 168, 0.1), rgba(130, 245, 168, 0.2));
 }
 
-.bounce {
-    animation: bounce 2s infinite;
+.bg-faded-grey {
+    background: linear-gradient(rgba(119, 119, 120, 0.1), rgba(119, 119, 120, 0.2));
 }
 
 .bg-grey {
