@@ -1,9 +1,10 @@
 /**
  * Makes a ketcher sketcher, hides it and sets up the autosave
- * @param {string} [width="1020px"] - width of the sketcher in pixels
+ * @param {string} [width="1080px"] - width of the sketcher in pixels
+ * @param {string} [height="540px"] - width of the sketcher in pixels
  */
-function setupNewKetcherSketcher(width = "1020px") {
-  let ketcherHTML = `<iframe id="ketcher-editor" src=/static/ketcher/index.html width=${width} height="480px"></iframe>`;
+function setupNewKetcherSketcher(width = "1080px", height = "540px") {
+  let ketcherHTML = `<iframe id="ketcher-editor" src=/static/ketcher/index.html width=${width} height=${height}></iframe>`;
   $("#ketcher-sketcher").empty().append(ketcherHTML).hide();
   $("#ketcher-select").prop("disabled", false);
 }

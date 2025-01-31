@@ -62,6 +62,10 @@ body {
     color: var(--primary-grey);
 }
 
+.text-blue {
+    color: var(--primary-blue);
+}
+
 .btn.icon {
     height: 70px;
     width: 70px;
@@ -160,20 +164,6 @@ body {
   color: white
 }
 
-.section-title::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 0;
-    width: 60px;
-    height: 3px;
-    background-color: var(--primary-green);
-}
-
-.card-header-green {
-    background-color: var(--primary-green);
-}
-
 #retrosynthesis-cytoscape {
   border-color: #333333;
   border-width: thick;
@@ -183,3 +173,5 @@ body {
 .btn-toolbar .btn-label {
   float: left;
 }
+
+
