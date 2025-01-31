@@ -25,6 +25,7 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/standard_user.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/pagestyle.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hazard_colours.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
     </head>
 
     <body>
@@ -123,40 +124,33 @@
 
     </body>
 
-
-    <footer class="bg-light text-center text-lg-start fixed-bottom footer-at-bottom">
-        <div style="display: none; background-color: #777778" id="cookie-consent-banner" class="nk-cookie-banner alert alert-dark text-primary-green mb-0 fixed-bottom" role="alert">
-          🍪 This website uses first party cookies to ensure you get the best experience on our website.
-          <a href=" {{ url_for('auth.privacy_notice') }}" target="blank" rel="noopener noreferrer" class="text-secondary-green">Learn more</a>
-          <button id="accept_cookies" type="button" class="btn btn-secondary btn-sm ml-3" onclick="updateCookiePreferences()">
-            I Got It
-          </button>
+    <!--footer-->
+  <footer class="footer bg-light text-center text-lg-start">
+        <div style="display: none; background-color: #777778" id="cookie-consent-banner" class="nk-cookie-banner alert alert-dark text-primary-green mb-0" role="alert">
+            🍪 This website uses first party cookies to ensure you get the best experience on our website.
+            <a href="{{ url_for('auth.privacy_notice') }}" target="blank" rel="noopener noreferrer" class="text-secondary-green">Learn more</a>
+            <button id="accept_cookies" type="button" class="btn btn-secondary btn-sm ml-3" onclick="updateCookiePreferences()">
+                I Got It
+            </button>
         </div>
         {% if session_type != 'UNIT_TEST' %}
         <!--Utility Links-->
         <div class="text-center p-3" style="background-color: #777778;">
-
-            <table>
-                 <tr>
-                    <span class="text-left" style="position: fixed; left: 1em; bottom: 0.2em;">
-                        <img src="/static/img/ai4green_logo.png" alt="AI4Green Logo" width="140">
-                    </span>
-                </tr>
+            <table style="width: 100%;">
                 <tr>
-                    <a class="text-primary-green" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank">Hazard Disclaimer</a>  <span class="text-primary-green"> | </span>
-                    <a class="text-primary-green" href="{{ url_for('auth.privacy_notice') }}" target="_blank">Privacy Notice</a> <span class="text-primary-green"> | </span>
-                    <a class="text-primary-green" href="https://twitter.com/ai4green" target="_blank">Twitter</a> <span class="text-primary-green"> | </span>
-                    <a class="text-primary-green" href="https://github.com/AI4Green/AI4Green" target="_blank">GitHub</a>
-                </tr>
-                <tr style="width: 33%;">
-                    <span class="text-right" style="position: fixed; right:1em; width: 33%;">
-                        <p style="display: inline; width: 33%;" class="text-primary-green">Hazard data sourced from ECHA references on PubChem</p>
-                    </span>
+                    <td class="text-left" style="width: 140px;">
+                        <img src="/static/img/ai4green_logo.png" alt="AI4Green Logo" width="140">
+                    </td>
+                    <td class="text-center">
+                        <a class="text-primary-green" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank">Hazard Disclaimer</a> <span class="text-primary-green"> | </span>
+                        <a class="text-primary-green" href="{{ url_for('auth.privacy_notice') }}" target="_blank">Privacy Notice</a> <span class="text-primary-green"> | </span>
+                        <a class="text-primary-green" href="https://twitter.com/ai4green" target="_blank">Twitter</a> <span class="text-primary-green"> | </span>
+                        <a class="text-primary-green" href="https://github.com/AI4Green/AI4Green" target="_blank">GitHub</a>
+                    </td>
                 </tr>
             </table>
         </div>
         <!--Utility Links-->
         {% endif %}
     </footer>
-
 </html>
