@@ -58,15 +58,25 @@ def index() -> Response:
             .order_by(models.NewsItem.time.desc())
             .all()
         )
+        return render_template(
+            "home.html",
+            user_role=user_role,
+            user_confirmed=user_confirmed,
+            news_items=news_items,
+            messages_from_redirects=messages_from_redirects,
+            form=form
+        )
+    # user is not authenticated, send to landing page.
+    else:
+        return render_template(
+            "landing_page.html",
+            # user_role=user_role,
+            # user_confirmed=user_confirmed,
+            # news_items=news_items,
+            # messages_from_redirects=messages_from_redirects,
+            form=form
+        )
 
-    return render_template(
-        "home.html",
-        user_role=user_role,
-        user_confirmed=user_confirmed,
-        news_items=news_items,
-        messages_from_redirects=messages_from_redirects,
-        form=form
-    )
 
 
 @main_bp.route("/load_icons", methods=["GET", "POST"])

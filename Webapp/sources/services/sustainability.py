@@ -127,7 +127,7 @@ def element_sustainability_from_set(element_sustainability_set: Set[str]) -> str
 def get_element_set(reaction_smiles_list: List):
     element_symbols = set()
     for component in reaction_smiles_list:
-        if "{+n}" in component:  # in polymer mode  # TODO: check
+        if "*" in component:  # in polymer mode  # TODO: check
             component = services.polymer_novel_compound.clean_polymer_smiles(component)
             component = component.replace(
                 "*", ""

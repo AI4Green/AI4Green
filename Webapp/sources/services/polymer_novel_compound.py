@@ -277,7 +277,7 @@ def check_positive_number(s: float) -> bool:
 def extract_inside_brackets(
     s: str,
     start_index: int,
-) -> tuple[str, int]:
+) -> str:
     """
     Extracts contents of brackets to identify branching in polymer SMILES.
     Handles nested branching.
