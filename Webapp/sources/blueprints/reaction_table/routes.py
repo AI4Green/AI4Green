@@ -86,10 +86,13 @@ def process():
 
         if idx in polymer_indices:
             polymer = True
-            (
-                reactant_smiles,
-                repeat_unit,
-            ) = services.polymer_novel_compound.find_repeat_clean_canonicalise(
+            if reactant_smiles.count("{+n}") > 1:
+                return jsonify(
+                    {
+                        "error": f"Cannot process Reactant {idx} structure: copolymers are not yet supported"
+                    }
+                )
+            reactant_smiles = services.polymer_novel_compound.find_canonical_repeat(
                 reactant_smiles
             )
 

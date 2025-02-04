@@ -70,10 +70,6 @@ def index() -> Response:
     else:
         return render_template(
             "landing_page.html",
-            # user_role=user_role,
-            # user_confirmed=user_confirmed,
-            # news_items=news_items,
-            # messages_from_redirects=messages_from_redirects,
             form=form
         )
 
