@@ -373,10 +373,6 @@ async function regenerateImages(sortCriteria, workbook, workgroup, images) {
       // only generate missing imgs
       continue;
     }
-    if (smile === "") {
-      missingImages.push("Empty Reaction");
-      continue;
-    }
     try {
       let rxn = rxns[idx];
       let source = await ketcherFrame.contentWindow.ketcher.generateImage(rxn);
@@ -388,7 +384,7 @@ async function regenerateImages(sortCriteria, workbook, workgroup, images) {
       let source = await ketcherFrame.contentWindow.ketcher.generateImage(
         smile,
       );
-      const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 50);
+      const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 100);
       let imgSource = await convertBlobToBase64(shrunkenBlob);
       missingImages.push(imgSource);
     }
@@ -424,14 +420,6 @@ async function showSavedReactionsImages() {
   for (const [idx, imgSource] of images.entries()) {
     let idx1 = idx + 1;
     let $image = $(`#image${idx1}`);
-
-    if (imgSource === "Empty Reaction") {
-      // change img div to text div
-      $image.replaceWith(
-        '<div id="image${idx1}" style="text-align: center; padding: 20px;">[Empty Reaction]</div>',
-      );
-    }
-
     $image.attr("src", imgSource);
   }
 }

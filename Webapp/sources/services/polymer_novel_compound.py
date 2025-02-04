@@ -364,7 +364,7 @@ def get_last_bracketed_expression(expression):
     return ""
 
 
-def reformat_smiles(smiles: str) -> str:
+def reformat_smiles(smiles):
     branch = smiles.split(")")[-1]
     smiles = smiles[: smiles.rfind(branch)]
     inner = get_last_bracketed_expression(smiles)
@@ -387,12 +387,8 @@ def find_polymer_repeat_unit(
     # If both {-} and {+} are found
     if start_marker != -1 and end_marker != -1:
         # Reformat if end of SRU is treated as a branch. e.g. *C{-}(CC{+n}*)C where {+n} is within brackets
-        while is_within_brackets(compound, "{+n}") != is_within_brackets(
-            compound, "{-}"
-        ):
+        while is_within_brackets(compound, "{+n}"):
             compound = reformat_smiles(compound)
-            if compound == reformat_smiles(compound):
-                return ""  # avoid infinite loop
             start_marker = compound.find("{-}")
             end_marker = compound.find("{+n}")
 
@@ -410,7 +406,6 @@ def find_polymer_repeat_unit(
                 branch, close_paren = extract_inside_brackets(compound, close_paren + 1)
                 if close_paren != -1:
                     result += branch
-        result = result.replace("/", "").replace("\\", "")  # ignore stereochemistry
         return result
     # if either {-} or {+} is not found
     return ""
@@ -425,7 +420,7 @@ def clean_polymer_smiles(
     return compound.replace("{+n}", "").replace("{-}", "").replace("-", "")
 
 
-def canonicalise(smiles: str) -> str:
+def canonicalise(smiles):
     """
     Canonicalise a polymer SMILES string. Not for use when endgroups are known (must have two '*'s)
     """
@@ -434,17 +429,14 @@ def canonicalise(smiles: str) -> str:
     return str(smiles).replace("[", "").replace("]", "")
 
 
-def find_canonical_repeat(smiles: str) -> str:
+def find_repeat_clean_canonicalise(smiles):
     """
-    Find repeat unit, and canonicalise a polymer smiles string.
-    REMOVES END GROUPS
-    Args:
-        smiles - the unedited smiles from ketcher output. e.g. CC{-}C{+n}C
-    Returns:
-        canon_smiles - the canonicalised repeat unit. e.g *C*
+    Find repeat unit, clean, and canonicalise a polymer smiles string.
     """
     repeat_unit = find_polymer_repeat_unit(smiles)
-    smiles = "*" + repeat_unit + "*"
-    smiles = canonicalise(smiles)
+    smiles = clean_polymer_smiles(smiles)
+    if smiles.count("*") == 2:
+        smiles = canonicalise(smiles)
+        # TODO: update repeat unit to after canonicalising?
 
-    return smiles
+    return smiles, repeat_unit
