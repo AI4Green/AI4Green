@@ -476,6 +476,18 @@ def clone_reaction() -> Response:
             json.dumps(remove_yield_dict),
             old_reaction.reaction_smiles,
         )
+
+        # update reaction type and RXN
+        new_reaction = services.reaction.get_from_name_and_workbook_id(
+            new_reaction_name, workbook_object.id
+        )
+        new_reaction.update(
+            **{
+                "reaction_type": old_reaction.reaction_type.value,
+                "reaction_rxn": old_reaction.reaction_rxn,
+            }
+        )
+
         feedback = "New reaction made"
         return jsonify({"feedback": feedback})
     else:
