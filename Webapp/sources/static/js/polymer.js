@@ -35,7 +35,7 @@ function savePolymerMode() {
  */
 async function getPolymerMode() {
   let demo = $("#js-demo").val();
-  if (demo) {
+  if (demo === "demo") {
     return false;
   }
   return new Promise((resolve, reject) => {
