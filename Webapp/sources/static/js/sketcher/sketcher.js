@@ -99,6 +99,12 @@ async function createReactionTable() {
   let polymer_indices = identifyPolymers(await exportRXNFromActiveEditor());
   smiles = replaceSmilesSymbols(smiles);
 
+  if (rxn.includes("SRU") && polymer_mode === false) {
+    alert("Structural Repeating Units are only available in Polymer Mode.");
+    $(".loading-bar").css("display", "none");
+    return;
+  }
+
   // Asynchronous request to _process in routes.py
   $.ajax({
     type: "GET",
