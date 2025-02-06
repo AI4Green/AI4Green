@@ -108,7 +108,7 @@ def process():
 
         # if no match is found we inform the user the compound is not in the database
         if reactant is None:
-            if demo:
+            if demo == "demo":
                 return jsonify({"reactionTable": "Demo", "novelCompound": ""})
 
             reactant_name = iupac_convert(reactant_smiles)

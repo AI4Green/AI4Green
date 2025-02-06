@@ -83,7 +83,7 @@ async function createReactionTable() {
   }
   let rxn = await exportRXNFromActiveEditor();
   $("#js-reaction-rxn").val(rxn);
-  await exportImageFromActiveEditor();
+  makeReactionSchemeImage("hidden");
   sketcherDataLossHandler();
   let [reactants, products] =
     reactionSmilesToReactantsAndProductsSmiles(smiles);
