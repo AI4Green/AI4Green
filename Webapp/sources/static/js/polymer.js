@@ -34,6 +34,10 @@ function savePolymerMode() {
  * Retrieve polymer mode - reads reaction dict
  */
 async function getPolymerMode() {
+  let demo = $("#js-demo").val();
+  if (demo) {
+    return false;
+  }
   return new Promise((resolve, reject) => {
     let workgroup = $("#js-active-workgroup").val();
     let workbook = $("#js-active-workbook").val();

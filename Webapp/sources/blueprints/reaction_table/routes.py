@@ -108,6 +108,9 @@ def process():
 
         # if no match is found we inform the user the compound is not in the database
         if reactant is None:
+            if demo:
+                return jsonify({"reactionTable": "Demo", "novelCompound": ""})
+
             reactant_name = iupac_convert(reactant_smiles)
             # generate molweight
             reactant_mol_wt = services.all_compounds.mol_weight_from_smiles(
@@ -158,6 +161,9 @@ def process():
 
         # if no match is found we inform the user the compound is not in the database
         if product is None:
+            if demo:
+                return jsonify({"reactionTable": "Demo", "novelCompound": ""})
+
             product_name = iupac_convert(product_smiles)
             # generate molweight
             product_mol_wt = services.all_compounds.mol_weight_from_smiles(
@@ -305,7 +311,7 @@ def get_compound_all_tables(smiles, workbook, polymer, demo):
     # if no match by inchi, then check the workbook collection of novel compounds
     if compound is None:
         if demo == "demo":  # if in demo mode don't search novel compounds
-            return jsonify({"reactionTable": "demo", "novelCompound": ""})
+            return compound, True
 
         if polymer:
             compound = services.polymer_novel_compound.from_smiles_and_workbook(
