@@ -211,12 +211,9 @@ async function reloadReaction() {
   let $sketcherSelectRadioButtons = $('input[name="sketcher-select"]');
   $sketcherSelectRadioButtons.prop("disabled", true);
 
-  const response = await getPolymerMode();
-  if (response === true) {
-    await reloadSketcherFromRXN();
-  } else {
-    await reloadSketcherFromSmiles();
-  }
+  // load reaction to sketcher from RXN file or from SMILES
+  await reloadSketcher();
+
   $sketcherSelectRadioButtons.prop("disabled", false);
 
   // block polymer mode for old reactions
@@ -239,52 +236,54 @@ async function reloadReaction() {
 /**
  * Loads the reloaded reaction smiles to the active sketcher
  */
-async function reloadSketcherFromSmiles() {
-  let $reactionSmiles = $("#js-reaction-smiles");
-  let reloadedReaction = $reactionSmiles.val();
-  if (reloadedReaction) {
-    let selectedSketcher = $('input[name="sketcher-select"]:checked').attr(
-      "id",
-    );
-    if (selectedSketcher === "marvin-select") {
-      marvin.importStructure("cxsmiles", reloadedReaction);
-      await sleep(500);
-    } else if (selectedSketcher === "ketcher-select") {
-      // wait for ketcher to load and if it has loaded then reload the scheme
-      for (let i = 0; i < 5; i++) {
-        let ketcher = getKetcher();
-        if (ketcher !== undefined) {
-          ketcher.setMolecule(reloadedReaction);
-          break;
-        } else {
-          await sleep(250);
-        }
+async function reloadSketcherFromSmiles(smiles, sketcher) {
+  if (sketcher === "marvin-select") {
+    marvin.importStructure("cxsmiles", smiles);
+    await sleep(500);
+  } else if (sketcher === "ketcher-select") {
+    // wait for ketcher to load and if it has loaded then reload the scheme
+    for (let i = 0; i < 5; i++) {
+      let ketcher = getKetcher();
+      if (ketcher !== undefined) {
+        ketcher.setMolecule(smiles);
+        break;
+      } else {
+        await sleep(250);
       }
-      // sleep used to allow ketcher to load smiles before proceeding
-      await sleep(2000);
     }
+    // sleep used to allow ketcher to load smiles before proceeding
+    await sleep(2000);
   }
 }
 
 /**
  * Loads the reloaded RXN file to the active sketcher
  */
-async function reloadSketcherFromRXN() {
-  let $reactionRXN = $("#js-reaction-rxn");
-  let reloadedReaction = $reactionRXN.val();
-  if (reloadedReaction) {
-    let selectedSketcher = $('input[name="sketcher-select"]:checked').attr(
-      "id",
-    );
-    if (selectedSketcher === "marvin-select") {
-      marvin.importStructure("rxn", reloadedReaction);
-      await sleep(500);
-    } else if (selectedSketcher === "ketcher-select") {
-      let ketcher = getKetcher();
-      ketcher.setMolecule(reloadedReaction);
-      // sleep used to allow ketcher to load smiles before proceeding
-      await sleep(2000);
-    }
+async function reloadSketcherFromRXN(rxn, sketcher) {
+  if (sketcher === "marvin-select") {
+    marvin.importStructure("rxn", rxn);
+    await sleep(500);
+  } else if (sketcher === "ketcher-select") {
+    let ketcher = getKetcher();
+    ketcher.setMolecule(rxn);
+    // sleep used to allow ketcher to load smiles before proceeding
+    await sleep(2000);
+  }
+}
+
+/**
+ * Loads either the reaction RXN file or reaction smiles to the active sketcher
+ */
+async function reloadSketcher() {
+  let reactionSmiles = $("#js-reaction-smiles").val();
+  let reactionRXN = $("#js-reaction-rxn").val();
+  let selectedSketcher = $('input[name="sketcher-select"]:checked').attr("id");
+  // reactionRXN will be None for reactions made before polymer mode deployment
+  if (reactionRXN !== "None") {
+    console.log(reactionRXN);
+    await reloadSketcherFromRXN(reactionRXN, selectedSketcher);
+  } else {
+    await reloadSketcherFromSmiles(reactionSmiles, selectedSketcher);
   }
 }
 
