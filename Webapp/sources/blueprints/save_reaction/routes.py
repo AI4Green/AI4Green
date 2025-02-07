@@ -86,7 +86,7 @@ def new_reaction() -> Response:
                 "solvent_concentrations": [],
                 "solvent_hazards": [],
                 "solvent_physical_forms": [],
-                "product_intended_dps": [],
+                # "product_intended_dps": [], not yet implemented
                 "product_amounts": [],
                 "product_amounts_raw": [],
                 "product_masses": [],
@@ -227,7 +227,7 @@ def autosave() -> Response:
     product_molecular_weights = get_data("productMolecularWeights")
     product_hazards = get_data("productHazards")
     product_physical_forms_text = get_data("productPhysicalFormsText")
-    product_intended_dps = get_data("productIntendedDPs")
+    # product_intended_dps = get_data("productIntendedDPs") not yet implemented
     amount_units = str(request.form["amountUnits"])
     mass_units = str(request.form["massUnits"])
     volume_units = str(request.form["volumeUnits"])
@@ -298,7 +298,7 @@ def autosave() -> Response:
             "product_molecular_weights": product_molecular_weights,
             "product_hazards": product_hazards,
             "product_physical_forms_text": product_physical_forms_text,
-            "product_intended_dps": product_intended_dps,
+            # "product_intended_dps": product_intended_dps, not yet implemented
         }
     )
 
