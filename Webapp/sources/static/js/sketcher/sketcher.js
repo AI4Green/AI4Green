@@ -273,7 +273,6 @@ async function reloadSketcher() {
   let selectedSketcher = $('input[name="sketcher-select"]:checked').attr("id");
   // reactionRXN will be None for reactions made before polymer mode deployment
   if (reactionRXN !== "None") {
-    console.log(reactionRXN);
     await reloadSketcherFromRXN(reactionRXN, selectedSketcher);
   } else {
     await reloadSketcherFromSmiles(reactionSmiles, selectedSketcher);
