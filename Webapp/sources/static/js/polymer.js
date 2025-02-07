@@ -2,32 +2,38 @@
  * Save polymer mode - updates reaction dict
  */
 function savePolymerMode() {
-  let workgroup = $("#js-active-workgroup").val();
-  let workbook = $("#js-active-workbook").val();
-  let reactionID = $("#js-reaction-id").val();
-  let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
-  let reactionType;
-  if (polymerMode) {
-    reactionType = "POLYMER";
-  } else {
-    reactionType = "STANDARD";
-  }
+  // save only if reaction table has not loaded
+  let reactionDiv = document.getElementById("reaction-table-div");
+  if (reactionDiv.childNodes.length === 0) {
+    let workgroup = $("#js-active-workgroup").val();
+    let workbook = $("#js-active-workbook").val();
+    let reactionID = $("#js-reaction-id").val();
+    let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
+    let reactionType;
+    if (polymerMode) {
+      reactionType = "POLYMER";
+    } else {
+      reactionType = "STANDARD";
+    }
 
-  $.ajax({
-    url: "/_save_polymer_mode",
-    type: "post",
-    data: {
-      workgroup: workgroup,
-      workbook: workbook,
-      reactionID: reactionID,
-      reactionType: reactionType,
-    },
-    success: function (response) {},
-    error: function (error) {
-      // Handle error
-      console.error(error);
-    },
-  });
+    $.ajax({
+      url: "/_save_polymer_mode",
+      type: "post",
+      data: {
+        workgroup: workgroup,
+        workbook: workbook,
+        reactionID: reactionID,
+        reactionType: reactionType,
+      },
+      success: function (response) {
+        flashUserSaveMessage();
+      },
+      error: function (error) {
+        // Handle error
+        console.error(error);
+      },
+    });
+  }
 }
 
 /**

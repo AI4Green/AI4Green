@@ -147,11 +147,6 @@ def autosave() -> Response:
     reaction = services.reaction.get_current_from_request()
     reaction_name = reaction.name
     reaction_image = str(request.form["reactionImage"])
-    polymer_mode = request.form.get("polymerMode")
-    if polymer_mode.lower() == "true":  # convert string to boolean
-        reaction_type = "POLYMER"
-    else:
-        reaction_type = "STANDARD"
     polymer_indices = json.loads(request.form.get("polymerIndices"))
     polymerisation_type = str(request.form["polymerisationType"])
 
@@ -418,7 +413,6 @@ def autosave() -> Response:
         "solvent": solvent_primary_keys_ls,
         "reaction_table_data": reaction_table,
         "summary_table_data": summary_table,
-        "reaction_type": reaction_type,
         "polymerisation_type": polymerisation_type,
     }
     reaction.update(**update_dict)
@@ -503,13 +497,20 @@ def autosave_sketcher() -> Response:
     services.auth.edit_reaction(reaction)
 
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
-    reaction_smiles = str(request.form["reactionSmiles"])
-    reaction_rxn = str(request.form["reactionRXN"])
+    reaction_smiles = str(request.form.get("reactionSmiles"))
+    reaction_rxn = str(request.form.get("reactionRXN"))
+    polymer_mode = request.form.get("polymerMode")
+
+    if polymer_mode.lower() == "true":  # convert string to boolean
+        reaction_type = "POLYMER"
+    else:
+        reaction_type = "STANDARD"
 
     update_dict = {
         "time_of_update": current_time,
         "reaction_smiles": reaction_smiles,
         "reaction_rxn": reaction_rxn,
+        "reaction_type": reaction_type,
     }
     reaction.update(**update_dict)
     feedback = "Reaction Updated!"

@@ -42,7 +42,7 @@
     <div>
         <form action="{{ url_for('reaction_table.process') }}" method="post">
             <label> Polymer Mode?
-                <input type="checkbox" id="polymer-mode-select" name="polymer-mode-select" onclick="savePolymerMode()" {% if reaction.reaction_type.value == "POLYMER" %} checked {% endif %}>
+                <input type="checkbox" id="polymer-mode-select" name="polymer-mode-select" onchange="savePolymerMode()" {% if reaction.reaction_type.value == "POLYMER" %} checked {% endif %}>
             </label>
         </form>
     </div>
@@ -71,6 +71,7 @@
     <input type="hidden" id="js-time-of-creation" value="{{ reaction.time_of_creation }}">
     <input type="hidden" id="js-reaction-object" value="{{ reaction }}">
     <input type="hidden" id="js-reaction-smiles" value="{{ reaction.reaction_smiles }}">
+    <input type="hidden" id="js-reaction-type" value="{{ reaction.reaction_type }}">
     <input type="hidden" id="js-reaction-rxn" value="{{ reaction.reaction_rxn }}">
     <input type="hidden" value="{{ reaction.reaction_table_data }}" id="js-reaction-table-data">
     <input type="hidden" value="{{ reaction.summary_table_data }}" id="js-summary-table-data">

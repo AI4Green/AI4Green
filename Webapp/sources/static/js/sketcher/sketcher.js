@@ -75,6 +75,7 @@ function loadExampleSmiles() {
  * prompts for compound data or alerts error
  */
 async function createReactionTable() {
+  await sketcherAutoSave();
   let smiles;
   try {
     smiles = await exportSmilesFromActiveEditor();
