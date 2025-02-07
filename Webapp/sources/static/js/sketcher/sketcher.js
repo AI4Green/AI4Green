@@ -216,13 +216,6 @@ async function reloadReaction() {
 
   $sketcherSelectRadioButtons.prop("disabled", false);
 
-  // block polymer mode for old reactions
-  let time_of_creation = getVal($("#js-time-of-creation"));
-  if (new Date(time_of_creation) <= new Date("2025-02-05")) {
-    let $polymerSelect = $('input[name="polymer-mode-select"]');
-    $polymerSelect.prop("disabled", true);
-  }
-
   $("#js-load-status").val("loaded");
   // show compound if reloading a reaction where the reaction table has previously been loaded and description is in json
   let js_reaction_table_data = JSON.parse(
