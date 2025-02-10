@@ -31,6 +31,15 @@ def summary() -> Response:
         ):
             abort(401)
 
+        polymer_mode = request.form["polymerMode"]
+        # change summary table in polymer mode
+        if polymer_mode.lower() == "true":
+            summary_table_html = "_polymer_summary_table.html"
+        else:
+            summary_table_html = "_summary_table.html"
+    else:
+        summary_table_html = "_summary_table.html"
+
     unit_data = services.summary.get_unit_data(request.form)
     reactant_data = services.summary.get_reactant_data(request.form)
     reagent_data = services.summary.get_reagent_data(request.form)
@@ -52,13 +61,6 @@ def summary() -> Response:
     risk_data = services.summary.get_risk_data(
         reactant_data, reagent_data, solvent_data, product_data
     )
-
-    polymer_mode = request.form["polymerMode"]
-    # change summary table in polymer mode
-    if polymer_mode.lower() == "true":
-        summary_table_html = "_polymer_summary_table.html"
-    else:
-        summary_table_html = "_summary_table.html"
 
     # if product mass and reactant mass sum are calculated, then it forms a summary table
     if product_data and reactant_data:
