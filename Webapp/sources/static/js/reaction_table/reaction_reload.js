@@ -96,7 +96,7 @@ async function reactionTableReload() {
       let jsonID = "product_" + jsonField;
       fillInputField(productFieldID, jsonID, i);
     }
-    fillInputField("#js-product-intended-dp" + j, "product_intended_dps", i);
+    //fillInputField("#js-product-intended-dp" + j, "product_intended_dps", i); not yet implemented
   }
   // iterate through and reload reagents data
   let numberOfReagents = js_reaction_table_data["reagent_names"].length;

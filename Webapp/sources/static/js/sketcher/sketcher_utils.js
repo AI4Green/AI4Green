@@ -73,6 +73,24 @@ async function exportImageFromActiveEditor() {
 }
 
 /**
+ * Generates a reaction image and adds to html (where it is saved by getFieldData())
+ * use "hidden" before summary table
+ * @returns {Promise<void>}
+ */
+async function makeReactionSchemeImage(hidden) {
+  let $image = $("#image");
+  $image.attr("src", "");
+  let imgSource = await exportImageFromActiveEditor();
+  $image.attr("src", imgSource);
+  if (hidden === "hidden") {
+    $("#imageContainer").css("display", "none");
+  } else {
+    // image above summary table
+    $("#imageContainer").css("display", "block");
+  }
+}
+
+/**
  * Causes a pause in the code to give time for sketcher code to laod.
  */
 function sleep(ms) {

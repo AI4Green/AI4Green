@@ -331,7 +331,7 @@ def is_within_brackets(expression, target="{+n}"):
     return balance > 0
 
 
-def get_last_bracketed_expression(expression):
+def get_last_bracketed_expression(expression: str) -> str:
     """
     Returns the last set of brackets, including its content, in a given expression.
 

@@ -86,7 +86,7 @@ def new_reaction() -> Response:
                 "solvent_concentrations": [],
                 "solvent_hazards": [],
                 "solvent_physical_forms": [],
-                "product_intended_dps": [],
+                # "product_intended_dps": [], not yet implemented
                 "product_amounts": [],
                 "product_amounts_raw": [],
                 "product_masses": [],
@@ -147,11 +147,6 @@ def autosave() -> Response:
     reaction = services.reaction.get_current_from_request()
     reaction_name = reaction.name
     reaction_image = str(request.form["reactionImage"])
-    polymer_mode = request.form.get("polymerMode")
-    if polymer_mode.lower() == "true":  # convert string to boolean
-        reaction_type = "POLYMER"
-    else:
-        reaction_type = "STANDARD"
     polymer_indices = json.loads(request.form.get("polymerIndices"))
     polymerisation_type = str(request.form["polymerisationType"])
 
@@ -227,7 +222,7 @@ def autosave() -> Response:
     product_molecular_weights = get_data("productMolecularWeights")
     product_hazards = get_data("productHazards")
     product_physical_forms_text = get_data("productPhysicalFormsText")
-    product_intended_dps = get_data("productIntendedDPs")
+    # product_intended_dps = get_data("productIntendedDPs") not yet implemented
     amount_units = str(request.form["amountUnits"])
     mass_units = str(request.form["massUnits"])
     volume_units = str(request.form["volumeUnits"])
@@ -298,7 +293,7 @@ def autosave() -> Response:
             "product_molecular_weights": product_molecular_weights,
             "product_hazards": product_hazards,
             "product_physical_forms_text": product_physical_forms_text,
-            "product_intended_dps": product_intended_dps,
+            # "product_intended_dps": product_intended_dps, not yet implemented
         }
     )
 
@@ -418,7 +413,6 @@ def autosave() -> Response:
         "solvent": solvent_primary_keys_ls,
         "reaction_table_data": reaction_table,
         "summary_table_data": summary_table,
-        "reaction_type": reaction_type,
         "polymerisation_type": polymerisation_type,
     }
     reaction.update(**update_dict)
@@ -476,6 +470,18 @@ def clone_reaction() -> Response:
             json.dumps(remove_yield_dict),
             old_reaction.reaction_smiles,
         )
+
+        # update reaction type and RXN
+        new_reaction = services.reaction.get_from_name_and_workbook_id(
+            new_reaction_name, workbook_object.id
+        )
+        new_reaction.update(
+            **{
+                "reaction_type": old_reaction.reaction_type.value,
+                "reaction_rxn": old_reaction.reaction_rxn,
+            }
+        )
+
         feedback = "New reaction made"
         return jsonify({"feedback": feedback})
     else:
@@ -491,13 +497,20 @@ def autosave_sketcher() -> Response:
     services.auth.edit_reaction(reaction)
 
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
-    reaction_smiles = str(request.form["reactionSmiles"])
-    reaction_rxn = str(request.form["reactionRXN"])
+    reaction_smiles = str(request.form.get("reactionSmiles"))
+    reaction_rxn = str(request.form.get("reactionRXN"))
+    polymer_mode = request.form.get("polymerMode")
+
+    if polymer_mode.lower() == "true":  # convert string to boolean
+        reaction_type = "POLYMER"
+    else:
+        reaction_type = "STANDARD"
 
     update_dict = {
         "time_of_update": current_time,
         "reaction_smiles": reaction_smiles,
         "reaction_rxn": reaction_rxn,
+        "reaction_type": reaction_type,
     }
     reaction.update(**update_dict)
     feedback = "Reaction Updated!"
