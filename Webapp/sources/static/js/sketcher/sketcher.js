@@ -75,7 +75,10 @@ function loadExampleSmiles() {
  * prompts for compound data or alerts error
  */
 async function createReactionTable() {
-  await sketcherAutoSave();
+  let tutorial = getVal($("#js-tutorial"));
+  if (tutorial === "no") {
+    await sketcherAutoSave();
+  }
   let smiles;
   try {
     smiles = await exportSmilesFromActiveEditor();
@@ -95,7 +98,6 @@ async function createReactionTable() {
   let workbook = getVal($("#js-active-workbook"));
   let reaction_id = getVal($("#js-reaction-id"));
   let demo_mode = getVal($("#js-demo"));
-  let tutorial = getVal($("#js-tutorial"));
   let polymer_mode = $('input[id="polymer-mode-select"]').prop("checked");
   let polymer_indices = identifyPolymers(await exportRXNFromActiveEditor());
   smiles = replaceSmilesSymbols(smiles);
