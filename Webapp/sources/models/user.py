@@ -1,9 +1,9 @@
 from datetime import datetime
 
 import pytz
+import sqlalchemy as sa
 from flask_login import UserMixin
 from sources.extensions import db
-import sqlalchemy as sa
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .base import Model
@@ -51,11 +51,11 @@ class User(Model, UserMixin):
         nullable=False,
     )
     time_of_creation = db.Column(db.DateTime)
-    registration_location = db.Column(db.JSON, default={})
-    most_recent_login_location = db.Column(db.JSON, default={})
     Role = db.relationship("Role")
 
-    is_verified = db.Column(db.Boolean, nullable=True, server_default=sa.sql.false(), default=False)
+    is_verified = db.Column(
+        db.Boolean, nullable=True, server_default=sa.sql.false(), default=False
+    )
     verified_on = db.Column(db.DateTime, nullable=True)
 
     """Password hashing is implemented by the two following methods"""
