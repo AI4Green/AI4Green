@@ -14,12 +14,15 @@ def test_check_reaction_for_controlled_substances(app: Flask, client: FlaskClien
     Tests whether controlled substances are correctly identified in a given reaction
     """
 
-    reaction_name, workbook_id = create_controlled_substance_reaction(app)
+    reaction_name = create_controlled_substance_reaction(app)
     with app.app_context():
         with client:
+            workbook = services.workbook.get_workbook_from_group_book_name_combination(
+                "Test-Workgroup", "Test-Workbook"
+            )
             login(client)
             reaction = services.reaction.get_from_name_and_workbook_id(
-                reaction_name, workbook_id
+                reaction_name, workbook.id
             )
             checks = (
                 services.controlled_substances.check_reaction_for_controlled_substances(
@@ -51,6 +54,12 @@ def test_check_reaction_for_controlled_substances(app: Flask, client: FlaskClien
             assert duplicate_checks is None
 
             db.session.delete(reaction)
+
+            novel_compound = services.novel_compound.from_name_and_workbook(
+                "Explosion Risk Test", workbook
+            )
+            db.session.delete(novel_compound)
+
             db.session.commit()
 
 
@@ -87,4 +96,4 @@ def create_controlled_substance_reaction(app: Flask) -> Tuple[str, str]:
         db.session.add(reaction)
         db.session.commit()
 
-        return reaction.name, workbook.id
+        return reaction.name
