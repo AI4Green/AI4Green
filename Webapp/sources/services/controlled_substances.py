@@ -1,13 +1,17 @@
-from sources import services, models
-from sources.extensions import db
-from typing import List, Optional, Dict, Union
-from flask import current_app
-from flask_login import current_user
 import os
 from datetime import datetime
-import pytz
+from typing import Dict, List, Optional, Union
 
-def check_reaction_for_controlled_substances(reaction: models.Reaction) -> Union[List[List[str]], None]:
+import pytz
+from flask import current_app
+from flask_login import current_user
+from sources import models, services
+from sources.extensions import db
+
+
+def check_reaction_for_controlled_substances(
+    reaction: models.Reaction,
+) -> Union[List[List[str]], None]:
     """
     Checks the provided reaction against AI4Green's list of controlled substances and adds their usage to the database.
 
@@ -22,15 +26,18 @@ def check_reaction_for_controlled_substances(reaction: models.Reaction) -> Union
                         - List[3]: Solvents
         None: If no controlled substances are used in the reaction.
     """
+    location = services.utils.get_location()
     substance_smiles = [
         reaction.reactants,
         reaction.reagents,
         reaction.products,
-        reaction.solvent
+        reaction.solvent,
     ]
 
     # this list of lists maintains the structure of reagents, reactants, products and solvents incase this is useful later
-    checks = [check_smiles_in_controlled_substances(smi_list) for smi_list in substance_smiles]
+    checks = [
+        check_smiles_in_controlled_substances(smi_list) for smi_list in substance_smiles
+    ]
 
     # if no compounds found return None
     if all(not sublist for sublist in checks):
@@ -40,14 +47,14 @@ def check_reaction_for_controlled_substances(reaction: models.Reaction) -> Union
         inchi
         for sublist in checks  # flatten the list of lists
         for inchi in sublist
-        if not check_duplicate(reaction, inchi)  # filter out duplicates
+        if not check_duplicate(reaction, inchi, location)  # filter out duplicates
     }
 
     if not unique_structures:
         return None
 
     for substance in unique_structures:
-        services.controlled_substances.add(reaction, substance)
+        services.controlled_substances.add(reaction, substance, location)
 
     return checks
 
@@ -63,10 +70,16 @@ def check_smiles_in_controlled_substances(smiles_list: List[str]) -> List[str]:
         List of InChI found in controlled substances.
     """
     query_inchis = [services.all_compounds.smiles_to_inchi(smi) for smi in smiles_list]
-    return [inchi for inchi in query_inchis if inchi in current_app.config["CONTROLLED_SUBSTANCES"]]
+    return [
+        inchi
+        for inchi in query_inchis
+        if inchi in current_app.config["CONTROLLED_SUBSTANCES"]
+    ]
 
 
-def check_duplicate(reaction: models.Reaction, inchi: str) -> bool:
+def check_duplicate(
+    reaction: models.Reaction, inchi: str, location: Dict[str:str]
+) -> bool:
     """
     Checks db ControlledSubstanceUsage table for entries containing this reaction and InChI and updates the last_edited
     attribute of the entry if duplicate is found
@@ -90,23 +103,27 @@ def check_duplicate(reaction: models.Reaction, inchi: str) -> bool:
         duplicate.last_edited = datetime.now(pytz.timezone("Europe/London")).replace(
             tzinfo=None
         )
+        duplicate.last_location = location["country"]
         db.session.commit()
+
+        detect_usage_in_embargoed_country(reaction, inchi, location)
+
         return True
 
     return False
 
 
-def add(reaction: models.Reaction, inchi: str) -> None:
+def add(reaction: models.Reaction, inchi: str, location: Dict[str:str]) -> None:
     """
     Adds instance of controlled substance use to the ControlledSubstanceUsage table.
 
     Args:
         reaction (models.Reaction): The reaction in which the controlled substance is used
         inchi (str): The InChI of the controlled substance
+        location (Dict[str: str]): The location of the controlled substance usage
 
     """
     compound = services.all_compounds.from_inchi(inchi, reaction.workbook)
-    location = current_user.most_recent_login_location
     usage = models.ControlledSubstanceUsage(
         creator=reaction.creator,
         workgroups=reaction.workbook.WorkGroup.id,
@@ -116,14 +133,29 @@ def add(reaction: models.Reaction, inchi: str) -> None:
         controlled_substance_smiles=compound.smiles,
         controlled_substance_cas=compound.cas,
         controlled_substance_inchi=compound.inchi,
-        last_location=location["country"]
+        last_location=location["country"],
     )
     db.session.add(usage)
     db.session.commit()
 
+    detect_usage_in_embargoed_country(reaction, inchi, location)
+
+
+def detect_usage_in_embargoed_country(
+    reaction: models.Reaction, inchi: str, location: Dict[str:str]
+) -> None:
+    """
+    Checks whether location is on embargoed country list and sends controlled substance usage alert if it is.
+    Args:
+         reaction (models.Reaction): The reaction in which the controlled substance is used
+        inchi (str): The InChI of the controlled substance
+        location (Dict[str: str]): The location of the controlled substance usage
+
+    Returns:
+        None
+    """
     if location["country"] in current_app.config["EMBARGOED_COUNTRIES"]:
         services.email.send_controlled_substance_alert(inchi, location, reaction)
-
 
 
 def list_all() -> List[models.Reaction]:
@@ -134,9 +166,7 @@ def list_all() -> List[models.Reaction]:
          List of all controlled substance usages
     """
     return (
-        (
-            db.session.query(models.ControlledSubstanceUsage)
-        )
+        (db.session.query(models.ControlledSubstanceUsage))
         .order_by(models.ControlledSubstanceUsage.time_of_creation.desc())
         .all()
     )
@@ -145,25 +175,23 @@ def list_all() -> List[models.Reaction]:
 def controlled_substance_inchi():
     """Returns list of InChI for controlled chemicals that are stores in controlled_substances_inchi.txt"""
     with open(
-            os.path.join(
-                os.path.dirname(
-                    os.path.dirname(
-                        os.path.abspath(__file__)
-                    )
-                ), "static", "controlled_substances_inchi.txt"
-            ), "r"
+        os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "static",
+            "controlled_substances_inchi.txt",
+        ),
+        "r",
     ) as f:
         return set(f.read().splitlines())
 
 
 def uk_arms_embargoes():
     with open(
-            os.path.join(
-                os.path.dirname(
-                    os.path.dirname(
-                        os.path.abspath(__file__)
-                    )
-                ), "static", "UK_arms_embargoed_countries.txt"
-            ), "r"
+        os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "static",
+            "UK_arms_embargoed_countries.txt",
+        ),
+        "r",
     ) as f:
         return set(f.read().splitlines())
