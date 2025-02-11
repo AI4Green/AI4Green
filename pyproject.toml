@@ -54,6 +54,7 @@ dash-core-components = "^2.0.0"
 odfpy =  "^1.4.1"
 qrcode = "^7.4.2"
 psmiles = {git = "https://github.com/Ramprasad-Group/psmiles.git"}
+ipinfo = "^5.1.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
