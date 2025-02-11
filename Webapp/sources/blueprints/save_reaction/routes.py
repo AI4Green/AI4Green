@@ -366,7 +366,7 @@ def autosave() -> Response:
         }
     )
 
-    # value is 'complete' if user is trying to lock reaction.
+    # value is "complete" if user is trying to lock reaction.
     complete = request.form["complete"]
     feedback = "Reaction Updated!"
     if complete == "complete":
@@ -449,7 +449,24 @@ def clone_reaction() -> Response:
     creator = services.person.from_current_user_email()
 
     remove_yield_dict = json.loads(old_reaction.summary_table_data)
-    remove_yield_dict.update({"real_product_mass": "", "unreacted_reactant_mass": ""})
+
+    # Experimental fields in Summary table should be removed when cloning
+    remove_yield_dict.update(
+        {
+            "real_product_mass": "",
+            "unreacted_reactant_mass": "",
+            "polymer_dispersity": "",
+            "polymer_mass_calibration": "",
+            "polymer_mass_method": "-select-",
+            "polymer_mn": "",
+            "polymer_mw": "",
+            "polymer_tc": "",
+            "polymer_tg": "",
+            "polymer_thermal_calibration": "",
+            "polymer_thermal_method": "-select-",
+            "polymer_tm": "",
+        }
+    )
 
     # check for reaction id - catches errors caused if user has 2 tabs open
     reaction_id_check = services.reaction.get_from_reaction_id_and_workbook_id(
@@ -576,7 +593,7 @@ def check_reaction_name() -> Response:
     )
     if reaction_name_check is None:
         # populate_database(reaction_name)
-        feedback = "This reaction name is unique"  # added to the reaction database'
+        feedback = "This reaction name is unique"  # added to the reaction database"
     else:
         feedback = "This reaction name is already used. Please choose another name."
     return jsonify({"feedback": feedback})
