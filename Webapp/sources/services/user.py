@@ -1,9 +1,9 @@
 from typing import List
 
-from sqlalchemy import func
 from flask_login import current_user
 from sources import models, services
 from sources.extensions import db
+from sqlalchemy import func
 
 
 def list_all() -> List[models.User]:
@@ -33,14 +33,12 @@ def person_from_current_user() -> models.Person:
 def add(
     username: str, email: str, fullname: str, password_data: str, person: models.Person
 ):
-    location = services.utils.get_location()
     models.User.create(
         username=username,
         email=email,
         fullname=fullname,
         Person=person,
         password_hash=models.User.set_password(password_data),
-        registration_location=location
     )
 
 
@@ -59,11 +57,15 @@ def from_id(user_id: int) -> models.User:
 
 def from_email(user_email: str) -> models.User:
     """
-        Gets user from User email
-        Args:
-            user_email: email of user to search for
+    Gets user from User email
+    Args:
+        user_email: email of user to search for
 
-        Returns:
-            models.User with matching email
-        """
-    return db.session.query(models.User).filter(func.lower(models.User.email) == user_email.lower()).first()
+    Returns:
+        models.User with matching email
+    """
+    return (
+        db.session.query(models.User)
+        .filter(func.lower(models.User.email) == user_email.lower())
+        .first()
+    )

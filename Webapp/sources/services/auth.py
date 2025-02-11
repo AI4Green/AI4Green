@@ -73,7 +73,6 @@ def verify_login(form) -> redirect:
             .filter(models.User.email == current_user.email)
             .first()
         )
-        user.most_recent_login_location = services.utils.get_location()
         db.session.commit()
         session["role"] = role.name
         """If the username and password are both correct, then the login_user() function
