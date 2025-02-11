@@ -78,7 +78,7 @@ def check_smiles_in_controlled_substances(smiles_list: List[str]) -> List[str]:
 
 
 def check_duplicate(
-    reaction: models.Reaction, inchi: str, location: Dict[str:str]
+    reaction: models.Reaction, inchi: str, location: Dict[str, str]
 ) -> bool:
     """
     Checks db ControlledSubstanceUsage table for entries containing this reaction and InChI and updates the last_edited
@@ -113,7 +113,7 @@ def check_duplicate(
     return False
 
 
-def add(reaction: models.Reaction, inchi: str, location: Dict[str:str]) -> None:
+def add(reaction: models.Reaction, inchi: str, location: Dict[str, str]) -> None:
     """
     Adds instance of controlled substance use to the ControlledSubstanceUsage table.
 
@@ -142,7 +142,7 @@ def add(reaction: models.Reaction, inchi: str, location: Dict[str:str]) -> None:
 
 
 def detect_usage_in_embargoed_country(
-    reaction: models.Reaction, inchi: str, location: Dict[str:str]
+    reaction: models.Reaction, inchi: str, location: Dict[str, str]
 ) -> None:
     """
     Checks whether location is on embargoed country list and sends controlled substance usage alert if it is.
