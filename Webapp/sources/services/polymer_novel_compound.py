@@ -32,7 +32,7 @@ def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> st
 
     return (
         db.session.query(models.PolymerNovelCompound.smiles)
-        .filter(models.PolymerNovelCompound.name == primary_key[0].lower())
+        .filter(func.lower(models.PolymerNovelCompound.name) == primary_key[0].lower())
         .join(models.WorkBook)
         .filter(models.WorkBook.id == primary_key[1])
         .first()
