@@ -332,7 +332,7 @@ class UploadExperimentDataFiles:
         if filename != "":
             # size under 1 mb
             filesize = os.fstat(file.fileno()).st_size
-            if filesize > 1000000:
+            if filesize > 1024 * 1024 * 2:
                 print("file too large")
                 return "failure"
             # acceptable file extension

@@ -13,23 +13,40 @@ which is from the NovelCompound table and associated with a specific workgroup
 
 
 def get_smiles_list(
-    primary_key_ls: List[Union[Tuple[str, int], int, str]], person: models.Person = None
+    primary_key_ls: List[Union[Tuple[str, int], int, str]],
+    polymer_indices: List[str] = None,
+    number_of_reactants: int = 0,
+    person: models.Person = None,
 ) -> List[str]:
     """
     Gets SMILES of compounds that could be type Compound (pk is int) or type NovelCompound (pk is Tuple[str, int])
 
     Args:
         primary_key_ls - the list of primary keys of the compounds
+        polymer_indices - list of indices where polymers are in reaction
+        number_of_reactants - used to update product indexing to check for polymers, can be empty when checking reactant smiles
         person - the person we are checking for permission if accessing novel compounds
 
     Returns:
         The list of smiles for the compounds - or None if that item has no SMILES.
     """
     smiles_ls = []
-    for primary_key in primary_key_ls:
+
+    if polymer_indices is None:
+        polymer_indices = []
+
+    for idx, primary_key in enumerate(primary_key_ls):
         if validate_primary_key(primary_key):
             primary_key = primary_key_resolver(primary_key)
-            smiles_ls.append(smiles_from_primary_key(primary_key, person=person))
+
+            if (idx + 1 + number_of_reactants) in polymer_indices:
+                smiles_ls.append(
+                    services.polymer_novel_compound.get_smiles(  # get smiles from polymer db
+                        primary_key, person=person
+                    )
+                )
+            else:
+                smiles_ls.append(smiles_from_primary_key(primary_key, person=person))
     return smiles_ls
 
 

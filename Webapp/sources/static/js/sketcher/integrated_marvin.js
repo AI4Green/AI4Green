@@ -6,7 +6,7 @@ async function setupNewMarvinSketcher() {
   let marvinKey = $("#marvin-js-key").val();
   marvin = await newMarvinSketcher("#marvin-sketcher", marvinKey);
   if (marvin) {
-    marvin.setDisplaySettings({ toolbars: "education" });
+    marvin.setDisplaySettings({ toolbars: "reaction" });
     $("#marvin-sketcher").hide();
   }
 }
@@ -70,7 +70,7 @@ async function getMarvinKey() {
 async function switchToMarvinSketcher() {
   $("#ketcher-sketcher").hide();
   if (marvin) {
-    await exportSmilesFromKetcherToMarvin();
+    await exportReactionFromKetcherToMarvin();
     $("#marvin-sketcher").show();
   } else {
     alert("Marvin JS is temporarily unavailable");
@@ -108,15 +108,23 @@ function setupMarvinAutosave() {
 }
 
 /**
- * Exports structures from ketcher to marvin via SMILES
+ * Exports structures from ketcher to marvin via SMILES (or RXN in polymer mode)
  * @return {Promise<void>}
  */
-async function exportSmilesFromKetcherToMarvin() {
-  let smiles;
+async function exportReactionFromKetcherToMarvin() {
+  let reaction;
   if (getKetcher()) {
-    smiles = await exportSmilesFromKetcher();
-    if (smiles) {
-      marvin.importStructure("cxsmiles", smiles);
+    const polymerMode = await getPolymerMode();
+    if (polymerMode === true) {
+      reaction = await exportRXNFromKetcher();
+      if (reaction) {
+        marvin.importStructure("rxn", reaction);
+      }
+    } else {
+      reaction = await exportSmilesFromKetcher();
+      if (reaction) {
+        marvin.importStructure("cxsmiles", reaction);
+      }
     }
   }
 }
@@ -135,18 +143,49 @@ function exportSmilesFromMarvin() {
 }
 
 /**
+ * Exports the current contents of Marvin JS as RXN
+ * @return {Promise<string>} RXN file
+ */
+function exportRXNFromMarvin() {
+  return marvin
+    .exportStructure("rxn", { multiplesgroup: false })
+    .then(function (reaction) {
+      return reaction;
+    });
+}
+
+/**
+ * Exports the current contents of Marvin JS as MOL
+ * @return {Promise<string>} MOL file
+ */
+function exportMOLFromMarvin() {
+  return marvin
+    .exportStructure("mol", { multiplesgroup: false })
+    .then(function (reaction) {
+      return reaction;
+    });
+}
+
+/**
  * Enters the example reaction into the Marvin editor
  */
 function marvinExampleSmiles() {
   let smiles = "OC(=O)C1=CC=CC=C1.CCN>>CCNC(=O)C1=CC=CC=C1";
-  marvin.importStructure("cxsmiles", smiles);
+
+  getPolymerMode().then((polymerMode) => {
+    if (polymerMode === true) {
+      marvin.importStructure("rxn", getExamplePolymer());
+    } else {
+      marvin.importStructure("cxsmiles", smiles);
+    }
+  });
 }
 
 /**
  * Makes an image of the current reaction scheme and saves to a hidden HTML input
  */
 async function exportMarvinImage() {
-  let settings = { width: 600, height: 400 };
+  let settings = { width: 600, height: 400, multiplesgroup: true };
   let reactionSchemeImage;
   await marvin.exportStructure("jpeg", settings).then(function (source) {
     reactionSchemeImage = source;

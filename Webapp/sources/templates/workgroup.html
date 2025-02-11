@@ -18,7 +18,7 @@
         {% if approval_status == false %} <h6 style="color: red">Workgroup Pending Moderation</h6> {% endif %}
         <br>
         <div class="row">
-            <div class="col">
+            <div class="col-3">
                 {% if user_type == 'standard_member' %}
                 <p><b>User Type: Standard Member</b></p>
                     <p><a href="{{ url_for('main.index') }}" id="change-workgroup" class="btn btn-success">Change Workgroup</a></p>
@@ -37,7 +37,7 @@
                     <p><a href="{{ url_for('manage_workbook.manage_workbook', workgroup=workgroup_selected) }}" id="manage-workbook" class="btn btn-primary">Manage Workbooks</a></p>
                 {% endif %}
             </div>
-            <div class="col">
+            <div class="col-3">
                 <p><b>Choose a Workbook to view or create reactions</b></p>
                     <select name="workbook-select" id="active-workbook" class="form-select" onchange="updateSelectedWorkbook()">
                         {% if workbooks == "no_workbooks" %}
@@ -61,11 +61,11 @@
                     <p><button onclick=newReactionModalWindow() id="new-reaction" class="btn btn-primary"  data-toggle="modal" data-target="#new-reaction-modal" title="Create New Reaction">+ New Reaction</button></p>
                 </div>
             </div>
-            <div class="col">
+            <div class="col-6">
                 <div id="reaction-content" style="display: none;">
                     <h3>Your Saved Reactions</h3>
                     <div id="no-reactions" style="display: none;"><h4>No Reactions to Show</h4></div>
-                    <div class="scrollClass">
+                    <div class="scrollClass" style="height: 500px;">
                         <div id="reaction-details">
                         </div>
                     </div>

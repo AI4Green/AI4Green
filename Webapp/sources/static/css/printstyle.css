@@ -14,7 +14,7 @@
     visibility: visible;
   }
   #qr-title {
-    display: block
+    display: block;
     margin-left: 0;
     font-size: 60;
     white-space: nowrap
