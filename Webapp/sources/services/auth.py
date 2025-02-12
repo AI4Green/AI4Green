@@ -73,7 +73,6 @@ def verify_login(form) -> redirect:
             .filter(models.User.email == current_user.email)
             .first()
         )
-        db.session.commit()
         session["role"] = role.name
         """If the username and password are both correct, then the login_user() function
         from Flask-Login is called. This function will register the user as logged in,
