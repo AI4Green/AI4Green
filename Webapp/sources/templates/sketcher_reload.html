@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <head>
+    <title>{{ reaction.reaction_id }}</title>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
@@ -12,6 +13,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
 
+
     <script>
         // disable complete reaction button once reaction is completed
         $(function () {
@@ -20,7 +22,7 @@
             }
         })
     </script>
-
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/sketcher.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
@@ -36,7 +38,7 @@
     <a id="tutorial-mode" href="/sketcher_tutorial/yes" class="btn btn-success btn-sm" style="color: white;" target="_blank">Enter Tutorial Mode <i class="bi bi-box-arrow-in-up-right"></i></a>
     <br><br>
     <div id="editor-instructions">
-        <p>Please sketch or upload your reaction to begin. Click <a target="_blank" href="{{ url_for('main.marvin_js_help') }}">here</a> to view our Marvin JS help guide.</p>
+<!--        <p>Please sketch or upload your reaction to begin. Click <a target="_blank" href="{{ url_for('main.marvin_js_help') }}">here</a> to view our Marvin JS help guide.</p>-->
         <p>Please note compounds drawn above or underneath the arrow will not be recognised.</p>
     </div>
     <div>
@@ -48,10 +50,10 @@
     </div>
     <div id="sketchers-div">
         <div>
-            Selected Reaction Sketcher:
-            <label> MarvinJS
-                <input type="radio" id="marvin-select" name="sketcher-select" disabled>
-            </label>
+<!--            Selected Reaction Sketcher:-->
+<!--            <label> MarvinJS-->
+<!--                <input type="radio" id="marvin-select" name="sketcher-select" disabled>-->
+<!--            </label>-->
             <label> Ketcher
                 <input type="radio" id="ketcher-select" name="sketcher-select" checked="checked" disabled>
             </label>

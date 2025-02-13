@@ -26,20 +26,20 @@ $(async function () {
   }
   hideSketcherLoadingCircle();
   // Use Promise.race to give setupNewMarvinSketcher() a maximum of 2 seconds
-  try {
-    await Promise.race([
-      setupNewMarvinSketcher(),
-      new Promise((_, reject) => {
-        setTimeout(() => {
-          reject(new Error("Timeout after 2 seconds"));
-        }, 2000);
-      }),
-    ]);
-  } catch (error) {
-    abortMarvinSketcherCreation();
-    console.error(error);
-    // Handle errors or take appropriate action
-  }
+  // try {
+  //   await Promise.race([
+  //     setupNewMarvinSketcher(),
+  //     new Promise((_, reject) => {
+  //       setTimeout(() => {
+  //         reject(new Error("Timeout after 2 seconds"));
+  //       }, 2000);
+  //     }),
+  //   ]);
+  // } catch (error) {
+  //   abortMarvinSketcherCreation();
+  //   console.error(error);
+  //   // Handle errors or take appropriate action
+  // }
 });
 
 /**

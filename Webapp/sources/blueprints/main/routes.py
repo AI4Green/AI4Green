@@ -15,11 +15,7 @@ from flask_login import (  # protects a view function against anonymous users
     login_required,
 )
 from sources import models, services
-from sources.auxiliary import (
-    get_notification_number,
-    get_workgroups,
-    security_member_workgroup_workbook,
-)
+from sources.auxiliary import get_notification_number, get_workgroups
 from sources.blueprints.auth.forms import LoginForm
 from sources.decorators import workbook_member_required
 from sources.extensions import db
@@ -58,15 +54,17 @@ def index() -> Response:
             .order_by(models.NewsItem.time.desc())
             .all()
         )
-
-    return render_template(
-        "home.html",
-        user_role=user_role,
-        user_confirmed=user_confirmed,
-        news_items=news_items,
-        messages_from_redirects=messages_from_redirects,
-        form=form,
-    )
+        return render_template(
+            "home.html",
+            user_role=user_role,
+            user_confirmed=user_confirmed,
+            news_items=news_items,
+            messages_from_redirects=messages_from_redirects,
+            form=form,
+        )
+    # user is not authenticated, send to landing page.
+    else:
+        return render_template("landing_page.html", form=form)
 
 
 @main_bp.route("/load_icons", methods=["GET", "POST"])
