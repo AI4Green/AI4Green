@@ -2,26 +2,22 @@ from flask import (
     Response,
     current_app,
     flash,
+    get_template_attribute,
     jsonify,
     redirect,
     render_template,
     request,
     send_file,
     url_for,
-    get_template_attribute
 )
 from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
-from sources.decorators import workbook_member_required
-from sources.blueprints.auth.forms import LoginForm
 from sources import models, services
-from sources.auxiliary import (
-    get_notification_number,
-    get_workgroups,
-    security_member_workgroup_workbook,
-)
+from sources.auxiliary import get_notification_number, get_workgroups
+from sources.blueprints.auth.forms import LoginForm
+from sources.decorators import workbook_member_required
 from sources.extensions import db
 
 from . import main_bp  # imports the blueprint of the main route
@@ -64,15 +60,11 @@ def index() -> Response:
             user_confirmed=user_confirmed,
             news_items=news_items,
             messages_from_redirects=messages_from_redirects,
-            form=form
+            form=form,
         )
     # user is not authenticated, send to landing page.
     else:
-        return render_template(
-            "landing_page.html",
-            form=form
-        )
-
+        return render_template("landing_page.html", form=form)
 
 
 @main_bp.route("/load_icons", methods=["GET", "POST"])
@@ -86,7 +78,9 @@ def load_icons() -> Response:
     header = None
     bootstrap_icon = ""
     if load_type == "workgroup":
-        workbooks = services.workbook.get_workbooks_from_user_group_combination(selected)
+        workbooks = services.workbook.get_workbooks_from_user_group_combination(
+            selected
+        )
         icon_names = [i.name for i in workbooks]
         header = "Workbooks in " + selected
         load_type = "workbook"
@@ -94,7 +88,9 @@ def load_icons() -> Response:
 
     elif load_type == "workbook":
         reactions = services.reaction.list_active_in_workbook(
-            workbook=selected, workgroup=request.json.get("activeWorkgroup"), sort_crit="time"
+            workbook=selected,
+            workgroup=request.json.get("activeWorkgroup"),
+            sort_crit="time",
         )
         icon_names = [i.reaction_id for i in reactions[:11]]
         header = "Recent Reactions in " + selected
@@ -120,7 +116,6 @@ def get_marvinjs_key():
 def sketcher(
     workgroup: str, workbook: str, reaction_id: str, tutorial: str
 ) -> Response:
-
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     workbook_object = (
@@ -170,7 +165,11 @@ def sketcher_tutorial(tutorial: str) -> Response:
         notification_number = get_notification_number()
     return render_template(
         "sketcher_reload.html",
-        reaction={"name": "Tutorial Reaction", "reaction_id": "TUT-001"},
+        reaction={
+            "name": "Tutorial Reaction",
+            "reaction_id": "TUT-001",
+            "reaction_type": "STANDARD",
+        },
         demo="not demo",
         workgroups=workgroups,
         notification_number=notification_number,

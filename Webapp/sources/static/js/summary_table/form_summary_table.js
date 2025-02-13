@@ -388,12 +388,3 @@ async function showSummary(mode) {
     },
   });
 }
-
-async function makeReactionSchemeImage() {
-  // make reaction image above summary table
-  let $image = $("#image");
-  $image.attr("src", "");
-  let imgSource = await exportImageFromActiveEditor();
-  $image.attr("src", imgSource);
-  $("#imageContainer").css("display", "block");
-}

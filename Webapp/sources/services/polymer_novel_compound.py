@@ -32,7 +32,7 @@ def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> st
 
     return (
         db.session.query(models.PolymerNovelCompound.smiles)
-        .filter(models.PolymerNovelCompound.name == primary_key[0].lower())
+        .filter(func.lower(models.PolymerNovelCompound.name) == primary_key[0].lower())
         .join(models.WorkBook)
         .filter(models.WorkBook.id == primary_key[1])
         .first()
@@ -331,7 +331,7 @@ def is_within_brackets(expression, target="{+n}"):
     return balance > 0
 
 
-def get_last_bracketed_expression(expression):
+def get_last_bracketed_expression(expression: str) -> str:
     """
     Returns the last set of brackets, including its content, in a given expression.
 

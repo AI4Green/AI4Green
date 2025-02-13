@@ -5,7 +5,7 @@ if ($("#js-tutorial").val() === "no" && $("#js-demo").val() !== "demo") {
 
 function observer() {
   // this line detects any changes user makes to any input field and saves 0.5 seconds after user stops focus on input
-  $(document).on("change", ":input", function (e) {
+  $(document).on("change", ":input:not(#polymer-mode-select)", function (e) {
     setTimeout(autoSaveCheck(e), 500);
   });
   // on press remove solvent save
@@ -94,6 +94,7 @@ async function sketcherAutoSave() {
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
   let reactionID = $("#js-reaction-id").val();
+  let polymerMode = $("#polymer-mode-select").is(":checked");
   let userEmail = "{{ current_user.email }}";
   $.ajax({
     url: "/_autosave_sketcher",
@@ -105,6 +106,7 @@ async function sketcherAutoSave() {
       userEmail: userEmail,
       reactionSmiles: smilesNew,
       reactionRXN: rxn,
+      polymerMode: polymerMode,
     },
     dataType: "json",
     success: function () {
@@ -231,7 +233,6 @@ function postReactionData(complete = "not complete") {
     url: "/_autosave",
     type: "post",
     data: {
-      polymerMode: polymerMode,
       polymerIndices: polymerIndices,
       polymerisationType: polymerisationType,
       workgroup: workgroup,
@@ -421,7 +422,6 @@ function controlLockedReactionFunctionality() {
 }
 
 function getFieldData() {
-  let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
   let polymerisationType = $("#js-polymerisation-type").val();
   if (!polymerisationType) {
     polymerisationType = "";
@@ -744,7 +744,6 @@ function getFieldData() {
     }
   }
   return {
-    polymerMode: polymerMode,
     polymerIndices: polymerIndices,
     polymerisationType: polymerisationType,
     reactionID: reactionID,
