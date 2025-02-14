@@ -299,7 +299,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             args=[request_url, unique_identifier],
         )
         thread.start()
-        interval = dcc.Interval(id="interval-component", interval=15000, n_intervals=0)
+        interval = dcc.Interval(id="interval-component", interval=5000, n_intervals=0)
 
         return (
             "Retrosynthesis process started. Please wait...",
