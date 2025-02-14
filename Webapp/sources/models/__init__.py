@@ -24,6 +24,7 @@ from .person import (
     t_Person_WorkGroup_2,
     t_Person_WorkGroup_3,
 )
+from .polymer_novel_compound import PolymerNovelCompound
 from .reaction import Reaction, t_Reaction_Reaction
 from .reaction_data_file import ReactionDataFile
 from .reaction_note import ReactionNote

@@ -66,7 +66,7 @@
         <td id="summary-product-cell" style="background-color: rgb(184, 184, 184);"><b>Product</b></td>
         <td style="background-color: rgb(184, 184, 184);"><b>Mol.Wt</b></td>
         <td colspan="2" style="background-color: rgb(184, 184, 184);"><b>Theoretical Yield ({{ product_mass_unit }})</b></td>
-        <td style="background-color: rgb(184, 184, 184);" title="The approximate mass of the limiting reactant which has not reacted. Used to calculate the reaction conversion."><b>Unreacted ({{ product_mass_unit }})</b><i class="bi bi-info-circle"></i></td>
+        <td style="background-color: rgb(184, 184, 184);"><b>Unreacted</b></td>
         <td style="background-color: rgb(184, 184, 184);"><b>Product Mass ({{ product_mass_unit }})</b></td>
         <td style="background-color: rgb(184, 184, 184);"><b>&#37; Yield</b></td>
         <td style="background-color: rgb(184, 184, 184);"></td>
@@ -93,6 +93,93 @@
     {% endfor %}
 <input type="hidden" id="js-limited-reactant-mass" value="{{ reactant_masses[0] }}">
 <input type="hidden" id="js-main-product-mass" value="{{ product_masses[main_product_index] }}">
+    <tr><td colspan="9">&nbsp;</td></tr>
+
+
+
+    <tr><td colspan="9" style="background-color: rgb(184, 184, 184);"><b>Polymer Characterisation:</b></td></tr>
+    <tr>
+        <td colspan="2" style="vertical-align: top;">
+            <table class="table table-sm w-auto">
+                <tr>
+                    <td style="background-color: rgb(184, 184, 184);"><b>Mass</b></td>
+                </tr>
+
+            </table>
+        </td>
+        <td colspan="7" style="vertical-align: top;">
+            <table class="nested-table">
+                <tr>
+
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>M<sub>n</sub></b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>M<sub>w</sub></b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Dispersity</b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Measurement Method</b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Calibration standard</b></td>
+                </tr>
+                <tr>
+
+                    <td id="js-polymer-mn-cell"><input type="number" id="js-polymer-mn" placeholder="-" style="width: 80px;"></td>
+                    <td id="js-polymer-mw-cell"><input type="number" id="js-polymer-mw" placeholder="-" style="width: 80px;"></td>
+                    <td id="js-polymer-dispersity-cell"><input type="number" id="js-polymer-dispersity" placeholder="-" style="width: 80px;"></td>
+                    <td id="js-polymer-mass-method-cell"><select size="1" id="js-polymer-mass-method">
+                        <option class='hazard-reset-hazard' selected>-select-</option>
+                        <option>SEC/GPC</option>
+                    </select></td>
+                    <td><input id="js-polymer-mass-calibration" type="text" size="25em"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" style="vertical-align: top;">
+            <table class="table table-sm w-auto">
+                <tr>
+                    <td style="background-color: rgb(184, 184, 184);"><b>Thermal Properties</b></td>
+                </tr>
+
+            </table>
+        </td>
+        <td colspan="7" style="vertical-align: top;">
+            <table class="nested-table">
+                <tr>
+
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>T<sub>g</sub></b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>T<sub>m</sub></b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>T<sub>c</sub></b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Measurement Method</b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Calibration standard</b></td>
+                </tr>
+                <tr>
+
+                    <td id="js-polymer-tg-cell"><input type="number" id="js-polymer-tg" placeholder="-" style="width: 80px;"></td>
+                    <td id="js-polymer-tm-cell"><input type="number" id="js-polymer-tm" placeholder="-" style="width: 80px;"></td>
+                    <td id="js-polymer-tc-cell"><input type="number" id="js-polymer-tc" placeholder="-" style="width: 80px;"></td>
+                    <td id="js-polymer-thermal-method-cell"><select size="1" id="js-polymer-thermal-method">
+                        <option class='hazard-reset-hazard' selected>-select-</option>
+                        <option>TGA</option>
+                        <option>DSC</option>
+                    </select></td>
+                    <td><input id="js-polymer-thermal-calibration" type="text" size="25em"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <tr><td colspan="9">&nbsp;</td></tr>
     <tr>
         <td style="background-color: rgb(184, 184, 184);"></td>
@@ -157,7 +244,7 @@
                 {% endfor %}
             </table>
         </td>
-          <td colspan="7" style="vertical-align: top;">
+        <td colspan="7" style="vertical-align: top;">
             <table class="nested-table">
                 <tr>
                     <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Safety</b></td>
@@ -169,8 +256,8 @@
                     </td>
                     <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Batch/flow</b></td>
                     <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Isolation</b></td>
-                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Stoichiometry</b></td>
-                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Cat. Recovery</b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Catalyst</b></td>
+                    <td style="width: 14%; background-color: rgb(184, 184, 184);"><b>Recovery</b></td>
                 </tr>
                 <tr>
                     <td id="js-safety-cell" class="{{ risk_color }}">{{ risk_rating }}</td>
@@ -199,7 +286,7 @@
                     </select></td>
                     <td id="js-catalyst-cell"><select size="1" id="js-catalyst">
                         <option class='hazard-reset-hazard' selected>-select-</option>
-                        <option class="hazard-acceptable">No catalyst or reagents</option>
+                        <option class="hazard-acceptable">No catalyst</option>
                         <option class="hazard-acceptable">Catalyst or enzyme</option>
                         <option class="hazard-warning">Stoichiometric reagents</option>
                         <option class="hazard-hazardous">Excess reagents</option>
@@ -219,7 +306,7 @@
                     <td colspan="2" style="background-color: rgb(184, 184, 184);"></td>
                 </tr>
                 <tr>
-                    <td id="js-ae-cell" class="{{ ae_flag }}"><input id="js-ae" type="number" class="{{ ae_flag }} to-export" name="Atom Efficiency" value="{{ ae }}" style="width: 80px; border:none;" readonly></td>
+                    <td id="js-ae-cell" class="{{ ae_flag }}"><input type="number" class="{{ ae_flag }} to-export" name="Atom Efficiency" value="{{ ae }}" style="width: 80px; border:none;" readonly></td>
                     <td id="js-me-cell"><input type="number" id="js-me" class="to-export" name="Mass Efficiency" style="width: 80px; border:none;" readonly></td>
                     <td id="js-yield-cell"><input type="number" id="js-yield" class="to-export" name="Yield" style="width: 80px; border:none" readonly></td>
                     <td id="js-conversion-cell"><input type="number" id="js-conversion" class="to-export" name="Conversion" style="width: 80px; border:none" readonly></td>
@@ -248,7 +335,7 @@
                     <td><input type="checkbox" id="hydrogenation" class="to-export-checkbox" name="Standard Protocol Hydrogenation"><label for="hydrogenation">Hydrogenation</label></td>
                     <td><input type="checkbox" id="peptideSynthesis" class="to-export-checkbox" name="Standard Protocol Peptide Synthesis"><label for="peptideSynthesis">Peptide Synthesis</label></td>
                     <td><input type="checkbox" id="ozone" class="to-export-checkbox" name="Standard Protocol Ozone"><label for="ozone">Ozone</label></td>
-                    <td><input type="checkbox" id="field1" class="to-export-checkbox" name="Standard Protocol Custom 1"><label for="field1"><input id="field1-text" type="text"></label></td>
+                    <td><input type="checkbox" id="highPressure" class="to-export-checkbox" name="Standard Protocol High Pressure"><label for="highPressure">High Pressure</label></td>
                     <td></td>
                 </tr>
                 <tr>
@@ -293,7 +380,7 @@
     <tr>
         <td colspan="9" style="background-color: rgb(184, 184, 184);">
             <b>Other Risks, controls, containment, location and PPE.</b><br>
-            (Hazardous byproducts. Exothermic reactions. The need for appropriate signage and inform others of risks. Lab and hood number. Lone-working.)</td>
+            (Hazardous by Products. Exothermic reactions. The need to inform others of risks. Lab and hood number.)</td>
     </tr>
     <tr>
         <td colspan="9"><textarea class="text-in-table" id="other-risks-textbox" style="width: 100%; background-color: white;"></textarea></td>

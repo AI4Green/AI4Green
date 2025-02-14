@@ -266,6 +266,10 @@ async function showSummary(mode) {
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
   let demo = $("#js-demo").val();
+  let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
+  let polymerIndices = JSON.stringify(
+    identifyPolymers(await exportRXNFromActiveEditor()),
+  );
   let tutorial = getVal("#js-tutorial");
   let reactionID;
   if (demo === "not demo" && tutorial === "no") {
@@ -335,6 +339,9 @@ async function showSummary(mode) {
       print: "not to print",
       workgroup: workgroup,
       workbook: workbook,
+      polymerMode: polymerMode,
+      polymerIndices: polymerIndices,
+      numberOfReactants: numberOfReactants,
       demo: demo,
       tutorial: tutorial,
       reactionID: reactionID,
@@ -380,13 +387,4 @@ async function showSummary(mode) {
       }
     },
   });
-}
-
-async function makeReactionSchemeImage() {
-  // make reaction image above summary table
-  let $image = $("#image");
-  $image.attr("src", "");
-  let imgSource = await exportImageFromActiveEditor();
-  $image.attr("src", imgSource);
-  $("#imageContainer").css("display", "block");
 }
