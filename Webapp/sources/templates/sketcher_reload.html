@@ -1,16 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
 <head>
+    <title>{{ reaction.reaction_id }}</title>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher_page.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/addendum.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/file_handling.js') }}"></script>
-
+    <script type="text/javascript" src="{{ url_for('static', filename='js/polymer.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
+
 
     <script>
         // disable complete reaction button once reaction is completed
@@ -20,7 +22,7 @@
             }
         })
     </script>
-
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/sketcher.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
@@ -36,15 +38,22 @@
     <a id="tutorial-mode" href="/sketcher_tutorial/yes" class="btn btn-success btn-sm" style="color: white;" target="_blank">Enter Tutorial Mode <i class="bi bi-box-arrow-in-up-right"></i></a>
     <br><br>
     <div id="editor-instructions">
-        <p>Please sketch or upload your reaction to begin. Click <a target="_blank" href="{{ url_for('main.marvin_js_help') }}">here</a> to view our Marvin JS help guide.</p>
+<!--        <p>Please sketch or upload your reaction to begin. Click <a target="_blank" href="{{ url_for('main.marvin_js_help') }}">here</a> to view our Marvin JS help guide.</p>-->
         <p>Please note compounds drawn above or underneath the arrow will not be recognised.</p>
+    </div>
+    <div>
+        <form action="{{ url_for('reaction_table.process') }}" method="post">
+            <label> Polymer Mode?
+                <input type="checkbox" id="polymer-mode-select" name="polymer-mode-select" onchange="savePolymerMode()" {% if reaction.reaction_type.value == "POLYMER" %} checked {% endif %}>
+            </label>
+        </form>
     </div>
     <div id="sketchers-div">
         <div>
-            Selected Reaction Sketcher:
-            <label> MarvinJS
-                <input type="radio" id="marvin-select" name="sketcher-select" disabled>
-            </label>
+<!--            Selected Reaction Sketcher:-->
+<!--            <label> MarvinJS-->
+<!--                <input type="radio" id="marvin-select" name="sketcher-select" disabled>-->
+<!--            </label>-->
             <label> Ketcher
                 <input type="radio" id="ketcher-select" name="sketcher-select" checked="checked" disabled>
             </label>
@@ -61,13 +70,18 @@
     <input type="hidden" id="js-tutorial" value="{{ tutorial }}">
     <input type="hidden" id="js-reaction-name" value="{{ reaction.name }}">
     <input type="hidden" id="js-reaction-id" value="{{ reaction.reaction_id }}">
+    <input type="hidden" id="js-time-of-creation" value="{{ reaction.time_of_creation }}">
     <input type="hidden" id="js-reaction-object" value="{{ reaction }}">
     <input type="hidden" id="js-reaction-smiles" value="{{ reaction.reaction_smiles }}">
+    <input type="hidden" id="js-reaction-type" value="{{ reaction.reaction_type }}">
+    <input type="hidden" id="js-reaction-rxn" value="{{ reaction.reaction_rxn }}">
     <input type="hidden" value="{{ reaction.reaction_table_data }}" id="js-reaction-table-data">
     <input type="hidden" value="{{ reaction.summary_table_data }}" id="js-summary-table-data">
-    <input type="hidden" id="js-reaction-scheme-image" value="0" style="{'width': 600, 'height': 400}">
+    <input type="hidden" id="js-reloaded-image" value="0" style="{'width': 600, 'height': 400}">
     <input type="hidden" value="{{ demo }}" id="js-demo">
     <input type="hidden" value="{{ reaction.complete }}" id="js-complete">
+    <input type="hidden" value="{{ marvin_js_key }}" id="marvin-js-key">
+    <input type="hidden" value="{{ url_for('static', filename='ketcher/index.html') }}" id="ketcher-source">
 
     {% if tutorial == 'no' %}
         <input type="hidden" value="{{ reaction.creator_person.user.email }}" id="js-creator-email">

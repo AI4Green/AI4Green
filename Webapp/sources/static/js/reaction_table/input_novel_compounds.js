@@ -10,23 +10,36 @@ function novelCompoundDataFromSketcher() {
   let smiles = $("#js-new-compound-smiles").val();
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
+  let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
+  let polymer = $("#js-polymer").val();
+  let requestData = {
+    name: name,
+    molWeight: molWeight,
+    hPhrase: hPhrase,
+    density: density,
+    concentration: concentration,
+    smiles: smiles,
+    workbook: workbook,
+    workgroup: workgroup,
+    component: "component",
+    source: "sketcher",
+    polymerMode: polymerMode,
+    polymer: polymer, // from reaction_table/routes via html
+  };
+
+  // sends polymers to polymer db
+  if (polymerMode && polymer === "True") {
+    novelCompoundURL = "/_polymer_novel_compound";
+  } else {
+    novelCompoundURL = "/_novel_compound";
+    requestData.cas = cas;
+  }
+
   $.ajax({
-    url: "/_novel_compound",
+    url: novelCompoundURL,
     type: "post",
     dataType: "json",
-    data: {
-      name: name,
-      molWeight: molWeight,
-      hPhrase: hPhrase,
-      cas: cas,
-      density: density,
-      concentration: concentration,
-      smiles: smiles,
-      workbook: workbook,
-      workgroup: workgroup,
-      component: "component",
-      source: "sketcher",
-    },
+    data: requestData,
   }).done(function (data) {
     alert(data.feedback);
     if (data.feedback === "Compound added to the database") {

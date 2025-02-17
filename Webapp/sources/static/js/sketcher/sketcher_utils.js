@@ -27,6 +27,36 @@ async function exportSmilesFromActiveEditor() {
 }
 
 /**
+ * Checks which sketcher is selected by the radio buttons and calls the function to export RXN from the active editor.
+ * @returns {Promise<string>} - The RXN string from the structures drawn in the active editor
+ */
+async function exportRXNFromActiveEditor() {
+  let selectedSketcher = $('input[name="sketcher-select"]:checked').attr("id");
+  let rxn;
+  if (selectedSketcher === "marvin-select") {
+    rxn = await exportRXNFromMarvin();
+  } else if (selectedSketcher === "ketcher-select") {
+    rxn = await exportRXNFromKetcher();
+  }
+  return rxn;
+}
+
+/**
+ * Checks which sketcher is selected by the radio buttons and calls the function to export MOL from the active editor.
+ * @returns {Promise<string>} - The MOL string from the structures drawn in the active editor
+ */
+async function exportMOLFromActiveEditor() {
+  let selectedSketcher = $('input[name="sketcher-select"]:checked').attr("id");
+  let mol;
+  if (selectedSketcher === "marvin-select") {
+    mol = await exportMOLFromMarvin();
+  } else if (selectedSketcher === "ketcher-select") {
+    mol = await exportMOLFromKetcher();
+  }
+  return mol;
+}
+
+/**
  * Checks which sketcher is selected by the radio buttons and calls the function to export image from the active editor.
  * @returns {Promise<void>}
  */
@@ -40,6 +70,24 @@ async function exportImageFromActiveEditor() {
     reactionSchemeImage = await exportKetcherImage(smiles);
   }
   return reactionSchemeImage;
+}
+
+/**
+ * Generates a reaction image and adds to html (where it is saved by getFieldData())
+ * use "hidden" before summary table
+ * @returns {Promise<void>}
+ */
+async function makeReactionSchemeImage(hidden) {
+  let $image = $("#image");
+  $image.attr("src", "");
+  let imgSource = await exportImageFromActiveEditor();
+  $image.attr("src", imgSource);
+  if (hidden === "hidden") {
+    $("#imageContainer").css("display", "none");
+  } else {
+    // image above summary table
+    $("#imageContainer").css("display", "block");
+  }
 }
 
 /**
