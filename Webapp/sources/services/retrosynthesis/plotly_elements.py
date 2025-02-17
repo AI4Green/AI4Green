@@ -441,6 +441,7 @@ tabs = html.Div(
                     "border": "none",
                     "display": "inline-block",
                     "text-decoration": "none",
+                    "margin-bottom": "15px",
                 },
             )
         ),
