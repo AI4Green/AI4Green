@@ -294,6 +294,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             f"&max_depth={max_depth}"
         )
         unique_identifier = str(uuid.uuid4())
+        # Start the retrosynthesis process in a background thread
         thread = threading.Thread(
             target=retrosynthesis_process_wrapper,
             args=[request_url, unique_identifier],
