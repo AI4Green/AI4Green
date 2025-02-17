@@ -62,13 +62,121 @@ inputs = html.Div(
     ],
     style={"width": "auto"},
 )
+
+"""
+Enhancement Dropdown with Tooltips
+"""
+enhancement_dropdown = html.Div(
+    className="input-group",
+    children=[
+        # Dropdown
+        html.Div(
+            dcc.Dropdown(
+                id="enhancement-dropdown",
+                options=[
+                    {"label": "Default", "value": "Default"},
+                    {"label": "Enhanced Search", "value": "eUCT"},
+                    {"label": "Enhanced Speed", "value": "dUCT-v1"},
+                    {"label": "Enhanced Solve Rate", "value": "dUCT-v2"},
+                ],
+                placeholder="Select Enhancement Type",
+                style={"width": "100%", "border": "1px solid #9FA6B2"},
+            ),
+            style={"flex-grow": "1"},
+        ),
+        html.Div(
+            html.Span(
+                "i",
+                id="enhancement-tooltip",
+                style={
+                    "display": "inline-flex",
+                    "align-items": "center",
+                    "justify-content": "center",
+                    "width": "20px",
+                    "height": "20px",
+                    "borderRadius": "50%",
+                    "backgroundColor": "#007BFF",
+                    "color": "white",
+                    "fontWeight": "bold",
+                    "cursor": "pointer",
+                    "margin-left": "8px",
+                },
+            ),
+            style={"display": "flex", "align-items": "center"},
+        ),
+        # Tooltip Content
+        dbc.Tooltip(
+            "Options Explained:\n"
+            "- Default: Standard configuration for retrosynthesis.\n"
+            "- Enhanced Search: Small speed and solve rate improvements\n"
+            "- Enhanced Speed: Prioritises speed of results.\n"
+            "- Enhanced Solve Rate: Most efficient at solving difficult molecules",
+            target="enhancement-tooltip",
+            placement="right",
+            style={"white-space": "pre-line", "max-width": "250px"},
+        ),
+    ],
+    style={"display": "flex", "align-items": "center", "gap": "5px"},
+)
+
+"""
+MCTS Search configurations
+"""
+
+search_configurations = dbc.Collapse(
+    [
+        html.Label("Number of Iterations:"),
+        dcc.Input(
+            id="iterations-input", type="number", value=100, min=20, max=5000, step=1
+        ),
+        html.Label(" Time Limit (seconds):"),
+        dcc.Input(
+            id="time-limit-input", type="number", value=60, min=30, max=1000, step=1
+        ),
+        html.Label(" Max Depth:"),
+        dcc.Input(id="max-depth-input", type="number", value=7, min=1, max=25, step=1),
+    ],
+    id="search-config-collapse",
+    is_open=False,
+    style={"margin-bottom": "15px", "border": "1px solid #9FA6B2", "padding": "10px"},
+)
+
+search_toggle_button = html.Div(
+    [
+        dbc.Button(
+            html.I(className="fa fa-sliders"),
+            id="search-config-toggle",
+            className="btn btn-outline-secondary btn-sm",
+            style={
+                "width": "32px",
+                "height": "32px",
+                "border-radius": "50%",
+                "display": "flex",
+                "align-items": "center",
+                "justify-content": "center",
+                "padding": "0",
+                "margin-left": "10px",
+                "font-size": "16px",
+            },
+        ),
+        dbc.Tooltip(
+            "Search Configuration",
+            target="search-config-toggle",
+            placement="bottom",
+            delay={"show": 500, "hide": 100},
+        ),
+    ]
+)
+
 """
 Smiles field + Retrosynthesis button
 """
 smiles_field_and_retrosynthesis_button = dbc.Row(
     className="gx-2",
     children=[
+        # Column 1: New Retrosynthesis Button and SMILES Input
         dbc.Col(
+            width=3,
             children=[
                 html.Div(
                     className="input-group",
@@ -92,10 +200,24 @@ smiles_field_and_retrosynthesis_button = dbc.Row(
                         ),
                     ],
                 ),
-            ]
+            ],
         ),
-        dbc.Col(children=[inputs, html.Div(id="route-score")]),
+        # Column 2: Route Dropdown
         dbc.Col(
+            width=3,
+            children=[
+                inputs,
+                html.Div(id="route-score"),
+            ],
+        ),
+        # Column 3: Enhancement Dropdown
+        dbc.Col(
+            width=3,
+            children=[enhancement_dropdown],
+        ),
+        # Column 4: Save to Workbook Button
+        dbc.Col(
+            width=3,
             children=[
                 html.Button(
                     "Save To Workbook",
@@ -104,10 +226,23 @@ smiles_field_and_retrosynthesis_button = dbc.Row(
                     n_clicks=0,
                     className="btn btn-outline-primary m-1",
                 )
-            ]
+            ],
+        ),
+        dbc.Col(
+            width=12,  # Takes full width below the above fields
+            children=[
+                html.Div(
+                    style={"display": "flex", "align-items": "center"},
+                    children=[
+                        search_toggle_button,
+                        search_configurations,
+                    ],
+                ),
+            ],
         ),
     ],
 )
+
 
 """Header and inputs"""
 header_and_inputs = html.Div(
@@ -291,14 +426,38 @@ saved_results_sidebar = html.Div(
     style=webStyle.SIDEBAR_STYLE,
 )
 
-tabs = dbc.Tabs(
-    [
-        dbc.Tab(compound_sidebar, label="Compounds", id="compound-tab"),
-        dbc.Tab(reaction_sidebar, label="Reactions", id="reaction-tab"),
-        dbc.Tab(route_sidebar, label="Routes", id="route-tab"),
-        dbc.Tab(saved_results_sidebar, label="Saved Results", id="saved-results-tab"),
+
+"""Tabs layout and about retrosynthesis button"""
+tabs = html.Div(
+    children=[
+        html.Div(
+            html.A(
+                "About Retrosynthesis ❯",
+                href="/retrosynthesis_about",
+                className="btn btn-primary",
+                style={
+                    "border-radius": "7px",
+                    "padding": "10px 14px",
+                    "border": "none",
+                    "display": "inline-block",
+                    "text-decoration": "none",
+                    "margin-bottom": "15px",
+                },
+            )
+        ),
+        dbc.Tabs(
+            [
+                dbc.Tab(compound_sidebar, label="Compounds", id="compound-tab"),
+                dbc.Tab(reaction_sidebar, label="Reactions", id="reaction-tab"),
+                dbc.Tab(route_sidebar, label="Routes", id="route-tab"),
+                dbc.Tab(
+                    saved_results_sidebar, label="Saved Results", id="saved-results-tab"
+                ),
+            ]
+        ),
     ]
 )
+
 """Save results modal window"""
 
 save_modal = html.Div(
@@ -408,33 +567,6 @@ new_reaction_modal = html.Div(
             ],
             id="new-reaction-modal",
             is_open=False,
-        ),
-    ]
-)
-
-references = html.Div(
-    [
-        html.Br(),
-        html.B("References:"),
-        html.P(
-            [
-                "Retrosynthetic routes predicted with: AiZynthFinder: a fast, robust and flexible open-source software for "
-                "retrosynthetic planning. ",
-                html.I("J. Cheminform."),
-                ", 2020, ",
-                html.B("12"),
-                ", 70 (2020).",
-            ]
-        ),
-        html.P(
-            [
-                "Reaction conditions predicted with: Using Machine Learning To Predict Suitable Conditions for Organic "
-                "Reactions. ",
-                html.I("ACS Cent. Sci."),
-                ", 2018, ",
-                html.B("4"),
-                ", 11, 1465–1476. ",
-            ]
         ),
     ]
 )
