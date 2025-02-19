@@ -384,36 +384,49 @@ def find_polymer_repeat_unit(
     start_marker = compound.find("{-}")
     end_marker = compound.find("{+n}")
 
-    # If both {-} and {+} are found
-    if start_marker != -1 and end_marker != -1:
-        # Reformat if end of SRU is treated as a branch. e.g. *C{-}(CC{+n}*)C where {+n} is within brackets
-        while is_within_brackets(compound, "{+n}") != is_within_brackets(
-            compound, "{-}"
-        ):
-            compound = reformat_smiles(compound)
-            if compound == reformat_smiles(compound):
-                return ""  # avoid infinite loop
-            start_marker = compound.find("{-}")
-            end_marker = compound.find("{+n}")
+    # if either {-} or {+} is not found
+    if start_marker == -1 or end_marker == -1:
+        return ""
 
-        # Start is the character just before {-}, and end is the character just before {+}
+    # Reformat if end of SRU is treated as a branch. e.g. *C{-}(CC{+n}*)C where {+n} is within brackets
+    while is_within_brackets(compound, "{+n}") != is_within_brackets(compound, "{-}"):
+        compound = reformat_smiles(compound)
+        if compound == reformat_smiles(compound):
+            return ""  # avoid infinite loop
+        start_marker = compound.find("{-}")
+        end_marker = compound.find("{+n}")
+
+    # Start is the letter before {-}, and end is the character just before {+}
+    if compound[start_marker - 1].isupper():
         result = compound[start_marker - 1] + compound[start_marker + 3 : end_marker]
+    elif (
+        compound[start_marker - 1] == "]"
+    ):  # for polymers with [] groups e.g C[SiH2]{-}CC{+n}C
+        i = 2
+        while compound[start_marker - i] != "[" and start_marker - i > 0:
+            i += 1  # search backwards
+        result = compound[start_marker - i : end_marker].replace("{-}", "")
+    else:  # for polymers with rings e.g *C1{-}CC{+n}(CCC1)*
+        i = 2
+        while not compound[start_marker - i].isupper() and start_marker - i > 0:
+            i += 1  # search backwards
+        result = compound[start_marker - i : end_marker].replace("{-}", "")
 
-        # Check for branching: if the character after {+} is '('
-        if end_marker + 4 < len(compound) and compound[end_marker + 4] == "(":
-            branch, close_paren = extract_inside_brackets(compound, end_marker + 4)
+    # Check for branching: if the character after {+} is '('
+    if end_marker + 4 < len(compound) and compound[end_marker + 4] == "(":
+        branch, close_paren = extract_inside_brackets(compound, end_marker + 4)
+        if close_paren != -1:
+            result += branch
+
+        # check for more branching
+        while close_paren + 1 < len(compound) and compound[close_paren + 1] == "(":
+            branch, close_paren = extract_inside_brackets(compound, close_paren + 1)
             if close_paren != -1:
                 result += branch
 
-            # check for more branching
-            while close_paren + 1 < len(compound) and compound[close_paren + 1] == "(":
-                branch, close_paren = extract_inside_brackets(compound, close_paren + 1)
-                if close_paren != -1:
-                    result += branch
-        result = result.replace("/", "").replace("\\", "")  # ignore stereochemistry
-        return result
-    # if either {-} or {+} is not found
-    return ""
+    result = result.replace("/", "").replace("\\", "")  # ignore stereochemistry
+
+    return result
 
 
 def clean_polymer_smiles(
@@ -431,7 +444,7 @@ def canonicalise(smiles: str) -> str:
     """
     ps = PolymerSmiles(smiles)
     smiles = ps.canonicalize
-    return str(smiles).replace("[", "").replace("]", "")
+    return str(smiles).replace("[*]", "*")
 
 
 def find_canonical_repeat(smiles: str) -> str:
