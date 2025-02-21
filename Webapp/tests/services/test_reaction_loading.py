@@ -1,7 +1,7 @@
 import pickle
 from pathlib import Path
 
-from flask import Flask
+from flask import Flask, json
 from flask.testing import FlaskClient
 from pytest_mock import MockFixture
 from sources import models, services
@@ -58,6 +58,34 @@ def test_delete_reaction(client: FlaskClient, app: Flask):
         # undo delete for later tests
         reaction.status = "active"
         db.session.commit()
+
+
+def test_image_list(client: FlaskClient):
+    """Tests the responses when saving and loading the image list"""
+    login(client)
+    # Define form data to send in the request
+    images = ["a", "b"]
+    form_data = {
+        "workgroup": "Test-Workgroup",
+        "workbook": "Test-Workbook",
+        "images": json.dumps(images),
+        "sortCriteria": "AZ",
+    }
+    # Send a GET request to the route with the form data and confirm response
+    response = client.post("/_save_new_images", data=form_data)
+    assert (
+        response.status_code == 200 and response.json["feedback"] == "Reaction Updated!"
+    )
+
+    # Define form data to send in the request
+    form_data = {
+        "workgroup": "Test-Workgroup",
+        "workbook": "Test-Workbook",
+        "sortCriteria": "AZ",
+    }
+    # Send a GET request to the route with the form data and confirm response
+    response = client.post("/get_reaction_images", data=form_data)
+    assert response.status_code == 200 and response.json["reaction_images"] == images
 
 
 def save_reaction_version(app: Flask):

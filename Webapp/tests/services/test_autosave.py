@@ -14,6 +14,28 @@ def test_autosave(client: FlaskClient):
     )
 
 
+def test_polymer_save(client: FlaskClient):
+    """Tests the responses when saving and getting reaction type"""
+    login(client)
+    # Define form data to send in the request
+    form_data = make_polymer_save_form()
+    # Send a POST request to the route with the form data and confirm response
+    response = client.post("/_save_polymer_mode", data=form_data)
+    assert (
+        response.status_code == 200 and response.json["feedback"] == "Reaction Updated!"
+    )
+
+    # Define form data to send in the request
+    form_data = {
+        "workgroup": "Test-Workgroup",
+        "workbook": "Test-Workbook",
+        "reactionID": "TW1-001",
+    }
+    # Send a GET request to the route with the form data and confirm response
+    response = client.get("/_get_polymer_mode", query_string=form_data)
+    assert response.status_code == 200 and response.json is True
+
+
 def make_autosave_form():
     return {
         "reactionName": "test reaction name",
@@ -160,3 +182,12 @@ def exampleRXN():
               1  2  1  0  0  0  0
               2  3  1  0  0  0  0
             M  END"""
+
+
+def make_polymer_save_form():
+    return {
+        "workgroup": "Test-Workgroup",
+        "workbook": "Test-Workbook",
+        "reactionID": "TW1-001",
+        "reactionType": "POLYMER",
+    }
