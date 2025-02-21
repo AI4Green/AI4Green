@@ -135,9 +135,9 @@
 
 
     <div id="complete-reaction-div" style="display:none;">
-        <button id="complete-reaction-button" onclick="completeReaction()" class="btn btn-primary" style="width: fit-content;">Lock Reaction</button>
+        <button id="complete-reaction-button" onclick="completeReaction()" class="btn btn-primary" style="width: fit-content;">Lock & Sign Reaction</button>
         {% if reaction.complete == 'complete' %}
-            <b>Reaction locked: {{ (reaction.time_of_update|string)[:-7]  }}</b>
+            <b>Reaction locked by {{ reaction.creator_person.user.fullname }} at: {{ (reaction.time_of_update|string)[:-7]  }}</b>
         {% endif %}
     </div>
 
