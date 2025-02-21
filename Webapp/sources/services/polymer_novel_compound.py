@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 from typing import Optional, Tuple
 
-from flask import abort, request
+from flask import abort, jsonify, request
 from flask_login import current_user
 from psmiles import PolymerSmiles
 from rdkit import Chem
@@ -444,7 +444,7 @@ def canonicalise(smiles: str) -> str:
     """
     ps = PolymerSmiles(smiles)
     smiles = ps.canonicalize
-    return str(smiles).replace("[*]", "*")
+    return str(smiles).replace("[*]", "*")  # change dangling bonds label
 
 
 def find_canonical_repeat(smiles: str) -> str:
@@ -457,6 +457,8 @@ def find_canonical_repeat(smiles: str) -> str:
         canon_smiles - the canonicalised repeat unit. e.g *C*
     """
     repeat_unit = find_polymer_repeat_unit(smiles)
+    if "*" in repeat_unit:  # block dummy atoms like R groups
+        return ""
     smiles = "*" + repeat_unit + "*"
     smiles = canonicalise(smiles)
 
