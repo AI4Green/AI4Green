@@ -153,7 +153,14 @@ def test_novel_compound_table_all_data(app: Flask, client: FlaskClient):
 def test_polymer_smiles_parsing():
     """Tests if different polymers are parsed correctly"""
     assert find_canonical_repeat("CC{-}C{+n}C") == "*C*"  # end groups
-    assert find_canonical_repeat("*C{-}(CC{+n}*)C") == "*CCC(*)C"  # branches
+
+    # different branching patterns
+    assert find_canonical_repeat("*C{-}(CC{+n}*)C") == "*CCC(*)C"
+    assert (
+        find_canonical_repeat("*C{-}(C(C(C{+n}*)=O)C(C)C)=O") == "*C(=O)CC(=O)C(*)C(C)C"
+    )
+    assert find_canonical_repeat("*C{-}C(C(C{+n}*)=O)C(C)C") == "*CCC(=O)C(*)C(C)C"
+
     assert find_canonical_repeat("*C1{-}CC{+n}(CCC1)*") == "*C1CCCC(*)C1"  # rings
     assert (
         find_canonical_repeat("C[SiH2]{-}CC{+n}C") == "*C[SiH2]C*"

@@ -365,7 +365,24 @@ def get_last_bracketed_expression(expression: str) -> str:
 
 
 def reformat_smiles(smiles: str) -> str:
-    branch = smiles.split(")")[-1]
+    """
+    Reformats SMILES string to move {+n} out of brackets (a branch) and into the main chain.
+
+    Args:
+    - smiles (str): The input string containing {+n} in brackets.
+
+    Returns:
+    - str: The reformatted SMILES string.
+    """
+    after_start_marker = smiles.split("{+n}")[-1]
+    if (
+        "(" in after_start_marker
+        and after_start_marker[after_start_marker.rfind("(") :].count(")") == 1
+    ):
+        # branches after {+n} e.g *C{-}C(C(C{+n}*)=O)C(C)C
+        branch = ")".join(smiles.split(")")[-2:])
+    else:  # no whole branches after {+n}
+        branch = smiles.split(")")[-1]
     smiles = smiles[: smiles.rfind(branch)]
     inner = get_last_bracketed_expression(smiles)
     smiles = smiles.split(inner)[0] + branch + ")" + inner
@@ -442,9 +459,12 @@ def canonicalise(smiles: str) -> str:
     """
     Canonicalise a polymer SMILES string. Not for use when endgroups are known (must have two '*'s)
     """
-    ps = PolymerSmiles(smiles)
-    smiles = ps.canonicalize
-    return str(smiles).replace("[*]", "*")  # change dangling bonds label
+    try:
+        ps = PolymerSmiles(smiles)
+        smiles = ps.canonicalize
+        return str(smiles).replace("[*]", "*")  # change dangling bonds label
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 
 def find_canonical_repeat(smiles: str) -> str:
@@ -458,7 +478,7 @@ def find_canonical_repeat(smiles: str) -> str:
     """
     repeat_unit = find_polymer_repeat_unit(smiles)
     if "*" in repeat_unit:  # block dummy atoms like R groups
-        return ""
+        return "dummy"
     smiles = "*" + repeat_unit + "*"
     smiles = canonicalise(smiles)
 
