@@ -135,9 +135,30 @@
 
 
     <div id="complete-reaction-div" style="display:none;">
-        <button id="complete-reaction-button" onclick="completeReaction()" class="btn btn-primary" style="width: fit-content;">Lock Reaction</button>
+        <button id="complete-reaction-button" type="button" class="btn btn-primary" data-toggle="modal" data-target="#lockingModal">Lock & Sign Reaction</button>
+        <!-- Modal -->
+        <div id="lockingModal" class="modal fade">
+          <div class="modal-dialog" style="top: 30%">
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-body">
+                <p>I provide my signature and confirm that to the best of my knowledge the contents of this reaction are accurate.</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="completeReaction()">Confirm</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+
+
+
+
         {% if reaction.complete == 'complete' %}
-            <b>Reaction locked: {{ (reaction.time_of_update|string)[:-7]  }}</b>
+            <b>Reaction locked by {{ reaction.creator_person.user.fullname }} at: {{ (reaction.time_of_update|string)[:-7]  }}</b>
         {% endif %}
     </div>
 

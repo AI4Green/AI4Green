@@ -139,7 +139,7 @@ class SearchHandler:
 
     def exact_polymer_structure_search(self) -> Response:  # different func if polymer
         """Performs an exact structure search on the reaction list"""
-        # get search smiles and convert to inchi
+        # get search smiles
         smiles = request.form["smiles"]
         smiles = smiles.split(" |")[0]
         if smiles.count("*") == 2:
