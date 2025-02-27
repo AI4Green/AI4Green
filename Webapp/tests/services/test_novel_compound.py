@@ -156,13 +156,19 @@ def test_polymer_smiles_parsing():
 
     # different branching patterns
     assert find_canonical_repeat("*C{-}(CC{+n}*)C") == "*CCC(*)C"
+    assert find_canonical_repeat("*C{-}C{+n}(C)(C)*") == "*CC(*)(C)C"
+    assert find_canonical_repeat("C(C)(C)C{-}(CC{+n}C(C)C)C") == "*CCC(*)C"
     assert (
         find_canonical_repeat("*C{-}(C(C(C{+n}*)=O)C(C)C)=O") == "*C(=O)CC(=O)C(*)C(C)C"
     )
     assert find_canonical_repeat("*C{-}C(C(C{+n}*)=O)C(C)C") == "*CCC(=O)C(*)C(C)C"
+    assert (
+        find_canonical_repeat("*C1{-}C(C23C1C2(C3C{+n}(C(C)Cl)C(C)C)C(Cl)C)C1CC1")
+        == "*C(C(C)Cl)C1C2(C(C)Cl)C3C(*)C(C4CC4)C132"
+    )
 
     assert find_canonical_repeat("*C1{-}CC{+n}(CCC1)*") == "*C1CCCC(*)C1"  # rings
     assert (
         find_canonical_repeat("C[SiH2]{-}CC{+n}C") == "*C[SiH2]C*"
     )  # groups in [] brackets
-    assert find_canonical_repeat("C[*]{-}C{+n}C") == ""  # dummy atoms = blocked
+    assert find_canonical_repeat("C[*]{-}C{+n}C") == "dummy"  # dummy atoms = blocked

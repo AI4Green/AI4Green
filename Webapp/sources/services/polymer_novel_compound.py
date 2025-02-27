@@ -305,89 +305,15 @@ def extract_inside_brackets(
     return inner_content, -1  # Return -1 if no matching parenthesis found
 
 
-def is_within_brackets(expression, target="{+n}"):
-    """
-    Checks if a target substring (like "{+n}") is within brackets.
-
-    Args:
-    - expression (str): String to search.
-    - target (str): The substring to check if it's within brackets.
-
-    Returns:
-    - bool: True if the target substring is within brackets, False otherwise.
-    """
-    # Find the position of the target in the expression
-    target_index = expression.find(target)
-
-    # Track the context of parentheses up to the target's position
+def check_bracket_balance(s):
     balance = 0
-    for i in range(target_index):
-        if expression[i] == "(":
+    for i in range(len(s)):
+        if s[i] == "(":
             balance += 1
-        elif expression[i] == ")":
+        elif s[i] == ")":
             balance -= 1
 
-    # If we have open parentheses when reaching the target, it is within brackets
-    return balance > 0
-
-
-def get_last_bracketed_expression(expression: str) -> str:
-    """
-    Returns the last set of brackets, including its content, in a given expression.
-
-    Args:
-    - expression (str): The input string containing brackets.
-
-    Returns:
-    - str: The last complete set of brackets and its content, or an empty string if none found.
-    """
-    # Initialize variables to store positions of the last matching brackets
-    open_index = -1
-    close_index = -1
-    balance = 0
-
-    # Traverse the expression in reverse to find the last matching pair of brackets
-    for i in range(len(expression) - 1, -1, -1):
-        if expression[i] == ")":
-            if balance == 0:
-                close_index = i
-            balance += 1
-        elif expression[i] == "(":
-            balance -= 1
-            if balance == 0:
-                open_index = i
-                break
-
-    # If we have found a matching set, return the substring
-    if open_index != -1 and close_index != -1:
-        return expression[open_index + 1 : close_index]
-    return ""
-
-
-def reformat_smiles(smiles: str) -> str:
-    """
-    Reformats SMILES string to move {+n} out of brackets (a branch) and into the main chain.
-
-    Args:
-    - smiles (str): The input string containing {+n} in brackets.
-
-    Returns:
-    - str: The reformatted SMILES string.
-    """
-    after_start_marker = smiles.split("{+n}")[-1]
-    if (
-        "(" in after_start_marker
-        and after_start_marker[after_start_marker.rfind("(") :].count(")") == 1
-    ):
-        # branches after {+n} e.g *C{-}C(C(C{+n}*)=O)C(C)C
-        branch = ")".join(smiles.split(")")[-2:])
-    else:  # no whole branches after {+n}
-        branch = smiles.split(")")[-1]
-    smiles = smiles[: smiles.rfind(branch)]
-    inner = get_last_bracketed_expression(smiles)
-    smiles = smiles.split(inner)[0] + branch + ")" + inner
-
-    return smiles
+    return balance
 
 
 def find_polymer_repeat_unit(
@@ -405,43 +331,56 @@ def find_polymer_repeat_unit(
     if start_marker == -1 or end_marker == -1:
         return ""
 
-    # Reformat if end of SRU is treated as a branch. e.g. *C{-}(CC{+n}*)C where {+n} is within brackets
-    while is_within_brackets(compound, "{+n}") != is_within_brackets(compound, "{-}"):
-        compound = reformat_smiles(compound)
-        if compound == reformat_smiles(compound):
-            return ""  # avoid infinite loop
-        start_marker = compound.find("{-}")
-        end_marker = compound.find("{+n}")
-
-    # Start is the letter before {-}, and end is the character just before {+}
+    # START is the letter before {-}
     if compound[start_marker - 1].isupper():
-        result = compound[start_marker - 1] + compound[start_marker + 3 : end_marker]
+        result = "*" + compound[start_marker - 1] + compound[start_marker + 3 :]
     elif (
         compound[start_marker - 1] == "]"
     ):  # for polymers with [] groups e.g C[SiH2]{-}CC{+n}C
         i = 2
         while compound[start_marker - i] != "[" and start_marker - i > 0:
             i += 1  # search backwards
-        result = compound[start_marker - i : end_marker].replace("{-}", "")
+        result = "*" + compound[start_marker - i :].replace("{-}", "")
     else:  # for polymers with rings e.g *C1{-}CC{+n}(CCC1)*
         i = 2
         while not compound[start_marker - i].isupper() and start_marker - i > 0:
             i += 1  # search backwards
-        result = compound[start_marker - i : end_marker].replace("{-}", "")
+        result = "*" + compound[start_marker - i :].replace("{-}", "")
 
-    # Check for branching: if the character after {+} is '('
-    if end_marker + 4 < len(compound) and compound[end_marker + 4] == "(":
+    # END is the character before {+n}
+    if ")" not in result[end_marker:]:  # no branching at end of SRU
+        return result[: end_marker - 3] + "*"
+
+    if result[end_marker + 1] == "(":  # last atom of SRU has a branch
+        result = result[: end_marker - 3]
         branch, close_paren = extract_inside_brackets(compound, end_marker + 4)
         if close_paren != -1:
             result += branch
 
-        # check for more branching
+        # check for more branching on last atom of SRU
         while close_paren + 1 < len(compound) and compound[close_paren + 1] == "(":
             branch, close_paren = extract_inside_brackets(compound, close_paren + 1)
             if close_paren != -1:
                 result += branch
+    else:
+        result = result[: result.find("{+n}")]
 
-    result = result.replace("/", "").replace("\\", "")  # ignore stereochemistry
+    # if end is inside brackets, ----------------------
+    if check_bracket_balance(compound[:end_marker]) == 0:
+        return result + "*"
+
+    section = []
+    parts = compound[end_marker + 4 :].split(")")
+    for i, part in enumerate(parts):
+        if "(" in part and i < len(parts) - 1:
+            parts[i] = ")" + part + ")" + parts[i + 1]
+            parts.pop(i + 1)
+            section.append(parts[i])
+        else:
+            section.append(")" + part)
+    idx = check_bracket_balance(compound[:end_marker])
+
+    result = result + "*" + "".join(section[-idx:])
 
     return result
 
@@ -476,10 +415,12 @@ def find_canonical_repeat(smiles: str) -> str:
     Returns:
         canon_smiles - the canonicalised repeat unit. e.g *C*
     """
-    repeat_unit = find_polymer_repeat_unit(smiles)
-    if "*" in repeat_unit:  # block dummy atoms like R groups
+    if "[*]" in smiles:  # block dummy atoms like R groups
         return "dummy"
-    smiles = "*" + repeat_unit + "*"
+    smiles = find_polymer_repeat_unit(smiles)
+
+    smiles = smiles.replace("/", "").replace("\\", "")  # ignore stereochemistry
+
     smiles = canonicalise(smiles)
 
     return smiles
