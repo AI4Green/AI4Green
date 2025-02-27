@@ -1,3 +1,5 @@
+from typing import Literal
+
 from flask import (
     Response,
     current_app,
@@ -20,23 +22,25 @@ from sources.blueprints.auth.forms import LoginForm
 from sources.decorators import workbook_member_required
 from sources.extensions import db
 
-from . import main_bp  # imports the blueprint of the main route
+from . import main_bp
 
 
-# The standard user page is rendered
 @main_bp.route("/", methods=["GET", "POST"])
 @main_bp.route("/home", methods=["GET", "POST"])
 def index() -> Response:
+    """
+    The home page is rendered if the user is authenticated, otherwise the landing page is rendered.
+
+    Returns:
+        flask.Response:  Either a rendered template (home.html or landing_page.html)
+        or a redirect response from the auth service.
+    """
     # used to display flash messages after a redirect following a fetch request.
     messages_from_redirects = (
         [request.args.get("message")] if request.args.get("message") else []
     )
 
-    # get default jinja variables for landing page
-    user_confirmed = None
     form = LoginForm()
-    user_role = None
-    news_items = []
 
     if request.method == "POST":
         # return redirects from login verification to prevent form resubmission
@@ -70,7 +74,10 @@ def index() -> Response:
 @main_bp.route("/load_icons", methods=["GET", "POST"])
 def load_icons() -> Response:
     """
-    This function renders the icon macro from macros.html for the quick access panel
+    Renders the icon macro from macros.html for the quick access panel.
+
+    Returns:
+        flask.Response: A JSON response containing the rendered icon macro.
     """
     selected = request.json.get("input")
     load_type = request.json.get("load_type")
@@ -103,39 +110,45 @@ def load_icons() -> Response:
 
 
 @main_bp.route("/get_marvinjs_key", methods=["POST"])
+@main_bp.doc(hide=True)
 def get_marvinjs_key():
+    """
+    Retrieves the marvin JS API key from the configuration file.
+    Returns:
+        flask.Response: A JSON response containing the marvin JS API key.
+    """
     return jsonify({"marvinjs_key": current_app.config["MARVIN_JS_API_KEY"]})
 
 
-# Go to the sketcher
 @main_bp.route(
     "/sketcher/<workgroup>/<workbook>/<reaction_id>/<tutorial>", methods=["GET", "POST"]
 )
 @login_required
 @workbook_member_required
 def sketcher(
-    workgroup: str, workbook: str, reaction_id: str, tutorial: str
+    workgroup: str, workbook: str, reaction_id: str, tutorial: Literal["yes", "no"]
 ) -> Response:
+    """
+    Renders the sketcher page with the given reaction ID.
+
+    Args:
+        workgroup: the workgroup the reaction belongs to
+        workbook: the workbook the reaction belongs to
+        reaction_id: the reaction ID of the reaction to be loaded
+        tutorial: whether the user is in tutorial mode
+
+    Returns:
+        flask.Response The rendered sketcher page.
+    """
     workgroups = get_workgroups()
     notification_number = get_notification_number()
-    workbook_object = (
-        db.session.query(models.WorkBook)
-        .filter(models.WorkBook.name == workbook)
-        .filter(models.WorkGroup.name == workgroup)
-        .first()
+    workbook_object = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup, workbook
     )
-    reaction = (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.reaction_id == reaction_id)
-        .filter(models.WorkBook.id == workbook_object.id)
-        .first()
+    reaction = services.reaction.get_from_reaction_id_and_workbook_id(
+        reaction_id, workbook_object.id
     )
-    addenda = (
-        db.session.query(models.ReactionNote)
-        .join(models.Reaction)
-        .filter(models.Reaction.id == reaction.id)
-        .all()
-    )
+    addenda = services.reaction.get_addenda(reaction)
 
     if reaction.reaction_smiles:
         load_status = "loading"
@@ -155,9 +168,17 @@ def sketcher(
     )
 
 
-# Go to the sketcher tutorial
 @main_bp.route("/sketcher_tutorial/<tutorial>", methods=["GET", "POST"])
 def sketcher_tutorial(tutorial: str) -> Response:
+    """
+    Renders the tutorial sketcher page
+
+    Args:
+        tutorial: whether the user is in tutorial mode
+
+    Returns:
+        flask.Response: The rendered tutorial sketcher page.
+    """
     workgroups = []
     notification_number = 0
     if current_user.is_authenticated:
@@ -179,10 +200,14 @@ def sketcher_tutorial(tutorial: str) -> Response:
     )
 
 
-# Go to demo
 @main_bp.route("/demo", methods=["GET", "POST"])
 def demo() -> Response:
-    # must be logged in
+    """
+    Renders the demo sketcher page.
+
+    Returns:
+        flask.Response: The rendered demo sketcher page.
+    """
     workgroups = []
     notification_number = 0
     if current_user.is_authenticated:
@@ -199,6 +224,12 @@ def demo() -> Response:
 @main_bp.route("/search", methods=["GET", "POST"])
 @login_required
 def search() -> Response:
+    """
+    Renders the search page.
+
+    Returns:
+        flask.Response: The rendered search page.
+    """
     # must be logged in
     workgroups = get_workgroups()
     notification_number = get_notification_number()
@@ -211,7 +242,12 @@ def search() -> Response:
 @main_bp.route("/manage_account", methods=["GET", "POST"])
 @login_required
 def manage_account() -> Response:
-    # must be logged in
+    """
+    Renders the manage account page.
+
+    Returns:
+        flask.Response: The rendered manage account page.
+    """
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
@@ -224,6 +260,12 @@ def manage_account() -> Response:
 # info page
 @main_bp.route("/info", methods=["GET", "POST"])
 def info() -> Response:
+    """
+    Renders the info (help) page.
+
+    Returns:
+        flask.Response: The rendered info page.
+    """
     workgroups = []
     notification_number = 0
     if current_user.is_authenticated:
@@ -237,6 +279,12 @@ def info() -> Response:
 # about page
 @main_bp.route("/about", methods=["GET", "POST"])
 def about() -> Response:
+    """
+    Renders the about page
+
+    Returns:
+        flask.Response: The rendered about page.
+    """
     workgroups = []
     notification_number = 0
     if current_user.is_authenticated:
@@ -250,20 +298,36 @@ def about() -> Response:
 # send guide
 @main_bp.route("/send_guide", methods=["GET", "POST"])
 def send_guide() -> Response:
-    # must be logged in
+    """
+    Sends the user manual as a file download.
+
+    Returns:
+        flask.Response: The user manual file.
+    """
     return send_file("static/AI4Green_User_Manual.pdf", as_attachment=True)
 
 
 # send quickstart guide
 @main_bp.route("/send_quickstart_guide", methods=["GET", "POST"])
 def send_quickstart_guide() -> Response:
-    # must be logged in
+    """
+    Sends the quick start guide as a file download.
+
+    Returns:
+        flask.Response: The quick start guide file.
+    """
     return send_file("static/AI4Green_quick_guide.pdf", as_attachment=True)
 
 
 # marvin js help page
 @main_bp.route("/marvin_js_help", methods=["GET", "POST"])
 def marvin_js_help() -> Response:
+    """
+    Renders the Marvin JS help page.
+
+    Returns:
+        flask.Response: The rendered Marvin JS help page.
+    """
     # must be logged in
     workgroups = get_workgroups()
     notification_number = get_notification_number()
@@ -274,10 +338,15 @@ def marvin_js_help() -> Response:
     )
 
 
-# accessibility
 @main_bp.route("/accessibility", methods=["GET", "POST"])
 @login_required
 def accessibility() -> Response:
+    """
+    Renders the accessibility page where the sustainability colour-coding can be changed.
+
+    Returns:
+        flask.Response: The rendered accessibility page.
+    """
     # must be logged in
     workgroups = get_workgroups()
     notification_number = get_notification_number()
@@ -290,6 +359,12 @@ def accessibility() -> Response:
 
 @main_bp.route("/get_custom_colours", methods=["GET", "POST"])
 def get_custom_colours() -> Response:
+    """
+    Retrieves the custom colours for the sustainability colour-coding. Default if user is not logged in.
+
+    Returns:
+        flask.Response: A JSON response containing the custom colours.
+    """
     if current_user.is_authenticated:
         colours = current_user.hazard_colors
     else:
@@ -310,6 +385,12 @@ def get_custom_colours() -> Response:
 @main_bp.route("/change_hazard_colours", methods=["GET", "POST"])
 @login_required
 def change_hazard_colours() -> Response:
+    """
+    Changes the sustainability colour-coding for the user.
+
+    Returns:
+        flask.Response: A JSON response indicating the success of the operation.
+    """
     current_user.hazard_colors = {
         "Recommended": request.form["Recommended"],
         "Problematic": request.form["Problematic"],

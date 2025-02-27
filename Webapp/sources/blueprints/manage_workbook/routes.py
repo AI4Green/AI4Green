@@ -2,10 +2,7 @@ from datetime import datetime
 from typing import Optional as OptionalType
 
 from flask import Response, flash, jsonify, redirect, render_template, url_for
-from flask_login import (  # protects a view function against anonymous users
-    current_user,
-    login_required,
-)
+from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
 from sources import models, services
 from sources.auxiliary import (
@@ -13,12 +10,15 @@ from sources.auxiliary import (
     get_notification_number,
     get_workgroups,
 )
-from sources.decorators import workgroup_member_required, principal_investigator_or_senior_researcher_required
+from sources.decorators import (
+    principal_investigator_or_senior_researcher_required,
+    workgroup_member_required,
+)
 from sources.extensions import db
 from wtforms import SelectField, SubmitField
 from wtforms.validators import Optional
 
-from . import manage_workbook_bp  # imports the blueprint of the dummy route
+from . import manage_workbook_bp
 
 
 class SelectWorkbookForm(FlaskForm):
@@ -49,12 +49,21 @@ class JoinWorkbookForm(FlaskForm):
 def manage_workbook(
     workgroup: str, has_request: str = "no", workbook: OptionalType[str] = None
 ) -> Response:
+    """
+    Renders the manage workbook page
+    Args:
+        workgroup: the workgroup the workbook belongs to
+        has_request: whether the workbook has a request to respond to
+        workbook: the workbook being managed
 
+    Returns:
+        flask.Response: The rendered template for managing the selected workbook.
+    """
     current_workgroup = workgroup
     workgroups = get_workgroups()
     notification_number = get_notification_number()
 
-    """This function provides the initial dropdown choices for a user and then handles submission of the form"""
+    # This function provides the initial dropdown choices for a user and then handles submission of the form
     # Initiate form
     form = SelectWorkbookForm()
 
@@ -155,6 +164,18 @@ def manage_workbook(
 def add_remove_user_from_workbook(
     workgroup: str, workbook: str, email: str, mode: str
 ) -> Response:
+    """
+    Add or remove a user from a workbook
+
+    Args:
+        workgroup: the workgroup the workbook belongs to
+        workbook: the workbook to add or remove the user from
+        email: the email of the user to add or remove
+        mode: whether to add or remove the user
+
+    Returns:
+        flask.Response: A JSON response with feedback on the action taken
+    """
 
     user = (
         db.session.query(models.Person)
@@ -184,7 +205,18 @@ def add_remove_user_from_workbook(
 def manage_workbook_request(
     workgroup: str, workbook: str, email: str, mode: str
 ) -> Response:
-    # must be logged in and a PI or SR of the workgroup
+    """
+    Manage a request to join a workbook
+
+    Args:
+        workgroup: the workgroup the workbook belongs to
+        workbook: the workbook to accept or deny the request to join
+        email: the email of the user requesting to join
+        mode: whether to accept or deny the request
+
+    Returns:
+        flask.Response: A JSON response with feedback on the action taken
+    """
     wb = db.session.query(models.WorkBook).get(workbook)
 
     # change request to inactive
@@ -248,6 +280,7 @@ def manage_workbook_request(
 @login_required
 @workgroup_member_required
 def join_workbook(workgroup: str) -> Response:
+    # TODO - is this function deprecated?
     workgroups = get_workgroups()
     notification_number = get_notification_number()
 
@@ -362,12 +395,21 @@ def join_workbook(workgroup: str) -> Response:
     )
 
 
-# from notification go to requests
 @manage_workbook_bp.route(
     "/manage_workbook/go_to_workbook/<workbook>/<workgroup>", methods=["GET", "POST"]
 )
 @login_required
 def go_to_workgroup(workbook: str, workgroup: str) -> Response:
+    """
+    Redirects to the workbook management page from a notification
+
+    Args:
+        workbook: the workbook to manage
+        workgroup: the workgroup the workbook belongs to
+
+    Returns:
+        flask.Response: A redirect to the workbook management page
+    """
     wb = (
         db.session.query(models.WorkBook)
         .filter(models.WorkBook.name == workbook)

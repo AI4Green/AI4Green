@@ -44,7 +44,17 @@ from . import manage_workgroup_bp
 @login_required
 @principal_investigator_required
 def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
-    # must be logged in and a PI of the workgroup
+    """
+    Renders the page for managing a workgroup. This page allows the PI to view all members of the workgroup, remove
+    members, change roles, and view requests to join the workgroup.
+
+    Args:
+        workgroup:
+        has_request:
+
+    Returns:
+
+    """
     workgroups = get_workgroups()
     current_workgroup = workgroup
     notification_number = get_notification_number()
@@ -89,7 +99,18 @@ def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
 def make_change_to_workgroup(
     workgroup: str, email: str, mode: str, current_status: str
 ) -> Response:
-    # must be logged in and a PI of the workgroup
+    """
+    Enables a principal investigator to changes the role of a user in a workgroup or remove them from the workgroup.
+
+    Args:
+        workgroup: the workgroup name
+        email: the email of the user to be changed or removed
+        mode: the action to be taken, either remove or change role
+        current_status: the current role of the user in the workgroup
+
+    Returns:
+        JSON message of success or failure
+    """
 
     # find the person and workgroup objects that the change relates to
     wg = services.workgroup.from_name(workgroup)
@@ -139,10 +160,17 @@ def make_change_to_workgroup(
 @login_required
 @workgroup_member_required
 def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
-    # must be logged in and a member of the workgroup
-    if not security_member_workgroup(workgroup):
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
+    """
+    Allows a user to request a change in role within a workgroup. The request is sent to the workgroup
+
+    Args:
+        user_type: the current role of the user
+        new_role: the requested new role of the user
+        workgroup: the workgroup name
+
+    Returns:
+        Redirect to the home page with a message indicating the request has been made
+    """
     # find all the PIs for the workgroup
     pis = (
         db.session.query(models.Person)
@@ -196,7 +224,6 @@ def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
     return redirect(url_for("main.index"))
 
 
-# PI/SR status request decision
 @manage_workgroup_bp.route(
     "/manage_workgroup/change_status_request/<workgroup>/<email>/<mode>/<decision>",
     methods=["GET", "POST"],
@@ -206,7 +233,19 @@ def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
 def change_status_from_request(
     workgroup: str, email: str, mode: str, decision: str
 ) -> Response:
-    # must be logged in and a PI of the workgroup
+    """
+    Responds to a status request from a user to change their role in a workgroup. The PI can approve or deny the request
+    and the user will be notified of the decision.
+
+    Args:
+        workgroup: the workgroup name
+        email: the email of the user who requested the change
+        mode: the mode of the request, either to-sm, sr-to-pi, or sm-to-pi
+        decision: the decision of the PI, either approve or deny
+
+    Returns:
+        JSON message of success or failure
+    """
 
     wg = services.workgroup.from_name(workgroup)
 
@@ -265,12 +304,19 @@ def change_status_from_request(
         return jsonify({"feedback": feedback})
 
 
-# from notification go to requests
 @manage_workgroup_bp.route(
     "/manage_workgroup/go_to_workgroup/<workgroup>", methods=["GET", "POST"]
 )
 @login_required
 def go_to_workgroup(workgroup: str) -> Response:
+    """
+    Redirects the user to the workgroup management page from a notification
+    Args:
+        workgroup: the workgroup name
+
+    Returns:
+        Redirect to the workgroup management page
+    """
     return redirect(
         url_for(
             "manage_workgroup.manage_workgroup", has_request="yes", workgroup=workgroup
@@ -281,6 +327,15 @@ def go_to_workgroup(workgroup: str) -> Response:
 @manage_workgroup_bp.route("/add_user_by_email", methods=["GET", "POST"])
 @principal_investigator_required
 def add_user_by_email(workgroup):
+    """
+    Allows a principal investigator to add a user to a workgroup by email. A request is sent to the user to join the
+    workgroup.
+    Args:
+        workgroup: the workgroup name
+
+    Returns:
+        Redirect to the workgroup management page with a message indicating the request has been sent.
+    """
     email = request.args.get("email")
     user_type = request.args.get("user_type")
 
@@ -351,6 +406,15 @@ def add_user_by_email(workgroup):
 @manage_workgroup_bp.route("/generate_qr_code/<workgroup>", methods=["GET", "POST"])
 @principal_investigator_required
 def generate_qr_code(workgroup=None):
+    """
+    Generates a QR code for a workgroup that allows a user to join the workgroup by scanning the code.
+
+    Args:
+        workgroup: the workgroup name
+
+    Returns:
+        flask.Response with a JSON message of the QR code image
+    """
     token = services.email.get_encoded_token(31536000, {"workgroup": workgroup})
     url = f"https://{current_app.config['SERVER_NAME']}/qr_add_user/{token}"
     logo = Image.open("sources/static/img/favicon.ico")

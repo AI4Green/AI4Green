@@ -11,14 +11,18 @@ from sources import models, services
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db
 
-from . import delete_profile_bp  # imports the blueprint of the route
+from . import delete_profile_bp
 
 
-# Go to the delete profile page
 @delete_profile_bp.route("/delete_profile", methods=["GET", "POST"])
 @login_required
 def delete_profile() -> Response:
-    # must be logged in
+    """
+    Renders the delete user profile page
+
+    Returns:
+        flask.Response: The rendered template for deleting a user profile
+    """
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
@@ -31,6 +35,12 @@ def delete_profile() -> Response:
 @delete_profile_bp.route("/confirm_delete_profile", methods=["GET", "POST"])
 @login_required
 def confirm_delete_profile() -> Response:
+    """
+    Confirms the deletion of a user profile
+
+    Returns:
+        flask.Response: The rendered template for confirming the deletion of a user.
+    """
     # must be logged in
     if request.method == "POST":
         # remove from all workgroups and workbooks
@@ -157,4 +167,13 @@ def confirm_delete_profile() -> Response:
 @delete_profile_bp.route("/delete_profile/reassign/<wg_name>", methods=["GET", "POST"])
 @login_required
 def delete_profile_reassign(wg_name: str) -> Response:
+    """
+    Redirects the user to the workgroup to reassign their principal investigator role before deleting their profile
+
+    Args:
+        wg_name (str): The name of the workgroup the user is reassigning their role in.
+
+    Returns:
+        flask.Response: A redirect to the workgroup management page to reassign their principal investigator role
+    """
     return redirect(url_for("manage_workgroup.manage_workgroup", workgroup=wg_name))
