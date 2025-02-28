@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-retrosynthesis_bp = Blueprint("retrosynthesis", __name__)
+retrosynthesis_bp = APIBlueprint("retrosynthesis", __name__)
 
 from . import routes

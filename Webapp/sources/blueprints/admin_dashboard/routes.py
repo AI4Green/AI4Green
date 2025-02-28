@@ -3,11 +3,8 @@ from datetime import datetime
 from flask import Response, flash, redirect, render_template, url_for
 from flask_login import login_required
 from sources import models, services
-from sources.auxiliary import (
-    get_notification_number,
-    get_workgroups,
-    security_admin_only,
-)
+from sources.auxiliary import get_notification_number, get_workgroups
+from sources.decorators import admin_required
 from sources.extensions import db
 
 from . import admin_dashboard_bp
@@ -19,6 +16,7 @@ from . import admin_dashboard_bp
     methods=["GET", "POST"],
 )
 @login_required
+@admin_required
 def admin_dashboard(
     request_institution: str = None, request_name: str = None, decision: str = None
 ) -> Response:
@@ -26,9 +24,6 @@ def admin_dashboard(
     # must be logged in and admin
     workgroups = get_workgroups()
     notification_number = get_notification_number()
-    if not security_admin_only():
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
 
     # if admin responds to a new workgroup request this block of code will process it and flash a message to the admin
     if request_institution:
@@ -70,6 +65,7 @@ def admin_dashboard(
 
 
 @admin_dashboard_bp.route("/admin_delete_user/<user_id>", methods=["GET", "POST"])
+@admin_required
 def delete_user(user_id=None):
     user = services.user.from_id(user_id)
 

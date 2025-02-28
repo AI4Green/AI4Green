@@ -21,7 +21,7 @@ def novel_compound(workgroup, workbook) -> Response:
         workbook: the name of the workbook that we are looking for
 
     Returns:
-        Flask Response with feedback about the operation.
+        flask.Response a JSON response with feedback about the operation.
     """
     # get the active workbook
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
@@ -62,14 +62,14 @@ def polymer_novel_compound(workgroup, workbook) -> Response:
     """
     Adds a novel compound to the database and links it to the workbook of the current reaction.
     The novel compound data is saved from the data the user enters in the form.
-    This function is triggered when a novel structure is drawn in the sketcher.
+    This function is triggered when a novel structure is drawn in the sketcher in polymer mode.
 
     Args:
         workgroup: the name of the workgroup that the workbook belongs to
         workbook: the name of the workbook that we are looking for
 
     Returns:
-        Flask Response with feedback about the operation.
+        flask.Response: A JSON response with feedback about the operation.
     """
     # get the active workbook
     workbook = services.workbook.get_workbook_from_group_book_name_combination(

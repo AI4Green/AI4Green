@@ -23,7 +23,12 @@ from . import save_reaction_bp
 @save_reaction_bp.route("/new_reaction", methods=["POST", "GET"])
 @login_required
 def new_reaction() -> Response:
-    """Makes a new reaction after user submits modal window"""
+    """
+    Save a new reaction to the database after user submits from the modal window
+
+    Returns:
+        flaks.Response as JSON, either New Reaction Made or Reaction Name is not Unique
+    """
     workbook_name = request.form["workbook"]
     workgroup_name = request.form["workgroup"]
 

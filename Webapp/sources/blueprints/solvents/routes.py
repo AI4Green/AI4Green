@@ -6,17 +6,17 @@ from sources.auxiliary import abort_if_user_not_in_workbook, sanitise_user_input
 from sources.extensions import db
 from sqlalchemy import func
 
-# request parses incoming request data and gives access to it
-# jsonify is used to send a JSON response to the browser
-from . import solvents_bp  # imports the blueprint of the reagents route
+from . import solvents_bp
 
 
-# Getting the solvent name from browser and returning its data
 @solvents_bp.route("/_solvents", methods=["POST"])
 def solvents() -> Response:
-    """This function gets a solvent name from browser,
-    makes request to the solvent database, and returns
-    its data back to show it in the reaction table"""
+    """
+    This function gets a solvent identifier and returns the solvent data.
+
+    Returns:
+        flask.Response: returns the solvent data as a json object
+    """
     solvent = sanitise_user_input(
         request.form["solvent"]
     )  # gets the solvent from browser

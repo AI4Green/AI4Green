@@ -6,6 +6,7 @@ The main file of the app
 import os
 from typing import Dict
 
+from apiflask import APIFlask
 from flask import Flask
 from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
@@ -25,7 +26,7 @@ def create_app(c: str = "dev") -> Flask:
         Flask app.
 
     """
-    app = Flask(__name__)
+    app = APIFlask(__name__, title="AI4Green OpenAPI", version="1.6.0")
 
     if c == "prod":
         print("Starting AI4Green in deployment configuration")
@@ -258,5 +259,5 @@ def inject_session_context(app: Flask) -> Dict[str, str]:
             session_type="",
             marvin_js_key=app.config["MARVIN_JS_API_KEY"],
             workgroups=workgroups,
-            notification_number=notification_number
+            notification_number=notification_number,
         )

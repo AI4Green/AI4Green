@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-save_reaction_bp = Blueprint("save_reaction", __name__)
+save_reaction_bp = APIBlueprint("save_reaction", __name__)
 
 from . import routes

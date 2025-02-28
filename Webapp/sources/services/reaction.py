@@ -295,6 +295,24 @@ def add_addendum(
     return new_addendum
 
 
+def get_addenda(reaction: models.Reaction) -> List[models.ReactionNote]:
+    """
+    Get all addenda for a reaction
+    Args:
+        reaction: The reaction object for which addenda are retrieved
+
+    Returns:
+        List of ReactionNote (addenda) objects
+
+    """
+    return (
+        db.session.query(models.ReactionNote)
+        .join(models.Reaction)
+        .filter(models.Reaction.id == reaction.id)
+        .all()
+    )
+
+
 def most_recent_in_workbook(workbook_id: int) -> models.Reaction:
     """
     Retrieves the most recent reaction in a given workbook.

@@ -1,12 +1,8 @@
 from datetime import datetime
 
 import pytz
-from flask import redirect  # renders html templates
-from flask import Response, flash, render_template, request, url_for
-from flask_login import (  # protects a view function against anonymous users
-    current_user,
-    login_required,
-)
+from flask import Response, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
 from sources import auxiliary, models, services
 from sources.auxiliary import get_notification_number, get_workgroups
@@ -16,7 +12,7 @@ from sqlalchemy import func
 from wtforms import StringField, SubmitField
 from wtforms.validators import Length
 
-from . import create_workbook_bp  # imports the blueprint of the dummy route
+from . import create_workbook_bp
 
 
 class CreateWorkbookForm(FlaskForm):
@@ -33,8 +29,16 @@ class CreateWorkbookForm(FlaskForm):
 @login_required
 @principal_investigator_or_senior_researcher_required
 def create_workbook(workgroup: str) -> Response:
-    """Creates a workbook using a FlaskForm. The book is created by a PI or SR and they must provide the name
-    and workgroup the workbook should belong to"""
+    """Creates a workbook using a FlaskForm. The book is created by a principal investigator
+     or senior researcher and they must provide the name and workgroup the workbook should belong to
+
+    Args:
+        workgroup (str): The workgroup the workbook should belong to
+
+    Returns:
+        flask.Response: The rendered template for creating a workbook
+        or a redirect to the manage workbook page for the new workbook
+    """
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     form = CreateWorkbookForm()

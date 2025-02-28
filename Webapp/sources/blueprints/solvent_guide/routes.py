@@ -6,9 +6,7 @@ import pandas as pd
 import plotly
 import plotly.express as px
 from flask import Response, render_template
-from flask_login import \
-    login_required  # protects a view function against anonymous users
-
+from flask_login import login_required
 from sources.auxiliary import get_notification_number, get_workgroups
 
 from . import solvent_guide_bp
@@ -30,9 +28,15 @@ def get_radar_plot(s: str, h: str, e: str) -> str:
 @solvent_guide_bp.route("/solvent_guide/<sol>", methods=["GET", "POST"])
 @login_required
 def solvent_guide(sol: Optional[str] = None) -> Response:
-    # user must be logged in
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
+    """
+    Renders the solvent guide page. Includes a solvent card if one is provided as an argument
+
+    Args:
+        sol: solvent name
+
+    Returns:
+        flask.Response: renders the solvent guide template
+    """
     CHEM21 = pd.read_csv(
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "CHEM21_full.csv")
     )
@@ -47,11 +51,11 @@ def solvent_guide(sol: Optional[str] = None) -> Response:
         if not CHEM21["Solvent Alternative Name"].str.lower().eq(sol.lower()).any():
             sol = None
         else:
-            sol = CHEM21[CHEM21["Solvent Alternative Name"].str.lower() == sol.lower()]["Number"].iloc[0]
+            sol = CHEM21[CHEM21["Solvent Alternative Name"].str.lower() == sol.lower()][
+                "Number"
+            ].iloc[0]
     return render_template(
         "solvent_guide.html",
-        workgroups=workgroups,
-        notification_number=notification_number,
         solvents=solvents,
         families=families,
         sol=sol,
@@ -61,7 +65,12 @@ def solvent_guide(sol: Optional[str] = None) -> Response:
 @solvent_guide_bp.route("/solvent_guide_help", methods=["GET", "POST"])
 @login_required
 def solvent_guide_help() -> Response:
-    # user must be logged in
+    """
+    Renders the solvent guide help page
+
+    Returns:
+        flask.Response: renders the solvent guide help template with information about the solvent guide
+    """
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
