@@ -21,6 +21,16 @@ from sources.extensions import db
 from sqlalchemy import func
 from werkzeug.urls import url_parse
 from urllib.parse import urlparse
+from flask import Response, jsonify
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    get_jwt_identity,
+    jwt_required,
+    unset_jwt_cookies,
+)
+from datetime import timedelta
+
 
 from . import auth_bp  # imports the blueprint of the
 from .forms import LoginForm, RegistrationForm
@@ -37,18 +47,48 @@ from .utils import login_not_allowed
 # Login page
 @auth_bp.route("/login", methods=["GET", "POST"])
 @login_not_allowed
-def login() -> Response:  # the login view function
-    # anyone may view
+def login() -> Response:
+    form = LoginForm()
+    if request.method == "GET":
+        return render_template("auth/login.html", title="Sign In", form=form)  # Serve login page
+    
+    if form.validate_on_submit():
+        user = services.auth.verify_login(form)
+        print(f"User returned from verify_login: {user}")
+        if user:
+            # Prepare user data to be added to the token payload
+            user_data = {
+                "id": user.id,
+                "email": user.email,
+                "username": user.username,
+                "role_id": user.role,
+                "Role": user.Role.name,
+                "fullname": user.fullname,  # Add other user data as needed
+                "is_verified": user.is_verified,
+                "time_of_creation": user.time_of_creation.isoformat() if user.time_of_creation else None,
+            }
 
-    form = LoginForm()  # instantiates an object of LoginForm
-    if request.method == "POST":
-        page_redirect = services.auth.verify_login(form)
-    if not current_user.is_authenticated:
-        return render_template(
-            "auth/login.html", title="Sign In", form=form
-        )  # renders the login template
-    else:
-        return page_redirect
+            # Create access and refresh tokens with user data in the payload
+            access_token = create_access_token(identity=user.id, additional_claims=user_data, expires_delta=timedelta(hours=1))
+            refresh_token = create_refresh_token(identity=user.id, additional_claims=user_data)
+
+            print(f"Access token: {access_token}")
+            print(f"Refresh token: {refresh_token}")
+
+            # You can choose to store the token in the session or cookies
+            session['access_token'] = access_token
+            session['refresh_token'] = refresh_token
+
+            # Determine the next page
+            next_page = request.args.get("next")
+            if not next_page or url_parse(next_page).netloc != "":
+                next_page = url_for("main.index")  # Default redirect URL
+
+            # Redirect to the next page after login
+            return redirect(next_page)  # This will redirect to the main index
+
+    return jsonify({"error": "Invalid credentials"}), 401  # Return error message if login fails
+
 
 
 # Logout option redirecting to the login page

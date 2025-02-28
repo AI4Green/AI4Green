@@ -10,6 +10,7 @@ from flask import Flask
 from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db, login, ma, mail, migrate
+from flask_jwt_extended import JWTManager
 
 
 def create_app(c: str = "dev") -> Flask:
@@ -38,6 +39,8 @@ def create_app(c: str = "dev") -> Flask:
         app.config.from_object(config.TestConfig)
 
     register_extensions(app)
+    jwt = JWTManager(app)
+   
 
     app.context_processor(lambda: inject_session_context(app))
 
@@ -46,6 +49,7 @@ def create_app(c: str = "dev") -> Flask:
 
         app = init_dashboard(app)
         return run_app(app)
+    
 
 
 def run_app(app: Flask) -> Flask:

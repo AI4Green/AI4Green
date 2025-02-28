@@ -6,6 +6,8 @@ This is a configuration module for the app
 import os
 
 from dotenv import load_dotenv
+from datetime import timedelta
+
 
 load_dotenv()
 
@@ -17,7 +19,7 @@ class BaseConfig(object):  # class to store configuration variables
     key as a cryptographic key to generate signatures or tokens.
     The Flask-WTF extension uses it to protect web forms against
     Cross-Site Request Forgery."""
-    SERVER_NAME = os.getenv("SERVER_NAME", "127.0.0.1:80")
+    SERVER_NAME = os.getenv("SERVER_NAME", "127.0.0.1:5000")
     SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
     WTF_CSRF_ENABLED = False
     LIVESERVER_TIMEOUT = 10
@@ -88,6 +90,11 @@ class BaseConfig(object):  # class to store configuration variables
     MAIL_USE_LOCAL = os.getenv("MAIL_USE_LOCAL", "local")
     MAIL_ADMIN_SENDER = os.getenv("MAIL_ADMIN_SENDER", "admin@ai4green.app")
     MAIL_SAVE_DIR = os.getenv("MAIL_SAVE_DIR", "temp")
+
+    SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-key")
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
     # Marvin JS - Change to your own
     MARVIN_JS_API_KEY = os.getenv("MARVIN_JS_API_KEY", "")

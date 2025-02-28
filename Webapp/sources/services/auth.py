@@ -9,21 +9,22 @@ from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
 from sqlalchemy import func
 from werkzeug.urls import url_parse
+from flask import jsonify
 
 
-def verify_login(form) -> redirect:
+def verify_login(form):
     """
     Logic to validate login request.
     Args:
         form: Form with login credentials
 
     Returns:
-        redirect to home page or previous page that required login
+        user object if login is successful, None otherwise.
     """
     if form.validate_on_submit():
         """The form.validate_on_submit returns True when the browser sends the POST
         request as a result of the user pressing the submit button and if all the fields
-        passes validation. It returns False when the browser sends the GET request to
+        pass validation. It returns False when the browser sends the GET request to
         receive the web page with the form or if at least one field fails validation."""
         input_data = form.username.data.lower()
         user = (
@@ -42,7 +43,7 @@ def verify_login(form) -> redirect:
         or None if it does not."""
         if user is None or not user.check_password(form.password.data):
             """If it got a match for the username that was provided, it can next check
-            if the password came with the form is valid. This is done by invoking the
+            if the password that came with the form is valid. This is done by invoking the
             check_password() method defined in models.py. This will take the password
             hash stored with the user and determine if the password entered in the
             form matches the hash or not. In either of two possible error conditions -
@@ -50,9 +51,9 @@ def verify_login(form) -> redirect:
             flashed, and the user is redirected back to the login prompt to try again.
             """
             flash("Invalid username or password")
-            return redirect(url_for("main.index"))
+            return None  # Instead of redirecting, return None
 
-        # if user was added after 22/04/2024 their email needs to be verified before login
+        # If user was added after 22/04/2024, their email needs to be verified before login
         if (
             user.time_of_creation
             and user.time_of_creation > datetime(2024, 4, 22)
@@ -64,7 +65,7 @@ def verify_login(form) -> redirect:
                     f"Please verify your email address before logging in. Didn't receive an email? <a href='{verification_url}' class='alert-link'>Click here</a> to resend."
                 )
             )
-            return redirect(url_for("main.index"))
+            return None  # Instead of redirecting, return None
 
         login_user(user, remember=form.remember_me.data)
         role = (
@@ -78,22 +79,12 @@ def verify_login(form) -> redirect:
         from Flask-Login is called. This function will register the user as logged in,
         which means that any future pages the user navigates to will have the current_user
         variable set to that user."""
-        next_page = request.args.get("next")
-        """The next query string argument is set to the original URL,
-        so the application can use that to redirect back after login."""
-        if not next_page or url_parse(next_page).netloc != "":
-            """If the login URL does not have a next argument or the
-            next argument is set to a full URL that includes a domain
-            name, then the user is redirected to the index page."""
-            return redirect(url_for("main.index"))
 
-        else:
-            """If the login URL includes a next argument that is set
-            to a relative path (a URL without the domain portion),
-            then the user is redirected to that URL."""
-            next_page = next_page.replace("\\", "")
-            if not urlparse(next_page).netloc:
-                return redirect(next_page)
+        next_page = request.args.get("next")
+        if not next_page or url_parse(next_page).netloc != "":
+            next_page = url_for("main.index")
+
+        return user
 
 
 def reaction_files(
