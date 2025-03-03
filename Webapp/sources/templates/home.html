@@ -4,64 +4,63 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/standard_user.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/home.js') }}"></script>
+    <title>AI4Green - Home</title>
     {% import "macros.html" as macro_templates %}
 </head>
 <body>
-    {% if current_user.is_authenticated %}
+    <div class="jumbotron jumbotron-fluid home">
 
-        <div class="jumbotron jumbotron-fluid home">
-
-            <div class="container">
-                <h2 class="text-primary-green">Welcome to AI4Green, {{ current_user.username }}!</h2>
-            </div>
+        <div class="container">
+            <h2 class="text-primary-green">Welcome to AI4Green, {{ current_user.username }}!</h2>
         </div>
-        <div class="container-fluid">
-            {% if user_confirmed == false %}
-                    <div class="alert alert-primary">AI4Green now requires email verification.  <a href='/email_verification_request' class='alert-link'>Click here</a> to send a verification email to your email address.</div>
-                {% endif %}
-            <div class="row" id="workgroup-icons">
-                <div class="col-7" id="quick-access-icons">
-                    <h2><i class="bi bi-star"></i> Quick Access</h2>
-                    <hr class="line-news">
-                {{ macro_templates.icon_panel(workgroups, "workgroup", "Your Workgroups", "bi bi-people-fill") }}
-                    <div id="workbook-icons"></div>
-                <div id="reaction-icons"></div>
-                    {% if workgroups|length == 0 %}
-                    <br>
-                    <p>
-                        <h4> Create a Workgroup to begin or click below to find out more. </h4>
-                        <a id="about-button" class="btn btn-primary btn-lg" href="{{ url_for('main.about') }}" role="button">Learn more &raquo;</a>
-                        <a id="quickstart-guide" href="{{ url_for('main.send_quickstart_guide') }}" class="btn btn-primary btn-lg">Quickstart Guide &raquo;</a>
-                    </p>
-                    {% endif %}
-                </div>
-
-            <div class="col-5">
-                <h2><i class="bi bi-pin-angle"></i> News Feed</h2>
+    </div>
+    <div class="container-fluid">
+        {% if user_confirmed == false %}
+                <div class="alert alert-primary">AI4Green now requires email verification.  <a href='/email_verification_request' class='alert-link'>Click here</a> to send a verification email to your email address.</div>
+            {% endif %}
+        <div class="row" id="workgroup-icons">
+            <div class="col-7" id="quick-access-icons">
+                <h2><i class="bi bi-star"></i> Quick Access</h2>
                 <hr class="line-news">
-                <div class="scrollClass">
-                    {% if news_items %}
-                        {% for item in news_items %}
-                            <h4 id="title-{{ item.id }}">{{ item.title|safe }}</h4>
-                            <p>{{ item.message|safe }}</p>
-                            <div class="reaction-time">{{ (item.time|string)[:-7] }}</div>
-                            {% if user_role == 'Admin' %}
-                            <form action="{{ url_for('news_feed.delete_news_post') }}" method="post">
-                                <input type="hidden" value="{{ item.id }}" name="post-to-delete">
-                                <button type="submit" class="btn btn-danger" id="delete-{{ item.id }}">Delete</button>
-                            </form>
-                            {% endif %}
-                            <hr class="line">
-                        {% endfor %}
-                    {% else %}
-                        No news items to show!
-                    {% endif %}
-                </div>
+            {{ macro_templates.icon_panel(workgroups, "workgroup", "Your Workgroups", "bi bi-people-fill") }}
+                <div id="workbook-icons"></div>
+            <div id="reaction-icons"></div>
+                {% if workgroups|length == 0 %}
+                <br>
+                <p>
+                    <h4> Create a Workgroup to begin or click below to find out more. </h4>
+                    <a id="about-button" class="btn btn-primary btn-lg" href="{{ url_for('main.about') }}" role="button">Learn more &raquo;</a>
+                    <a id="quickstart-guide" href="{{ url_for('main.send_quickstart_guide') }}" class="btn btn-primary btn-lg">Quickstart Guide &raquo;</a>
+                </p>
+                {% endif %}
             </div>
-                </div>
-        </div>
 
-        {%  if current_user.time_of_creation  < privacy_policy_date %}
+        <div class="col-5">
+            <h2><i class="bi bi-pin-angle"></i> News Feed</h2>
+            <hr class="line-news">
+            <div class="scrollClass">
+                {% if news_items %}
+                    {% for item in news_items %}
+                        <h4 id="title-{{ item.id }}">{{ item.title|safe }}</h4>
+                        <p>{{ item.message|safe }}</p>
+                        <div class="reaction-time">{{ (item.time|string)[:-7] }}</div>
+                        {% if user_role == 'Admin' %}
+                        <form action="{{ url_for('news_feed.delete_news_post') }}" method="post">
+                            <input type="hidden" value="{{ item.id }}" name="post-to-delete">
+                            <button type="submit" class="btn btn-danger" id="delete-{{ item.id }}">Delete</button>
+                        </form>
+                        {% endif %}
+                        <hr class="line">
+                    {% endfor %}
+                {% else %}
+                    No news items to show!
+                {% endif %}
+            </div>
+        </div>
+            </div>
+    </div>
+
+    {%  if current_user.time_of_creation  < privacy_policy_date %}
             <!-- Privacy Policy Overlay -->
             <div id="privacy-overlay">
                 <div id="privacy-popup">
@@ -81,72 +80,13 @@
             </div>
             {% endif %}
 
-    {% else %}
-        <!--    current user is not logged in-->
-        <div class="jumbotron jumbotron-fluid home">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-6" style="margin:auto;">
-                        <!--        welcome text and description of AI4Green-->
-                        <img src="/static/img/ai4green_logo.png" alt="AI4Green Logo" width="100%" >
-                    </div>
-                    <div class="col-6" style="margin:auto;"> <br><br>
-    <div class="container text-center">
-    <br><br>
-    <div class="form-outline mb-4" style="margin: auto; width: 50%">
-        <form action="" method="post" novalidate>
-            {{ form.hidden_tag() }}
-            {{ form.username }}<br>
-            {% for error in form.username.errors %}
-                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
-                    {{ error }}
-                </div>
-            <br>
-            {% endfor %}
-            {{ form.password }}<br>
-            {% for error in form.password.errors %}
-                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
-                    {{ error }}
-                </div>
-            <br>
-            {% endfor %}
-            {{ form.submit() }} <br><br>
-            {{ form.remember_me() }} {{ form.remember_me.label }}
-
-        </form>
-    </div>
-        New User? <a id="register" class="btn btn-link" href="{{ url_for('auth.register') }}">Click to Register!</a><br>
-        Forgotten Your Password? <a class="btn btn-link" id="reset-password" href="{{ url_for('reset_password.reset_password_request') }}">Click to Reset!</a>
-    </div></div>
-                    </div>
-                </div>
-            </div>
-            <!--    video and login/registration buttons-->
-            <div class="container-fluid text-center">
-                <div class="row">
-                <div class="col-6">
-                <h1>Welcome to AI4Green</h1>
-                <h5>
-                    AI4Green provides an ELN including collaboration tools, data archival and management and green and sustainability metrics for organic chemistry.<br><br>
-                </h5>
-                <p>It is accessible via a web interface and fully available on an open source basis.</p>
-                <b>Key features include:</b>
-                <ul>
-                  <li>Automatic calculations, hazard lookup and CAS database linkage</li>
-                  <li>Solvent selection guide</li>
-                  <li>Reaction summary including colour coding of solvent sustainability and hazards</li>
-                </ul>
-                <p>For any queries please contact us at <a id="email-link" href="mailto:ai4green@nottingham.ac.uk">ai4green@nottingham.ac.uk</a>.</p>
-                </div>
-            <div class="col-6">
-                <iframe id="help-video" width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PL7u_tOd0vTynC0tgWt0cb7jLlnEoDwiO4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            </div>
-            </div>
-                </div>
-        {% endif %}
     <input id="active-workgroup" type="hidden" >
     <input id="active-workbook" type="hidden">
     {{ macro_templates.render_new_reaction_modal() }}
+<br>
+<br>
+<br>
+<br>
 </body>
 
 {% endblock %}

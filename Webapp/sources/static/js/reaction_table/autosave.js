@@ -121,7 +121,6 @@ async function sketcherAutoSave() {
 function postReactionData(complete = "not complete") {
   // this function posts data to the backend for saving and then updates the save indicator
   let {
-    polymerMode,
     polymerIndices,
     polymerisationType,
     reactionID,

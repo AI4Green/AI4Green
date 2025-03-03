@@ -173,9 +173,9 @@ def list_all_members(workgroup: models.WorkGroup) -> List[models.Person]:
     Lists all members of a given workgroup by compiling data from three categories: senior researchers,
     standard members, and the principal investigator.
     Args:
-        workgroup: models.WorkGroup, the workgroup from which members will be listed
+        workgroup: models.WorkGroup, the workgroup from which members will be listed.
     Returns:
-        List[models.Person], a list of all persons associated with the workgroup
+        List[models.Person], a list of all persons associated with the workgroup.
     """
     senior_researchers = get_workgroup_sr(workgroup.name)
     standard_members = get_workgroup_sm(workgroup.name)

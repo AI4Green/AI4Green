@@ -62,7 +62,6 @@ def init_dashboard(server: Flask) -> classes.Dash:
                         children=[
                             plotly_elements.header_and_inputs,
                             plotly_elements.retro_tree,
-                            plotly_elements.references,
                         ],
                     ),
                 ],
@@ -241,11 +240,21 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Output("loading-display", "display", allow_duplicate=True),
         State("validated-smiles", "data"),
         State("smiles-input", "pattern"),
+        State("enhancement-dropdown", "value"),
+        State("iterations-input", "value"),
+        State("time-limit-input", "value"),
+        State("max-depth-input", "value"),
         Input("btn-retrosynthesis", "n_clicks"),
         prevent_initial_call=True,
     )
     def start_new_retrosynthesis(
-        validated_smiles: str, smiles_regex: str, n_clicks: int
+        validated_smiles: str,
+        smiles_regex: str,
+        enhancement: str,
+        iterations: int,
+        time_limit: int,
+        max_depth: int,
+        n_clicks: int,
     ) -> Tuple[str, str, Optional[dcc.Interval], str]:
         """
         Called when the user clicks the retrosynthesis button.
@@ -255,6 +264,10 @@ def init_dashboard(server: Flask) -> classes.Dash:
             n_clicks - increments when the user clicks the retrosynthesis button and calls the function
             validated_smiles - the validated SMILES string
             smiles_regex - contains 'invalid' if SMILES are not valid and prompts user to enter valid SMILES
+            enhancement - the selected enhancement type from the dropdown
+            iterations - the number of iterations for the search
+            time_limit - the time limit for the search (in seconds)
+            max_depth - the maximum depth of the search tree
 
         Returns:
             a message to give the user feedback
@@ -264,23 +277,31 @@ def init_dashboard(server: Flask) -> classes.Dash:
         if utils.smiles_not_valid(smiles_regex):
             return "Please enter a valid SMILES", "", None, "hide"
 
-        # If valid SMILES, continue with the process
         validated_smiles = utils.encodings_to_smiles_symbols(validated_smiles)
-        request_url = f"{retrosynthesis_base_url}/retrosynthesis_api/?key={retrosynthesis_api_key}&smiles={validated_smiles}"
 
+        iterations = iterations if iterations is not None else 100
+        time_limit = time_limit if time_limit is not None else 60
+        max_depth = max_depth if max_depth is not None else 7
+        enhancement = enhancement if enhancement else "Default"
+
+        request_url = (
+            f"{retrosynthesis_base_url}/retrosynthesis_api/"
+            f"?key={retrosynthesis_api_key}"
+            f"&smiles={validated_smiles}"
+            f"&enhancement={enhancement}"
+            f"&iterations={iterations}"
+            f"&time_limit={time_limit}"
+            f"&max_depth={max_depth}"
+        )
         unique_identifier = str(uuid.uuid4())
-
         # Start the retrosynthesis process in a background thread
         thread = threading.Thread(
             target=retrosynthesis_process_wrapper,
-            args=[
-                request_url,
-                unique_identifier,
-            ],
+            args=[request_url, unique_identifier],
         )
         thread.start()
-        # set up an interval element to check every 15 seconds if it is complete
-        interval = dcc.Interval(id="interval-component", interval=15000, n_intervals=0)
+        interval = dcc.Interval(id="interval-component", interval=5000, n_intervals=0)
+
         return (
             "Retrosynthesis process started. Please wait...",
             unique_identifier,
@@ -752,6 +773,25 @@ def init_dashboard(server: Flask) -> classes.Dash:
         if n1 or n2:
             return not is_open
         return is_open
+
+    @dash_app.callback(
+        Output("search-config-collapse", "is_open"),
+        Input("search-config-toggle", "n_clicks"),
+        State("search-config-collapse", "is_open"),
+        prevent_initial_call=True,
+    )
+    def toggle_search_configuration(n_clicks, is_open):
+        """
+        Toggles the search configuration panel when the settings button (gear icon) is clicked.
+
+        Args:
+            n_clicks (int): The number of times the toggle button is clicked.
+            is_open (bool): The current state of the search configuration panel.
+
+        Returns:
+            bool: The opposite of the current state (i.e., toggles open/close).
+        """
+        return not is_open
 
     @dash_app.callback(
         Output("modal-save-message", "children"),

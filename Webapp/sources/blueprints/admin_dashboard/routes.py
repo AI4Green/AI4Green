@@ -169,8 +169,6 @@ def handle_new_workgroup_request(
                     type="Your Request to Create a Workgroup",
                     info="Your Workgroup request for "
                     + new_workgroup_request.name
-                    + " at "
-                    + new_workgroup_request.Institution.name
                     + " has been approved.",
                     time=datetime.now(),
                     status="active",
