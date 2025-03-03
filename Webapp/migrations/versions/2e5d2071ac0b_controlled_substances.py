@@ -1,15 +1,15 @@
 """controlled_substances
 
-Revision ID: 7bd0431169c1
+Revision ID: 2e5d2071ac0b
 Revises: f5b3539b9a0e
-Create Date: 2025-02-11 15:33:56.272096
+Create Date: 2025-03-03 13:40:50.405667
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "7bd0431169c1"
+revision = "2e5d2071ac0b"
 down_revision = "f5b3539b9a0e"
 branch_labels = None
 depends_on = None
@@ -30,7 +30,7 @@ def upgrade():
         sa.Column("controlled_substance_name", sa.Text(), nullable=True),
         sa.Column("controlled_substance_smiles", sa.Text(), nullable=False),
         sa.Column("controlled_substance_cas", sa.Text(), nullable=True),
-        sa.Column("controlled_substance_inchi", sa.Text(), nullable=True),
+        sa.Column("controlled_substance_inchi", sa.Text(), nullable=False),
         sa.ForeignKeyConstraint(["creator"], ["Person.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["reactions"], ["Reaction.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["workbooks"], ["WorkBook.id"], ondelete="CASCADE"),
