@@ -1,9 +1,9 @@
 import contextlib
-from typing import Tuple, Dict
+from typing import Dict, Tuple
 
+import ipinfo
 import toml
 from flask import current_app, request
-import ipinfo
 
 
 def camelCase_to_snake_case(string: str) -> str:
@@ -90,12 +90,12 @@ def get_location() -> Dict[str, str]:
             "city": location.city,
         }
     except AttributeError:
-        # If running on local host use default values that point to Nottingham
-        print("Local Host IP is not findable with IPInfo. Using Nottingham as default...")
+        # If running on local host use default values defined in
+        print("Local Host IP is not findable with IPInfo.")
         return {
-            "IP_address": "NOTTINGHAM_IP_ADDRESS",
-            "country": "United Kingdom",
-            "city": "Nottingham",
+            "IP_address": "Local host instance does not support location information.",
+            "country": "Local host instance does not support location information.",
+            "city": "Local host instance does not support location information.",
         }
 
 
