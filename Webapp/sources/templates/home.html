@@ -60,6 +60,26 @@
             </div>
     </div>
 
+    {%  if current_user.time_of_creation  < privacy_policy_date %}
+            <!-- Privacy Policy Overlay -->
+            <div id="privacy-overlay">
+                <div id="privacy-popup">
+                    <p>We have updated our <a href="auth/privacy_notice" target="_blank">Privacy Policy</a>.</p>
+                    <p>To continue using AI4Green, please review and agree to these updates.</p>
+                    <div class="container-fluid">
+                        <div class="row">
+                        <div class="col-6">
+                            <button onclick="updatePrivacyPolicyAgreement()" class="btn btn-success reload-btn">I Accept</button>
+                        </div>
+                        <div class="col-6">
+                            <a href={{url_for("auth.logout")}}><button onclick=href="/logout" class="btn btn-danger">No Thanks</button></a>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
     <input id="active-workgroup" type="hidden" >
     <input id="active-workbook" type="hidden">
     {{ macro_templates.render_new_reaction_modal() }}
