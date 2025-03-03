@@ -158,7 +158,7 @@ def detect_usage_in_embargoed_country(
         services.email.send_controlled_substance_alert(inchi, location, reaction)
 
 
-def list_all() -> List[models.Reaction]:
+def list_all() -> List[models.ControlledSubstanceUsage]:
     """
     Gets a list of all controlled substance usages. For the admin_dashboard
 
@@ -173,7 +173,12 @@ def list_all() -> List[models.Reaction]:
 
 
 def controlled_substance_inchi():
-    """Returns list of InChI for controlled chemicals that are stores in controlled_substances_inchi.txt"""
+    """
+    Returns list of InChI for controlled chemicals that are stores in controlled_substances_inchi.txt
+
+    Returns:
+        List of InChI found in controlled substances.
+    """
     with open(
         os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -186,6 +191,12 @@ def controlled_substance_inchi():
 
 
 def uk_arms_embargoes():
+    """
+    Returns list of countries that have a UK arms embargo, listed in UK_arms_embargoed_countries.txt
+
+    Returns:
+        List of countries found in UK_arms_embargoed_countries.txt
+    """
     with open(
         os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
