@@ -90,7 +90,7 @@ def get_location() -> Dict[str, str]:
             "city": location.city,
         }
     except AttributeError:
-        # If running on local host use default values defined in
+        # If running on local host use default values
         print("Local Host IP is not findable with IPInfo.")
         return {
             "IP_address": "Local host instance does not support location information.",
