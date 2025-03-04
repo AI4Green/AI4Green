@@ -25,9 +25,6 @@ from flask import Response, jsonify
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
-    get_jwt_identity,
-    jwt_required,
-    unset_jwt_cookies,
 )
 from datetime import timedelta
 
@@ -71,9 +68,6 @@ def login() -> Response:
             # Create access and refresh tokens with user data in the payload
             access_token = create_access_token(identity=user.id, additional_claims=user_data, expires_delta=timedelta(hours=1))
             refresh_token = create_refresh_token(identity=user.id, additional_claims=user_data)
-
-            print(f"Access token: {access_token}")
-            print(f"Refresh token: {refresh_token}")
 
             # You can choose to store the token in the session or cookies
             session['access_token'] = access_token

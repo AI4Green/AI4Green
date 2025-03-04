@@ -9,7 +9,9 @@ from flask import (
     request,
     send_file,
     url_for,
+    session
 )
+
 from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
@@ -19,6 +21,13 @@ from sources.auxiliary import get_notification_number, get_workgroups
 from sources.blueprints.auth.forms import LoginForm
 from sources.decorators import workbook_member_required
 from sources.extensions import db
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+)
+from werkzeug.urls import url_parse
+from datetime import timedelta
+
 
 from . import main_bp  # imports the blueprint of the main route
 
@@ -27,23 +36,58 @@ from . import main_bp  # imports the blueprint of the main route
 @main_bp.route("/", methods=["GET", "POST"])
 @main_bp.route("/home", methods=["GET", "POST"])
 def index() -> Response:
-    # used to display flash messages after a redirect following a fetch request.
     messages_from_redirects = (
         [request.args.get("message")] if request.args.get("message") else []
     )
 
-    # get default jinja variables for landing page
     user_confirmed = None
     form = LoginForm()
     user_role = None
     news_items = []
 
     if request.method == "POST":
-        # return redirects from login verification to prevent form resubmission
-        page_redirect = services.auth.verify_login(form)
-        return page_redirect
+        print("Login form submitted from index page")
+        print(f"Form data: {form.data}")
+        if form.validate_on_submit():
+            try:
+                # change page_redirect to user.
+                user = services.auth.verify_login(form)
+                print(f"Verify login result: {user}")
+                if user:
+                    # After successful login, redirect to the desired page
+                    # You can use the same logic as in the /auth/login route
+                    user_data = {
+                        "id": user.id,
+                        "email": user.email,
+                        "username": user.username,
+                        "role_id": user.role,
+                        "Role": user.Role.name,
+                        "fullname": user.fullname,
+                        "is_verified": user.is_verified,
+                        "time_of_creation": user.time_of_creation.isoformat() if user.time_of_creation else None,
+                    }
 
-    # update jinja variables if user is logged in to populate the homepage
+                    access_token = create_access_token(
+                        identity=user.id, additional_claims=user_data, expires_delta=timedelta(hours=1))
+                    refresh_token = create_refresh_token(
+                        identity=user.id, additional_claims=user_data)
+
+                    session['access_token'] = access_token
+                    session['refresh_token'] = refresh_token
+
+                    next_page = request.args.get("next")
+                    if not next_page or url_parse(next_page).netloc != "":
+                        next_page = url_for("main.index")
+
+                    return redirect(next_page)  # Return a redirect.
+
+            except Exception as e:
+                print(f"Error during login on index: {e}")
+                flash("Something went wrong with login.")
+                return redirect(url_for("main.index"))
+        else:
+            print(f"Form validation failed: {form.errors}")
+
     if current_user.is_authenticated:
         form = None
         user_role = current_user.Role.name
@@ -62,7 +106,6 @@ def index() -> Response:
             messages_from_redirects=messages_from_redirects,
             form=form,
         )
-    # user is not authenticated, send to landing page.
     else:
         return render_template("landing_page.html", form=form)
 
