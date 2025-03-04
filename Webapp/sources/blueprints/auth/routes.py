@@ -51,7 +51,6 @@ def login() -> Response:
     
     if form.validate_on_submit():
         user = services.auth.verify_login(form)
-        print(f"User returned from verify_login: {user}")
         if user:
             # Prepare user data to be added to the token payload
             user_data = {

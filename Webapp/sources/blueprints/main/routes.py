@@ -46,13 +46,11 @@ def index() -> Response:
     news_items = []
 
     if request.method == "POST":
-        print("Login form submitted from index page")
-        print(f"Form data: {form.data}")
+
         if form.validate_on_submit():
             try:
                 # change page_redirect to user.
                 user = services.auth.verify_login(form)
-                print(f"Verify login result: {user}")
                 if user:
                     # After successful login, redirect to the desired page
                     # You can use the same logic as in the /auth/login route
@@ -82,11 +80,9 @@ def index() -> Response:
                     return redirect(next_page)  # Return a redirect.
 
             except Exception as e:
-                print(f"Error during login on index: {e}")
                 flash("Something went wrong with login.")
                 return redirect(url_for("main.index"))
-        else:
-            print(f"Form validation failed: {form.errors}")
+            
 
     if current_user.is_authenticated:
         form = None
