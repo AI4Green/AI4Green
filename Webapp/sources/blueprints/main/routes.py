@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal
 
 from flask import (
@@ -41,6 +42,9 @@ def index() -> Response:
     )
 
     form = LoginForm()
+    privacy_policy_date = datetime(
+        2025, 3, 3
+    )  # date privacy policy was updated to capture user location
 
     if request.method == "POST":
         # return redirects from login verification to prevent form resubmission
@@ -65,6 +69,7 @@ def index() -> Response:
             news_items=news_items,
             messages_from_redirects=messages_from_redirects,
             form=form,
+            privacy_policy_date=privacy_policy_date,
         )
     # user is not authenticated, send to landing page.
     else:
