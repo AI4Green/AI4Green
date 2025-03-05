@@ -1,0 +1,34 @@
+<p>Controlled Substance Use in Embargoed Country Detected!</p>
+
+<p>
+    A User in {{ country }} has been detected using controlled substance with smiles: {{ substance }}.
+
+    Please alert your export control team as soon as possible.
+
+    The details are given below
+
+    --- User Details ---
+    User email: {{ email }}
+    Country: {{ country }}
+    City: {{ city }}
+    IP Address: {{ ip }}
+
+
+    --- Substance Details ---
+    Name: {{ substance_name }}
+    Smiles: {{ substance_smiles }}
+    InChI: {{ substance_inchi }}
+
+
+    --- Reaction Details ---
+    Reaction ID: {{ reaction_id }}
+    Reaction Name: {{ reaction_name }}
+    Smiles: {{ reaction_smiles }}
+    Workbook: {{ workbook }}
+    Date Created: {{ date_created }}
+    Date Last Edited: {{ time_of_update }}
+
+</p>
+
+<p>Sincerely,</p>
+<p>The AI4Green Team</p>

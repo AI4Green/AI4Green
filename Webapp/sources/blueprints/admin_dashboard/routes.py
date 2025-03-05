@@ -45,6 +45,7 @@ def admin_dashboard(
         services.retrosynthesis.predictive_chemistry.saved_retrosyntheses.list_all()
     )
     recent_reactions = services.reaction.list_recent()
+    controlled_substance_usage = services.controlled_substances.list_all()
 
     return render_template(
         "admin_dashboard.html",
@@ -61,6 +62,7 @@ def admin_dashboard(
         recent_reactions=recent_reactions,
         all_solvent_surfers=all_solvent_surfers,
         all_retrosynthesis=all_retrosynthesis,
+        controlled_substance_usage=controlled_substance_usage,
     )
 
 

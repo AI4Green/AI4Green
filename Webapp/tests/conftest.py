@@ -18,7 +18,13 @@ def app():
     with app.app_context():
         db.drop_all()
         db.create_all()
-        populate_database.insert_test_data()
+        # set up request context for location data to add users to db
+        with app.test_request_context(json={
+            "IP_address": "104.28.100.0",
+            "country": "North Korea",
+            "city": "Pyongyang"
+        }):
+            populate_database.insert_test_data()
 
     yield app
 
