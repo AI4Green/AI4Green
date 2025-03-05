@@ -96,6 +96,19 @@ class BaseConfig(object):  # class to store configuration variables
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
+    # Keycloak Configuration
+    KEYCLOAK_SERVER_URL = os.getenv("KEYCLOAK_SERVER_URL", "http://localhost:8080")
+    KEYCLOAK_REALM = os.getenv("KEYCLOAK_REALM", "myrealm")
+    KEYCLOAK_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID", "myclient")
+    KEYCLOAK_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET", "myclientsecret")
+    KEYCLOAK_REDIRECT_URI = os.getenv("KEYCLOAK_REDIRECT_URI", "http://localhost:5000/oidc/callback")
+
+    OIDC_CLIENT_SECRETS = "client_secrets.json"
+    OIDC_COOKIE_SECURE = False  # Set to True in production (requires HTTPS)
+    OIDC_CALLBACK_ROUTE = "/oidc/callback"
+    OIDC_SCOPES = ["openid", "email", "profile"]
+    OIDC_INTROSPECTION_AUTH_METHOD = "client_secret_post"
+
     # Marvin JS - Change to your own
     MARVIN_JS_API_KEY = os.getenv("MARVIN_JS_API_KEY", "")
 

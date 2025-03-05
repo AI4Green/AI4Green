@@ -11,7 +11,9 @@ from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db, login, ma, mail, migrate
 from flask_jwt_extended import JWTManager
+from flask_oidc import OpenIDConnect
 
+oidc = OpenIDConnect()
 
 def create_app(c: str = "dev") -> Flask:
     """
@@ -79,6 +81,13 @@ def register_extensions(app: Flask) -> None:
     migrate.init_app(app, db)
 
     login.init_app(app)
+
+    # Load the OIDC settings from the client_secrets.json
+    app.config['OIDC_CLIENT_SECRETS'] = 'client_secrets.json'
+    app.config['OIDC_ID_TOKEN_COOKIE_SECURE'] = False  # Set to True in production
+    app.config['SECRET_KEY'] = 'random_secret_key'
+
+    oidc.init_app(app)
     login.login_view = "auth.login"
 
     @login.user_loader

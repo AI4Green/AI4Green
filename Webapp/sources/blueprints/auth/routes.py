@@ -8,6 +8,7 @@ import pytz
 
 # imports the objects of the login and registration forms
 from flask import Response, flash, redirect, render_template, request, session, url_for, Markup
+from flask_oidc import OpenIDConnect
 
 # url_parse parses the URL if it is relative or
 # absolute to avoid redirection to a malicious site
@@ -28,7 +29,9 @@ from flask_jwt_extended import (
 )
 from datetime import timedelta
 
+from . import auth_bp  # imports the blueprint of the
 
+oidc = OpenIDConnect()
 from . import auth_bp  # imports the blueprint of the
 from .forms import LoginForm, RegistrationForm
 from .utils import login_not_allowed
@@ -42,53 +45,34 @@ from .utils import login_not_allowed
 
 
 # Login page
-@auth_bp.route("/login", methods=["GET", "POST"])
-@login_not_allowed
-def login() -> Response:
-    form = LoginForm()
-    if request.method == "GET":
-        return render_template("auth/login.html", title="Sign In", form=form)  # Serve login page
-    
-    if form.validate_on_submit():
-        user = services.auth.verify_login(form)
-        if user:
-            # Prepare user data to be added to the token payload
-            user_data = {
-                "id": user.id,
-                "email": user.email,
-                "username": user.username,
-                "role_id": user.role,
-                "Role": user.Role.name,
-                "fullname": user.fullname,  # Add other user data as needed
-                "is_verified": user.is_verified,
-                "time_of_creation": user.time_of_creation.isoformat() if user.time_of_creation else None,
-            }
+@auth_bp.route("/login")
+@oidc.require_login
+def login():
+    """Handles user login via OIDC and retrieves user info."""
+    user_info = oidc.user_getinfo(["sub", "email", "name", "preferred_username"])
 
-            # Create access and refresh tokens with user data in the payload
-            access_token = create_access_token(identity=user.id, additional_claims=user_data, expires_delta=timedelta(hours=1))
-            refresh_token = create_refresh_token(identity=user.id, additional_claims=user_data)
+    if not user_info:
+        return jsonify({"error": "Failed to retrieve user info"}), 401
 
-            # You can choose to store the token in the session or cookies
-            session['access_token'] = access_token
-            session['refresh_token'] = refresh_token
+    # Store user info in session (if needed)
+    session["user"] = {
+        "id": user_info.get("sub"),  # User's unique identifier from OIDC provider
+        "email": user_info.get("email"),
+        "fullname": user_info.get("name"),
+        "username": user_info.get("preferred_username"),
+    }
 
-            # Determine the next page
-            next_page = request.args.get("next")
-            if not next_page or url_parse(next_page).netloc != "":
-                next_page = url_for("main.index")  # Default redirect URL
-
-            # Redirect to the next page after login
-            return redirect(next_page)  # This will redirect to the main index
-
-    return jsonify({"error": "Invalid credentials"}), 401  # Return error message if login fails
+    next_page = request.args.get("next") or url_for("main.index")
+    return redirect(next_page)
 
 
 
 # Logout option redirecting to the login page
 @auth_bp.route("/logout")
-def logout() -> Response:  # the logout view function
-    # anyone may view
-    logout_user()
+def logout():
+    """Logs the user out and revokes their OIDC session."""
+    oidc.logout()
+    session.clear()  # Clear session data
     return redirect(url_for("main.index"))
 
 

@@ -26,6 +26,9 @@ from flask_jwt_extended import (
     create_refresh_token,
 )
 from werkzeug.urls import url_parse
+from flask_oidc import OpenIDConnect
+
+oidc = OpenIDConnect()
 from datetime import timedelta
 
 
@@ -35,6 +38,7 @@ from . import main_bp  # imports the blueprint of the main route
 # The standard user page is rendered
 @main_bp.route("/", methods=["GET", "POST"])
 @main_bp.route("/home", methods=["GET", "POST"])
+@oidc.require_login
 def index() -> Response:
     messages_from_redirects = (
         [request.args.get("message")] if request.args.get("message") else []
