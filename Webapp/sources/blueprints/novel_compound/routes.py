@@ -10,7 +10,7 @@ from . import novel_compound_bp
 @login_required
 @workbook_member_required
 @novel_compound_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and membership in the specified workbook.",
 )
 def novel_compound(workgroup, workbook) -> Response:
@@ -63,7 +63,7 @@ def novel_compound(workgroup, workbook) -> Response:
 @login_required
 @workbook_member_required
 @novel_compound_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and membership in the specified workbook.",
 )
 def polymer_novel_compound(workgroup, workbook) -> Response:

@@ -18,7 +18,7 @@ from . import workgroup_bp
     "/workgroup/<workgroup_selected>/<workbook_selected>", methods=["GET", "POST"]
 )
 @login_required
-@workgroup_bp.doc("sessionAuth")
+@workgroup_bp.doc(security="sessionAuth")
 def workgroup(
     workgroup_selected: str, workbook_selected: Optional[str] = None
 ) -> Response:

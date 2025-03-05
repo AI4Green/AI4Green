@@ -11,7 +11,7 @@ from . import join_workgroup_bp
 
 @join_workgroup_bp.route("/join_workgroup/<workgroup>", methods=["GET", "POST"])
 @login_required
-@join_workgroup_bp.doc("sessionAuth")
+@join_workgroup_bp.doc(security="sessionAuth")
 def join_workgroup(workgroup=None) -> Response:
     """
     Sends a notification to the principal investigator of the workgroup to request membership.

@@ -44,7 +44,7 @@ from . import manage_workgroup_bp
 @login_required
 @principal_investigator_required
 @manage_workgroup_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and Principal Investigator role in the specified workgroup.",
 )
 def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
@@ -101,7 +101,7 @@ def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
 @login_required
 @principal_investigator_required
 @manage_workgroup_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and Principal Investigator role in the specified workgroup.",
 )
 def make_change_to_workgroup(
@@ -168,7 +168,7 @@ def make_change_to_workgroup(
 @login_required
 @workgroup_member_required
 @manage_workgroup_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and membership in the specified workgroup.",
 )
 def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
@@ -243,7 +243,7 @@ def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
 @login_required
 @principal_investigator_required
 @manage_workgroup_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and Principal Investigator role in the specified workgroup.",
 )
 def change_status_from_request(
@@ -324,7 +324,7 @@ def change_status_from_request(
     "/manage_workgroup/go_to_workgroup/<workgroup>", methods=["GET", "POST"]
 )
 @login_required
-@manage_workgroup_bp.doc("sessionAuth")
+@manage_workgroup_bp.doc(security="sessionAuth")
 def go_to_workgroup(workgroup: str) -> Response:
     """
     Redirects the user to the workgroup management page from a notification
@@ -345,7 +345,7 @@ def go_to_workgroup(workgroup: str) -> Response:
 @principal_investigator_required
 @login_required
 @manage_workgroup_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and Principal Investigator role in the specified workgroup.",
 )
 def add_user_by_email(workgroup):
@@ -429,7 +429,7 @@ def add_user_by_email(workgroup):
 @principal_investigator_required
 @login_required
 @manage_workgroup_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and Principal Investigator role in the specified workgroup.",
 )
 def generate_qr_code(workgroup=None):
@@ -481,7 +481,7 @@ def add_user_by_qr(token=None):
 @principal_investigator_required
 @login_required
 @manage_workgroup_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and Principal Investigator role in the specified workgroup.",
 )
 def change_name(workgroup: str, new_name: str):

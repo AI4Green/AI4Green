@@ -29,7 +29,7 @@ class CreateWorkbookForm(FlaskForm):
 @login_required
 @principal_investigator_or_senior_researcher_required
 @create_workbook_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and Principal Investigator or Senior Researcher role in the specified workgroup.",
 )
 def create_workbook(workgroup: str) -> Response:

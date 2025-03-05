@@ -16,7 +16,7 @@ from . import delete_profile_bp
 
 @delete_profile_bp.route("/delete_profile", methods=["GET", "POST"])
 @login_required
-@delete_profile_bp.doc("sessionAuth")
+@delete_profile_bp.doc(security="sessionAuth")
 def delete_profile() -> Response:
     """
     Renders the delete user profile page
@@ -35,7 +35,7 @@ def delete_profile() -> Response:
 
 @delete_profile_bp.route("/confirm_delete_profile", methods=["GET", "POST"])
 @login_required
-@delete_profile_bp.doc("sessionAuth")
+@delete_profile_bp.doc(security="sessionAuth")
 def confirm_delete_profile() -> Response:
     """
     Confirms the deletion of a user profile
@@ -168,7 +168,7 @@ def confirm_delete_profile() -> Response:
 
 @delete_profile_bp.route("/delete_profile/reassign/<wg_name>", methods=["GET", "POST"])
 @login_required
-@delete_profile_bp.doc("sessionAuth")
+@delete_profile_bp.doc(security="sessionAuth")
 def delete_profile_reassign(wg_name: str) -> Response:
     """
     Redirects the user to the workgroup to reassign their principal investigator role before deleting their profile

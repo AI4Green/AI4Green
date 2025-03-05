@@ -10,7 +10,7 @@ from .forms import UpdateEmailForm
 
 @update_email_bp.route("/update_email_password", methods=["GET", "POST"])
 @login_required
-@update_email_bp.doc("sessionAuth")
+@update_email_bp.doc(security="sessionAuth")
 def update_email_password() -> Response:
     """
     Update email and password page
@@ -41,7 +41,7 @@ def update_email_password() -> Response:
 
 @update_email_bp.route("/update_email", methods=["GET", "POST"])
 @login_required
-@update_email_bp.doc("sessionAuth")
+@update_email_bp.doc(security="sessionAuth")
 def update_email() -> Response:
     """
     Update email and sends verification email to the new email address.

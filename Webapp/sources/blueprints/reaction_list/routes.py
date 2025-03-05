@@ -27,7 +27,7 @@ from . import reaction_list_bp
 @login_required
 @workbook_member_required
 @reaction_list_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and membership in the specified workbook.",
 )
 def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response:
@@ -76,7 +76,7 @@ def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response
 
 @reaction_list_bp.route("/get_reactions", methods=["GET", "POST"])
 @login_required
-@reaction_list_bp.doc("sessionAuth")
+@reaction_list_bp.doc(security="sessionAuth")
 def get_reactions() -> Response:
     """
     Gets a list of reactions for the active workbook. Reaction data is sent as a list of dictionaries.
@@ -110,7 +110,7 @@ def get_reactions() -> Response:
 @login_required
 @workbook_member_required
 @reaction_list_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and membership in the specified workbook.",
 )
 def get_reaction_images(workgroup, workbook) -> Response:
@@ -132,7 +132,7 @@ def get_reaction_images(workgroup, workbook) -> Response:
 @login_required
 @workbook_member_required
 @reaction_list_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and membership in the specified workbook.",
 )
 def get_smiles(workgroup, workbook) -> Response:
@@ -154,7 +154,7 @@ def get_smiles(workgroup, workbook) -> Response:
 @login_required
 @workbook_member_required
 @reaction_list_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and membership in the specified workbook.",
 )
 def get_rxns(workgroup, workbook) -> Response:
@@ -174,7 +174,7 @@ def get_rxns(workgroup, workbook) -> Response:
 
 @reaction_list_bp.route("/_save_new_images", methods=["POST"])
 @login_required
-@reaction_list_bp.doc("sessionAuth")
+@reaction_list_bp.doc(security="sessionAuth")
 def save_new_images():
     """
     Updates reaction dict with images
@@ -203,7 +203,7 @@ def save_new_images():
 
 @reaction_list_bp.route("/get_new_reaction_id", methods=["GET", "POST"])
 @login_required
-@reaction_list_bp.doc("sessionAuth")
+@reaction_list_bp.doc(security="sessionAuth")
 def get_new_reaction_id() -> Response:
     """
     Gets the next reaction id for the active workbook

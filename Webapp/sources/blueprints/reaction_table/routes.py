@@ -383,7 +383,7 @@ def get_compound_data(
 
 @reaction_table_bp.route("/_save_reaction_note", methods=["POST"])
 @login_required
-@reaction_table_bp.doc("sessionAuth")
+@reaction_table_bp.doc(security="sessionAuth")
 def save_reaction_note():
     """
     Saves an reaction_note to the reaction object

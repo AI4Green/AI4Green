@@ -126,7 +126,7 @@ def get_marvinjs_key():
 @login_required
 @workbook_member_required
 @main_bp.doc(
-    "sessionAuth",
+    security="sessionAuth",
     description="Requires login and membership in the specified workbook.",
 )
 def sketcher(
@@ -227,7 +227,7 @@ def demo() -> Response:
 
 @main_bp.route("/search", methods=["GET", "POST"])
 @login_required
-@main_bp.doc("sessionAuth")
+@main_bp.doc(security="sessionAuth")
 def search() -> Response:
     """
     Renders the search page.
@@ -246,7 +246,7 @@ def search() -> Response:
 # manage account page
 @main_bp.route("/manage_account", methods=["GET", "POST"])
 @login_required
-@main_bp.doc("sessionAuth")
+@main_bp.doc(security="sessionAuth")
 def manage_account() -> Response:
     """
     Renders the manage account page.
@@ -346,7 +346,7 @@ def marvin_js_help() -> Response:
 
 @main_bp.route("/accessibility", methods=["GET", "POST"])
 @login_required
-@main_bp.doc("sessionAuth")
+@main_bp.doc(security="sessionAuth")
 def accessibility() -> Response:
     """
     Renders the accessibility page where the sustainability colour-coding can be changed.
@@ -391,7 +391,7 @@ def get_custom_colours() -> Response:
 
 @main_bp.route("/change_hazard_colours", methods=["GET", "POST"])
 @login_required
-@main_bp.doc("sessionAuth")
+@main_bp.doc(security="sessionAuth")
 def change_hazard_colours() -> Response:
     """
     Changes the sustainability colour-coding for the user.

@@ -27,7 +27,7 @@ def get_radar_plot(s: str, h: str, e: str) -> str:
 @solvent_guide_bp.route("/solvent_guide", methods=["GET", "POST"])
 @solvent_guide_bp.route("/solvent_guide/<sol>", methods=["GET", "POST"])
 @login_required
-@solvent_guide_bp.doc("sessionAuth")
+@solvent_guide_bp.doc(security="sessionAuth")
 def solvent_guide(sol: Optional[str] = None) -> Response:
     """
     Renders the solvent guide page. Includes a solvent card if one is provided as an argument
@@ -65,7 +65,7 @@ def solvent_guide(sol: Optional[str] = None) -> Response:
 
 @solvent_guide_bp.route("/solvent_guide_help", methods=["GET", "POST"])
 @login_required
-@solvent_guide_bp.doc("sessionAuth")
+@solvent_guide_bp.doc(security="sessionAuth")
 def solvent_guide_help() -> Response:
     """
     Renders the solvent guide help page

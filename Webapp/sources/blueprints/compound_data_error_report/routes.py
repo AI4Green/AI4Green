@@ -8,7 +8,7 @@ from . import compound_data_error_report_bp
 
 @compound_data_error_report_bp.route("/compound_data_error_report", methods=["POST"])
 @login_required
-@compound_data_error_report_bp.doc("sessionAuth")
+@compound_data_error_report_bp.doc(security="sessionAuth")
 def compound_data_error_report() -> Response:
     """
     Handles submitted compound data error reports by adding to the database

@@ -18,7 +18,7 @@ from . import solvent_PCA_bp
     "/solvent_PCA/<mode>", methods=["GET", "POST"]
 )  # todo is this route deprecated?
 @login_required
-@solvent_PCA_bp.doc("sessionAuth")
+@solvent_PCA_bp.doc(security="sessionAuth")
 def solvent_PCA() -> Response:
     """
     Loads initial solvent_PCA page which allows access to solvent surfer

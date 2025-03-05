@@ -6,7 +6,7 @@ from . import retrosynthesis_bp
 
 @retrosynthesis_bp.route("/retrosynthesis/", methods=["GET", "POST"])
 @login_required
-@retrosynthesis_bp.doc("sessionAuth")
+@retrosynthesis_bp.doc(security="sessionAuth")
 def retrosynthesis():
     """
     Renders the retrosynthesis page
@@ -20,7 +20,7 @@ def retrosynthesis():
 
 @retrosynthesis_bp.route("/retrosynthesis_about", methods=["GET"])
 @login_required
-@retrosynthesis_bp.doc("sessionAuth")
+@retrosynthesis_bp.doc(security="sessionAuth")
 def retrosynthesis_about():
     """
     Renders the retrosynthesis about page

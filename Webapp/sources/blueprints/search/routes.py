@@ -16,7 +16,7 @@ from . import search_bp
 
 @search_bp.route("/structure_search_handler", methods=["POST"])
 @login_required
-@search_bp.doc("sessionAuth")
+@search_bp.doc(security="sessionAuth")
 def structure_search_handler() -> Response:
     """
     Returns search results for exact structure search.

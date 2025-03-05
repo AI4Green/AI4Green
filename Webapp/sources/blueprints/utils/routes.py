@@ -7,7 +7,7 @@ from . import utils_bp
 
 @utils_bp.route("/updated_workgroup_dropdown", methods=["POST"])
 @login_required
-@utils_bp.doc("sessionAuth")
+@utils_bp.doc(security="sessionAuth")
 def updated_workgroup_dropdown() -> Response:
     """
     When the workgroup dropdown is updated, gets all workbooks which belong to the selected workgroup
