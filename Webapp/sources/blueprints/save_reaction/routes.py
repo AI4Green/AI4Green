@@ -22,6 +22,7 @@ from . import save_reaction_bp
 
 @save_reaction_bp.route("/new_reaction", methods=["POST", "GET"])
 @login_required
+@save_reaction_bp.doc("sessionAuth")
 def new_reaction() -> Response:
     """
     Save a new reaction to the database after user submits from the modal window
@@ -146,6 +147,7 @@ def new_reaction() -> Response:
 
 @save_reaction_bp.route("/_autosave", methods=["POST"])
 @login_required
+@save_reaction_bp.doc("sessionAuth")
 def autosave() -> Response:
     """autosave when a field changes in the reaction page"""
     reaction_description = str(request.form["reactionDescription"])
@@ -426,6 +428,7 @@ def autosave() -> Response:
 
 @save_reaction_bp.route("/clone_reaction", methods=["POST", "GET"])
 @login_required
+@save_reaction_bp.doc("sessionAuth")
 def clone_reaction() -> Response:
     """
     Takes reactions data from previously saved reaction and copies it into a new reaction which is saved to the database
@@ -512,6 +515,7 @@ def clone_reaction() -> Response:
 
 @save_reaction_bp.route("/_autosave_sketcher", methods=["POST"])
 @login_required
+@save_reaction_bp.doc("sessionAuth")
 def autosave_sketcher() -> Response:
     """Autosave function for saving changes to the sketcher only. Only used before reaction table is generated."""
 
@@ -541,6 +545,7 @@ def autosave_sketcher() -> Response:
 
 @save_reaction_bp.route("/_save_polymer_mode", methods=["POST"])
 @login_required
+@save_reaction_bp.doc("sessionAuth")
 def save_polymer_mode():
     """Updates reaction dict with polymer mode"""
     reaction = services.reaction.get_current_from_request()
@@ -555,6 +560,7 @@ def save_polymer_mode():
 
 @save_reaction_bp.route("/_get_polymer_mode", methods=["GET"])
 @login_required
+@save_reaction_bp.doc("sessionAuth")
 def get_polymer_mode():
     """Read reaction dict to get polymer mode"""
     workgroup_name = str(request.args.get("workgroup"))
@@ -572,6 +578,7 @@ def get_polymer_mode():
 
 @save_reaction_bp.route("/_check_reaction", methods=["POST"])
 @login_required
+@save_reaction_bp.doc("sessionAuth")
 def check_reaction_name() -> Response:
     """Checks the reaction name is unique"""
     reaction_name = sanitise_user_input(request.form["reactionName"])
@@ -606,6 +613,7 @@ def check_reaction_name() -> Response:
 
 @save_reaction_bp.route("/_upload_experimental_data", methods=["POST"])
 @login_required
+@save_reaction_bp.doc("sessionAuth")
 def upload_experiment_files():
     """Takes a list of files, and saves upon successful validation. Url added to database, file saved to azure blob"""
     services.auth.reaction_files(permission_level="edit")
@@ -617,6 +625,7 @@ def upload_experiment_files():
 
 @save_reaction_bp.route("/view_reaction_attachment", methods=["GET"])
 @login_required
+@save_reaction_bp.doc("sessionAuth")
 def view_reaction_attachment() -> Response:
     """
     Authenticate user has permission to view, then use the uuid to find the file on azure and then return the file.
@@ -640,6 +649,7 @@ def view_reaction_attachment() -> Response:
 
 @save_reaction_bp.route("/_download_reaction_attachment", methods=["POST"])
 @login_required
+@save_reaction_bp.doc("sessionAuth")
 def download_experiment_files():
     """Take a file and return as attachment to the user"""
     services.auth.reaction_files(permission_level="view_only")
@@ -658,6 +668,7 @@ def download_experiment_files():
 
 @save_reaction_bp.route("/_delete_reaction_attachment", methods=["DELETE"])
 @login_required
+@save_reaction_bp.doc("sessionAuth")
 def delete_reaction_attachment():
     """Delete file attached to reaction"""
     services.file_attachments.delete_file_attachment(request_source="user")

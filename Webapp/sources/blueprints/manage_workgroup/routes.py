@@ -43,6 +43,10 @@ from . import manage_workgroup_bp
 )
 @login_required
 @principal_investigator_required
+@manage_workgroup_bp.doc(
+    "sessionAuth",
+    description="Requires login and Principal Investigator role in the specified workgroup.",
+)
 def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
     """
     Renders the page for managing a workgroup. This page allows the PI to view all members of the workgroup, remove
@@ -96,6 +100,10 @@ def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
 )
 @login_required
 @principal_investigator_required
+@manage_workgroup_bp.doc(
+    "sessionAuth",
+    description="Requires login and Principal Investigator role in the specified workgroup.",
+)
 def make_change_to_workgroup(
     workgroup: str, email: str, mode: str, current_status: str
 ) -> Response:
@@ -159,6 +167,10 @@ def make_change_to_workgroup(
 )
 @login_required
 @workgroup_member_required
+@manage_workgroup_bp.doc(
+    "sessionAuth",
+    description="Requires login and membership in the specified workgroup.",
+)
 def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
     """
     Allows a user to request a change in role within a workgroup. The request is sent to the workgroup
@@ -230,6 +242,10 @@ def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
 )
 @login_required
 @principal_investigator_required
+@manage_workgroup_bp.doc(
+    "sessionAuth",
+    description="Requires login and Principal Investigator role in the specified workgroup.",
+)
 def change_status_from_request(
     workgroup: str, email: str, mode: str, decision: str
 ) -> Response:
@@ -308,6 +324,7 @@ def change_status_from_request(
     "/manage_workgroup/go_to_workgroup/<workgroup>", methods=["GET", "POST"]
 )
 @login_required
+@manage_workgroup_bp.doc("sessionAuth")
 def go_to_workgroup(workgroup: str) -> Response:
     """
     Redirects the user to the workgroup management page from a notification
@@ -326,6 +343,11 @@ def go_to_workgroup(workgroup: str) -> Response:
 
 @manage_workgroup_bp.route("/add_user_by_email", methods=["GET", "POST"])
 @principal_investigator_required
+@login_required
+@manage_workgroup_bp.doc(
+    "sessionAuth",
+    description="Requires login and Principal Investigator role in the specified workgroup.",
+)
 def add_user_by_email(workgroup):
     """
     Allows a principal investigator to add a user to a workgroup by email. A request is sent to the user to join the
@@ -405,6 +427,11 @@ def add_user_by_email(workgroup):
 
 @manage_workgroup_bp.route("/generate_qr_code/<workgroup>", methods=["GET", "POST"])
 @principal_investigator_required
+@login_required
+@manage_workgroup_bp.doc(
+    "sessionAuth",
+    description="Requires login and Principal Investigator role in the specified workgroup.",
+)
 def generate_qr_code(workgroup=None):
     """
     Generates a QR code for a workgroup that allows a user to join the workgroup by scanning the code.
@@ -452,6 +479,11 @@ def add_user_by_qr(token=None):
     "/change_workgroup_name/<workgroup>/<new_name>", methods=["POST"]
 )
 @principal_investigator_required
+@login_required
+@manage_workgroup_bp.doc(
+    "sessionAuth",
+    description="Requires login and Principal Investigator role in the specified workgroup.",
+)
 def change_name(workgroup: str, new_name: str):
     """
     Calls a verify workgroup name function in /manage_workgroup/routes.py, verifies the output is the same as the user

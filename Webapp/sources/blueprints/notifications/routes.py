@@ -11,6 +11,7 @@ from . import notifications_bp
 
 @notifications_bp.route("/notifications", methods=["GET", "POST"])
 @login_required
+@notifications_bp.doc("sessionAuth")
 def notifications() -> Response:
     """
     Renders the notification page to display the notifications for the current user
@@ -42,6 +43,7 @@ def notifications() -> Response:
 
 @notifications_bp.route("/archive_notification", methods=["GET", "POST"])
 @login_required
+@notifications_bp.doc("sessionAuth")
 def archive_notification() -> Response:
     """
     Archive a notification

@@ -16,6 +16,7 @@ class SelectWorkgroupForm(FlaskForm):
     "/workgroup_membership_summary", methods=["GET", "POST"]
 )
 @login_required
+@workgroup_membership_summary_bp.doc("sessionAuth")
 def workgroup_membership_summary() -> Response:
     """
     Workgroup membership summary page, all the workgroups the user belongs to and can find the workbooks

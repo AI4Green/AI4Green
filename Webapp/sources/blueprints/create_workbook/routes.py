@@ -28,6 +28,10 @@ class CreateWorkbookForm(FlaskForm):
 @create_workbook_bp.route("/create_workbook/<workgroup>", methods=["GET", "POST"])
 @login_required
 @principal_investigator_or_senior_researcher_required
+@create_workbook_bp.doc(
+    "sessionAuth",
+    description="Requires login and Principal Investigator or Senior Researcher role in the specified workgroup.",
+)
 def create_workbook(workgroup: str) -> Response:
     """Creates a workbook using a FlaskForm. The book is created by a principal investigator
      or senior researcher and they must provide the name and workgroup the workbook should belong to

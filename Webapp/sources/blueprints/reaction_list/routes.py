@@ -26,6 +26,10 @@ from . import reaction_list_bp
 )
 @login_required
 @workbook_member_required
+@reaction_list_bp.doc(
+    "sessionAuth",
+    description="Requires login and membership in the specified workbook.",
+)
 def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response:
     """
     must be logged in, a member of the workgroup and workbook and the creator of the reaction
@@ -72,6 +76,7 @@ def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response
 
 @reaction_list_bp.route("/get_reactions", methods=["GET", "POST"])
 @login_required
+@reaction_list_bp.doc("sessionAuth")
 def get_reactions() -> Response:
     """
     Gets a list of reactions for the active workbook. Reaction data is sent as a list of dictionaries.
@@ -104,6 +109,10 @@ def get_reactions() -> Response:
 @reaction_list_bp.route("/get_reaction_images", methods=["GET", "POST"])
 @login_required
 @workbook_member_required
+@reaction_list_bp.doc(
+    "sessionAuth",
+    description="Requires login and membership in the specified workbook.",
+)
 def get_reaction_images(workgroup, workbook) -> Response:
     """
     Gets a list of reaction images for the active workbook.
@@ -122,6 +131,10 @@ def get_reaction_images(workgroup, workbook) -> Response:
 @reaction_list_bp.route("/get_smiles", methods=["GET", "POST"])
 @login_required
 @workbook_member_required
+@reaction_list_bp.doc(
+    "sessionAuth",
+    description="Requires login and membership in the specified workbook.",
+)
 def get_smiles(workgroup, workbook) -> Response:
     """
     Gets a list of reaction smiles for the active workbook.
@@ -140,6 +153,10 @@ def get_smiles(workgroup, workbook) -> Response:
 @reaction_list_bp.route("/get_rxns", methods=["GET", "POST"])
 @login_required
 @workbook_member_required
+@reaction_list_bp.doc(
+    "sessionAuth",
+    description="Requires login and membership in the specified workbook.",
+)
 def get_rxns(workgroup, workbook) -> Response:
     """
     Gets a list of reaction RXNs for the active workbook.
@@ -157,6 +174,7 @@ def get_rxns(workgroup, workbook) -> Response:
 
 @reaction_list_bp.route("/_save_new_images", methods=["POST"])
 @login_required
+@reaction_list_bp.doc("sessionAuth")
 def save_new_images():
     """
     Updates reaction dict with images
@@ -185,6 +203,7 @@ def save_new_images():
 
 @reaction_list_bp.route("/get_new_reaction_id", methods=["GET", "POST"])
 @login_required
+@reaction_list_bp.doc("sessionAuth")
 def get_new_reaction_id() -> Response:
     """
     Gets the next reaction id for the active workbook

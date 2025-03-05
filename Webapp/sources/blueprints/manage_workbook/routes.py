@@ -46,6 +46,10 @@ class JoinWorkbookForm(FlaskForm):
 )
 @login_required
 @principal_investigator_or_senior_researcher_required
+@manage_workbook_bp.doc(
+    "sessionAuth",
+    description="Requires login and Principal Investigator or Senior Researcher role in the specified workgroup.",
+)
 def manage_workbook(
     workgroup: str, has_request: str = "no", workbook: OptionalType[str] = None
 ) -> Response:
@@ -161,6 +165,10 @@ def manage_workbook(
 )
 @login_required
 @principal_investigator_or_senior_researcher_required
+@manage_workbook_bp.doc(
+    "sessionAuth",
+    description="Requires login and Principal Investigator or Senior Researcher role in the specified workgroup.",
+)
 def add_remove_user_from_workbook(
     workgroup: str, workbook: str, email: str, mode: str
 ) -> Response:
@@ -202,6 +210,10 @@ def add_remove_user_from_workbook(
 )
 @login_required
 @principal_investigator_or_senior_researcher_required
+@manage_workbook_bp.doc(
+    "sessionAuth",
+    description="Requires login and Principal Investigator or Senior Researcher role in the specified workgroup.",
+)
 def manage_workbook_request(
     workgroup: str, workbook: str, email: str, mode: str
 ) -> Response:
@@ -279,6 +291,10 @@ def manage_workbook_request(
 @manage_workbook_bp.route("/join_workbook/<workgroup>", methods=["GET", "POST"])
 @login_required
 @workgroup_member_required
+@manage_workbook_bp.doc(
+    "sessionAuth",
+    description="Requires login and membership in the specified workgroup.",
+)
 def join_workbook(workgroup: str) -> Response:
     # TODO - is this function deprecated?
     workgroups = get_workgroups()
@@ -399,6 +415,7 @@ def join_workbook(workgroup: str) -> Response:
     "/manage_workbook/go_to_workbook/<workbook>/<workgroup>", methods=["GET", "POST"]
 )
 @login_required
+@manage_workbook_bp.doc("sessionAuth")
 def go_to_workgroup(workbook: str, workgroup: str) -> Response:
     """
     Redirects to the workbook management page from a notification

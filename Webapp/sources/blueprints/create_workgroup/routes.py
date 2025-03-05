@@ -30,6 +30,7 @@ class CreateWorkgroupForm(FlaskForm):
 
 @create_workgroup_bp.route("/create_workgroup", methods=["GET", "POST"])
 @login_required
+@create_workgroup_bp.doc(security="sessionAuth")
 def create_workgroup() -> Response:
     """
     Creates a workgroup using a FlaskForm. The creator becomes the principal investigator of the workgroup

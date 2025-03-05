@@ -9,6 +9,10 @@ from . import novel_compound_bp
 @novel_compound_bp.route("/_novel_compound", methods=["GET", "POST"])
 @login_required
 @workbook_member_required
+@novel_compound_bp.doc(
+    "sessionAuth",
+    description="Requires login and membership in the specified workbook.",
+)
 def novel_compound(workgroup, workbook) -> Response:
     """
     Adds a novel compound to the database and links it to the workbook of the current reaction.
@@ -58,6 +62,10 @@ def novel_compound(workgroup, workbook) -> Response:
 @novel_compound_bp.route("/_polymer_novel_compound", methods=["GET", "POST"])
 @login_required
 @workbook_member_required
+@novel_compound_bp.doc(
+    "sessionAuth",
+    description="Requires login and membership in the specified workbook.",
+)
 def polymer_novel_compound(workgroup, workbook) -> Response:
     """
     Adds a novel compound to the database and links it to the workbook of the current reaction.

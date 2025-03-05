@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from flask import Response, jsonify, request
 from flask_login import login_required
 from sources import models
@@ -10,6 +8,7 @@ from . import compound_data_error_report_bp
 
 @compound_data_error_report_bp.route("/compound_data_error_report", methods=["POST"])
 @login_required
+@compound_data_error_report_bp.doc("sessionAuth")
 def compound_data_error_report() -> Response:
     """
     Handles submitted compound data error reports by adding to the database

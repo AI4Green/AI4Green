@@ -28,6 +28,15 @@ def create_app(c: str = "dev") -> Flask:
     """
     app = APIFlask(__name__, title="AI4Green OpenAPI", version="1.6.0")
 
+    app.security_schemes = {
+        "sessionAuth": {
+            "type": "apiKey",
+            "in": "cookie",
+            "name": "session",  # Flask-Login uses a session cookie
+            "description": "Session cookie set after login by flask_login.",
+        }
+    }
+
     if c == "prod":
         print("Starting AI4Green in deployment configuration")
         app.config.from_object(config.DeploymentConfig)

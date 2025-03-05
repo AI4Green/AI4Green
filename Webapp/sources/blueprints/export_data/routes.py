@@ -25,6 +25,7 @@ from . import export_data_bp
 
 @export_data_bp.route("/export_data/home", methods=["GET", "POST"])
 @login_required
+@export_data_bp.doc("sessionAuth")
 def export_data_home():
     """
     Renders the data export home page
@@ -43,6 +44,7 @@ def export_data_home():
 
 @export_data_bp.route("/export_data/new_request", methods=["POST", "GET"])
 @login_required
+@export_data_bp.doc("sessionAuth")
 def new_data_export_request():
     """
     Initiates a data export request if user has permission to export from the selected workbook.
@@ -59,6 +61,7 @@ def new_data_export_request():
 
 @export_data_bp.route("/export_data/request_response/<token>", methods=["GET", "POST"])
 @login_required
+@export_data_bp.doc("sessionAuth")
 def export_data_request_response(token: str) -> Response:
     """
     Verify the token and the requestor and either redirect or render the page with the request information
@@ -87,6 +90,7 @@ def export_data_request_response(token: str) -> Response:
 
 @export_data_bp.route("/export_data/export_denied", methods=["POST", "GET"])
 @login_required
+@export_data_bp.doc("sessionAuth")
 def export_denied():
     """
     Update the database with the denial of the request.
@@ -103,6 +107,7 @@ def export_denied():
 
 @export_data_bp.route("/export_data/export_approved", methods=["POST", "GET"])
 @login_required
+@export_data_bp.doc("sessionAuth")
 def export_approved():
     """
     Update the database with the approval. Then check if all approvers have done so and start export.
@@ -130,6 +135,7 @@ def export_approved():
 
 @export_data_bp.route("/export_data/request_download/<token>", methods=["POST", "GET"])
 @login_required
+@export_data_bp.doc("sessionAuth")
 def request_download(token: str) -> Response:
     """
     Verify the token and the requestor and either redirect or render the page with the link to download the export file.
@@ -162,6 +168,7 @@ def request_download(token: str) -> Response:
 
 @export_data_bp.route("/export_permission", methods=["GET", "POST"])
 @login_required
+@export_data_bp.doc("sessionAuth")
 def export_permission():
     """
     Checks if the user has permission to export from the selected workbook.
@@ -182,6 +189,7 @@ def export_permission():
 
 @export_data_bp.route("/get_reaction_id_list", methods=["GET", "POST"])
 @login_required
+@export_data_bp.doc("sessionAuth")
 def get_reaction_id_list():
     """
     Get a list of reaction IDs from a workbook
