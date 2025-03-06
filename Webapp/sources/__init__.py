@@ -226,6 +226,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(search_bp)
 
+    from sources.blueprints.reaction_constructor import reaction_constructor_bp
+
+    app.register_blueprint(reaction_constructor_bp)
+
     from sources.blueprints.retrosynthesis import retrosynthesis_bp
 
     app.register_blueprint(retrosynthesis_bp)
@@ -258,5 +262,5 @@ def inject_session_context(app: Flask) -> Dict[str, str]:
             session_type="",
             marvin_js_key=app.config["MARVIN_JS_API_KEY"],
             workgroups=workgroups,
-            notification_number=notification_number
+            notification_number=notification_number,
         )
