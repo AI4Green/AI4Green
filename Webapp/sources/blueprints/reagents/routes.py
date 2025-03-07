@@ -1,22 +1,20 @@
 import re
 
 from flask import Response, jsonify, request
-from sources import db, models, services
+from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook, sanitise_user_input
-from sqlalchemy import func
 
-# request parses incoming request data and gives access to it
-# jsonify is used to send a JSON response to the browser
-from . import reagents_bp  # imports the blueprint of the reagents route
+from . import reagents_bp
 
 
-# Getting the reagent name from browser and returning its data
 @reagents_bp.route("/_reagents", methods=["POST"])
 def reagents() -> Response:
-    # must be logged in
-    """This function gets a reagent name from browser,
-    makes request to the reagent database, and returns
-    its data back to show it in the reaction table"""
+    """
+    This function gets the reagent from the browser and searches the database for it and returns the reagent data
+    \n Reagent identifier will be either a CAS number or name
+    Returns:
+        flask.Response: A JSON response with the reagent data
+    """
     reagent = sanitise_user_input(
         request.form["reagent"]
     )  # gets the reagent from browser

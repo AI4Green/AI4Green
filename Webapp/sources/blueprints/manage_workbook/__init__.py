@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-manage_workbook_bp = Blueprint("manage_workbook", __name__)
+manage_workbook_bp = APIBlueprint("manage_workbook", __name__)
 
 from . import routes

@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-summary_bp = Blueprint("summary", __name__)
+summary_bp = APIBlueprint("summary", __name__)
 
 from . import routes

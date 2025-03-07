@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-delete_profile_bp = Blueprint("delete_profile", __name__)
+delete_profile_bp = APIBlueprint("delete_profile", __name__)
 
 from . import routes

@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-version_bp = Blueprint("version", __name__)
+version_bp = APIBlueprint("version", __name__)
 
 from . import routes

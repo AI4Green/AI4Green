@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Dict
 from urllib.parse import urlparse
 
 from flask import Markup, abort, flash, redirect, request, session, url_for

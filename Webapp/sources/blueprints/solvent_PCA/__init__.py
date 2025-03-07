@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-solvent_PCA_bp = Blueprint("solvent_surfer", __name__)
+solvent_PCA_bp = APIBlueprint("solvent_surfer", __name__)
 
 from . import routes
