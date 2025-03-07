@@ -20,6 +20,7 @@ def summary() -> Response:
     # must be logged in
     """This function receives the reaction information from browser, calculates
     green metrics, gives hazard information, and renders the summary"""
+    reaction = None
     if not (
         str(request.form["demo"]) == "demo" or str(request.form["tutorial"]) == "yes"
     ):
@@ -30,6 +31,9 @@ def summary() -> Response:
             workgroup_name, workbook_name
         ):
             abort(401)
+
+        reaction = services.reaction.get_current_from_request()
+        # also handle if reactants/reagents/solvents/products have changed since reload
 
         polymer_mode = request.form["polymerMode"]
         # change summary table in polymer mode
@@ -64,6 +68,14 @@ def summary() -> Response:
 
     # if product mass and reactant mass sum are calculated, then it forms a summary table
     if product_data and reactant_data:
+        if reaction is None or json.loads(reaction.summary_table_data):
+            summary_table = json.loads(reaction.summary_table_data)
+            summary_table["summary_table_generated"] = True
+            # check if compounds have hazard codes indicating mutagen, carcinogen, or reproductive toxicity
+            # toxicity_types = services.hazard_code.get_toxicities(
+            #     [reactant_data, reagent_data, solvent_data, product_data]
+            # )
+
         summary_table = render_template(
             summary_table_html,
             amount_unit=unit_data["amount_unit"],

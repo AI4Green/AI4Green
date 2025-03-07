@@ -254,3 +254,17 @@ def get(h_code: str) -> models.HazardCode:
         .filter(models.HazardCode.code == h_code)
         .first()
     )
+
+
+# def get_toxicities(compound_data: List[Dict]) -> List[str]:
+#
+#     carcinogen_h_codes = ['H350', 'H350i', 'H351']
+#     mutagen_h_codes = ['H340', 'H341']
+#     reproductive_toxin_h_codes = ['H360', 'H360D', 'H360Df' 'H360F', 'H360FD', 'H360Fd', 'H361', 'H361d', 'H361f',
+#                                   'H361fd', 'H362']
+#     # if any(compound_data['reactants']['reactant_hazards'])
+#
+#
+#     for compound_type in compound_data:
+#         # for each type we want to access hazard codes
+#         print(compound_type)
