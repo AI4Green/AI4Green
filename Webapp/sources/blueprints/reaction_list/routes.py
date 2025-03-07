@@ -28,11 +28,10 @@ from . import reaction_list_bp
 @workbook_member_required
 @reaction_list_bp.doc(
     security="sessionAuth",
-    description="Requires login and membership in the specified workbook.",
+    description="Requires login and membership in the specified workbook and be the creator of the reaction.",
 )
 def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response:
     """
-    must be logged in, a member of the workgroup and workbook and the creator of the reaction
     Deletes a reaction from the list of reactions in the workbook by changing its status to 'inactive'.
 
     Args:
@@ -44,7 +43,6 @@ def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response
 
 
     """
-    # must be logged in, a member of the workgroup and workbook and the creator of the reaction
     # find reaction
     reaction = (
         db.session.query(models.Reaction)
@@ -182,7 +180,6 @@ def save_new_images():
     Returns:
         flask.Response: A JSON response with feedback
     """
-    # must be logged in
     workbook_name = str(request.form.get("workbook"))
     workgroup_name = str(request.form.get("workgroup"))
     workbook = services.workbook.get_workbook_from_group_book_name_combination(

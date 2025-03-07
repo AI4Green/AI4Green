@@ -39,7 +39,6 @@ def create_workgroup() -> Response:
         flask.Response: The rendered template for creating a workgroup
         or a redirect to the home page with a success message
     """
-    # must be logged in
     workgroups = get_workgroups()
     form = CreateWorkgroupForm()
     # institutions removed for now

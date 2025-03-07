@@ -57,7 +57,7 @@ def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
         has_request:
 
     Returns:
-
+        flask.Response The rendered manage workgroup page for the specific workgroup
     """
     workgroups = get_workgroups()
     current_workgroup = workgroup

@@ -24,7 +24,7 @@ def workgroup(
 ) -> Response:
     """
     Workgroup page, shows all the workbooks in a workgroup and allows the user to select a workbook to view and
-    see the reactions in that workbook.
+    see the reactions in that workbook. Must be a member of the workgroup.
 
     Args:
         workgroup_selected: workgroup to be selected
@@ -33,7 +33,6 @@ def workgroup(
     Returns:
         flask.Response: renders the workgroup page
     """
-    # must be logged in and a member of the workgroup
     if not security_member_workgroup(workgroup_selected):
         flash("You do not have permission to view this page")
         return redirect(url_for("main.index"))

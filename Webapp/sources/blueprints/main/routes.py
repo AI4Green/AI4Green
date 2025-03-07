@@ -240,7 +240,6 @@ def search() -> Response:
     Returns:
         flask.Response: The rendered search page.
     """
-    # must be logged in
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
@@ -339,7 +338,6 @@ def marvin_js_help() -> Response:
     Returns:
         flask.Response: The rendered Marvin JS help page.
     """
-    # must be logged in
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
@@ -359,7 +357,6 @@ def accessibility() -> Response:
     Returns:
         flask.Response: The rendered accessibility page.
     """
-    # must be logged in
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(

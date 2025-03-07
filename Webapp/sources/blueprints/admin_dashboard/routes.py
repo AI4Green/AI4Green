@@ -17,11 +17,14 @@ from . import admin_dashboard_bp
 )
 @login_required
 @admin_required
+@admin_dashboard_bp.doc(
+    security="sessionAuth",
+    description="Requires login and admin user role.",
+)
 def admin_dashboard(
     request_institution: str = None, request_name: str = None, decision: str = None
 ) -> Response:
     """These routes display all active requests from database and perform the actions on approval/denial"""
-    # must be logged in and admin
     workgroups = get_workgroups()
     notification_number = get_notification_number()
 
@@ -68,6 +71,10 @@ def admin_dashboard(
 
 @admin_dashboard_bp.route("/admin_delete_user/<user_id>", methods=["GET", "POST"])
 @admin_required
+@admin_dashboard_bp.doc(
+    security="sessionAuth",
+    description="Requires login and admin user role.",
+)
 def delete_user(user_id=None):
     user = services.user.from_id(user_id)
 

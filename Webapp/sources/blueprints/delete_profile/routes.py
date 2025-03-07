@@ -43,7 +43,6 @@ def confirm_delete_profile() -> Response:
     Returns:
         flask.Response: The rendered template for confirming the deletion of a user.
     """
-    # must be logged in
     if request.method == "POST":
         # remove from all workgroups and workbooks
         wgs_pi = (

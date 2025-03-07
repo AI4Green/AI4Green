@@ -13,6 +13,10 @@ from . import news_feed_bp
 @news_feed_bp.route("/new_news_post", methods=["POST"])
 @login_required
 @admin_required
+@news_feed_bp.doc(
+    security="sessionAuth",
+    description="Requires login and admin user role.",
+)
 def new_news_post():
     """
     Create a new news post and save it to the database
@@ -34,6 +38,10 @@ def new_news_post():
 @news_feed_bp.route("/delete_news_post", methods=["POST"])
 @login_required
 @admin_required
+@news_feed_bp.doc(
+    security="sessionAuth",
+    description="Requires login and admin user role.",
+)
 def delete_news_post():
     """
     Delete a news post from the database and feed
