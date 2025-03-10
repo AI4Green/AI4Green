@@ -30,6 +30,7 @@ empty_summary_table = json.dumps(
         "researcher": "",
         "supervisor": "",
         "radio_buttons": [],
+        "hazard_codes": [],
     }
 )
 
@@ -367,4 +368,16 @@ def get_risk_data(
         if risk_data["risk_rating"] == "VH"
         else "hazard-reset-hazard"
     )  # colour code for the hazard rating
+    # get a list of each hazard code in the reaction.
+    risk_data["hazard_codes"] = list(
+        set(
+            reactants["reactant_hazard_codes"]
+            + reagents["reagent_hazard_codes"]
+            + solvents["solvent_hazard_codes"]
+            + products["product_hazard_codes"]
+        )
+    )
+    risk_data["toxicity_types"] = services.hazard_code.get_toxicities(
+        risk_data["hazard_codes"]
+    )
     return risk_data

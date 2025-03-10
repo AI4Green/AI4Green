@@ -65,19 +65,29 @@ def summary() -> Response:
     risk_data = services.summary.get_risk_data(
         reactant_data, reagent_data, solvent_data, product_data
     )
-
+    toxicity_types = []
     # if product mass and reactant mass sum are calculated, then it forms a summary table
     if product_data and reactant_data:
-        if reaction is None or json.loads(reaction.summary_table_data):
-            summary_table = json.loads(reaction.summary_table_data)
-            summary_table["summary_table_generated"] = True
+        # if there is no prior reaction e.g., demo
+        # or if the summary table is being generated for the first time with these hazard codes then check for toxicities
+        if (
+            reaction is None
+            or json.loads(reaction.summary_table_data).get("hazard_codes")
+            != risk_data["hazard_codes"]
+            and reaction.complete
+        ):
             # check if compounds have hazard codes indicating mutagen, carcinogen, or reproductive toxicity
-            # toxicity_types = services.hazard_code.get_toxicities(
-            #     [reactant_data, reagent_data, solvent_data, product_data]
-            # )
+            toxicity_types = risk_data["toxicity_types"]
+            # update the reaction
+            if reaction:
+                summary_data = json.loads(reaction.summary_table_data)
+                summary_data["hazard_codes"] = risk_data["hazard_codes"]
+                reaction.summary_table_data = summary_data
+                reaction.update()
 
         summary_table = render_template(
             summary_table_html,
+            toxicity_alerts=toxicity_types,
             amount_unit=unit_data["amount_unit"],
             volume_unit=unit_data["volume_unit"],
             mass_unit=unit_data["mass_unit"],

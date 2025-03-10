@@ -305,7 +305,9 @@ def autosave() -> Response:
     conversion = request.form["conversion"]
     to_export = request.form["toExport"]
 
-    summary_table = json.dumps(
+    summary_table = json.loads(reaction.summary_table_data)
+
+    summary_table.update(
         {
             "real_product_mass": real_product_mass,
             "unreacted_reactant_mass": unreacted_reactant_mass,
@@ -338,6 +340,7 @@ def autosave() -> Response:
             "to_export": to_export,
         }
     )
+    summary_table = json.dumps(summary_table)
 
     # value is "complete" if user is trying to lock reaction.
     complete = request.form["complete"]
