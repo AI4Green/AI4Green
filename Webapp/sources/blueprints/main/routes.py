@@ -1,6 +1,7 @@
+from datetime import datetime
+
 from flask import (
     Response,
-    current_app,
     flash,
     get_template_attribute,
     jsonify,
@@ -14,13 +15,9 @@ from flask_login import (  # protects a view function against anonymous users
     current_user,
     login_required,
 )
-from datetime import datetime
-from sources.decorators import workbook_member_required
-from sources.blueprints.auth.forms import LoginForm
 from sources import models, services
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.blueprints.auth.forms import LoginForm
-from sources.decorators import workbook_member_required
 from sources.extensions import db
 
 from . import main_bp  # imports the blueprint of the main route
@@ -40,7 +37,9 @@ def index() -> Response:
     form = LoginForm()
     user_role = None
     news_items = []
-    privacy_policy_date = datetime(2025, 3, 3) # date privacy policy was updated to capture user location
+    privacy_policy_date = datetime(
+        2025, 3, 3
+    )  # date privacy policy was updated to capture user location
 
     if request.method == "POST":
         # return redirects from login verification to prevent form resubmission
@@ -65,7 +64,7 @@ def index() -> Response:
             news_items=news_items,
             messages_from_redirects=messages_from_redirects,
             form=form,
-            privacy_policy_date=privacy_policy_date
+            privacy_policy_date=privacy_policy_date,
         )
     # user is not authenticated, send to landing page.
     else:
@@ -105,83 +104,6 @@ def load_icons() -> Response:
     # load macro template with assigned variables
     icon_macro = get_template_attribute("macros.html", "icon_panel")
     return jsonify(icon_macro(icon_names, load_type, header, bootstrap_icon))
-
-
-@main_bp.route("/get_marvinjs_key", methods=["POST"])
-def get_marvinjs_key():
-    return jsonify({"marvinjs_key": current_app.config["MARVIN_JS_API_KEY"]})
-
-
-# Go to the sketcher
-@main_bp.route(
-    "/sketcher/<workgroup>/<workbook>/<reaction_id>/<tutorial>", methods=["GET", "POST"]
-)
-@login_required
-@workbook_member_required
-def sketcher(
-    workgroup: str, workbook: str, reaction_id: str, tutorial: str
-) -> Response:
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
-    workbook_object = (
-        db.session.query(models.WorkBook)
-        .filter(models.WorkBook.name == workbook)
-        .filter(models.WorkGroup.name == workgroup)
-        .first()
-    )
-    reaction = (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.reaction_id == reaction_id)
-        .filter(models.WorkBook.id == workbook_object.id)
-        .first()
-    )
-    addenda = (
-        db.session.query(models.ReactionNote)
-        .join(models.Reaction)
-        .filter(models.Reaction.id == reaction.id)
-        .all()
-    )
-
-    if reaction.reaction_smiles:
-        load_status = "loading"
-    else:
-        load_status = "loaded"
-    return render_template(
-        "sketcher_reload.html",
-        reaction=reaction,
-        load_status=load_status,
-        demo="not demo",
-        workgroups=workgroups,
-        notification_number=notification_number,
-        active_workgroup=workgroup,
-        active_workbook=workbook,
-        tutorial=tutorial,
-        addenda=addenda,
-    )
-
-
-# Go to the sketcher tutorial
-@main_bp.route("/sketcher_tutorial/<tutorial>", methods=["GET", "POST"])
-def sketcher_tutorial(tutorial: str) -> Response:
-    workgroups = []
-    notification_number = 0
-    if current_user.is_authenticated:
-        workgroups = get_workgroups()
-        notification_number = get_notification_number()
-    return render_template(
-        "sketcher_reload.html",
-        reaction={
-            "name": "Tutorial Reaction",
-            "reaction_id": "TUT-001",
-            "reaction_type": "STANDARD",
-        },
-        demo="not demo",
-        workgroups=workgroups,
-        notification_number=notification_number,
-        active_workgroup=None,
-        active_workbook=None,
-        tutorial=tutorial,
-    )
 
 
 # Go to demo
