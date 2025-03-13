@@ -11,6 +11,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/compound_error_flag.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_table_style.css') }}">
+    {% import "reaction_constructor.reaction_table_components.html" as reaction_table_components %}
 </head>
 
 
@@ -76,68 +77,8 @@
         </tr>
 
     {% for reactant in reactants %}
-    <input type="hidden" value="{{ loop.index }}" id="js-reactant-loop-index">
-        <tr class="not-novel-compound-input">
-            <td><input id="js-reactant-table-number{{ loop.index }}" style="width: 40px; border-width:0px;" type="number" value="{{ loop.index }}" readonly></td>
-            <td style='width: 200px;'><input  id="js-reactant{{ loop.index }}" style="width: 200px; border-width:0px;" value="{{ reactant }}"></td>
-            <td><input  type="radio" step="any"
-                    name="reactant-limiting" id="js-reactant-limiting{{ loop.index }}" value="{{ loop.index }}"  class="js-reactant-limiting">
-            </td>
-            <td><input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ reactant_mol_weights[loop.index0] }}"
-                    id="js-reactant-molecular-weight{{ loop.index }}" readonly>
-            </td>
-            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
-                    {% if reactant_densities %}value="{{ reactant_densities[loop.index0] }}"{% endif %}
-                    id="js-reactant-density{{ loop.index }}"></td>
-            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
-                    {% if reactant_сoncentrations %}value="{{ reactant_сoncentrations[loop.index0] }}"{% endif %}
-                    id="js-reactant-concentration{{ loop.index }}"></td>
-            <td><input style="width: 60px;" type="number" step="any" min="0" id="js-reactant-equivalent{{ loop.index }}" placeholder="-"
-                    {% if loop.index == 1 %} value="1" readonly {% else %}
-                    {% if reactant_equivalents %}value="{{ reactant_equivalents[loop.index0] }}"{% endif %}
-                    {% endif %}></td>
-            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
-                    {% if rounded_reactant_amounts %}value="{{ rounded_reactant_amounts[loop.index0] }}"{% endif %}
-                    id="js-reactant-rounded-amount{{ loop.index }}" class="js-reactant-rounded-amounts"
-                    readonly></td>
-            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
-                    {% if rounded_reactant_volumes %}value="{{ rounded_reactant_volumes[loop.index0] }}"{% endif %}
-                    id="js-reactant-rounded-volume{{ loop.index }}"
-                    readonly></td>
-            <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-reactant-rounded-mass{{ loop.index }}" class="js-reactant-rounded-masses"
-                    {% if rounded_reactant_masses %}value="{{ rounded_reactant_masses[loop.index0] }}"{% endif %}
-                    {% if loop.index == 1 %} {% else %}
-                    readonly
-                    {% endif %}></td>
-            <td><select size="1" class="physical-form" id="js-reactant-physical-form{{ loop.index }}">
-                    <option value="-select-" selected>-select-</option>
-                    <option value="Dense solid">Dense solid</option>
-                    <option value="Non-volatile liquid">Non-volatile liquid (b.p. &gt; 130&#8451;)</option>
-                    <option value="Unknown">Unknown</option>
-                    <option value="Dusty Solid">Dusty Solid</option>
-                    <option value="Lyophilised solid">Lyophilised solid</option>
-                    <option value="Volatile liquid">Volatile liquid (70&#8451; &le; b.p. &le; 130&#8451;)</option>
-                    <option value="Gas">Gas</option>
-                    <option value="Highly volatile liquid">Highly volatile liquid (b.p. &lt; 70&#8451;)</option>
-                    <option value="Aerosol">Aerosol</option>
-                    <option value="Solution that promotes skin absorption">Solution that promotes skin absorption</option>
-                </select></td>
-            <td><textarea class="text-in-table" id="js-reactant-hazards{{ loop.index }}" readonly>{{ reactant_hazards[loop.index0] }}</textarea></td>
-            <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal" title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-reactant{{ loop.index }}" type="button"><i class="bi bi-exclamation-circle"></i></button></td>
-            <td></td>
-        </tr>
-        <input type="hidden"
-        {% if reactant_amounts %}value="{{ reactant_amounts[loop.index0] }}"{% endif %}
-        id="js-reactant-amount{{ loop.index }}">
-        <input type="hidden"
-        {% if reactant_volumes %}value="{{ reactant_volumes[loop.index0] }}"{% endif %}
-        id="js-reactant-volume{{ loop.index }}">
-        <input type="hidden"
-        {% if reactant_masses %}value="{{ reactant_masses[loop.index0] }}"{% endif %}
-        id="js-reactant-mass{{ loop.index }}">
-        <input type="hidden" value="{{ reactant_primary_keys[loop.index0] }}" id="js-reactant-primary-key{{ loop.index }}">
-
-        {% endfor %}
+        {{  reaction_table_components.reactant_row(reactant, loop.index) }}
+    {% endfor %}
         <input type="hidden" value="{{ number_of_reactants }}" id="js-number-of-reactants">
 
         <tbody id="js-reagent-table">
@@ -251,50 +192,8 @@
             <td></td>
         </tr>
 
-        {% for product in products %}
-        <tr class="not-novel-compound-input">
-            <td><input type="number" id="js-product-table-number{{ loop.index }}" value="{{ product_table_numbers[loop.index0] }}" style="width:40px; border:none" readonly></td>
-            <td style='width: 200px;'><input  id="js-product{{ loop.index }}" style="width: 200px; border-width:0px;" value="{{ product }}"></td>
-            <td><input type="radio" id="js-main-product{{ loop.index }}" name="js-main-product" value="{{ product_table_numbers[loop.index0] }}" class="js-main-product"></td>
-                <script>
-                $('input[name="js-main-product"]').first().prop('checked', true)
-                </script>
-            <td><input type="number" step="any" value="{{ product_mol_weights[loop.index0] }}"
-                       id="js-product-molecular-weight{{ loop.index }}" style="width: 70px; border:none" readonly></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td><input type="number" step="any" placeholder="-" min="0"
-                {% if rounded_product_amounts %}value="{{ rounded_product_amounts[loop.index0] }}"{% endif %}
-                id="js-product-rounded-amount{{ loop.index }}" style="width: 60px; border:none" readonly></td>
-            <td></td>
-            <td style="width:4.3em"><input type="number" step="any" placeholder="-" min="0"
-                {% if rounded_product_masses %}value="{{ rounded_product_masses[loop.index0] }}"{% endif %}
-                id="js-product-rounded-mass{{ loop.index }}" style="width: 60px; border:none" readonly></td>
-            <td><select size="1" class='physical-form' id="js-product-physical-form{{ loop.index }}">
-                <option value="-select-" selected>-select-</option>
-                <option value="Dense solid">Dense solid</option>
-                <option value="Non-volatile liquid">Non-volatile liquid (b.p. &gt; 130&#8451;)</option>
-                <option value="Unknown">Unknown</option>
-                <option value="Dusty Solid">Dusty Solid</option>
-                <option value="Lyophilised solid">Lyophilised solid</option>
-                <option value="Volatile liquid">Volatile liquid (70&#8451; &le; b.p. &le; 130&#8451;)</option>
-                <option value="Gas">Gas</option>
-                <option value="Highly volatile liquid">Highly volatile liquid (b.p. &lt; 70&#8451;)</option>
-                <option value="Aerosol">Aerosol</option>
-                <option value="Solution that promotes skin absorption">Solution that promotes skin absorption</option>
-            </select></td>
-            <td><textarea class="text-in-table" id="js-product-hazard{{ loop.index }}" readonly>{{ product_hazards[loop.index0] }}</textarea></td>
-            <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal" title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-product{{ loop.index }}" type="button"><i class="bi bi-exclamation-circle"></i></button></td>
-            <td></td>
-        </tr>
-        <input type="hidden" {% if product_amounts %}value="{{ product_amounts[loop.index0] }}"{% endif %}
-               id="js-product-amount{{ loop.index }}">
-        <input type="hidden" {% if product_masses %}value="{{ product_masses[loop.index0] }}"{% endif %}
-               id="js-product-mass{{ loop.index }}">
-        <input type="hidden" value="{{ product_primary_keys[loop.index0] }}" id="js-product-primary-key{{ loop.index }}">
-
-
+    {% for product in products %}
+        {{  reaction_table_components.product_row(product, loop.index) }}
     {% endfor %}
 
     </table>
