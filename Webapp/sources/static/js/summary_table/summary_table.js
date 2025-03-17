@@ -13,7 +13,103 @@ function checkDemoMode() {
   }
 }
 
+/**
+ * Displays a modal with toxicity warnings based on provided alerts.
+ * Creates a list of toxicities and buttons to print corresponding signs.
+ */
+function showToxicityWarnings() {
+  const toxicityAlerts = JSON.parse(
+    document.getElementById("toxicity-alerts").value,
+  );
+
+  if (toxicityAlerts.length === 0) {
+    return;
+  }
+
+  const toxicityList = toxicityAlerts
+    .map((alert) => `<li><strong>${capitalize(alert)}</strong></li>`)
+    .join("");
+
+  const printButtons = toxicityAlerts
+    .map(
+      (type) => `
+            <button class="btn btn-secondary toxicity-print-sign" data-toxicity="${type}">
+                Print ${capitalize(type)} Sign
+            </button><br><br>
+        `,
+    )
+    .join("");
+
+  let modalContent = `
+        <div class="modal" id="toxicityModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Toxicity Warning</h5>
+                    </div>
+                    <div class="modal-body">
+                        <p>Your reaction involves the use of hazardous substances that may have the following toxicities:</p
+                        <ul>${toxicityList}</ul>
+                        <p>You should display signs in the lab to alert other lab users.</p>
+                        ${printButtons}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="toxicity-modal-confirm" class="btn btn-primary">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+  closeToxicityModal();
+  document.body.insertAdjacentHTML("beforeend", modalContent);
+
+  const modalElement = document.getElementById("toxicityModal");
+  modalElement.style.display = "block";
+
+  document
+    .getElementById("toxicity-modal-confirm")
+    .addEventListener("click", () => {
+      closeToxicityModal();
+    });
+
+  document.querySelectorAll(".toxicity-print-sign").forEach((button) => {
+    button.addEventListener("click", () => {
+      printToxicitySign(button.getAttribute("data-toxicity"));
+    });
+  });
+}
+
+/**
+ * Opens and prints a toxicity sign in a new window.
+ * @param {string} toxicityType - The type of toxicity for which to print a sign
+ */
+function printToxicitySign(toxicityType) {
+  const signUrl = `/static/img/lab_hazard_signs/${lower(
+    toxicityType.replace(" ", "_"),
+  )}.png`;
+  const newWindow = window.open(signUrl, "_blank");
+  if (newWindow) {
+    newWindow.onload = () => {
+      newWindow.print();
+    };
+  } else {
+    alert("Please allow pop-ups to print the lab sign.");
+  }
+}
+
+/**
+ * Closes and removes the toxicity warning modal from the DOM.
+ */
+function closeToxicityModal() {
+  const modal = document.getElementById("toxicityModal");
+  if (modal) {
+    modal.remove();
+  }
+}
+
 function reloadSummary() {
+  showToxicityWarnings();
   // get reaction image
   makeReactionSchemeImage();
   if ($("#js-tutorial").val() === "yes" || $("#js-demo").val() === "demo") {

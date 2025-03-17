@@ -1,7 +1,7 @@
 import json
 from typing import Dict, List
 
-from sources import auxiliary, services
+from sources import auxiliary, models, services
 
 empty_summary_table = json.dumps(
     {
@@ -30,7 +30,10 @@ empty_summary_table = json.dumps(
         "researcher": "",
         "supervisor": "",
         "radio_buttons": [],
-        "hazard_codes": [],
+        "reactant_primary_keys": [],
+        "reagent_primary_keys": [],
+        "solvent_primary_keys": [],
+        "product_primary_keys": [],
     }
 )
 
@@ -66,6 +69,7 @@ def get_reactant_data(request_data: Dict) -> Dict:
         "roundedReactantMasses",
         "reactantHazards",
         "reactantPhysicalForms",
+        "reactantPrimaryKeys",
     ]
     reactant_dict = get_request_data_from_keys(request_data, keys)
     services.hazard_code.get_multiple_compounds_data(reactant_dict, "reactant")
@@ -110,6 +114,7 @@ def get_reagent_data(request_data: Dict) -> Dict:
         "roundedReagentMasses",
         "reagentHazards",
         "reagentPhysicalForms",
+        "reagentPrimaryKeys",
     ]
     reagent_dict = get_request_data_from_keys(request_data, keys)
     services.hazard_code.get_multiple_compounds_data(reagent_dict, "reagent")
@@ -143,6 +148,7 @@ def get_solvent_data(request_data: Dict) -> Dict:
         "solventVolumes",
         "solventHazards",
         "solventPhysicalForms",
+        "solventPrimaryKeys",
     ]
     solvent_dict = get_request_data_from_keys(request_data, solvent_data_keys)
     services.hazard_code.get_multiple_compounds_data(solvent_dict, "solvent")
@@ -181,6 +187,7 @@ def get_product_data(request_data: Dict) -> Dict:
         "productMolecularWeights",
         "productHazards",
         "productPhysicalForms",
+        "productPrimaryKeys",
     ]
     product_dict = get_request_data_from_keys(request_data, product_data_keys)
     services.hazard_code.get_multiple_compounds_data(product_dict, "product")
@@ -381,3 +388,76 @@ def get_risk_data(
         risk_data["hazard_codes"]
     )
     return risk_data
+
+
+def check_if_updated(
+    reaction: models.Reaction,
+    reactant_data: Dict,
+    reagent_data: Dict,
+    solvent_data: Dict,
+    product_data: Dict,
+) -> bool:
+    """
+    Checks if the reactants, reagents, solvents, or products in a reaction have changed.
+
+    Args:
+        reaction (models.Reaction): The reaction object containing summary table data
+        reactant_data (Dict): Dictionary containing reactant information with 'reactant_primary_keys'
+        reagent_data (Dict): Dictionary containing reagent information with 'reagent_primary_keys'
+        solvent_data (Dict): Dictionary containing solvent information with 'solvent_primary_keys'
+        product_data (Dict): Dictionary containing product information with 'product_primary_keys'
+
+    Returns:
+        bool: True if any component (reactants, reagents, solvents, or products) has changed,
+              False if no changes detected
+
+    Note:
+        The function compares current primary keys with those stored in reaction.summary_table_data
+    """
+    summary_data = json.loads(reaction.summary_table_data)
+    if reactant_data["reactant_primary_keys"] != summary_data.get(
+        "reactant_primary_keys"
+    ):
+        return True
+    if reagent_data["reagent_primary_keys"] != summary_data.get("reagent_primary_keys"):
+        return True
+    if solvent_data["solvent_primary_keys"] != summary_data.get("solvent_primary_keys"):
+        return True
+    if product_data["product_primary_keys"] != summary_data.get("product_primary_keys"):
+        return True
+    return False
+
+
+def update_summary_keys(
+    reaction: models.Reaction,
+    reactant_data: Dict,
+    reagent_data: Dict,
+    solvent_data: Dict,
+    product_data: Dict,
+) -> None:
+    """
+    Updates the primary keys in a reaction's summary table data while preserving other fields.
+
+    Args:
+        reaction (models.Reaction): The reaction object to update with new summary data
+        reactant_data (Dict): Dictionary containing reactant information with 'reactant_primary_keys'
+        reagent_data (Dict): Dictionary containing reagent information with 'reagent_primary_keys'
+        solvent_data (Dict): Dictionary containing solvent information with 'solvent_primary_keys'
+        product_data (Dict): Dictionary containing product information with 'product_primary_keys'
+
+    Returns:
+        None: Updates the reaction.summary_table_data in place
+
+    Note:
+        The function modifies only the primary key fields in the existing summary_table_data,
+        preserving all other existing keys and values
+    """
+    summary_data = json.loads(reaction.summary_table_data)
+
+    summary_data["reactant_primary_keys"] = reactant_data["reactant_primary_keys"]
+    summary_data["reagent_primary_keys"] = reagent_data["reagent_primary_keys"]
+    summary_data["solvent_primary_keys"] = solvent_data["solvent_primary_keys"]
+    summary_data["product_primary_keys"] = product_data["product_primary_keys"]
+
+    reaction.summary_table_data = json.dumps(summary_data)
+    reaction.update()
