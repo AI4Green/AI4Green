@@ -85,7 +85,6 @@ def summary() -> Response:
                     reaction, reactant_data, reagent_data, solvent_data, product_data
                 )
 
-        print(toxicity_types)
         summary_table = render_template(
             summary_table_html,
             toxicity_alerts=toxicity_types,
