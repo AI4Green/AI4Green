@@ -11,7 +11,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/compound_error_flag.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_table_style.css') }}">
-    {% import "reaction_constructor.reaction_table_components.html" as reaction_table_components %}
+    {% import "reaction_constructor/reaction_table_components.html" as reaction_table_components %}
 </head>
 
 
@@ -26,21 +26,11 @@
     </div>
     <p><b>Please fill in the highlighted boxes to proceed</b></p>
 </div>
-<label for="reaction-class"><b>Reaction Class:</b> </label>
-<select size="1" name="reactionClass" id="reaction-class">
-
-     {% for option in reaction_classes %}
-     {% if option == reaction_class %}
-        <option value="{{option}}" SELECTED>{{option}}</option>
-     {% else %}
-        <option value="{{option}}">{{option}}</option>
-    {% endif %}
-    {% endfor %}
-</select>
+{{ reaction_table_components.reaction_class_dropdown(reaction_class) }}
 
 <div style="overflow-x:auto;" class="table-responsive text-nowrap" id="reaction-table-div">
     <br>
-
+    {#     Table headings     #}
     <table class="table table-sm w-auto">
         <tr class="not-novel-compound-input">
             <th scope="col">&#8470;</th>
@@ -79,7 +69,6 @@
     {% for reactant in reactants %}
         {{  reaction_table_components.reactant_row(reactant, loop.index) }}
     {% endfor %}
-        <input type="hidden" value="{{ number_of_reactants }}" id="js-number-of-reactants">
 
         <tbody id="js-reagent-table">
             <tr style="display: none" id="js-input-reagent1">
@@ -198,10 +187,10 @@
 
     </table>
 </div>
-<input type="hidden" value="{{ number_of_products }}" id="js-number-of-products">
 <input type="hidden" value="0" id="js-reaction-image-source">
 
 <div hidden>
+{#    can this be moved  #}
     <select id="js-physical-form-dropdown" size="1" class="physical-form add-highlight-unfilled-cell">
         <option selected>-select-</option>
         <option>Dense solid</option>
@@ -302,14 +291,17 @@
 
 
 
-
+{# Numbers #}
 <input type="hidden" value="{{ number_of_solvents }}" id="js-number-of-solvents" onchange="autoSaveCheck()">
-
 
 <input type="hidden" value="{{ number_of_reagents }}" id="js-number-of-reagents">
 
+<input type="hidden" value="{{ number_of_reactants }}" id="js-number-of-reactants">
+
+<input type="hidden" value="{{ number_of_products }}" id="js-number-of-products">
 
 <input type="hidden" value="1" id="js-limiting-reactant-table-number">
+
 <input type="hidden" value="1" id="js-main-product-table-number">
 
 <input type="hidden" value="{{ identifiers }}" id="js-reagent-identifiers">

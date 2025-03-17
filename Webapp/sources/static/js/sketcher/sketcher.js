@@ -114,7 +114,7 @@ async function createReactionTable() {
     contentType: "application/json;charset-utf-08",
     dataType: "json",
     url:
-      "/_process?reactants=" +
+      "/_update_reaction_table?reactants=" +
       reactants +
       "&products=" +
       products +
