@@ -173,6 +173,7 @@ def get_single_compound_hazard(
     Returns:
         compound_hazard_sentence - combines the H-code and associated phrase
         compound_hazard_ratings - list of ['VH', 'L',...] low to very high hazard level of hazard codes for a compound
+        Compound hazard codes - list of H codes for a compound
     """
 
     if (
@@ -277,6 +278,8 @@ def get_toxicities(hazard_codes: List[str]) -> List[str]:
         List of strings indicating whether reproductive, carcinogenic or mutagenic toxicities that are present
     """
     toxicity_types = []
+    # some of the reproductive toxin H codes may be superfluous currently, but adding them all guards
+    # against future updates
     hazard_categories = {
         "carcinogen": ["H350", "H350i", "H351"],
         "mutagen": ["H340", "H341"],
