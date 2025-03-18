@@ -1,4 +1,5 @@
 import contextlib
+import datetime
 from typing import Dict, Tuple
 
 import ipinfo
@@ -35,6 +36,16 @@ def get_app_version() -> Tuple[str, str]:
             git_hash = f.read().strip()
 
     return app_version, git_hash
+
+
+def get_privacy_policy_date() -> datetime.date:
+    """
+    Returns the date the current privacy policy was introduced in to the app.
+
+    Returns:
+        datetime.date, the date the privacy policy was introduced in to the app.
+    """
+    return datetime.date(2025, 3, 18)
 
 
 def check_is_number(string: str) -> bool:
