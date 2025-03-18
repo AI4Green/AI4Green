@@ -40,7 +40,7 @@ def index() -> Response:
     user_role = None
     news_items = []
     privacy_policy_date = datetime(
-        2025, 3, 13
+        2025, 3, 18, hour=15, minute=00
     )  # date privacy policy was updated to capture user location
 
     if request.method == "POST":
