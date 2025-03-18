@@ -13,7 +13,41 @@ function checkDemoMode() {
   }
 }
 
+/**
+ * Displays a modal with toxicity warnings based on provided alerts.
+ */
+function showToxicityWarnings() {
+  const toxicityAlerts = JSON.parse(
+    document.getElementById("toxicity-alerts").value,
+  );
+
+  if (toxicityAlerts.length === 0) {
+    return;
+  }
+
+  $("#toxicityModal").modal("show");
+}
+
+/**
+ * Opens and prints a toxicity sign in a new window.
+ * @param {string} toxicityType - The type of toxicity for which to print a sign
+ */
+function printToxicitySign(toxicityType) {
+  const signUrl = `/static/img/lab_hazard_signs/${lower(
+    toxicityType.replace(" ", "_"),
+  )}.png`;
+  const newWindow = window.open(signUrl, "_blank");
+  if (newWindow) {
+    newWindow.onload = () => {
+      newWindow.print();
+    };
+  } else {
+    alert("Please allow pop-ups to print the lab sign.");
+  }
+}
+
 function reloadSummary() {
+  showToxicityWarnings();
   // get reaction image
   makeReactionSchemeImage();
   if ($("#js-tutorial").val() === "yes" || $("#js-demo").val() === "demo") {

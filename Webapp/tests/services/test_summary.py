@@ -1,4 +1,6 @@
+from flask import Flask
 from flask.testing import FlaskClient
+from sources import services
 from tests.utils import login
 
 
@@ -31,6 +33,37 @@ def test_summary_tutorial(client: FlaskClient):
     response = client.post("/_summary", data=form_data)
     assert response.status_code == 200
     assert_summary_table_html_formed(response)
+
+
+def test_summary_updates(app: Flask):
+    """
+    Test updating and verifying changes in the primary keys of compounds in a reaction's summary tables.
+    """
+    # app context required throughout as we are interacting with the database
+    with app.app_context():
+        reaction = services.reaction.get_from_reaction_id_and_workbook_id("TW1-001", 1)
+        reaction_data = {"reactant_primary_keys": ["1", "2"]}
+        reagent_data = {"reagent_primary_keys": ["3", "4"]}
+        solvent_data = {"solvent_primary_keys": ["5", "6"]}
+        product_data = {"product_primary_keys": ["7", "8"]}
+        # tests old summary tables which don't have these keys initially, therefore registers as an update and return True
+        assert (
+            services.summary.check_if_updated(
+                reaction, reaction_data, reagent_data, solvent_data, product_data
+            )
+            is True
+        )
+        # update the values - tests this function too, to avoid reproducing its code exactly
+        services.summary.update_summary_keys(
+            reaction, reaction_data, reagent_data, solvent_data, product_data
+        )
+        # now the summary table has been updated with the new keys, therefore register as no update and return False
+        assert (
+            services.summary.check_if_updated(
+                reaction, reaction_data, reagent_data, solvent_data, product_data
+            )
+            is False
+        )
 
 
 def assert_summary_table_html_formed(response):
