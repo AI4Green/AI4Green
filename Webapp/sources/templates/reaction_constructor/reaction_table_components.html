@@ -1,4 +1,83 @@
-{%  macro reaction_class_dropdown(reaction_class) -%}
+{% macro reaction_description(reaction, tutorial) -%}
+<div class="container-fluid" style="padding-left: 0px">
+    <div id="reaction-name-description">
+        <p>
+            <textarea disabled id="js-reaction-name2" style="resize: horizontal;" rows="1" cols="50" placeholder="Please enter your reaction name">{% if tutorial == "yes" %}Tutorial Reaction{% else %}{{ reaction.name }}{% endif %}</textarea>
+        </p>
+        <p>
+            <textarea id="js-reaction-description" rows="4" cols="100" placeholder="Please describe your reaction"></textarea>
+        </p>
+    </div>
+    <p><b>Please fill in the highlighted boxes to proceed</b></p>
+</div>
+{%- endmacro  %}
+
+
+{% macro table_headings() -%}
+    <tr class="not-novel-compound-input">
+        <th scope="col">&#8470;</th>
+        <th scope="col">Reactants</th>
+        <th scope="col">Limiting Reagent?</th>
+        <th scope="col">Mol.Wt</th>
+        <th scope="col">Density (g/mL)</th>
+        <th scope="col">Conc. (M)</th>
+        <th scope="col">Equiv.</th>
+        <th scope="col">Amount<br>
+            <select size="1" name="amountUnit" id="js-amount-unit">
+                <option value="mol">mol</option>
+                <option value="mmol" selected>mmol</option>
+                <option value="μmol">μmol</option>
+            </select>
+        </th>
+        <th scope="col">Volume<br>
+            <select size="1" name="volumeUnit" id="js-volume-unit">
+                <option value="mL" selected>mL</option>
+                <option value="μL">μL</option>
+            </select>
+        </th>
+        <th scope="col">Mass<br>
+            <select size="1" name="massUnit" id="js-mass-unit">
+                <option value="g">g</option>
+                <option value="mg" selected>mg</option>
+                <option value="μg">μg</option>
+            </select>
+        </th>
+        <th scope="col">Physical Form</th>
+        <th scope="col">Hazards</th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+    </tr>
+{%- endmacro %}
+
+
+{%  macro product_headings() -%}
+    <tr class="not-novel-compound-input">
+            <td></td>
+            <td><b>Product</b></td>
+            <td><b>Desired Product?</b></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><select size="1" name="productAmountUnit" id="js-product-amount-unit">
+                <option value="mol">mol</option>
+                <option value="mmol" selected>mmol</option>
+                <option value="μmol">μmol</option>
+            </select></td>
+            <td></td>
+            <td><select size="1" name="productMassUnit" id="js-product-mass-unit">
+                <option value="g">g</option>
+                <option value="mg" selected>mg</option>
+                <option value="μg">μg</option>
+            </select></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+{%- endmacro %}
+
+{%  macro reaction_class_dropdown(reaction_class, reaction_classes) -%}
 <label for="reaction-class"><b>Reaction Class:</b> </label>
 <select size="1" name="reactionClass" id="reaction-class">
 
@@ -11,6 +90,7 @@
     {% endfor %}
 </select>
 {%- endmacro %}
+
 
 {%  macro physical_form_dropdown(index) -%}
 <select size="1" class="physical-form" id="js-reactant-physical-form{{ index }}">
@@ -80,6 +160,108 @@
 {%- endmacro %}
 
 
+{% macro reagent_or_solvent_heading(type) -%}
+    <tbody id="js-{{ type }}-table">
+            <tr style="display: none" id="js-input-{{ type }}1">
+                <td style="text-align:center;">New<br>Compound</td>
+                <td>Name</td>
+                <td>SMILES</td>
+                <td>Hazard Codes</td>
+                <td>CAS</td>
+                <td>MW</td>
+                <td>Density</td>
+                <td>Conc.</td>
+            </tr>
+            <tr class="not-novel-compound-input" id="{{ type }}-row">
+                <td></td>
+                {{ reagent_or_solvent_title(type) }}
+                <td><button id="js-add-new-{{ type }}-by-table" title="Add new {{ type }} to database" onclick="make{{ type|capitalize }}Input()" class="btn btn-outline-dark" style="width: fit-content;">Add new {{ type|capitalize }} to database</button></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td> {{ solvent_units_dropdown(type) }} </td>
+                <td></td>
+                <td></td>
+                <td><button type="button" title="Add {{ type }} to reaction" onclick="addNew{{ type|capitalize }}()" class="js-add-{{ type }} btn btn-success" style="width: fit-content;">Add {{ type|capitalize }}</button></td>
+            </tr>
+            {{ add_to_database_row( type ) }}
+        </tbody>
+{%- endmacro %}
+
+
+{%  macro reagent_or_solvent_title(type) -%}
+    {% if type == "reagent" %}
+        <td><b>Catalysts/reagents</b></td>
+    {% else %}
+        <td><b>Solvents</b></td>
+    {% endif %}
+{%- endmacro %}
+
+
+{% macro solvent_units_dropdown(type) -%}
+    {% if type == "solvent" %}
+        <select size="1" name="solventVolumeUnit" id="js-solvent-volume-unit">
+            <option value="mL" selected>mL</option>
+            <option value="μL">μL</option>
+        </select>
+    {% endif %}
+{%- endmacro  %}
+
+
+{% macro solvent_heading() -%}
+    <tbody id="js-solvent-table">
+            <tr id="solvent-row">
+                <td></td>
+                <td><b>Solvents</b><button id="js-add-new-solvent-by-table" title="Add new solvent to database" onclick="makeSolventInput()" class="btn btn-outline-dark" style="width: fit-content;">Add new solvent to database</button></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><select size="1" name="solventVolumeUnit" id="js-solvent-volume-unit">
+                        <option value="mL" selected>mL</option>
+                        <option value="μL">μL</option>
+                    </select></td>
+                <td></td>
+                <td></td>
+                <td><button type="button" title="Add solvent to reaction" onclick="addNewSolvent()" class="js-add-solvent btn btn-primary" style="width: fit-content;">Add Solvent</button></td>
+            </tr>
+            <tr style="display: none" id="js-input-solvent1">
+                <td style="text-align:center;">New<br>Compound</td>
+                <td>Name</td>
+                <td>SMILES</td>
+                <td>Hazard Codes</td>
+                <td>CAS</td>
+                <td>MW</td>
+                <td>Density</td>
+                <td>Conc.</td>
+            </tr>
+            {{ add_to_database_row("solvent") }}
+        </tbody>
+{%- endmacro %}
+
+
+{% macro add_to_database_row(type) -%}
+    <tr style="display: none" id="js-input-{{ type }}2">
+                <td></td>
+                <td><input style="width: 200px;" class="add-highlight-unfilled-cell no_autosave"  type="text" id="js-input-{{ type }}-name" placeholder="Required"></td>
+                <td><input style="width: 200px" type="text" id="js-input-{{ type }}-smiles" placeholder="Optional" class="no_autosave"></td>
+                <td><input style="width: 200px" type="text" id="js-input-{{ type }}-hazards" placeholder="Optional (HXXX-etc.)" class="no_autosave"></td>
+                <td><input style="width: 200px" type="text" id="js-input-{{ type }}-cas" placeholder="Optional" class="no_autosave"></td>
+                <td><input style="width: 60px" type="number" id="js-input-{{ type }}-mw" placeholder="Opt." class="no_autosave"></td>
+                <td><input style="width: 60px" type="number" id="js-input-{{ type }}-density" placeholder="Opt." class="no_autosave"></td>
+                <td><input style="width: 60px" type="number" id="js-input-{{ type }}-concentration" placeholder="Opt." class="no_autosave"></td>
+                <td><button type="button" id="js-input-{{ type }}" class="btn btn-outline-dark"
+                            onclick="submitNovelCompoundViaTable('{{ type }}')" title="Add compound to database" style="width: fit-content;">Input</button></td>
+                <td><button type="button" id="js-input-cancel" class="js-input-cancel btn btn-outline-dark"
+                            style="width: fit-content;" onclick="cancelNovelCompoundInput('{{ type }}')">Cancel</button></td>
+            </tr>
+{%- endmacro  %}
+
+
 {%  macro product_row(product, index) -%}
 <tr class="not-novel-compound-input">
             <td><input type="number" id="js-product-table-number{{ index }}" value="{{ product.idx }}" style="width:40px; border:none" readonly></td>
@@ -110,5 +292,4 @@
         <input type="hidden" {% if product_masses %}value="{{ product_masses[index0] }}"{% endif %}
                id="js-product-mass{{ index }}">
         <input type="hidden" value="{{ product.compound_data.primary_key }}" id="js-product-primary-key{{ index }}">
-
 {%- endmacro %}

@@ -15,178 +15,32 @@
 </head>
 
 
-<div class="container-fluid" style="padding-left: 0px">
-    <div id="reaction-name-description">
-        <p>
-            <textarea disabled id="js-reaction-name2" style="resize: horizontal;" rows="1" cols="50" placeholder="Please enter your reaction name">{% if tutorial == "yes" %}Tutorial Reaction{% else %}{{ reaction.name }}{% endif %}</textarea>
-        </p>
-        <p>
-            <textarea id="js-reaction-description" rows="4" cols="100" placeholder="Please describe your reaction"></textarea>
-        </p>
-    </div>
-    <p><b>Please fill in the highlighted boxes to proceed</b></p>
-</div>
-{{ reaction_table_components.reaction_class_dropdown(reaction_class) }}
+{{ reaction_table_components.reaction_description(reaction, tutorial) }}
+
+{{ reaction_table_components.reaction_class_dropdown(reaction_class, reaction_classes) }}
 
 <div style="overflow-x:auto;" class="table-responsive text-nowrap" id="reaction-table-div">
     <br>
-    {#     Table headings     #}
     <table class="table table-sm w-auto">
-        <tr class="not-novel-compound-input">
-            <th scope="col">&#8470;</th>
-            <th scope="col">Reactants</th>
-            <th scope="col">Limiting Reagent?</th>
-            <th scope="col">Mol.Wt</th>
-            <th scope="col">Density (g/mL)</th>
-            <th scope="col">Conc. (M)</th>
-            <th scope="col">Equiv.</th>
-            <th scope="col">Amount<br>
-                <select size="1" name="amountUnit" id="js-amount-unit">
-                    <option value="mol">mol</option>
-                    <option value="mmol" selected>mmol</option>
-                    <option value="μmol">μmol</option>
-                </select>
-            </th>
-            <th scope="col">Volume<br>
-                <select size="1" name="volumeUnit" id="js-volume-unit">
-                    <option value="mL" selected>mL</option>
-                    <option value="μL">μL</option>
-                </select>
-            </th>
-            <th scope="col">Mass<br>
-                <select size="1" name="massUnit" id="js-mass-unit">
-                    <option value="g">g</option>
-                    <option value="mg" selected>mg</option>
-                    <option value="μg">μg</option>
-                </select>
-            </th>
-            <th scope="col">Physical Form</th>
-            <th scope="col">Hazards</th>
-            <th scope="col"></th>
-            <th scope="col"></th>
-        </tr>
+
+    {{ reaction_table_components.table_headings() }}
 
     {% for reactant in reactants %}
         {{  reaction_table_components.reactant_row(reactant, loop.index) }}
     {% endfor %}
 
-        <tbody id="js-reagent-table">
-            <tr style="display: none" id="js-input-reagent1">
-                <td style="text-align:center;">New<br>Compound</td>
-                <td>Name</td>
-                <td>SMILES</td>
-                <td>Hazard Codes</td>
-                <td>CAS</td>
-                <td>MW</td>
-                <td>Density</td>
-                <td>Conc.</td>
-            </tr>
-            <tr style="display: none" id="js-input-reagent2">
-                <td></td>
-                <td><input style="width: 200px;" class="add-highlight-unfilled-cell no_autosave"  type="text" id="js-input-reagent-name" placeholder="Required"></td>
-                <td><input style="width: 200px" type="text" id="js-input-reagent-smiles" placeholder="Optional" class="no_autosave"></td>
-                <td><input style="width: 200px" type="text" id="js-input-reagent-hazards" placeholder="Optional (HXXX-etc.)" class="no_autosave"></td>
-                <td><input style="width: 200px" type="text" id="js-input-reagent-cas" placeholder="Optional" class="no_autosave"></td>
-                <td><input style="width: 60px" type="number" id="js-input-reagent-mw" placeholder="Opt." class="no_autosave"></td>
-                <td><input style="width: 60px" type="number" id="js-input-reagent-density" placeholder="Opt." class="no_autosave"></td>
-                <td><input style="width: 60px" type="number" id="js-input-reagent-concentration" placeholder="Opt." class="no_autosave"></td>
-                <td><button type="button" id="js-input-reagent" class="btn btn-outline-dark"
-                            onclick="submitNovelCompoundViaTable('reagent')" title="Add compound to database" style="width: fit-content;">Input</button></td>
-                <td><button type="button" id="js-input-cancel" class="js-input-cancel btn btn-outline-dark"
-                            style="width: fit-content;" onclick="cancelNovelCompoundInput('reagent')">Cancel</button></td>
-            </tr>
-            <tr class="not-novel-compound-input" id="reagent-row">
-                <td></td>
-                <td><b>Catalysts/reagents</b> <button id="js-add-new-reagent-by-table" title="Add new reagent to database" onclick="makeReagentInput()" class="btn btn-outline-dark" style="width: fit-content;">Add new reagent to database</button></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><button type="button" title="Add reagent to reaction" onclick="addNewReagent()" class="js-add-reagent btn btn-success" style="width: fit-content;">Add Reagent</button></td>
-            </tr>
-        </tbody>
+    {#      Reagent/catalyst input - includes new reagent row   #}
+    {{ reaction_table_components.reagent_or_solvent_heading("reagent") }}
 
+    {{ reaction_table_components.reagent_or_solvent_heading("solvent") }}
 
-        <tbody id="js-solvent-table">
-            <tr id="solvent-row">
-                <td></td>
-                <td><b>Solvents</b><button id="js-add-new-solvent-by-table" title="Add new solvent to database" onclick="makeSolventInput()" class="btn btn-outline-dark" style="width: fit-content;">Add new solvent to database</button></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><select size="1" name="solventVolumeUnit" id="js-solvent-volume-unit">
-                        <option value="mL" selected>mL</option>
-                        <option value="μL">μL</option>
-                    </select></td>
-                <td></td>
-                <td></td>
-                <td><button type="button" title="Add solvent to reaction" onclick="addNewSolvent()" class="js-add-solvent btn btn-primary" style="width: fit-content;">Add Solvent</button></td>
-            </tr>
-            <tr style="display: none" id="js-input-solvent1">
-                <td style="text-align:center;">New<br>Compound</td>
-                <td>Name</td>
-                <td>SMILES</td>
-                <td>Hazard Codes</td>
-                <td>CAS</td>
-                <td>MW</td>
-                <td>Density</td>
-                <td>Conc.</td>
-            </tr>
-            <tr style="display: none" id="js-input-solvent2">
-                <td></td>
-                <td><input style="width: 200px;" class="add-highlight-unfilled-cell no_autosave"  type="text" id="js-input-solvent-name" placeholder="Required"></td>
-                <td><input style="width: 200px" type="text" id="js-input-solvent-smiles" placeholder="Optional" class="no_autosave"></td>
-                <td><input style="width: 200px" type="text" id="js-input-solvent-hazards" placeholder="Optional (HXXX-etc.)" class="no_autosave"></td>
-                <td><input style="width: 200px" type="text" id="js-input-solvent-cas" placeholder="Optional" class="no_autosave"></td>
-                <td><input style="width: 60px" type="number" id="js-input-solvent-mw" placeholder="Opt." class="no_autosave"></td>
-                <td><input style="width: 60px" type="number" id="js-input-solvent-density" placeholder="Opt." class="no_autosave"></td>
-                <td><input style="width: 60px" type="number" id="js-input-solvent-concentration" placeholder="Opt." class="no_autosave"></td>
-                <td><button type="button" id="js-input-solvent" class="btn btn-outline-dark"
-                            onclick="submitNovelCompoundViaTable('solvent')" title="Add solvent to database" style="width: fit-content;">Input</button></td>
-                <td><button type="button" id="js-input-solvent-cancel" class="js-input-cancel btn btn-outline-dark"
-                            style="width: fit-content;" onclick="cancelNovelCompoundInput('solvent')">Cancel</button></td>
-            </tr>
-        </tbody>
-
-        <tr class="not-novel-compound-input">
-            <td></td>
-            <td><b>Product</b></td>
-            <td><b>Desired Product?</b></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td><select size="1" name="productAmountUnit" id="js-product-amount-unit">
-                <option value="mol">mol</option>
-                <option value="mmol" selected>mmol</option>
-                <option value="μmol">μmol</option>
-            </select></td>
-            <td></td>
-            <td><select size="1" name="productMassUnit" id="js-product-mass-unit">
-                <option value="g">g</option>
-                <option value="mg" selected>mg</option>
-                <option value="μg">μg</option>
-            </select></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
+    {{ reaction_table_components.product_headings() }}
 
     {% for product in products %}
         {{  reaction_table_components.product_row(product, loop.index) }}
     {% endfor %}
 
     </table>
-</div>
 <input type="hidden" value="0" id="js-reaction-image-source">
 
 <div hidden>
