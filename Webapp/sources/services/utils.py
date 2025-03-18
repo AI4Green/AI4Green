@@ -38,14 +38,14 @@ def get_app_version() -> Tuple[str, str]:
     return app_version, git_hash
 
 
-def get_privacy_policy_date() -> datetime.date:
+def get_privacy_policy_date() -> datetime.datetime:
     """
     Returns the date the current privacy policy was introduced in to the app.
 
     Returns:
-        datetime.date, the date the privacy policy was introduced in to the app.
+        datetime.datetime, datetime the privacy policy was introduced in to the app.
     """
-    return datetime.date(2025, 3, 18)
+    return datetime.datetime(2025, 3, 18)
 
 
 def check_is_number(string: str) -> bool:
