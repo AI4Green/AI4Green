@@ -1,3 +1,5 @@
+{% from "macros.html" import toxicity_modal %}
+
 <div id="section-to-print">
 <table class="table table-sm">
     <tr>
@@ -375,3 +377,6 @@
 <input type="hidden" value="{{ reagent_primary_keys }}" id="js-reagent-primary-keys">
 <input type="hidden" value="{{ solvent_primary_keys }}" id="js-solvent-primary-keys">
 <input type="hidden" value='{{ toxicity_alerts | tojson }}' id="toxicity-alerts">
+
+
+{{ toxicity_modal(toxicity_alerts) }}

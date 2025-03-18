@@ -17,7 +17,9 @@ body {
 --primary-green-hover: #62BA79;
 --primary-grey: #777778;
 --primary-grey-hover: #686868;
+--secondary-grey: #1c1f1c;
 --secondary-green: #62BA79;
+--tertiary-green: #BDFFD0;
 --icon-background: #caf7e3;
 --primary-blue: #83F5F2;
 --primary-blue-hover: #63B1B9;
@@ -91,12 +93,13 @@ body {
 .btn.btn-primary {
   background-color: var(--primary-grey);
   border-color: var(--primary-grey);
-  color: var(--primary-green);
+  color: var(--tertiary-green);
 }
 
 .btn.btn-primary:hover {
   background-color: var(--primary-grey-hover);
   border-color: var(--primary-grey-hover);
+  text-decoration:underline;
 }
 
 .btn.btn-outline-primary {
@@ -112,48 +115,49 @@ body {
 .btn.btn-secondary {
   background-color: var(--primary-green);
   border-color: var(--primary-green);
-  color: var(--primary-grey);
+  color: var(--secondary-grey);
 }
 
 .btn.btn-secondary:hover {
   background-color: var(--primary-green-hover);
   border-color: var(--primary-green-hover);
+  color: var(--secondary-grey);
 }
 
 .btn.btn-success {
     background-color: var(--primary-green);
   border-color: var(--primary-green);
-  color: var(--primary-grey);
+  color: var(--secondary-grey);
 }
 
 .btn.btn-success:hover {
   background-color: var(--primary-green-hover);
   border-color: var(--primary-green-hover);
-  color: white
+    text-decoration:underline;
 }
 
 .btn.btn-info {
   background-color: var(--primary-blue);
   border-color: var(--primary-blue);
-  color: var(--primary-grey);
+  color: var(--secondary-grey);
 }
 
 .btn.btn-info:hover {
   background-color: var(--primary-blue-hover);
   border-color: var(--primary-blue-hover);
-  color: white
+    text-decoration:underline;
 }
 
 .btn.btn-danger{
     background-color: var(--primary-red);
     border-color: var(--primary-red);
-    color: var(--primary-grey);
+  color: var(--secondary-grey);
 }
 
 .btn.btn-danger:hover {
   background-color: var(--primary-red-hover);
   border-color: var(--primary-red-hover);
-  color: white
+    text-decoration:underline;
 }
 
 #retrosynthesis-cytoscape {
