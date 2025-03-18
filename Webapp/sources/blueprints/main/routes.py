@@ -213,6 +213,15 @@ def search() -> Response:
     )
 
 
+@main_bp.route("/accept_privacy_policy", methods=["GET"])
+def accept_privacy_policy() -> Response:
+    user = services.user.from_email(current_user.email)
+    user.privacy_policy_accepted_on = datetime.now()
+    db.session.commit()
+
+    return redirect(url_for("main.home"))
+
+
 # manage account page
 @main_bp.route("/manage_account", methods=["GET", "POST"])
 @login_required
