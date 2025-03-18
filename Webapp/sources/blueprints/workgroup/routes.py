@@ -3,13 +3,12 @@ from typing import Optional
 
 from flask import Response, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required
-from sources import models, services
+from sources import services
 from sources.auxiliary import (
     get_notification_number,
     get_workgroups,
     security_member_workgroup,
 )
-from sources.extensions import db
 
 from . import workgroup_bp
 
@@ -19,10 +18,21 @@ from . import workgroup_bp
     "/workgroup/<workgroup_selected>/<workbook_selected>", methods=["GET", "POST"]
 )
 @login_required
+@workgroup_bp.doc(security="sessionAuth")
 def workgroup(
     workgroup_selected: str, workbook_selected: Optional[str] = None
 ) -> Response:
-    # must be logged in and a member of the workgroup
+    """
+    Workgroup page, shows all the workbooks in a workgroup and allows the user to select a workbook to view and
+    see the reactions in that workbook. Must be a member of the workgroup.
+
+    Args:
+        workgroup_selected: workgroup to be selected
+        workbook_selected: workbook to be selected
+
+    Returns:
+        flask.Response: renders the workgroup page
+    """
     if not security_member_workgroup(workgroup_selected):
         flash("You do not have permission to view this page")
         return redirect(url_for("main.index"))
@@ -49,7 +59,6 @@ def workgroup(
         workbook_new_reaction_ids_dic[workbook.name] = next_reaction_id
     # select workbook with newest reaction in as active workbook to be selected by default
     if workbooks:
-
         newest_reaction = services.workbook.get_newest_reaction_in_workbooks(workbooks)
 
         # if there is a newest reaction in the workbook collection, set to default and set the new reaction id

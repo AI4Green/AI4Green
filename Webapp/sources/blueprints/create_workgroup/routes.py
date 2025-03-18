@@ -1,21 +1,17 @@
 from datetime import datetime
 
 import pytz
-from flask import redirect  # renders html templates
-from flask import Response, flash, render_template, request, url_for
-from flask_login import (  # protects a view function against anonymous users
-    current_user,
-    login_required,
-)
+from flask import Response, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
 from sources import auxiliary, models, services
 from sources.auxiliary import get_workgroups
 from sources.extensions import db
 from sqlalchemy import func
-from wtforms import SelectField, StringField, SubmitField, TextAreaField
+from wtforms import StringField, SubmitField, TextAreaField
 from wtforms.validators import Length
 
-from . import create_workgroup_bp  # imports the blueprint of the dummy route
+from . import create_workgroup_bp
 
 
 class CreateWorkgroupForm(FlaskForm):
@@ -34,8 +30,15 @@ class CreateWorkgroupForm(FlaskForm):
 
 @create_workgroup_bp.route("/create_workgroup", methods=["GET", "POST"])
 @login_required
+@create_workgroup_bp.doc(security="sessionAuth")
 def create_workgroup() -> Response:
-    # must be logged in
+    """
+    Creates a workgroup using a FlaskForm. The creator becomes the principal investigator of the workgroup
+
+    Returns:
+        flask.Response: The rendered template for creating a workgroup
+        or a redirect to the home page with a success message
+    """
     workgroups = get_workgroups()
     form = CreateWorkgroupForm()
     # institutions removed for now

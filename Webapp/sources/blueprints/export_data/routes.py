@@ -25,7 +25,14 @@ from . import export_data_bp
 
 @export_data_bp.route("/export_data/home", methods=["GET", "POST"])
 @login_required
+@export_data_bp.doc(security="sessionAuth")
 def export_data_home():
+    """
+    Renders the data export home page
+
+    Returns:
+        flask.Response: The rendered template for the data export home page
+    """
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
@@ -37,8 +44,14 @@ def export_data_home():
 
 @export_data_bp.route("/export_data/new_request", methods=["POST", "GET"])
 @login_required
+@export_data_bp.doc(security="sessionAuth")
 def new_data_export_request():
-    """Initiates a data export request if user has permission"""
+    """
+    Initiates a data export request if user has permission to export from the selected workbook.
+
+    Returns:
+        flask.Response: A JSON response with the status of the request
+    """
     export_request = services.data_export.requests.NewRequest()
     permission_status = export_request.check_permissions()
     if permission_status == "permission accepted":
@@ -46,12 +59,18 @@ def new_data_export_request():
     return jsonify(permission_status)
 
 
-# route to reset password when link in email is used
 @export_data_bp.route("/export_data/request_response/<token>", methods=["GET", "POST"])
 @login_required
+@export_data_bp.doc(security="sessionAuth")
 def export_data_request_response(token: str) -> Response:
     """
-    Verify the token and the approver and either redirect or render the page with the request information
+    Verify the token and the requestor and either redirect or render the page with the request information
+
+    Args:
+        token: The token to verify the request
+
+    Returns:
+        flask.Response: The rendered template for the data export request page
     """
     # verify and give user the request data or if they fail verification send them home.
     verification = services.data_export.requests.RequestLinkVerification(token)
@@ -71,8 +90,14 @@ def export_data_request_response(token: str) -> Response:
 
 @export_data_bp.route("/export_data/export_denied", methods=["POST", "GET"])
 @login_required
+@export_data_bp.doc(security="sessionAuth")
 def export_denied():
-    """Update the request in the database"""
+    """
+    Update the database with the denial of the request.
+
+    Returns:
+        flask.Response: A redirect to the home page with a success message
+    """
     data_export_request = models.DataExportRequest.query.get(request.json["exportID"])
     request_status = services.data_export.requests.RequestStatus(data_export_request)
     request_status.deny()
@@ -82,8 +107,14 @@ def export_denied():
 
 @export_data_bp.route("/export_data/export_approved", methods=["POST", "GET"])
 @login_required
+@export_data_bp.doc(security="sessionAuth")
 def export_approved():
-    """Update the database with the approval. Then check if all approvers have done so and start export."""
+    """
+    Update the database with the approval. Then check if all approvers have done so and start export.
+
+    Returns:
+        flask.Response: A redirect to the home page with a success message
+    """
     data_export_request = models.DataExportRequest.query.get(request.json["exportID"])
     request_status = services.data_export.requests.RequestStatus(data_export_request)
     request_status.accept()
@@ -104,9 +135,16 @@ def export_approved():
 
 @export_data_bp.route("/export_data/request_download/<token>", methods=["POST", "GET"])
 @login_required
+@export_data_bp.doc(security="sessionAuth")
 def request_download(token: str) -> Response:
     """
     Verify the token and the requestor and either redirect or render the page with the link to download the export file.
+
+    Args:
+        token: The token to verify the request
+
+    Returns:
+        flask.Response: The rendered template for the data export download page with a link to download the export.
     """
     # verify and give user the request data or if they fail verification send them home.
     verification = services.data_export.requests.RequestLinkVerification(token)
@@ -130,10 +168,14 @@ def request_download(token: str) -> Response:
 
 @export_data_bp.route("/export_permission", methods=["GET", "POST"])
 @login_required
+@export_data_bp.doc(security="sessionAuth")
 def export_permission():
     """
     Checks if the user has permission to export from the selected workbook.
     The requestor must be either a workbook member or a workgroup PI
+
+    Returns:
+        flask.Response: A JSON response with the status of the request
     """
     if security_pi_workgroup(
         request.json.get("workgroup") and request.json.get("workbook")
@@ -147,7 +189,14 @@ def export_permission():
 
 @export_data_bp.route("/get_reaction_id_list", methods=["GET", "POST"])
 @login_required
+@export_data_bp.doc(security="sessionAuth")
 def get_reaction_id_list():
+    """
+    Get a list of reaction IDs from a workbook
+
+    Returns:
+        flask.Response: A JSON response with the list of reaction
+    """
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         request.json["workgroup"], request.json["workbook"]
     )
