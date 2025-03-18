@@ -43,7 +43,7 @@ def index() -> Response:
 
     form = LoginForm()
     privacy_policy_date = datetime(
-        2025, 3, 3
+        2025, 3, 13
     )  # date privacy policy was updated to capture user location
 
     if request.method == "POST":

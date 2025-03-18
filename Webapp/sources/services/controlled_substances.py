@@ -26,7 +26,6 @@ def check_reaction_for_controlled_substances(
                         - List[3]: Solvents
         None: If no controlled substances are used in the reaction.
     """
-    location = services.utils.get_location()
     substance_smiles = [
         reaction.reactants,
         reaction.reagents,
@@ -43,6 +42,7 @@ def check_reaction_for_controlled_substances(
     if all(not sublist for sublist in checks):
         return None
 
+    location = services.utils.get_location()
     unique_structures = {
         inchi
         for sublist in checks  # flatten the list of lists
