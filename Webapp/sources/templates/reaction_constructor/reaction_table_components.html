@@ -210,40 +210,6 @@
 {%- endmacro  %}
 
 
-{% macro solvent_heading() -%}
-    <tbody id="js-solvent-table">
-            <tr id="solvent-row">
-                <td></td>
-                <td><b>Solvents</b><button id="js-add-new-solvent-by-table" title="Add new solvent to database" onclick="makeSolventInput()" class="btn btn-outline-dark" style="width: fit-content;">Add new solvent to database</button></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><select size="1" name="solventVolumeUnit" id="js-solvent-volume-unit">
-                        <option value="mL" selected>mL</option>
-                        <option value="μL">μL</option>
-                    </select></td>
-                <td></td>
-                <td></td>
-                <td><button type="button" title="Add solvent to reaction" onclick="addNewSolvent()" class="js-add-solvent btn btn-primary" style="width: fit-content;">Add Solvent</button></td>
-            </tr>
-            <tr style="display: none" id="js-input-solvent1">
-                <td style="text-align:center;">New<br>Compound</td>
-                <td>Name</td>
-                <td>SMILES</td>
-                <td>Hazard Codes</td>
-                <td>CAS</td>
-                <td>MW</td>
-                <td>Density</td>
-                <td>Conc.</td>
-            </tr>
-            {{ add_to_database_row("solvent") }}
-        </tbody>
-{%- endmacro %}
-
-
 {% macro add_to_database_row(type) -%}
     <tr style="display: none" id="js-input-{{ type }}2">
                 <td></td>
