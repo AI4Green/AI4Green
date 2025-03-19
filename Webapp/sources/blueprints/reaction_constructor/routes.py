@@ -48,7 +48,7 @@ def sketcher(
     else:
         load_status = "loaded"
     return render_template(
-        "sketcher_reload.html",
+        "reaction_constructor.html",
         reaction=reaction,
         load_status=load_status,
         demo="not demo",
@@ -70,7 +70,7 @@ def sketcher_tutorial(tutorial: str) -> Response:
         workgroups = get_workgroups()
         notification_number = get_notification_number()
     return render_template(
-        "sketcher_reload.html",
+        "reaction_constructor.html",
         reaction={
             "name": "Tutorial Reaction",
             "reaction_id": "TUT-001",
