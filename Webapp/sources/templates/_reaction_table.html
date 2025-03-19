@@ -45,90 +45,10 @@
 
 
 
-<table hidden id="js-solvent-table-new-row">
-    <tr id="js-solvent-table-row-x-" class="not-novel-compound-input">
-        <td><input type="number"
-         style="width:40px; border:none" id="js-solvent-table-number-x-"
-         value="" readonly></td>
-        <td id="js-solvent-datalist-cell-x-"  ><input aria-role="combobox" type="search"
-        style="width: 200px;" class="add-highlight-unfilled-cell" id="js-solvent-x-" autocomplete="off"
-        placeholder="Name or CAS Number">
-        </td>
-        <td><button value="-x-" id="go-to-solvent-guide-x-" title="Open solvent guide in new tab" class="btn btn-primary btn-primary btn-sm" onclick="goToSolventGuide(this.value)">Solvent Guide</button></td>
-        <td><button  value="-x-" id="go-to-solvent-surfer" title="Open solvent surfer in new tab" class="btn btn-primary btn-primary btn-sm" onclick="goToSolventSurfer(this.value)">Solvent Surfer</button></td>
-        <td></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-solvent-rounded-concentration-x-"
-         style="width:60px; border:none" readonly></td>
-        <td></td>
-        <td></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-solvent-volume-x-" style="width:60px;" class="add-highlight-unfilled-cell"></td>
-        <td></td>
-        <td id="js-solvent-physical-form-dropdown-cell-x-"></td>
-        <td><textarea class="text-in-table"
-         id="js-solvent-hazards-x-" readonly></textarea></td>
-        <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal"
-                    title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-solvent-x-"
-                    type="button" style="display: none"><i class="bi bi-exclamation-circle"></i></button></td>
-        <td>
-            <button value="-x-" id="remove-solvent-x-" onclick="removeSolvent(this.value)" type="button" class="js-remove-solvent close" aria-label="Close">
-                <span aria-hidden="true" title="Remove Solvent">&times;</span>
-            </button>
-        </td>
-        <input type="hidden"
-        id="js-solvent-concentration-x-">
-        <input type="hidden" id="js-solvent-primary-key-x-">
-    </tr>
-</table>
+{{ reaction_table_components.solvent_row() }}
 
-
-<table hidden id="js-reagent-table-new-row">
-    <tr id="js-reagent-table-row-x-" class="not-novel-compound-input">
-        <td><input type="number"
-         id="js-reagent-table-number-x-"
-         style="width: 40px; border-width:0px;" value="
-        reagentTableNumber  " readonly>
-        </td><td style="width: 200px;"><datalist size="1"
-         id="js2-reagent-x-" style="width: 200px;">
-         <option selected>-select-</option>
-        </datalist><input style="width: 200px;" class="add-highlight-unfilled-cell" type="search" id="js-reagent-x-" autocomplete="off" list="js2-reagent-x-" placeholder="Name or CAS Number"></td>
-        <td></td>
-        <td><input type="number" step="any" placeholder="-" min="0"
-         id="js-reagent-molecular-weight-x-" style="width: 70px; border:none" readonly></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-reagent-density-x-" style="width: 60px; border:none"></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-reagent-concentration-x-" style="width: 60px; border:none"></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-reagent-equivalent-x-" style="width: 60px;" class="add-highlight-unfilled-cell"></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-reagent-rounded-amount-x-" style="width: 60px; border:none" readonly></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-reagent-rounded-volume-x-" style="width: 60px; border:none" readonly></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-reagent-rounded-mass-x-" style="width: 60px; border:none" readonly></td>
-        <td id="js-reagent-physical-form-dropdown-cell-x-"></td>
-        <td><textarea class="text-in-table"
-         id="js-reagent-hazards-x-" readonly></textarea></td>
-        <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal"
-                    title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-reagent-x-"
-                    type="button" style="display: none"><i class="bi bi-exclamation-circle"></i></button>
-        <input type="hidden" id="js-reagent-amount-x-">
-        <input type="hidden" id="js-reagent-mass-x-">
-        <input type="hidden" id="js-reagent-volume-x-">
-        <input type="hidden" id="js-reagent-primary-key-x-">
-        <input type="hidden" id="js-reagent-smiles-x-"></td>
-        <td>
-            <button value="-x-" id="remove-reagent-x-" onclick="removeReagent(this.value)" type="button" class="js-remove-reagent close" aria-label="Close">
-                <span aria-hidden="true" title="Remove Reagent">&times;</span>
-            </button>
-        </td>
-    </tr>
-</table>
+{{ reaction_table_components.reagent_row() }}
 </div>
-
-
 
 {# Numbers #}
 <input type="hidden" value="{{ number_of_solvents }}" id="js-number-of-solvents" onchange="autoSaveCheck()">
@@ -152,70 +72,6 @@
 </datalist>
 
 
-<!-- Report compound modal -->
-<div class="modal fade" id="report-compound-data-modal" tabindex="-1" role="dialog" aria-labelledby="report-compound-data-modal-title" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="compound-data-report-modal-title"></h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" id="compound-data-report-body">
-          <span id="compound-data-report-text"></span>
-          <div id="modal-report-inner-body">
-              <br>
-              <span style="float: left">
-                  Select error from dropdown
-                  <br>
-                  <select size="1" id="compound-data-report-dropdown">
-                      <option value="-select-" selected>-select-</option>
-                      <option value="incorrect-cas">Incorrect CAS</option>
-                      <option value="incorrect-name">Incorrect name</option>
-                      <option value="incorrect-molecular-weight">Incorrect molecular weight</option>
-                      <option value="incorrect-density">Incorrect density</option>
-                      <option value="incorrect-concentration">Incorrect concentration</option>
-                      <option value="incorrect-hazards">Incorrect hazards</option>
-                      <option value="other">Other</option>
-                  </select>
-                  </span>
-                  <span style="float: right">
-                      Additional information
-                      <br>
-                      <textarea id="compound-data-report-additional-info" cols="28"></textarea>
-            </span>
-          </div>
-          <input hidden id="compound-data-report-id">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" id="report-compound-data-close">Close</button>
-        <button type="button" class="btn btn-danger" id="report-compound-data-submit" onclick="reportCompoundSubmit()" disabled>Report</button>
-      </div>
-    </div>
-  </div>
-</div>
+{{ reaction_table_components.report_compound_modal() }}
 
-<!-- reaction-note modal window -->
-<div class="modal fade" id="new-reaction-note-modal" tabindex="-1" role="dialog" aria-labelledby="new-reaction-note-modal-title" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="new-reaction-note-modal-title">Add Note</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" id="new-reaction-note-body">
-          <div id="modal-new-reaction-note-inner-body">
-              <label for="new-reaction-note-text">Add a note to amend any missing or incorrect details in the reaction.</label>
-              <textarea id="new-reaction-note-text" style="width: 100%; height:10rem"></textarea>
-          </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-dismiss="modal" id="new-reaction-note-close">Close</button>
-        <button type="button" class="btn btn-success" id="new-reaction-note-submit" data-dismiss="modal" onclick="saveNewReactionNoteToDatabase()" disabled>Submit</button>
-      </div>
-    </div>
-  </div>
-</div>
+{{ reaction_table_components.reaction_note_modal() }}
