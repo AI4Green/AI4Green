@@ -58,6 +58,8 @@ class User(Model, UserMixin):
     )
     verified_on = db.Column(db.DateTime, nullable=True)
 
+    privacy_policy_accepted_on = db.Column(db.DateTime, nullable=True)
+
     """Password hashing is implemented by the two following methods"""
 
     def check_password(self, password):
