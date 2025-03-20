@@ -6,7 +6,7 @@ if ($("#js-tutorial").val() === "no" && $("#js-demo").val() !== "demo") {
 function observer() {
   // this line detects any changes user makes to any input field and saves 0.5 seconds after user stops focus on input
   $(document).on("change", ":input:not(#polymer-mode-select)", function (e) {
-    setTimeout(autoSaveCheck(e), 500);
+    setTimeout(autoSaveCheck(e), 2000);
   });
   // on press remove solvent save
   $(document).on("click", ".js-remove-solvent", function (e) {
@@ -48,9 +48,9 @@ function autoSaveCheck(e = null, sketcher = false) {
     } else if (sketcher === true) {
       // dont autosave sketcher if reaction table has loaded
       let reactionDiv = document.getElementById("reaction-table-div");
-      if (reactionDiv.childNodes.length === 0) {
-        sketcherAutoSave();
-      }
+      // if (reactionDiv.childNodes.length === 0) {
+      sketcherAutoSave();
+      // }
     }
   }
 }
@@ -88,6 +88,7 @@ async function sketcherAutoSave() {
     // catches if autosave occurs during a sketcher crash
     return;
   }
+  // change here for reagent support
   let smilesNew = removeReagentsFromSmiles(smiles);
   $("#js-reaction-smiles").val(smilesNew);
   $("#js-reaction-rxn").val(rxn);
@@ -116,6 +117,28 @@ async function sketcherAutoSave() {
       flashUserErrorSavingMessage();
     },
   });
+  updateReactionTable(smiles, workgroup, workbook, reactionID);
+}
+
+function updateReactionTable(smiles, workgroup, workbook, reactionID) {
+  fetch("/autoupdate_reaction_table", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      reaction_smiles: smiles,
+      workgroup: workgroup,
+      workbook: workbook,
+      reaction_id: reactionID,
+    }),
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (item) {
+      $("#reaction-table-div").html(item.reactionTable).show();
+    });
 }
 
 function postReactionData(complete = "not complete") {

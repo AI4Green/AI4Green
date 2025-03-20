@@ -34,20 +34,13 @@ class SketcherCompound:
         polymer_indices,
         workbook,
         demo,
-        number_of_reactants=0,
-        is_product=False,
+        reaction_component,
     ):
         self.smiles = smiles
+        self.idx = idx
         self.demo = demo
         self.workbook = workbook
-
-        if is_product:
-            self.reaction_component = "Product"
-            self.idx = idx + number_of_reactants
-        else:
-            self.reaction_component = "Reactant"
-            self.idx = idx
-
+        self.reaction_component = reaction_component
         self.is_polymer = False
         self.is_novel_compound = False
         self.novel_compound_table = None
@@ -160,53 +153,44 @@ def check_novel_compounds(compound_list: List[SketcherCompound]) -> Union[str, N
     return None
 
 
-# Processing data from Marvin JS and creating reaction table
-@reaction_table_bp.route("/_update_reaction_table", methods=["GET"])
+@reaction_table_bp.route("/autoupdate_reaction_table", methods=["GET", "POST"])
 @workbook_member_required
-def update_reaction_table():
-    # must be logged in
-    """This function receives reagents and product from browser, finds
-    their IUPAC names and molar weights in PubChem, forms the lists of
-    reagents and solvents. and renders the reaction table
-
-    We should refactor this function to provide each reagent with its associated data instead
-    write clases for product and reactants, with like name
-
+def autoupdate_reaction_table():
     """
+    I guess the idea is to take any smiles from the front end and generate the reaction table
 
+    Needs to get reaction from db too, but ignore for now
+    """
     # get user workbook
-    demo = request.args.get("demo")
-    tutorial = request.args.get("tutorial")
+    demo = request.json.get("demo")
+    tutorial = request.json.get("tutorial")
     reaction = None
     workbook = None
     if demo != "demo" and tutorial != "yes":
-        workgroup = request.args.get("workgroup")
-        workbook_name = request.args.get("workbook")
+        workgroup = request.json.get("workgroup")
+        workbook_name = request.json.get("workbook")
         workbook = services.workbook.get_workbook_from_group_book_name_combination(
             workgroup, workbook_name
         )
-        reaction_id = request.args.get("reaction_id")
+        reaction_id = request.json.get("reaction_id")
         reaction = services.reaction.get_from_reaction_id_and_workbook_id(
             reaction_id, workbook.id
         )
 
     # get position of polymers in reaction or leave empty if none
-    polymer_mode = request.args.get("polymer")
-    polymer_indices = request.args.get("polymerIndices")
+    # polymer_mode = request.json.get("polymer_mode")
+    polymer_indices = request.json.get("polymer_indices")
     if polymer_indices:
         polymer_indices = list(map(int, polymer_indices.split(",")))
     else:
         polymer_indices = list()
 
-    # get the SMILES string of reactants and products from the args and then replace the symbols
-    reactants0 = request.args.get("reactants", 0, type=str)
-    products0 = request.args.get("products", 0, type=str)
-    if not reactants0 and products0:
+    reaction_smiles = request.json.get("reaction_smiles")
+    if not reaction_smiles:
         return jsonify({"error": "Missing data!"})
 
-    # keep
-    reactants_smiles_list, products_smiles_list = get_reactants_and_products_list(
-        reactants0, products0
+    reactants_smiles_list, product_smiles_list = get_reactants_and_products_list(
+        reaction_smiles
     )
 
     reactants = [
@@ -216,26 +200,40 @@ def update_reaction_table():
             polymer_indices=polymer_indices,
             workbook=workbook,
             demo=demo,
+            reaction_component="Reactant",
         )
         for idx, x in enumerate(reactants_smiles_list)
     ]
     number_of_reactants = len(reactants)
 
+    # add for reagent support
+    # reagents = [
+    #     SketcherCompound(
+    #         smiles=x,
+    #         idx=idx + 1 + number_of_reactants,
+    #         polymer_indices=polymer_indices,
+    #         workbook=workbook,
+    #         demo=demo,
+    #         reaction_component="Reagent"
+    #     )
+    #     for idx, x in enumerate(reactants_smiles_list)
+    # ]
+    # number_of_reagents = len(reactants)
+
     products = [
         SketcherCompound(
             smiles=y,
-            idx=idx + 1,
+            idx=idx + 1 + number_of_reactants,
             polymer_indices=polymer_indices,
             workbook=workbook,
             demo=demo,
-            number_of_reactants=number_of_reactants,
-            is_product=True,
+            reaction_component="Product",
         )
-        for idx, y in enumerate(products_smiles_list)
+        for idx, y in enumerate(product_smiles_list)
     ]
     number_of_products = len(products)
 
-    # check errors first
+    # check errors first add reagents here for reagent support
     for compound_group in (reactants, products):
         # now handles co polymer, dummy atom and invalid molecule errors
         error = check_compound_errors(compound_group)
@@ -244,123 +242,9 @@ def update_reaction_table():
 
         novel_compound_row = check_novel_compounds(compound_group)
         if novel_compound_row:
+            # this should be changed i think
             return novel_compound_row
 
-    # # Find reactants in database then add data to the dictionary
-    # for idx, reactant_smiles in enumerate(reactants_smiles_list, 1):
-    #     novel_compound = False  # false but change later if true
-    #
-    #     if idx in polymer_indices:
-    #         polymer = True
-    #         if reactant_smiles.count("{+n}") > 1:
-    #             return jsonify(
-    #                 {
-    #                     "error": f"Cannot process Reactant {idx} structure: copolymers are not yet supported"
-    #                 }
-    #             )
-    #         reactant_smiles = services.polymer_novel_compound.find_canonical_repeat(
-    #             reactant_smiles
-    #         )
-    #
-    #
-    #     # check if valid SMILES
-    #     mol = Chem.MolFromSmiles(reactant_smiles)
-    #     if mol is None:
-    #         return jsonify({"error": f"Cannot process Reactant {idx} structure"})
-    #
-    #     # find compound in database
-    #     reactant, novel_compound = get_compound_all_tables(
-    #         reactant_smiles, workbook, polymer, demo
-    #     )
-    #
-    #     # if no match is found we inform the user the compound is not in the database
-    #     if reactant is None:
-    #         if demo == "demo":
-    #             return jsonify({"reactionTable": "Demo", "novelCompound": ""})
-    #
-    #         reactant_name = iupac_convert(reactant_smiles)
-    #         # generate molweight
-    #         reactant_mol_wt = services.all_compounds.mol_weight_from_smiles(
-    #             reactant_smiles
-    #         )
-    #         novel_reactant_html = render_template(
-    #             "_novel_compound.html",
-    #             component="Reactant",
-    #             name=reactant_name,
-    #             number=idx,
-    #             mw=reactant_mol_wt,
-    #             smiles=reactant_smiles,
-    #             polymer=polymer,
-    #         )
-    #         return jsonify(
-    #             {"reactionTable": novel_reactant_html, "novelCompound": True}
-    #         )
-    #
-    #     # now we have the compound/novel_compound object, we can get all the data and add to reactant_data dict
-    #     get_compound_data(reactant_data, reactant, novel_compound)
-    # # keep
-    # number_of_reactants = len(reactants)
-    #
-    # # Find products in database then add data to the dictionary
-    # for idx, product_smiles in enumerate(products_smiles_list, 1):
-    #     polymer = False
-    #
-    #     if (idx + number_of_reactants) in polymer_indices:  # if polymer:
-    #         polymer = True
-    #         if product_smiles.count("{+n}") > 1:
-    #             return jsonify(
-    #                 {
-    #                     "error": f"Cannot process Product {idx} structure: copolymers are not yet supported"
-    #                 }
-    #             )
-    #         product_smiles = services.polymer_novel_compound.find_canonical_repeat(
-    #             product_smiles
-    #         )
-    #         if product_smiles == "":
-    #             return jsonify(
-    #                 {
-    #                     "error": f"Cannot process Product {idx} structure: dummy atoms are not yet supported"
-    #                 }
-    #             )
-    #
-    #     # check if valid SMILES
-    #     mol = Chem.MolFromSmiles(product_smiles)
-    #     if mol is None:
-    #         return jsonify({"error": f"Cannot process Product {idx} structure"})
-    #
-    #     # find compound in database
-    #     product, novel_compound = get_compound_all_tables(
-    #         product_smiles, workbook, polymer, demo
-    #     )
-    #
-    #     # if no match is found we inform the user the compound is not in the database
-    #     if product is None:
-    #         if demo == "demo":
-    #             return jsonify({"reactionTable": "Demo", "novelCompound": ""})
-    #
-    #         product_name = iupac_convert(product_smiles)
-    #         # generate molweight
-    #         product_mol_wt = services.all_compounds.mol_weight_from_smiles(
-    #             product_smiles
-    #         )
-    #         novel_product_html = render_template(
-    #             "_novel_compound.html",
-    #             component="Product",
-    #             name=product_name,
-    #             number=idx,
-    #             mw=product_mol_wt,
-    #             smiles=product_smiles,
-    #             polymer=polymer,
-    #         )
-    #         return jsonify({"reactionTable": novel_product_html, "novelCompound": True})
-    #
-    #     # now we have the compound/novel_compound object, we can get all the data and add to product_data dict
-    #     get_compound_data(product_data, product, novel_compound)
-    #     product_data["table_numbers"].append(number_of_reactants + idx)
-    # number_of_products = len(product_data["name_list"])
-
-    # Reagents - There are too many for a unselected dropdown. Could do recently used within workbook
-    # identifiers = reagent_name + reagent_cas
     identifiers = []
 
     # Solvents - keep solvents that are not novel compounds or are novel compounds within the current workbook
@@ -370,20 +254,22 @@ def update_reaction_table():
         sol_rows = services.solvent.get_workbook_list(workbook)
 
     # change rxn table in polymer mode
-    if polymer_mode.lower() == "true":
-        reaction_table_html = "_polymer_reaction_table.html"
-        r_class = None
-        r_classes = None
-    else:
-        reaction_table_html = "_reaction_table.html"
-        r_class, r_classes = services.reaction_classification.classify_reaction(
-            reactants_smiles_list, products_smiles_list
-        )
+    # if polymer_mode.lower() == "true":
+    #     # need to fix polymer mode
+    #     reaction_table_html = "_polymer_reaction_table.html"
+    #     r_class = None
+    #     r_classes = None
+    # else:
+    reaction_table_html = "_reaction_table.html"
+    r_class, r_classes = services.reaction_classification.classify_reaction(
+        reactants_smiles_list, product_smiles_list
+    )
 
     # Now it renders the reaction table template
     reaction_table = render_template(
         reaction_table_html,
         reactants=reactants,
+        # reagents=reagents,
         number_of_products=number_of_products,
         identifiers=identifiers,
         reactant_table_numbers=[],
@@ -400,38 +286,9 @@ def update_reaction_table():
     )
     return jsonify({"reactionTable": reaction_table})
 
-    # # Now it renders the reaction table template
-    # reaction_table = render_template(
-    #     reaction_table_html,
-    #     reactants=reactants,
-    #     reactant_mol_weights=reactant_data["molecular_weight_list"],
-    #     reactant_densities=reactant_data["density_list"],
-    #     reactant_hazards=reactant_data["hazard_list"],
-    #     reactant_primary_keys=reactant_data["primary_key_list"],
-    #     number_of_reactants=number_of_reactants,
-    #     number_of_products=number_of_products,
-    #     identifiers=identifiers,
-    #     reactant_table_numbers=[],
-    #     products=products,
-    #     product_mol_weights=product_data["molecular_weight_list"],
-    #     product_hazards=product_data["hazard_list"],
-    #     product_primary_keys=product_data["primary_key_list"],
-    #     product_table_numbers=product_data["table_numbers"],
-    #     # product_intended_dps=product_data["intended_dps"],
-    #     reagent_table_numbers=[],
-    #     reaction_table_data="",
-    #     summary_table_data="",
-    #     sol_rows=sol_rows,
-    #     reaction=reaction,
-    #     reaction_class=r_class,
-    #     reaction_classes=r_classes,
-    #     polymer_indices=polymer_indices,
-    # )
-    # return jsonify({"reactionTable": reaction_table})
-
 
 def get_reactants_and_products_list(
-    reactants: str, products: str
+    reaction_smiles: str,
 ) -> Tuple[List[str], List[str]]:
     """
     Process reactants and products strings to obtain lists of reactant and product SMILES.
@@ -439,21 +296,20 @@ def get_reactants_and_products_list(
     If ions are present, it processes the ionic SMILES accordingly.
 
     Args:
-        reactants (str): A string representing the reactants in the reaction.
-        products (str): A string representing the products in the reaction.
+        reaction_smiles (str), the smiles of the reaction from the front end
 
     Returns:
-        Tuple[List[str], List[str]]: A tuple containing lists of reactant and product SMILES.
+        Tuple[List[str], List[str]]: A tuple containing lists of reactant, reagent and product SMILES.
 
     """
-    reactants_smiles = smiles_symbols(reactants)
-    products_smiles = smiles_symbols(products)
+    # reactants_smiles = smiles_symbols(reactants)
+    # products_smiles = smiles_symbols(products)
 
-    # form the reaction_smiles. Just from reactands and products to exclude reagents/other data
-    reaction_smiles = (reactants_smiles + ">>" + products_smiles).replace(",", ".")
+    # # form the reaction_smiles. Just from reactands and products to exclude reagents/other data
+    # reaction_smiles = (reactants_smiles + ">>" + products_smiles).replace(",", ".")
 
     # we get the smiles straight from the sketcher to see if we have CXSmiles
-    sketcher_smiles = smiles_symbols(request.args.get("reactionSmiles"))
+    sketcher_smiles = smiles_symbols(request.json.get("reaction_smiles"))
 
     # [OH-].[Na+]>>[Cl-].[Cl-].[Zn++] |f:0.1,2.3.4|
     if "|f:" in sketcher_smiles:
@@ -466,15 +322,24 @@ def get_reactants_and_products_list(
         r"(?<!\{)-", reaction_smiles
     ):
         # find "+" or "-" in reaction_smiles but not {-} or {+n} for polymers
+        # CHANGE THIS FUNCTION TO HANDLE REAGENTS
         (
             reactants_smiles_list,
             products_smiles_list,
         ) = services.ions.reactants_and_products_from_ionic_smiles(reaction_smiles)
     # reactions with no ions - make rxn object directly from string
     else:
-        reactants_smiles_list, products_smiles_list = reactants_smiles.split(
-            ","
-        ), products_smiles.split(",")
+        # Split and pad to ensure two parts
+        # change to 3 for reagent support
+        parts = reaction_smiles.split(">") + [""] * (
+            3 - len(reaction_smiles.split(">"))
+        )
+
+        # Process each part (add reagent_smiles_list_here)
+        reactants_smiles_list, products_smiles_list = [
+            x.split(".") if x else [] for x in parts
+        ]
+
     return reactants_smiles_list, products_smiles_list
 
 

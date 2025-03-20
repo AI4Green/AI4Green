@@ -75,82 +75,82 @@ function loadExampleSmiles() {
  * prompts for compound data or alerts error
  */
 async function createReactionTable() {
-  let tutorial = getVal($("#js-tutorial"));
-  if (tutorial === "no") {
-    await sketcherAutoSave();
-  }
-  let smiles;
-  try {
-    smiles = await exportSmilesFromActiveEditor();
-  } catch (error) {
-    alert("An error occurred:\n\n" + error.message);
-  }
-  let rxn = await exportRXNFromActiveEditor();
-  $("#js-reaction-rxn").val(rxn);
-  makeReactionSchemeImage("hidden");
-  sketcherDataLossHandler();
-  let [reactants, products] =
-    reactionSmilesToReactantsAndProductsSmiles(smiles);
-  $(".loading-bar").css("display", "block");
-  let smilesNew = removeReagentsFromSmiles(smiles);
-  $("#js-reaction-smiles").val(smilesNew);
-  let workgroup = getVal($("#js-active-workgroup"));
-  let workbook = getVal($("#js-active-workbook"));
-  let reaction_id = getVal($("#js-reaction-id"));
-  let demo_mode = getVal($("#js-demo"));
-  let polymer_mode = $('input[id="polymer-mode-select"]').prop("checked");
-  let polymer_indices = identifyPolymers(await exportRXNFromActiveEditor());
-  smiles = replaceSmilesSymbols(smiles);
-
-  if (rxn.includes("SRU") && polymer_mode === false) {
-    alert("Structural Repeating Units are only available in Polymer Mode.");
-    $(".loading-bar").css("display", "none");
-    return;
-  }
+  // let tutorial = getVal($("#js-tutorial"));
+  // if (tutorial === "no") {
+  //   // await sketcherAutoSave();
+  // }
+  // let smiles;
+  // try {
+  //   smiles = await exportSmilesFromActiveEditor();
+  // } catch (error) {
+  //   alert("An error occurred:\n\n" + error.message);
+  // }
+  // let rxn = await exportRXNFromActiveEditor();
+  // // $("#js-reaction-rxn").val(rxn);
+  // makeReactionSchemeImage("hidden");
+  // sketcherDataLossHandler();
+  // let [reactants, products] =
+  //   reactionSmilesToReactantsAndProductsSmiles(smiles);
+  // $(".loading-bar").css("display", "block");
+  // let smilesNew = removeReagentsFromSmiles(smiles);
+  // $("#js-reaction-smiles").val(smilesNew);
+  // let workgroup = getVal($("#js-active-workgroup"));
+  // let workbook = getVal($("#js-active-workbook"));
+  // let reaction_id = getVal($("#js-reaction-id"));
+  // let demo_mode = getVal($("#js-demo"));
+  // let polymer_mode = $('input[id="polymer-mode-select"]').prop("checked");
+  // let polymer_indices = identifyPolymers(await exportRXNFromActiveEditor());
+  // smiles = replaceSmilesSymbols(smiles);
+  //
+  // if (rxn.includes("SRU") && polymer_mode === false) {
+  //   alert("Structural Repeating Units are only available in Polymer Mode.");
+  //   $(".loading-bar").css("display", "none");
+  //   return;
+  // }
 
   // Asynchronous request to _process in routes.py
-  $.ajax({
-    type: "GET",
-    contentType: "application/json;charset-utf-08",
-    dataType: "json",
-    url:
-      "/_update_reaction_table?reactants=" +
-      reactants +
-      "&products=" +
-      products +
-      "&reactionSmiles=" +
-      smiles +
-      "&demo=" +
-      demo_mode +
-      "&tutorial=" +
-      tutorial +
-      "&workgroup=" +
-      workgroup +
-      "&workbook=" +
-      workbook +
-      "&reaction_id=" +
-      reaction_id +
-      "&polymer=" +
-      polymer_mode +
-      "&polymerIndices=" +
-      polymer_indices,
-  }).done(function (data) {
-    $(".loading-bar").css("display", "none");
-    if (data.novelCompound) {
-      // one of the compounds is not in database - must be added as novel compound
-      $("#reaction-table-div").html(data.reactionTable).show();
-      sketcherNovelCompoundInputValidate();
-    } else if (data.error) {
-      $("#errorAlert").text(data.error).show();
-      $("#reaction-table-div").hide();
-    } else if (data.reactionTable === "Demo") {
-      alert(
-        "One or more reactants or products are not in the database. Adding novel compounds is not available in Demo mode.",
-      );
-    } else {
-      generateReactionTable(data);
-    }
-  });
+  // $.ajax({
+  //   type: "GET",
+  //   contentType: "application/json;charset-utf-08",
+  //   dataType: "json",
+  //   url:
+  //     "/_update_reaction_table?reactants=" +
+  //     reactants +
+  //     "&products=" +
+  //     products +
+  //     "&reactionSmiles=" +
+  //     smiles +
+  //     "&demo=" +
+  //     demo_mode +
+  //     "&tutorial=" +
+  //     tutorial +
+  //     "&workgroup=" +
+  //     workgroup +
+  //     "&workbook=" +
+  //     workbook +
+  //     "&reaction_id=" +
+  //     reaction_id +
+  //     "&polymer=" +
+  //     polymer_mode +
+  //     "&polymerIndices=" +
+  //     polymer_indices,
+  // }).done(function (data) {
+  //   $(".loading-bar").css("display", "none");
+  //   if (data.novelCompound) {
+  //     // one of the compounds is not in database - must be added as novel compound
+  //     $("#reaction-table-div").html(data.reactionTable).show();
+  //     sketcherNovelCompoundInputValidate();
+  //   } else if (data.error) {
+  //     $("#errorAlert").text(data.error).show();
+  //     $("#reaction-table-div").hide();
+  //   } else if (data.reactionTable === "Demo") {
+  //     alert(
+  //       "One or more reactants or products are not in the database. Adding novel compounds is not available in Demo mode.",
+  //     );
+  //   } else {
+  //     generateReactionTable(data);
+  //   }
+  // });
   // when ajax is done
   document.body.className = "";
 }
