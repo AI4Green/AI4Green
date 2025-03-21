@@ -42,7 +42,6 @@
         <p>Please note compounds drawn above or underneath the arrow will not be recognised.</p>
     </div>
     <div>
-        <form action="{{ url_for('reaction_table.update_reaction_table') }}" method="post">
             <label> Polymer Mode?
                 <input type="checkbox" id="polymer-mode-select" name="polymer-mode-select" onchange="savePolymerMode()" {% if reaction.reaction_type.value == "POLYMER" %} checked {% endif %}>
             </label>
