@@ -469,9 +469,12 @@ function addNewReagent() {
   let $reagentNumber = $("#js-number-of-reagents");
   let reagentNumber = getNum($reagentNumber);
   reagentNumber++;
-  let reagentTableNumber = reactionTable.numberOfReactants + reagentNumber;
+  let $reactantNumber = $("#js-number-of-reactants");
+  let numberOfReactants = getNum($reactantNumber);
+  let reagentTableNumber = numberOfReactants + reagentNumber;
   // updates reagent number html hidden input
   $reagentNumber.val(reagentNumber);
+  $reactantNumber.val(numberOfReactants);
   // makes variable markup for new row to be appended
   let markup = $("#js-reagent-table-new-row")
     .html()

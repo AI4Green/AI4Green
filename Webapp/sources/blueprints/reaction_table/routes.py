@@ -154,7 +154,7 @@ def check_novel_compounds(compound_list: List[SketcherCompound]) -> Union[str, N
 
 
 @reaction_table_bp.route("/autoupdate_reaction_table", methods=["GET", "POST"])
-@workbook_member_required
+# @workbook_member_required
 def autoupdate_reaction_table():
     """
     I guess the idea is to take any smiles from the front end and generate the reaction table
@@ -270,7 +270,9 @@ def autoupdate_reaction_table():
         reaction_table_html,
         reactants=reactants,
         # reagents=reagents,
+        number_of_reactants=number_of_reactants,
         number_of_products=number_of_products,
+        number_of_reagents=0,
         identifiers=identifiers,
         reactant_table_numbers=[],
         products=products,
@@ -330,9 +332,9 @@ def get_reactants_and_products_list(
     # reactions with no ions - make rxn object directly from string
     else:
         # Split and pad to ensure two parts
-        # change to 3 for reagent support
-        parts = reaction_smiles.split(">") + [""] * (
-            3 - len(reaction_smiles.split(">"))
+        # change to 3 for reagent support and change split type >> to >
+        parts = reaction_smiles.split(">>") + [""] * (
+            2 - len(reaction_smiles.split(">>"))
         )
 
         # Process each part (add reagent_smiles_list_here)
