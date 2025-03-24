@@ -92,69 +92,78 @@
 {%- endmacro %}
 
 
-{%  macro physical_form_dropdown(index) -%}
+{%  macro physical_form_dropdown(index, value) -%}
 <select size="1" class="physical-form" id="js-reactant-physical-form{{ index }}">
-                    <option value="-select-" selected>-select-</option>
-                    <option value="Dense solid">Dense solid</option>
-                    <option value="Non-volatile liquid">Non-volatile liquid (b.p. &gt; 130&#8451;)</option>
-                    <option value="Unknown">Unknown</option>
-                    <option value="Dusty Solid">Dusty Solid</option>
-                    <option value="Lyophilised solid">Lyophilised solid</option>
-                    <option value="Volatile liquid">Volatile liquid (70&#8451; &le; b.p. &le; 130&#8451;)</option>
-                    <option value="Gas">Gas</option>
-                    <option value="Highly volatile liquid">Highly volatile liquid (b.p. &lt; 70&#8451;)</option>
-                    <option value="Aerosol">Aerosol</option>
-                    <option value="Solution that promotes skin absorption">Solution that promotes skin absorption</option>
-                </select>
+    {% set options = [
+        "-select-",
+        "Dense solid",
+        "Non-volatile liquid",
+        "Unknown",
+        "Dusty Solid",
+        "Lyophilised solid",
+        "Volatile liquid",
+        "Gas",
+        "Highly volatile liquid",
+        "Aerosol",
+        "Solution that promotes skin absorption"
+    ] %}
+
+    {% for option in options %}
+        <option value="{{ option }}" {% if option == value %}selected{% endif %}>
+            {{ option if option != "Non-volatile liquid" and option != "Volatile liquid" and option != "Highly volatile liquid" else option + ' (b.p. ' + ('> 130℃' if option == 'Non-volatile liquid' else '< 70℃' if option == 'Highly volatile liquid' else '70℃ ≤ b.p. ≤ 130℃') + ')' }}
+        </option>
+    {% endfor %}
+</select>
 {%- endmacro %}
+
 
 
 {% macro reactant_row(reactant, index) -%}
 <tr class="not-novel-compound-input">
             <td><input id="js-reactant-table-number{{ index }}" style="width: 40px; border-width:0px;" type="number" value="{{ index }}" readonly></td>
-            <td style='width: 200px;'><input  id="js-reactant{{ index }}" style="width: 200px; border-width:0px;" value="{{ reactant.compound_data.name }}"></td>
+            <td style='width: 200px;'><input  id="js-reactant{{ index }}" style="width: 200px; border-width:0px;" value="{{ reactant.compound_data.names }}"></td>
             <td><input  type="radio" step="any"
                     name="reactant-limiting" id="js-reactant-limiting{{ index }}" value="{{ index }}"  class="js-reactant-limiting">
             </td>
-            <td><input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ reactant.compound_data.molecular_weight }}"
+            <td><input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ reactant.compound_data.molecular_weights }}"
                     id="js-reactant-molecular-weight{{ index }}" readonly>
             </td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
-                    {% if reactant_densities %}value="{{ reactant.density }}"{% endif %}
+                    {% if reactant.compound_data.densities %}value="{{ reactant.compound_data.densities }}"{% endif %}
                     id="js-reactant-density{{ index }}"></td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
-                    {% if reactant.сoncentrations %}value="{{ reactant.сoncentrations }}"{% endif %}
+                    {% if reactant.compound_data.сoncentration %}value="{{ reactant.compound_data.сoncentrations }}"{% endif %}
                     id="js-reactant-concentration{{ index }}"></td>
             <td><input style="width: 60px;" type="number" step="any" min="0" id="js-reactant-equivalent{{ index }}" placeholder="-"
                     {% if index == 1 %} value="1" readonly {% else %}
-                    {% if reactant.equivalents %}value="{{ reactant.equivalents }}"{% endif %}
+                    {% if reactant.compound_data.equivalents %}value="{{ reactant.compound_data.equivalents }}"{% endif %}
                     {% endif %}></td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
-                    {% if rounded_reactant_amounts %}value="{{ rounded_reactant_amounts[index0] }}"{% endif %}
+                    {% if reactant.compound_data.rounded_reactant_amounts %}value="{{ reactant.compound_data.amounts }}"{% endif %}
                     id="js-reactant-rounded-amount{{ index }}" class="js-reactant-rounded-amounts"
                     readonly></td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
-                    {% if rounded_reactant_volumes %}value="{{ rounded_reactant_volumes[index0] }}"{% endif %}
+                    {% if reactant.compound_data.rounded_reactant_volumes %}value="{{ reactant.compound_data.volumes }}"{% endif %}
                     id="js-reactant-rounded-volume{{ index }}"
                     readonly></td>
             <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-reactant-rounded-mass{{ index }}" class="js-reactant-rounded-masses"
-                    {% if rounded_reactant_masses %}value="{{ rounded_reactant_masses[index0] }}"{% endif %}
+                    {% if reactant.compound_data.rounded_reactant_masses %}value="{{ reactant.compound_data.masses }}"{% endif %}
                     {% if index == 1 %} {% else %}
                     readonly
                     {% endif %}></td>
-            <td> {{ physical_form_dropdown(index) }} </td>
+            <td> {{ physical_form_dropdown(index, reactant.compound_data.physical_form) }} </td>
             <td><textarea class="text-in-table" id="js-reactant-hazards{{ index }}" readonly>{{ reactant.compound_data.hazards }}</textarea></td>
             <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal" title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-reactant{{ index }}" type="button"><i class="bi bi-exclamation-circle"></i></button></td>
             <td></td>
         </tr>
         <input type="hidden"
-        {% if reactant_amounts %}value="{{ reactant_amounts[index0] }}"{% endif %}
+        {% if reactant.compound_data.reactant_amounts %}value="{{ reactant.compound_data.reactant_amounts }}"{% endif %}
         id="js-reactant-amount{{ index }}">
         <input type="hidden"
-        {% if reactant_volumes %}value="{{ reactant_volumes[index0] }}"{% endif %}
+        {% if reactant.compound_data.reactant_volumes %}value="{{ reactant.compound_data.reactant_volumes }}"{% endif %}
         id="js-reactant-volume{{ index }}">
         <input type="hidden"
-        {% if reactant_masses %}value="{{ reactant_masses[index0] }}"{% endif %}
+        {% if reactant.compound_data.reactant_masses %}value="{{ reactant.compound_data.reactant_masses }}"{% endif %}
         id="js-reactant-mass{{ index }}">
         <input type="hidden" value="{{ reactant.compound_data.primary_key }}" id="js-reactant-primary-key{{ index }}">
 {%- endmacro %}
