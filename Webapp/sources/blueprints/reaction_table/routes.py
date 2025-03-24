@@ -95,12 +95,14 @@ def process():
             reactant_smiles = services.polymer_novel_compound.find_canonical_repeat(
                 reactant_smiles
             )
-            if reactant_smiles == "":
+            if reactant_smiles == "dummy":
                 return jsonify(
                     {
                         "error": f"Cannot process Reactant {idx} structure: dummy atoms are not yet supported"
                     }
                 )
+            elif reactant_smiles.startswith("Error"):
+                return jsonify({"error": f"Cannot process Reactant {idx} structure"})
 
         # check if valid SMILES
         mol = Chem.MolFromSmiles(reactant_smiles)
@@ -154,12 +156,14 @@ def process():
             product_smiles = services.polymer_novel_compound.find_canonical_repeat(
                 product_smiles
             )
-            if product_smiles == "":
+            if product_smiles == "dummy":
                 return jsonify(
                     {
                         "error": f"Cannot process Product {idx} structure: dummy atoms are not yet supported"
                     }
                 )
+            elif product_smiles.startswith("Error"):
+                return jsonify({"error": f"Cannot process Product {idx} structure"})
 
         # check if valid SMILES
         mol = Chem.MolFromSmiles(product_smiles)
