@@ -360,7 +360,9 @@ async function regenerateImages(sortCriteria, workbook, workgroup, images) {
   });
 
   let rxns = await getRXNs(sortCriteria, workbook, workgroup);
+  console.log(rxns);
   let smiles = await getSmiles(sortCriteria, workbook, workgroup);
+  console.log(smiles);
 
   //indices of empty images
   const missingImagesIdx = images
@@ -378,19 +380,25 @@ async function regenerateImages(sortCriteria, workbook, workgroup, images) {
       continue;
     }
     try {
-      let rxn = rxns[idx];
-      let source = await ketcherFrame.contentWindow.ketcher.generateImage(rxn);
-      const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 50);
-      let imgSource = await convertBlobToBase64(shrunkenBlob);
-      missingImages.push(imgSource);
+      try {
+        let rxn = rxns[idx];
+        let source = await ketcherFrame.contentWindow.ketcher.generateImage(
+          rxn,
+        );
+        const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 50);
+        let imgSource = await convertBlobToBase64(shrunkenBlob);
+        missingImages.push(imgSource);
+      } catch (error) {
+        // catch reactions with no rxn file, use smiles instead.
+        let source = await ketcherFrame.contentWindow.ketcher.generateImage(
+          smile,
+        );
+        const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 50);
+        let imgSource = await convertBlobToBase64(shrunkenBlob);
+        missingImages.push(imgSource);
+      }
     } catch (error) {
-      // catch reactions with no rxn file, use smiles instead.
-      let source = await ketcherFrame.contentWindow.ketcher.generateImage(
-        smile,
-      );
-      const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 50);
-      let imgSource = await convertBlobToBase64(shrunkenBlob);
-      missingImages.push(imgSource);
+      missingImages.push("Error generating image");
     }
   }
   // Replace "" with the corresponding image
@@ -429,6 +437,11 @@ async function showSavedReactionsImages() {
       // change img div to text div
       $image.replaceWith(
         '<div id="image${idx1}" style="text-align: center; padding: 20px;">[Empty Reaction]</div>',
+      );
+    } else if (imgSource === "Error generating image") {
+      // change img div to text div
+      $image.replaceWith(
+        '<div id="image${idx1}" style="text-align: center; padding: 20px;">[Error generating image]</div>',
       );
     }
 
