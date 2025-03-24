@@ -147,7 +147,7 @@
                     id="js-reactant-rounded-volume{{ index }}"
                     readonly></td>
             <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-reactant-rounded-mass{{ index }}" class="js-reactant-rounded-masses"
-                    {% if reactant.compound_data.rounded_reactant_masses %}value="{{ reactant.compound_data.masses }}"{% endif %}
+                    {% if reactant.compound_data.masses %}value="{{ reactant.compound_data.masses }}"{% endif %}
                     {% if index == 1 %} {% else %}
                     readonly
                     {% endif %}></td>
