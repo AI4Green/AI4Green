@@ -1,8 +1,7 @@
 import re
-from datetime import datetime
-from typing import Optional, Tuple
+from typing import Tuple
 
-from flask import abort, jsonify, request
+from flask import abort, json, request
 from flask_login import current_user
 from psmiles import PolymerSmiles
 from rdkit import Chem
@@ -10,7 +9,7 @@ from rdkit.Chem import rdMolDescriptors
 from sources import models, services
 from sources.auxiliary import sanitise_user_input
 from sources.extensions import db
-from sqlalchemy import func
+from sqlalchemy import exists, func
 
 
 def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> str:
@@ -62,39 +61,54 @@ def from_name_and_workbook(
 
 
 def from_smiles_and_workbook(
-    smiles: str, workbook: models.WorkBook
+    smiles: list, workbook: models.WorkBook
 ) -> models.PolymerNovelCompound:
     """
-    Retrieves a novel compound by name and workbook.
+    Retrieves a novel compound by repeat units and workbook.
 
     Args:
-        smiles: Compound smiles.
+        smiles: Repeat unit smiles as list.
         workbook: Workbook model.
 
     Returns:
         PolymerNovelCompound model.
     """
-    return (
+    query = (
         db.session.query(models.PolymerNovelCompound)
-        .filter(models.PolymerNovelCompound.smiles == smiles)
+        .filter(
+            # Ensure no repeat units not in smiles list
+            ~exists().where(
+                (models.PolymerRepeatUnit.polymer_id == models.PolymerNovelCompound.id)
+                & (~models.PolymerRepeatUnit.smiles.in_(smiles))
+            ),
+            # Ensure all repeat units are from the smiles list and count matches
+            db.session.query(func.count(models.PolymerRepeatUnit.id))
+            .filter(
+                models.PolymerRepeatUnit.polymer_id == models.PolymerNovelCompound.id
+            )
+            .scalar_subquery()
+            == len(smiles),
+        )
         .join(models.WorkBook)
         .filter(models.WorkBook.id == workbook.id)
         .first()
     )
 
+    return query
+
 
 def add(
     name: str,
-    mol_formula: str,
-    mol_weight: float,
+    mol_formula: list,
+    mol_weight: list,
     density: float,
     concentration: float,
     hazards: str,
-    smiles: str,
+    smiles: list,
     workbook_id: int,
 ) -> models.PolymerNovelCompound:
     """
-    Creates a novel compound in the database.
+    Creates a novel compound in the database, and adds repeat units to database
 
     Args:
         name: Compound name.
@@ -103,25 +117,37 @@ def add(
         density: Density.
         concentration: Concentration.
         hazards: Hazard codes.
-        smiles: SMILES notation.
+        smiles: list of strings in SMILES notation.
         workbook_id: Workbook ID.
-        current_time: Current timestamp.
 
     Returns:
         PolymerNovelCompound model.
     """
     nc = models.PolymerNovelCompound(
         name=name,
-        molec_formula=mol_formula,
-        molec_weight=mol_weight,
         density=density,
         concentration=concentration,
         hphrase=hazards,
-        smiles=smiles,
         workbook=workbook_id,
     )
     db.session.add(nc)
     db.session.commit()
+
+    polymer = from_name_and_workbook(name, services.workbook.get(workbook_id))
+
+    for idx in range(len(smiles)):
+        nr = models.PolymerRepeatUnit(
+            name=name,
+            polymer_id=polymer.id,
+            polymer=polymer,
+            smiles=smiles[idx],
+            molec_weight=mol_weight[idx],
+            molec_formula=mol_formula,
+            workbook=workbook_id,
+        )
+        db.session.add(nr)
+        db.session.commit()
+
     return nc
 
 
@@ -138,12 +164,14 @@ class NewNovelCompound:
             else None
         )
         self.mol_weight = (
-            float(request.form["molWeight"])
+            [float(mw) for mw in json.loads(request.form["molWeight"])]
             if request.form["molWeight"] != ""
             else None
         )
         self.hazard_codes = sanitise_user_input(request.form["hPhrase"])
-        self.smiles = sanitise_user_input(request.form["smiles"])  # canonicalised
+        self.smiles = [
+            sanitise_user_input(smiles) for smiles in json.loads(request.form["smiles"])
+        ]  # canonicalised
 
         self.feedback = ""
         self.validation = ""
@@ -221,7 +249,8 @@ class NewNovelCompound:
         Density, concentration, and molecular weight are optional properties that if provided must be a positive number.
         This function validates this data or fails the validation and provides feedback.
         """
-        numerical_values = [self.density, self.concentration, self.mol_weight]
+        numerical_values = [self.density, self.concentration]
+        numerical_values.extend(self.mol_weight)
         if all(
             entry is None or check_positive_number(entry) for entry in numerical_values
         ):
@@ -246,10 +275,14 @@ class NewNovelCompound:
         """
         Calculate additional molecule identifiers if SMILES is present.
         """
-        mol = Chem.MolFromSmiles(self.smiles)
-        if mol is None or mol.GetNumAtoms() == 0:
-            return
-        self.mol_formula = rdMolDescriptors.CalcMolFormula(mol)
+        mol_formula = []
+        for smiles in self.smiles:
+            mol = Chem.MolFromSmiles(smiles)
+            if mol is None or mol.GetNumAtoms() == 0:
+                mol_formula.append("")  # TODO: is this gonna cause issues?
+                continue
+            mol_formula.append(rdMolDescriptors.CalcMolFormula(mol))
+        self.mol_formula = mol_formula
 
     def validate_hazards(self):
         """
