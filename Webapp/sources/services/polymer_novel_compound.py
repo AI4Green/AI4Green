@@ -12,15 +12,15 @@ from sources.extensions import db
 from sqlalchemy import exists, func
 
 
-def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> str:
+def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> list[str]:
     """
-    Gets the novel compound's SMILES string from the primary key if the entry has the SMILES attribute
+    Gets the repeat units SMILES strings from the PolymerNovelCompound primary key by searching in the PolymerRepeatUnit table
     Args:
         primary_key - the primary key is a tuple in the format [compound_name, workgroup.id]
         person - the person we are checking for access rights to the novel compound
 
     Returns:
-        The SMILES string corresponding to the primary key or None
+        A list of the SMILES strings corresponding to the primary key or None
     """
     primary_key = (primary_key[0], int(primary_key[1]))
     workbook = services.workbook.get(primary_key[1])
@@ -29,13 +29,34 @@ def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> st
     ):
         abort(401)
 
-    return (
-        db.session.query(models.PolymerNovelCompound.smiles)
-        .filter(func.lower(models.PolymerNovelCompound.name) == primary_key[0].lower())
+    query = (
+        db.session.query(models.PolymerRepeatUnit.smiles)
+        .filter(func.lower(models.PolymerRepeatUnit.name) == primary_key[0].lower())
         .join(models.WorkBook)
         .filter(models.WorkBook.id == primary_key[1])
-        .first()
-    )[0]
+        .all()
+    )
+    return [q[0] for q in query]
+
+
+def get_repeat_unit_weights(polymer_id: int, workbook: int) -> list:
+    """
+    Retrieves a list of molec weights of the repeat units, from the polymer id.
+
+    Args:
+        polymer_id: PolymerNovelCompound.id
+        workbook: PolymerNovelCompound.workbook
+
+    Returns:
+        PolymerNovelCompound model.
+    """
+    return (
+        db.session.query(models.PolymerRepeatUnit.molec_weight)
+        .filter(models.PolymerRepeatUnit.polymer_id == polymer_id)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook)
+        .all()
+    )
 
 
 def from_name_and_workbook(

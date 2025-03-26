@@ -8,7 +8,7 @@ from typing import Dict, List, Tuple, Union
 from urllib.parse import quote
 from urllib.request import urlopen
 
-from flask import jsonify, render_template, request
+from flask import json, jsonify, render_template, request
 from flask_login import login_required
 from rdkit import Chem
 from sources import models, services
@@ -120,8 +120,8 @@ def process():
                 component="Reactant",
                 name=reactant_name,
                 number=idx,
-                mw=reactant_mol_wt,
-                smiles=reactant_smiles,
+                mw=json.dumps(reactant_mol_wt),
+                smiles=json.dumps(reactant_smiles),
                 polymer=polymer,
             )
             return jsonify(
@@ -337,9 +337,15 @@ def get_compound_data(
     """
 
     # now we have the compound/novel_compound object, we can get all the data
-    molecular_weight = (
-        float(compound.molec_weight) if compound.molec_weight != "" else 0
-    )
+    if isinstance(compound, models.PolymerNovelCompound):
+        molecular_weight = services.polymer_novel_compound.get_repeat_unit_weights(
+            compound.id, compound.workbook
+        )
+    else:
+        molecular_weight = (
+            float(compound.molec_weight) if compound.molec_weight != "" else 0
+        )
+
     compound_data["molecular_weight_list"].append(molecular_weight)
 
     compound_name = compound.name if compound.name != "" else "Not found"
