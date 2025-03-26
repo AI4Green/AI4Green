@@ -349,73 +349,93 @@ def check_bracket_balance(s):
     return balance
 
 
-def find_polymer_repeat_unit(
+def find_polymer_repeat_units(
     compound: str,
-) -> str:
+) -> list[str]:
     """
     Identify the repeat group within a polymer SMILES string.
     Must be done before smiles is cleaned.
     Uses {-} and {+n} to find repeat unit.
     """
-    start_marker = compound.find("{-}")
-    end_marker = compound.find("{+n}")
+    start_marker = [marker.start() for marker in re.finditer("{-}", compound)]
+    end_marker = [marker.start() for marker in re.finditer(re.escape("{+n}"), compound)]
 
     # if either {-} or {+} is not found
     if start_marker == -1 or end_marker == -1:
-        return ""
+        return [""]
 
-    # START is the letter before {-}
-    if compound[start_marker - 1].isupper():
-        result = "*" + compound[start_marker - 1] + compound[start_marker + 3 :]
-    elif (
-        compound[start_marker - 1] == "]"
-    ):  # for polymers with [] groups e.g C[SiH2]{-}CC{+n}C
-        i = 2
-        while compound[start_marker - i] != "[" and start_marker - i > 0:
-            i += 1  # search backwards
-        result = "*" + compound[start_marker - i :].replace("{-}", "")
-    else:  # for polymers with rings e.g *C1{-}CC{+n}(CCC1)*
-        i = 2
-        while not compound[start_marker - i].isupper() and start_marker - i > 0:
-            i += 1  # search backwards
-        result = "*" + compound[start_marker - i :].replace("{-}", "")
+    results = []
+    for i in range(len(start_marker)):
+        # START is the letter before {-}
+        if compound[start_marker[i] - 1].isupper():
+            result = (
+                "*" + compound[start_marker[i] - 1] + compound[start_marker[i] + 3 :]
+            )
+        elif (
+            compound[start_marker[i] - 1] == "]"
+        ):  # for polymers with [] groups e.g C[SiH2]{-}CC{+n}C
+            x = 2
+            while compound[start_marker[i] - x] != "[" and start_marker[i] - x > 0:
+                x += 1  # search backwards
+            result = "*" + compound[start_marker[i] - x :].replace("{-}", "")
+        else:  # for polymers with rings e.g *C1{-}CC{+n}(CCC1)*
+            x = 2
+            while (
+                not compound[start_marker[i] - x].isupper() and start_marker[i] - x > 0
+            ):
+                x += 1  # search backwards
+            result = "*" + compound[start_marker[i] - x :].replace("{-}", "")
 
-    # END is the character before {+n}
-    if ")" not in result[end_marker:]:  # no branching at end of SRU
-        return result[: end_marker - 3] + "*"
+        diff = len(compound) - len(result)
 
-    if result[end_marker + 1] == "(":  # last atom of SRU has a branch
-        result = result[: end_marker - 3]
-        branch, close_paren = extract_inside_brackets(compound, end_marker + 4)
-        if close_paren != -1:
-            result += branch
+        # END is the character before {+n}
+        if i + 1 < len(end_marker):
+            if (
+                ")" not in result[end_marker[i] - diff : end_marker[i + 1] - diff]
+            ):  # no branching at end of SRU
+                results.append(result[: end_marker[i] - diff] + "*")
+                continue
+        else:  # last repeat unit
+            if ")" not in result[end_marker[i] - diff :]:  # no branching at end of SRU
+                results.append(result[: end_marker[i] - diff] + "*")
+                continue
 
-        # check for more branching on last atom of SRU
-        while close_paren + 1 < len(compound) and compound[close_paren + 1] == "(":
-            branch, close_paren = extract_inside_brackets(compound, close_paren + 1)
+        if result[end_marker[i] - diff + 4] == "(":  # last atom of SRU has a branch
+            result = result[: end_marker[i] - diff]
+            branch, close_paren = extract_inside_brackets(compound, end_marker[i] + 4)
             if close_paren != -1:
                 result += branch
-    else:
-        result = result[: result.find("{+n}")]
 
-    # if end is inside brackets, ----------------------
-    if check_bracket_balance(compound[:end_marker]) == 0:
-        return result + "*"
-
-    section = []
-    parts = compound[end_marker + 4 :].split(")")
-    for i, part in enumerate(parts):
-        if "(" in part and i < len(parts) - 1:
-            parts[i] = ")" + part + ")" + parts[i + 1]
-            parts.pop(i + 1)
-            section.append(parts[i])
+            # check for more branching on last atom of SRU
+            while close_paren + 1 < len(compound) and compound[close_paren + 1] == "(":
+                branch, close_paren = extract_inside_brackets(compound, close_paren + 1)
+                if close_paren != -1:
+                    result += branch
         else:
-            section.append(")" + part)
-    idx = check_bracket_balance(compound[:end_marker])
+            result = result[: result.find("{+n}")]
 
-    result = result + "*" + "".join(section[-idx:])
+        # if end is inside brackets, ----------------------
+        if check_bracket_balance(compound[start_marker[i] : end_marker[i]]) == 0:
+            results.append(result + "*")
+            continue
 
-    return result
+        section = []
+        parts = compound[end_marker[i] + 4 :].split(")")
+        for p, part in enumerate(parts):
+            if "(" in part and i < len(parts) - 1:
+                parts[p] = ")" + part + ")" + parts[p + 1]
+                parts.pop(p + 1)
+                section.append(parts[p])
+            else:
+                section.append(")" + part)
+
+        idx = check_bracket_balance(compound[: end_marker[i]])
+
+        result = result + "*" + "".join(section[-idx:])
+
+        results.append(result)
+
+    return results
 
 
 def clean_polymer_smiles(
@@ -439,21 +459,23 @@ def canonicalise(smiles: str) -> str:
         return f"Error: {str(e)}"
 
 
-def find_canonical_repeat(smiles: str) -> str:
+def find_canonical_repeats(smiles: str) -> list[str] or str:
     """
     Find repeat unit, and canonicalise a polymer smiles string.
     REMOVES END GROUPS
     Args:
         smiles - the unedited smiles from ketcher output. e.g. CC{-}C{+n}C
     Returns:
-        canon_smiles - the canonicalised repeat unit. e.g *C*
+        smiles_list - list of the canonicalised repeat units. e.g ['*C*']
     """
     if "[*]" in smiles:  # block dummy atoms like R groups
         return "dummy"
-    smiles = find_polymer_repeat_unit(smiles)
 
-    smiles = smiles.replace("/", "").replace("\\", "")  # ignore stereochemistry
+    repeat_units = find_polymer_repeat_units(smiles)
 
-    smiles = canonicalise(smiles)
+    smiles_list = []
+    for unit in repeat_units:
+        unit = unit.replace("/", "").replace("\\", "")  # ignore stereochemistry
+        smiles_list.append(canonicalise(unit))
 
-    return smiles
+    return smiles_list

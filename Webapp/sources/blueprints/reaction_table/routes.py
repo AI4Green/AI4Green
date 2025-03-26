@@ -86,13 +86,7 @@ def process():
 
         if idx in polymer_indices:
             polymer = True
-            if reactant_smiles.count("{+n}") > 1:
-                return jsonify(
-                    {
-                        "error": f"Cannot process Reactant {idx} structure: copolymers are not yet supported"
-                    }
-                )
-            reactant_smiles = services.polymer_novel_compound.find_canonical_repeat(
+            reactant_smiles = services.polymer_novel_compound.find_canonical_repeats(
                 reactant_smiles
             )
             if reactant_smiles == "dummy":
@@ -101,12 +95,9 @@ def process():
                         "error": f"Cannot process Reactant {idx} structure: dummy atoms are not yet supported"
                     }
                 )
-            elif reactant_smiles.startswith("Error"):
-                return jsonify({"error": f"Cannot process Reactant {idx} structure"})
 
         # check if valid SMILES
-        mol = Chem.MolFromSmiles(reactant_smiles)
-        if mol is None:
+        if not services.all_compounds.check_valid_smiles(reactant_smiles):
             return jsonify({"error": f"Cannot process Reactant {idx} structure"})
 
         # find compound in database
@@ -147,13 +138,7 @@ def process():
 
         if (idx + number_of_reactants) in polymer_indices:  # if polymer:
             polymer = True
-            if product_smiles.count("{+n}") > 1:
-                return jsonify(
-                    {
-                        "error": f"Cannot process Product {idx} structure: copolymers are not yet supported"
-                    }
-                )
-            product_smiles = services.polymer_novel_compound.find_canonical_repeat(
+            product_smiles = services.polymer_novel_compound.find_canonical_repeats(
                 product_smiles
             )
             if product_smiles == "dummy":
@@ -162,12 +147,9 @@ def process():
                         "error": f"Cannot process Product {idx} structure: dummy atoms are not yet supported"
                     }
                 )
-            elif product_smiles.startswith("Error"):
-                return jsonify({"error": f"Cannot process Product {idx} structure"})
 
         # check if valid SMILES
-        mol = Chem.MolFromSmiles(product_smiles)
-        if mol is None:
+        if not services.all_compounds.check_valid_smiles(product_smiles):
             return jsonify({"error": f"Cannot process Product {idx} structure"})
 
         # find compound in database
@@ -305,7 +287,7 @@ def get_compound_all_tables(smiles, workbook, polymer, demo):
     Retrieves a compound from the database, checking the Compound, NovelCompound, and PolymerNovelCompound tables.
 
     Args:
-        smiles (str): The SMILES string for the compound.
+        smiles (str or list): The SMILES string for the compound.
         workbook (str):
         polymer (bool): True if compound is a polymer.
         demo (str): "demo" if in demo mode.
