@@ -90,17 +90,19 @@ def get_ip_address() -> str:
 
 
 def get_location() -> Dict[str, str]:
-    print(current_app.config["IPINFO_API_KEY"])
     handler = ipinfo.getHandler(current_app.config["IPINFO_API_KEY"])
     ip = get_ip_address()
-    print(ip)
     location = handler.getDetails(ip)
     # try:
     # This will fail if running on local host
     return {
         "IP_address": ip,
-        "country": location.country_name,
-        "city": location.city,
+        "country": location.details.get(
+            "country_name", "N/A"
+        ),  # Fetch full country name
+        "city": location.details.get(
+            "city", "N/A"
+        ),  # Fetch city from details dictionary
     }
     # except AttributeError:
     #     # If running on local host use default values
