@@ -416,7 +416,9 @@ def autosave() -> Response:
         "polymerisation_type": polymerisation_type,
     }
     reaction.update(**update_dict)
-    services.controlled_substances.check_reaction_for_controlled_substances(reaction)
+    services.controlled_substances.check_reaction_for_controlled_substances(
+        reaction, request
+    )
     return jsonify({"feedback": feedback})
 
 

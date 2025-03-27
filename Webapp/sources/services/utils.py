@@ -2,6 +2,7 @@ import contextlib
 import datetime
 from typing import Dict, Tuple
 
+import flask
 import ipinfo
 import toml
 from flask import current_app, request
@@ -84,25 +85,29 @@ def remove_duplicates_keep_first(lst: list) -> list:
     return new_list
 
 
-def get_ip_address() -> str:
+def get_ip_address(user_request) -> str:
     """Returns current IP address"""
-    return request.remote_addr
+    return user_request.remote_addr
 
 
-def get_location() -> Dict[str, str]:
+def get_location(user_request: flask.request) -> Dict[str, str]:
+    """
+    Uses IPInfo call to get user location
+    Args:
+        user_request (flask.request): flask request from frontend, required to find IP address
+
+    Returns:
+        Dict[str, str]: dictionary with IP address, country name and city of the request
+    """
     handler = ipinfo.getHandler(current_app.config["IPINFO_API_KEY"])
-    ip = get_ip_address()
+    ip = get_ip_address(user_request)
     location = handler.getDetails(ip)
     # try:
     # This will fail if running on local host
     return {
         "IP_address": ip,
-        "country": location.details.get(
-            "country_name", "N/A"
-        ),  # Fetch full country name
-        "city": location.details.get(
-            "city", "N/A"
-        ),  # Fetch city from details dictionary
+        "country": location.country_name,
+        "city": location.city,
     }
     # except AttributeError:
     #     # If running on local host use default values

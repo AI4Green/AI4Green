@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
+import flask
 import pytz
 from flask import current_app
 from flask_login import current_user
@@ -10,13 +11,14 @@ from sources.extensions import db
 
 
 def check_reaction_for_controlled_substances(
-    reaction: models.Reaction,
+    reaction: models.Reaction, user_request: flask.request
 ) -> Union[List[List[str]], None]:
     """
     Checks the provided reaction against AI4Green's list of controlled substances and adds their usage to the database.
 
     Args:
         reaction (models.Reaction): The reaction to check for controlled substances.
+        user_request (flask.request): The flask request object, needed to find IP address
 
     Returns:
         List[List[str]]: A list of lists containing the InChI for substances that are in AI4Green's controlled substance list.
@@ -42,7 +44,7 @@ def check_reaction_for_controlled_substances(
     if all(not sublist for sublist in checks):
         return None
 
-    location = services.utils.get_location()
+    location = services.utils.get_location(user_request)
     unique_structures = {
         inchi
         for sublist in checks  # flatten the list of lists
