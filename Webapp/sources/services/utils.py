@@ -1,5 +1,6 @@
 import contextlib
 import datetime
+from audioop import error
 from typing import Dict, Tuple
 
 import flask
@@ -87,7 +88,8 @@ def remove_duplicates_keep_first(lst: list) -> list:
 
 def get_ip_address(user_request) -> str:
     """Returns current IP address"""
-    return user_request.remote_addr
+    raise Exception(f"IP address is {user_request.remote_addr}")
+    # return user_request.remote_addr
 
 
 def get_location(user_request: flask.request) -> Dict[str, str]:
@@ -101,7 +103,9 @@ def get_location(user_request: flask.request) -> Dict[str, str]:
     """
     handler = ipinfo.getHandler(current_app.config["IPINFO_API_KEY"])
     ip = get_ip_address(user_request)
+    print(ip)
     location = handler.getDetails(ip)
+    print(vars(location))
     # try:
     # This will fail if running on local host
     return {
