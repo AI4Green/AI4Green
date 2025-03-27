@@ -85,7 +85,7 @@
                     </ul>
                     <p>You should display signs in the lab to alert other lab users.</p>
                     {% for toxicity in toxicity_list %}
-                        <button  onclick=printToxicitySign({{ toxicity }}) class="btn btn-danger toxicity-print-sign" data-toxicity={{ toxicity }}>
+                        <button  onclick="printToxicitySign('{{ toxicity }}')" class="btn btn-danger toxicity-print-sign" data-toxicity={{ toxicity }}>
                             Print {{ toxicity.capitalize()  }} Sign
                         </button><br><br>
                     {%  endfor %}
