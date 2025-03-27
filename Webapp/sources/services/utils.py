@@ -1,7 +1,7 @@
 import contextlib
 import datetime
 from audioop import error
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Union
 
 import flask
 import ipinfo
@@ -86,43 +86,36 @@ def remove_duplicates_keep_first(lst: list) -> list:
     return new_list
 
 
-def get_ip_address(user_request) -> str:
+def get_ip_address() -> Union[str, None]:
     """Returns current IP address"""
     if request.headers.get("X-Forwarded-For"):
         ip = request.headers.get("X-Forwarded-For").split(",")[0].strip()
-        raise Exception(f"IP address is {ip}")
-    # return user_request.remote_addr
+        return ip.split(":")[0]
+    return None
 
 
-def get_location(user_request: flask.request) -> Dict[str, str]:
+def get_location() -> Dict[str, str]:
     """
     Uses IPInfo call to get user location
-    Args:
-        user_request (flask.request): flask request from frontend, required to find IP address
 
     Returns:
         Dict[str, str]: dictionary with IP address, country name and city of the request
     """
     handler = ipinfo.getHandler(current_app.config["IPINFO_API_KEY"])
-    ip = get_ip_address(user_request)
-    print(ip)
-    location = handler.getDetails(ip)
-    print(vars(location))
-    # try:
-    # This will fail if running on local host
+    ip = get_ip_address()
+    if ip is not None:
+        location = handler.getDetails(ip)
+        return {
+            "IP_address": ip,
+            "country": location.country_name,
+            "city": location.city,
+        }
+    # location information is not supported for local instances
     return {
-        "IP_address": ip,
-        "country": location.country_name,
-        "city": location.city,
+        "IP_address": "Location Not Found",
+        "country": "Location Not Found",
+        "city": "Location Not Found",
     }
-    # except AttributeError:
-    #     # If running on local host use default values
-    #     print("Local Host IP is not findable with IPInfo.")
-    #     return {
-    #         "IP_address": "Local host instance does not support location information.",
-    #         "country": "Local host instance does not support location information.",
-    #         "city": "Local host instance does not support location information.",
-    #     }
 
 
 def remove_spaces_and_dashes(name: str) -> str:
