@@ -90,6 +90,15 @@ class SketcherCompound:
             {"reactionTable": novel_reactant_html, "novelCompound": True}
         )
 
+    def add_primary_key_to_compound_data(self):
+        inchi = services.all_compounds.smiles_to_inchi(self.smiles)
+        db_entry = services.all_compounds.from_inchi(inchi)
+
+        if self.is_novel_compound:
+            self.compound_data["primary_key"] = (db_entry.name, db_entry.workbook)
+        else:
+            self.compound_data["primary_key"] = db_entry.id
+
     def check_polymer(self, polymer_indices):
         """
         Set is_polymer to True if idx in polymer indices and process smiles
@@ -136,7 +145,7 @@ class SketcherCompound:
                 compound_data = {}
                 for key in sub_dict.keys():
                     value = sub_dict.get(key)
-                    # print(key, value)
+                    print(key, value)
                     if "units" in key:
                         compound_data[key.replace(component_type + "_", "")] = value
                     else:
@@ -155,6 +164,8 @@ class SketcherCompound:
                 )
 
                 compound.compound_data = compound_data
+                compound.add_primary_key_to_compound_data()
+                print(compound.compound_data)
                 component_lists[component_type].append(compound)
 
         return component_lists
