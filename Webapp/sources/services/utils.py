@@ -88,7 +88,9 @@ def remove_duplicates_keep_first(lst: list) -> list:
 
 def get_ip_address(user_request) -> str:
     """Returns current IP address"""
-    raise Exception(f"IP address is {user_request.remote_addr}")
+    if request.headers.get("X-Forwarded-For"):
+        ip = request.headers.get("X-Forwarded-For").split(",")[0].strip()
+        raise Exception(f"IP address is {ip}")
     # return user_request.remote_addr
 
 
