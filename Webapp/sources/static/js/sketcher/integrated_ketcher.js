@@ -33,6 +33,7 @@ function displayKetcher() {
 function setupKetcherAutosave() {
   let ketcher = getKetcher();
   ketcher.editor.subscribe("change", function () {
+    console.log("autosave call1");
     setTimeout(autoSaveCheck(null, true), 100);
   });
 }

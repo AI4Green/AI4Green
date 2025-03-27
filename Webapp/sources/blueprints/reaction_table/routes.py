@@ -3,6 +3,7 @@ This module receives a reaction from Marvin JS as a
 GET request and renders the reaction table template
 """
 
+import json
 import re
 from typing import Dict, List, Tuple, Union
 from urllib.parse import quote
@@ -35,6 +36,7 @@ class SketcherCompound:
         workbook,
         demo,
         reaction_component,
+        reload=False,
     ):
         self.smiles = smiles
         self.idx = idx
@@ -51,7 +53,7 @@ class SketcherCompound:
         self.check_polymer(polymer_indices)
         self.check_invalid_molecule()
 
-        if not self.errors:
+        if not self.errors and not reload:
             self.process_compound()
 
     def process_compound(self):
@@ -100,6 +102,63 @@ class SketcherCompound:
             self.check_polymer_dummy_atom()
             self.check_copolymer()
 
+    @classmethod
+    def from_reaction_table_dict(cls, reaction_table_dict, workbook):
+        """
+        Create SketcherCompound instances from a dictionary of reaction data.
+
+        Args:
+            reaction_table_dict (dict): Dictionary containing reaction data with keys for reactants, products, and other details.
+            workbook:
+
+        Returns:
+            dict: A list of SketcherCompound instances representing individual reactants and products.
+        """
+
+        component_lists = {"reactant": [], "reagent": [], "solvent": [], "product": []}
+
+        # need to attach limiting reagent/desired product
+        # radio_buttons = {
+        #     "limiting_reactant_table_number": reaction_table_dict.pop(
+        #         "limiting_reactant_table_number"
+        #     ),
+        #     "main_product": reaction_table_dict.pop("main_product"),
+        # }
+
+        number_of_compounds = 0
+        for component_type, component_list in component_lists.items():
+            # get all relevant items from reaction_table_dict
+            sub_dict = {
+                k: v for k, v in reaction_table_dict.items() if component_type in k
+            }
+            for idx, name in enumerate(sub_dict.get(component_type + "_names")):
+                number_of_compounds += 1
+                compound_data = {}
+                for key in sub_dict.keys():
+                    value = sub_dict.get(key)
+                    # print(key, value)
+                    if "units" in key:
+                        compound_data[key.replace(component_type + "_", "")] = value
+                    else:
+                        compound_data[key.replace(component_type + "_", "")] = value[
+                            idx
+                        ]
+                # print(compound_data)
+                compound = cls(
+                    smiles=compound_data["smiles"],
+                    idx=idx + 1,
+                    polymer_indices={},
+                    workbook=workbook,
+                    demo="no",
+                    reaction_component=component_type.capitalize(),
+                    reload=True,
+                )
+
+                compound.compound_data = compound_data
+                component_lists[component_type].append(compound)
+
+        return component_lists
+
     def check_copolymer(self):
         if self.smiles.count("{+n}") > 1:
             self.errors.append(
@@ -137,7 +196,6 @@ def check_compound_errors(compound_list: List[SketcherCompound]) -> Union[str, N
     checks errors for lists of sketcher compounds
     """
     for compound in compound_list:
-        print(compound.compound_data)
         if compound.errors:
             return compound.errors[0]
     return None
@@ -205,6 +263,7 @@ def autoupdate_reaction_table():
         for idx, x in enumerate(reactants_smiles_list)
     ]
     number_of_reactants = len(reactants)
+    # print(reactants[0].compound_data)
 
     # add for reagent support
     # reagents = [
@@ -285,6 +344,47 @@ def autoupdate_reaction_table():
         reaction_class=r_class,
         reaction_classes=r_classes,
         polymer_indices=polymer_indices,
+    )
+    return jsonify({"reactionTable": reaction_table})
+
+
+@reaction_table_bp.route("/reload_reaction_table", methods=["GET", "POST"])
+def reload_reaction_table():
+    # reaction_table_dict = request.json.get("reaction_table_data")
+    # print(reaction_table_dict)
+    workbook = request.json.get("workbook")
+    workgroup = request.json.get("workgroup")
+    reaction_id = request.json.get("reaction_id")
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup, workbook
+    )
+    reaction = services.reaction.get_from_reaction_id_and_workbook_id(
+        reaction_id, workbook.id
+    )
+    compounds = SketcherCompound.from_reaction_table_dict(
+        json.loads(reaction.reaction_table_data), workbook
+    )
+
+    # Now it renders the reaction table template
+    reaction_table = render_template(
+        "_reaction_table.html",
+        reactants=compounds["reactant"],
+        reagents=compounds["reagent"],
+        number_of_reactants=len(compounds["reactant"]),
+        number_of_products=len(compounds["product"]),
+        number_of_reagents=0,
+        identifiers=[],
+        reactant_table_numbers=[],
+        products=compounds["product"],
+        # product_intended_dps=product_data["intended_dps"],
+        reagent_table_numbers=[],
+        reaction_table_data="",
+        summary_table_data="",
+        sol_rows=services.solvent.get_workbook_list(workbook),
+        reaction=reaction,
+        reaction_class=[],
+        reaction_classes=[],
+        polymer_indices={},
     )
     return jsonify({"reactionTable": reaction_table})
 
@@ -403,10 +503,10 @@ def get_compound_data(
     molecular_weight = (
         float(compound.molec_weight) if compound.molec_weight != "" else 0
     )
-    compound_data["molecular_weight"] = molecular_weight
+    compound_data["molecular_weights"] = molecular_weight
 
     compound_name = compound.name if compound.name != "" else "Not found"
-    compound_data["name"] = compound_name
+    compound_data["names"] = compound_name
 
     compound_hazard = (
         compound.hphrase if compound.hphrase != "No hazard codes found" else "Unknown"
@@ -414,7 +514,7 @@ def get_compound_data(
     compound_data["hazards"] = compound_hazard
 
     compound_density = compound.density if compound.density != "" else "-"
-    compound_data["density"] = compound_density
+    compound_data["densities"] = compound_density
 
     if novel_compound:
         compound_data["primary_key"] = (compound.name, compound.workbook)

@@ -9,7 +9,8 @@ function initialiseReactionTable() {
   $('input[name="reactant-limiting"]').first().prop("checked", true);
   hideButtonsInDemoMode();
   // reload before autofill functions
-  reactionTableReload();
+  //reloadReactionTable()
+  //reactionTableReload();
   // The next functions make changes based on the limiting reactant/main product
   updateTableAfterLimitingReactantChange();
   updateMainProduct();

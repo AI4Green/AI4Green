@@ -151,7 +151,7 @@
                     {% if index == 1 %} {% else %}
                     readonly
                     {% endif %}></td>
-            <td> {{ physical_form_dropdown(index, reactant.compound_data.physical_form) }} </td>
+            <td> {{ physical_form_dropdown(index, reactant.compound_data.physical_forms) }} </td>
             <td><textarea class="text-in-table" id="js-reactant-hazards{{ index }}" readonly>{{ reactant.compound_data.hazards }}</textarea></td>
             <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal" title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-reactant{{ index }}" type="button"><i class="bi bi-exclamation-circle"></i></button></td>
             <td></td>

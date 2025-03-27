@@ -1,12 +1,12 @@
 // run observer if not in tutorial mode
-if ($("#js-tutorial").val() === "no" && $("#js-demo").val() !== "demo") {
-  observer();
-}
+// if ($("#js-tutorial").val() === "no" && $("#js-demo").val() !== "demo") {
+//   observer();
+// }
 
 function observer() {
   // this line detects any changes user makes to any input field and saves 0.5 seconds after user stops focus on input
   $(document).on("change", ":input:not(#polymer-mode-select)", function (e) {
-    setTimeout(autoSaveCheck(e), 2000);
+    setTimeout(autoSaveCheck(e), 500);
   });
   // on press remove solvent save
   $(document).on("click", ".js-remove-solvent", function (e) {
@@ -42,8 +42,10 @@ function autoSaveCheck(e = null, sketcher = false) {
       ifCurrentUserIsNotCreator()
     )
   ) {
+    //console.log("autosave 2", load_status, listOfClasses, complete_status)
     // use sketcher variable to either do the sketcher autosave function or the normal autosave function
     if (sketcher === false) {
+      //console.log("autosave3")
       autoSave();
     } else if (sketcher === true) {
       // dont autosave sketcher if reaction table has loaded
@@ -56,6 +58,7 @@ function autoSaveCheck(e = null, sketcher = false) {
 }
 
 function autoSave() {
+  console.log("autosave");
   // normal autosave
   postReactionData();
 }
@@ -90,6 +93,7 @@ async function sketcherAutoSave() {
   }
   // change here for reagent support
   let smilesNew = removeReagentsFromSmiles(smiles);
+  console.log("sketcher", smilesNew);
   $("#js-reaction-smiles").val(smilesNew);
   $("#js-reaction-rxn").val(rxn);
   let workgroup = $("#js-active-workgroup").val();
@@ -97,6 +101,7 @@ async function sketcherAutoSave() {
   let reactionID = $("#js-reaction-id").val();
   let polymerMode = $("#polymer-mode-select").is(":checked");
   let userEmail = "{{ current_user.email }}";
+  updateReactionTable(smiles, workgroup, workbook, reactionID);
   $.ajax({
     url: "/_autosave_sketcher",
     type: "post",
@@ -111,16 +116,17 @@ async function sketcherAutoSave() {
     },
     dataType: "json",
     success: function () {
-      flashUserSaveMessage();
+      flashUserSaveMessage("SKETCHER");
     },
     error: function () {
       flashUserErrorSavingMessage();
     },
   });
-  updateReactionTable(smiles, workgroup, workbook, reactionID);
+  //updateReactionTable(smiles, workgroup, workbook, reactionID);
 }
 
 function updateReactionTable(smiles, workgroup, workbook, reactionID) {
+  console.log("autoupdate reaction table");
   fetch("/autoupdate_reaction_table", {
     headers: {
       "Content-Type": "application/json",
@@ -137,7 +143,7 @@ function updateReactionTable(smiles, workgroup, workbook, reactionID) {
       return response.json();
     })
     .then(function (item) {
-      $("#reaction-table-div").html(item.reactionTable).show();
+      generateReactionTable(item);
     });
 }
 
@@ -410,7 +416,7 @@ function postReactionData(complete = "not complete") {
         }
       } else {
         // if not locking reaction save as normal
-        flashUserSaveMessage();
+        flashUserSaveMessage("AUTOSAVE");
       }
     },
     error: function () {
@@ -489,6 +495,7 @@ function getFieldData() {
     reactantNames += $(reactantNamesID).val() + ";";
     let reactantPrimaryKeyID = "#js-reactant-primary-key" + i;
     reactantPrimaryKeys += $(reactantPrimaryKeyID).val() + ";";
+    console.log(reactantPrimaryKeys);
     reactantMassID = "#js-reactant-rounded-mass" + i;
     reactantMasses += $(reactantMassID).val() + ";";
     let reactantMassRawID = "#js-reactant-mass" + i;
@@ -906,9 +913,9 @@ function fade_save_message() {
   $("#reaction-saved-indicator").fadeOut("slow");
 }
 
-function flashUserSaveMessage() {
+function flashUserSaveMessage(message) {
   let $reactionSaveIndicator = $("#reaction-saved-indicator");
-  $reactionSaveIndicator.text("Reaction Changes Saved");
+  $reactionSaveIndicator.text(message);
   $reactionSaveIndicator
     .removeClass()
     .addClass("reaction-save-success")
