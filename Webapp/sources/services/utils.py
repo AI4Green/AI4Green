@@ -90,24 +90,26 @@ def get_ip_address() -> str:
 
 
 def get_location() -> Dict[str, str]:
+    print(current_app.config["IPINFO_API_KEY"])
     handler = ipinfo.getHandler(current_app.config["IPINFO_API_KEY"])
     ip = get_ip_address()
+    print(ip)
     location = handler.getDetails(ip)
-    try:
-        # This will fail if running on local host
-        return {
-            "IP_address": ip,
-            "country": location.country_name,
-            "city": location.city,
-        }
-    except AttributeError:
-        # If running on local host use default values
-        print("Local Host IP is not findable with IPInfo.")
-        return {
-            "IP_address": "Local host instance does not support location information.",
-            "country": "Local host instance does not support location information.",
-            "city": "Local host instance does not support location information.",
-        }
+    # try:
+    # This will fail if running on local host
+    return {
+        "IP_address": ip,
+        "country": location.country_name,
+        "city": location.city,
+    }
+    # except AttributeError:
+    #     # If running on local host use default values
+    #     print("Local Host IP is not findable with IPInfo.")
+    #     return {
+    #         "IP_address": "Local host instance does not support location information.",
+    #         "country": "Local host instance does not support location information.",
+    #         "city": "Local host instance does not support location information.",
+    #     }
 
 
 def remove_spaces_and_dashes(name: str) -> str:
