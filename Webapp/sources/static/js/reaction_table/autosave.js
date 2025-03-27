@@ -1,7 +1,7 @@
 // run observer if not in tutorial mode
-// if ($("#js-tutorial").val() === "no" && $("#js-demo").val() !== "demo") {
-//   observer();
-// }
+if ($("#js-tutorial").val() === "no" && $("#js-demo").val() !== "demo") {
+  setTimeout(observer(), 1000);
+}
 
 function observer() {
   // this line detects any changes user makes to any input field and saves 0.5 seconds after user stops focus on input
@@ -23,7 +23,7 @@ function observer() {
  * @param {HTMLElement} [e=null] - the changed element that triggered the autosave function
  * @param {boolean} [sketcher=false] - true if the changed element is a chemical sketcher
  */
-function autoSaveCheck(e = null, sketcher = false) {
+async function autoSaveCheck(e = null, sketcher = false) {
   if (!checkIfSaveEnabled()) {
     return;
   }
@@ -42,23 +42,19 @@ function autoSaveCheck(e = null, sketcher = false) {
       ifCurrentUserIsNotCreator()
     )
   ) {
-    //console.log("autosave 2", load_status, listOfClasses, complete_status)
     // use sketcher variable to either do the sketcher autosave function or the normal autosave function
     if (sketcher === false) {
-      //console.log("autosave3")
       autoSave();
     } else if (sketcher === true) {
       // dont autosave sketcher if reaction table has loaded
       let reactionDiv = document.getElementById("reaction-table-div");
-      // if (reactionDiv.childNodes.length === 0) {
-      sketcherAutoSave();
+      await sketcherAutoSave();
       // }
     }
   }
 }
 
 function autoSave() {
-  console.log("autosave");
   // normal autosave
   postReactionData();
 }
@@ -93,7 +89,6 @@ async function sketcherAutoSave() {
   }
   // change here for reagent support
   let smilesNew = removeReagentsFromSmiles(smiles);
-  console.log("sketcher", smilesNew);
   $("#js-reaction-smiles").val(smilesNew);
   $("#js-reaction-rxn").val(rxn);
   let workgroup = $("#js-active-workgroup").val();
@@ -122,11 +117,10 @@ async function sketcherAutoSave() {
       flashUserErrorSavingMessage();
     },
   });
-  //updateReactionTable(smiles, workgroup, workbook, reactionID);
+  updateReactionTable(smiles, workgroup, workbook, reactionID);
 }
 
 function updateReactionTable(smiles, workgroup, workbook, reactionID) {
-  console.log("autoupdate reaction table");
   fetch("/autoupdate_reaction_table", {
     headers: {
       "Content-Type": "application/json",
@@ -495,7 +489,6 @@ function getFieldData() {
     reactantNames += $(reactantNamesID).val() + ";";
     let reactantPrimaryKeyID = "#js-reactant-primary-key" + i;
     reactantPrimaryKeys += $(reactantPrimaryKeyID).val() + ";";
-    console.log(reactantPrimaryKeys);
     reactantMassID = "#js-reactant-rounded-mass" + i;
     reactantMasses += $(reactantMassID).val() + ";";
     let reactantMassRawID = "#js-reactant-mass" + i;

@@ -212,7 +212,6 @@ function sketcherDataLossHandler() {
 async function reloadReaction() {
   // disable select sketcher buttons until SMILES are loaded into sketcher
   $("#js-load-status").val("loading");
-  console.log($("#js-load-status").val());
   let $sketcherSelectRadioButtons = $('input[name="sketcher-select"]');
   $sketcherSelectRadioButtons.prop("disabled", true);
 
@@ -228,8 +227,6 @@ async function reloadReaction() {
   if (Object.keys(js_reaction_table_data).includes("reaction_description")) {
     reloadReactionTable(js_reaction_table_data);
   }
-  $("#js-load-status").val("loaded");
-  console.log($("#js-load-status").val());
 }
 
 function reloadReactionTable(reactionTableData) {
