@@ -92,8 +92,8 @@
 {%- endmacro %}
 
 
-{%  macro physical_form_dropdown(index, value) -%}
-<select size="1" class="physical-form" id="js-reactant-physical-form{{ index }}">
+{%  macro physical_form_dropdown(index, value, type) -%}
+<select size="1" class="physical-form" id="js-{{ type }}-physical-form{{ index }}">
     {% set options = [
         "-select-",
         "Dense solid",
@@ -132,7 +132,7 @@
                     {% if reactant.compound_data.densities %}value="{{ reactant.compound_data.densities }}"{% endif %}
                     id="js-reactant-density{{ index }}"></td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
-                    {% if reactant.compound_data.сoncentration %}value="{{ reactant.compound_data.сoncentrations }}"{% endif %}
+                    {% if reactant.compound_data.сoncentrations %}value="{{ reactant.compound_data.сoncentrations }}"{% endif %}
                     id="js-reactant-concentration{{ index }}"></td>
             <td><input style="width: 60px;" type="number" step="any" min="0" id="js-reactant-equivalent{{ index }}" placeholder="-"
                     {% if index == 1 %} value="1" readonly {% else %}
@@ -151,7 +151,7 @@
                     {% if index == 1 %} {% else %}
                     readonly
                     {% endif %}></td>
-            <td> {{ physical_form_dropdown(index, reactant.compound_data.physical_forms) }} </td>
+            <td> {{ physical_form_dropdown(index, reactant.compound_data.physical_forms_text, "reactant") }} </td>
             <td><textarea class="text-in-table" id="js-reactant-hazards{{ index }}" readonly>{{ reactant.compound_data.hazards }}</textarea></td>
             <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal" title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-reactant{{ index }}" type="button"><i class="bi bi-exclamation-circle"></i></button></td>
             <td></td>
@@ -240,31 +240,31 @@
 {%  macro product_row(product, index) -%}
 <tr class="not-novel-compound-input">
             <td><input type="number" id="js-product-table-number{{ index }}" value="{{ product.idx }}" style="width:40px; border:none" readonly></td>
-            <td style='width: 200px;'><input  id="js-product{{ index }}" style="width: 200px; border-width:0px;" value="{{ product.compound_data.name }}"></td>
+            <td style='width: 200px;'><input  id="js-product{{ index }}" style="width: 200px; border-width:0px;" value="{{ product.compound_data.names }}"></td>
             <td><input type="radio" id="js-main-product{{ index }}" name="js-main-product" value="{{ product.idx }}" class="js-main-product"></td>
                 <script>
                 $('input[name="js-main-product"]').first().prop('checked', true)
                 </script>
-            <td><input type="number" step="any" value="{{ product.compound_data.molecular_weight }}"
+            <td><input type="number" step="any" value="{{ product.compound_data.molecular_weights }}"
                        id="js-product-molecular-weight{{ index }}" style="width: 70px; border:none" readonly></td>
             <td></td>
             <td></td>
             <td></td>
             <td><input type="number" step="any" placeholder="-" min="0"
-                {% if rounded_product_amounts %}value="{{ rounded_product_amounts[index0] }}"{% endif %}
+                {% if product.compound_data.amounts %}value="{{ product.compound_data.amounts }}"{% endif %}
                 id="js-product-rounded-amount{{ index }}" style="width: 60px; border:none" readonly></td>
             <td></td>
             <td style="width:4.3em"><input type="number" step="any" placeholder="-" min="0"
-                {% if rounded_product_masses %}value="{{ rounded_product_masses[index0] }}"{% endif %}
+                {% if product.compound_data.masses %}value="{{ product.compound_data.masses }}"{% endif %}
                 id="js-product-rounded-mass{{ index }}" style="width: 60px; border:none" readonly></td>
-            <td> {{ physical_form_dropdown(index) }} </td>
+            <td> {{ physical_form_dropdown(index, product.compound_data.physical_forms_text, "product") }} </td>
             <td><textarea class="text-in-table" id="js-product-hazard{{ index }}" readonly>{{ product.compound_data.hazards }}</textarea></td>
             <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal" title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-product{{ index }}" type="button"><i class="bi bi-exclamation-circle"></i></button></td>
             <td></td>
         </tr>
-        <input type="hidden" {% if product_amounts %}value="{{ product_amounts[index0] }}"{% endif %}
+        <input type="hidden" {% if product.compound_data.amounts_raw %}value="{{ product.compound_data.masses_raw }}"{% endif %}
                id="js-product-amount{{ index }}">
-        <input type="hidden" {% if product_masses %}value="{{ product_masses[index0] }}"{% endif %}
+        <input type="hidden" {% if product.compound_data.masses_raw %}value="{{ product.compound_data.masses_raw }}"{% endif %}
                id="js-product-mass{{ index }}">
         <input type="hidden" value="{{ product.compound_data.primary_key }}" id="js-product-primary-key{{ index }}">
 {%- endmacro %}
