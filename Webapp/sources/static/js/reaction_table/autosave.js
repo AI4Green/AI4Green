@@ -1,6 +1,6 @@
 // run observer if not in tutorial mode
 if ($("#js-tutorial").val() === "no" && $("#js-demo").val() !== "demo") {
-  setTimeout(observer(), 1000);
+  observer();
 }
 
 function observer() {

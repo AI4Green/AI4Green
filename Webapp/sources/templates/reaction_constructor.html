@@ -2,26 +2,6 @@
 {% block content %}
 <head>
     <title>{{ reaction.reaction_id }}</title>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher_page.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/addendum.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/file_handling.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/polymer.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
-
-    <script>
-        // disable complete reaction button once reaction is completed
-        $(function () {
-            if ($("#js-complete").val() === "not complete") {
-                $("#mark-complete").attr("disabled", false)
-            }
-        })
-
-    </script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/sketcher.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tutorial.css') }}">
@@ -435,5 +415,26 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher_page.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/addendum.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/file_handling.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/polymer.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
+
+<script>
+// disable complete reaction button once reaction is completed
+$(function () {
+    if ($("#js-complete").val() === "not complete") {
+        $("#mark-complete").attr("disabled", false)
+    }
+})
+
+</script>
 
 {% endblock %}
