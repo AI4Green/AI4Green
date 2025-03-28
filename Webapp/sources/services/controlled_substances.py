@@ -61,7 +61,7 @@ def check_reaction_for_controlled_substances(
 
 def check_smiles_in_controlled_substances(smiles_list: List[str]) -> List[str]:
     """
-    Checks which of the smiles in the list provided are in AI4Green's controlled substance list.
+    Checks which of the smiles in the list provided are in AI4Green's controlled substance list. Doesnt check polymers.
 
     Args:
         smiles_list: (List[str]), list of smiles to check
@@ -69,7 +69,10 @@ def check_smiles_in_controlled_substances(smiles_list: List[str]) -> List[str]:
     Returns:
         List of InChI found in controlled substances.
     """
-    query_inchis = [services.all_compounds.smiles_to_inchi(smi) for smi in smiles_list]
+    query_inchis = [
+        services.all_compounds.smiles_to_inchi(smi) if type(smi) == str else None
+        for smi in smiles_list
+    ]
     return [
         inchi
         for inchi in query_inchis

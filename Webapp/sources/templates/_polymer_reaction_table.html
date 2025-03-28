@@ -82,8 +82,15 @@
             <td><input  type="radio" step="any"
                     name="reactant-limiting" id="js-reactant-limiting{{ loop.index }}" value={{ loop.index }}  class="js-reactant-limiting">
             </td>
-            <td><input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ reactant_mol_weights[loop.index0] }}"
-                    id="js-reactant-molecular-weight{{ loop.index }}" readonly>
+            <td>{% if reactant_mol_weights[loop.index0] is iterable %}
+                    {% for weight in reactant_mol_weights[loop.index0] %}
+                    <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ weight }}"
+                        id="js-reactant-molecular-weight{{ loop.index }}" readonly>
+                    {% endfor %}
+                {% else %}
+                    <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ reactant_mol_weights[loop.index0] }}"
+                        id="js-reactant-molecular-weight{{ loop.index }}" readonly>
+                {% endif %}
                 <br>
                 {% if loop.index in polymer_indices %}
                     <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
@@ -262,8 +269,15 @@
                 <script>
                 $('input[name="js-main-product"]').first().prop('checked', true)
                 </script>
-            <td><input type="number" step="any" value="{{ product_mol_weights[loop.index0] }}"
-                       id="js-product-molecular-weight{{ loop.index }}" style="width: 70px; border:none" readonly>
+            <td>{% if product_mol_weights[loop.index0] is iterable %}
+                    {% for weight in product_mol_weights[loop.index0] %}
+                    <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ weight }}"
+                        id="js-product-molecular-weight{{ loop.index }}" readonly>
+                    {% endfor %}
+                {% else %}
+                    <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ product_mol_weights[loop.index0] }}"
+                        id="js-product-molecular-weight{{ loop.index }}" readonly>
+                {% endif %}
                 <br>
                 {% if (loop.index + number_of_reactants) in polymer_indices %}
                     <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>

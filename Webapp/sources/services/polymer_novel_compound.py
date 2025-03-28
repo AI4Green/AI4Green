@@ -50,13 +50,14 @@ def get_repeat_unit_weights(polymer_id: int, workbook: int) -> list:
     Returns:
         PolymerNovelCompound model.
     """
-    return (
+    query = (
         db.session.query(models.PolymerRepeatUnit.molec_weight)
         .filter(models.PolymerRepeatUnit.polymer_id == polymer_id)
         .join(models.WorkBook)
         .filter(models.WorkBook.id == workbook)
         .all()
     )
+    return [q[0] for q in query]
 
 
 def from_name_and_workbook(
