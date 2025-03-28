@@ -214,6 +214,13 @@ function autofillAmount(component, changedParameter, loopValue) {
       amount =
         (firstReactantAmount * amountFactor[reactantAmountUnit]) /
         amountFactor[productAmountUnit];
+      let totalMW = getVal($("#js-polymer-total-weight" + loopValue));
+      if (totalMW) {
+        // if polymer
+        amount =
+          (firstReactantAmount * amountFactor[reactantAmountUnit]) /
+          (amountFactor[productAmountUnit] * totalMW);
+      }
     } else {
       amount = firstReactantAmount * equivalent;
     }
@@ -1034,7 +1041,7 @@ function autofillProductFields2() {
       "#js-product-amount-unit",
       "#js-product-mass-unit",
       ".js-reactant-limiting",
-      "#js-product-intended-dp",
+      "#js-product-intended-dp" + i,
     ];
     for (const param of productAmountParameters) {
       autofillAmount(component, param, i);
@@ -1241,8 +1248,8 @@ function autofillTotalMW(component, changedParameter, loopValue) {
   //for polymers
   $(changedParameter).on("input change", function () {
     let molecularWeight = $("#js-product-molecular-weight" + loopValue).val();
-    let intendedDP = $("#js-product-intended-dp").val(); //get intended DP from html input
+    let intendedDP = $("#js-product-intended-dp" + loopValue).val(); //get intended DP from html input
     let totalMW = parseFloat(molecularWeight) * parseFloat(intendedDP);
-    $("#js-polymer-total-weight").val(totalMW);
+    $("#js-polymer-total-weight" + loopValue).val(totalMW);
   });
 }

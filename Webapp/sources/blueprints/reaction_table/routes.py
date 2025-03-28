@@ -172,8 +172,8 @@ def process():
                 component="Product",
                 name=product_name,
                 number=idx,
-                mw=product_mol_wt,
-                smiles=product_smiles,
+                mw=json.dumps(product_mol_wt),
+                smiles=json.dumps(product_smiles),
                 polymer=polymer,
             )
             return jsonify({"reactionTable": novel_product_html, "novelCompound": True})
@@ -221,7 +221,7 @@ def process():
         product_hazards=product_data["hazard_list"],
         product_primary_keys=product_data["primary_key_list"],
         product_table_numbers=product_data["table_numbers"],
-        # product_intended_dps=product_data["intended_dps"],
+        product_intended_dps=product_data["intended_dps"],
         reagent_table_numbers=[],
         reaction_table_data="",
         summary_table_data="",
