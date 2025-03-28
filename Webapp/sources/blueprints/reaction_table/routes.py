@@ -126,13 +126,15 @@ class SketcherCompound:
 
         component_lists = {"reactant": [], "reagent": [], "solvent": [], "product": []}
 
-        # need to attach limiting reagent/desired product
-        # radio_buttons = {
-        #     "limiting_reactant_table_number": reaction_table_dict.pop(
-        #         "limiting_reactant_table_number"
-        #     ),
-        #     "main_product": reaction_table_dict.pop("main_product"),
-        # }
+        print(reaction_table_dict.keys())
+        # need to attach limiting reagent/desired product and maybe like masses and stuff?
+        radio_buttons = {
+            "limiting_reactant_table_number": reaction_table_dict.pop(
+                "limiting_reactant_table_number"
+            ),
+            "main_product": reaction_table_dict.pop("main_product"),
+        }
+        print(radio_buttons)
 
         number_of_compounds = 0
         for component_type, component_list in component_lists.items():
@@ -152,10 +154,9 @@ class SketcherCompound:
                         compound_data[key.replace(component_type + "_", "")] = value[
                             idx
                         ]
-                # print(compound_data)
                 compound = cls(
                     smiles=compound_data["smiles"],
-                    idx=idx + 1,
+                    idx=number_of_compounds,
                     polymer_indices={},
                     workbook=workbook,
                     demo="no",
@@ -165,7 +166,6 @@ class SketcherCompound:
 
                 compound.compound_data = compound_data
                 compound.add_primary_key_to_compound_data()
-                print(compound.compound_data)
                 component_lists[component_type].append(compound)
 
         return component_lists
@@ -375,6 +375,7 @@ def reload_reaction_table():
     compounds = SketcherCompound.from_reaction_table_dict(
         json.loads(reaction.reaction_table_data), workbook
     )
+    print(compounds["product"][0].compound_data)
 
     # Now it renders the reaction table template
     reaction_table = render_template(
