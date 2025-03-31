@@ -212,7 +212,7 @@ function autofillAmount(component, changedParameter, loopValue) {
       let reactantAmountUnit = getVal($("#js-amount-unit"));
       let productAmountUnit = getVal($("#js-product-amount-unit"));
       amount =
-        (firstReactantAmount * amountFactor[reactantAmountUnit]) /
+        (firstReactantAmount * equivalent * amountFactor[reactantAmountUnit]) /
         amountFactor[productAmountUnit];
       let totalMW = getVal($("#js-polymer-total-weight" + loopValue));
       if (totalMW) {
@@ -1037,6 +1037,7 @@ function autofillProductFields2() {
     let productAmountParameters = [
       limitingReactantEquivalentID,
       limitingReactantMassID,
+      "#js-product-equivalent" + i,
       "#js-mass-unit",
       "#js-product-amount-unit",
       "#js-product-mass-unit",
