@@ -170,6 +170,7 @@ function postReactionData(complete = "not complete") {
     productPhysicalForms,
     productAmounts,
     productAmountsRaw,
+    productEquivalents,
     productMasses,
     productMassesRaw,
     mainProductTableNumber,
@@ -281,6 +282,7 @@ function postReactionData(complete = "not complete") {
       productPhysicalForms: productPhysicalForms,
       productAmounts: productAmounts,
       productAmountsRaw: productAmountsRaw,
+      productEquivalents: productEquivalents,
       productMasses: productMasses,
       productMassesRaw: productMassesRaw,
       mainProductTableNumber: mainProductTableNumber,
@@ -579,6 +581,8 @@ function getFieldData() {
   let productHazards = "";
   let mainProductTableNumber = $("#js-main-product-table-number").val();
   let numberOfProducts = Number($("#js-number-of-products").val());
+  let productEquivalentID;
+  let productEquivalents = "";
   let productPhysicalFormID;
   let productPhysicalForms = "";
   let productPhysicalFormsText = "";
@@ -594,6 +598,8 @@ function getFieldData() {
     productNames += $(productNameID).val() + ";";
     let productMolecularWeightID = "#js-product-molecular-weight" + i;
     productMolecularWeights += $(productMolecularWeightID).val() + ";";
+    productEquivalentID = "#js-product-equivalent" + i;
+    productEquivalents += $(productEquivalentID).val() + ";";
     let productHazardsID = "#js-product-hazard" + i;
     productHazards += $(productHazardsID).val() + ";";
     productPhysicalFormID = "#js-product-physical-form" + i;
@@ -794,6 +800,7 @@ function getFieldData() {
     productAmountsRaw: productAmountsRaw,
     productMasses: productMasses,
     productMassesRaw: productMassesRaw,
+    productEquivalents: productEquivalents,
     mainProductTableNumber: mainProductTableNumber,
     amountUnits: amountUnits,
     massUnits: massUnits,

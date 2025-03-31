@@ -89,6 +89,7 @@ def new_reaction() -> Response:
                 "product_intended_dps": [],
                 "product_amounts": [],
                 "product_amounts_raw": [],
+                "product_equivalents": [],
                 "product_masses": [],
                 "product_masses_raw": [],
                 "product_physical_forms": [],
@@ -216,6 +217,7 @@ def autosave() -> Response:
     product_physical_form = get_data("productPhysicalForms")[:-1]
     product_amounts = get_data("productAmounts")[:-1]
     product_amounts_raw = get_data("productAmountsRaw")[:-1]
+    product_equivalents = get_data("productEquivalents")[:-1]
     product_masses = get_data("productMasses")[:-1]
     product_masses_raw = get_data("productMassesRaw")[:-1]
     product_names = get_data("productNames")[:-1]
@@ -272,6 +274,7 @@ def autosave() -> Response:
             "solvent_physical_forms": solvent_physical_forms,
             "product_amounts": product_amounts,
             "product_amounts_raw": product_amounts_raw,
+            "product_equivalents": product_equivalents,
             "product_masses": product_masses,
             "product_masses_raw": product_masses_raw,
             "product_smiles": product_smiles_ls,

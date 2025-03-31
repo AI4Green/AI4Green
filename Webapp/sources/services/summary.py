@@ -148,6 +148,7 @@ def get_product_data(request_data: Dict) -> Dict:
         "productMasses",
         "roundedProductMasses",
         "productMolecularWeights",
+        "productEquivalents",
         "productHazards",
         "productPhysicalForms",
     ]

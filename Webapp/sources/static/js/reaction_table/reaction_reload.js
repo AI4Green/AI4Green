@@ -39,6 +39,7 @@ async function reactionTableReload() {
   const productFields = {
     amounts: "-rounded-amount",
     amounts_raw: "-amount",
+    equivalents: "-equivalent",
     masses: "-rounded-mass",
     masses_raw: "-mass",
     physical_forms: "-physical-form",

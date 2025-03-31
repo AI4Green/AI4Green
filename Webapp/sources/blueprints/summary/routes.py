@@ -107,6 +107,7 @@ def summary() -> Response:
             main_product_table_number=product_data["main_product_table_number"],
             main_product_index=product_data["main_product_index"],
             product_molecular_weights=product_data["product_molecular_weights"],
+            product_equivalents=product_data["product_equivalents"],
             product_masses=product_data["product_masses"],
             rounded_product_masses=product_data["rounded_product_masses"],
             ae=sustainability_data["ae"],
