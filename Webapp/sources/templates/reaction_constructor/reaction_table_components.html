@@ -162,13 +162,13 @@
             <td></td>
         </tr>
         <input type="hidden"
-        {% if reactant.compound_data.reactant_amounts %}value="{{ reactant.compound_data.reactant_amounts }}"{% endif %}
+        {% if reactant.compound_data.amounts_raw %}value="{{ reactant.compound_data.amounts_raw }}"{% endif %}
         id="js-reactant-amount{{ index }}">
         <input type="hidden"
-        {% if reactant.compound_data.reactant_volumes %}value="{{ reactant.compound_data.reactant_volumes }}"{% endif %}
+        {% if reactant.compound_data.volumes_raw %}value="{{ reactant.compound_data.volumes_raw }}"{% endif %}
         id="js-reactant-volume{{ index }}">
         <input type="hidden"
-        {% if reactant.compound_data.reactant_masses %}value="{{ reactant.compound_data.reactant_masses }}"{% endif %}
+        {% if reactant.compound_data.masses_raw %}value="{{ reactant.compound_data.masses_raw }}"{% endif %}
         id="js-reactant-mass{{ index }}">
         <input type="hidden" value="{{ reactant.compound_data.primary_key }}" id="js-reactant-primary-key{{ index }}">
 {%- endmacro %}
@@ -268,7 +268,7 @@
             <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal" title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-product{{ index }}" type="button"><i class="bi bi-exclamation-circle"></i></button></td>
             <td></td>
         </tr>
-        <input type="hidden" {% if product.compound_data.amounts_raw %}value="{{ product.compound_data.masses_raw }}"{% endif %}
+        <input type="hidden" {% if product.compound_data.amounts_raw %}value="{{ product.compound_data.amounts_raw }}"{% endif %}
                id="js-product-amount{{ index }}">
         <input type="hidden" {% if product.compound_data.masses_raw %}value="{{ product.compound_data.masses_raw }}"{% endif %}
                id="js-product-mass{{ index }}">
