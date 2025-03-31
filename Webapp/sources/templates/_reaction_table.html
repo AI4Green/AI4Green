@@ -18,22 +18,23 @@
 
 {{ reaction_table_components.reaction_class_dropdown(reaction_class, reaction_classes) }}
 
+
 <div style="overflow-x:auto;" class="table-responsive text-nowrap" id="reaction-table-div">
     <br>
     <table class="table table-sm w-auto">
 
-    {{ reaction_table_components.table_headings() }}
+    {{ reaction_table_components.table_headings(units) }}
 
     {% for reactant in reactants %}
         {{  reaction_table_components.reactant_row(reactant, loop.index) }}
     {% endfor %}
 
-    {#      Reagent/catalyst input - includes new reagent row   #}
-    {{ reaction_table_components.reagent_or_solvent_heading("reagent") }}
+    {#      Reagent/catalyst input  #}
+    {{ reaction_table_components.reagent_or_solvent_heading("reagent", units)}}
 
-    {{ reaction_table_components.reagent_or_solvent_heading("solvent") }}
+    {{ reaction_table_components.reagent_or_solvent_heading("solvent", units) }}
 
-    {{ reaction_table_components.product_headings() }}
+    {{ reaction_table_components.product_headings(units) }}
 
     {% for product in products %}
         {{  reaction_table_components.product_row(product, loop.index) }}

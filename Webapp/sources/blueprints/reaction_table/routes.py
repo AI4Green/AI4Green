@@ -94,10 +94,11 @@ class SketcherCompound:
         inchi = services.all_compounds.smiles_to_inchi(self.smiles)
         db_entry = services.all_compounds.from_inchi(inchi)
 
-        if self.is_novel_compound:
-            self.compound_data["primary_key"] = (db_entry.name, db_entry.workbook)
-        else:
-            self.compound_data["primary_key"] = db_entry.id
+        if self.reaction_component != "Solvent":
+            if self.is_novel_compound:
+                self.compound_data["primary_key"] = (db_entry.name, db_entry.workbook)
+            else:
+                self.compound_data["primary_key"] = db_entry.id
 
     def check_polymer(self, polymer_indices):
         """
@@ -125,16 +126,24 @@ class SketcherCompound:
         """
 
         component_lists = {"reactant": [], "reagent": [], "solvent": [], "product": []}
+        units = {}
 
         print(reaction_table_dict.keys())
-        # need to attach limiting reagent/desired product and maybe like masses and stuff?
-        radio_buttons = {
-            "limiting_reactant_table_number": reaction_table_dict.pop(
-                "limiting_reactant_table_number"
-            ),
-            "main_product": reaction_table_dict.pop("main_product"),
-        }
-        print(radio_buttons)
+
+        reaction_param_keys = [
+            "limiting_reactant_table_number",
+            "main_product",
+            "mass_units",
+            "polymerisation_type",
+            "amount_units",
+            "volume_units",
+            "solvent_volume_units",
+            "product_mass_units",
+            "product_amount_units",
+        ]
+
+        for param in reaction_param_keys:
+            units[param] = reaction_table_dict.pop(param)
 
         number_of_compounds = 0
         for component_type, component_list in component_lists.items():
@@ -155,7 +164,9 @@ class SketcherCompound:
                             idx
                         ]
                 compound = cls(
-                    smiles=compound_data["smiles"],
+                    smiles=compound_data.get(
+                        "smiles", ""
+                    ),  # blank default in case of solvents/reagents
                     idx=number_of_compounds,
                     polymer_indices={},
                     workbook=workbook,
@@ -168,7 +179,7 @@ class SketcherCompound:
                 compound.add_primary_key_to_compound_data()
                 component_lists[component_type].append(compound)
 
-        return component_lists
+        return component_lists, units
 
     def check_copolymer(self):
         if self.smiles.count("{+n}") > 1:
@@ -372,7 +383,7 @@ def reload_reaction_table():
     reaction = services.reaction.get_from_reaction_id_and_workbook_id(
         reaction_id, workbook.id
     )
-    compounds = SketcherCompound.from_reaction_table_dict(
+    compounds, units = SketcherCompound.from_reaction_table_dict(
         json.loads(reaction.reaction_table_data), workbook
     )
     print(compounds["product"][0].compound_data)
@@ -384,6 +395,8 @@ def reload_reaction_table():
         reagents=compounds["reagent"],
         number_of_reactants=len(compounds["reactant"]),
         number_of_products=len(compounds["product"]),
+        solvents=compounds["solvent"],
+        units=units,
         number_of_reagents=0,
         identifiers=[],
         reactant_table_numbers=[],
