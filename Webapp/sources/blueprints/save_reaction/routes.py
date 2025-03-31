@@ -68,6 +68,7 @@ def new_reaction() -> Response:
                 "reactant_physical_forms": [],
                 "reactant_densities": [],
                 "reactant_concentrations": [],
+                "reactant_mns": [],
                 "reagent_names": [],
                 "reagent_molecular_weights": [],
                 "reagent_densities": [],
@@ -166,6 +167,10 @@ def autosave() -> Response:
     reactant_smiles_ls = services.all_compounds.get_smiles_list(
         reactant_primary_keys_ls, polymer_indices
     )
+    reactant_smiles_ls = [
+        smiles if type(smiles) == str else json.dumps(smiles)
+        for smiles in reactant_smiles_ls
+    ]
     reactant_masses = get_data("reactantMasses")[:-1]
     reactant_masses_raw = get_data("reactantMassesRaw")[:-1]
     reactant_amounts = get_data("reactantAmounts")[:-1]
@@ -180,6 +185,7 @@ def autosave() -> Response:
     reactant_molecular_weights = get_data("reactantMolecularWeights")[:-1]
     reactant_hazards = get_data("reactantHazards")[:-1]
     reactant_physical_forms_text = get_data("reactantPhysicalFormsText")[:-1]
+    reactant_mns = get_data("reactantMns")[:-1]
     # reagents data from the ajax post
     reagent_smiles_ls = get_data("reagentSmiles")
     reagent_names = get_data("reagentNames")[:-1]
@@ -214,6 +220,10 @@ def autosave() -> Response:
         polymer_indices,
         number_of_reactants=len(reactant_smiles_ls),
     )
+    product_smiles_ls = [
+        smiles if type(smiles) == str else json.dumps(smiles)
+        for smiles in product_smiles_ls
+    ]
     product_physical_form = get_data("productPhysicalForms")[:-1]
     product_amounts = get_data("productAmounts")[:-1]
     product_amounts_raw = get_data("productAmountsRaw")[:-1]
@@ -290,6 +300,7 @@ def autosave() -> Response:
             "reactant_molecular_weights": reactant_molecular_weights,
             "reactant_hazards": reactant_hazards,
             "reactant_physical_forms_text": reactant_physical_forms_text,
+            "reactant_mns": reactant_mns,
             "reagent_physical_forms_text": reagent_physical_forms_text,
             "solvent_physical_forms_text": solvent_physical_forms_text,
             "product_names": product_names,

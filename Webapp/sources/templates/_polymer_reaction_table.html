@@ -94,6 +94,9 @@
                 <br>
                 {% if loop.index in polymer_indices %}
                     <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
+                    <span style="font-weight: bold; font-size: 90%"><br>Mn = </span>
+                    <input style="width: 70px;" type="number" step="any" placeholder="-" min="0" value="js-reactant-mn{{ loop.index }}"
+                        id="js-reactant-mn{{ loop.index }}">
                 {% endif %}
             </td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
@@ -283,7 +286,7 @@
                     <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
                 {% endif %}
             </td>
-            <td><input style="width: 60px;" type="number" step="any" min="0" id="js-product-intended-dp{{ loop.index }}" placeholder="-"
+            <td><input style="width: 60px;" type="number" step="any" min="0" id="js-product-intended-dp{{ loop.index }}" placeholder="1"
                        value="js-product-intended-dp{{ loop.index }}"></td>
             <td><input type="number" step="any" value="js-polymer-total-weight{{ loop.index }}"
                        id="js-polymer-total-weight{{ loop.index }}" style="width: 70px; border:none"></td>

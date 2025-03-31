@@ -210,6 +210,7 @@ function postReactionData(complete = "not complete") {
     reactantMolecularWeights,
     reactantHazards,
     reactantPhysicalFormsText,
+    reactantMns,
     reagentPhysicalFormsText,
     solventPhysicalFormsText,
     productNames,
@@ -321,6 +322,7 @@ function postReactionData(complete = "not complete") {
       reactantMolecularWeights: reactantMolecularWeights,
       reactantHazards: reactantHazards,
       reactantPhysicalFormsText: reactantPhysicalFormsText,
+      reactantMns: reactantMns,
       reagentPhysicalFormsText: reagentPhysicalFormsText,
       solventPhysicalFormsText: solventPhysicalFormsText,
       productNames: productNames,
@@ -462,6 +464,7 @@ function getFieldData() {
   let reactantMolecularWeights = "";
   let reactantHazards = "";
   let reactantPhysicalFormsText = "";
+  let reactantMns = "";
 
   for (let i = 1; i <= numberOfReactants; i++) {
     let reactantNamesID = "#js-reactant" + i;
@@ -494,6 +497,8 @@ function getFieldData() {
     let reactantHazardsID = "#js-reactant-hazards" + i;
     reactantHazards += $(reactantHazardsID).val() + ";";
     reactantPhysicalFormsText += $(reactantPhysicalFormID).val() + ";";
+    let reactantMnsID = "#js-reactant-mn" + i;
+    reactantMns += $(reactantMnsID).val() + ";";
   }
   // reagent data
   let reagentPrimaryKeys = "";
@@ -836,6 +841,7 @@ function getFieldData() {
     reactantMolecularWeights: reactantMolecularWeights,
     reactantHazards: reactantHazards,
     reactantPhysicalFormsText: reactantPhysicalFormsText,
+    reactantMns: reactantMns,
     reagentPhysicalFormsText: reagentPhysicalFormsText,
     solventPhysicalFormsText: solventPhysicalFormsText,
     productNames: productNames,

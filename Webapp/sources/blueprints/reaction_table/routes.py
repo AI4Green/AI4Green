@@ -69,6 +69,7 @@ def process():
         "hazard_list": [],
         "density_list": [],
         "primary_key_list": [],
+        "mns": [],
     }
     product_data = {
         "molecular_weight_list": [],
@@ -212,6 +213,7 @@ def process():
         reactant_densities=reactant_data["density_list"],
         reactant_hazards=reactant_data["hazard_list"],
         reactant_primary_keys=reactant_data["primary_key_list"],
+        reactant_mns=reactant_data["mns"],
         number_of_reactants=number_of_reactants,
         number_of_products=number_of_products,
         identifiers=identifiers,
