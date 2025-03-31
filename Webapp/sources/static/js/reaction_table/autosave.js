@@ -636,7 +636,7 @@ function getFieldData() {
   }
   // unit data
   let amountUnits = unitData("#js-amount-unit", "mmol");
-  let volumeUnits = unitData("#js-solvent-volume-unit", "mL");
+  let volumeUnits = unitData("#js-volume-unit", "mL");
   let massUnits = unitData("#js-mass-unit", "mg");
   let solventVolumeUnits = unitData("#js-solvent-volume-unit", "mL");
   let productAmountUnits = unitData("#js-product-amount-unit", "mmol");
