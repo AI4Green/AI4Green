@@ -13,7 +13,14 @@
 {%- endmacro  %}
 
 
-{% macro table_headings() -%}
+{% macro table_headings(units) -%}
+
+    {% set unit_options = {
+    "amount": ["mol", "mmol", "μmol"],
+    "volume": ["mL", "μL"],
+    "mass": ["g", "mg", "μg"]
+    } %}
+
     <tr class="not-novel-compound-input">
         <th scope="col">&#8470;</th>
         <th scope="col">Reactants</th>
@@ -22,26 +29,16 @@
         <th scope="col">Density (g/mL)</th>
         <th scope="col">Conc. (M)</th>
         <th scope="col">Equiv.</th>
-        <th scope="col">Amount<br>
-            <select size="1" name="amountUnit" id="js-amount-unit">
-                <option value="mol">mol</option>
-                <option value="mmol" selected>mmol</option>
-                <option value="μmol">μmol</option>
-            </select>
-        </th>
-        <th scope="col">Volume<br>
-            <select size="1" name="volumeUnit" id="js-volume-unit">
-                <option value="mL" selected>mL</option>
-                <option value="μL">μL</option>
-            </select>
-        </th>
-        <th scope="col">Mass<br>
-            <select size="1" name="massUnit" id="js-mass-unit">
-                <option value="g">g</option>
-                <option value="mg" selected>mg</option>
-                <option value="μg">μg</option>
-            </select>
-        </th>
+        {#  set up headings with variable units  #}
+        {% for unit_type, options in unit_options.items() %}
+            <th scope="col">{{ unit_type|capitalize }}<br>
+                <select size="1" name="{{ unit_type }}Unit" id="js-{{ unit_type }}-unit">
+                    {% for option in options %}
+                        <option value="{{ option }}" {{ "selected" if units[unit_type + "_units"] == option else "" }}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </th>
+        {% endfor %}
         <th scope="col">Physical Form</th>
         <th scope="col">Hazards</th>
         <th scope="col"></th>
@@ -139,11 +136,11 @@
                     {% if reactant.compound_data.equivalents %}value="{{ reactant.compound_data.equivalents }}"{% endif %}
                     {% endif %}></td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
-                    {% if reactant.compound_data.rounded_reactant_amounts %}value="{{ reactant.compound_data.amounts }}"{% endif %}
+                    {% if reactant.compound_data.amounts %}value="{{ reactant.compound_data.amounts }}"{% endif %}
                     id="js-reactant-rounded-amount{{ index }}" class="js-reactant-rounded-amounts"
                     readonly></td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
-                    {% if reactant.compound_data.rounded_reactant_volumes %}value="{{ reactant.compound_data.volumes }}"{% endif %}
+                    {% if reactant.compound_data.volumes %}value="{{ reactant.compound_data.volumes }}"{% endif %}
                     id="js-reactant-rounded-volume{{ index }}"
                     readonly></td>
             <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-reactant-rounded-mass{{ index }}" class="js-reactant-rounded-masses"
@@ -169,7 +166,7 @@
 {%- endmacro %}
 
 
-{% macro reagent_or_solvent_heading(type) -%}
+{% macro reagent_or_solvent_heading(type, units) -%}
     <tbody id="js-{{ type }}-table">
             <tr style="display: none" id="js-input-{{ type }}1">
                 <td style="text-align:center;">New<br>Compound</td>
@@ -190,7 +187,7 @@
                 <td></td>
                 <td></td>
                 <td></td>
-                <td> {{ solvent_units_dropdown(type) }} </td>
+                <td> {{ solvent_units_dropdown(type, units["solvent_volume_units"]) }} </td>
                 <td></td>
                 <td></td>
                 <td><button type="button" title="Add {{ type }} to reaction" onclick="addNew{{ type|capitalize }}()" class="js-add-{{ type }} btn btn-success" style="width: fit-content;">Add {{ type|capitalize }}</button></td>
@@ -209,14 +206,15 @@
 {%- endmacro %}
 
 
-{% macro solvent_units_dropdown(type) -%}
+{% macro solvent_units_dropdown(type, selected_unit) -%}
     {% if type == "solvent" %}
         <select size="1" name="solventVolumeUnit" id="js-solvent-volume-unit">
-            <option value="mL" selected>mL</option>
-            <option value="μL">μL</option>
+            <option value="mL" {{ "selected" if selected_unit == "mL" else "" }}>mL</option>
+            <option value="μL" {{ "selected" if selected_unit == "μL" else "" }}>μL</option>
         </select>
     {% endif %}
-{%- endmacro  %}
+{%- endmacro %}
+
 
 
 {% macro add_to_database_row(type) -%}
