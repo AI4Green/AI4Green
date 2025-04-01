@@ -20,7 +20,14 @@ function updateCookiePreferences() {
 }
 
 function updatePrivacyPolicyAgreement() {
-  window.location.href = "/accept_privacy_policy";
+  // patch request to update the date when the user agreed to the privacy policy, then redirect home.
+  fetch("/accept_privacy_policy", {
+    method: "PATCH",
+  }).then((response) => {
+    if (response.ok) {
+      window.location.href = "/home";
+    }
+  });
 }
 
 function getCookie(cname) {
