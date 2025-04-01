@@ -19,6 +19,7 @@ def summary() -> Response:
     Returns:
         flask.Response: returns the summary table as a json object
     """
+    reaction = None
     if not (
         str(request.form["demo"]) == "demo" or str(request.form["tutorial"]) == "yes"
     ):
