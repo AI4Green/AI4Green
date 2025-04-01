@@ -176,19 +176,10 @@
 
 {% macro reagent_or_solvent_heading(type, units) -%}
     <tbody id="js-{{ type }}-table">
-            <tr style="display: none" id="js-input-{{ type }}1">
-                <td style="text-align:center;">New<br>Compound</td>
-                <td>Name</td>
-                <td>SMILES</td>
-                <td>Hazard Codes</td>
-                <td>CAS</td>
-                <td>MW</td>
-                <td>Density</td>
-                <td>Conc.</td>
-            </tr>
+{#            {{ add_to_database_row( type ) }}#}
             <tr class="not-novel-compound-input" id="{{ type }}-row">
                 <td></td>
-                {{ reagent_or_solvent_title(type) }}
+                <td>{{ reagent_or_solvent_title(type) }}</td>
                 <td><button id="js-add-new-{{ type }}-by-table" title="Add new {{ type }} to database" onclick="make{{ type|capitalize }}Input()" class="btn btn-outline-dark" style="width: fit-content;">Add new {{ type|capitalize }} to database</button></td>
                 <td></td>
                 <td></td>
@@ -200,16 +191,15 @@
                 <td></td>
                 <td><button type="button" title="Add {{ type }} to reaction" onclick="addNew{{ type|capitalize }}()" class="js-add-{{ type }} btn btn-success" style="width: fit-content;">Add {{ type|capitalize }}</button></td>
             </tr>
-            {{ add_to_database_row( type ) }}
         </tbody>
 {%- endmacro %}
 
 
 {%  macro reagent_or_solvent_title(type) -%}
     {% if type == "reagent" %}
-        <td><b>Catalysts/reagents</b></td>
+        <b>Catalysts/reagents</b>
     {% else %}
-        <td><b>Solvents</b></td>
+        <b>Solvents</b>
     {% endif %}
 {%- endmacro %}
 
@@ -224,22 +214,31 @@
 {%- endmacro %}
 
 
-
 {% macro add_to_database_row(type) -%}
+    <tr style="display: none" id="js-input-{{ type }}1">
+                <td style="text-align:center;">New<br>Compound</td>
+                <td>Name</td>
+                <td>SMILES</td>
+                <td>Hazard Codes</td>
+                <td>CAS</td>
+                <td>MW</td>
+                <td>Density</td>
+                <td>Conc.</td>
+    </tr>
     <tr style="display: none" id="js-input-{{ type }}2">
-                <td></td>
-                <td><input style="width: 200px;" class="add-highlight-unfilled-cell no_autosave"  type="text" id="js-input-{{ type }}-name" placeholder="Required"></td>
-                <td><input style="width: 200px" type="text" id="js-input-{{ type }}-smiles" placeholder="Optional" class="no_autosave"></td>
-                <td><input style="width: 200px" type="text" id="js-input-{{ type }}-hazards" placeholder="Optional (HXXX-etc.)" class="no_autosave"></td>
-                <td><input style="width: 200px" type="text" id="js-input-{{ type }}-cas" placeholder="Optional" class="no_autosave"></td>
-                <td><input style="width: 60px" type="number" id="js-input-{{ type }}-mw" placeholder="Opt." class="no_autosave"></td>
-                <td><input style="width: 60px" type="number" id="js-input-{{ type }}-density" placeholder="Opt." class="no_autosave"></td>
-                <td><input style="width: 60px" type="number" id="js-input-{{ type }}-concentration" placeholder="Opt." class="no_autosave"></td>
-                <td><button type="button" id="js-input-{{ type }}" class="btn btn-outline-dark"
-                            onclick="submitNovelCompoundViaTable('{{ type }}')" title="Add compound to database" style="width: fit-content;">Input</button></td>
-                <td><button type="button" id="js-input-cancel" class="js-input-cancel btn btn-outline-dark"
-                            style="width: fit-content;" onclick="cancelNovelCompoundInput('{{ type }}')">Cancel</button></td>
-            </tr>
+        <td></td>
+        <td><input style="width: 200px;" class="add-highlight-unfilled-cell no_autosave"  type="text" id="js-input-{{ type }}-name" placeholder="Required"></td>
+        <td><input style="width: 200px" type="text" id="js-input-{{ type }}-smiles" placeholder="Optional" class="no_autosave"></td>
+        <td><input style="width: 200px" type="text" id="js-input-{{ type }}-hazards" placeholder="Optional (HXXX-etc.)" class="no_autosave"></td>
+        <td><input style="width: 200px" type="text" id="js-input-{{ type }}-cas" placeholder="Optional" class="no_autosave"></td>
+        <td><input style="width: 60px" type="number" id="js-input-{{ type }}-mw" placeholder="Opt." class="no_autosave"></td>
+        <td><input style="width: 60px" type="number" id="js-input-{{ type }}-density" placeholder="Opt." class="no_autosave"></td>
+        <td><input style="width: 60px" type="number" id="js-input-{{ type }}-concentration" placeholder="Opt." class="no_autosave"></td>
+        <td><button type="button" id="js-input-{{ type }}" class="btn btn-outline-dark"
+                    onclick="submitNovelCompoundViaTable('{{ type }}')" title="Add compound to database" style="width: fit-content;">Input</button></td>
+        <td><button type="button" id="js-input-cancel" class="js-input-cancel btn btn-outline-dark"
+                    style="width: fit-content;" onclick="cancelNovelCompoundInput('{{ type }}')">Cancel</button></td>
+    </tr>
 {%- endmacro  %}
 
 
@@ -275,8 +274,9 @@
         <input type="hidden" value="{{ product.compound_data.primary_key }}" id="js-product-primary-key{{ index }}">
 {%- endmacro %}
 
+
 {% macro solvent_row() -%}
-    <table hidden id="js-solvent-table-new-row">
+{#    <table hidden id="js-solvent-table-new-row">#}
     <tr id="js-solvent-table-row-x-" class="not-novel-compound-input">
         <td><input type="number"
          style="width:40px; border:none" id="js-solvent-table-number-x-"
@@ -311,53 +311,67 @@
         id="js-solvent-concentration-x-">
         <input type="hidden" id="js-solvent-primary-key-x-">
     </tr>
-</table>
 {%- endmacro %}
 
-{% macro reagent_row() -%}
-    <table hidden id="js-reagent-table-new-row">
-    <tr id="js-reagent-table-row-x-" class="not-novel-compound-input">
-        <td><input type="number"
-         id="js-reagent-table-number-x-"
-         style="width: 40px; border-width:0px;" value="
-        reagentTableNumber  " readonly>
-        </td><td style="width: 200px;"><datalist size="1"
-         id="js2-reagent-x-" style="width: 200px;">
-         <option selected>-select-</option>
-        </datalist><input style="width: 200px;" class="add-highlight-unfilled-cell" type="search" id="js-reagent-x-" autocomplete="off" list="js2-reagent-x-" placeholder="Name or CAS Number"></td>
-        <td></td>
-        <td><input type="number" step="any" placeholder="-" min="0"
-         id="js-reagent-molecular-weight-x-" style="width: 70px; border:none" readonly></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-reagent-density-x-" style="width: 60px; border:none"></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-reagent-concentration-x-" style="width: 60px; border:none"></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-reagent-equivalent-x-" style="width: 60px;" class="add-highlight-unfilled-cell"></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-reagent-rounded-amount-x-" style="width: 60px; border:none" readonly></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-reagent-rounded-volume-x-" style="width: 60px; border:none" readonly></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-reagent-rounded-mass-x-" style="width: 60px; border:none" readonly></td>
-        <td id="js-reagent-physical-form-dropdown-cell-x-"></td>
-        <td><textarea class="text-in-table"
-         id="js-reagent-hazards-x-" readonly></textarea></td>
-        <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal"
-                    title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-reagent-x-"
-                    type="button" style="display: none"><i class="bi bi-exclamation-circle"></i></button>
-        <input type="hidden" id="js-reagent-amount-x-">
-        <input type="hidden" id="js-reagent-mass-x-">
-        <input type="hidden" id="js-reagent-volume-x-">
-        <input type="hidden" id="js-reagent-primary-key-x-">
-        <input type="hidden" id="js-reagent-smiles-x-"></td>
+
+{% macro reagent_row(reagent=None, index="-x-") -%}
+    <table {{ "hidden" if index == "-x-" else "" }} id="js-reagent-table-new-row">
+    <tr id="js-reagent-table-row"{{ index }} class="not-novel-compound-input">
         <td>
-            <button value="-x-" id="remove-reagent-x-" onclick="removeReagent(this.value)" type="button" class="js-remove-reagent close" aria-label="Close">
+            <input type="number"
+             id="js-reagent-table-number{{ index }}"
+             style="width: 40px; border-width:0px;" value="
+            reagentTableNumber  " readonly>
+        </td>
+        <td style="width: 200px;">
+            <datalist size="1" id="js2-reagent{{ index }}" style="width: 200px;">
+                <option selected>-select-</option>
+            </datalist>
+            <input style="width: 200px;" class="add-highlight-unfilled-cell" type="search" id="js-reagent{{ index }}" autocomplete="off" list="js2-reagent{{ index }}" placeholder="Name or CAS Number">
+        </td>
+        <td></td>
+        <td>
+            <input type="number" step="any" placeholder="-" min="0" id="js-reagent-molecular-weight{{ index }}" style="width: 70px; border:none" readonly>
+        </td>
+        <td>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-density{{ index }}" style="width: 60px; border:none">
+        </td>
+        <td>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-concentration{{ index }}" style="width: 60px; border:none">
+        </td>
+        <td>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-equivalent{{ index }}" style="width: 60px;" class="add-highlight-unfilled-cell">
+        </td>
+        <td>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-amount{{ index }}" style="width: 60px; border:none" readonly>
+        </td>
+        <td>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-volume{{ index }}" style="width: 60px; border:none" readonly>
+        </td>
+        <td>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-mass{{ index }}" style="width: 60px; border:none" readonly>
+        </td>
+        <td>
+        {{ physical_form_dropdown(index, reagent.compound_data.physical_forms_text if reagent and reagent.compound_data else "-select-", "reagent") }}
+        </td>
+        <td>
+            <textarea class="text-in-table" id="js-reagent-hazards{{ index }}" readonly></textarea>
+        </td>
+        <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal"
+                    title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-reagent{{ index }}"
+                    type="button" style="display: none"><i class="bi bi-exclamation-circle"></i></button>
+        <input type="hidden" id="js-reagent-amount{{ index }}">
+        <input type="hidden" id="js-reagent-mass{{ index }}">
+        <input type="hidden" id="js-reagent-volume{{ index }}">
+        <input type="hidden" id="js-reagent-primary-key{{ index }}">
+        <input type="hidden" id="js-reagent-smiles{{ index }}">
+        </td>
+        <td>
+            <button value="{{ index }}" id="remove-reagent{{ index }}" onclick="removeReagent(this.value)" type="button" class="js-remove-reagent close" aria-label="Close">
                 <span aria-hidden="true" title="Remove Reagent">&times;</span>
             </button>
         </td>
     </tr>
-</table>
 {%- endmacro %}
 
 {% macro report_compound_modal() -%}

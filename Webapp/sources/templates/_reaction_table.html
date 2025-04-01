@@ -32,6 +32,10 @@
     {#      Reagent/catalyst input  #}
     {{ reaction_table_components.reagent_or_solvent_heading("reagent", units)}}
 
+    {% for reagent in reagents %}
+        {{  reaction_table_components.reagent_row(reagent, loop.index) }}
+    {% endfor %}
+
     {{ reaction_table_components.reagent_or_solvent_heading("solvent", units) }}
 
     {{ reaction_table_components.product_headings(units) }}
@@ -45,9 +49,9 @@
 
 
 
-{{ reaction_table_components.solvent_row() }}
+{#{{ reaction_table_components.solvent_row() }}#}
 
-{{ reaction_table_components.reagent_row() }}
+{#{{ reaction_table_components.reagent_row(None, "-x-") }}#}
 </div>
 
 {# Numbers #}
