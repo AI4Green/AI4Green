@@ -78,7 +78,7 @@ def process():
         "density_list": [],
         "primary_key_list": [],
         "table_numbers": [],
-        "intended_dps": [],
+        "mns": [],
     }
 
     # Find reactants in database then add data to the dictionary
@@ -223,7 +223,7 @@ def process():
         product_hazards=product_data["hazard_list"],
         product_primary_keys=product_data["primary_key_list"],
         product_table_numbers=product_data["table_numbers"],
-        product_intended_dps=product_data["intended_dps"],
+        product_mns=product_data["mns"],
         reagent_table_numbers=[],
         reaction_table_data="",
         summary_table_data="",

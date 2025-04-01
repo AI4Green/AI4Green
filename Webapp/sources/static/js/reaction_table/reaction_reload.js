@@ -43,7 +43,7 @@ async function reactionTableReload() {
     masses: "-rounded-mass",
     masses_raw: "-mass",
     physical_forms: "-physical-form",
-    intended_dps: "-intended-dp",
+    mns: "-mn",
   };
   // object.assign concatenates the two arguments - all productFields are also found in reactant and reagent
   const reactantFields = Object.assign({

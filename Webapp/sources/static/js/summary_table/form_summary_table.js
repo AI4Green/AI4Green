@@ -27,6 +27,7 @@ async function showSummary(mode) {
     reactantMassID,
     reagentMassID,
     reactantDensityID,
+    reactantMnID,
     reactantConcentrationID,
     reactantEquivalentID,
     reactantAmountID,
@@ -37,11 +38,11 @@ async function showSummary(mode) {
     reagentDensities,
     productID,
     productMolecularWeightID,
+    productMnID,
     productEquivalentID,
     productMassID,
     roundedProductMassID,
     productHazardID,
-    productPhysicalForm,
     productPhysicalFormID;
   let numberOfReactants = Number($("#js-number-of-reactants").val());
   let reactantMassSum = 0.0;
@@ -57,6 +58,7 @@ async function showSummary(mode) {
   let reactantMolecularWeights = "";
   let reactantDensities = "";
   let reactantConcentrations = "";
+  let reactantMns = "";
   let reactantEquivalents = "";
   let reactantAmounts = "";
   let roundedReactantAmounts = "";
@@ -86,6 +88,8 @@ async function showSummary(mode) {
     reactantDensities += $(reactantDensityID).val() + ";";
     reactantConcentrationID = "#js-reactant-concentration" + i;
     reactantConcentrations += $(reactantConcentrationID).val() + ";";
+    reactantMnID = "#js-reactant-mn" + i;
+    reactantMns += $(reactantMnID).val() + ";";
     reactantEquivalentID = "#js-reactant-equivalent" + i;
     reactantEquivalents += $(reactantEquivalentID).val() + ";";
     reactantAmountID = "#js-reactant-amount" + i;
@@ -231,6 +235,7 @@ async function showSummary(mode) {
   let productMasses = "";
   let roundedProductMasses = "";
   let productMolecularWeights = "";
+  let productMns = "";
   let productEquivalents = "";
   let productHazards = "";
   let productPhysicalForms = "";
@@ -246,8 +251,10 @@ async function showSummary(mode) {
     roundedProductMasses += $(roundedProductMassID).val() + ";";
     productMolecularWeightID = "#js-product-molecular-weight" + i;
     productMolecularWeights += $(productMolecularWeightID).val() + ";";
+    productMnID = "#js-product-mn" + i;
+    productMns += $(productMnID).val() + ";";
     productEquivalentID = "#js-product-equivalent" + i;
-    productEquivalents += $(productEquivalentID).val() + ";";
+    productEquivalents += $(productEquivalentID).val() || "1" + ";"; // defaults to 1
     productHazardID = "#js-product-hazard" + i;
     productHazards += $(productHazardID).val() + ";";
     productPhysicalFormID = "#js-product-physical-form" + i;
@@ -293,6 +300,7 @@ async function showSummary(mode) {
       reactantMolecularWeights: reactantMolecularWeights,
       reactantDensities: reactantDensities,
       reactantConcentrations: reactantConcentrations,
+      reactantMns: reactantMns,
       reactantEquivalents: reactantEquivalents,
       reactantAmounts: reactantAmounts,
       roundedReactantAmounts: roundedReactantAmounts,
@@ -337,6 +345,7 @@ async function showSummary(mode) {
       reagentPhysicalForms: reagentPhysicalForms,
       solventHazards: solventHazards,
       solventPhysicalForms: solventPhysicalForms,
+      productMns: productMns,
       productEquivalents: productEquivalents,
       productHazards: productHazards,
       productPhysicalForms: productPhysicalForms,

@@ -217,7 +217,7 @@ function postReactionData(complete = "not complete") {
     productMolecularWeights,
     productHazards,
     productPhysicalFormsText,
-    productIntendedDPs,
+    productMns,
     massEfficiency,
     conversion,
     selectivity,
@@ -329,7 +329,7 @@ function postReactionData(complete = "not complete") {
       productMolecularWeights: productMolecularWeights,
       productHazards: productHazards,
       productPhysicalFormsText: productPhysicalFormsText,
-      productIntendedDPs: productIntendedDPs,
+      productMns: productMns,
       summary_to_print: summary_to_print,
       massEfficiency: massEfficiency,
       conversion: conversion,
@@ -591,7 +591,7 @@ function getFieldData() {
   let productPhysicalFormID;
   let productPhysicalForms = "";
   let productPhysicalFormsText = "";
-  let productIntendedDPs = "";
+  let productMns = "";
   let productMassesRaw = "";
   let productAmounts = "";
   let productAmountsRaw = "";
@@ -611,8 +611,8 @@ function getFieldData() {
     let productPhysicalForm = $(productPhysicalFormID).prop("selectedIndex");
     productPhysicalForms += productPhysicalForm + ";";
     productPhysicalFormsText += $(productPhysicalFormID).val() + ";";
-    let productIntendedDPID = "#js-product-intended-dp" + i;
-    productIntendedDPs += $(productIntendedDPID).val() + ";";
+    let productMnID = "#js-product-mn" + i;
+    productMns += $(productMnID).val() + ";";
     let productMassFormID = "#js-product-rounded-mass" + i;
     productMasses += $(productMassFormID).val() + ";";
     let productMassRawFormID = "#js-product-mass" + i;
@@ -848,7 +848,7 @@ function getFieldData() {
     productMolecularWeights: productMolecularWeights,
     productHazards: productHazards,
     productPhysicalFormsText: productPhysicalFormsText,
-    productIntendedDPs: productIntendedDPs,
+    productMns: productMns,
     massEfficiency: mass_efficiency,
     conversion: conversion,
     selectivity: selectivity,
