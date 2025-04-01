@@ -216,13 +216,18 @@ def search() -> Response:
     )
 
 
-@main_bp.route("/accept_privacy_policy", methods=["GET"])
+@main_bp.route("/accept_privacy_policy", methods=["PATCH"])
 def accept_privacy_policy() -> Response:
+    """
+    Accepts the privacy policy and updates the property in the database for the current user.
+
+    Returns:
+        flask.Response: 204 successful with no additional content
+    """
     user = services.user.from_email(current_user.email)
     user.privacy_policy_accepted_on = datetime.now()
     db.session.commit()
-
-    return redirect(url_for("main.index"))
+    return Response(status=204)
 
 
 # manage account page
