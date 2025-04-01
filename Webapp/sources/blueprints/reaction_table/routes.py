@@ -47,13 +47,14 @@ class SketcherCompound:
         self.is_novel_compound = False
         self.novel_compound_table = None
         self.compound_data = {}
+        self.reload = reload
 
         self.errors = []
 
         self.check_polymer(polymer_indices)
         self.check_invalid_molecule()
 
-        if not self.errors and not reload:
+        if not self.errors and self.reaction_component != "Solvent":
             self.process_compound()
 
     def process_compound(self):
@@ -61,13 +62,20 @@ class SketcherCompound:
         compound, novel_compound = get_compound_all_tables(
             self.smiles, self.workbook, self.is_polymer, self.demo
         )
+        # only check for novel compound if reaction is not being reloaded
+        if not self.reload:
+            if compound is None:
+                self.handle_new_novel_compound()
 
-        if compound is None:
-            self.handle_new_novel_compound()
+            else:
+                self.is_novel_compound = novel_compound
+                get_compound_data(self.compound_data, compound, novel_compound)
 
+        # always load primary_key regardless of reload
+        if novel_compound:
+            self.compound_data["primary_key"] = (compound.name, compound.workbook)
         else:
-            self.is_novel_compound = novel_compound
-            get_compound_data(self.compound_data, compound, novel_compound)
+            self.compound_data["primary_key"] = compound.id
 
     def handle_new_novel_compound(self):
         if self.demo == "demo":
@@ -128,8 +136,6 @@ class SketcherCompound:
         component_lists = {"reactant": [], "reagent": [], "solvent": [], "product": []}
         units = {}
 
-        print(reaction_table_dict.keys())
-
         reaction_param_keys = [
             "limiting_reactant_table_number",
             "main_product",
@@ -175,8 +181,9 @@ class SketcherCompound:
                     reload=True,
                 )
 
-                compound.compound_data = compound_data
-                compound.add_primary_key_to_compound_data()
+                compound.compound_data.update(compound_data)
+                print(compound.compound_data)
+                # compound.add_primary_key_to_compound_data()
                 component_lists[component_type].append(compound)
 
         return component_lists, units
@@ -264,6 +271,18 @@ def autoupdate_reaction_table():
         polymer_indices = list(map(int, polymer_indices.split(",")))
     else:
         polymer_indices = list()
+
+    default_units = {
+        "limiting_reactant_table_number": 1,
+        "main_product": -1,
+        "mass_units": "mg",
+        "polymerisation_type": "NAN",
+        "amount_units": "mmol",
+        "volume_units": "mL",
+        "solvent_volume_units": "mL",
+        "product_mass_units": "mg",
+        "product_amount_units": "mmol",
+    }
 
     reaction_smiles = request.json.get("reaction_smiles")
     if not reaction_smiles:
@@ -357,6 +376,7 @@ def autoupdate_reaction_table():
         identifiers=identifiers,
         reactant_table_numbers=[],
         products=products,
+        units=default_units,
         # product_intended_dps=product_data["intended_dps"],
         reagent_table_numbers=[],
         reaction_table_data="",
@@ -386,7 +406,7 @@ def reload_reaction_table():
     compounds, units = SketcherCompound.from_reaction_table_dict(
         json.loads(reaction.reaction_table_data), workbook
     )
-    print(compounds["product"][0].compound_data)
+    print(compounds)
 
     # Now it renders the reaction table template
     reaction_table = render_template(
@@ -540,11 +560,6 @@ def get_compound_data(
 
     compound_density = compound.density if compound.density != "" else "-"
     compound_data["densities"] = compound_density
-
-    if novel_compound:
-        compound_data["primary_key"] = (compound.name, compound.workbook)
-    else:
-        compound_data["primary_key"] = compound.id
 
 
 @reaction_table_bp.route("/_save_reaction_note", methods=["POST"])
