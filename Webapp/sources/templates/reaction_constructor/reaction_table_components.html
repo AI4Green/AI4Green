@@ -315,8 +315,7 @@
 
 
 {% macro reagent_row(reagent=None, index="-x-") -%}
-    <table {{ "hidden" if index == "-x-" else "" }} id="js-reagent-table-new-row">
-    <tr id="js-reagent-table-row"{{ index }} class="not-novel-compound-input">
+    <tr id="js-reagent-table-row{{ index }}" class="not-novel-compound-input">
         <td>
             <input type="number"
              id="js-reagent-table-number{{ index }}"

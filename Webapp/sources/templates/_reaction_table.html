@@ -45,13 +45,15 @@
     {% endfor %}
 
     </table>
-<input type="hidden" value="0" id="js-reaction-image-source">
 
+<table hidden id="js-reagent-table-new-row">
+    {{ reaction_table_components.reagent_row(None, "-x-") }}
+</table>
 
+<table hidden id="js-solvent-table-new-row">
+    {{ reaction_table_components.solvent_row() }}
+</table>
 
-{#{{ reaction_table_components.solvent_row() }}#}
-
-{#{{ reaction_table_components.reagent_row(None, "-x-") }}#}
 </div>
 
 {# Numbers #}
@@ -68,6 +70,8 @@
 <input type="hidden" value="1" id="js-main-product-table-number">
 
 <input type="hidden" value="{{ identifiers }}" id="js-reagent-identifiers">
+
+<input type="hidden" value="0" id="js-reaction-image-source">
 
 <datalist role="listbox" size=1 list="" id="js-solvent-datalist" class="solvent-datalist">
     {% for sol in sol_rows %}
