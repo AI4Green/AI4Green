@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-create_workgroup_bp = Blueprint("create_workgroup", __name__)
+create_workgroup_bp = APIBlueprint("create_workgroup", __name__)
 
 from . import routes

@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-notifications_bp = Blueprint("notifications", __name__)
+notifications_bp = APIBlueprint("notifications", __name__)
 
 from . import routes

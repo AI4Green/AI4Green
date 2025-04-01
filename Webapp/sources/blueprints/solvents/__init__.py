@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-solvents_bp = Blueprint("solvents", __name__)
+solvents_bp = APIBlueprint("solvents", __name__)
 
 from . import routes
