@@ -42,9 +42,8 @@ def index() -> Response:
     )
 
     form = LoginForm()
-    privacy_policy_date = datetime(
-        2025, 3, 13
-    )  # date privacy policy was updated to capture user location
+    privacy_policy_accepted = True
+    privacy_policy_date = services.utils.get_privacy_policy_date()
 
     if request.method == "POST":
         # return redirects from login verification to prevent form resubmission
@@ -56,6 +55,10 @@ def index() -> Response:
         form = None
         user_role = current_user.Role.name
         user_confirmed = current_user.is_verified
+        user_privacy_policy = current_user.privacy_policy_accepted_on
+
+        if user_privacy_policy is None or user_privacy_policy < privacy_policy_date:
+            privacy_policy_accepted = False
 
         news_items = (
             db.session.query(models.NewsItem)
@@ -69,7 +72,7 @@ def index() -> Response:
             news_items=news_items,
             messages_from_redirects=messages_from_redirects,
             form=form,
-            privacy_policy_date=privacy_policy_date,
+            privacy_policy_accepted=privacy_policy_accepted,
         )
     # user is not authenticated, send to landing page.
     else:
@@ -245,6 +248,22 @@ def search() -> Response:
     return render_template(
         "search.html", workgroups=workgroups, notification_number=notification_number
     )
+
+
+@main_bp.route("/accept_privacy_policy", methods=["POST"])
+def accept_privacy_policy() -> Response:
+    """
+    Accepts the privacy policy and updates the property in the database for the current user.
+
+    Returns:
+        flask.Response: redirect to the home page.
+
+    """
+    user = services.user.from_email(current_user.email)
+    user.privacy_policy_accepted_on = datetime.now()
+    db.session.commit()
+
+    return redirect(url_for("main.index"))
 
 
 # manage account page
