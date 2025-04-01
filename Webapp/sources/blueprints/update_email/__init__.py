@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-update_email_bp = Blueprint("update_email", __name__)
+update_email_bp = APIBlueprint("update_email", __name__)
 
 from . import routes

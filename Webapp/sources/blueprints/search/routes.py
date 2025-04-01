@@ -4,10 +4,6 @@ from sources import models, services
 from sources.auxiliary import get_workbooks, get_workgroups
 from sources.extensions import db
 
-#     workgroup = request.form["workgroup"]
-#     workbook = request.form["workbook"]
-from sources.models import reaction
-
 from . import search_bp
 
 # @search_bp.route("/text_search_handler", methods=["POST"])
@@ -20,8 +16,14 @@ from . import search_bp
 
 @search_bp.route("/structure_search_handler", methods=["POST"])
 @login_required
+@search_bp.doc(security="sessionAuth")
 def structure_search_handler() -> Response:
-    """Receives ajax request from search.js"""
+    """
+    Returns search results for exact structure search.
+
+    Returns:
+        flask.Response: returns the search results as a json object
+    """
     search = SearchHandler()
     if not search.reactions:
         # if no reactions exit search and post exception to frontend

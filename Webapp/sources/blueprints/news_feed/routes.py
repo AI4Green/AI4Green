@@ -3,8 +3,8 @@ from datetime import datetime
 import pytz
 from flask import flash, redirect, request, url_for
 from flask_login import login_required
-
 from sources import models
+from sources.decorators import admin_required
 from sources.extensions import db
 
 from . import news_feed_bp
@@ -12,7 +12,17 @@ from . import news_feed_bp
 
 @news_feed_bp.route("/new_news_post", methods=["POST"])
 @login_required
+@admin_required
+@news_feed_bp.doc(
+    security="sessionAuth",
+    description="Requires login and admin user role.",
+)
 def new_news_post():
+    """
+    Create a new news post and save it to the database
+    Returns:
+        flask.Response: A redirect to the admin dashboard with a message indicating whether the post was successful.
+    """
     # save to database
     title = request.form["newsPostTitle"]
     message = request.form["newsPostMessage"]
@@ -27,7 +37,18 @@ def new_news_post():
 
 @news_feed_bp.route("/delete_news_post", methods=["POST"])
 @login_required
+@admin_required
+@news_feed_bp.doc(
+    security="sessionAuth",
+    description="Requires login and admin user role.",
+)
 def delete_news_post():
+    """
+    Delete a news post from the database and feed
+
+    Returns:
+        flask.Response: A redirect to the home page with a message indicating whether the post was deleted.
+    """
     # get id
     item_id = request.form["post-to-delete"]
     # delete post

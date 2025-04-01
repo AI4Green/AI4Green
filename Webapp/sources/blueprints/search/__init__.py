@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-search_bp = Blueprint("search", __name__)
+search_bp = APIBlueprint("search", __name__)
 
 from . import routes
