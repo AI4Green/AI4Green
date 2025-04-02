@@ -9,15 +9,15 @@ function initialiseReactionTable() {
   $('input[name="reactant-limiting"]').first().prop("checked", true);
   hideButtonsInDemoMode();
   // reload before autofill functions
-  //reloadReactionTable()
-  //reactionTableReload();
   // The next functions make changes based on the limiting reactant/main product
   updateTableAfterLimitingReactantChange();
   updateMainProduct();
-  // autofill for all the components
+
+  // set up event listeners to change table amounts/volumes/masses
   autoFillLimitingReactant();
   autofillReactantFields2();
   autofillProductFields2();
+  initialiseReagentListeners();
   updateStyling();
   setColours();
   $("#js-load-status").on("change", function () {
@@ -25,6 +25,15 @@ function initialiseReactionTable() {
   });
 }
 
+/**
+ * Hides specific buttons when the application is in demo mode.
+ *
+ * This function checks if the element with the ID "js-demo" has a value of "demo".
+ * If it does, it hides the elements with the following IDs:
+ * - "reaction-name-description"
+ * - "js-add-new-reagent-by-table"
+ * - "js-add-new-solvent-by-table"
+ */
 function hideButtonsInDemoMode() {
   if (getVal($("#js-demo")) === "demo") {
     document.getElementById("reaction-name-description").style.display = "none";
@@ -35,6 +44,17 @@ function hideButtonsInDemoMode() {
   }
 }
 
+/**
+ * Event listener for limiting reactant change.
+ * Updates the reaction table and related fields when the limiting reactant selection changes.
+ *
+ * This function listens for clicks on elements with the class "js-reactant-limiting".
+ * When triggered, it:
+ * - Updates the limiting reactant table number in the HTML.
+ * - Calls `updateReactantsAfterLimitingReactantChange()` to refresh reactant data.
+ * - Sends an AJAX request to autofill reactant fields and updates required styling.
+ * - Calls functions to autofill solvent and product fields.
+ */
 function updateTableAfterLimitingReactantChange() {
   $(".js-reactant-limiting").click(function () {
     // update the limiting reactant table number in the html
@@ -54,6 +74,18 @@ function updateTableAfterLimitingReactantChange() {
   });
 }
 
+/**
+ * Updates reactant fields when the limiting reactant changes.
+ *
+ * This function iterates through all reactants in the reaction table and:
+ * - Recalculates equivalents relative to the new limiting reactant.
+ * - Updates the "readonly" and "editable" states of equivalent and mass fields accordingly.
+ *
+ * If a reactant is marked as limiting, its equivalents are recalculated.
+ * Otherwise:
+ * - The equivalent field becomes editable.
+ * - The rounded mass field becomes read-only.
+ */
 function updateReactantsAfterLimitingReactantChange() {
   for (let i = 1; i < reactionTable.numberOfReactants + 1; i++) {
     if ($("#js-reactant-limiting" + i).is(":checked")) {
@@ -72,6 +104,19 @@ function updateReactantsAfterLimitingReactantChange() {
   }
 }
 
+/**
+ * Updates the equivalents of all reactants and reagents when a new limiting reactant is selected.
+ *
+ * @param {number} x - The index of the newly selected limiting reactant.
+ *
+ * This function:
+ * - Calculates a change factor to normalize the new limiting reactant's equivalents to 1.
+ * - Scales the equivalents of all other reactants accordingly.
+ * - Updates reagent equivalents based on the same scaling factor.
+ * - Adjusts the readonly and editable states of relevant input fields:
+ *   - The limiting reactant's equivalent is set to 1 and marked as readonly.
+ *   - The limiting reactant's mass field becomes editable.
+ */
 function updateEquivalentsRelativeToNewLimitingReactant(x) {
   // x is the limiting reactant integer and i is the integer for each reactant
   // updates the classes of reactants - controls readonly and style properties when limiting reactant changes
@@ -86,7 +131,7 @@ function updateEquivalentsRelativeToNewLimitingReactant(x) {
     $reactantEquivalent.val(newEquivalentValue);
   }
   // Scales and updates equivalents for reagents
-  let reagentNumber = getVal($("#js-number-of-reagents"));
+  let reagentNumber = Number(getVal($("#js-number-of-reagents")));
   for (let i = 1; i < reagentNumber + 1; i++) {
     let $reagentEquivalent = $("#js-reagent-equivalent" + i);
     let newEquivalentValue = getVal($reagentEquivalent) / changeFactor;
@@ -104,6 +149,16 @@ function updateEquivalentsRelativeToNewLimitingReactant(x) {
     .addClass("editable-cell");
 }
 
+/**
+ * Adds an event listener to update the hidden variable storing the main product's table number upon main product
+ * selection change.
+ *
+ * This function:
+ * - Listens for clicks on elements with the class "js-main-product".
+ * - Retrieves the selected main product's table number.
+ * - Adjusts the table number by subtracting the total number of reactants, reagents, and solvents.
+ * - Stores the updated value in the hidden input field "js-main-product-table-number".
+ */
 function updateMainProduct() {
   $(".js-main-product").click(function () {
     // updates the hidden variable main product table number
@@ -121,6 +176,18 @@ function updateMainProduct() {
   });
 }
 
+/**
+ * Sets up event listeners for parameters affecting the limiting reactant calculations.
+ *
+ * This function defines an array of parameters (`changedParameters`) that impact molar calculations
+ * when modified. For each parameter, it triggers:
+ * - `autofillLimitingReactantAmount()`
+ * - `autofillRoundedLimitingReactantAmount()`
+ * - `autofillLimitingReactantMass()`
+ *
+ * These functions ensure that changes in mass or unit selection automatically update the relevant
+ * limiting reactant values.
+ */
 function autoFillLimitingReactant() {
   let changedParameters = [
     ".js-reactant-rounded-masses",
@@ -134,10 +201,19 @@ function autoFillLimitingReactant() {
   }
 }
 
-// Functions for autofilling the limiting reactant
 /**
- * Recalculates and auto fills the limiting reactant amount when the mass changes or mass/amount units change
- * @param changedParameter{string} as a jquery selector either #id or .class
+ * Adds an event listener to recalculate and autofill the limiting reactant amount.
+ *
+ * @param {string} changedParameter - A jQuery selector (`#id` or `.class`) that triggers recalculation
+ *                                    when its value changes.
+ *
+ * This function:
+ * - Listens for `input` or `change` events on the specified parameter.
+ * - Retrieves the limiting reactant's table number.
+ * - Gets the reactant's mass and molecular weight.
+ * - Converts the mass using the appropriate unit factor (`massFactor`).
+ * - Converts the molecular weight using the appropriate unit factor (`amountFactor`).
+ * - Calculates the reactant amount and updates the corresponding input field.
  */
 function autofillLimitingReactantAmount(changedParameter) {
   $(changedParameter).on("input change", function () {
@@ -158,8 +234,17 @@ function autofillLimitingReactantAmount(changedParameter) {
 }
 
 /**
- * Rounds and auto fills the new limiting reactant amount when the mass changes or mass/amount units change
- * @param changedParameter{string} as a jquery selector either #id or .class
+ * Adds an event listener to round and autofill the limiting reactant amount when mass or units change.
+ *
+ * @param {string} changedParameter - A jQuery selector (`#id` or `.class`) that triggers recalculation
+ *                                    when its value changes.
+ *
+ * This function:
+ * - Listens for `input` or `change` events on the specified parameter.
+ * - Retrieves the limiting reactant's table number.
+ * - Gets the current reactant amount.
+ * - Rounds the reactant amount using `roundedNumber()`.
+ * - Updates the corresponding rounded amount input field.
  */
 function autofillRoundedLimitingReactantAmount(changedParameter) {
   $(changedParameter).on("input change", function () {
@@ -175,8 +260,16 @@ function autofillRoundedLimitingReactantAmount(changedParameter) {
 }
 
 /**
- * Recalculates and auto fills the hidden input reactant mass when the mass changes or mass/amount units change
- * @param changedParameter{string} as a jquery selector either #id or .class
+ * Adds an event listener to recalculate and autofill the hidden input for the limiting reactant mass.
+ *
+ * @param {string} changedParameter - A jQuery selector (`#id` or `.class`) that triggers recalculation
+ *                                    when its value changes.
+ *
+ * This function:
+ * - Listens for `input` or `change` events on the specified parameter.
+ * - Retrieves the limiting reactant's table number.
+ * - Gets the updated rounded mass of the limiting reactant.
+ * - Updates the corresponding hidden input field for the reactant mass.
  */
 function autofillLimitingReactantMass(changedParameter) {
   $(changedParameter).on("input change", function () {
@@ -191,12 +284,18 @@ function autofillLimitingReactantMass(changedParameter) {
 }
 
 /**
- * Calculates and auto fills the amount for reactant, reagent, or product when the limiting reactant mass, equivalents,
- * or mass/amount units are changed
+ * Event listener for raw amount changes. Calculates and autofills the amount for a reactant, reagent, solvent, or product.
  *
- * @param component {string} reactant/solvent/product/reagent
- * @param changedParameter {string} the parameter that has triggered the change
- * @param loopValue {string} the number combined with the component to make the HTML element ID. e.g, reactant1
+ * @param {string} component - The type of component being updated (`reactant`, `solvent`, `product`, or `reagent`).
+ * @param {string} changedParameter - The jQuery selector that triggered the change (`#id` or `.class`).
+ * @param {string} loopValue - The numeric identifier combined with the component name to form the HTML element ID (e.g., `reactant1`).
+ *
+ * This function:
+ * - Listens for `input` or `change` events on the specified `changedParameter`.
+ * - Retrieves the limiting reactant's amount.
+ * - Gets the equivalent value for the specified component.
+ * - If the component is a product, it converts the amount based on unit differences.
+ * - Updates the corresponding input field for the component's amount.
  */
 function autofillAmount(component, changedParameter, loopValue) {
   $(changedParameter).on("input change", function () {
@@ -222,7 +321,19 @@ function autofillAmount(component, changedParameter, loopValue) {
   });
 }
 
-//Autofill rounded reactant amount in the explicit input field
+/**
+ * Event listener for rounded amount changes. Calculates and autofills the rounded moles for a reactant, reagent, solvent, or product.
+ *
+ * @param {string} component - The type of component being updated (`reactant`, `solvent`, `product`, or `reagent`).
+ * @param {string} changedParameter - The jQuery selector that triggered the change (`#id` or `.class`).
+ * @param {string} loopValue - The numeric identifier combined with the component name to form the HTML element ID (e.g., `reactant1`).
+ *
+ * This function:
+ * - Listens for `input` or `change` events on the specified `changedParameter`.
+ * - Retrieves the current amount for the specified component.
+ * - Rounds the amount using `roundedNumber()`.
+ * - Updates the corresponding input field for the rounded amount.
+ */
 function autofillRoundedAmount(component, changedParameter, loopValue) {
   // autofills the rounded amount for reactant, reagent, or product
   $(changedParameter).on("input change", function () {
@@ -232,7 +343,19 @@ function autofillRoundedAmount(component, changedParameter, loopValue) {
   });
 }
 
-//Autofill the reactant volume
+/**
+ * Event listener for volume changes. Calculates and autofills the volume for a reactant, reagent, solvent, or product.
+ *
+ * @param {string} component - The type of component being updated (`reactant`, `solvent`, `product`, or `reagent`).
+ * @param {string} changedParameter - The jQuery selector that triggered the change (`#id` or `.class`).
+ * @param {string} loopValue - The numeric identifier combined with the component name to form the HTML element ID (e.g., `reactant1`).
+ *
+ * This function:
+ * - Listens for `input` or `change` events on the specified `changedParameter`.
+ * - Retrieves the mass, amount, density, and concentration for the specified component.
+ * - Uses the `calcVolume()` function to calculate the volume based on the retrieved values.
+ * - Updates the corresponding input field for the component's volume.
+ */
 function autofillVolume(component, changedParameter, loopValue) {
   // autofills the volume for reactant or reagent
   $(changedParameter).on("input change", function () {
@@ -247,6 +370,19 @@ function autofillVolume(component, changedParameter, loopValue) {
   });
 }
 
+/**
+ * Event listener for volume changes. Calculates and autofills the rounded volume for a reactant, reagent, solvent, or product.
+ *
+ * @param {string} component - The type of component being updated (`reactant`, `solvent`, `product`, or `reagent`).
+ * @param {string} changedParameter - The jQuery selector that triggered the change (`#id` or `.class`).
+ * @param {string} loopValue - The numeric identifier combined with the component name to form the HTML element ID (e.g., `reactant1`).
+ *
+ * This function:
+ * - Listens for `input` or `change` events on the specified `changedParameter`.
+ * - Retrieves the current volume for the specified component.
+ * - Rounds the volume using the `roundedNumber()` function.
+ * - Updates the corresponding input field for the rounded volume.
+ */
 function autofillRoundedVolume(component, changedParameter, loopValue) {
   // autofills the rounded volume for reactant, reagent, or product
   $(changedParameter).on("input change", function () {
@@ -256,8 +392,20 @@ function autofillRoundedVolume(component, changedParameter, loopValue) {
   });
 }
 
+/**
+ * Event listener for mass changes. Calculates and autofills the mass for a reactant, reagent, or product.
+ *
+ * @param {string} component - The type of component being updated (`reactant`, `solvent`, `product`, or `reagent`).
+ * @param {string} changedParameter - The jQuery selector that triggered the change (`#id` or `.class`).
+ * @param {string} loopValue - The numeric identifier combined with the component name to form the HTML element ID (e.g., `reactant1`).
+ *
+ * This function:
+ * - Listens for `input` or `change` events on the specified `changedParameter`.
+ * - For products, calculates the mass based on the molecular weight, amount, and units.
+ * - For reactants and reagents, calculates the mass based on the molecular weight, equivalent, and limiting reactant mass.
+ * - Updates the corresponding input field for the component's mass.
+ */
 function autofillMass(component, changedParameter, loopValue) {
-  // autofills the mass for reactant, reagent, or product
   $(changedParameter).on("input change", function () {
     let molecularWeight = getVal(
       $("#js-" + component + "-molecular-weight" + loopValue),
@@ -290,6 +438,19 @@ function autofillMass(component, changedParameter, loopValue) {
   });
 }
 
+/**
+ * Event listener for mass changes. Calculates and autofills the rounded mass for a reactant, reagent, or product.
+ *
+ * @param {string} component - The type of component being updated (`reactant`, `solvent`, `product`, or `reagent`).
+ * @param {string} changedParameter - The jQuery selector that triggered the change (`#id` or `.class`).
+ * @param {string} loopValue - The numeric identifier combined with the component name to form the HTML element ID (e.g., `reactant1`).
+ *
+ * This function:
+ * - Listens for `input` or `change` events on the specified `changedParameter`.
+ * - Retrieves the current mass for the specified component.
+ * - Rounds the mass using the `roundedNumber()` function.
+ * - Updates the corresponding input field for the rounded mass.
+ */
 function autofillRoundedMass(component, changedParameter, loopValue) {
   // autofills the rounded mass for reactant, reagent, or product
   $(changedParameter).on("input change", function () {
@@ -299,6 +460,18 @@ function autofillRoundedMass(component, changedParameter, loopValue) {
   });
 }
 
+/**
+ * Event listener for volume removal. Clears the rounded volume if both the density and concentration are empty.
+ *
+ * @param {string} component - The type of component being updated (`reactant`, `solvent`, `product`, or `reagent`).
+ * @param {string} changedParameter - The jQuery selector that triggered the change (`#id` or `.class`).
+ * @param {string} loopValue - The numeric identifier combined with the component name to form the HTML element ID (e.g., `reactant1`).
+ *
+ * This function:
+ * - Listens for `input` or `change` events on the specified `changedParameter`.
+ * - Checks if both density and concentration fields for the component are empty.
+ * - If both fields are empty, clears the rounded volume field.
+ */
 function autoRemoveVolume(component, changedParameter, loopValue) {
   $(changedParameter).on("input change", function () {
     // if reactant density + mol conc are both empty then set volume to also be empty not just '0'
@@ -312,6 +485,21 @@ function autoRemoveVolume(component, changedParameter, loopValue) {
   });
 }
 
+/**
+ * Sets up event listeners for reactant rows in the reaction table.
+ * This function is called in `initialiseReactionTable()`.
+ *
+ * It autofills the fields for reactants, including volume, amount, mass, and equivalent,
+ * based on changes in related parameters such as density, concentration, and units.
+ * The function also handles specific behavior for the limiting reactant, ensuring its fields are properly updated.
+ *
+ * @returns {void}
+ *
+ * This function:
+ * - Iterates over each reactant and sets up listeners for volume, mass, and amount fields.
+ * - Applies calculations based on limiting reactant settings.
+ * - Utilizes various autofill helper functions for each reactant field.
+ */
 function autofillReactantFields2() {
   // autofills each reactant field depending on number of reactants
   const component = "reactant";
@@ -355,7 +543,17 @@ function autofillReactantFields2() {
   }
 }
 
-// Autofill reagent data when user enters key in search box
+/**
+ * Sets up an event listener for changes in a reagent field, which triggers the posting of reagent data.
+ * The function is called for each reagent row and handles the dynamic updating of reagent data.
+ *
+ * @param {number} x - The index number of the reagent, used to generate the specific reagent ID (e.g., `js-reagent1`).
+ *
+ * This function:
+ * - Listens for `keyup` and `change` events on the reagent input field.
+ * - Retrieves the reagent name from the field.
+ * - Posts the reagent data using the `postReagentData` function.
+ */
 function autofillReagentData(x) {
   let reagentID = "#js-reagent" + x;
   $(reagentID).on("keyup change", function () {
@@ -364,6 +562,27 @@ function autofillReagentData(x) {
   });
 }
 
+/**
+ * Posts reagent data to the server and handles the response to either update the reagent fields or handle errors.
+ * This function is called when the reagent name is updated in the input field.
+ * It handles cases such as reagent not found, CAS number not found, or successful reagent retrieval.
+ *
+ * @param {string} reagentName - The name of the reagent entered by the user.
+ * @param {number} x - The index number of the reagent, used to generate the specific reagent element IDs (e.g., `js-reagent1`).
+ *
+ * @returns {Promise} Resolves with a message indicating the result of the operation:
+ * - "CAS not found" if the reagent’s CAS number was not found.
+ * - "Reagent not found" if the reagent is not found, and partial matches are returned.
+ * - "Reagent found" if the reagent data is found and the fields are populated.
+ *
+ * This function:
+ * - Sends an AJAX `POST` request to the server with the reagent data.
+ * - If no reagent data is found, it returns early without making changes.
+ * - If the CAS number is not found, it triggers the `novelCompoundInput` function for manual input.
+ * - If the reagent is not found, it populates a `datalist` with partial matches.
+ * - If the reagent is found, it populates various fields with the reagent's attributes and applies styling.
+ * - Calls `autoSaveCheck()` to save the state after the reagent is found.
+ */
 function postReagentData(reagentName, x) {
   return new Promise(function (resolve) {
     let workbook = getVal($("#js-active-workbook"));
@@ -429,6 +648,32 @@ function postReagentData(reagentName, x) {
   });
 }
 
+function initialiseReagentListeners() {
+  let numberOfReagents = getNum($("#js-number-of-reagents"));
+  for (let i = 1; i < numberOfReagents + 1; i++) {
+    autofillReagentFields2(i);
+  }
+}
+
+/**
+ * Sets up event listeners and autofills fields for a reagent row in the reaction table.
+ * This function configures all the relevant input fields for a reagent based on the limiting reactant and various parameters.
+ *
+ * It handles autofilling the amount, mass, volume, and related values based on changes in mass, amount, unit, equivalents, density, and concentration.
+ *
+ * @param {number} i - The index of the reagent row to configure (e.g., reagent1, reagent2, etc.).
+ *
+ * This function:
+ * - Sets up autofill functionality for amount, rounded amount, mass, and rounded mass for the reagent.
+ * - Sets up autofill functionality for volume and rounded volume based on density and concentration.
+ * - Removes volume values if both density and concentration are empty for the reagent.
+ *
+ * It performs the following steps:
+ * 1. Initializes the relevant reagent field IDs and limiting reactant field IDs.
+ * 2. Sets up autofill for amount, rounded amount, mass, and rounded mass based on changes in mass, amount, and equivalent values.
+ * 3. Sets up autofill for volume and rounded volume based on changes in density, concentration, and other relevant parameters.
+ * 4. Calls `autoRemoveVolume` to clear the volume field if both concentration and density are empty for the reagent.
+ */
 function autofillReagentFields2(i) {
   const component = "reagent";
   let limitingReactantTableNumber = getLimitingReactantTableNumber();
@@ -497,6 +742,20 @@ function addNewReagent() {
   postReagentData("", reagentNumber);
 }
 
+/**
+ * Removes a reagent from the reaction table and updates the relevant table numbers and field IDs for remaining reagents.
+ * This function is triggered when the user clicks the "remove reagent" button.
+ * It also handles updating the table numbers for reagents, solvents, and products, and reassigns IDs and event listeners to remaining reagents.
+ *
+ * @param {number} removedReagentNumber - The index (1-based) of the reagent to be removed from the table.
+ *
+ * This function:
+ * - Removes the HTML row of the reagent being deleted.
+ * - Loops through the remaining reagents, adjusting the table number and field IDs.
+ * - Replaces the HTML elements with updated IDs and reattaches event listeners.
+ * - Updates the reagent, solvent, and product table numbers.
+ * - Calls `updateSolventTableNumbers()` and `updateProductTableNumber()` to ensure accurate table numbering across the entire form.
+ */
 async function removeReagent(removedReagentNumber) {
   // called from remove reagent button
   removedReagentNumber = Number(removedReagentNumber);
@@ -504,6 +763,7 @@ async function removeReagent(removedReagentNumber) {
   let reagentNumber = getNum("#js-number-of-reagents");
   // remove the reagent table row from the html
   let reagentTableRowID = "#js-reagent-table-row" + removedReagentNumber;
+  console.log(reagentTableRowID);
   $(reagentTableRowID).remove();
   // list of reagent ids that need to be updated
   const reagentIDsToUpdate = [
@@ -519,7 +779,6 @@ async function removeReagent(removedReagentNumber) {
     "js-reagent-rounded-amount",
     "js-reagent-rounded-volume",
     "js-reagent-rounded-mass",
-    "js-reagent-physical-form-dropdown-cell",
     "js-reagent-physical-form",
     "js-reagent-hazards",
     "js-report-reagent",
@@ -541,6 +800,8 @@ async function removeReagent(removedReagentNumber) {
       for (let reagentIDToUpdate of reagentIDsToUpdate) {
         // remove listener events by cloning elements
         let old_element = document.getElementById(reagentIDToUpdate + iStr);
+        console.log(reagentIDToUpdate + iStr);
+        console.log(old_element);
         let new_element = old_element.cloneNode(true);
         old_element.parentNode.replaceChild(new_element, old_element);
         $("#" + reagentIDToUpdate + iStr).attr("id", reagentIDToUpdate + j);
@@ -560,6 +821,16 @@ async function removeReagent(removedReagentNumber) {
   updateProductTableNumber();
 }
 
+/**
+ * Updates the table numbers for the solvent rows based on the current number of reactants and reagents.
+ * This function is called when the table numbers for reactants or reagents are updated, and it adjusts the
+ * solvent table numbers accordingly.
+ *
+ * The solvent table numbers are calculated by adding the number of reactants and reagents to the current
+ * solvent row index.
+ *
+ * This function will only update the solvent table numbers if the number of solvents is greater than zero.
+ */
 function updateSolventTableNumbers() {
   let reactantNumber = getNum($("#js-number-of-reactants"));
   let reagentNumber = getNum($("#js-number-of-reagents"));
@@ -572,6 +843,12 @@ function updateSolventTableNumbers() {
   }
 }
 
+/**
+ * CARRY ON HERE
+ * @param compoundNumber
+ * @param idToUpdate
+ * @returns {Promise<unknown>}
+ */
 function updateTableNumber(compoundNumber, idToUpdate) {
   return new Promise(function (resolve) {
     if (compoundNumber < 0) {

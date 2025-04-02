@@ -406,7 +406,7 @@ def reload_reaction_table():
     compounds, units = SketcherCompound.from_reaction_table_dict(
         json.loads(reaction.reaction_table_data), workbook
     )
-    print(compounds)
+    # print(compounds["reagent"][0].compound_data)
 
     # Now it renders the reaction table template
     reaction_table = render_template(
@@ -415,9 +415,9 @@ def reload_reaction_table():
         reagents=compounds["reagent"],
         number_of_reactants=len(compounds["reactant"]),
         number_of_products=len(compounds["product"]),
+        number_of_reagents=len(compounds["reagent"]),
         solvents=compounds["solvent"],
         units=units,
-        number_of_reagents=0,
         identifiers=[],
         reactant_table_numbers=[],
         products=compounds["product"],

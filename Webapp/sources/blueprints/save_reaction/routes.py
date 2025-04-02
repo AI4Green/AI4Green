@@ -168,10 +168,8 @@ def autosave() -> Response:
     reactant_masses = get_data("reactantMasses")[:-1]
     reactant_masses_raw = get_data("reactantMassesRaw")[:-1]
     reactant_amounts = get_data("reactantAmounts")[:-1]
-    print(get_data("reactantAmounts"))
     reactant_amounts_raw = get_data("reactantAmountsRaw")[:-1]
     reactant_volumes = get_data("reactantVolumes")[:-1]
-    print(get_data("reactantVolumesRaw"))
     reactant_volumes_raw = get_data("reactantVolumesRaw")  # [:-1]
     reactant_equivalents = get_data("reactantEquivalents")[:-1]
     reactant_physical_forms = get_data("reactantPhysicalForms")[:-1]
@@ -197,6 +195,21 @@ def autosave() -> Response:
     reagent_physical_forms = get_data("reagentPhysicalForms")[:-1]
     reagent_hazards = get_data("reagentHazards")[:-1]
     reagent_physical_forms_text = get_data("reagentPhysicalFormsText")
+    print("reagent_smiles_ls:", reagent_smiles_ls)
+    print("reagent_names:", reagent_names)
+    print("reagent_molecular_weights:", reagent_molecular_weights)
+    print("reagent_densities:", reagent_densities)
+    print("reagent_concentrations:", reagent_concentrations)
+    print("reagent_amounts:", reagent_amounts)
+    print("reagent_amounts_raw:", reagent_amounts_raw)
+    print("reagent_masses:", reagent_masses)
+    print("reagent_masses_raw:", reagent_masses_raw)
+    print("reagent_volumes:", reagent_volumes)
+    print("reagent_volumes_raw:", reagent_volumes_raw)
+    print("reagent_equivalents:", reagent_equivalents)
+    print("reagent_physical_forms:", reagent_physical_forms)
+    print("reagent_hazards:", reagent_hazards)
+    print("reagent_physical_forms_text:", reagent_physical_forms_text)
     # solvents data from the ajax post
     solvent_primary_keys = get_data("solventPrimaryKeys")
     solvent_primary_keys_ls = list(filter(None, solvent_primary_keys))

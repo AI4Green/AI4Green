@@ -314,56 +314,67 @@
 {%- endmacro %}
 
 
+{% macro get_compound_data(compound, attr, default="") %}
+    {{ compound.compound_data[attr] if compound and compound.compound_data else default}}
+{% endmacro %}
+
+
 {% macro reagent_row(reagent=None, index="-x-") -%}
     <tr id="js-reagent-table-row{{ index }}" class="not-novel-compound-input">
         <td>
-            <input type="number"
-             id="js-reagent-table-number{{ index }}"
-             style="width: 40px; border-width:0px;" value="
-            reagentTableNumber  " readonly>
+            <input
+                    type="number"
+                    id="js-reagent-table-number{{ index }}"
+                    style="width: 40px;
+                    border-width:0px;"
+                    value="{{ reagent.idx if reagent.idx else "" }}"
+                    readonly
+            >
         </td>
         <td style="width: 200px;">
             <datalist size="1" id="js2-reagent{{ index }}" style="width: 200px;">
                 <option selected>-select-</option>
             </datalist>
-            <input style="width: 200px;" class="add-highlight-unfilled-cell" type="search" id="js-reagent{{ index }}" autocomplete="off" list="js2-reagent{{ index }}" placeholder="Name or CAS Number">
+            <input style="width: 200px;" class="add-highlight-unfilled-cell" type="search" id="js-reagent{{ index }}" autocomplete="off" list="js2-reagent{{ index }}" placeholder="Name or CAS Number" value="{{ reagent.compound_data.names if reagent else "" }}">
         </td>
         <td></td>
         <td>
-            <input type="number" step="any" placeholder="-" min="0" id="js-reagent-molecular-weight{{ index }}" style="width: 70px; border:none" readonly>
+            <input type="number" step="any" placeholder="-" min="0" id="js-reagent-molecular-weight{{ index }}" style="width: 70px; border:none" readonly value="{{ reagent.compound_data.molecular_weights if reagent else "" }}">
         </td>
         <td>
-            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-density{{ index }}" style="width: 60px; border:none">
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-density{{ index }}" style="width: 60px; border:none" value="{{ reagent.compound_data.densities if reagent else "" }}">
         </td>
         <td>
-            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-concentration{{ index }}" style="width: 60px; border:none">
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-concentration{{ index }}" style="width: 60px; border:none" value="{{ reagent.compound_data.concentrations if reagent else "" }}">
         </td>
         <td>
-            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-equivalent{{ index }}" style="width: 60px;" class="add-highlight-unfilled-cell">
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-equivalent{{ index }}" style="width: 60px;" class="add-highlight-unfilled-cell" value="{{ reagent.compound_data.equivalents if reagent else "" }}">
         </td>
         <td>
-            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-amount{{ index }}" style="width: 60px; border:none" readonly>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-amount{{ index }}" style="width: 60px; border:none" readonly value="{{ reagent.compound_data.amounts if reagent else "" }}">
         </td>
         <td>
-            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-volume{{ index }}" style="width: 60px; border:none" readonly>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-volume{{ index }}" style="width: 60px; border:none" readonly value="{{ reagent.compound_data.volumes if reagent else "" }}">
         </td>
         <td>
-            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-mass{{ index }}" style="width: 60px; border:none" readonly>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-mass{{ index }}" style="width: 60px; border:none" readonly value="{{ reagent.compound_data.masses if reagent else "" }}">
         </td>
         <td>
-        {{ physical_form_dropdown(index, reagent.compound_data.physical_forms_text if reagent and reagent.compound_data else "-select-", "reagent") }}
+        {{ physical_form_dropdown(index, reagent.compound_data.physical_forms_text if reagent else "-select-", "reagent") }}
         </td>
         <td>
-            <textarea class="text-in-table" id="js-reagent-hazards{{ index }}" readonly></textarea>
+            <textarea class="text-in-table" id="js-reagent-hazards{{ index }}" readonly>{{ reagent.compound_data.hazards if reagent else "" }}</textarea>
         </td>
-        <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal"
+        <td>
+            <button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal"
                     title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-reagent{{ index }}"
-                    type="button" style="display: none"><i class="bi bi-exclamation-circle"></i></button>
-        <input type="hidden" id="js-reagent-amount{{ index }}">
-        <input type="hidden" id="js-reagent-mass{{ index }}">
-        <input type="hidden" id="js-reagent-volume{{ index }}">
-        <input type="hidden" id="js-reagent-primary-key{{ index }}">
-        <input type="hidden" id="js-reagent-smiles{{ index }}">
+                    type="button"><i class="bi bi-exclamation-circle"></i>
+            </button>
+        <input type="hidden" id="js-reagent-amount{{ index }}" value="{{ reagent.compound_data.amounts_raw if reagent else "" }}">
+        <input type="hidden" id="js-reagent-mass{{ index }}" value="{{ reagent.compound_data.masses_raw if reagent else "" }}">
+        <input type="hidden" id="js-reagent-volume{{ index }}" value="{{ reagent.compound_data.volumes_raw if reagent else "" }}">
+        <input type="hidden" id="js-reagent-primary-key{{ index }}" value="{{ reagent.compound_data.primary_key if reagent else "" }}">
+        <input type="hidden" id="js-reagent-smiles{{ index }}" value="{{ reagent.compound_data.smiles if reagent else "" }}">
         </td>
         <td>
             <button value="{{ index }}" id="remove-reagent{{ index }}" onclick="removeReagent(this.value)" type="button" class="js-remove-reagent close" aria-label="Close">
