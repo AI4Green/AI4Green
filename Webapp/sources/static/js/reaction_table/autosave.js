@@ -23,7 +23,7 @@ function observer() {
  * @param {HTMLElement} [e=null] - the changed element that triggered the autosave function
  * @param {boolean} [sketcher=false] - true if the changed element is a chemical sketcher
  */
-async function autoSaveCheck(e = null, sketcher = false) {
+function autoSaveCheck(e = null, sketcher = false) {
   if (!checkIfSaveEnabled()) {
     return;
   }
@@ -48,7 +48,7 @@ async function autoSaveCheck(e = null, sketcher = false) {
     } else if (sketcher === true) {
       // dont autosave sketcher if reaction table has loaded
       let reactionDiv = document.getElementById("reaction-table-div");
-      await sketcherAutoSave();
+      sketcherAutoSave();
       // }
     }
   }
