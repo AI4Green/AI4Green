@@ -144,6 +144,7 @@ function updateReactionTable(smiles, workgroup, workbook, reactionID) {
 function postReactionData(complete = "not complete") {
   // this function posts data to the backend for saving and then updates the save indicator
   let {
+    reactionClass,
     polymerIndices,
     polymerisationType,
     reactionID,
@@ -255,6 +256,7 @@ function postReactionData(complete = "not complete") {
     url: "/_autosave",
     type: "post",
     data: {
+      reactionClass: reactionClass,
       polymerIndices: polymerIndices,
       polymerisationType: polymerisationType,
       workgroup: workgroup,
@@ -463,6 +465,8 @@ function getFieldData() {
   if (!reactionImage) {
     reactionImage = "";
   }
+  let reactionClass = $("#reaction-class").val();
+  console.log(reactionClass);
   let limitingReactantTableNumber = $(
     "#js-limiting-reactant-table-number",
   ).val();
@@ -766,6 +770,7 @@ function getFieldData() {
     }
   }
   return {
+    reactionClass: reactionClass,
     polymerIndices: polymerIndices,
     polymerisationType: polymerisationType,
     reactionID: reactionID,

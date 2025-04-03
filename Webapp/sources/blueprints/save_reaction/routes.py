@@ -154,6 +154,7 @@ def autosave() -> Response:
     reaction = services.reaction.get_current_from_request()
     reaction_name = reaction.name
     reaction_image = str(request.form["reactionImage"])
+    reaction_class = str(request.form.get("reactionClass"))
     polymer_indices = json.loads(request.form.get("polymerIndices"))
     polymerisation_type = str(request.form["polymerisationType"])
 
@@ -202,21 +203,6 @@ def autosave() -> Response:
     reagent_physical_forms = get_data("reagentPhysicalForms")[:-1]
     reagent_hazards = get_data("reagentHazards")[:-1]
     reagent_physical_forms_text = get_data("reagentPhysicalFormsText")
-    print("reagent_smiles_ls:", reagent_smiles_ls)
-    print("reagent_names:", reagent_names)
-    print("reagent_molecular_weights:", reagent_molecular_weights)
-    print("reagent_densities:", reagent_densities)
-    print("reagent_concentrations:", reagent_concentrations)
-    print("reagent_amounts:", reagent_amounts)
-    print("reagent_amounts_raw:", reagent_amounts_raw)
-    print("reagent_masses:", reagent_masses)
-    print("reagent_masses_raw:", reagent_masses_raw)
-    print("reagent_volumes:", reagent_volumes)
-    print("reagent_volumes_raw:", reagent_volumes_raw)
-    print("reagent_equivalents:", reagent_equivalents)
-    print("reagent_physical_forms:", reagent_physical_forms)
-    print("reagent_hazards:", reagent_hazards)
-    print("reagent_physical_forms_text:", reagent_physical_forms_text)
     # solvents data from the ajax post
     solvent_primary_keys = get_data("solventPrimaryKeys")
     solvent_primary_keys_ls = list(filter(None, solvent_primary_keys))
@@ -436,6 +422,7 @@ def autosave() -> Response:
         "reaction_table_data": reaction_table,
         "summary_table_data": summary_table,
         "polymerisation_type": polymerisation_type,
+        "reaction_class": reaction_class,
     }
     reaction.update(**update_dict)
     services.controlled_substances.check_reaction_for_controlled_substances(reaction)
