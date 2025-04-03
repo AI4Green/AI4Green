@@ -167,7 +167,7 @@ def sketcher(
     else:
         load_status = "loaded"
     return render_template(
-        "sketcher_reload.html",
+        "reaction_constructor.html",
         reaction=reaction,
         load_status=load_status,
         demo="not demo",
