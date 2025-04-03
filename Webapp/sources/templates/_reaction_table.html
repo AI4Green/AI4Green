@@ -16,7 +16,7 @@
 
 {{ reaction_table_components.reaction_description(reaction, tutorial) }}
 
-{{ reaction_table_components.reaction_class_dropdown(reaction_class, reaction_classes) }}
+{{ reaction_table_components.reaction_class_dropdown(reaction_class) }}
 
 
 <div style="overflow-x:auto;" class="table-responsive text-nowrap" id="reaction-table-div">
@@ -38,11 +38,17 @@
 
     {{ reaction_table_components.reagent_or_solvent_heading("solvent", units) }}
 
+    {% for solvent in solvents %}
+        {{  reaction_table_components.solvent_row(solvent, loop.index) }}
+    {% endfor %}
+
     {{ reaction_table_components.product_headings(units) }}
 
     {% for product in products %}
         {{  reaction_table_components.product_row(product, loop.index) }}
     {% endfor %}
+
+
 
     </table>
 
@@ -51,7 +57,7 @@
 </table>
 
 <table hidden id="js-solvent-table-new-row">
-    {{ reaction_table_components.solvent_row() }}
+    {{ reaction_table_components.solvent_row(None, "-x-") }}
 </table>
 
 </div>

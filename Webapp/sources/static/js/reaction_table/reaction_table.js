@@ -18,6 +18,7 @@ function initialiseReactionTable() {
   autofillReactantFields2();
   autofillProductFields2();
   initialiseReagentListeners();
+  initialiseSolventListeners();
   updateStyling();
   setColours();
   $("#js-load-status").on("change", function () {
@@ -1080,6 +1081,22 @@ async function removeSolvent(removedSolventNumber) {
   // update product table numbers
   updateProductTableNumber();
 }
+
+function initialiseReagentListeners() {
+  let numberOfReagents = getNum($("#js-number-of-reagents"));
+  for (let i = 1; i < numberOfReagents + 1; i++) {
+    autofillReagentFields2(i);
+  }
+}
+
+function initialiseSolventListeners() {
+  let numberOfSolvents = getNum($("#js-number-of-solvents"));
+  for (let i = 1; i < numberOfSolvents + 1; i++) {
+    autofillSolventData(i);
+    autofillSolventFields2(i);
+  }
+}
+
 // Autofill solvent flag (colour code) and hazards depending on selected solvent
 function autofillSolventData(x) {
   setColours();
