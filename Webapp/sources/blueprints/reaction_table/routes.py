@@ -361,7 +361,7 @@ def autoupdate_reaction_table():
     #     r_classes = None
     # else:
     reaction_table_html = "_reaction_table.html"
-    r_class, r_classes = services.reaction_classification.classify_reaction(
+    r_class = services.reaction_classification.classify_reaction(
         reactants_smiles_list, product_smiles_list
     )
 
@@ -384,7 +384,6 @@ def autoupdate_reaction_table():
         sol_rows=sol_rows,
         reaction=reaction,
         reaction_class=r_class,
-        reaction_classes=r_classes,
         polymer_indices=polymer_indices,
     )
     return jsonify({"reactionTable": reaction_table})
@@ -427,7 +426,7 @@ def reload_reaction_table():
         summary_table_data="",
         sol_rows=services.solvent.get_workbook_list(workbook),
         reaction=reaction,
-        reaction_class=[],
+        reaction_class=reaction.reaction_class,
         reaction_classes=[],
         polymer_indices={},
     )

@@ -82,7 +82,21 @@
         </tr>
 {%- endmacro %}
 
-{%  macro reaction_class_dropdown(reaction_class, reaction_classes) -%}
+{%  macro reaction_class_dropdown(reaction_class) -%}
+    {% set reaction_classes =
+        [
+            "Amide bond formation",
+            "Alcohol oxidation",
+            "Alkene metathesis",
+            "Baylis-Hillman",
+            "Buchwald-Hartwig coupling",
+            "Ester hydrolysis",
+            "Grignard",
+            "Heck cross-coupling",
+            "SNAr/SN2",
+            "Suzuki-Miyaura coupling"
+        ]
+    %}
 <label for="reaction-class"><b>Reaction Class:</b> </label>
 <select size="1" name="reactionClass" id="reaction-class">
 
