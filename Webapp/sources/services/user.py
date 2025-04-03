@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 from flask_login import current_user
@@ -39,6 +40,7 @@ def add(
         fullname=fullname,
         Person=person,
         password_hash=models.User.set_password(password_data),
+        privacy_policy_accepted_on=datetime.now(),
     )
 
 

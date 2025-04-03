@@ -1,29 +1,33 @@
 import json
-from datetime import date, datetime
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
 from flask import Response, jsonify, render_template, request
 from flask_login import login_required
 from sources import models, services
-from sources.services import solvent_surfer as sfr
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db
+from sources.services import solvent_surfer as sfr
 
 from . import solvent_PCA_bp
 
 
 @solvent_PCA_bp.route("/solvent_PCA", methods=["GET", "POST"])
-@solvent_PCA_bp.route("/solvent_PCA/<mode>", methods=["GET", "POST"])
+@solvent_PCA_bp.route(
+    "/solvent_PCA/<mode>", methods=["GET", "POST"]
+)  # todo is this route deprecated?
 @login_required
+@solvent_PCA_bp.doc(security="sessionAuth")
 def solvent_PCA() -> Response:
     """
     Loads initial solvent_PCA page which allows access to solvent surfer
+
+    Returns:
+        flask.Response: renders the solvent_PCA template
     """
-    # user must be logged in
     workgroups = get_workgroups()
     notification_number = get_notification_number()
-
     return render_template(
         "solvent_PCA.html",
         workgroups=workgroups,
@@ -45,12 +49,19 @@ def get_graph(mode="start_up") -> Response:
         mode: str, links graph variables to callbacks depending on user interaction. defaults as 'start_up'
 
     Returns:
-        Response, Json object containing plotted graph (chart) and suggested_solvent_table (if applicable)
+        flask.Response, Json object containing plotted graph (chart) and suggested_solvent_table (if applicable)
     """
     # Deal with graph variables depending on mode
-    colour_name, point, r_class, name, names, mode, mode_df, control_points = sfr.utils.get_mode(
-        mode
-    )
+    (
+        colour_name,
+        point,
+        r_class,
+        name,
+        names,
+        mode,
+        mode_df,
+        control_points,
+    ) = sfr.utils.get_mode(mode)
 
     # get the PC dataframe to plot the graph
     pca_df, descriptors, names, kPCA = sfr.embedding.get_PCA(r_class)
@@ -76,7 +87,9 @@ def get_graph(mode="start_up") -> Response:
 
     # get the suggested solvent table if a point has been selected
     if len(point) > 0:
-        suggest_solvent_table, best_solvents = sfr.utils.get_suggest_solvent_table(point, df)
+        suggest_solvent_table, best_solvents = sfr.utils.get_suggest_solvent_table(
+            point, df
+        )
 
     # plot the graph and send
     chart = sfr.graph.editable_bokeh_graph(
@@ -99,16 +112,26 @@ def get_graph(mode="start_up") -> Response:
 @solvent_PCA_bp.route("/on_point_click/<mode>", methods=["GET", "POST"])
 def on_point_click(mode="point_change") -> Response:
     """
-    renders suggested solvent table upon point click
+    Renders suggested solvent table upon point click
+
+    Args:
+        mode: str, links graph variables to callbacks depending on user interaction. defaults as 'point_change'
+
+    Returns:
+        flask.Response, Json object containing suggested_solvent_table
     """
     # get graph variables depending on mode
-    colour_name, point, r_class, name, names, mode, mode_df, _ = sfr.utils.get_mode(mode)
+    colour_name, point, r_class, name, names, mode, mode_df, _ = sfr.utils.get_mode(
+        mode
+    )
 
     suggest_solvent_table = ""
 
     # get suggested solvent table and render template
     if len(point) > 0:
-        suggest_solvent_table, best_solvents = sfr.utils.get_suggest_solvent_table(point, mode_df)
+        suggest_solvent_table, best_solvents = sfr.utils.get_suggest_solvent_table(
+            point, mode_df
+        )
 
     return jsonify({"suggestSolventTable": suggest_solvent_table})
 
@@ -117,6 +140,9 @@ def on_point_click(mode="point_change") -> Response:
 def on_class_change() -> Response:
     """
     Renders 'about reaction class' .html files upon class change
+
+    Returns:
+        flask.Response, Json object containing aboutSolventClass
     """
     data = request.get_json()
     r_class = data["class_selected"]
@@ -142,6 +168,12 @@ def from_reaction_table(mode="from_reaction_table") -> Response:
     """
     Sets up solvent surfer with variables from the reaction table.
     Also searches suggest solvent table if mode == 'check_solvents'
+
+    Args:
+        mode: str, links graph variables to callbacks depending on user interaction. defaults as 'from_reaction_table'
+
+    Returns:
+        flask.Response, Json object containing the chart or alternative solvents if accessing from the reaction table
     """
     # get graph variables depending on mode
     colour_name, point, r_class, name, names, _, df, _ = sfr.utils.get_mode(
@@ -161,7 +193,9 @@ def from_reaction_table(mode="from_reaction_table") -> Response:
     suggest_solvent_table = ""
 
     if name != "":
-        suggest_solvent_table, best_solvents = sfr.utils.get_suggest_solvent_table(point, df)
+        suggest_solvent_table, best_solvents = sfr.utils.get_suggest_solvent_table(
+            point, df
+        )
 
     # plot graph
     editable_chart = sfr.graph.editable_bokeh_graph(
@@ -193,7 +227,9 @@ def from_reaction_table(mode="from_reaction_table") -> Response:
     # else return possible sustainable substitutions for alert in rxn table
     else:
         if len(point) != 0:
-            alternatives, substitutions = sfr.utils.search_suggest_solvent_table(best_solvents)
+            alternatives, substitutions = sfr.utils.search_suggest_solvent_table(
+                best_solvents
+            )
 
         else:
             alternatives = ""
@@ -208,14 +244,17 @@ def from_reaction_table(mode="from_reaction_table") -> Response:
         )
 
 
-
 @solvent_PCA_bp.route("/update_interactive_graph/<mode>", methods=["GET", "POST"])
 def update_interactive_graph(mode="interactive") -> Response:
     """
     Updates solvent surfer in interactive mode if points have been dragged to new positions
-    """
-    # this route updates the graph on dragging points
 
+    Args:
+        mode: str, links graph variables to callbacks depending on user interaction. defaults as 'interactive'
+
+    Returns:
+        flask.Response, Json object containing the updated chart and a rendered template about the solvent class
+    """
     # load variables depending on mode
     (
         new_data,
@@ -245,7 +284,7 @@ def update_interactive_graph(mode="interactive") -> Response:
             raw_data, "on_load", embedding_dict
         )
 
-        #update control_points and kpca with loaded data
+        # update control_points and kpca with loaded data
         control_points_kPCA.update(control_points)
         interactive_data_kPCA.append(full_data)
         interactive_data_kPCA.append(kPCA)
@@ -263,13 +302,17 @@ def update_interactive_graph(mode="interactive") -> Response:
 
     # compare PCs of new data with old data to get control points
 
-    point_changed = sfr.interactive.data_analysis.getPointChanged(PCs, previous[["PC1", "PC2"]])
+    point_changed = sfr.interactive.data_analysis.getPointChanged(
+        PCs, previous[["PC1", "PC2"]]
+    )
 
     # if control_points have changed, update kPCA object and control_points
     if point_changed:
         control_points_kPCA[point_changed[0]] = point_changed[1]
 
-        kPCA, points = sfr.utils.update_kPCA(interactive_data_kPCA[1], control_points_kPCA)
+        kPCA, points = sfr.utils.update_kPCA(
+            interactive_data_kPCA[1], control_points_kPCA
+        )
 
         interactive_data_kPCA[1] = kPCA
 
@@ -314,12 +357,17 @@ def update_interactive_graph(mode="interactive") -> Response:
 def save_graph() -> Response:
     """
     Saves edited surfers as PCA_graph model
+
+    Returns:
+        flask.Response, Json object containing the saved graphs
     """
     graph_data = request.get_json()
 
     author = services.person.from_current_user_email()
 
-    embedding_algorithm_dict = sfr.utils.jsonify_embedding_params(interactive_data_kPCA[1].embedding_algorithm)
+    embedding_algorithm_dict = sfr.utils.jsonify_embedding_params(
+        interactive_data_kPCA[1].embedding_algorithm
+    )
 
     saved_graph = models.PCAGraph(
         graph_name=graph_data["graph_name"],
@@ -346,6 +394,9 @@ def save_graph() -> Response:
 def get_saved_graphs() -> Response:
     """
     Extracts saved graphs from the database by user id for 'Saved Graphs' tab.
+
+    Returns:
+        flask.Response, Json object containing the saved graphs.
     """
     user = services.person.from_current_user_email()
 
@@ -376,10 +427,16 @@ def get_saved_graphs() -> Response:
 
 
 @solvent_PCA_bp.route("/delete_graph/<graph_id>", methods=["GET", "POST"])
-def delete_graph(graph_id) -> Response:
+def delete_graph(graph_id: str) -> Response:
     """
     Sets a graph's status to inactive, so it doesn't show up in saved graphs.
     Graphs are not deleted from the database in case they need to be restored.
+
+    Args:
+        graph_id: str, id of the graph to be deleted
+
+    Returns:
+        flask.Response, Json object containing the saved graphs
     """
     user = services.person.from_current_user_email()
 

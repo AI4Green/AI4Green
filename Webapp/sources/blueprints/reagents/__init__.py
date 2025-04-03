@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-reagents_bp = Blueprint("reagents", __name__)
+reagents_bp = APIBlueprint("reagents", __name__)
 
 from . import routes

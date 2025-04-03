@@ -1,7 +1,3 @@
-import contextlib
-import os
-
-import toml
 from flask import Response, jsonify
 from sources import services
 
@@ -14,6 +10,9 @@ def version() -> Response:
     Returns the current version of the application, with its git commit hash.
 
     We use the relative path to the root from this file, as there are multiple entrypoints to run the application.
+
+    Returns:
+        flask.Response: returns the version and git hash as a json object
     """
     app_version, git_hash = services.utils.get_app_version()
     return jsonify(f"{app_version}+{git_hash}")

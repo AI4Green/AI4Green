@@ -11,13 +11,6 @@ function checkCookie() {
   } else {
     $("#cookie-consent-banner").show();
   }
-  let privacyPolicy = getCookie("privacy_policy")
-  if (privacyPolicy === "accepted") {
-    // hide banner if user has previously accepted
-    $("#privacy-overlay").hide();
-  } else {
-    $("#privacy-overlay").show();
-  }
 }
 
 function updateCookiePreferences() {
@@ -26,10 +19,15 @@ function updateCookiePreferences() {
   checkCookie();
 }
 
-function updatePrivacyPolicyAgreement(){
-  // function to update agreement to new privacy policy
-  document.cookie = "privacy_policy=accepted";
-  checkCookie();
+function updatePrivacyPolicyAgreement() {
+  // patch request to update the date when the user agreed to the privacy policy, then redirect home.
+  fetch("/accept_privacy_policy", {
+    method: "PATCH",
+  }).then((response) => {
+    if (response.ok) {
+      window.location.href = "/home";
+    }
+  });
 }
 
 function getCookie(cname) {

@@ -1,5 +1,6 @@
 import contextlib
-from typing import Dict, Tuple
+import datetime
+from typing import Dict, Tuple, Union
 
 import ipinfo
 import toml
@@ -35,6 +36,16 @@ def get_app_version() -> Tuple[str, str]:
             git_hash = f.read().strip()
 
     return app_version, git_hash
+
+
+def get_privacy_policy_date() -> datetime.datetime:
+    """
+    Returns the date the current privacy policy was introduced in to the app.
+
+    Returns:
+        datetime.datetime, datetime the privacy policy was introduced in to the app.
+    """
+    return datetime.datetime(2025, 3, 18)
 
 
 def check_is_number(string: str) -> bool:
@@ -73,30 +84,36 @@ def remove_duplicates_keep_first(lst: list) -> list:
     return new_list
 
 
-def get_ip_address() -> str:
+def get_ip_address() -> Union[str, None]:
     """Returns current IP address"""
-    return request.remote_addr
+    if request.headers.get("X-Forwarded-For"):
+        ip = request.headers.get("X-Forwarded-For").split(",")[0].strip()
+        return ip.split(":")[0]
+    return None
 
 
 def get_location() -> Dict[str, str]:
+    """
+    Uses IPInfo call to get user location
+
+    Returns:
+        Dict[str, str]: dictionary with IP address, country name and city of the request
+    """
     handler = ipinfo.getHandler(current_app.config["IPINFO_API_KEY"])
     ip = get_ip_address()
-    location = handler.getDetails(ip)
-    try:
-        # This will fail if running on local host
+    if ip is not None:
+        location = handler.getDetails(ip)
         return {
             "IP_address": ip,
             "country": location.country_name,
             "city": location.city,
         }
-    except AttributeError:
-        # If running on local host use default values
-        print("Local Host IP is not findable with IPInfo.")
-        return {
-            "IP_address": "Local host instance does not support location information.",
-            "country": "Local host instance does not support location information.",
-            "city": "Local host instance does not support location information.",
-        }
+    # location information is not supported for local instances
+    return {
+        "IP_address": "Location Not Found",
+        "country": "Location Not Found",
+        "city": "Location Not Found",
+    }
 
 
 def remove_spaces_and_dashes(name: str) -> str:

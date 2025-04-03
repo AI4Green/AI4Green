@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-reaction_table_bp = Blueprint("reaction_table", __name__)
+reaction_table_bp = APIBlueprint("reaction_table", __name__)
 
 from . import routes

@@ -564,8 +564,14 @@ def get_compound_data(
 
 @reaction_table_bp.route("/_save_reaction_note", methods=["POST"])
 @login_required
+@reaction_table_bp.doc(security="sessionAuth")
 def save_reaction_note():
-    """Saves an reaction_note to the reaction object"""
+    """
+    Saves an reaction_note to the reaction object
+
+    Returns:
+        flask.Response: A JSON response with the reaction_note object
+    """
     workgroup_name = request.form["workgroup"]
     workbook_name = request.form["workbook"]
     workbook_object = services.workbook.get_workbook_from_group_book_name_combination(
