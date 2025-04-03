@@ -1389,7 +1389,9 @@ function autoChangeRequiredStyling2(styleParameterID, excludedNullValues = []) {
  * @param {Array} [excludedNullValues=[]] Typically null values which should not be treated as null for this parameter
  */
 function autoChangeRequiredStyling(changedParameter, excludedNullValues = []) {
-  // requires change parameter
+  // update styling of current reaction table (for reaction table reload)
+  autoChangeRequiredStyling2(changedParameter, excludedNullValues);
+  // then set up the listener for future changes
   $(changedParameter).on("input change", function () {
     autoChangeRequiredStyling2(changedParameter, excludedNullValues);
   });
@@ -1428,6 +1430,7 @@ function updateStyling() {
     autoChangeRequiredStylingValidCompound("reagent", i);
   }
   let numberOfSolvents = getNum($("#js-number-of-solvents"));
+  console.log(numberOfSolvents);
   for (let i = 1; i < numberOfSolvents + 1; i++) {
     autoChangeRequiredStyling("#js-solvent-physical-form" + i);
     autoChangeRequiredStyling("#js-solvent-volume" + i);

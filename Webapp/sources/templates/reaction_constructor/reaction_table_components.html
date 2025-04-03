@@ -309,7 +309,7 @@
         <td><input type="number" step="any" min="0" placeholder="-"
          id="js-solvent-volume{{ index }}" style="width:60px;" class="add-highlight-unfilled-cell" value="{{ solvent.compound_data.volumes if solvent else "" }}"></td>
         <td></td>
-        <td>
+        <td id="js-solvent-physical-form-dropdown-cell">
         {{ physical_form_dropdown(index, solvent.compound_data.physical_forms_text if solvent else "-select-", "solvent") }}
         </td>
         <td><textarea class="text-in-table"
