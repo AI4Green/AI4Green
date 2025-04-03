@@ -11,6 +11,7 @@ function setupNewKetcherSketcher(width = "1080px", height = "540px") {
 
 /**
  * Displays the ketcher sketcher nd exports SMILES from Marvin to Ketcher
+ * ** Might break after async update to getKetcher function **
  * @return {Promise<void>}
  */
 async function switchToKetcherSketcher() {
@@ -40,6 +41,7 @@ function setupKetcherAutosave() {
 
 /**
  * Exports structures from Marvin to Ketcher vin via SMILES (or RXN in polymer mode)
+ * ** Might break after async update to getKetcher function **
  */
 async function exportReactionFromMarvinToKetcher() {
   let reaction;
