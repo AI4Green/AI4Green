@@ -19,6 +19,7 @@ def summary() -> Response:
     Returns:
         flask.Response: returns the summary table as a json object
     """
+    reaction = None
     if not (
         str(request.form["demo"]) == "demo" or str(request.form["tutorial"]) == "yes"
     ):
@@ -29,6 +30,9 @@ def summary() -> Response:
             workgroup_name, workbook_name
         ):
             abort(401)
+
+        reaction = services.reaction.get_current_from_request()
+        # also handle if reactants/reagents/solvents/products have changed since reload
 
         polymer_mode = request.form["polymerMode"]
         # change summary table in polymer mode
@@ -60,11 +64,29 @@ def summary() -> Response:
     risk_data = services.summary.get_risk_data(
         reactant_data, reagent_data, solvent_data, product_data
     )
-
+    toxicity_types = []
     # if product mass and reactant mass sum are calculated, then it forms a summary table
     if product_data and reactant_data:
+        # if there is no prior reaction e.g., demo
+        # or if the summary table is being generated for the first time with these compounds then check for toxicities
+        if (
+            reaction is None
+            or services.summary.check_if_updated(
+                reaction, reactant_data, reagent_data, solvent_data, product_data
+            )
+            and reaction.complete != "complete"
+        ):
+            # check if compounds have hazard codes indicating mutagen, carcinogen, or reproductive toxicity
+            toxicity_types = risk_data["toxicity_types"]
+            # update the reaction
+            if reaction:
+                services.summary.update_summary_keys(
+                    reaction, reactant_data, reagent_data, solvent_data, product_data
+                )
+
         summary_table = render_template(
             summary_table_html,
+            toxicity_alerts=toxicity_types,
             amount_unit=unit_data["amount_unit"],
             volume_unit=unit_data["volume_unit"],
             mass_unit=unit_data["mass_unit"],
