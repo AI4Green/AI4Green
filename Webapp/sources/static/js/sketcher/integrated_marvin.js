@@ -113,20 +113,22 @@ function setupMarvinAutosave() {
  */
 async function exportReactionFromKetcherToMarvin() {
   let reaction;
-  if (getKetcher()) {
-    const polymerMode = await getPolymerMode();
-    if (polymerMode === true) {
-      reaction = await exportRXNFromKetcher();
-      if (reaction) {
-        marvin.importStructure("rxn", reaction);
-      }
-    } else {
-      reaction = await exportSmilesFromKetcher();
-      if (reaction) {
-        marvin.importStructure("cxsmiles", reaction);
+  getKetcher().then(async (ketcher) => {
+    if (ketcher) {
+      const polymerMode = await getPolymerMode();
+      if (polymerMode === true) {
+        reaction = await exportRXNFromKetcher();
+        if (reaction) {
+          marvin.importStructure("rxn", reaction);
+        }
+      } else {
+        reaction = await exportSmilesFromKetcher();
+        if (reaction) {
+          marvin.importStructure("cxsmiles", reaction);
+        }
       }
     }
-  }
+  });
 }
 
 /**

@@ -239,7 +239,7 @@ async function reloadSketcherFromSmiles(smiles, sketcher) {
   } else if (sketcher === "ketcher-select") {
     // wait for ketcher to load and if it has loaded then reload the scheme
     for (let i = 0; i < 5; i++) {
-      let ketcher = getKetcher();
+      let ketcher = await getKetcher();
       if (ketcher !== undefined) {
         ketcher.setMolecule(smiles);
         break;
@@ -260,7 +260,7 @@ async function reloadSketcherFromRXN(rxn, sketcher) {
     marvin.importStructure("rxn", rxn);
     await sleep(500);
   } else if (sketcher === "ketcher-select") {
-    let ketcher = getKetcher();
+    let ketcher = await getKetcher();
     ketcher.setMolecule(rxn);
     // sleep used to allow ketcher to load smiles before proceeding
     await sleep(2000);
