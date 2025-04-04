@@ -83,7 +83,18 @@ async function showSummary(mode) {
     roundedReactantMasses += $(roundedReactantMassID).val() + ";";
     reactantMolecularWeightID = "#js-reactant-molecular-weight" + i;
     reactantMolecularWeightSum += Number($(reactantMolecularWeightID).val());
-    reactantMolecularWeights += $(reactantMolecularWeightID).val() + ";";
+    if (!$(reactantMolecularWeightID).val()) {
+      // element id is different for polymers
+      let k = 1;
+      while ($(reactantMolecularWeightID + "-" + k).val()) {
+        reactantMolecularWeights +=
+          $(reactantMolecularWeightID + "-" + k).val() + ","; // change semicolon
+        k++;
+      }
+      reactantMolecularWeights = reactantMolecularWeights.replace(/.$/, ";");
+    } else {
+      reactantMolecularWeights += $(reactantMolecularWeightID).val() + ";";
+    }
     reactantDensityID = "#js-reactant-density" + i;
     reactantDensities += $(reactantDensityID).val() + ";";
     reactantConcentrationID = "#js-reactant-concentration" + i;
@@ -250,7 +261,18 @@ async function showSummary(mode) {
     roundedProductMassID = "#js-product-rounded-mass" + i;
     roundedProductMasses += $(roundedProductMassID).val() + ";";
     productMolecularWeightID = "#js-product-molecular-weight" + i;
-    productMolecularWeights += $(productMolecularWeightID).val() + ";";
+    if (!$(productMolecularWeightID).val()) {
+      // element id is different for polymers
+      let k = 1;
+      while ($(productMolecularWeightID + "-" + k).val()) {
+        productMolecularWeights +=
+          $(productMolecularWeightID + "-" + k).val() + ","; // change semicolon
+        k++;
+      }
+      productMolecularWeights = productMolecularWeights.replace(/.$/, ";");
+    } else {
+      productMolecularWeights += $(productMolecularWeightID).val() + ";";
+    }
     productMnID = "#js-product-mn" + i;
     productMns += $(productMnID).val() + ";";
     productEquivalentID = "#js-product-equivalent" + i;

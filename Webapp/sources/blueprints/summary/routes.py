@@ -46,6 +46,10 @@ def summary() -> Response:
     solvent_data = services.summary.get_solvent_data(request.form)
     product_data = services.summary.get_product_data(request.form)
 
+    # get position of polymers in reaction
+    polymer_indices = request.form["polymerIndices"]
+    polymer_indices = json.loads(polymer_indices)
+
     # check all the requirement information has been typed into the reaction table
     check_results = services.summary.check_required_data_is_present(
         reactant_data, reagent_data, solvent_data, product_data
@@ -146,6 +150,7 @@ def summary() -> Response:
             risk_rating=risk_data["risk_rating"],
             risk_color=risk_data["risk_colour"],
             number_of_solvents=solvent_data["number_of_solvents"],
+            polymer_indices=polymer_indices,
         )
         return jsonify({"summary": summary_table})
     else:

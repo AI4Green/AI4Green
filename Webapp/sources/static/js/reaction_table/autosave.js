@@ -498,9 +498,10 @@ function getFieldData() {
       let k = 1;
       while ($(reactantMolecularWeightsID + "-" + k).val()) {
         reactantMolecularWeights +=
-          $(reactantMolecularWeightsID + "-" + k).val() + ";";
+          $(reactantMolecularWeightsID + "-" + k).val() + ","; // change semicolon
         k++;
       }
+      reactantMolecularWeights = reactantMolecularWeights.replace(/.$/, ";");
     } else {
       reactantMolecularWeights += $(reactantMolecularWeightsID).val() + ";";
     }
@@ -617,9 +618,10 @@ function getFieldData() {
       let k = 1;
       while ($(productMolecularWeightID + "-" + k).val()) {
         productMolecularWeights +=
-          $(productMolecularWeightID + "-" + k).val() + ";";
+          $(productMolecularWeightID + "-" + k).val() + +","; // change semicolon
         k++;
       }
+      productMolecularWeights = productMolecularWeights.replace(/.$/, ";");
     } else {
       productMolecularWeights += $(productMolecularWeightID).val() + ";";
     }
