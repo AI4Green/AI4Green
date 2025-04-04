@@ -203,9 +203,9 @@ function autofillAmount(component, changedParameter, loopValue) {
     const firstReactantAmount = getVal(
       $("#js-reactant-amount" + limitingReactantTableNumber),
     );
-    const equivalent = getVal(
-      $("#js-" + component + "-equivalent" + loopValue),
-    );
+    let equivalentSelector = $("#js-" + component + "-equivalent" + loopValue);
+    const equivalent =
+      getVal(equivalentSelector) || equivalentSelector.attr("placeholder");
     let amount;
     // product can have different units to reactant, hence different equation
     if (component === "product") {
@@ -267,7 +267,9 @@ function autofillMass(component, changedParameter, loopValue) {
       let productAmountUnit = getVal($("#js-product-amount-unit"));
       let productMassUnit = getVal($("#js-product-mass-unit"));
       let productAmount = getVal($("#js-product-amount" + loopValue));
-      let polymerMn = getVal($("#js-product-mn" + loopValue));
+      let polymerMnSelector = $("#js-product-mn" + loopValue);
+      let polymerMn =
+        getVal(polymerMnSelector) || polymerMnSelector.attr("placeholder");
       if (polymerMn) {
         // if polymer
         molecularWeight = polymerMn;
@@ -286,7 +288,9 @@ function autofillMass(component, changedParameter, loopValue) {
       let equivalent = getVal(
         $("#js-" + component + "-equivalent" + loopValue),
       );
-      let polymerMn = getVal($("#js-reactant-mn" + loopValue));
+      let polymerMnSelector = $("#js-reactant-mn" + loopValue);
+      let polymerMn =
+        getVal(polymerMnSelector) || polymerMnSelector.attr("placeholder");
       if (polymerMn) {
         // if polymer
         molecularWeight = polymerMn;

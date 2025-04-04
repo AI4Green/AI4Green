@@ -83,9 +83,10 @@
                     name="reactant-limiting" id="js-reactant-limiting{{ loop.index }}" value={{ loop.index }}  class="js-reactant-limiting">
             </td>
             <td>{% if reactant_mol_weights[loop.index0] is iterable %}
-                    {% for weight in reactant_mol_weights[loop.index0] %}
-                    <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ weight }}"
-                        id="js-reactant-molecular-weight{{ loop.index }}" readonly>
+                    {% set outer_index = loop.index0 %}
+                    {% for weight in reactant_mol_weights[outer_index] %}
+                        <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ weight }}"
+                            id="js-reactant-molecular-weight{{ outer_index + 1 }}-{{ loop.index }}" readonly>
                     {% endfor %}
                 {% else %}
                     <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ reactant_mol_weights[loop.index0] }}"
@@ -273,9 +274,10 @@
                 $('input[name="js-main-product"]').first().prop('checked', true)
                 </script>
             <td>{% if product_mol_weights[loop.index0] is iterable %}
-                    {% for weight in product_mol_weights[loop.index0] %}
-                    <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ weight }}"
-                        id="js-product-molecular-weight{{ loop.index }}" readonly>
+                    {% set outer_index = loop.index0 %}
+                    {% for weight in product_mol_weights[outer_index] %}
+                        <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ weight }}"
+                            id="js-product-molecular-weight{{ outer_index + 1 }}-{{ loop.index }}" readonly>
                     {% endfor %}
                 {% else %}
                     <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ product_mol_weights[loop.index0] }}"
