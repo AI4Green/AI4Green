@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 <head>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/standard_user.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/home.js') }}"></script>
     <title>AI4Green - Home</title>
@@ -83,10 +82,7 @@
     <input id="active-workgroup" type="hidden" >
     <input id="active-workbook" type="hidden">
     {{ macro_templates.render_new_reaction_modal() }}
-<br>
-<br>
-<br>
-<br>
+
 </body>
 
 {% endblock %}

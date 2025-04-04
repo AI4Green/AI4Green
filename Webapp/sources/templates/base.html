@@ -1,9 +1,8 @@
 <html lang="en">
-
+    {% from "macros.html" import navbar %}
     <head>
         <!-- add icon link -->
-        <link rel ="icon" href="{{ url_for('static', filename='img/favicon.ico') }}"
-            type="image/x-icon">
+        <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!--    External JavaScript + libraries-->
@@ -22,90 +21,14 @@
         <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher_utils.js') }}"></script>
     <!--    Internal CSS styling-->
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/standard_user.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/buttons.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/pagestyle.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hazard_colours.css') }}">
+
     </head>
 
     <body>
-        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-          <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav mr-auto">
-              {% if '/retrosynthesis/' in request.path %}
-                <li class="nav-item">
-                    <a class="nav-link" href="" data-toggle="collapse" data-target="#retrosynthesis-sidebar-root" aria-controls="navbarToggleExternalContent" aria-expanded="true" aria-label="Toggle navigation">
-                        <i class="navbar-toggler-icon"></i>
-                    </a>
-                </li>
-              {% endif %}
-              <li {% if request.path == '/' or request.path == '/home' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
-                <a class="nav-link" id="TopNavHomeButton" href="{{ url_for('main.index') }}"><i class="bi bi-house-door-fill"></i> Home <span class="sr-only">(current)</span></a>
-              </li>
-              <li {% if request.path == '/demo' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
-                <a class="nav-link" id="TopNavSketcherButton" href="{{ url_for('main.demo') }}">Demo <span class="sr-only">(current)</span></a>
-              </li>
-              {% if current_user.is_authenticated %}
-                  <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="solvent-guide-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Solvents</a>
-                    <div class="dropdown-menu" aria-labelledby="solvent-guide-dropdown">
-                        <a class="dropdown-item" id="solvent-guide" href="{{ url_for('solvent_guide.solvent_guide') }}">Solvent Guide</a>
-                        <a class="dropdown-item" id="solvent-surfer" href="{{ url_for('solvent_surfer.solvent_PCA') }}">Solvent Surfer</a>
-                    </div>
-                  </li>
-                  <li {% if request.path == '/retrosynthesis' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
-                    <a class="nav-link" id="retrosynthesis" href="{{ url_for('retrosynthesis.retrosynthesis') }}">Retrosynthesis<span class="sr-only">(current)</span></a>
-                  </li>
-                  <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Workgroup</a>
-                    <div class="dropdown-menu" aria-labelledby="dropdown01">
-                      {% for workgroup in workgroups %}
-                          <a class="dropdown-item" href="{{ url_for('workgroup.workgroup', workgroup_selected=workgroup) }}">{{ workgroup }}</a>
-                      {% endfor %}
-                    </div>
-                  </li>
-                  <li {% if request.path == '/search' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
-                    <a class="nav-link" id="TopNavSearchButton" href="{{ url_for('main.search') }}">Search <span class="sr-only">(current)</span></a>
-                  </li>
-
-
-
-              {% endif %}
-            </ul>
-              <div id="reaction-saved-indicator" class="reaction-save-hidden">
-              </div>
-              <a id="AboutButton" class="btn btn-primary" href="{{ url_for('main.about') }}"> About AI4Green <span class="sr-only">(current)</span></a>
-              <p style="visibility: hidden;">x</p>
-              <a id="InfoButton" class="btn btn-primary" href="{{ url_for('main.info') }}"><i class="bi bi-question-diamond-fill"></i> Help <span class="sr-only">(current)</span></a>
-              <p style="visibility: hidden;">x</p>
-              {% if current_user.is_anonymous %}
-                <a class="btn btn-light my-2 my-sm-0" type="submit" id="TopNavLoginButton" href="{{ url_for('auth.login') }}">Log in</a>
-              {% endif %}
-
-              {% if current_user.is_authenticated %}
-                  <div class="btn-group">
-                      <button id="user-dropdown" type="button" class="btn btn-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <sup>{% if notification_number %}<span class="badge badge-pill badge-danger">{{ notification_number }}</span>{% endif %}</sup>{{ current_user.username }}
-                      </button>
-                      <div class="dropdown-menu" style="right: 0; left: auto;">
-                        <a id="notifications" href="{{ url_for('notifications.notifications') }}" class="dropdown-item" type="button">Notifications<sup>{% if notification_number %}<span class="badge badge-pill badge-danger">{{ notification_number }}</span>{% endif %}</sup></a>
-                        <a id="manage-account" href="{{ url_for('main.manage_account') }}" class="dropdown-item" type="button">Manage Account</a>
-                        <a id="accessibility" href="{{ url_for('main.accessibility') }}" class="dropdown-item" type="button">Accessibility</a>
-                        <a id="WG-membership-summary" class="dropdown-item" href="{{ url_for('workgroup_membership_summary.workgroup_membership_summary') }}" type="button">Membership Summary</a>
-                        {% if user_role == 'Admin' %}
-                            <a href="{{ url_for('admin_dashboard.admin_dashboard') }}" id="admin_dashboard" class="dropdown-item">Admin Dashboard</a>
-                        {% endif %}
-                          <div class="dropdown-divider"></div>
-                        <div class="px-4">
-                            <a id="TopNavLoginButton" href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger" type="button">Logout</a>
-                        </div>
-                      </div>
-                  </div>
-              {% endif %}
-          </div>
-        </nav>
+        {{ navbar(current_user) }}
         <div id="content">
             {% with messages = get_flashed_messages() + (messages_from_redirects or []) %}
                 {% if messages %}
@@ -121,17 +44,15 @@
             {% block content %}{% endblock %}
         </div>
 
-    </body>
-
-    <!--footer-->
-  <footer class="bg-light text-center text-lg-start fixed-bottom footer-at-bottom">
-      <div style="display: none; background-color: #777778" id="cookie-consent-banner" class="nk-cookie-banner alert alert-dark text-primary-green mb-0 fixed-bottom" role="alert">
-            🍪 This website uses first party cookies to ensure you get the best experience on our website.
-            <a href="{{ url_for('auth.privacy_notice') }}" target="blank" rel="noopener noreferrer" class="text-secondary-green">Learn more</a>
-            <button id="accept_cookies" type="button" class="btn btn-secondary btn-sm ml-3" onclick="updateCookiePreferences()">
-                I Got It
-            </button>
-      </div>
+        <!--footer-->
+        <footer class="bg-light text-center text-lg-start">
+            <div style="display: none; background-color: #777778" id="cookie-consent-banner" class="nk-cookie-banner alert alert-dark text-primary-green mb-0 fixed-bottom" role="alert">
+                🍪 This website uses first party cookies to ensure you get the best experience on our website.
+                <a href="{{ url_for('auth.privacy_notice') }}" target="blank" rel="noopener noreferrer" class="text-secondary-green">Learn more</a>
+                <button id="accept_cookies" type="button" class="btn btn-secondary btn-sm ml-3" onclick="updateCookiePreferences()">
+                    I Got It
+                </button>
+            </div>
             {% if session_type != 'UNIT_TEST' %}
             <!--Utility Links-->
             <div class="text-center" style="background-color: #777778;">
@@ -150,5 +71,6 @@
                 </table>
             </div>
             {% endif %}
-  </footer>
+        </footer>
+    </body>
 </html>
