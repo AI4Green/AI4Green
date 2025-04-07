@@ -96,18 +96,3 @@ main {
   background-color: #4CAF50;
   color: white;
 }
-
-/*html, body {*/
-/*    height: 100%;*/
-/*    margin: 0;*/
-/*}*/
-/*body {*/
-/*    display: flex;*/
-/*    flex-direction: column;*/
-/*    min-height: 100vh;*/
-/*    padding: 0; !* Remove any default padding from body *!*/
-/*}*/
-
-/*footer {*/
-/*    flex-shrink: 0; !* Prevent footer from shrinking *!*/
-/*}*/

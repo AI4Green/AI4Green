@@ -43,7 +43,6 @@
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 32px;
-  /*color: #00ff00; !* Change this color value *!*/
   text-align: center;
 }
 
@@ -68,6 +67,7 @@
     white-space: pre-line;
 }
 
+/* used for the periodic table of element sustainability */
 .img-big {
   width: 100%;
   height: auto;
