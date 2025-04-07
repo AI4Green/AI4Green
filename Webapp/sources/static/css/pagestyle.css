@@ -16,7 +16,10 @@
 
 .jumbotron.jumbotron-fluid.home {
   background: linear-gradient(90deg, var(--primary-grey) 50%, var(--primary-green));
+}
 
+.non-spaced-page-content {
+    margin-top: -2.5rem;
 }
 
 .line {
