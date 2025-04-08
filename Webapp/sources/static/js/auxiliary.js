@@ -19,6 +19,17 @@ function updateCookiePreferences() {
   checkCookie();
 }
 
+function updatePrivacyPolicyAgreement() {
+  // patch request to update the date when the user agreed to the privacy policy, then redirect home.
+  fetch("/accept_privacy_policy", {
+    method: "PATCH",
+  }).then((response) => {
+    if (response.ok) {
+      window.location.href = "/home";
+    }
+  });
+}
+
 function getCookie(cname) {
   // retrieves cookie values from cookie object
   let name = cname + "=";
@@ -103,4 +114,22 @@ function updateSelectedWorkGroup(origin_page = "") {
       },
     });
   });
+}
+
+/**
+ * Capitalizes the first character of a string and returns the result.
+ * @param {string} str - The input string to capitalize
+ * @returns {string} The string with its first character capitalized
+ */
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/**
+ * Converts the first character of a string to lowercase and returns the result.
+ * @param {string} str - The input string to modify
+ * @returns {string} The string with its first character in lowercase
+ */
+function lower(str) {
+  return str.charAt(0).toLowerCase() + str.slice(1);
 }

@@ -3,9 +3,9 @@ from typing import Dict, Optional, Tuple
 
 import jwt
 from flask import current_app, render_template
+from flask_login import current_user
 
-import sources.services.workgroup
-from sources import models
+from sources import models, services
 from sources.extensions import mail
 
 from qrcode import QRCode
@@ -258,6 +258,59 @@ def send_password_reset_test(user: models.User) -> Tuple[str, str]:
         render_template("email/reset_password_text.html", user=user, token=token),
         token,
     )
+
+
+def send_controlled_substance_alert(substance: str, location: Dict[str,str], reaction: models.Reaction) -> str:
+    """
+    Send an email to AI4Green admin if use of a controlled substance has been detected in a country with
+    a UK arms embargo.
+
+    Args:
+        substance: str, inchi of the substance that has been used
+        location: Dict[str,str], the country where the substance has been used
+        reaction: models.Reaction, the reaction that contains the controlled substance
+
+    """
+    compound = services.all_compounds.from_inchi(substance, reaction.workbook)
+    mail.send_email(
+        "Controlled Substance Alert",
+        sender=current_app.config["MAIL_ADMIN_SENDER"],
+        recipients=[
+            current_app.config["EXPORT_CONTROL_EMAIL_ADDRESS"],
+            current_app.config["MAIL_ADMIN_SENDER"]
+        ],
+        text_body=render_template(
+            "email/controlled_substance_alert.txt",
+            country=location["country"],
+            substance_smiles=compound.smiles,
+            email=current_user.email,
+            city=location["city"],
+            ip=location["IP_address"],
+            substance_name=compound.name,
+            substance_inchi=substance,
+            reaction_id=reaction.reaction_id,
+            reaction_name=reaction.name,
+            reaction_smiles=reaction.reaction_smiles,
+            workbook=reaction.workbook,
+            date_created=reaction.time_of_creation,
+            time_of_update=reaction.time_of_update
+        ),
+        html_body=render_template(
+            "email/controlled_substance_alert.html",
+            country=location["country"],
+            substance=substance,
+            email=current_user.email,
+            city=location["city"],
+            ip=location["IP_address"],
+            reaction_id=reaction.reaction_id,
+            reaction_name=reaction.name,
+            reaction_smiles=reaction.reaction_smiles,
+            workbook=reaction.workbook,
+            date_created=reaction.time_of_creation,
+            time_of_update=reaction.time_of_update
+        ),
+    )
+
 
 
 # send reset email test

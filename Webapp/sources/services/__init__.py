@@ -5,6 +5,7 @@ from . import (
     compound,
     data_export,
     email,
+    controlled_substances,
     file_attachments,
     hazard_code,
     interactive,

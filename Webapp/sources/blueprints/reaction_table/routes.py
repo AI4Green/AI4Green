@@ -22,11 +22,19 @@ from . import reaction_table_bp
 # Processing data from Marvin JS and creating reaction table
 @reaction_table_bp.route("/_process", methods=["GET"])
 @workbook_member_required
+@reaction_table_bp.doc(
+    description="Requires login and membership of a workbook for full functionality."
+)
 def process():
-    # must be logged in
-    """This function receives reagents and product from browser, finds
-    their IUPAC names and molar weights in PubChem, forms the lists of
-    reagents and solvents. and renders the reaction table"""
+    """
+    This function receives the reaction smiles and finds returns the reactant and product data from the database.
+     If compounds are not in the database, the user will be prompted to provide this data themselves.
+
+     Returns:
+            flask.Response: A JSON response with the reaction table data, a prompt for novel compounds,
+            or an error message.
+
+    """
 
     # get user workbook
     demo = request.args.get("demo")
@@ -375,8 +383,14 @@ def get_compound_data(
 
 @reaction_table_bp.route("/_save_reaction_note", methods=["POST"])
 @login_required
+@reaction_table_bp.doc(security="sessionAuth")
 def save_reaction_note():
-    """Saves an reaction_note to the reaction object"""
+    """
+    Saves an reaction_note to the reaction object
+
+    Returns:
+        flask.Response: A JSON response with the reaction_note object
+    """
     workgroup_name = request.form["workgroup"]
     workbook_name = request.form["workbook"]
     workbook_object = services.workbook.get_workbook_from_group_book_name_combination(

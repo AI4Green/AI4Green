@@ -68,3 +68,32 @@
     <br>
 </div>
 {% endmacro %}
+
+{% macro toxicity_modal(toxicity_list) %}
+    <div class="modal fade" id="toxicityModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Toxicity Warning</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Your reaction involves the use of hazardous substances that may have the following toxicities:</p>
+                    <ul>
+                        {% for toxicity in toxicity_list %}
+                            <li>{{ toxicity.capitalize() }}</li>
+                        {% endfor %}
+                    </ul>
+                    <p>You should display signs in the lab to alert other lab users.</p>
+                    {% for toxicity in toxicity_list %}
+                        <button  onclick="printToxicitySign('{{ toxicity }}')" class="btn btn-danger toxicity-print-sign" data-toxicity={{ toxicity }}>
+                            Print {{ toxicity.capitalize()  }} Sign
+                        </button><br><br>
+                    {%  endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" type="button" id="toxicity-modal-confirm" class="btn btn-primary">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}

@@ -2,7 +2,6 @@
 This module contains user authentication functions:
 login, logout, and register
 """
-from datetime import datetime
 
 import pytz
 
@@ -36,12 +35,6 @@ from . import auth_bp  # imports the blueprint of the
 from .forms import LoginForm, RegistrationForm
 from .utils import login_not_allowed
 
-# render_template renders html templates
-# redirect instructs the client web browser to automatically
-# navigate to a different page, given as an argument
-# url_for generates URLs using its internal mapping of URLs to view functions
-# flash stores a message for the user to show it when called from the templates
-# request parses incoming request data and gives access to it
 
 
 # Login page
@@ -81,9 +74,15 @@ def logout():
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 @login_not_allowed
-def register() -> Response:  # the view function that handles user registrations
-    # anyone may view
-    form = RegistrationForm()  # instantiates an object of RegistrationForm
+def register() -> Response:
+    """
+    Manages user registration
+
+    Returns:
+        flask.Response Renders the login template if registration is successful or registration template if not
+
+    """
+    form = RegistrationForm()
     if form.validate_on_submit():
         """The form.validate_on_submit returns True when the browser sends the POST
         request as a result of the user pressing the submit button and if all the fields
@@ -110,11 +109,21 @@ def register() -> Response:  # the view function that handles user registrations
 
 @auth_bp.route("/privacy_notice")
 def privacy_notice() -> Response:
-    # anyone may view
+    """
+    Renders the privacy notice page
+
+    Returns:
+        flask.Response The privacy notice page
+    """
     return render_template("privacy_notice.html")
 
 
 @auth_bp.route("/hazard_disclaimer")
 def hazard_disclaimer() -> Response:
-    # anyone may view
+    """
+    Renders the hazard disclaimer page
+
+    Returns:
+        flask.Response The hazard disclaimer page
+    """
     return render_template("hazards_disclaimer.html")

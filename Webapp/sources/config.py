@@ -6,6 +6,7 @@ This is a configuration module for the app
 import os
 
 from dotenv import load_dotenv
+from sources.services.controlled_substances import uk_arms_embargoes, controlled_substance_inchi
 from datetime import timedelta
 
 
@@ -146,6 +147,14 @@ class BaseConfig(object):  # class to store configuration variables
     RETROSYNTHESIS_API_KEY = os.getenv("RETROSYNTHESIS_API_KEY", "retro_key")
 
     CONDITIONS_API_URL = os.getenv("CONDITIONS_API_URL", "http://127.0.0.1:9901")
+
+    IPINFO_API_KEY = os.getenv("IPINFO_API_KEY", "") # change to your own
+
+    EXPORT_CONTROL_EMAIL_ADDRESS = os.getenv("EXPORT_CONTROL_EMAIL_ADDRESS", "") # who to alert for controlled substance usage
+
+    CONTROLLED_SUBSTANCES = controlled_substance_inchi()
+
+    EMBARGOED_COUNTRIES = uk_arms_embargoes()
 
 
 class TestConfig(BaseConfig):

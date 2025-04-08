@@ -22,8 +22,14 @@ from . import save_reaction_bp
 
 @save_reaction_bp.route("/new_reaction", methods=["POST", "GET"])
 @login_required
+@save_reaction_bp.doc(security="sessionAuth")
 def new_reaction() -> Response:
-    """Makes a new reaction after user submits modal window"""
+    """
+    Save a new reaction to the database after user submits from the modal window
+
+    Returns:
+        flaks.Response as JSON, either New Reaction Made or Reaction Name is not Unique
+    """
     workbook_name = request.form["workbook"]
     workgroup_name = request.form["workgroup"]
 
@@ -95,34 +101,7 @@ def new_reaction() -> Response:
             }
         )
 
-        summary_table = json.dumps(
-            {
-                "real_product_mass": "",
-                "unreacted_reactant_mass": "",
-                "polymer_mn": "",
-                "polymer_mw": "",
-                "polymer_dispersity": "",
-                "polymer_mass_method": "-select-",
-                "polymer_mass_calibration": "",
-                "polymer_tg": "",
-                "polymer_tm": "",
-                "polymer_tc": "",
-                "polymer_thermal_method": "-select-",
-                "polymer_thermal_calibration": "",
-                "reaction_temperature": "",
-                "batch_flow": "-select-",
-                "element_sustainability": "undefined",
-                "isolation_method": "undefined",
-                "catalyst_used": "-select-",
-                "catalyst_recovered": "-select-",
-                "custom_protocol1": "",
-                "custom_protocol2": "",
-                "other_hazards_text": "",
-                "researcher": "",
-                "supervisor": "",
-                "radio_buttons": [],
-            }
-        )
+        summary_table = services.summary.empty_summary_table
         # add reaction to database
         services.reaction.add(
             reaction_name,
@@ -141,6 +120,7 @@ def new_reaction() -> Response:
 
 @save_reaction_bp.route("/_autosave", methods=["POST"])
 @login_required
+@save_reaction_bp.doc(security="sessionAuth")
 def autosave() -> Response:
     """autosave when a field changes in the reaction page"""
     reaction_description = str(request.form["reactionDescription"])
@@ -332,7 +312,9 @@ def autosave() -> Response:
     conversion = request.form["conversion"]
     to_export = request.form["toExport"]
 
-    summary_table = json.dumps(
+    summary_table = json.loads(reaction.summary_table_data)
+
+    summary_table.update(
         {
             "real_product_mass": real_product_mass,
             "unreacted_reactant_mass": unreacted_reactant_mass,
@@ -365,6 +347,7 @@ def autosave() -> Response:
             "to_export": to_export,
         }
     )
+    summary_table = json.dumps(summary_table)
 
     # value is "complete" if user is trying to lock reaction.
     complete = request.form["complete"]
@@ -416,11 +399,13 @@ def autosave() -> Response:
         "polymerisation_type": polymerisation_type,
     }
     reaction.update(**update_dict)
+    services.controlled_substances.check_reaction_for_controlled_substances(reaction)
     return jsonify({"feedback": feedback})
 
 
 @save_reaction_bp.route("/clone_reaction", methods=["POST", "GET"])
 @login_required
+@save_reaction_bp.doc(security="sessionAuth")
 def clone_reaction() -> Response:
     """
     Takes reactions data from previously saved reaction and copies it into a new reaction which is saved to the database
@@ -507,6 +492,7 @@ def clone_reaction() -> Response:
 
 @save_reaction_bp.route("/_autosave_sketcher", methods=["POST"])
 @login_required
+@save_reaction_bp.doc(security="sessionAuth")
 def autosave_sketcher() -> Response:
     """Autosave function for saving changes to the sketcher only. Only used before reaction table is generated."""
 
@@ -536,6 +522,7 @@ def autosave_sketcher() -> Response:
 
 @save_reaction_bp.route("/_save_polymer_mode", methods=["POST"])
 @login_required
+@save_reaction_bp.doc(security="sessionAuth")
 def save_polymer_mode():
     """Updates reaction dict with polymer mode"""
     reaction = services.reaction.get_current_from_request()
@@ -550,6 +537,7 @@ def save_polymer_mode():
 
 @save_reaction_bp.route("/_get_polymer_mode", methods=["GET"])
 @login_required
+@save_reaction_bp.doc(security="sessionAuth")
 def get_polymer_mode():
     """Read reaction dict to get polymer mode"""
     workgroup_name = str(request.args.get("workgroup"))
@@ -567,6 +555,7 @@ def get_polymer_mode():
 
 @save_reaction_bp.route("/_check_reaction", methods=["POST"])
 @login_required
+@save_reaction_bp.doc(security="sessionAuth")
 def check_reaction_name() -> Response:
     """Checks the reaction name is unique"""
     reaction_name = sanitise_user_input(request.form["reactionName"])
@@ -601,6 +590,7 @@ def check_reaction_name() -> Response:
 
 @save_reaction_bp.route("/_upload_experimental_data", methods=["POST"])
 @login_required
+@save_reaction_bp.doc(security="sessionAuth")
 def upload_experiment_files():
     """Takes a list of files, and saves upon successful validation. Url added to database, file saved to azure blob"""
     services.auth.reaction_files(permission_level="edit")
@@ -612,6 +602,7 @@ def upload_experiment_files():
 
 @save_reaction_bp.route("/view_reaction_attachment", methods=["GET"])
 @login_required
+@save_reaction_bp.doc(security="sessionAuth")
 def view_reaction_attachment() -> Response:
     """
     Authenticate user has permission to view, then use the uuid to find the file on azure and then return the file.
@@ -635,6 +626,7 @@ def view_reaction_attachment() -> Response:
 
 @save_reaction_bp.route("/_download_reaction_attachment", methods=["POST"])
 @login_required
+@save_reaction_bp.doc(security="sessionAuth")
 def download_experiment_files():
     """Take a file and return as attachment to the user"""
     services.auth.reaction_files(permission_level="view_only")
@@ -653,6 +645,7 @@ def download_experiment_files():
 
 @save_reaction_bp.route("/_delete_reaction_attachment", methods=["DELETE"])
 @login_required
+@save_reaction_bp.doc(security="sessionAuth")
 def delete_reaction_attachment():
     """Delete file attached to reaction"""
     services.file_attachments.delete_file_attachment(request_source="user")
