@@ -46,6 +46,7 @@
   border-color: #333333;
   border-width: thick;
   border-style: dashed;
+  margin-bottom: 1rem;
 }
 
 /* Fullscreen overlay styling */
