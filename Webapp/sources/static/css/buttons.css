@@ -1,0 +1,103 @@
+.btn.icon {
+    height: 70px;
+    width: 70px;
+    background-color: var(--icon-background);
+    border-color: var(--icon-background);
+    border-radius: 35px;
+    text-align: center;
+    margin: 7px;
+    line-height: 80px;
+    color: var(--primary-grey);
+    transition: all 0.3s linear;
+    font-size: 40;
+}
+
+.icon:hover {
+  background-color: var(--primary-grey);
+  border-color: var(--primary-grey);
+  color: var(--primary-green);
+  transform: scale(1.1);
+}
+
+.icon.focused {
+  background-color: var(--primary-grey);
+  border-color: var(--primary-green);
+  border-width: 3;
+  color: var(--primary-green);
+  transform: scale(1.1);
+}
+
+
+.btn.btn-primary {
+  background-color: var(--primary-grey);
+  border-color: var(--primary-grey);
+  color: var(--tertiary-green);
+}
+
+.btn.btn-primary:hover {
+  background-color: var(--primary-grey-hover);
+  border-color: var(--primary-grey-hover);
+  text-decoration:underline;
+}
+
+.btn.btn-outline-primary {
+  border-color: var(--primary-grey);
+  color: var(--primary-grey);
+}
+
+.btn.btn-outline-primary:hover {
+  color: var(--primary-grey);
+  background-color: var(--primary-green);
+}
+
+.btn.btn-secondary {
+  background-color: var(--primary-green);
+  border-color: var(--primary-green);
+  color: var(--secondary-grey);
+}
+
+.btn.btn-secondary:hover {
+  background-color: var(--primary-green-hover);
+  border-color: var(--primary-green-hover);
+  color: var(--secondary-grey);
+}
+
+.btn.btn-success {
+    background-color: var(--primary-green);
+  border-color: var(--primary-green);
+  color: var(--secondary-grey);
+}
+
+.btn.btn-success:hover {
+  background-color: var(--primary-green-hover);
+  border-color: var(--primary-green-hover);
+    text-decoration:underline;
+}
+
+.btn.btn-info {
+  background-color: var(--primary-blue);
+  border-color: var(--primary-blue);
+  color: var(--secondary-grey);
+}
+
+.btn.btn-info:hover {
+  background-color: var(--primary-blue-hover);
+  border-color: var(--primary-blue-hover);
+    text-decoration:underline;
+}
+
+.btn.btn-danger{
+    background-color: var(--primary-red);
+    border-color: var(--primary-red);
+  color: var(--secondary-grey);
+}
+
+.btn.btn-danger:hover {
+  background-color: var(--primary-red-hover);
+  border-color: var(--primary-red-hover);
+    text-decoration:underline;
+}
+
+.btn-toolbar .btn-label {
+  float: left;
+}

@@ -1,3 +1,31 @@
+.readonly-cell {
+    background-color: transparent;
+    border: none;
+}
+
+.editable-cell {
+    background-color: white;
+    border-color: black;
+    border-width: thin;
+}
+
+.remove-highlight-summary-cell {
+    border-color: transparent;
+    border-width: thin;
+}
+
+.remove-highlight-filled-cell {
+    border-color: black;
+    border-width: thin;
+    background-color: white;
+}
+
+.add-highlight-unfilled-cell {
+    border-color: red;
+    border-width: medium;
+}
+
+
 #loading-overlay {
   display: none;
   position: fixed;
@@ -15,7 +43,6 @@
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 32px;
-  /*color: #00ff00; !* Change this color value *!*/
   text-align: center;
 }
 
@@ -24,11 +51,11 @@
   top: 50%;
   left: 48%;
   transform: translate(-50%, -50%);
-  font-size: 60px; /* Adjust the size based on your preference */
-  /*color: #008000; !* Green color for the flask icon *!*/
+  font-size: 60px;
+
     color: #82f5a8;
     animation: spin2 1s linear infinite;
--webkit-text-stroke: 2px #7c7d7c;/* White border around the flask icon */
+    -webkit-text-stroke: 2px #7c7d7c;/* White border around the flask icon */
 }
 
 @keyframes spin2 {
@@ -40,7 +67,7 @@
     white-space: pre-line;
 }
 
-
+/* used for the periodic table of element sustainability */
 .img-big {
   width: 100%;
   height: auto;
@@ -87,7 +114,7 @@ datalist>option:hover, datalist>option.active {
   height: 60px;
   border: 3px solid #ccc;
   border-radius: 50%;
-  border-top: 3px solid #007bff; /* Change the color to your preferred loading color */
+  border-top: 3px solid #007bff;
   animation: spin 1s linear infinite; /* The spin animation will rotate the circle */
 }
 
