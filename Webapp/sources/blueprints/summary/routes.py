@@ -3,7 +3,7 @@ This module receives data from the reaction table
 via POST request and renders the summary template
 """
 
-from flask import Response, abort, jsonify, render_template, request
+from flask import Response, abort, json, jsonify, render_template, request
 from flask_login import login_required
 from sources import auxiliary, services
 
