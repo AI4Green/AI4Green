@@ -39,35 +39,42 @@ async function reactionTableReload() {
   const productFields = {
     amounts: "-rounded-amount",
     amounts_raw: "-amount",
+    equivalents: "-equivalent",
     masses: "-rounded-mass",
     masses_raw: "-mass",
     physical_forms: "-physical-form",
+    mns: "-mn",
   };
   // object.assign concatenates the two arguments - all productFields are also found in reactant and reagent
-  const reactantFields = Object.assign(
-    {
-      equivalents: "-equivalent",
-      concentrations: "-concentration",
-      densities: "-density",
-      volumes_raw: "-volume",
-      volumes: "-rounded-volume",
-    },
-    productFields,
-  );
+  const reactantFields = Object.assign({
+    amounts: "-rounded-amount",
+    amounts_raw: "-amount",
+    equivalents: "-equivalent",
+    masses: "-rounded-mass",
+    masses_raw: "-mass",
+    physical_forms: "-physical-form",
+    concentrations: "-concentration",
+    densities: "-density",
+    volumes_raw: "-volume",
+    volumes: "-rounded-volume",
+    mns: "-mn",
+  });
 
-  const reagentFields = Object.assign(
-    {
-      names: "",
-      equivalents: "-equivalent",
-      concentrations: "-concentration",
-      densities: "-density",
-      volumes_raw: "volume-",
-      volumes: "-rounded-volume",
-      molecular_weights: "-molecular-weight",
-      hazards: "-hazards",
-    },
-    productFields,
-  );
+  const reagentFields = Object.assign({
+    names: "",
+    amounts: "-rounded-amount",
+    amounts_raw: "-amount",
+    equivalents: "-equivalent",
+    masses: "-rounded-mass",
+    masses_raw: "-mass",
+    physical_forms: "-physical-form",
+    concentrations: "-concentration",
+    densities: "-density",
+    volumes_raw: "volume-",
+    volumes: "-rounded-volume",
+    molecular_weights: "-molecular-weight",
+    hazards: "-hazards",
+  });
 
   const solventFields = {
     volumes: "-volume",
@@ -96,7 +103,6 @@ async function reactionTableReload() {
       let jsonID = "product_" + jsonField;
       fillInputField(productFieldID, jsonID, i);
     }
-    //fillInputField("#js-product-intended-dp" + j, "product_intended_dps", i); not yet implemented
   }
   // iterate through and reload reagents data
   let numberOfReagents = js_reaction_table_data["reagent_names"].length;

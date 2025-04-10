@@ -184,7 +184,7 @@ def smiles_to_inchi(smiles: str) -> str:
     return None if mol is None else Chem.MolToInchi(mol)
 
 
-def mol_weight_from_smiles(smiles: str) -> float:
+def mol_weight_from_smiles(smiles: str or list) -> float or list:
     """
     Uses RDKit to calculate the molecular weight for a compound from its SMILES string
 
@@ -195,7 +195,14 @@ def mol_weight_from_smiles(smiles: str) -> float:
         The molecular weight of the compound.
     """
     # MolWt accounts for the average across isotopes but ExactMolWt only takes the most abundant isotope.
-    return round(Descriptors.MolWt(Chem.MolFromSmiles(smiles)), 2)
+    if isinstance(smiles, list):
+        mol_wts = []
+        for s in smiles:
+            mol_wts.append(round(Descriptors.MolWt(Chem.MolFromSmiles(s)), 2))
+    else:
+        mol_wts = round(Descriptors.MolWt(Chem.MolFromSmiles(smiles)), 2)
+
+    return mol_wts
 
 
 def from_cas(
@@ -257,6 +264,7 @@ def from_inchi(
         compound = services.novel_compound.from_inchi_and_workbook(inchi, workbook)
     return compound
 
+
 def populate_reagent_dropdown(
     reagent_substring: str, workbook: models.WorkBook = None
 ) -> List[str]:
@@ -302,3 +310,26 @@ def populate_reagent_dropdown(
         )
         reagent_names.extend([x.name for x in additional_reagents])
     return reagent_names
+
+
+def check_valid_smiles(smiles: str or list):
+    """
+    Checks if a smiles string or list of smiles strings are valid.
+
+    Args:
+        smiles: The compound's smiles string
+
+    Returns:
+        True if compound is valid, False otherwise.
+    """
+    if isinstance(smiles, list):
+        for s in smiles:
+            mol = Chem.MolFromSmiles(s)
+            if mol is None:
+                return False
+    else:
+        mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            return False
+
+    return True
