@@ -396,6 +396,7 @@ def reload_reaction_table():
     workbook = request.json.get("workbook")
     workgroup = request.json.get("workgroup")
     reaction_id = request.json.get("reaction_id")
+    demo = request.json.get("demo")
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup, workbook
     )
@@ -406,6 +407,11 @@ def reload_reaction_table():
         json.loads(reaction.reaction_table_data), workbook
     )
     # print(compounds["reagent"][0].compound_data)
+
+    if demo == "demo":
+        sol_rows = services.solvent.get_default_list()
+    else:
+        sol_rows = services.solvent.get_workbook_list(workbook)
 
     # Now it renders the reaction table template
     reaction_table = render_template(
@@ -425,7 +431,7 @@ def reload_reaction_table():
         reagent_table_numbers=[],
         reaction_table_data="",
         summary_table_data="",
-        sol_rows=services.solvent.get_workbook_list(workbook),
+        sol_rows=sol_rows,
         reaction=reaction,
         reaction_class=reaction.reaction_class,
         reaction_classes=[],
