@@ -360,9 +360,7 @@ async function regenerateImages(sortCriteria, workbook, workgroup, images) {
   });
 
   let rxns = await getRXNs(sortCriteria, workbook, workgroup);
-  console.log(rxns);
   let smiles = await getSmiles(sortCriteria, workbook, workgroup);
-  console.log(smiles);
 
   //indices of empty images
   const missingImagesIdx = images
