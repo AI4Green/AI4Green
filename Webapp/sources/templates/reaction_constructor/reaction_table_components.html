@@ -294,9 +294,15 @@
     <tr id="js-solvent-table-row{{ index }}" class="not-novel-compound-input">
         <td><input type="number"
          style="width:40px; border:none" id="js-solvent-table-number{{ index }}" readonly value="{{ solvent.idx if solvent else ""}}"></td>
-        <td id="js-solvent-datalist-cell{{ index }}"  ><input aria-role="combobox" type="search"
-        style="width: 200px;" class="add-highlight-unfilled-cell" id="js-solvent{{ index }}" autocomplete="off"
-        placeholder="Name or CAS Number" value="{{ solvent.compound_data.names if solvent else "" }}">
+        <td id="js-solvent-datalist-cell{{ index }}"  >
+            <input aria-role="combobox" type="search" style="width: 200px;"
+                   {% if solvent %}
+                    class="{{ solvent.compound_data.sustainability_flag}} remove-highlight-filled-cell"
+                   {% else %}
+                    class="add-highlight-unfilled-cell"
+                   {% endif %}
+                   id="js-solvent{{ index }}" autocomplete="off" placeholder="Name or CAS Number"
+                   value="{{ solvent.compound_data.names if solvent else "" }}">
         </td>
         <td><button value="{{ index }}" id="go-to-solvent-guide{{ index }}" title="Open solvent guide in new tab" class="btn btn-primary btn-primary btn-sm" onclick="goToSolventGuide(this.value)">Solvent Guide</button></td>
         <td><button  value="{{ index }}" id="go-to-solvent-surfer" title="Open solvent surfer in new tab" class="btn btn-primary btn-primary btn-sm" onclick="goToSolventSurfer(this.value)">Solvent Surfer</button></td>

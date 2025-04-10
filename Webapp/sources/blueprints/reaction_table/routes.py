@@ -98,15 +98,24 @@ class SketcherCompound:
             {"reactionTable": novel_reactant_html, "novelCompound": True}
         )
 
-    def add_primary_key_to_compound_data(self):
-        inchi = services.all_compounds.smiles_to_inchi(self.smiles)
-        db_entry = services.all_compounds.from_inchi(inchi)
+    def add_solvent_sustainability_flags(self):
+        flag = services.solvent.sustainability_from_primary_key(
+            self.compound_data["ids"]
+        )
+        self.compound_data[
+            "sustainability_flag"
+        ] = services.solvent.convert_sustainability_flag_to_text(flag)
+        print(type(self.compound_data["sustainability_flag"]))
 
-        if self.reaction_component != "Solvent":
-            if self.is_novel_compound:
-                self.compound_data["primary_key"] = (db_entry.name, db_entry.workbook)
-            else:
-                self.compound_data["primary_key"] = db_entry.id
+    # def add_primary_key_to_compound_data(self):
+    #     inchi = services.all_compounds.smiles_to_inchi(self.smiles)
+    #     db_entry = services.all_compounds.from_inchi(inchi)
+    #
+    #     if self.reaction_component != "Solvent":
+    #         if self.is_novel_compound:
+    #             self.compound_data["primary_key"] = (db_entry.name, db_entry.workbook)
+    #         else:
+    #             self.compound_data["primary_key"] = db_entry.id
 
     def check_polymer(self, polymer_indices):
         """
@@ -182,8 +191,9 @@ class SketcherCompound:
                 )
 
                 compound.compound_data.update(compound_data)
-                print(compound.compound_data)
-                # compound.add_primary_key_to_compound_data()
+                if component_type == "solvent":
+                    compound.add_solvent_sustainability_flags()
+
                 component_lists[component_type].append(compound)
 
         return component_lists, units

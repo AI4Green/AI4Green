@@ -1090,7 +1090,6 @@ function initialiseSolventListeners() {
       .clone()
       .prop("id", solventDatalistID)
       .appendTo("#js-solvent-datalist-cell" + i);
-    console.log($("#js-solvent-datalist-cell" + i).val());
     setColours();
     datalist_initiate(solventInputID, solventDatalistID, i);
   }
@@ -1389,7 +1388,6 @@ function autoChangeRequiredStyling2(styleParameterID, excludedNullValues = []) {
  */
 function autoChangeRequiredStyling(changedParameter, excludedNullValues = []) {
   // update styling of current reaction table (for reaction table reload)
-  //autoChangeRequiredStyling2(changedParameter, excludedNullValues);
   // then set up the listener for future changes
   $(changedParameter).on("input change", function () {
     autoChangeRequiredStyling2(changedParameter, excludedNullValues);
