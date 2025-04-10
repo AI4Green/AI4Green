@@ -649,13 +649,6 @@ function postReagentData(reagentName, x) {
   });
 }
 
-function initialiseReagentListeners() {
-  let numberOfReagents = getNum($("#js-number-of-reagents"));
-  for (let i = 1; i < numberOfReagents + 1; i++) {
-    autofillReagentFields2(i);
-  }
-}
-
 /**
  * Sets up event listeners and autofills fields for a reagent row in the reaction table.
  * This function configures all the relevant input fields for a reagent based on the limiting reactant and various parameters.
@@ -764,7 +757,6 @@ async function removeReagent(removedReagentNumber) {
   let reagentNumber = getNum("#js-number-of-reagents");
   // remove the reagent table row from the html
   let reagentTableRowID = "#js-reagent-table-row" + removedReagentNumber;
-  console.log(reagentTableRowID);
   $(reagentTableRowID).remove();
   // list of reagent ids that need to be updated
   const reagentIDsToUpdate = [
@@ -801,8 +793,6 @@ async function removeReagent(removedReagentNumber) {
       for (let reagentIDToUpdate of reagentIDsToUpdate) {
         // remove listener events by cloning elements
         let old_element = document.getElementById(reagentIDToUpdate + iStr);
-        console.log(reagentIDToUpdate + iStr);
-        console.log(old_element);
         let new_element = old_element.cloneNode(true);
         old_element.parentNode.replaceChild(new_element, old_element);
         $("#" + reagentIDToUpdate + iStr).attr("id", reagentIDToUpdate + j);
@@ -1094,6 +1084,15 @@ function initialiseSolventListeners() {
   for (let i = 1; i < numberOfSolvents + 1; i++) {
     autofillSolventData(i);
     autofillSolventFields2(i);
+    let solventInputID = "js-solvent" + i;
+    let solventDatalistID = "js-solvent-datalist" + i;
+    $("#js-solvent-datalist")
+      .clone()
+      .prop("id", solventDatalistID)
+      .appendTo("#js-solvent-datalist-cell" + i);
+    console.log($("#js-solvent-datalist-cell" + i).val());
+    setColours();
+    datalist_initiate(solventInputID, solventDatalistID, i);
   }
 }
 
@@ -1390,7 +1389,7 @@ function autoChangeRequiredStyling2(styleParameterID, excludedNullValues = []) {
  */
 function autoChangeRequiredStyling(changedParameter, excludedNullValues = []) {
   // update styling of current reaction table (for reaction table reload)
-  autoChangeRequiredStyling2(changedParameter, excludedNullValues);
+  //autoChangeRequiredStyling2(changedParameter, excludedNullValues);
   // then set up the listener for future changes
   $(changedParameter).on("input change", function () {
     autoChangeRequiredStyling2(changedParameter, excludedNullValues);
@@ -1430,7 +1429,6 @@ function updateStyling() {
     autoChangeRequiredStylingValidCompound("reagent", i);
   }
   let numberOfSolvents = getNum($("#js-number-of-solvents"));
-  console.log(numberOfSolvents);
   for (let i = 1; i < numberOfSolvents + 1; i++) {
     autoChangeRequiredStyling("#js-solvent-physical-form" + i);
     autoChangeRequiredStyling("#js-solvent-volume" + i);
