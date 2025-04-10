@@ -147,6 +147,17 @@ function autofillLimitingReactantAmount(changedParameter) {
     let reactantMolecularWeight = getVal(
       $("#js-reactant-molecular-weight" + limitingReactantTableNumber),
     );
+    if (!reactantMolecularWeight) {
+      let polymerMnSelector = $(
+        "#js-reactant-mn" + limitingReactantTableNumber,
+      );
+      let polymerMn =
+        getVal(polymerMnSelector) || polymerMnSelector.attr("placeholder");
+      if (polymerMn) {
+        // if polymer
+        reactantMolecularWeight = polymerMn;
+      }
+    }
     const reactantMassUnit = getVal($("#js-mass-unit"));
     const reactantAmountUnit = getVal($("#js-amount-unit"));
     let reactantAmount =
