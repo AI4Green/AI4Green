@@ -191,7 +191,7 @@
 
 {% macro reagent_or_solvent_heading(type, units) -%}
     <tbody id="js-{{ type }}-table">
-{#            {{ add_to_database_row( type ) }}#}
+            {{ add_to_database_row( type ) }}
             <tr class="not-novel-compound-input" id="{{ type }}-row">
                 <td></td>
                 <td>{{ reagent_or_solvent_title(type) }}</td>
