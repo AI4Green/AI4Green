@@ -1,4 +1,4 @@
-from flask import Response, jsonify, render_template, request
+from flask import Response, json, jsonify, render_template, request
 from flask_login import login_required
 from sources import models, services
 from sources.auxiliary import get_workbooks, get_workgroups
@@ -184,8 +184,17 @@ class SearchHandler:
                 reaction.reagents,
                 reaction.products,
             )
-            reactants, products = list(set(reactants1 + reactants2)), list(
-                set(products1 + products2)
+
+            # load json strings and flatten lists
+            for smiles_list in reactants2, products2:
+                for i in range(len(smiles_list)):
+                    try:
+                        smiles_list[i] = json.loads(smiles_list[i])
+                    except:
+                        smiles_list[i] = [smiles_list[i]]
+
+            reactants, products = list(set(reactants1 + sum(reactants2, []))), list(
+                set(products1 + sum(products2, []))
             )
             components = [reactants, reagents, products]
             for component_type in components:
