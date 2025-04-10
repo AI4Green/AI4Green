@@ -530,10 +530,13 @@
                             Creator
                         </th>
                         <th>
+                            Workgroup
+                        </th>
+                        <th>
                             Workbook
                         </th>
                         <th>
-                            Reaction Name
+                            Reaction ID
                         </th>
                         <th>
                             Date of creation
@@ -560,10 +563,13 @@
                             {{ subst.creator_person.user.email }}
                         </td>
                         <td>
+                            {{ subst.workgroup.name }}
+                        </td>
+                        <td>
                             {{ subst.workbook.name }}
                         </td>
                         <td>
-                            {{ subst.reaction.name }}
+                            {{ subst.reaction.reaction_id }}
                         </td>
                         <td>
                             {{ (subst.time_of_creation|string)[:-7] }}

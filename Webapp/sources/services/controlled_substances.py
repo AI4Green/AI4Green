@@ -1,10 +1,9 @@
 import os
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 import pytz
 from flask import current_app
-from flask_login import current_user
 from sources import models, services
 from sources.extensions import db
 
