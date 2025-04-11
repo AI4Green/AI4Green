@@ -39,6 +39,7 @@ class SketcherCompound:
         reload=False,
     ):
         self.smiles = smiles
+        self.inchi = ""
         self.idx = idx
         self.demo = demo
         self.workbook = workbook
@@ -58,24 +59,17 @@ class SketcherCompound:
             self.process_compound()
 
     def process_compound(self):
-        # find out if compound is a novel compound (if polymer then novel compound is always true)
+        # find out if compound is a novel compound (if polymer then novel compound is always true)# fails for polymers lmao
         compound, novel_compound = get_compound_all_tables(
             self.smiles, self.workbook, self.is_polymer, self.demo
         )
         # only check for novel compound if reaction is not being reloaded
-        if not self.reload:
-            if compound is None:
-                self.handle_new_novel_compound()
+        if compound is None:
+            self.handle_new_novel_compound()
 
-            else:
-                self.is_novel_compound = novel_compound
-                get_compound_data(self.compound_data, compound, novel_compound)
-
-        # always load primary_key regardless of reload
-        if novel_compound:
-            self.compound_data["primary_key"] = (compound.name, compound.workbook)
         else:
-            self.compound_data["primary_key"] = compound.id
+            self.is_novel_compound = novel_compound
+            get_compound_data(self.compound_data, compound, novel_compound)
 
     def handle_new_novel_compound(self):
         if self.demo == "demo":
@@ -106,16 +100,6 @@ class SketcherCompound:
             "sustainability_flag"
         ] = services.solvent.convert_sustainability_flag_to_text(flag)
         print(type(self.compound_data["sustainability_flag"]))
-
-    # def add_primary_key_to_compound_data(self):
-    #     inchi = services.all_compounds.smiles_to_inchi(self.smiles)
-    #     db_entry = services.all_compounds.from_inchi(inchi)
-    #
-    #     if self.reaction_component != "Solvent":
-    #         if self.is_novel_compound:
-    #             self.compound_data["primary_key"] = (db_entry.name, db_entry.workbook)
-    #         else:
-    #             self.compound_data["primary_key"] = db_entry.id
 
     def check_polymer(self, polymer_indices):
         """
@@ -178,6 +162,7 @@ class SketcherCompound:
                         compound_data[key.replace(component_type + "_", "")] = value[
                             idx
                         ]
+
                 compound = cls(
                     smiles=compound_data.get(
                         "smiles", ""
@@ -195,6 +180,7 @@ class SketcherCompound:
                     compound.add_solvent_sustainability_flags()
 
                 component_lists[component_type].append(compound)
+                compound.is_polymer = True
 
         return component_lists, units
 
@@ -246,6 +232,7 @@ def check_novel_compounds(compound_list: List[SketcherCompound]) -> Union[str, N
     """
     for compound in compound_list:
         if compound.novel_compound_table:
+            print(compound.novel_compound_table)
             return compound.novel_compound_table
     return None
 
@@ -401,8 +388,6 @@ def autoupdate_reaction_table():
 
 @reaction_table_bp.route("/reload_reaction_table", methods=["GET", "POST"])
 def reload_reaction_table():
-    # reaction_table_dict = request.json.get("reaction_table_data")
-    # print(reaction_table_dict)
     workbook = request.json.get("workbook")
     workgroup = request.json.get("workgroup")
     reaction_id = request.json.get("reaction_id")
@@ -576,6 +561,14 @@ def get_compound_data(
 
     compound_density = compound.density if compound.density != "" else "-"
     compound_data["densities"] = compound_density
+
+    inchi = services.all_compounds.smiles_to_inchi(compound.smiles)
+    compound_data["inchi"] = inchi
+
+    if novel_compound:
+        compound_data["primary_key"] = (compound.name, compound.workbook)
+    else:
+        compound_data["primary_key"] = compound.id
 
 
 @reaction_table_bp.route("/_save_reaction_note", methods=["POST"])

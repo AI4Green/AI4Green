@@ -47,6 +47,9 @@ function novelCompoundDataFromSketcher() {
       $("#js-load-status").val("loaded");
       $("#action-button-submit").click();
     }
+    let reactionID = $("#js-reaction-id").val();
+    let reactionSmiles = $("#js-reaction-smiles").val();
+    updateReactionTable(reactionSmiles, workgroup, workbook, reactionID);
   });
 }
 
