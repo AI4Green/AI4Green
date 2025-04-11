@@ -46,7 +46,6 @@
     </tr>
 {%- endmacro %}
 
-
 {%  macro product_headings(units) -%}
     {% set product_units = {
     "amount": ["mol", "mmol", "μmol"],
@@ -102,13 +101,38 @@
 <select size="1" name="reactionClass" id="reaction-class">
 
      {% for option in reaction_classes %}
-     {% if option == reaction_class %}
-        <option value="{{option}}" SELECTED>{{option}}</option>
-     {% else %}
-        <option value="{{option}}">{{option}}</option>
-    {% endif %}
+         {% if option == reaction_class %}
+            <option value="{{option}}" SELECTED>{{option}}</option>
+         {% else %}
+            <option value="{{option}}">{{option}}</option>
+        {% endif %}
     {% endfor %}
 </select>
+{%- endmacro %}
+
+{% macro polymerisation_dropdown(polymerisation_type) -%}
+    {% set polymerisation_types =
+        [
+            "-select-",
+            "Addition",
+            "Anionic",
+            "Cationic",
+            "Coordination",
+            "Condensation",
+            "Radical",
+            "Ring-Opening",
+        ]
+    %}
+    <label for="js-polymerisation-type" style="padding-bottom: 20px"><b>Type of polymerisation:</b></label>
+        <select size="1" id="js-polymerisation-type">
+            {% for option in reaction_classes %}
+                {% if option == polymerisation_type %}
+                    <option value="{{option}}" SELECTED>{{option}}</option>
+                {% else %}
+                    <option value="{{option}}">{{option}}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
 {%- endmacro %}
 
 
@@ -147,6 +171,10 @@
             </td>
             <td><input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ reactant.compound_data.molecular_weights }}"
                     id="js-reactant-molecular-weight{{ index }}" readonly>
+                <br>
+                {% if reactant.is_polymer %}
+                     <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
+                {% endif %}
             </td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
                     {% if reactant.compound_data.densities %}value="{{ reactant.compound_data.densities }}"{% endif %}
@@ -266,7 +294,12 @@
                 $('input[name="js-main-product"]').first().prop('checked', true)
                 </script>
             <td><input type="number" step="any" value="{{ product.compound_data.molecular_weights }}"
-                       id="js-product-molecular-weight{{ index }}" style="width: 70px; border:none" readonly></td>
+                       id="js-product-molecular-weight{{ index }}" style="width: 70px; border:none" readonly>
+            <br>
+            {% if product.is_polymer %}
+                     <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
+                {% endif %}
+            </td>
             <td></td>
             <td></td>
             <td></td>

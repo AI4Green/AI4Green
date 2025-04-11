@@ -16,7 +16,12 @@
 
 {{ reaction_table_components.reaction_description(reaction, tutorial) }}
 
-{{ reaction_table_components.reaction_class_dropdown(reaction_class) }}
+
+{% if reaction.reaction_type == "POLYMER" %}
+    {{ reaction_table_components.polymerisation_dropdown(reaction.polymerisation_type) }}
+{% else %}
+    {{ reaction_table_components.reaction_class_dropdown(reaction_class) }}
+{% endif %}
 
 
 <div style="overflow-x:auto;" class="table-responsive text-nowrap" id="reaction-table-div">
