@@ -36,45 +36,45 @@ async function reactionTableReload() {
     "product-physical-form",
   ];
   // Field dicts to relate HTML IDs to js_reactant_table_data keys
-  const productFields = {
+  const commonFields = {
     amounts: "-rounded-amount",
     amounts_raw: "-amount",
     equivalents: "-equivalent",
     masses: "-rounded-mass",
     masses_raw: "-mass",
     physical_forms: "-physical-form",
-    mns: "-mn",
   };
-  // object.assign concatenates the two arguments - all productFields are also found in reactant and reagent
-  const reactantFields = Object.assign({
-    amounts: "-rounded-amount",
-    amounts_raw: "-amount",
-    equivalents: "-equivalent",
-    masses: "-rounded-mass",
-    masses_raw: "-mass",
-    physical_forms: "-physical-form",
-    concentrations: "-concentration",
-    densities: "-density",
-    volumes_raw: "-volume",
-    volumes: "-rounded-volume",
-    mns: "-mn",
-  });
+  // object.assign concatenates the two arguments - all commonFields are also found in reactant and reagent
+  const reactantFields = Object.assign(
+    {
+      concentrations: "-concentration",
+      //densities: "-density", //TODO: not sure why this was here previously?
+      volumes_raw: "-volume",
+      volumes: "-rounded-volume",
+      mns: "-mn",
+    },
+    commonFields,
+  );
 
-  const reagentFields = Object.assign({
-    names: "",
-    amounts: "-rounded-amount",
-    amounts_raw: "-amount",
-    equivalents: "-equivalent",
-    masses: "-rounded-mass",
-    masses_raw: "-mass",
-    physical_forms: "-physical-form",
-    concentrations: "-concentration",
-    densities: "-density",
-    volumes_raw: "volume-",
-    volumes: "-rounded-volume",
-    molecular_weights: "-molecular-weight",
-    hazards: "-hazards",
-  });
+  const productFields = Object.assign(
+    {
+      mns: "-mn",
+    },
+    commonFields,
+  );
+
+  const reagentFields = Object.assign(
+    {
+      names: "",
+      concentrations: "-concentration",
+      densities: "-density",
+      volumes_raw: "volume-",
+      volumes: "-rounded-volume",
+      molecular_weights: "-molecular-weight",
+      hazards: "-hazards",
+    },
+    commonFields,
+  );
 
   const solventFields = {
     volumes: "-volume",
