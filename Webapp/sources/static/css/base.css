@@ -12,10 +12,6 @@
 --primary-red: #F58683;
 --primary-red-hover: #BB6A61;
 
-  /* Accessibility variables */
-  --focus-outline-color: var(--primary-blue);
-  --hover-underline-color: var(--primary-green);
-  --active-text-color: var(--tertiary-green);
 }
 
 html, body {

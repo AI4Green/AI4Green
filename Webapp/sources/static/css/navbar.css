@@ -1,3 +1,9 @@
+:root {
+  /* Navbar colour variables */
+  --hover-underline-color: var(--primary-green);
+  --active-text-color: var(--tertiary-green);
+}
+
 /* Base navbar styling */
 #main-navbar {
   background: var(--primary-grey) !important;
@@ -8,20 +14,24 @@
 /* Active state styling */
 .navbar-nav .nav-item.active .nav-link {
   font-weight: bold;
-  color: var(--active-text-color)
+  color: var(--active-text-color);
 }
 
-/* Hover and focus state styling */
+/* Hover and focus state styling - changes text colour to green*/
 .navbar-nav .nav-item .nav-link:hover,
-.navbar-nav .nav-item .nav-link:focus {
+.navbar-nav .nav-item .nav-link:focus,
+.navbar-nav .dropdown-toggle:focus,
+.navbar-nav .dropdown.show .dropdown-toggle {
   text-decoration: none;
   position: relative;
-  color: var(--tertiary-green)
+  color: var(--active-text-color);
 }
 
-/* Underline effect */
+/* Underline effect - Ensures dropdown toggle retains styling when focused or dropdown is open */
 .navbar-nav .nav-item .nav-link:hover::before,
-.navbar-nav .nav-item .nav-link:focus::before {
+.navbar-nav .nav-item .nav-link:focus::before,
+.navbar-nav .dropdown-toggle:focus::before,
+.navbar-nav .dropdown.show .dropdown-toggle::before {
   content: '';
   position: absolute;
   left: 0;
@@ -83,15 +93,15 @@
 
 .dropdown-menu .dropdown-item:hover,
 .dropdown-menu .dropdown-item:focus {
-  color: var(--tertiary-green);
+  color: var(--active-text-color);
   background-color: var(--secondary-grey);
   font-weight: bold;
 }
 
-/* Ensure dropdown shows properly */
-.dropdown-menu.show {
-  display: block;
-}
+/*!* Ensure dropdown shows properly *!*/
+/*.dropdown-menu.show {*/
+/*  display: block;*/
+/*}*/
 
 /* ------ Layout & Positioning ------ */
 /* Prevent layout shift - consistent width */
@@ -108,15 +118,11 @@
 }
 
 /* ------ Visual Elements ------ */
-/* Notification badge */
+ Notification badge
 .badge-danger {
   background-color: var(--primary-red);
 }
 
-/* Mobile toggle button */
-.navbar-toggler {
-  border: 2px solid var(--primary-green);
-}
 
 /* ------ Mobile adjustments ------ */
 @media (max-width: 767.98px) {
