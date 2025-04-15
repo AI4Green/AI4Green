@@ -156,6 +156,7 @@ def autosave() -> Response:
     reaction_image = str(request.form["reactionImage"])
     reaction_class = str(request.form.get("reactionClass"))
     polymer_indices = json.loads(request.form.get("polymerIndices"))
+    print("autosave", polymer_indices)
     polymerisation_type = str(request.form["polymerisationType"])
 
     services.auth.edit_reaction(reaction)
@@ -530,12 +531,10 @@ def autosave_sketcher() -> Response:
     reaction_rxn = str(request.form.get("reactionRXN"))
     polymer_indices = str(request.form.get("polymerIndices"))
 
+    reaction_type = "STANDARD"
     if polymer_indices:  # convert string to boolean
         reaction_type = "POLYMER"
-    else:
-        reaction_type = "STANDARD"
 
-    print(polymer_indices, reaction_type)
     update_dict = {
         "time_of_update": current_time,
         "reaction_smiles": reaction_smiles,

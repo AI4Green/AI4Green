@@ -310,7 +310,6 @@ def autoupdate_reaction_table():
         for idx, x in enumerate(reactants_smiles_list)
     ]
     number_of_reactants = len(reactants)
-    print("REACTANTS", [(x.is_polymer, x.smiles) for x in reactants])
 
     # add for reagent support
     # reagents = [
@@ -338,7 +337,6 @@ def autoupdate_reaction_table():
         for idx, y in enumerate(product_smiles_list)
     ]
     number_of_products = len(products)
-    print("PRODUCTS", [(x.is_polymer, x.smiles) for x in products])
 
     # check errors first add reagents here for reagent support
     for compound_group in (reactants, products):
