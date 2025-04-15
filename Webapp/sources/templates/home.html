@@ -1,14 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
 <head>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/standard_user.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/home.js') }}"></script>
     <title>AI4Green - Home</title>
     {% import "macros.html" as macro_templates %}
 </head>
 <body>
-    <div class="jumbotron jumbotron-fluid home">
+    <div class="jumbotron jumbotron-fluid home non-spaced-page-content">
 
         <div class="container">
             <h2 class="text-primary-green">Welcome to AI4Green, {{ current_user.username }}!</h2>
@@ -83,10 +82,7 @@
     <input id="active-workgroup" type="hidden" >
     <input id="active-workbook" type="hidden">
     {{ macro_templates.render_new_reaction_modal() }}
-<br>
-<br>
-<br>
-<br>
+
 </body>
 
 {% endblock %}
