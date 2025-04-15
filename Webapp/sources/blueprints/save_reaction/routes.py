@@ -528,19 +528,21 @@ def autosave_sketcher() -> Response:
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
     reaction_smiles = str(request.form.get("reactionSmiles"))
     reaction_rxn = str(request.form.get("reactionRXN"))
-    # polymer_mode = request.form.get("polymerMode")
+    polymer_indices = str(request.form.get("polymerIndices"))
 
-    # if polymer_mode.lower() == "true":  # convert string to boolean
-    #     reaction_type = "POLYMER"
-    # else:
-    reaction_type = "STANDARD"
+    if polymer_indices:  # convert string to boolean
+        reaction_type = "POLYMER"
+    else:
+        reaction_type = "STANDARD"
 
+    print(polymer_indices, reaction_type)
     update_dict = {
         "time_of_update": current_time,
         "reaction_smiles": reaction_smiles,
         "reaction_rxn": reaction_rxn,
         "reaction_type": reaction_type,
     }
+
     reaction.update(**update_dict)
     feedback = "Reaction Updated!"
     return jsonify({"feedback": feedback})

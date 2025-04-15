@@ -94,9 +94,10 @@ async function sketcherAutoSave() {
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
   let reactionID = $("#js-reaction-id").val();
-  let polymerMode = $("#polymer-mode-select").is(":checked");
+  let polymerIndices = identifyPolymers(rxn);
   let userEmail = "{{ current_user.email }}";
-  updateReactionTable(smiles, workgroup, workbook, reactionID);
+  // change here for reagent support
+  updateReactionTable(smilesNew, workgroup, workbook, reactionID);
   $.ajax({
     url: "/_autosave_sketcher",
     type: "post",
@@ -107,7 +108,7 @@ async function sketcherAutoSave() {
       userEmail: userEmail,
       reactionSmiles: smilesNew,
       reactionRXN: rxn,
-      polymerMode: polymerMode,
+      polymerIndices: JSON.stringify(polymerIndices),
     },
     dataType: "json",
     success: function () {

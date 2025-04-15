@@ -180,8 +180,7 @@ function getExamplePolymer() {
  *
  * @returns {list} indices where polymer is.
  */
-function identifyPolymers() {
-  let rxn = $("#js-reaction-rxn").val();
+function identifyPolymers(rxn) {
   let array = rxn.split("$MOL");
   let header_lines = array[0].split("\n");
   let num_species = header_lines[header_lines.length - 2]

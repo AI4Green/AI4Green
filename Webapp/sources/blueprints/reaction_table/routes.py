@@ -180,7 +180,6 @@ class SketcherCompound:
                     compound.add_solvent_sustainability_flags()
 
                 component_lists[component_type].append(compound)
-                compound.is_polymer = True
 
         return component_lists, units
 

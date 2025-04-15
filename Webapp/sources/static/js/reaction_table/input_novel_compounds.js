@@ -12,7 +12,8 @@ function novelCompoundDataFromSketcher() {
   let workbook = $("#js-active-workbook").val();
   // let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
   // let polymer = $("#js-polymer").val();
-  let polymerIndices = identifyPolymers();
+  let rxn = $("#js-reaction-rxn").val();
+  let polymerIndices = identifyPolymers(rxn);
   console.log(polymerIndices);
   let requestData = {
     name: name,
