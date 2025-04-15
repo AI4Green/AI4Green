@@ -69,115 +69,6 @@
 </div>
 {% endmacro %}
 
-{% macro navbar(current_user, workgroups, notifications, user_role) %}
-
-    <nav id="main-navbar" class="navbar navbar-expand-md navbar-dark bg-dark sticky-top">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
-                aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav mr-auto">
-                {% if '/retrosynthesis/' in request.path %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="" data-toggle="collapse" data-target="#retrosynthesis-sidebar-root"
-                           aria-controls="navbarToggleExternalContent" aria-expanded="true" aria-label="Toggle navigation">
-                            <i class="navbar-toggler-icon"></i>
-                        </a>
-                    </li>
-                {% endif %}
-                <li {% if request.path == '/' or request.path == '/home' %} class="nav-item active" {% else %}
-                                                                            class="nav-item" {% endif %}>
-                    <a class="nav-link" id="TopNavHomeButton" href="{{ url_for('main.index') }}"><i
-                            class="bi bi-house-door-fill"></i> Home <span class="sr-only">(current)</span></a>
-                </li>
-                <li {% if request.path == '/demo' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
-                    <a class="nav-link" id="TopNavSketcherButton" href="{{ url_for('main.demo') }}">Demo <span
-                            class="sr-only">(current)</span></a>
-                </li>
-                {% if current_user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="solvent-guide-dropdown" data-toggle="dropdown"
-                           aria-haspopup="true" aria-expanded="false">Solvents</a>
-                        <div class="dropdown-menu" aria-labelledby="solvent-guide-dropdown">
-                            <a class="dropdown-item" id="solvent-guide" href="{{ url_for('solvent_guide.solvent_guide') }}">Solvent
-                                Guide</a>
-                            <a class="dropdown-item" id="solvent-surfer" href="{{ url_for('solvent_surfer.solvent_PCA') }}">Solvent
-                                Surfer</a>
-                        </div>
-                    </li>
-                    <li {% if request.path == '/retrosynthesis' %} class="nav-item active" {% else %}
-                                                                   class="nav-item" {% endif %}>
-                        <a class="nav-link" id="retrosynthesis" href="{{ url_for('retrosynthesis.retrosynthesis') }}">Retrosynthesis<span
-                                class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown"
-                           aria-haspopup="true" aria-expanded="false">Workgroup</a>
-                        <div class="dropdown-menu" aria-labelledby="dropdown01">
-                            {% for workgroup in workgroups %}
-                                <a class="dropdown-item"
-                                   href="{{ url_for('workgroup.workgroup', workgroup_selected=workgroup) }}">{{ workgroup }}</a>
-                            {% endfor %}
-                        </div>
-                    </li>
-                    <li {% if request.path == '/search' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
-                        <a class="nav-link" id="TopNavSearchButton" href="{{ url_for('main.search') }}">Search <span
-                                class="sr-only">(current)</span></a>
-                    </li>
-
-                {% endif %}
-
-            </ul>
-            <div id="reaction-saved-indicator" class="reaction-save-hidden">
-            </div>
-            <a id="AboutButton" class="btn btn-primary" href="{{ url_for('main.about') }}"> About AI4Green <span
-                    class="sr-only">(current)</span></a>
-            <p style="visibility: hidden;">x</p>
-            <a id="InfoButton" class="btn btn-primary" href="{{ url_for('main.info') }}"><i
-                    class="bi bi-question-diamond-fill"></i> Help <span class="sr-only">(current)</span></a>
-            <p style="visibility: hidden;">x</p>
-            {% if current_user.is_anonymous %}
-                <a class="btn btn-light my-2 my-sm-0" type="submit" id="TopNavLoginButton"
-                   href="{{ url_for('auth.login') }}">Log in</a>
-            {% endif %}
-
-            {% if current_user.is_authenticated %}
-                <div class="btn-group">
-                    <button id="user-dropdown" type="button" class="btn btn-light dropdown-toggle" data-toggle="dropdown"
-                            aria-haspopup="true" aria-expanded="false">
-                        <sup>{% if notification_number %}
-                            <span class="badge badge-pill badge-danger">{{ notification_number }}</span>{% endif %}
-                        </sup>{{ current_user.username }}
-                    </button>
-                    <div class="dropdown-menu" style="right: 0; left: auto;">
-                        <a id="notifications" href="{{ url_for('notifications.notifications') }}" class="dropdown-item"
-                           type="button">Notifications<sup>{% if notification_number %}
-                            <span class="badge badge-pill badge-danger">{{ notification_number }}</span>{% endif %}
-                        </sup></a>
-                        <a id="manage-account" href="{{ url_for('main.manage_account') }}" class="dropdown-item"
-                           type="button">Manage Account</a>
-                        <a id="accessibility" href="{{ url_for('main.accessibility') }}" class="dropdown-item"
-                           type="button">Accessibility</a>
-                        <a id="WG-membership-summary" class="dropdown-item"
-                           href="{{ url_for('workgroup_membership_summary.workgroup_membership_summary') }}" type="button">Membership
-                            Summary</a>
-                        {% if user_role == 'Admin' %}
-                            <a href="{{ url_for('admin_dashboard.admin_dashboard') }}" id="admin_dashboard"
-                               class="dropdown-item">Admin Dashboard</a>
-                        {% endif %}
-                        <div class="dropdown-divider"></div>
-                        <div class="px-4">
-                            <a id="TopNavLoginButton" href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger"
-                               type="button">Logout</a>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-    </nav>
-{% endmacro %}
-
 {% macro toxicity_modal(toxicity_list) %}
     <div class="modal fade" id="toxicityModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -205,4 +96,157 @@
             </div>
         </div>
     </div>
+{% endmacro %}
+
+{% macro navbar(current_user, workgroups, notifications, user_role) %}
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
+    </head>
+    <!-- Skip to content link for accessibility. TODO implement main content on pages-->
+    <a href="#main-content" class="sr-only sr-only-focusable">Skip to main content</a>
+    <nav id="main-navbar" class="navbar navbar-expand-md navbar-dark bg-dark sticky-top">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+                aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+            <!-- If in retrosynthesis page, show collapse sidebar option  -->
+                {% if '/retrosynthesis/' in request.path %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="" data-toggle="collapse" data-target="#retrosynthesis-sidebar-root"
+                           aria-controls="navbarToggleExternalContent" aria-expanded="true" aria-label="Toggle navigation">
+                            <i class="navbar-toggler-icon"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                <!-- Home page nav item  -->
+                <li {% if request.path == '/' or request.path == '/home' %} class="nav-item active" {% else %}
+                                                                            class="nav-item" {% endif %}>
+                    <a class="nav-link" id="TopNavHomeButton" href="{{ url_for('main.index') }}" {% if request.path == '/' or request.path == '/home' %}aria-current="page"{% endif %}>
+                        <i class="bi bi-house-door-fill"></i> Home
+                    </a>
+                </li>
+                <!-- Demo reaction nav item  -->
+                <li {% if request.path == '/demo' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
+                    <a class="nav-link" id="TopNavSketcherButton" href="{{ url_for('main.demo') }}" {% if request.path == '/demo' %}aria-current="page"{% endif %}>
+                        <i class="bi bi-pencil-square"></i> Demo
+                    </a>
+                </li>
+                <!-- If user is logged in show solvent, retrosynthesis, and search nav items -->
+                {% if current_user.is_authenticated %}
+                <!-- Solvent substitution dropdown  -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="solvent-guide-dropdown" data-toggle="dropdown"
+                           aria-haspopup="true" aria-expanded="false">
+                           <i class="bi bi-droplet-fill"></i> Solvents
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="solvent-guide-dropdown">
+                            <a class="dropdown-item" id="solvent-guide" href="{{ url_for('solvent_guide.solvent_guide') }}">
+                                <i class="bi bi-journal-text"></i> Solvent Guide
+                            </a>
+                            <a class="dropdown-item" id="solvent-surfer" href="{{ url_for('solvent_surfer.solvent_PCA') }}">
+                                <i class="bi bi-search"></i> Solvent Surfer
+                            </a>
+                        </div>
+                    </li>
+                    <!-- Retrosynthesis nav item  -->
+                    <li {% if request.path == '/retrosynthesis' %} class="nav-item active" {% else %}
+                                                                   class="nav-item" {% endif %}>
+                        <a class="nav-link" id="retrosynthesis" href="{{ url_for('retrosynthesis.retrosynthesis') }}" {% if request.path == '/retrosynthesis' %}aria-current="page"{% endif %}>
+                            <i class="bi bi-arrow-left-right"></i> Retrosynthesis
+                        </a>
+                    </li>
+                    <!-- Workgroup dropdown  -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="workgroup-dropdown" data-toggle="dropdown"
+                           aria-haspopup="true" aria-expanded="false">
+                           <i class="bi bi-people-fill"></i> Workgroup
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="workgroup-dropdown">
+                            {% for workgroup in workgroups %}
+                                <a class="dropdown-item"
+                                   href="{{ url_for('workgroup.workgroup', workgroup_selected=workgroup) }}">{{ workgroup }}</a>
+                            {% endfor %}
+                        </div>
+                    </li>
+                    <!-- Search nav item -->
+                    <li {% if request.path == '/search' %} class="nav-item active" {% else %} class="nav-item" {% endif %}>
+                        <a class="nav-link" id="TopNavSearchButton" href="{{ url_for('main.search') }}" {% if request.path == '/search' %}aria-current="page"{% endif %}>
+                            <i class="bi bi-search"></i> Search
+                        </a>
+                    </li>
+                {% endif %}
+                <!-- If user is not logged in, don't show above nav items, instead show login nav item.  -->
+                {% if current_user.is_anonymous %}
+                    <li class="nav-item">
+                        <a class="nav-link" id="TopNavLoginButton" href="{{ url_for('auth.login') }}">
+                            <i class="bi bi-box-arrow-in-right"></i> Log in
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+
+            <!-- The reaction save indicator on the navbar to provide feedback in the reaction constructor on auto saves and more  -->
+            <div
+                id="reaction-saved-indicator" class="reaction-save-hidden">
+            </div>
+
+            <!-- About, help, and user dropdown on the right hand side  -->
+            <ul class="navbar-nav">
+                <!-- About AI4Green nav item  -->
+                <li class="nav-item">
+                    <a class="nav-link" id="AboutButton" href="{{ url_for('main.about') }}">
+                        <i class="bi bi-info-circle-fill"></i> About AI4Green
+                    </a>
+                </li>
+                <!-- Help Nav item  -->
+                <li class="nav-item">
+                    <a class="nav-link" id="InfoButton" href="{{ url_for('main.info') }}">
+                        <i class="bi bi-question-diamond-fill"></i> Help
+                    </a>
+                </li>
+                <!-- User dropdown if the user is logged in  -->
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="user-dropdown" data-toggle="dropdown"
+                           aria-haspopup="true" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                            <sup>{% if notification_number %}
+                                <span class="badge rounded-pill badge-danger">{{ notification_number }}</span>{% endif %}
+                            </sup>{{ current_user.username }}
+                        </a>
+
+                        <div class="dropdown-menu" aria-labelledby="user-dropdown">
+                            <a id="notifications" href="{{ url_for('notifications.notifications') }}"
+                               class="dropdown-item"
+                               type="button">
+                                <i class="bi bi-bell-fill"></i> Notifications
+                                <sup>{% if notification_number %}
+                                    <span class="badge rounded-pill badge-danger">{{ notification_number }}</span>{% endif %}
+                                </sup></a>
+                            <a id="manage-account" href="{{ url_for('main.manage_account') }}" class="dropdown-item"
+                               type="button"><i class="bi bi-gear-fill"></i> Manage Account</a>
+                            <a id="accessibility" href="{{ url_for('main.accessibility') }}" class="dropdown-item"
+                               type="button"><i class="bi bi-eye-fill"></i> Accessibility</a>
+                            <a id="WG-membership-summary" class="dropdown-item"
+                               href="{{ url_for('workgroup_membership_summary.workgroup_membership_summary') }}"
+                               type="button">
+                                <i class="bi bi-people-fill"></i> Membership Summary</a>
+
+                            {% if user_role == 'Admin' %}
+                                <a href="{{ url_for('admin_dashboard.admin_dashboard') }}" id="admin_dashboard"
+                                   class="dropdown-item"><i class="bi bi-speedometer2"></i> Admin Dashboard</a>
+                            {% endif %}
+
+                            <div class="dropdown-divider"></div>
+                            <a id="TopNavLoginButton" href="{{ url_for('auth.logout') }}"
+                               class="dropdown-item bg-danger"
+                               type="button"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                        </div>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
 {% endmacro %}
