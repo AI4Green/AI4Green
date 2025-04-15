@@ -11,7 +11,7 @@
   color: var(--active-text-color)
 }
 
-/* Hover state styling */
+/* Hover and focus state styling */
 .navbar-nav .nav-item .nav-link:hover,
 .navbar-nav .nav-item .nav-link:focus {
   text-decoration: none;
@@ -54,11 +54,11 @@
 
 /* Dropdown menu container */
 .dropdown-menu {
-  width: 240px;
+  width: 250px;
   background-color: var(--secondary-grey);
   border: 1px solid var(--primary-grey);
   padding: 0.5rem 0;
-  margin: 0;
+  margin-top: 0.5rem;
   top: 100%;
   left: 0;
   transform: none;
@@ -118,7 +118,7 @@
   border: 2px solid var(--primary-green);
 }
 
-/* ------ Responsive Adjustments ------ */
+/* ------ Mobile adjustments ------ */
 @media (max-width: 767.98px) {
   .dropdown-menu {
     width: 100%;
@@ -126,7 +126,6 @@
     left: 0;
     right: auto ;
   }
-
   .navbar-nav .nav-item .nav-link:hover::before,
   .navbar-nav .nav-item .nav-link:focus::before {
     bottom: 0;
