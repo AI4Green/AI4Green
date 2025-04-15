@@ -10,8 +10,10 @@ function novelCompoundDataFromSketcher() {
   let smiles = $("#js-new-compound-smiles").val();
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
-  let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
-  let polymer = $("#js-polymer").val();
+  // let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
+  // let polymer = $("#js-polymer").val();
+  let polymerIndices = identifyPolymers();
+  console.log(polymerIndices);
   let requestData = {
     name: name,
     molWeight: molWeight,
@@ -23,12 +25,13 @@ function novelCompoundDataFromSketcher() {
     workgroup: workgroup,
     component: "component",
     source: "sketcher",
-    polymerMode: polymerMode,
-    polymer: polymer, // from reaction_table/routes via html
+    // polymerMode: polymerMode,
+    // polymer: polymer, // from reaction_table/routes via html
+    polymerIndices: polymerIndices,
   };
 
   // sends polymers to polymer db
-  if (polymerMode && polymer === "True") {
+  if (polymerIndices.length) {
     novelCompoundURL = "/_polymer_novel_compound";
   } else {
     novelCompoundURL = "/_novel_compound";

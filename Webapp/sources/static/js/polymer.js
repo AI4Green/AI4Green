@@ -178,10 +178,10 @@ function getExamplePolymer() {
 /**
  * Reads RXN files to identify polymer(s) by "SRU" tag
  *
- * @param {string} rxn The reaction RXN string
  * @returns {list} indices where polymer is.
  */
-function identifyPolymers(rxn) {
+function identifyPolymers() {
+  let rxn = $("#js-reaction-rxn").val();
   let array = rxn.split("$MOL");
   let header_lines = array[0].split("\n");
   let num_species = header_lines[header_lines.length - 2]
