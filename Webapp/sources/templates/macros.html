@@ -98,7 +98,7 @@
     </div>
 {% endmacro %}
 
-{% macro navbar(current_user, workgroups, notifications, user_role) %}
+{% macro navbar(current_user, workgroups, notification_number, user_role) %}
     <head>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
         <script>
@@ -231,7 +231,7 @@
                            aria-haspopup="true" aria-expanded="false">
                             <i class="bi bi-person-circle"></i>
                             <sup>{% if notification_number %}
-                                <span class="badge rounded-pill badge-danger">{{ notification_number }}</span>{% endif %}
+                                <span class="badge badge-pill badge-danger">{{ notification_number }}</span>{% endif %}
                             </sup>{{ current_user.username }}
                         </a>
 
@@ -241,7 +241,7 @@
                                type="button">
                                 <i class="bi bi-bell-fill"></i> Notifications
                                 <sup>{% if notification_number %}
-                                    <span class="badge rounded-pill badge-danger">{{ notification_number }}</span>{% endif %}
+                                    <span class="badge badge-pill badge-danger">{{ notification_number }}</span>{% endif %}
                                 </sup></a>
                             <a id="manage-account" href="{{ url_for('main.manage_account') }}" class="dropdown-item"
                                type="button"><i class="bi bi-gear-fill"></i> Manage Account</a>

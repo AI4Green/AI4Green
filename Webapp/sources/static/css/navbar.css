@@ -118,7 +118,7 @@
 }
 
 /* ------ Visual Elements ------ */
- Notification badge
+/* Notification badge*/
 .badge-danger {
   background-color: var(--primary-red);
 }

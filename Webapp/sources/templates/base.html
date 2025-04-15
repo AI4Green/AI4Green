@@ -28,7 +28,7 @@
     </head>
 
     <body>
-        {{ navbar(current_user, workgroups, notifications, user_role) }}
+        {{ navbar(current_user, workgroups, notification_number, user_role) }}
         <div id="content">
             {% with messages = get_flashed_messages() + (messages_from_redirects or []) %}
                 {% if messages %}

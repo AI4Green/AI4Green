@@ -85,3 +85,29 @@
 #privacy-popup a:hover {
     text-decoration: underline;
 }
+
+/* Bootstrap 5.3.2 font stack for use on about.html */
+.lead, .display-3, .display-6 {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Ensure .lead matches Bootstrap 5.3.2 */
+.lead {
+    font-size: 1.25rem;
+    font-weight: 300;
+    line-height: 1.5;
+}
+
+/* Replicate .display-6 from Bootstrap 5.3.2 */
+.display-6 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    line-height: 1.2;
+}
+
+/* Ensure .display-3 matches Bootstrap 5.3.2 */
+.display-3 {
+    font-size: 4.5rem;
+    font-weight: 300;
+    line-height: 1.2;
+}
