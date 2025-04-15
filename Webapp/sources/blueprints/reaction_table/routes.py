@@ -83,6 +83,7 @@ class SketcherCompound:
             "_novel_compound.html",
             component=self.reaction_component,
             name=compound_name,
+            # chenage for novel compound table
             number=self.idx,
             mw=mol_wt,
             smiles=self.smiles,
@@ -99,7 +100,6 @@ class SketcherCompound:
         self.compound_data[
             "sustainability_flag"
         ] = services.solvent.convert_sustainability_flag_to_text(flag)
-        print(type(self.compound_data["sustainability_flag"]))
 
     def check_polymer(self, polymer_indices):
         """
@@ -112,6 +112,21 @@ class SketcherCompound:
             )
             self.check_polymer_dummy_atom()
             self.check_copolymer()
+
+            # def check_polymer(self, reaction_smiles):
+            #     """
+            #     Set is_polymer to True if a polymer SMILES is detected in reaction_smiles
+            #     """
+            #     reactant_smiles, product_smiles = get_reactants_and_products_list(
+            #         reaction_smiles
+            #     )
+            #     smiles_list = (
+            #         reactant_smiles if self.reaction_component == "Reactant" else product_smiles
+            #     )
+            #     if "{+n}" in smiles_list[self.reaction_component_idx]:
+            #         self.is_polymer = True
+            #         self.check_polymer_dummy_atom()
+            #         self.check_copolymer()
 
     @classmethod
     def from_reaction_table_dict(cls, reaction_table_dict, workbook):
@@ -249,6 +264,7 @@ def autoupdate_reaction_table():
     tutorial = request.json.get("tutorial")
     reaction = None
     workbook = None
+    polymer_indices = []
     if demo != "demo" and tutorial != "yes":
         workgroup = request.json.get("workgroup")
         workbook_name = request.json.get("workbook")
@@ -260,13 +276,7 @@ def autoupdate_reaction_table():
             reaction_id, workbook.id
         )
 
-    # get position of polymers in reaction or leave empty if none
-    # polymer_mode = request.json.get("polymer_mode")
-    polymer_indices = request.json.get("polymer_indices")
-    if polymer_indices:
-        polymer_indices = list(map(int, polymer_indices.split(",")))
-    else:
-        polymer_indices = list()
+        polymer_indices = request.json.get("polymer_indices")
 
     default_units = {
         "limiting_reactant_table_number": 1,
@@ -300,7 +310,7 @@ def autoupdate_reaction_table():
         for idx, x in enumerate(reactants_smiles_list)
     ]
     number_of_reactants = len(reactants)
-    # print(reactants[0].compound_data)
+    print("REACTANTS", [(x.is_polymer, x.smiles) for x in reactants])
 
     # add for reagent support
     # reagents = [
@@ -328,6 +338,7 @@ def autoupdate_reaction_table():
         for idx, y in enumerate(product_smiles_list)
     ]
     number_of_products = len(products)
+    print("PRODUCTS", [(x.is_polymer, x.smiles) for x in products])
 
     # check errors first add reagents here for reagent support
     for compound_group in (reactants, products):
@@ -356,10 +367,15 @@ def autoupdate_reaction_table():
     #     r_class = None
     #     r_classes = None
     # else:
+    r_class = None
+
+    if not polymer_indices:
+        polymer_indices = list()
+        r_class = services.reaction_classification.classify_reaction(
+            reactants_smiles_list, product_smiles_list
+        )
+
     reaction_table_html = "_reaction_table.html"
-    r_class = services.reaction_classification.classify_reaction(
-        reactants_smiles_list, product_smiles_list
-    )
 
     # Now it renders the reaction table template
     reaction_table = render_template(

@@ -5,7 +5,7 @@ if ($("#js-tutorial").val() === "no" && $("#js-demo").val() !== "demo") {
 
 function observer() {
   // this line detects any changes user makes to any input field and saves 0.5 seconds after user stops focus on input
-  $(document).on("change", ":input:not(#polymer-mode-select)", function (e) {
+  $(document).on("change", ":input", function (e) {
     setTimeout(autoSaveCheck(e), 500);
   });
   // on press remove solvent save
@@ -91,6 +91,7 @@ async function sketcherAutoSave() {
   let smilesNew = removeReagentsFromSmiles(smiles);
   $("#js-reaction-smiles").val(smilesNew);
   $("#js-reaction-rxn").val(rxn);
+  console.log(rxn);
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
   let reactionID = $("#js-reaction-id").val();
@@ -122,6 +123,8 @@ async function sketcherAutoSave() {
 }
 
 function updateReactionTable(smiles, workgroup, workbook, reactionID) {
+  let rxn = $("#js-reaction-rxn").val();
+  let polymerIndices = identifyPolymers(rxn);
   fetch("/autoupdate_reaction_table", {
     headers: {
       "Content-Type": "application/json",
@@ -132,6 +135,7 @@ function updateReactionTable(smiles, workgroup, workbook, reactionID) {
       workgroup: workgroup,
       workbook: workbook,
       reaction_id: reactionID,
+      polymer_indices: polymerIndices,
     }),
   })
     .then(function (response) {

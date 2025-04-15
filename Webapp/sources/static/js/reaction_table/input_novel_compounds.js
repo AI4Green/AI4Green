@@ -14,7 +14,6 @@ function novelCompoundDataFromSketcher() {
   // let polymer = $("#js-polymer").val();
   let rxn = $("#js-reaction-rxn").val();
   let polymerIndices = identifyPolymers(rxn);
-  console.log(polymerIndices);
   let requestData = {
     name: name,
     molWeight: molWeight,
@@ -49,7 +48,6 @@ function novelCompoundDataFromSketcher() {
     if (data.feedback === "Compound added to the database") {
       $("#js-novel-compound-input-form").hide();
       $("#js-load-status").val("loaded");
-      $("#action-button-submit").click();
     }
     let reactionID = $("#js-reaction-id").val();
     let reactionSmiles = $("#js-reaction-smiles").val();
