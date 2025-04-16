@@ -46,8 +46,6 @@ function autoSaveCheck(e = null, sketcher = false) {
     if (sketcher === false) {
       autoSave();
     } else if (sketcher === true) {
-      // dont autosave sketcher if reaction table has loaded
-      let reactionDiv = document.getElementById("reaction-table-div");
       sketcherAutoSave();
       // }
     }
@@ -91,35 +89,35 @@ async function sketcherAutoSave() {
   let smilesNew = removeReagentsFromSmiles(smiles);
   $("#js-reaction-smiles").val(smilesNew);
   $("#js-reaction-rxn").val(rxn);
-  console.log(rxn);
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
   let reactionID = $("#js-reaction-id").val();
   let polymerIndices = identifyPolymers(rxn);
   let userEmail = "{{ current_user.email }}";
   // change here for reagent support
-  updateReactionTable(smilesNew, workgroup, workbook, reactionID);
-  $.ajax({
-    url: "/_autosave_sketcher",
-    type: "post",
-    data: {
-      workgroup: workgroup,
-      workbook: workbook,
-      reactionID: reactionID,
-      userEmail: userEmail,
-      reactionSmiles: smilesNew,
-      reactionRXN: rxn,
-      polymerIndices: JSON.stringify(polymerIndices),
-    },
-    dataType: "json",
-    success: function () {
-      flashUserSaveMessage("SKETCHER");
-    },
-    error: function () {
-      flashUserErrorSavingMessage();
-    },
-  });
-  updateReactionTable(smiles, workgroup, workbook, reactionID);
+  if (smiles.includes(">>")) {
+    updateReactionTable(smilesNew, workgroup, workbook, reactionID);
+    $.ajax({
+      url: "/_autosave_sketcher",
+      type: "post",
+      data: {
+        workgroup: workgroup,
+        workbook: workbook,
+        reactionID: reactionID,
+        userEmail: userEmail,
+        reactionSmiles: smilesNew,
+        reactionRXN: rxn,
+        polymerIndices: JSON.stringify(polymerIndices),
+      },
+      dataType: "json",
+      success: function () {
+        flashUserSaveMessage("SKETCHER");
+      },
+      error: function () {
+        flashUserErrorSavingMessage();
+      },
+    });
+  }
 }
 
 function updateReactionTable(smiles, workgroup, workbook, reactionID) {
@@ -507,7 +505,7 @@ function getFieldData() {
     let reactantAmountRawID = "#js-reactant-amount" + i;
     reactantAmountsRaw += $(reactantAmountRawID).val() + ";";
     let reactantVolumeRawID = "#js-reactant-volume" + i;
-    reactantVolumesRaw = $(reactantVolumeRawID).val() + ";";
+    reactantVolumesRaw += $(reactantVolumeRawID).val() + ";";
     let reactantVolumeID = "#js-reactant-rounded-volume" + i;
     reactantVolumes += $(reactantVolumeID).val() + ";";
     let reactantDensityID = "#js-reactant-density" + i;
