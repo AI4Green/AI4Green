@@ -9,16 +9,18 @@
 <div class="form-outline mb-4" style="margin: auto; width: 50%">
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
-        {{ form.username }}<br>
+        {{ form.username.label(class="form-label") }}
+        {{ form.username(id="username", aria_describedby="username-error", autocomplete="username") }}<br>
         {% for error in form.username.errors %}
-            <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+            <div id="username-error" class="alert alert-danger" style="margin: auto; width: 70%" aria-live="polite">
                 {{ error }}
             </div>
         <br>
         {% endfor %}
-        {{ form.password }}<br>
+        {{ form.password.label(class="form-label") }}
+        {{ form.password(id="password", aria_describedby="password-error", autocomplete="current-password") }}<br>
         {% for error in form.password.errors %}
-            <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+            <div id="password-error" class="alert alert-danger" style="margin: auto; width: 70%" aria-live="polite">
                 {{ error }}
             </div>
         <br>

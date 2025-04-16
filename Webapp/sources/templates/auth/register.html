@@ -11,58 +11,61 @@
     <div class="form-outline mb-4" style="margin: auto; width: 50%">
         <form action="" method="post">
             {{ form.hidden_tag() }}
-            Username (Only letters, numbers, and underscores):
-            {{ form.username }}<br>
+            {{ form.username.label(class="form-label") }} (Only letters, numbers, underscores, and at least 4 characters):
+            {{ form.username(id="username", aria_describedby="username-error", autocomplete="username") }}<br>
             {% for error in form.username.errors %}
-                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                <div id="username-error" class="alert alert-danger" style="margin: auto; width: 70%" aria-live="polite" >
                     {{ error }}
                 </div>
             {% endfor %}
-            Fullname:
-            {{ form.fullname }}<br>
+            {{ form.fullname.label(class="form-label") }}
+            {{ form.fullname(id="fullname", aria_describedby="fullname-error", autocomplete="name") }}<br>
             {% for error in form.fullname.errors %}
-                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                <div id="fullname-error" class="alert alert-danger" style="margin: auto; width: 70%" aria-live="polite">
                     {{ error }}
                 </div>
             {% endfor %}
-            Email:
-            {{ form.email }}<br>
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(id="email", aria_describedby="email-error", autocomplete="email") }}<br>
             {% for error in form.email.errors %}
-                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                <div id="email-error" class="alert alert-danger" style="margin: auto; width: 70%" aria-live="polite">
                     {{ error }}
                 </div>
             {% endfor %}
-            Password:
-            {{ form.password }}<br>
+            {{ form.password.label(class="form-label") }} (Minimum 8 characters)
+            {{ form.password(id="password", aria_describedby="password-error", autocomplete="new-password") }}<br>
             {% for error in form.password.errors %}
-                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                <div id="password-error" class="alert alert-danger" style="margin: auto; width: 70%" aria-live="polite">
                     {{ error }}
                 </div>
             {% endfor %}
-            Confirm Password:
-            {{ form.password2 }}<br>
+            {{ form.password2.label(class="form-label") }}
+            {{ form.password2(id="confirm-password", aria_describedby="confirm-password-error", autocomplete="new-password") }}<br>
             {% for error in form.password2.errors %}
-                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                <div id="confirm-password-error" class="alert alert-danger" style="margin: auto; width: 70%" aria-live="polite">
                     {{ error }}
                 </div>
             {% endfor %}
-            {{ form.privacy }} I have read and agree to the conditions in the <a id="privacy_link" href="{{ url_for('auth.privacy_notice') }}" target="_blank" onclick="enablePrivacyCheckbox()">privacy notice</a><br>
+            {{ form.privacy.label(class="form-label") }}
+            {{ form.privacy(id="privacy", aria_describedby="privacy-error") }} <a id="privacy_link" href="{{ url_for('auth.privacy_notice') }}" target="_blank" onclick="enablePrivacyCheckbox()">privacy notice</a><br>
             {% for error in form.privacy.errors %}
-                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                <div id="privacy-error" class="alert alert-danger" style="margin: auto; width: 70%" aria-live="polite">
                     {{ error }}
                 </div>
             {% endfor %}
-            {{ form.hazard_disclaimer }} I have read and agree to the conditions in the <a id="hazard_link" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank" onclick="enableHazardCheckbox()">hazard disclaimer</a> <br>
+            {{ form.hazard_disclaimer.label(class="form-label") }}
+            {{ form.hazard_disclaimer(id="hazard", aria_describedby="hazard-error") }} <a id="hazard_link" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank" onclick="enableHazardCheckbox()">hazard disclaimer</a> <br>
             {% for error in form.hazard_disclaimer.errors %}
-                <div class="alert alert-danger" style="margin: auto; width: 70%" role="alert">
+                <div id="hazard-error" class="alert alert-danger" style="margin: auto; width: 70%" aria-live="polite">
                     {{ error }}
                 </div>
             {% endfor %}
 
             <div style="margin: auto; width: 60%">
+                {{ form.recaptcha.label(class="form-label") }}
                 {{ form.recaptcha }}
                 {% for error in form.recaptcha.errors %}
-                <div class="alert alert-danger" style="width: 91%" role="alert">
+                <div class="alert alert-danger" style="width: 91%" aria-live="polite">
                     Please confirm you are not a robot!
                 </div>
                 {% endfor %}

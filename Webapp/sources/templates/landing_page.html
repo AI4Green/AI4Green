@@ -18,28 +18,26 @@
                         <div class="form-group mb-4">
                             <form action="" method="post" novalidate>
                                 {{ form.hidden_tag() }}
-                                <div class="mb-3">
-                                    {{ form.username(class="form-control form-control-lg") }}<br>
-                                    {% for error in form.username.errors %}
-                                        <div class="alert alert-danger" role="alert">
-                                            {{ error }}
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.password(class="form-control form-control-lg") }}<br>
-                                    {% for error in form.password.errors %}
-                                        <div class="alert alert-danger" role="alert">
-                                            {{ error }}
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.submit(class="btn btn-primary") }}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.remember_me() }} {{ form.remember_me.label }}
-                                </div>
+                                {{ form.username.label(class="form-label") }}
+                                {{ form.username(id="username", aria_describedby="username-error", autocomplete="username") }}<br>
+                                {% for error in form.username.errors %}
+                                    <div id="username-error" class="alert alert-danger" style="margin: auto; width: 70%"
+                                         aria-live="polite">
+                                        {{ error }}
+                                    </div>
+                                    <br>
+                                {% endfor %}
+                                {{ form.password.label(class="form-label") }}
+                                {{ form.password(id="password", aria_describedby="password-error", autocomplete="current-password") }}<br>
+                                {% for error in form.password.errors %}
+                                    <div id="password-error" class="alert alert-danger" style="margin: auto; width: 70%"
+                                         aria-live="polite">
+                                        {{ error }}
+                                    </div>
+                                    <br>
+                                {% endfor %}
+                                {{ form.remember_me() }} {{ form.remember_me.label }}<br>
+                                {{ form.submit() }}
                             </form>
                         </div>
                         <div class="d-flex flex-column gap-2">
