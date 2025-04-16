@@ -212,8 +212,7 @@ function sketcherDataLossHandler() {
 async function reloadReaction() {
   // disable select sketcher buttons until SMILES are loaded into sketcher
 
-  // CHANGE ME BFORE DEPLOYMENT !!!!!!!!!!!!!1
-  $("#js-load-status").val("loaded");
+  $("#js-load-status").val("loading");
   let $sketcherSelectRadioButtons = $('input[name="sketcher-select"]');
   $sketcherSelectRadioButtons.prop("disabled", true);
 
