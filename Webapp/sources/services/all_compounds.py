@@ -184,7 +184,7 @@ def smiles_to_inchi(smiles: str) -> str:
     return None if mol is None else Chem.MolToInchi(mol)
 
 
-def mol_weight_from_smiles(smiles: str or list) -> float or list:
+def mol_weight_from_smiles(smiles: Union[str, List]) -> Union[float, List]:
     """
     Uses RDKit to calculate the molecular weight for a compound from its SMILES string
 
