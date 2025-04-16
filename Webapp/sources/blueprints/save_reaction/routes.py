@@ -179,7 +179,7 @@ def autosave() -> Response:
     reactant_amounts = get_data("reactantAmounts")[:-1]
     reactant_amounts_raw = get_data("reactantAmountsRaw")[:-1]
     reactant_volumes = get_data("reactantVolumes")[:-1]
-    reactant_volumes_raw = get_data("reactantVolumesRaw")  # [:-1]
+    reactant_volumes_raw = get_data("reactantVolumesRaw")[:-1]
     reactant_equivalents = get_data("reactantEquivalents")[:-1]
     reactant_physical_forms = get_data("reactantPhysicalForms")[:-1]
     reactant_densities = get_data("reactantDensities")[:-1]
