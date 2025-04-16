@@ -32,28 +32,33 @@ class SketcherCompound:
         self,
         smiles,
         idx,
-        polymer_indices,
         workbook,
         demo,
         reaction_component,
+        reaction_component_idx,
+        polymer_indices=None,
+        reaction_smiles="",
         reload=False,
     ):
         self.smiles = smiles
         self.inchi = ""
         self.idx = idx
+        self.reaction_component_idx = reaction_component_idx
         self.demo = demo
         self.workbook = workbook
         self.reaction_component = reaction_component
-        self.is_polymer = False
         self.is_novel_compound = False
+        self.is_polymer = False
         self.novel_compound_table = None
         self.compound_data = {}
         self.reload = reload
-
         self.errors = []
 
-        self.check_polymer(polymer_indices)
+        self.check_for_polymer(polymer_indices, reaction_smiles)
+
         self.check_invalid_molecule()
+        self.check_polymer_dummy_atom()
+        self.check_copolymer()
 
         if not self.errors and self.reaction_component != "Solvent":
             self.process_compound()
@@ -70,6 +75,32 @@ class SketcherCompound:
         else:
             self.is_novel_compound = novel_compound
             get_compound_data(self.compound_data, compound, novel_compound)
+
+    def check_for_polymer(self, polymer_indices, reaction_smiles):
+        if polymer_indices is not None:
+            self.check_polymer_indices_for_polymer(polymer_indices)
+        else:
+            self.check_reaction_smiles_for_polymer(reaction_smiles)
+
+    def check_polymer_indices_for_polymer(self, polymer_indices):
+        """
+        Set is_polymer to True if idx in polymer indices and process smiles
+        """
+        if self.idx in polymer_indices:
+            self.is_polymer = True
+            self.smiles = services.polymer_novel_compound.find_canonical_repeat(
+                self.smiles
+            )
+
+    def check_reaction_smiles_for_polymer(self, reaction_smiles):
+        reactant_smiles, product_smiles = get_reactants_and_products_list(
+            reaction_smiles
+        )
+        smiles_list = (
+            reactant_smiles if self.reaction_component == "Reactant" else product_smiles
+        )
+        if "{+n}" in smiles_list[self.reaction_component_idx]:
+            self.is_polymer = True
 
     def handle_new_novel_compound(self):
         if self.demo == "demo":
@@ -100,33 +131,6 @@ class SketcherCompound:
         self.compound_data[
             "sustainability_flag"
         ] = services.solvent.convert_sustainability_flag_to_text(flag)
-
-    def check_polymer(self, polymer_indices):
-        """
-        Set is_polymer to True if idx in polymer indices and process smiles
-        """
-        if self.idx in polymer_indices:
-            self.is_polymer = True
-            self.smiles = services.polymer_novel_compound.find_canonical_repeat(
-                self.smiles
-            )
-            self.check_polymer_dummy_atom()
-            self.check_copolymer()
-
-            # def check_polymer(self, reaction_smiles):
-            #     """
-            #     Set is_polymer to True if a polymer SMILES is detected in reaction_smiles
-            #     """
-            #     reactant_smiles, product_smiles = get_reactants_and_products_list(
-            #         reaction_smiles
-            #     )
-            #     smiles_list = (
-            #         reactant_smiles if self.reaction_component == "Reactant" else product_smiles
-            #     )
-            #     if "{+n}" in smiles_list[self.reaction_component_idx]:
-            #         self.is_polymer = True
-            #         self.check_polymer_dummy_atom()
-            #         self.check_copolymer()
 
     @classmethod
     def from_reaction_table_dict(cls, reaction_table_dict, workbook):
@@ -183,10 +187,11 @@ class SketcherCompound:
                         "smiles", ""
                     ),  # blank default in case of solvents/reagents
                     idx=number_of_compounds,
-                    polymer_indices={},
+                    reaction_smiles=reaction_table_dict.get("reaction_smiles", ""),
                     workbook=workbook,
                     demo="no",
                     reaction_component=component_type.capitalize(),
+                    reaction_component_idx=len(component_list),
                     reload=True,
                 )
 
@@ -246,7 +251,6 @@ def check_novel_compounds(compound_list: List[SketcherCompound]) -> Union[str, N
     """
     for compound in compound_list:
         if compound.novel_compound_table:
-            print(compound.novel_compound_table)
             return compound.novel_compound_table
     return None
 
@@ -306,6 +310,7 @@ def autoupdate_reaction_table():
             workbook=workbook,
             demo=demo,
             reaction_component="Reactant",
+            reaction_component_idx=idx + 1,
         )
         for idx, x in enumerate(reactants_smiles_list)
     ]
@@ -333,6 +338,7 @@ def autoupdate_reaction_table():
             workbook=workbook,
             demo=demo,
             reaction_component="Product",
+            reaction_component_idx=idx + 1,
         )
         for idx, y in enumerate(product_smiles_list)
     ]
@@ -358,13 +364,6 @@ def autoupdate_reaction_table():
     else:
         sol_rows = services.solvent.get_workbook_list(workbook)
 
-    # change rxn table in polymer mode
-    # if polymer_mode.lower() == "true":
-    #     # need to fix polymer mode
-    #     reaction_table_html = "_polymer_reaction_table.html"
-    #     r_class = None
-    #     r_classes = None
-    # else:
     r_class = None
 
     if not polymer_indices:
@@ -470,11 +469,11 @@ def get_reactants_and_products_list(
     # reaction_smiles = (reactants_smiles + ">>" + products_smiles).replace(",", ".")
 
     # we get the smiles straight from the sketcher to see if we have CXSmiles
-    sketcher_smiles = smiles_symbols(request.json.get("reaction_smiles"))
+    # sketcher_smiles = smiles_symbols(request.json.get("reaction_smiles"))
 
     # [OH-].[Na+]>>[Cl-].[Cl-].[Zn++] |f:0.1,2.3.4|
-    if "|f:" in sketcher_smiles:
-        reaction_smiles += re.search(r" \|[^\|]*\|$", sketcher_smiles).group()
+    if "|f:" in reaction_smiles:
+        reaction_smiles += re.search(r" \|[^\|]*\|$", reaction_smiles).group()
         (
             reactants_smiles_list,
             products_smiles_list,
