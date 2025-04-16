@@ -36,29 +36,36 @@ async function reactionTableReload() {
     "product-physical-form",
   ];
   // Field dicts to relate HTML IDs to js_reactant_table_data keys
-  const productFields = {
+  const commonFields = {
     amounts: "-rounded-amount",
     amounts_raw: "-amount",
+    equivalents: "-equivalent",
     masses: "-rounded-mass",
     masses_raw: "-mass",
     physical_forms: "-physical-form",
   };
-  // object.assign concatenates the two arguments - all productFields are also found in reactant and reagent
+  // object.assign concatenates the two arguments - all commonFields are also found in reactant and reagent
   const reactantFields = Object.assign(
     {
-      equivalents: "-equivalent",
       concentrations: "-concentration",
-      densities: "-density",
+      //densities: "-density", //TODO: not sure why this was here previously?
       volumes_raw: "-volume",
       volumes: "-rounded-volume",
+      mns: "-mn",
     },
-    productFields,
+    commonFields,
+  );
+
+  const productFields = Object.assign(
+    {
+      mns: "-mn",
+    },
+    commonFields,
   );
 
   const reagentFields = Object.assign(
     {
       names: "",
-      equivalents: "-equivalent",
       concentrations: "-concentration",
       densities: "-density",
       volumes_raw: "volume-",
@@ -66,7 +73,7 @@ async function reactionTableReload() {
       molecular_weights: "-molecular-weight",
       hazards: "-hazards",
     },
-    productFields,
+    commonFields,
   );
 
   const solventFields = {
@@ -96,7 +103,6 @@ async function reactionTableReload() {
       let jsonID = "product_" + jsonField;
       fillInputField(productFieldID, jsonID, i);
     }
-    //fillInputField("#js-product-intended-dp" + j, "product_intended_dps", i); not yet implemented
   }
   // iterate through and reload reagents data
   let numberOfReagents = js_reaction_table_data["reagent_names"].length;

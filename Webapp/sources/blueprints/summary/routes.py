@@ -3,7 +3,7 @@ This module receives data from the reaction table
 via POST request and renders the summary template
 """
 
-from flask import Response, abort, jsonify, render_template, request
+from flask import Response, abort, json, jsonify, render_template, request
 from flask_login import login_required
 from sources import auxiliary, services
 
@@ -48,6 +48,10 @@ def summary() -> Response:
     reagent_data = services.summary.get_reagent_data(request.form)
     solvent_data = services.summary.get_solvent_data(request.form)
     product_data = services.summary.get_product_data(request.form)
+
+    # get position of polymers in reaction
+    polymer_indices = request.form["polymerIndices"]
+    polymer_indices = json.loads(polymer_indices)
 
     # check all the requirement information has been typed into the reaction table
     check_results = services.summary.check_required_data_is_present(
@@ -117,6 +121,7 @@ def summary() -> Response:
             reactant_molecular_weights=reactant_data["reactant_molecular_weights"],
             reactant_densities=reactant_data["reactant_densities"],
             reactant_concentrations=reactant_data["reactant_concentrations"],
+            reactant_mns=reactant_data["reactant_mns"],
             reactant_equivalents=reactant_data["reactant_equivalents"],
             reactant_amounts=reactant_data["reactant_amounts"],
             rounded_reactant_amounts=reactant_data["rounded_reactant_amounts"],
@@ -128,6 +133,8 @@ def summary() -> Response:
             main_product_table_number=product_data["main_product_table_number"],
             main_product_index=product_data["main_product_index"],
             product_molecular_weights=product_data["product_molecular_weights"],
+            product_mns=product_data["product_mns"],
+            product_equivalents=product_data["product_equivalents"],
             product_masses=product_data["product_masses"],
             rounded_product_masses=product_data["rounded_product_masses"],
             ae=sustainability_data["ae"],
@@ -164,6 +171,7 @@ def summary() -> Response:
             risk_rating=risk_data["risk_rating"],
             risk_color=risk_data["risk_colour"],
             number_of_solvents=solvent_data["number_of_solvents"],
+            polymer_indices=polymer_indices,
         )
         return jsonify({"summary": summary_table})
     else:

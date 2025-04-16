@@ -1,8 +1,8 @@
-from flask import Flask
+from flask import Flask, json
 from flask.testing import FlaskClient
 from sources import services
-from sources.services.polymer_novel_compound import find_canonical_repeat
-from tests.utils import assert_expected_values, login
+from sources.services.polymer_novel_compound import find_canonical_repeats
+from tests.utils import login
 
 
 def test_novel_compound_sketcher(app: Flask, client: FlaskClient):
@@ -49,12 +49,12 @@ def test_polymer_novel_compound_sketcher(app: Flask, client: FlaskClient):
         "workbook": "Test-Workbook",
         "name": "A Polymer Novel compound",
         "source": "sketcher",
-        "smiles": "PC(CC(C)P)C",
+        "smiles": json.dumps(["PC(CC(C)P)C", "C"]),
         "density": "",
         "concentration": "",
         "hPhrase": "",
         "cas": "",
-        "molWeight": "45.08",
+        "molWeight": json.dumps(["45.08", "10"]),
         "component": "component",
     }
     # Send a POST request to the route with the form data and confirm response
@@ -70,7 +70,7 @@ def test_polymer_novel_compound_sketcher(app: Flask, client: FlaskClient):
         )
 
         new_compound = services.polymer_novel_compound.from_smiles_and_workbook(
-            "PC(CC(C)P)C", workbook
+            ["PC(CC(C)P)C", "C"], workbook
         )
         assert new_compound.name == "A Polymer Novel compound"
 
@@ -152,10 +152,27 @@ def test_novel_compound_table_all_data(app: Flask, client: FlaskClient):
 
 def test_polymer_smiles_parsing():
     """Tests if different polymers are parsed correctly"""
-    assert find_canonical_repeat("CC{-}C{+n}C") == "*C*"  # end groups
-    assert find_canonical_repeat("*C{-}(CC{+n}*)C") == "*CCC(*)C"  # branches
-    assert find_canonical_repeat("*C1{-}CC{+n}(CCC1)*") == "*C1CCCC(*)C1"  # rings
-    assert (
-        find_canonical_repeat("C[SiH2]{-}CC{+n}C") == "*C[SiH2]C*"
-    )  # groups in [] brackets
-    assert find_canonical_repeat("C[*]{-}C{+n}C") == ""  # dummy atoms = blocked
+    assert find_canonical_repeats("CC{-}C{+n}C") == ["*C*"]  # end groups
+
+    # different branching patterns
+    assert find_canonical_repeats("*C{-}(CC{+n}*)C") == ["*CCC(*)C"]
+    assert find_canonical_repeats("*C{-}C{+n}(C)(C)*") == ["*CC(*)(C)C"]
+    assert find_canonical_repeats("C(C)(C)C{-}(CC{+n}C(C)C)C") == ["*CCC(*)C"]
+    assert find_canonical_repeats("*C{-}(C(C(C{+n}*)=O)C(C)C)=O") == [
+        "*C(=O)CC(=O)C(*)C(C)C"
+    ]
+    assert find_canonical_repeats("*C{-}C(C(C{+n}*)=O)C(C)C") == ["*CCC(=O)C(*)C(C)C"]
+    assert find_canonical_repeats(
+        "*C1{-}C(C23C1C2(C3C{+n}(C(C)Cl)C(C)C)C(Cl)C)C1CC1"
+    ) == ["*C(C(C)Cl)C1C2(C(C)Cl)C3C(*)C(C4CC4)C132"]
+
+    assert find_canonical_repeats("*C1{-}CC{+n}(CCC1)*") == ["*C1CCCC(*)C1"]  # rings
+    assert find_canonical_repeats("C[SiH2]{-}CC{+n}C") == [
+        "*C[SiH2]C*"
+    ]  # groups in [] brackets
+    assert find_canonical_repeats("C(C{-}{+n}*)C{-}(C{+n}*)C") == [
+        "*C*",
+        "*CC(*)C",
+    ]  # copolymers
+
+    assert find_canonical_repeats("C[*]{-}C{+n}C") == "dummy"  # dummy atoms = blocked
