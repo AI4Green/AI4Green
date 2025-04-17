@@ -1,5 +1,5 @@
 // run observer if not in tutorial mode
-if ($("#js-tutorial").val() === "no" && $("#js-demo").val() !== "demo") {
+if ($("#js-tutorial").val() === "no") {
   observer();
 }
 
@@ -24,9 +24,6 @@ function observer() {
  * @param {boolean} [sketcher=false] - true if the changed element is a chemical sketcher
  */
 function autoSaveCheck(e = null, sketcher = false) {
-  if (!checkIfSaveEnabled()) {
-    return;
-  }
   let listOfClasses = [];
   if (e !== null) {
     listOfClasses = e.currentTarget.classList.value;
@@ -47,7 +44,6 @@ function autoSaveCheck(e = null, sketcher = false) {
       autoSave();
     } else if (sketcher === true) {
       sketcherAutoSave();
-      // }
     }
   }
 }
@@ -94,35 +90,50 @@ async function sketcherAutoSave() {
   let reactionID = $("#js-reaction-id").val();
   let polymerIndices = identifyPolymers(rxn);
   let userEmail = "{{ current_user.email }}";
+  let demo = $("#js-demo").val();
   // change here for reagent support
   if (smiles.includes(">>")) {
-    updateReactionTable(smilesNew, workgroup, workbook, reactionID);
-    $.ajax({
-      url: "/_autosave_sketcher",
-      type: "post",
-      data: {
-        workgroup: workgroup,
-        workbook: workbook,
-        reactionID: reactionID,
-        userEmail: userEmail,
-        reactionSmiles: smilesNew,
-        reactionRXN: rxn,
-        polymerIndices: JSON.stringify(polymerIndices),
-      },
-      dataType: "json",
-      success: function () {
-        flashUserSaveMessage("SKETCHER");
-      },
-      error: function () {
-        flashUserErrorSavingMessage();
-      },
-    });
+    updateReactionTable(
+      smilesNew,
+      workgroup,
+      workbook,
+      reactionID,
+      polymerIndices,
+      demo,
+    );
+    if (demo !== "demo") {
+      $.ajax({
+        url: "/_autosave_sketcher",
+        type: "post",
+        data: {
+          workgroup: workgroup,
+          workbook: workbook,
+          reactionID: reactionID,
+          userEmail: userEmail,
+          reactionSmiles: smilesNew,
+          reactionRXN: rxn,
+          polymerIndices: JSON.stringify(polymerIndices),
+        },
+        dataType: "json",
+        success: function () {
+          flashUserSaveMessage("Reaction Changes Saved");
+        },
+        error: function () {
+          flashUserErrorSavingMessage();
+        },
+      });
+    }
   }
 }
 
-function updateReactionTable(smiles, workgroup, workbook, reactionID) {
-  let rxn = $("#js-reaction-rxn").val();
-  let polymerIndices = identifyPolymers(rxn);
+function updateReactionTable(
+  smiles,
+  workgroup,
+  workbook,
+  reactionID,
+  polymerIndices,
+  demo,
+) {
   fetch("/autoupdate_reaction_table", {
     headers: {
       "Content-Type": "application/json",
@@ -134,6 +145,7 @@ function updateReactionTable(smiles, workgroup, workbook, reactionID) {
       workbook: workbook,
       reaction_id: reactionID,
       polymer_indices: polymerIndices,
+      demo: demo,
     }),
   })
     .then(function (response) {

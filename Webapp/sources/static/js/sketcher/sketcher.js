@@ -9,6 +9,7 @@ $(async function () {
      */
   showSketcherLoadingCircle();
   await setupNewKetcherSketcher();
+  setupSketcherAutosave();
 
   // sleep used to allow sketchers to load scripts and make js Objects
   await sleep(1000);
@@ -22,7 +23,6 @@ $(async function () {
     //
     await reloadReaction();
     sketcherLockHandler();
-    setupSketcherAutosave();
   }
   hideSketcherLoadingCircle();
   // Use Promise.race to give setupNewMarvinSketcher() a maximum of 2 seconds

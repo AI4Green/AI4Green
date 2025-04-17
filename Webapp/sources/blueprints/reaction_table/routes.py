@@ -266,8 +266,9 @@ def autoupdate_reaction_table():
     # get user workbook
     demo = request.json.get("demo")
     tutorial = request.json.get("tutorial")
-    reaction = None
-    workbook = None
+    reaction = ""
+    workbook = ""
+    reaction = ""
     polymer_indices = []
     if demo != "demo" and tutorial != "yes":
         workgroup = request.json.get("workgroup")
