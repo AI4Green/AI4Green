@@ -197,7 +197,7 @@ def sketcher_tutorial(tutorial: str) -> Response:
         workgroups = get_workgroups()
         notification_number = get_notification_number()
     return render_template(
-        "sketcher_reload.html",
+        "reaction_constructor.html",
         reaction={
             "name": "Tutorial Reaction",
             "reaction_id": "TUT-001",

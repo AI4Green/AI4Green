@@ -4,7 +4,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/standard_user.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/new_reaction.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
-    {% from "macros.html" import render_new_reaction_modal %}
+    {% from "macros/modals.html" import render_new_reaction_modal %}
     <script>
         $(document).ready(function() {
             // when page loads get the reactions
