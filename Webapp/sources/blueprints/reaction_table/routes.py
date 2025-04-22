@@ -11,7 +11,6 @@ from urllib.request import urlopen
 
 from flask import jsonify, render_template, request
 from flask_login import login_required
-from numpy import number
 from rdkit import Chem
 from sources import models, services
 from sources.auxiliary import smiles_symbols
