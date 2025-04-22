@@ -266,9 +266,8 @@ def autoupdate_reaction_table():
     # get user workbook
     demo = request.json.get("demo")
     tutorial = request.json.get("tutorial")
-    reaction = ""
-    workbook = ""
-    reaction = ""
+    workbook = None
+    reaction = None
     polymer_indices = []
     if demo != "demo" and tutorial != "yes":
         workgroup = request.json.get("workgroup")
@@ -302,7 +301,6 @@ def autoupdate_reaction_table():
     reactants_smiles_list, product_smiles_list = get_reactants_and_products_list(
         reaction_smiles
     )
-
     reactants = [
         SketcherCompound(
             smiles=x,

@@ -91,6 +91,7 @@ async function sketcherAutoSave() {
   let polymerIndices = identifyPolymers(rxn);
   let userEmail = "{{ current_user.email }}";
   let demo = $("#js-demo").val();
+  let tutorial = $("#js-tutorial").val();
   // change here for reagent support
   if (smiles.includes(">>")) {
     updateReactionTable(
@@ -100,6 +101,7 @@ async function sketcherAutoSave() {
       reactionID,
       polymerIndices,
       demo,
+      tutorial,
     );
     if (demo !== "demo") {
       $.ajax({
@@ -133,6 +135,7 @@ function updateReactionTable(
   reactionID,
   polymerIndices,
   demo,
+  tutorial,
 ) {
   fetch("/autoupdate_reaction_table", {
     headers: {
@@ -146,6 +149,7 @@ function updateReactionTable(
       reaction_id: reactionID,
       polymer_indices: polymerIndices,
       demo: demo,
+      tutorial: tutorial,
     }),
   })
     .then(function (response) {
