@@ -217,11 +217,11 @@ def process():
 
     # change rxn table in polymer mode
     if polymer_mode.lower() == "true":
-        reaction_table_html = "_polymer_reaction_table.html"
+        reaction_table_html = "reactions/_polymer_reaction_table.html"
         r_class = None
         r_classes = None
     else:
-        reaction_table_html = "_reaction_table.html"
+        reaction_table_html = "reactions/_reaction_table.html"
         r_class, r_classes = services.reaction_classification.classify_reaction(
             reactants_smiles_list, products_smiles_list
         )

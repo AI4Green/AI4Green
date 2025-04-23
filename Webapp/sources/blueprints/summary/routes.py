@@ -37,11 +37,11 @@ def summary() -> Response:
         polymer_mode = request.form["polymerMode"]
         # change summary table in polymer mode
         if polymer_mode.lower() == "true":
-            summary_table_html = "_polymer_summary_table.html"
+            summary_table_html = "reactions/_polymer_summary_table.html"
         else:
-            summary_table_html = "_summary_table.html"
+            summary_table_html = "reactions/_summary_table.html"
     else:
-        summary_table_html = "_summary_table.html"
+        summary_table_html = "reactions/_summary_table.html"
 
     unit_data = services.summary.get_unit_data(request.form)
     reactant_data = services.summary.get_reactant_data(request.form)
