@@ -28,4 +28,4 @@ def retrosynthesis_about():
     Returns:
         flask.Response: renders the retrosynthesis about template
     """
-    return render_template("retrosynthesis_about.html")
+    return render_template("retrosynthesis/retrosynthesis_about.html")

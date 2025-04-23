@@ -131,7 +131,7 @@ def process():
                 reactant_smiles
             )
             novel_reactant_html = render_template(
-                "_novel_compound.html",
+                "reactions/_novel_compound.html",
                 component="Reactant",
                 name=reactant_name,
                 number=idx,
@@ -190,7 +190,7 @@ def process():
                 product_smiles
             )
             novel_product_html = render_template(
-                "_novel_compound.html",
+                "reactions/_novel_compound.html",
                 component="Product",
                 name=product_name,
                 number=idx,

@@ -181,7 +181,7 @@ def element_sustainability() -> Response:
     Returns:
         flask.Response: renders the element sustainability template
     """
-    return render_template("element_sustainability.html")
+    return render_template("reactions/element_sustainability.html")
 
 
 @summary_bp.route("/pdf", methods=["POST", "GET"])

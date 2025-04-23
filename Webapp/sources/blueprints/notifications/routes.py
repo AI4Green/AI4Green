@@ -29,8 +29,8 @@ def notifications() -> Response:
         .order_by(models.Notification.time.desc())
         .all()
     )
-    # for notification in notifications_obj:
-    #     notification.status = "read"
+    for notification in notifications_obj:
+        notification.status = "read"
     db.session.commit()
     notification_number = get_notification_number()
     return render_template(

@@ -62,7 +62,9 @@ def create_workbook(workgroup: str) -> Response:
         if not workbook_name.replace(" ", "").replace("-", "").isalnum():
             flash("Workgroup names cannot contain special characters!")
             return render_template(
-                "create_workgroup.html", form=form, workgroups=workgroups
+                "work_structures/create_workgroup.html",
+                form=form,
+                workgroups=workgroups,
             )
 
         # make sure workbook of same name does exist within workbook
@@ -80,7 +82,7 @@ def create_workbook(workgroup: str) -> Response:
         ]:
             flash("A workbook of this name already exists!")
             return render_template(
-                "create_workbook.html",
+                "work_structures/create_workbook.html",
                 form=form,
                 workgroups=workgroups,
                 notification_number=notification_number,
@@ -92,7 +94,7 @@ def create_workbook(workgroup: str) -> Response:
         if not workbook_abbreviation.isalnum():
             flash("Workbook abbreviation must only consist of alphanumeric characters!")
             return render_template(
-                "create_workbook.html",
+                "work_structures/create_workbook.html",
                 form=form,
                 workgroups=workgroups,
                 notification_number=notification_number,
@@ -111,7 +113,7 @@ def create_workbook(workgroup: str) -> Response:
         if existing_abbreviations:
             flash("A workbook with this abbreviation already exists!")
             return render_template(
-                "create_workbook.html",
+                "work_structures/create_workbook.html",
                 form=form,
                 workgroups=workgroups,
                 notification_number=notification_number,
@@ -157,7 +159,7 @@ def create_workbook(workgroup: str) -> Response:
         )
     else:
         return render_template(
-            "create_workbook.html",
+            "work_structures/create_workbook.html",
             form=form,
             workgroups=workgroups,
             notification_number=notification_number,
