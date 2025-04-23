@@ -48,6 +48,7 @@
 .btn.btn-outline-primary:hover {
   color: var(--primary-grey);
   background-color: var(--primary-green);
+  text-decoration:underline;
 }
 
 .btn.btn-secondary {
@@ -60,6 +61,7 @@
   background-color: var(--primary-green-hover);
   border-color: var(--primary-green-hover);
   color: var(--secondary-grey);
+  text-decoration:underline;
 }
 
 .btn.btn-success {

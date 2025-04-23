@@ -29,7 +29,7 @@ def solvent_PCA() -> Response:
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
-        "solvent_PCA.html",
+        "solvents/solvent_PCA.html",
         workgroups=workgroups,
         notification_number=notification_number,
     )
@@ -417,7 +417,9 @@ def get_saved_graphs() -> Response:
 
         graph_list.append(graph_details)
 
-    graph_details = render_template("_saved_pca_graphs.html", graph_list=graph_list)
+    graph_details = render_template(
+        "solvents/_saved_pca_graphs.html", graph_list=graph_list
+    )
 
     return (
         jsonify({"graphDetails": graph_details})

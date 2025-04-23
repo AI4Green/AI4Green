@@ -1,6 +1,7 @@
 <html lang="en">
-    {% from "macros.html" import navbar %}
+    {% from "macros/navbar.html" import navbar %}
     <head>
+        <title>{% block title %}AI4Green{% endblock %}</title>
         <!-- add icon link -->
         <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
         <meta charset="utf-8">
@@ -11,6 +12,7 @@
         <script type="text/javascript">
             var $SCRIPT_ROOT = {{ request.script_root| tojson | safe }};
         </script>
+
     <!--    Bootstrap + other external styling sources -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
@@ -24,11 +26,31 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/buttons.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/pagestyle.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hazard_colours.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
+        <script>
+            // Removes focus of collapsed dropdown when mouse moves away. Required to support keyboard focus.
+            document.addEventListener('DOMContentLoaded', function () {
+                // Get all dropdown toggles
+                const dropdownToggles = document.querySelectorAll('.navbar-nav .dropdown-toggle');
+
+                dropdownToggles.forEach(toggle => {
+                    // When mouse leaves a collapsed dropdown remove focus
+                    toggle.addEventListener('mouseleave', function () {
+                        // If dropdown is not open, remove styling
+                        if (!toggle.closest('.dropdown').classList.contains('show')) {
+                            toggle.classList.add('force-normal');
+                            toggle.blur();
+                        }
+                    });
+                });
+            });
+        </script>
+        {% block scripts %} {% endblock %}
 
     </head>
 
     <body>
-        {{ navbar(current_user, workgroups, notifications, user_role) }}
+        {{ navbar(current_user, workgroups, notification_number, user_role) }}
         <div id="content">
             {% with messages = get_flashed_messages() + (messages_from_redirects or []) %}
                 {% if messages %}

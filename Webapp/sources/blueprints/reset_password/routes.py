@@ -43,7 +43,9 @@ def reset_password_request() -> Response:
         else:
             flash("We could not find an account with this email")
     return render_template(
-        "reset_password_request.html", title="Reset Password", form=form
+        "account_management/reset_password_request.html",
+        title="Reset Password",
+        form=form,
     )
 
 
@@ -80,4 +82,4 @@ def reset_password(token: str) -> Response:
         user.update()
         flash("Your password has been reset!")
         return redirect(url_for("auth.login"))
-    return render_template("reset_password.html", form=form)
+    return render_template("account_management/reset_password.html", form=form)

@@ -11,6 +11,7 @@
 --primary-blue-hover: #63B1B9;
 --primary-red: #F58683;
 --primary-red-hover: #BB6A61;
+
 }
 
 html, body {
@@ -64,12 +65,7 @@ main {
     color: var(--primary-grey);
 }
 
-#main-navbar{
-  background: linear-gradient(90deg, var(--primary-grey) 50%, var(--primary-green));
-  background-color: #82F5A8 !important;
-  margin-bottom: 2.5rem;
-}
-
 #flash-messages{
+    margin-top: -2.5rem;
     margin-bottom: 2rem;
 }

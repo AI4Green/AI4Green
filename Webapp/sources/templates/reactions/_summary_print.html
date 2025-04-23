@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block scripts %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            showReactionsFromPDFExport()
+        });
+        /**
+         * Shows the reaction scheme images from the pdf export and displays the print page
+         * @returns {Promise<void>}
+         */
+        async function showReactionsFromPDFExport(){
+            const sort_crit = "{{ sort_crit }}";
+            let workbook = "{{ reaction_list[0].WorkBook.name }}";
+            let workgroup = "{{ reaction_list[0].WorkBook.WorkGroup.name }}";
+            let schemes = await getSchemata(sort_crit, workbook, workgroup, "large")
+            for (const [idx, scheme] of schemes.entries()){
+                let idx1 = idx + 1
+                $(`#image${idx1}`).append($('<div>').html(scheme))
+            }
+            window.print();
+        }
+    </script>
+{% endblock %}
+{% block content %}
+
+    <input type="hidden" id="number-of-reactions" value="{{ reaction_list|length }}">
+    <input type="hidden" id="js-summary-table-data">
+    <div class="container-fluid" id="print-container">
+        {% for reaction in reaction_list %}
+            <h1>
+                {{ reaction.name }}
+                {% if reaction.complete == "complete" %}
+                    <i class="fa fa-lock" style="color:darkgrey;"></i>
+                {% endif %}
+            </h1>
+            <p><b>Owner: {{ reaction.creator_person.user.username }}</b></p>
+            <p style="font-size: 10px; color: grey">
+            Created: {{ reaction.time_of_creation }}
+            <br>
+            Last updated: {{ reaction.time_of_update }}
+            </p>
+            <p>{{ reaction.description }}</p>
+            <div id="image{{ loop.index }}"></div>
+            <div id="summary-table-{{ loop.index }}"></div>
+            <br>
+            <input type="hidden" id="js-summary-table-data-{{ loop.index }}" value="{{ reaction_list[loop.index - 1].summary_table_data }}">
+            <input type="hidden" id="loop-number" value="{{ loop.index }}">
+        {% endfor %}
+    </div>
+
+
+{% endblock %}
