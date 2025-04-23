@@ -1,0 +1,68 @@
+{% macro render_new_reaction_modal() -%}
+<!-- new reaction modal -->
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/new_reaction.css') }}">
+    </head>
+    <div class="modal fade" id="new-reaction-modal" tabindex="-1" role="dialog" aria-labelledby="new-reaction-modal-title">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="new-reaction-modal-title">New Reaction</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div id="new-reaction-body">
+              <div id="new-reaction-inner-body">
+                  <br>
+                  <form>
+                      <label class="new-reaction-label">
+                          Reaction ID
+                          <input id="new-reaction-id-input" class="new-reaction-input" disabled value= "">
+                      </label>
+                      <label class="new-reaction-label">
+                          Reaction Name
+                          <input id="new-reaction-name" type="text" class="new-reaction-input">
+                      </label>
+                  </form>
+                  <div style="padding-left: 5px; color: red" id="error-warning-new-reaction"></div>
+              </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal" id="new-reaction-data-close">Cancel</button>
+            <button type="button" class="btn btn-success" id="new-reaction-data-submit" onclick="newReactionCreate()">Create</button>
+              <input type="hidden" id="old-reaction-id">
+
+          </div>
+        </div>
+      </div>
+    </div>
+{%- endmacro %}
+
+{% macro toxicity_modal(toxicity_list) %}
+    <div class="modal fade" id="toxicityModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Toxicity Warning</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Your reaction involves the use of hazardous substances that may have the following toxicities:</p>
+                    <ul>
+                        {% for toxicity in toxicity_list %}
+                            <li>{{ toxicity.capitalize() }}</li>
+                        {% endfor %}
+                    </ul>
+                    <p>You should display signs in the lab to alert other lab users.</p>
+                    {% for toxicity in toxicity_list %}
+                        <button  onclick="printToxicitySign('{{ toxicity }}')" class="btn btn-danger toxicity-print-sign" data-toxicity={{ toxicity }}>
+                            Print {{ toxicity.capitalize()  }} Sign
+                        </button><br><br>
+                    {%  endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" type="button" id="toxicity-modal-confirm" class="btn btn-primary">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
