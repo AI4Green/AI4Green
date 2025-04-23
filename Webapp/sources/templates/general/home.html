@@ -5,7 +5,8 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/home.js') }}"></script>
 {% endblock %}
 {% block content %}
-{% import "macros/macros.html" as macro_templates %}
+{% from "macros/icons.html" import icon_panel %}
+{% from "macros/modals.html" import render_new_reaction_modal %}
 
 <body>
     <div class="jumbotron jumbotron-fluid home non-spaced-page-content">
@@ -22,7 +23,7 @@
             <div class="col-7" id="quick-access-icons">
                 <h2><i class="bi bi-star"></i> Quick Access</h2>
                 <hr class="line-news">
-            {{ macro_templates.icon_panel(workgroups, "workgroup", "Your Workgroups", "bi bi-people-fill") }}
+            {{ icon_panel(workgroups, "workgroup", "Your Workgroups", "bi bi-people-fill") }}
                 <div id="workbook-icons"></div>
             <div id="reaction-icons"></div>
                 {% if workgroups|length == 0 %}
@@ -82,7 +83,7 @@
 
     <input id="active-workgroup" type="hidden" >
     <input id="active-workbook" type="hidden">
-    {{ macro_templates.render_new_reaction_modal() }}
+    {{ render_new_reaction_modal() }}
 
 </body>
 
