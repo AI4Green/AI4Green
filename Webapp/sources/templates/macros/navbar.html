@@ -37,7 +37,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="solvent-guide-dropdown" data-toggle="dropdown"
                            aria-haspopup="true" aria-expanded="false">
-                           <i class="bi bi-droplet-fill"></i> Solvents
+                           <i class="bi bi-droplet-fill mx-1"></i> Solvents
                         </a>
                         <div class="dropdown-menu" aria-labelledby="solvent-guide-dropdown">
                             <a class="dropdown-item" id="solvent-guide" href="{{ url_for('solvent_guide.solvent_guide') }}">
@@ -59,7 +59,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="workgroup-dropdown" data-toggle="dropdown"
                            aria-haspopup="true" aria-expanded="false">
-                           <i class="bi bi-people-fill"></i> Workgroup
+                           <i class="bi bi-people-fill mx-1"></i> Workgroup
                         </a>
                         <div class="dropdown-menu" aria-labelledby="workgroup-dropdown">
                             {% for workgroup in workgroups %}
@@ -109,7 +109,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="user-dropdown" data-toggle="dropdown"
                            aria-haspopup="true" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i>
+                            <i class="bi bi-person-circle mx-1"></i>
                             <sup>{% if notification_number %}
                                 <span class="badge badge-pill badge-danger">{{ notification_number }}</span>{% endif %}
                             </sup>{{ current_user.username }}
