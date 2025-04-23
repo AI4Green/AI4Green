@@ -56,7 +56,7 @@ def solvent_guide(sol: Optional[str] = None) -> Response:
                 "Number"
             ].iloc[0]
     return render_template(
-        "solvent_guide.html",
+        "solvents/solvent_guide.html",
         solvents=solvents,
         families=families,
         sol=sol,
@@ -76,7 +76,7 @@ def solvent_guide_help() -> Response:
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
-        "solvent_guide_help.html",
+        "solvents/solvent_guide_help.html",
         workgroups=workgroups,
         notification_number=notification_number,
         graphJSON=[get_radar_plot(8, 3, 5)],

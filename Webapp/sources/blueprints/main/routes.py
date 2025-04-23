@@ -278,7 +278,7 @@ def manage_account() -> Response:
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
-        "manage_account.html",
+        "account_management/manage_account.html",
         workgroups=workgroups,
         notification_number=notification_number,
     )
@@ -377,7 +377,7 @@ def accessibility() -> Response:
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
-        "accessibility.html",
+        "account_management/accessibility.html",
         workgroups=workgroups,
         notification_number=notification_number,
     )
