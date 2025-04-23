@@ -18,6 +18,7 @@
   background: linear-gradient(90deg, var(--primary-grey) 50%, var(--primary-green));
 }
 
+/* For pages where we use a jumbotron or container and don't want white space between this and the navbar */
 .non-spaced-page-content {
     margin-top: -2.5rem;
 }
