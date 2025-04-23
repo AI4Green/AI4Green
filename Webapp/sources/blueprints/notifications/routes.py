@@ -34,7 +34,7 @@ def notifications() -> Response:
     db.session.commit()
     notification_number = get_notification_number()
     return render_template(
-        "notifications.html",
+        "account_management/notifications.html",
         notifications=notifications_obj,
         workgroups=workgroups,
         notification_number=notification_number,

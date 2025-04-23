@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2>Delete Profile Confirmation</h2>
+    {% for wg in wgs_pi %}
+    <p>You are the sole Principal Investigator for workgroup: <b>{{ wg.name }}</b><br>
+    If no action is taken, all workbooks and reactions within this workgroup will be archived. Please consider assigning a new Principal Investigator.</p>
+    <a href="/delete_profile/reassign/{{ wg.name }}" class="btn btn-primary" id="assign-new-pi{{loop.index}}">Assign New PI</a><br><br>
+    {% endfor %}
+    <br>
+    <p style="color:red">Please confirm you wish to delete your profile.</p>
+    <form method="post">
+        <input type="submit" id="confirm-delete-profile-delete" value="Confirm Delete Profile" class="btn btn-danger">
+    </form>
+</div>
+{% endblock %}

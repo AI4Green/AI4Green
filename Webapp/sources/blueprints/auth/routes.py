@@ -90,7 +90,7 @@ def privacy_notice() -> Response:
     Returns:
         flask.Response The privacy notice page
     """
-    return render_template("privacy_notice.html")
+    return render_template("general/privacy_notice.html")
 
 
 @auth_bp.route("/hazard_disclaimer")
@@ -101,4 +101,4 @@ def hazard_disclaimer() -> Response:
     Returns:
         flask.Response The hazard disclaimer page
     """
-    return render_template("hazards_disclaimer.html")
+    return render_template("general/hazards_disclaimer.html")
