@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ reaction.reaction_id }}
+{% block title %}{{ reaction.reaction_id }}{% endblock %}
 {% block scripts %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>
