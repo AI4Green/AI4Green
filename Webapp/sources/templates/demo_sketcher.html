@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block content %}
-<head>
+{% block title %}Demo Reaction{% endblock %}
+{% block scripts %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/polymer.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
@@ -8,8 +8,9 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_constructor.css') }}">
-    <title>Demo Reaction</title>
-</head>
+{% endblock %}
+{% block content %}
+
 <div id="page-contents" class="container-fluid">
     <h2>Demo Reaction Constructor</h2>
     <div>

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block content %}
-<head>
+{% block title %}Solvent Surfer{% endblock %}
+{% block scripts %}
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-3.2.1.min.js"></script>
     <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.2.1.min.js"></script>
@@ -9,9 +9,9 @@
     <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.2.1.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/solvent_PCA.js') }}"></script>
     <script type="text/javascript"> Bokeh.set_log_level("info"); </script>
-    <title>Solvent Surfer</title>
+{% endblock %}
+{% block content %}
 
-</head>
 <body id="main-page" onload ="get_graph()" >
 <div class="container-fluid" style="padding-left: 10px">
     <h2>Solvent Surfer</h2>

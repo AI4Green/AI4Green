@@ -1,8 +1,5 @@
-<head>
-    <title>Retrosynthesis</title>
-</head>
-
 {% extends 'base.html' %}
+{% block title %}Retrosynthesis{% endblock %}
   {% block content %}
     {% if current_user.is_anonymous %}
       <h4>Please login to access this page</h4>

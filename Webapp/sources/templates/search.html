@@ -1,14 +1,15 @@
 {% extends "base.html" %}
-{% block content %}
-<head>
+{% block title %}Search{% endblock %}
+{% block scripts %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher_utils.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/search.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_constructor.css') }}">
-    <title>Search</title>
-</head>
+{% endblock %}
+{% block content %}
+
 <div class="container-fluid">
     {% if not workgroups %}
         <b>You must belong to a workgroup to use the search feature</b>

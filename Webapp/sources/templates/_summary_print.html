@@ -1,6 +1,5 @@
 {% extends "base.html" %}
-{% block content %}
-<head>
+{% block scripts %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
@@ -24,7 +23,9 @@
             window.print();
         }
     </script>
-</head>
+{% endblock %}
+{% block content %}
+
     <input type="hidden" id="number-of-reactions" value="{{ reaction_list|length }}">
     <input type="hidden" id="js-summary-table-data">
     <div class="container-fluid" id="print-container">

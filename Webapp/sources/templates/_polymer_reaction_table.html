@@ -1,4 +1,4 @@
-<head>
+{% block scripts %}
     <script src="https://unpkg.com/html2canvas@1.0.0-alpha.12/dist/npm/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 {#    TODO - look at replacing with html3pdf when a CDN url is made available https://github.com/davidnbooth/html3pdf.js#}
@@ -10,8 +10,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/reaction_table.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/compound_error_flag.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
-</head>
-
+{% endblock %}
 
 <div class="container-fluid" style="padding-left: 0px">
     <div id="reaction-name-description">

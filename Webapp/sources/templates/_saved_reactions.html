@@ -1,16 +1,16 @@
-<head>
+{% block scripts %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_list.css') }}">
     {% from "macros.html" import render_new_reaction_modal %}
-<script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
-<script>
-    $(async function() {
-        if (window.location.pathname.split("/")[1] !== 'search') {
-            await showSavedReactionsImages()
-        }
-    });
-</script>
-</head>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
+    <script>
+        $(async function() {
+            if (window.location.pathname.split("/")[1] !== 'search') {
+                await showSavedReactionsImages()
+            }
+        });
+    </script>
+{% endblock %}
 {% if reactions %}
 
 <div class="btn-group btn-group-toggle" data-toggle="buttons">

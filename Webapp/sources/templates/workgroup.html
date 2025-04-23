@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block content %}
-<head>
+{% block title %}Workgroups{% endblock %}
+{% block scripts %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/new_reaction.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
     {% from "macros.html" import render_new_reaction_modal %}
@@ -10,8 +10,9 @@
             updateSelectedWorkbook()
         })
     </script>
-    <title>Workgroups</title>
-</head>
+{% endblock %}
+{% block content %}
+
 <body>
     <div class="container">
         <h2>{{ workgroup_selected }}</h2>

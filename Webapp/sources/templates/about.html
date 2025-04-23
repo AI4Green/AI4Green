@@ -1,10 +1,6 @@
 {% extends "base.html" %}
-{% block content %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About AI4Green</title>
-
+{% block title %}About AI4Green{% endblock %}
+{% block scripts%}
      <style>
         .section-title::after {
             content: '';
@@ -19,7 +15,8 @@
             background-color: var(--primary-green);
         }
     </style>
-</head>
+{% endblock %}
+{% block content %}
 <body>
     <!-- Hero Section -->
     <section class="bg-faded-green pb-5 non-spaced-page-content pt-5">

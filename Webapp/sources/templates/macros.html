@@ -99,27 +99,6 @@
 {% endmacro %}
 
 {% macro navbar(current_user, workgroups, notification_number, user_role) %}
-    <head>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
-        <script>
-            // Removes focus of collapsed dropdown when mouse moves away. Required to support keyboard focus.
-            document.addEventListener('DOMContentLoaded', function () {
-                // Get all dropdown toggles
-                const dropdownToggles = document.querySelectorAll('.navbar-nav .dropdown-toggle');
-
-                dropdownToggles.forEach(toggle => {
-                    // When mouse leaves a collapsed dropdown remove focus
-                    toggle.addEventListener('mouseleave', function () {
-                        // If dropdown is not open, remove styling
-                        if (!toggle.closest('.dropdown').classList.contains('show')) {
-                            toggle.classList.add('force-normal');
-                            toggle.blur();
-                        }
-                    });
-                });
-            });
-        </script>
-    </head>
     <!-- Skip to content link for accessibility. TODO implement main content on pages-->
     <a href="#main-content" class="sr-only sr-only-focusable">Skip to main content</a>
     <nav id="main-navbar" class="navbar navbar-expand-md navbar-dark bg-dark sticky-top">

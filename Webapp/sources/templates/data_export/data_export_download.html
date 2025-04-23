@@ -1,9 +1,10 @@
 {% extends "base.html" %}
-{% block content %}
-<head>
+{% block title %}Download Data Export{% endblock %}
+{% block scripts %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/export_data.js') }}"></script>
-    <title>Download data export</title>
-</head>
+{% endblock %}
+{% block content %}
+
   <div class="container text-center">
     <h3 class="mt-3 mb-4">Data Export Request</h3>
     <div class="request-info">

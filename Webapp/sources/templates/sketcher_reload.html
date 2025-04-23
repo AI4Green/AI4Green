@@ -1,7 +1,6 @@
 {% extends "base.html" %}
-{% block content %}
-<head>
-    <title>{{ reaction.reaction_id }}</title>
+{% block title %}{{ reaction.reaction_id }}
+{% block scripts %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
@@ -25,7 +24,8 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_constructor.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tutorial.css') }}">
-</head>
+{% endblock %}
+{% block content %}
 
 <div id="page-contents" class="container-fluid">
     <div id="name-id">
