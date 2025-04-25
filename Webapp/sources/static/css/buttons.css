@@ -29,8 +29,8 @@
 
 
 .btn.btn-primary {
-  background-color: var(--primary-grey);
-  border-color: var(--primary-grey);
+  background-color: var(--dark-primary-grey);
+  border-color: var(--primary-green);
   color: var(--tertiary-green);
 }
 

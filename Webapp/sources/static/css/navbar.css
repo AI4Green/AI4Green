@@ -6,7 +6,7 @@
 
 /* Base navbar styling */
 #main-navbar {
-  background: var(--primary-grey) !important;
+  background: var(--navbar-black) !important;
   margin-bottom: 2.5rem;
 }
 

@@ -67,8 +67,8 @@
         </div>
 
         <!--footer-->
-        <footer class="bg-light text-center text-lg-start">
-            <div style="display: none; background-color: #777778" id="cookie-consent-banner" class="nk-cookie-banner alert alert-dark text-primary-green mb-0 fixed-bottom" role="alert">
+        <footer class="bg-grey text-center text-lg-start">
+            <div style="display: none" id="cookie-consent-banner" class="nk-cookie-banner alert alert-dark text-primary-green mb-0 fixed-bottom" role="alert">
                 🍪 This website uses first party cookies to ensure you get the best experience on our website.
                 <a href="{{ url_for('auth.privacy_notice') }}" target="blank" rel="noopener noreferrer" class="text-secondary-green">Learn more</a>
                 <button id="accept_cookies" type="button" class="btn btn-secondary btn-sm ml-3" onclick="updateCookiePreferences()">
@@ -77,17 +77,17 @@
             </div>
             {% if session_type != 'UNIT_TEST' %}
             <!--Utility Links-->
-            <div class="text-center" style="background-color: #777778;">
+            <div class="text-center">
                 <table style="width: 100%;">
                     <tr>
                         <td class="text-left py-1 pl-3" style="width: 140px;">
-                            <img src="/static/img/ai4green_logo.png" alt="AI4Green Logo" width="140">
+                            <img src="/static/img/ai4green_logo_transparent.svg" alt="AI4Green Logo" width="140">
                         </td>
                         <td class="text-center">
-                            <a class="text-primary-green" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank">Hazard Disclaimer</a> <span class="text-primary-green"> | </span>
-                            <a class="text-primary-green" href="{{ url_for('auth.privacy_notice') }}" target="_blank">Privacy Notice</a> <span class="text-primary-green"> | </span>
-                            <a class="text-primary-green" href="https://twitter.com/ai4green" target="_blank">Twitter</a> <span class="text-primary-green"> | </span>
-                            <a class="text-primary-green" href="https://github.com/AI4Green/AI4Green" target="_blank">GitHub</a>
+                            <a class="text-primary-green underline-link-white" href="{{ url_for('auth.hazard_disclaimer') }}" target="_blank">Hazard Disclaimer</a> <span class="text-primary-green"> | </span>
+                            <a class="text-primary-green underline-link-white" href="{{ url_for('auth.privacy_notice') }}" target="_blank">Privacy Notice</a> <span class="text-primary-green"> | </span>
+                            <a class="text-primary-green underline-link-white" href="https://twitter.com/ai4green" target="_blank">Twitter</a> <span class="text-primary-green"> | </span>
+                            <a class="text-primary-green underline-link-white" href="https://github.com/AI4Green/AI4Green" target="_blank">GitHub</a>
                         </td>
                     </tr>
                 </table>

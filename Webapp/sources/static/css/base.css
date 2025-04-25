@@ -1,4 +1,6 @@
 :root {
+--navbar-black: #000000;
+--dark-primary-grey: #4A4A4A;
 --primary-green: #82F5A8;
 --primary-green-hover: #62BA79;
 --primary-grey: #777778;
@@ -47,7 +49,7 @@ main {
 }
 
 .bg-grey {
-    background: var(--primary-grey);
+    background-color: var(--dark-primary-grey)!important;
 }
 
 .bg-green {
@@ -61,8 +63,12 @@ main {
     color: var(--secondary-green);
 }
 
+.text-tertiary-green{
+    color: var(--tertiary-green);
+}
+
 .text-grey {
-    color: var(--primary-grey);
+    color: var(--dark-primary-grey);
 }
 
 #flash-messages{

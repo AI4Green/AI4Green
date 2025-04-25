@@ -1,3 +1,22 @@
+a.underline-link-white {
+    text-decoration: underline;
+    text-decoration-color: currentColor;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1.5px;
+}
+
+a.underline-link-white:hover {
+    font-weight: bold;
+    color: white;
+    /*text-shadow:*/
+    /*        0.5px 0 currentColor,*/
+    /*        -0.5px 0 currentColor,*/
+    /*        0 0.5px currentColor,*/
+    /*        0 -0.5px currentColor;*/
+
+/*text-shadow: 0.5px 0 1px currentColor;*/
+}
+
 @keyframes bounce {
     0%, 20%, 50%, 80%, 100% {
         transform: translateY(0);
@@ -15,7 +34,15 @@
 }
 
 .jumbotron.jumbotron-fluid.home {
-  background: linear-gradient(90deg, var(--primary-grey) 50%, var(--primary-green));
+    background: var(--dark-primary-grey);
+    /*background: linear-gradient(*/
+    /*        315deg,*/
+    /*        var(--primary-green) 10%,*/
+    /*        var(--dark-primary-grey) 45%,*/
+    /*        var(--dark-primary-grey) 80%,*/
+    /*        var(--primary-green) 100%*/
+    /*);*/
+
 }
 
 /* For pages where we use a jumbotron or container and don't want white space between this and the navbar */
