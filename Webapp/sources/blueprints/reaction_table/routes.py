@@ -172,14 +172,19 @@ class SketcherCompound:
                 number_of_compounds += 1
                 compound_data = {}
                 for key in sub_dict.keys():
-                    value = sub_dict.get(key)
+                    # new_key = key.replace(component_type + "_", "")
+                    value = sub_dict.get(key, "")
                     print(key, value)
                     if "units" in key:
                         compound_data[key.replace(component_type + "_", "")] = value
                     else:
-                        compound_data[key.replace(component_type + "_", "")] = value[
-                            idx
-                        ]
+                        #
+                        try:
+                            compound_data[
+                                key.replace(component_type + "_", "")
+                            ] = value[idx]
+                        except IndexError:
+                            compound_data[key.replace(component_type + "_", "")] = ""
 
                 compound = cls(
                     smiles=compound_data.get(
