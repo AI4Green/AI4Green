@@ -393,3 +393,56 @@ def add(
     db.session.add(reaction)
     db.session.commit()
     return reaction
+
+
+class NewReactionApprovalRequest:
+    """
+    Class to handle creation of new reaction approval requests
+    """
+
+    def __init__(self):
+        """Creates an instance of NewReactionApprovalRequest from request.json"""
+        self.requestor = services.user.person_from_current_user()
+        self.workgroup = services.workgroup.from_name(request.json.get("workgroup"))
+        self.workbook = services.workbook.get_workbook_from_group_book_name_combination(
+            self.workgroup.name, request.json.get("workbook")
+        )
+        self.reaction = get_current_from_request_json()
+
+    def submit_request(self):
+        """Save request to database and notify and email approvers."""
+        self._save_to_database()
+        self._notify_approvers()
+
+    def _save_to_database(self):
+        """Save the data export request to the database"""
+        institution = services.workgroup.get_institution()
+
+        self.data_export_request = models.DataExportRequest.create(
+            requestor=self.requestor.id,
+            required_approvers=self.workgroup.principal_investigator,
+            status="PENDING",
+            reaction=self.reaction,
+            workgroup=self.workgroup.id,
+            workbook=self.workbook.id,
+            institution=institution.id,
+        )
+
+    def _notify_approvers(self):
+        """
+        Send a notification and an email to each principal investigator of the workgroup the data is being exported from
+        """
+        workbook_names = [wb.name for wb in self.workbooks]
+        for principal_investigator in self.workgroup.principal_investigator:
+            models.Notification.create(
+                person=principal_investigator.id,
+                type="Data Export Request",
+                info=f"The following user: {self.requestor.user.email} has requested to export data from workbooks: "
+                f"{', '.join(workbook_names)} in {self.data_format} format.<br>"
+                f"To respond please follow the link sent to your email account. This request will expire after 7 days.",
+                time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
+                status="active",
+            )
+            services.email.send_data_export_approval_request(
+                principal_investigator.user, self.data_export_request
+            )

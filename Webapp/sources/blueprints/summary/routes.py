@@ -225,3 +225,15 @@ def get_file_attachment_list():
         for x in file_attachments
     ]
     return jsonify({"file_attachments": file_attachments_dict_list})
+
+
+@summary_bp.route("/reaction_approval/new_request", methods=["POST"])
+def new_reaction_approval_request():
+    """
+    Initiates a reaction approval request from reaction constructor
+    """
+    workgroup = request.json.get("workgroup")
+    workbook = request.json.get("workbook")
+    reaction = request.json.get("reaction")
+
+    print(workgroup, workbook, reaction)

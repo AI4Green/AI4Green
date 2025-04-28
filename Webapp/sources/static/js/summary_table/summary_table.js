@@ -409,3 +409,21 @@ function flagMassEfficiency() {
   $("#js-me-cell").attr("class", meFlag);
   setColours();
 }
+
+function generateReactionApprovalRequest() {
+  let workbook = $("#js-active-workbook").val();
+  let workgroup = $("#js-active-workgroup").val();
+  let reactionId = $("#js-reaction-id").val();
+  console.log(workbook, workgroup, reactionId);
+  fetch("/submit_reaction_approval_request", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      workgroup: workgroup,
+      workbook: workbook,
+      reaction_id: reactionId,
+    }),
+  }).then();
+}
