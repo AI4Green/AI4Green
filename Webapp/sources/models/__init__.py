@@ -27,6 +27,7 @@ from .person import (
 )
 from .polymer_novel_compound import PolymerNovelCompound
 from .reaction import Reaction, t_Reaction_Reaction
+from .reaction_approval_request import ReactionApprovalRequest
 from .reaction_data_file import ReactionDataFile
 from .reaction_note import ReactionNote
 from .retrosynthesis import Retrosynthesis
