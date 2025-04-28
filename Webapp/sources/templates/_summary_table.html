@@ -357,8 +357,11 @@
                     <td colspan="4"><br></td>
                 </tr>
                 <tr>
-                    <td colspan="2">Researcher: <input id="js-researcher" type="text" size="25em"></td>
-                    <td colspan="2">Supervisor: <input id="js-supervisor" type="text" size="25em"></td>
+                    <td colspan="2">Researcher: <input id="js-researcher" type="text" size="30em"></td>
+                    <td colspan="2" style="text-align: center">
+                        <button id="review-button" class="btn btn-success" onclick="generateReactionApprovalRequest()">Submit Reaction For Review</button>
+                    </td>
+{#                    <td colspan="2">Approved By: <input id="js-supervisor" type="text" size="25em" disabled></td>#}
                 </tr>
             </table>
         </td>
