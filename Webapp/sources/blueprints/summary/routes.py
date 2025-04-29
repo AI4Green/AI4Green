@@ -232,8 +232,7 @@ def new_reaction_approval_request():
     """
     Initiates a reaction approval request from reaction constructor
     """
-    workgroup = request.json.get("workgroup")
-    workbook = request.json.get("workbook")
-    reaction = request.json.get("reaction")
+    request = services.reaction.NewReactionApprovalRequest()
+    request.submit_request()
 
-    print(workgroup, workbook, reaction)
+    return jsonify({"response": "success"})

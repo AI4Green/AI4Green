@@ -414,8 +414,8 @@ function generateReactionApprovalRequest() {
   let workbook = $("#js-active-workbook").val();
   let workgroup = $("#js-active-workgroup").val();
   let reactionId = $("#js-reaction-id").val();
-  console.log(workbook, workgroup, reactionId);
-  fetch("/submit_reaction_approval_request", {
+
+  fetch("/reaction_approval/new_request", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -423,7 +423,16 @@ function generateReactionApprovalRequest() {
     body: JSON.stringify({
       workgroup: workgroup,
       workbook: workbook,
-      reaction_id: reactionId,
+      reactionID: reactionId,
     }),
-  }).then();
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (item) {
+      if (item.response === "success") {
+        $("#review-button").hide();
+        $("#reaction-pending-review").show();
+      }
+    });
 }

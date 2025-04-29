@@ -408,6 +408,7 @@ class NewReactionApprovalRequest:
             self.workgroup.name, request.json.get("workbook")
         )
         self.reaction = get_current_from_request_json()
+        self.reaction_approval_request = None
 
     def submit_request(self):
         """Save request to database and notify and email approvers."""
@@ -418,11 +419,11 @@ class NewReactionApprovalRequest:
         """Save the data export request to the database"""
         institution = services.workgroup.get_institution()
 
-        self.data_export_request = models.DataExportRequest.create(
+        self.reaction_approval_request = models.ReactionApprovalRequest.create(
             requestor=self.requestor.id,
             required_approvers=self.workgroup.principal_investigator,
             status="PENDING",
-            reaction=self.reaction,
+            reaction=self.reaction.id,
             workgroup=self.workgroup.id,
             workbook=self.workbook.id,
             institution=institution.id,
@@ -430,19 +431,42 @@ class NewReactionApprovalRequest:
 
     def _notify_approvers(self):
         """
-        Send a notification and an email to each principal investigator of the workgroup the data is being exported from
+        Send a notification and an email to each principal investigator of the reaction workgroup
         """
-        workbook_names = [wb.name for wb in self.workbooks]
         for principal_investigator in self.workgroup.principal_investigator:
             models.Notification.create(
                 person=principal_investigator.id,
-                type="Data Export Request",
-                info=f"The following user: {self.requestor.user.email} has requested to export data from workbooks: "
-                f"{', '.join(workbook_names)} in {self.data_format} format.<br>"
-                f"To respond please follow the link sent to your email account. This request will expire after 7 days.",
+                type="Reaction Approval Request",
+                info=self._message_content(),
+                #
+                #
+                # f"The following user: {self.requestor.user.email} has requested approval for the following reaction: {self.reaction.name} <br>"
+                # f"To respond please follow the link sent to your email account. This request will expire after 7 days.",
                 time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
                 status="active",
             )
             services.email.send_data_export_approval_request(
-                principal_investigator.user, self.data_export_request
+                principal_investigator.user, self.reaction_approval_request
             )
+
+    def _message_content(self):
+        return f"""
+                <p>A user has requested your review for their reaction!</p>
+                <table style='border-collapse: collapse; width: 100%; max-width: 600px; font-family: Arial, sans-serif;'>
+                  <tr style='background-color: #f2f2f2;'>
+                    <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>User</th>
+                    <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Workgroup</th>
+                    <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Workbook</th>
+                    <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Reaction Title</th>
+                    <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Reaction ID</th>
+                  </tr>
+                  <tr>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>{self.requestor.user.email}</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>{self.workgroup.name}</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>{self.workbook.name}</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction.name}</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction.reaction_id}</td>
+                  </tr>
+                </table>
+                <button class='btn btn-success'>AAAA</button>
+                """

@@ -360,8 +360,13 @@
                     <td colspan="2">Researcher: <input id="js-researcher" type="text" size="30em"></td>
                     <td colspan="2" style="text-align: center">
                         <button id="review-button" class="btn btn-success" onclick="generateReactionApprovalRequest()">Submit Reaction For Review</button>
+                        <div id="reaction-pending-review" style="display: none">
+                          ⏳ Reaction Pending Approval
+                        </div>
+                        <div id="reaction-approved" style="display: none">
+                            ✅ Reaction Approved By:  <input aria-label="reaction-approved-by" id="js-supervisor" type="text" size="25em" disabled>
+                        </div>
                     </td>
-{#                    <td colspan="2">Approved By: <input id="js-supervisor" type="text" size="25em" disabled></td>#}
                 </tr>
             </table>
         </td>
