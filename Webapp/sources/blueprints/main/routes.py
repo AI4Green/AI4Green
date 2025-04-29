@@ -129,7 +129,7 @@ def get_marvinjs_key():
 
 
 @main_bp.route(
-    "/sketcher/<workgroup>/<workbook>/<reaction_id>/<tutorial>", methods=["GET", "POST"]
+    "/sketcher/<workgroup>/<workbook>/<reaction_id>", methods=["GET", "POST"]
 )
 @login_required
 @workbook_member_required
@@ -138,7 +138,9 @@ def get_marvinjs_key():
     description="Requires login and membership in the specified workbook.",
 )
 def sketcher(
-    workgroup: str, workbook: str, reaction_id: str, tutorial: Literal["yes", "no"]
+    workgroup: str,
+    workbook: str,
+    reaction_id: str,
 ) -> Response:
     """
     Renders the sketcher page with the given reaction ID.
@@ -147,7 +149,6 @@ def sketcher(
         workgroup: the workgroup the reaction belongs to
         workbook: the workbook the reaction belongs to
         reaction_id: the reaction ID of the reaction to be loaded
-        tutorial: whether the user is in tutorial mode
 
     Returns:
         flask.Response The rendered sketcher page.
@@ -175,7 +176,7 @@ def sketcher(
         notification_number=notification_number,
         active_workgroup=workgroup,
         active_workbook=workbook,
-        tutorial=tutorial,
+        tutorial="no",
         addenda=addenda,
     )
 
