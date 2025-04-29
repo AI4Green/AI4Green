@@ -438,15 +438,15 @@ class NewReactionApprovalRequest:
                 person=principal_investigator.id,
                 type="Reaction Approval Request",
                 info=self._message_content(),
-                #
-                #
-                # f"The following user: {self.requestor.user.email} has requested approval for the following reaction: {self.reaction.name} <br>"
-                # f"To respond please follow the link sent to your email account. This request will expire after 7 days.",
                 time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
                 status="active",
             )
-            services.email.send_data_export_approval_request(
-                principal_investigator.user, self.reaction_approval_request
+            services.email.send_reaction_approval_request(
+                principal_investigator.user,
+                self.reaction_approval_request,
+                self.workgroup,
+                self.workbook,
+                self.reaction,
             )
 
     def _message_content(self):
@@ -468,5 +468,6 @@ class NewReactionApprovalRequest:
                     <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction.reaction_id}</td>
                   </tr>
                 </table>
-                <button class='btn btn-success'>AAAA</button>
+                <br>
+                <button class='btn btn-primary'>Review Reaction</button>
                 """

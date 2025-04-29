@@ -1,0 +1,33 @@
+<p>Dear {{ user.username }},</p>
+
+
+<p>A user has requested your review for their reaction!</p>
+    <table style='border-collapse: collapse; width: 100%; max-width: 600px; font-family: Arial, sans-serif;'>
+      <tr style='background-color: #f2f2f2;'>
+        <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>User</th>
+        <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Workgroup</th>
+        <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Workbook</th>
+        <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Reaction Title</th>
+        <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Reaction ID</th>
+      </tr>
+      <tr>
+        <td style='padding: 8px; border: 1px solid #ddd;'>{self.requestor.user.email}</td>
+        <td style='padding: 8px; border: 1px solid #ddd;'>{self.workgroup.name}</td>
+        <td style='padding: 8px; border: 1px solid #ddd;'>{self.workbook.name}</td>
+        <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction.name}</td>
+        <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction.reaction_id}</td>
+      </tr>
+    </table>
+
+<p>
+    To review this reaction
+    <a href="{{ url_for('main.review_reaction', token=token, _external=True, _scheme='protocol') }}">
+        click here.</a>
+</p>
+<p>Alternatively, you can paste the following link in your browser's address bar:</p>
+<p>{{ url_for('main.review_reaction', token=token, _external=True, _scheme='protocol') }}</p>
+<p>If you do not respond, this request will expire in 7 days and the data will not be exported.</p>
+
+
+<p>Sincerely,</p>
+<p>The AI4Green Team</p>

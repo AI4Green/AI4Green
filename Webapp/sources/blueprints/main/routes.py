@@ -18,7 +18,11 @@ from flask_login import (  # protects a view function against anonymous users
     login_required,
 )
 from sources import models, services
-from sources.auxiliary import get_notification_number, get_workgroups
+from sources.auxiliary import (
+    get_notification_number,
+    get_workgroups,
+    security_pi_workgroup,
+)
 from sources.blueprints.auth.forms import LoginForm
 from sources.decorators import workbook_member_required
 from sources.extensions import db
@@ -129,7 +133,7 @@ def get_marvinjs_key():
 
 
 @main_bp.route(
-    "/sketcher/<workgroup>/<workbook>/<reaction_id>", methods=["GET", "POST"]
+    "/sketcher/<workgroup>/<workbook>/<reaction_id>/<tutorial>", methods=["GET", "POST"]
 )
 @login_required
 @workbook_member_required
@@ -138,9 +142,7 @@ def get_marvinjs_key():
     description="Requires login and membership in the specified workbook.",
 )
 def sketcher(
-    workgroup: str,
-    workbook: str,
-    reaction_id: str,
+    workgroup: str, workbook: str, reaction_id: str, tutorial: Literal["yes", "no"]
 ) -> Response:
     """
     Renders the sketcher page with the given reaction ID.
@@ -149,12 +151,11 @@ def sketcher(
         workgroup: the workgroup the reaction belongs to
         workbook: the workbook the reaction belongs to
         reaction_id: the reaction ID of the reaction to be loaded
+        tutorial: whether the user is in tutorial mode
 
     Returns:
         flask.Response The rendered sketcher page.
     """
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
     workbook_object = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup, workbook
     )
@@ -172,13 +173,57 @@ def sketcher(
         reaction=reaction,
         load_status=load_status,
         demo="not demo",
-        workgroups=workgroups,
-        notification_number=notification_number,
         active_workgroup=workgroup,
         active_workbook=workbook,
-        tutorial="no",
+        tutorial=tutorial,
         addenda=addenda,
     )
+
+
+# include reaction approval fns with sketcher functionality.
+@main_bp.route("/reaction_approval/new_request", methods=["POST"])
+def new_reaction_approval_request() -> Response:
+    """
+    Initiates a reaction approval request from reaction constructor
+    """
+    new_request = services.reaction.NewReactionApprovalRequest()
+    new_request.submit_request()
+
+    return jsonify({"response": "success"})
+
+
+@main_bp.route("/review_reaction/<token>", methods=["GET", "POST"])
+@login_required
+def review_reaction(token: str) -> Response:
+    (
+        workgroup,
+        workbook,
+        reaction,
+        reaction_approval_request,
+    ) = services.email.verify_reaction_approval_request_token(token)
+    addenda = services.reaction.get_addenda(reaction)
+
+    # check user is a required approver AND a PI in the workgroup
+    if (
+        current_user.Person in reaction_approval_request.required_approvers
+        and security_pi_workgroup(workgroup.name)
+    ):
+        print(workbook, workgroup)
+        return render_template(
+            "sketcher_reload.html",
+            reaction=reaction,
+            load_status="loading",
+            demo="not demo",
+            active_workgroup=workgroup.name,
+            active_workbook=workbook.name,
+            tutorial="no",
+            addenda=addenda,
+            review=True,
+        )
+
+    else:
+        flash("You do not have permission to view this page")
+        return redirect(url_for("main.index"))
 
 
 @main_bp.route("/sketcher_tutorial/<tutorial>", methods=["GET", "POST"])
