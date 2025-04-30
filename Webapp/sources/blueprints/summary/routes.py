@@ -20,6 +20,7 @@ def summary() -> Response:
         flask.Response: returns the summary table as a json object
     """
     reaction = None
+    review_status = ""
     if not (
         str(request.form["demo"]) == "demo" or str(request.form["tutorial"]) == "yes"
     ):
@@ -32,8 +33,12 @@ def summary() -> Response:
             abort(401)
 
         reaction = services.reaction.get_current_from_request()
-        # also handle if reactants/reagents/solvents/products have changed since reload
+        if reaction.reaction_approval_request:
+            print(reaction.reaction_approval_request)
+            review_status = reaction.reaction_approval_request[0].status.value
+            print(review_status, type(review_status))
 
+        # also handle if reactants/reagents/solvents/products have changed since reload
         polymer_mode = request.form["polymerMode"]
         # change summary table in polymer mode
         if polymer_mode.lower() == "true":
@@ -164,6 +169,7 @@ def summary() -> Response:
             risk_rating=risk_data["risk_rating"],
             risk_color=risk_data["risk_colour"],
             number_of_solvents=solvent_data["number_of_solvents"],
+            review_status=review_status,
         )
         return jsonify({"summary": summary_table})
     else:
