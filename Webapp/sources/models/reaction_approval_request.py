@@ -57,6 +57,12 @@ class ReactionApprovalRequest(Model):
     )
     requestor_person = db.relationship("Person", foreign_keys=[requestor])
 
+    approved_by = db.Column(
+        db.ForeignKey("Person.id", ondelete="CASCADE"),
+        index=True,
+    )
+    approved_by_person = db.relationship("Person", foreign_keys=[approved_by])
+
     reaction = db.Column(
         db.ForeignKey("Reaction.id", ondelete="CASCADE"), nullable=False, index=True
     )

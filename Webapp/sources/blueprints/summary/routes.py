@@ -21,12 +21,15 @@ def summary() -> Response:
     """
     reaction = None
     review_status = ""
+    review = False
     if not (
         str(request.form["demo"]) == "demo" or str(request.form["tutorial"]) == "yes"
     ):
         # check user permission
         workgroup_name = str(request.form["workgroup"])
         workbook_name = str(request.form["workbook"])
+        review = request.form.get("review")
+        print("review", review)
         if not auxiliary.security_member_workgroup_workbook(
             workgroup_name, workbook_name
         ):
@@ -170,6 +173,7 @@ def summary() -> Response:
             risk_color=risk_data["risk_colour"],
             number_of_solvents=solvent_data["number_of_solvents"],
             review_status=review_status,
+            review=review,
         )
         return jsonify({"summary": summary_table})
     else:

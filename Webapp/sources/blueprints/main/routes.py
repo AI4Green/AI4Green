@@ -177,6 +177,7 @@ def sketcher(
         active_workbook=workbook,
         tutorial=tutorial,
         addenda=addenda,
+        review=False,
     )
 
 
@@ -208,7 +209,6 @@ def review_reaction(token: str) -> Response:
         current_user.Person in reaction_approval_request.required_approvers
         and security_pi_workgroup(workgroup.name)
     ):
-        print(workbook, workgroup)
         return render_template(
             "sketcher_reload.html",
             reaction=reaction,

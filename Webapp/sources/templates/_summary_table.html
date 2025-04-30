@@ -358,15 +358,22 @@
                 </tr>
                 <tr>
                     <td colspan="2">Researcher: <input id="js-researcher" type="text" size="30em"></td>
-                    <td colspan="2" style="text-align: center">
-                        <button id="review-button" class="btn btn-success" onclick="generateReactionApprovalRequest()" {% if review_status in ["PENDING", "APPROVED"] %}style="display: none"{% endif %}>Submit Reaction For Review</button>
-                        <div id="reaction-pending-review" {% if review_status != "PENDING" %}style="display: none"{% endif %}>
-                          ⏳ Reaction Pending Approval
-                        </div>
-                        <div id="reaction-approved" {% if review_status != "APPROVED" %} style="display: none" {% endif %}>
-                            ✅ Reaction Approved By:  <input aria-label="reaction-approved-by" id="js-supervisor" type="text" size="25em" disabled>
-                        </div>
-                    </td>
+                        <td colspan="2" style="text-align: center">
+                            {% if review == "True" %}
+                                <button id="approve-reaction" class="btn btn-success" onclick="approve()" {% if review_status in ["PENDING", "APPROVED"] %}style="display: none"{% endif %}>Submit Reaction For Review</button>
+                                <button id="suggest-changes" class="btn btn-danger" onclick="generateReactionApprovalRequest()" {% if review_status in ["PENDING", "APPROVED"] %}style="display: none"{% endif %}>Submit Reaction For Review</button>
+
+
+                            {% else %}
+                                 <button id="review-button" class="btn btn-success" onclick="generateReactionApprovalRequest()" {% if review_status in ["PENDING", "APPROVED"] %}style="display: none"{% endif %}>Submit Reaction For Review</button>
+                                <div id="reaction-pending-review" {% if review_status != "PENDING" %}style="display: none"{% endif %}>
+                                  ⏳ Reaction Pending Approval
+                                </div>
+                                <div id="reaction-approved" {% if review_status != "APPROVED" %} style="display: none" {% endif %}>
+                                    ✅ Reaction Approved By:  <input aria-label="reaction-approved-by" id="js-supervisor" type="text" size="25em" disabled>
+                                </div>
+                            {% endif %}
+                        </td>
                 </tr>
             </table>
         </td>
