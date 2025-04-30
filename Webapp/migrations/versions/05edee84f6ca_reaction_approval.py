@@ -1,15 +1,15 @@
 """reaction_approval
 
-Revision ID: 0ffaff5977e3
+Revision ID: 05edee84f6ca
 Revises: 583f3c4423e8
-Create Date: 2025-04-28 13:43:43.034537
+Create Date: 2025-04-30 13:00:34.903698
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "0ffaff5977e3"
+revision = "05edee84f6ca"
 down_revision = "583f3c4423e8"
 branch_labels = None
 depends_on = None
@@ -23,6 +23,7 @@ def upgrade():
         sa.Column("time_of_acceptance", sa.DateTime(), nullable=True),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("requestor", sa.Integer(), nullable=False),
+        sa.Column("approved_by", sa.Integer(), nullable=True),
         sa.Column("reaction", sa.Integer(), nullable=False),
         sa.Column("workbook", sa.Integer(), nullable=False),
         sa.Column("workgroup", sa.Integer(), nullable=False),
@@ -32,6 +33,7 @@ def upgrade():
             sa.Enum("PENDING", "APPROVED", "REJECTED", name="reactionapprovalstatus"),
             nullable=True,
         ),
+        sa.ForeignKeyConstraint(["approved_by"], ["Person.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(
             ["institution"], ["Institution.id"], ondelete="CASCADE"
         ),
@@ -42,6 +44,11 @@ def upgrade():
         sa.PrimaryKeyConstraint("id"),
     )
     with op.batch_alter_table("ReactionApprovalRequest", schema=None) as batch_op:
+        batch_op.create_index(
+            batch_op.f("ix_ReactionApprovalRequest_approved_by"),
+            ["approved_by"],
+            unique=False,
+        )
         batch_op.create_index(
             batch_op.f("ix_ReactionApprovalRequest_institution"),
             ["institution"],
@@ -95,6 +102,7 @@ def downgrade():
         batch_op.drop_index(batch_op.f("ix_ReactionApprovalRequest_requestor"))
         batch_op.drop_index(batch_op.f("ix_ReactionApprovalRequest_reaction"))
         batch_op.drop_index(batch_op.f("ix_ReactionApprovalRequest_institution"))
+        batch_op.drop_index(batch_op.f("ix_ReactionApprovalRequest_approved_by"))
 
     op.drop_table("ReactionApprovalRequest")
     # ### end Alembic commands ###
