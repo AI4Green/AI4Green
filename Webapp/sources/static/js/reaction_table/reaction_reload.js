@@ -221,5 +221,6 @@ function controlNonCreatorFunctionality() {
   // keep the review buttons active for review
   $("#approve-reaction").prop("disabled", false);
   $("#suggest-changes").prop("disabled", false);
+  $("#reject-reaction").prop("disabled", false);
   $("#reaction-note-button").hide();
 }

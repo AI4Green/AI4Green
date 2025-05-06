@@ -361,7 +361,8 @@
                         <td colspan="2" style="text-align: center">
                             {% if review == "True" %}
                                 <button id="approve-reaction" class="btn btn-success" onclick="approveReaction()">✅ Approve Reaction</button>
-                                <button id="suggest-changes" class="btn btn-danger" onclick="showReactionApprovalModal()">❌ Reject Reaction </button>
+                                <button id="suggest-changes" class="btn btn-info" onclick="suggestChangesModal()">✏️ Suggest Changes </button>
+                                <button id="reject-reaction" class="btn btn-danger" onclick="rejectReactionModal()">❌ Reject Reaction </button>
 
 
                             {% else %}
