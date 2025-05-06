@@ -1,15 +1,15 @@
 """reaction_approval
 
-Revision ID: 05edee84f6ca
+Revision ID: f15706cfea5d
 Revises: 583f3c4423e8
-Create Date: 2025-04-30 13:00:34.903698
+Create Date: 2025-05-06 13:46:24.153332
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "05edee84f6ca"
+revision = "f15706cfea5d"
 down_revision = "583f3c4423e8"
 branch_labels = None
 depends_on = None
@@ -30,7 +30,13 @@ def upgrade():
         sa.Column("institution", sa.Integer(), nullable=False),
         sa.Column(
             "status",
-            sa.Enum("PENDING", "APPROVED", "REJECTED", name="reactionapprovalstatus"),
+            sa.Enum(
+                "PENDING",
+                "APPROVED",
+                "REJECTED",
+                "CHANGES_REQUESTED",
+                name="reactionapprovalstatus",
+            ),
             nullable=True,
         ),
         sa.ForeignKeyConstraint(["approved_by"], ["Person.id"], ondelete="CASCADE"),
@@ -105,4 +111,7 @@ def downgrade():
         batch_op.drop_index(batch_op.f("ix_ReactionApprovalRequest_approved_by"))
 
     op.drop_table("ReactionApprovalRequest")
+
+    # Manually added this line to ensure ENUM is dropped as part of migration downgrade
+    op.execute("DROP TYPE IF EXISTS reactionapprovalstatus")
     # ### end Alembic commands ###

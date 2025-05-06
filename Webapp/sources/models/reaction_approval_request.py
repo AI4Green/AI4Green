@@ -12,6 +12,7 @@ class ReactionApprovalStatus(Enum):
     PENDING = "PENDING"
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
+    CHANGES_REQUESTED = "CHANGES_REQUESTED"
 
 
 # Association table for the many-to-many relationship between Person and DataExportRequests
