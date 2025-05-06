@@ -360,8 +360,8 @@
                     <td colspan="2">Researcher: <input id="js-researcher" type="text" size="30em"></td>
                         <td colspan="2" style="text-align: center">
                             {% if review == "True" %}
-                                <button id="approve-reaction" class="btn btn-success" onclick="approve()" {% if review_status in ["PENDING", "APPROVED"] %}style="display: none"{% endif %}>Submit Reaction For Review</button>
-                                <button id="suggest-changes" class="btn btn-danger" onclick="generateReactionApprovalRequest()" {% if review_status in ["PENDING", "APPROVED"] %}style="display: none"{% endif %}>Submit Reaction For Review</button>
+                                <button id="approve-reaction" class="btn btn-success" onclick="approveReaction()">✅ Approve Reaction</button>
+                                <button id="suggest-changes" class="btn btn-danger" onclick="showReactionApprovalModal()">❌ Reject Reaction </button>
 
 
                             {% else %}

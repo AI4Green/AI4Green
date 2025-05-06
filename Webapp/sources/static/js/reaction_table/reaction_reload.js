@@ -218,5 +218,8 @@ function controlNonCreatorFunctionality() {
   $("#print-pdf").prop("disabled", false);
   $("#file-list").find("*").prop("disabled", false);
   $(".delete-file-button").prop("disabled", true);
+  // keep the review buttons active for review
+  $("#approve-reaction").prop("disabled", false);
+  $("#suggest-changes").prop("disabled", false);
   $("#reaction-note-button").hide();
 }
