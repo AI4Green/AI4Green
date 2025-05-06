@@ -1,15 +1,15 @@
 """reaction_approval
 
-Revision ID: f15706cfea5d
+Revision ID: 4bb67488505a
 Revises: 583f3c4423e8
-Create Date: 2025-05-06 13:46:24.153332
+Create Date: 2025-05-06 14:56:20.485620
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "f15706cfea5d"
+revision = "4bb67488505a"
 down_revision = "583f3c4423e8"
 branch_labels = None
 depends_on = None
@@ -39,6 +39,7 @@ def upgrade():
             ),
             nullable=True,
         ),
+        sa.Column("comments", sa.Text(), nullable=True),
         sa.ForeignKeyConstraint(["approved_by"], ["Person.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(
             ["institution"], ["Institution.id"], ondelete="CASCADE"
