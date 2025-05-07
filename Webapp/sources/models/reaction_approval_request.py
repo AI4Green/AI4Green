@@ -101,3 +101,5 @@ class ReactionApprovalRequest(Model):
     status = db.Column(
         db.Enum(ReactionApprovalStatus), default=ReactionApprovalStatus.PENDING.value
     )
+
+    comments = db.Column(db.Text)

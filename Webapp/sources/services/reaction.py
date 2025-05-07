@@ -6,7 +6,7 @@ from flask import request
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
-from sqlalchemy import func
+from sqlalchemy import func, update
 
 
 def get_from_name_and_workbook_id(name: str, workbook_id: int) -> models.Reaction:
@@ -471,3 +471,71 @@ class NewReactionApprovalRequest:
                 <br>
                 <button class='btn btn-primary'>Review Reaction</button>
                 """
+
+
+class ReactionApprovalRequestStatus:
+    """Class to update the request status when an approver approves or rejects a reaction"""
+
+    def __init__(self, reaction_approval_request: models.ReactionApprovalRequest):
+        """Creates an instance of the RequestStatus class."""
+        self.reaction_approval_request = reaction_approval_request
+        self.approver = services.person.from_current_user_email()
+
+    def _update_query(self, approved: bool):
+        """
+        Docstring for update_query.
+        """
+        # use update query because it is an association table. Normal query returns immutable Row.
+        update_query = (
+            update(models.reaction_approval_request_approvers)
+            .where(
+                models.reaction_.c.reaction_approval_request
+                == self.reaction_approval_request.id
+            )
+            .where(
+                models.reaction_approval_request_approvers.c.person_id
+                == self.approver.id
+            )
+            .values(approved=approved, responded=True)
+        )
+        db.session.execute(update_query)
+
+    def _update_request_status(self, status: str):
+        """
+        status is ENUM, how to document?
+        """
+
+        self.reaction_approval_request.status = status
+        db.session.commit()
+
+    def approve(self):
+        """
+        Approves a reaction approval request, updates the approval status of the current user's approval
+        in the data export request approvers association table, and updates the status of the reaction approval request.
+        """
+        self._update_query(True)
+        self._update_request_status("APPROVED")
+
+    def deny(self, comments):
+        """
+        Updates the status of a reaction approval request to as responded to (bool) and 'REJECTED' and notifies the requestor.
+        """
+        self._update_query(False)
+        self._update_request_status("REJECTED")
+
+        # notify requestor of rejection
+        models.Notification.create(
+            person=self.reaction_approval_request.requestor,
+            type="Reaction Rejected",
+            info=f"Your reaction {self.reaction_approval_request.reaction.reaction_id}  in workbook "
+            f"{self.reaction_approval_request.workbook.name} has been rejected.",
+            time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
+            status="active",
+        )
+
+    def suggest_changes(self, comments):
+        """
+        Updates the status of a reaction approval request to as responded to (bool) and 'CHANGES_REQUESTED' and notifies the requestor.
+        """
+        self._update_query(False)
+        self._update_request_status("CHANGES_REQUESTED")
