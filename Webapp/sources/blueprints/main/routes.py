@@ -181,68 +181,6 @@ def sketcher(
     )
 
 
-# include reaction approval fns with sketcher functionality.
-@main_bp.route("/reaction_approval/new_request", methods=["POST"])
-def new_reaction_approval_request() -> Response:
-    """
-    Initiates a reaction approval request from reaction constructor
-    """
-    # CHECK FOR DUPLICATES AND PREVENT FOR MALICIOUS FRONT END CONTENT
-    new_request = services.reaction.NewReactionApprovalRequest()
-    new_request.submit_request()
-
-    return jsonify({"response": "success"})
-
-
-@main_bp.route("/review_reaction/request_response/<token>", methods=["GET", "POST"])
-@login_required
-def reaction_approval_request_response(token: str) -> Response:
-    (
-        workgroup,
-        workbook,
-        reaction,
-        reaction_approval_request,
-    ) = services.email.verify_reaction_approval_request_token(token)
-    addenda = services.reaction.get_addenda(reaction)
-
-    # check user is a required approver AND a PI in the workgroup
-    if (
-        current_user.Person in reaction_approval_request.required_approvers
-        and security_pi_workgroup(workgroup.name)
-    ):
-        return render_template(
-            "sketcher_reload.html",
-            reaction=reaction,
-            load_status="loading",
-            demo="not demo",
-            active_workgroup=workgroup.name,
-            active_workbook=workbook.name,
-            tutorial="no",
-            addenda=addenda,
-            review=True,
-        )
-
-    else:
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
-
-
-@main_bp.route("/review_reaction/approve", methods=["PATCH"])
-@login_required
-@principal_investigator_required
-def review_reaction_approve() -> Response:
-    approval_request = models.ReactionApprovalRequest.query.get(
-        request.json.get("approvalID")
-    )
-    request_status = services.reaction.ApprovalRequestStatus(approval_request)
-    request_status.approve()
-
-    flash("Reaction approved!")
-    return jsonify(
-        {"message": "Reaction approved!", "redirect_url": url_for("main.index")}
-    )
-
-
 @main_bp.route("/sketcher_tutorial/<tutorial>", methods=["GET", "POST"])
 def sketcher_tutorial(tutorial: str) -> Response:
     """
