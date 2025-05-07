@@ -1,15 +1,15 @@
 """reaction_approval
 
-Revision ID: 4bb67488505a
+Revision ID: 731f946e150f
 Revises: 583f3c4423e8
-Create Date: 2025-05-06 14:56:20.485620
+Create Date: 2025-05-07 10:51:05.844926
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "4bb67488505a"
+revision = "731f946e150f"
 down_revision = "583f3c4423e8"
 branch_labels = None
 depends_on = None
