@@ -506,6 +506,9 @@ class ReactionApprovalRequestStatus:
         """
 
         self.reaction_approval_request.status = status
+        self.reaction_approval_request.reviewed_by = self.approver.id
+        self.reaction_approval_request.time_of_review = datetime.now()
+
         db.session.commit()
 
     def approve(self):

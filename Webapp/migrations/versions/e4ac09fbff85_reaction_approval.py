@@ -1,15 +1,15 @@
 """reaction_approval
 
-Revision ID: 731f946e150f
+Revision ID: e4ac09fbff85
 Revises: 583f3c4423e8
-Create Date: 2025-05-07 10:51:05.844926
+Create Date: 2025-05-07 12:14:35.302784
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "731f946e150f"
+revision = "e4ac09fbff85"
 down_revision = "583f3c4423e8"
 branch_labels = None
 depends_on = None
@@ -20,10 +20,10 @@ def upgrade():
     op.create_table(
         "ReactionApprovalRequest",
         sa.Column("time_of_request", sa.DateTime(), nullable=False),
-        sa.Column("time_of_acceptance", sa.DateTime(), nullable=True),
+        sa.Column("time_of_review", sa.DateTime(), nullable=True),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("requestor", sa.Integer(), nullable=False),
-        sa.Column("approved_by", sa.Integer(), nullable=True),
+        sa.Column("reviewed_by", sa.Integer(), nullable=True),
         sa.Column("reaction", sa.Integer(), nullable=False),
         sa.Column("workbook", sa.Integer(), nullable=False),
         sa.Column("workgroup", sa.Integer(), nullable=False),
@@ -40,22 +40,17 @@ def upgrade():
             nullable=True,
         ),
         sa.Column("comments", sa.Text(), nullable=True),
-        sa.ForeignKeyConstraint(["approved_by"], ["Person.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(
             ["institution"], ["Institution.id"], ondelete="CASCADE"
         ),
         sa.ForeignKeyConstraint(["reaction"], ["Reaction.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["requestor"], ["Person.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["reviewed_by"], ["Person.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["workbook"], ["WorkBook.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["workgroup"], ["WorkGroup.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
     with op.batch_alter_table("ReactionApprovalRequest", schema=None) as batch_op:
-        batch_op.create_index(
-            batch_op.f("ix_ReactionApprovalRequest_approved_by"),
-            ["approved_by"],
-            unique=False,
-        )
         batch_op.create_index(
             batch_op.f("ix_ReactionApprovalRequest_institution"),
             ["institution"],
@@ -69,6 +64,11 @@ def upgrade():
         batch_op.create_index(
             batch_op.f("ix_ReactionApprovalRequest_requestor"),
             ["requestor"],
+            unique=False,
+        )
+        batch_op.create_index(
+            batch_op.f("ix_ReactionApprovalRequest_reviewed_by"),
+            ["reviewed_by"],
             unique=False,
         )
         batch_op.create_index(
@@ -106,10 +106,10 @@ def downgrade():
     with op.batch_alter_table("ReactionApprovalRequest", schema=None) as batch_op:
         batch_op.drop_index(batch_op.f("ix_ReactionApprovalRequest_workgroup"))
         batch_op.drop_index(batch_op.f("ix_ReactionApprovalRequest_workbook"))
+        batch_op.drop_index(batch_op.f("ix_ReactionApprovalRequest_reviewed_by"))
         batch_op.drop_index(batch_op.f("ix_ReactionApprovalRequest_requestor"))
         batch_op.drop_index(batch_op.f("ix_ReactionApprovalRequest_reaction"))
         batch_op.drop_index(batch_op.f("ix_ReactionApprovalRequest_institution"))
-        batch_op.drop_index(batch_op.f("ix_ReactionApprovalRequest_approved_by"))
 
     op.drop_table("ReactionApprovalRequest")
 
