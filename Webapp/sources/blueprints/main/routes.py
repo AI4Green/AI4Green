@@ -24,7 +24,7 @@ from sources.auxiliary import (
     security_pi_workgroup,
 )
 from sources.blueprints.auth.forms import LoginForm
-from sources.decorators import workbook_member_required
+from sources.decorators import principal_investigator_required, workbook_member_required
 from sources.extensions import db
 
 from . import main_bp
@@ -187,15 +187,16 @@ def new_reaction_approval_request() -> Response:
     """
     Initiates a reaction approval request from reaction constructor
     """
+    # CHECK FOR DUPLICATES AND PREVENT FOR MALICIOUS FRONT END CONTENT
     new_request = services.reaction.NewReactionApprovalRequest()
     new_request.submit_request()
 
     return jsonify({"response": "success"})
 
 
-@main_bp.route("/review_reaction/<token>", methods=["GET", "POST"])
+@main_bp.route("/review_reaction/request_response/<token>", methods=["GET", "POST"])
 @login_required
-def review_reaction(token: str) -> Response:
+def reaction_approval_request_response(token: str) -> Response:
     (
         workgroup,
         workbook,
@@ -224,6 +225,22 @@ def review_reaction(token: str) -> Response:
     else:
         flash("You do not have permission to view this page")
         return redirect(url_for("main.index"))
+
+
+@main_bp.route("/review_reaction/approve", methods=["PATCH"])
+@login_required
+@principal_investigator_required
+def review_reaction_approve() -> Response:
+    approval_request = models.ReactionApprovalRequest.query.get(
+        request.json.get("approvalID")
+    )
+    request_status = services.reaction.ApprovalRequestStatus(approval_request)
+    request_status.approve()
+
+    flash("Reaction approved!")
+    return jsonify(
+        {"message": "Reaction approved!", "redirect_url": url_for("main.index")}
+    )
 
 
 @main_bp.route("/sketcher_tutorial/<tutorial>", methods=["GET", "POST"])

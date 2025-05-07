@@ -21,11 +21,11 @@
 
 <p>
     To review this reaction
-    <a href="{{ url_for('main.review_reaction', token=token, _external=True, _scheme='protocol') }}">
+    <a href="{{ url_for('main.reaction_approval_request_response', token=token, _external=True, _scheme='protocol') }}">
         click here.</a>
 </p>
 <p>Alternatively, you can paste the following link in your browser's address bar:</p>
-<p>{{ url_for('main.review_reaction', token=token, _external=True, _scheme='protocol') }}</p>
+<p>{{ url_for('main.reaction_approval_request_response', token=token, _external=True, _scheme='protocol') }}</p>
 <p>If you do not respond, this request will expire in 7 days and the data will not be exported.</p>
 
 

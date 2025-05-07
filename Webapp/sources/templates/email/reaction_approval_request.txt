@@ -4,7 +4,7 @@ A user has requested your review for their reaction!
 
 To review this reaction click on the following link:
 
-{{ url_for('main.review_reaction', token=token, _external=True, _scheme='protocol') }}
+{{ url_for('main.reaction_approval_request_response', token=token, _external=True, _scheme='protocol') }}
 
 If you do not respond, this request will expire in 70 days and the data will not be exported.
 
