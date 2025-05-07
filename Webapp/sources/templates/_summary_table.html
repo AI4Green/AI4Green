@@ -363,18 +363,19 @@
                                 <button id="approve-reaction" class="btn btn-success" value="{{ approval_request.id }}" onclick="approveReaction(this.value)">✅ Approve Reaction</button>
                                 <button id="suggest-changes" class="btn btn-info" value="{{ approval_request.id }}" onclick="suggestChangesModal(this.value)">✏️ Suggest Changes </button>
                                 <button id="reject-reaction" class="btn btn-danger" value="{{ approval_request.id }}" onclick="rejectReactionModal(this.value)">❌ Reject Reaction </button>
-                            {% endif %}
-
-                            {% if approval_request.status.value == None %}
-                                 <button id="review-button" class="btn btn-success" onclick="generateReactionApprovalRequest()" >Submit Reaction For Review</button>
                             {% else %}
-                                <div id="reaction-pending-review" {% if approval_request.status.value != "PENDING" %}style="display: none"{% endif %}>
-                                  ⏳ Reaction Pending Approval
-                                </div>
-                                <div id="reaction-approved" {% if approval_request.status.value != "APPROVED" %} style="display: none" {% endif %}>
-                                    ✅ Reaction Approved By:  <input aria-label="reaction-approved-by" id="js-supervisor" disabled value="{% if approval_request.reviewed_by_person %} }{{ approval_request.reviewed_by_person.user.fullname }} {% endif %}">
-                                      {% set time = approval_request.time_of_review|string %} {{ time[:-7] }}
-                                </div>
+
+                                {% if approval_request.status.value == None %}
+                                     <button id="review-button" class="btn btn-success" onclick="generateReactionApprovalRequest()" >Submit Reaction For Review</button>
+                                {% else %}
+                                    <div id="reaction-pending-review" {% if approval_request.status.value != "PENDING" %}style="display: none"{% endif %}>
+                                      ⏳ Reaction Pending Approval
+                                    </div>
+                                    <div id="reaction-approved" {% if approval_request.status.value != "APPROVED" %} style="display: none" {% endif %}>
+                                        ✅ Reaction Approved By:  <input aria-label="reaction-approved-by" id="js-supervisor" disabled value="{% if approval_request.reviewed_by_person %} }{{ approval_request.reviewed_by_person.user.fullname }} {% endif %}">
+                                          {% set time = approval_request.time_of_review|string %} {{ time[:-7] }}
+                                    </div>
+                                {% endif %}
                             {% endif %}
                         </td>
                 </tr>
