@@ -481,7 +481,7 @@ function submitSuggestComment(requestID) {
 
 function submitRejectReaction(requestID) {
   let commentText = $("#reject-comment-text").val();
-  fetch("/reaction_approval/reject_reaction", {
+  fetch("/reaction_approval/reject", {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

@@ -83,18 +83,21 @@ def review_reaction_approve() -> Response:
     )
 
 
-@reaction_approval_bp.route("/approve", methods=["PATCH"])
+@reaction_approval_bp.route("/reject", methods=["PATCH"])
 @login_required
 # @principal_investigator_required
 def review_reaction_reject() -> Response:
     approval_request = models.ReactionApprovalRequest.query.get(
-        request.json.get("approvalID")
+        request.json.get("requestID")
     )
     request_status = services.reaction.ReactionApprovalRequestStatus(approval_request)
     request_status.reject(request.json.get("comments"))
 
     return jsonify(
-        {"message": "Reaction approved!", "redirect_url": url_for("main.index")}
+        {
+            "message": "This reaction has been rejected. The creator will be notified!",
+            "redirect_url": url_for("main.index"),
+        }
     )
 
 
@@ -109,7 +112,7 @@ def review_reaction_suggest_changes() -> Response:
 
     return jsonify(
         {
-            "message": "You comments have been submitted! The reaction creator will be notified.",
+            "message": "Your comments have been submitted! The reaction creator will be notified.",
             "redirect_url": url_for("main.index"),
         }
     )

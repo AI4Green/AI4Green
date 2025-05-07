@@ -526,17 +526,17 @@ class ReactionApprovalRequestStatus:
         Updates the status of a reaction approval request to as responded to (bool) and 'REJECTED' and notifies the requestor.
         """
         self._update_query(False)
-        self._update_request_status("REJECTED")
+        self._update_request_status("REJECTED", comments)
 
-        # notify requestor of rejection
-        models.Notification.create(
-            person=self.reaction_approval_request.requestor,
-            type="Reaction Rejected",
-            info=f"Your reaction {self.reaction_approval_request.reaction.reaction_id}  in workbook "
-            f"{self.reaction_approval_request.workbook.name} has been rejected.",
-            time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
-            status="active",
-        )
+        # # notify requestor of rejection
+        # models.Notification.create(
+        #     person=self.reaction_approval_request.requestor,
+        #     type="Reaction Rejected",
+        #     info=f"Your reaction {self.reaction_approval_request.reaction.reaction_id}  in workbook "
+        #     f"{self.reaction_approval_request.workbook.name} has been rejected.",
+        #     time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
+        #     status="active",
+        # )
 
     def suggest_changes(self, comments):
         """
