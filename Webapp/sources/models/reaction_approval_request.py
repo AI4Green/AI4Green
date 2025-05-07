@@ -77,7 +77,7 @@ class ReactionApprovalRequest(Model):
     )
     WorkBook = db.relationship(
         "WorkBook",
-        backref="reaction_approval_requests",
+        backref="reaction_approval_request",
     )
 
     workgroup = db.Column(
@@ -95,7 +95,7 @@ class ReactionApprovalRequest(Model):
     required_approvers = db.relationship(
         "Person",
         secondary=reaction_approval_request_approvers,
-        backref="reaction_approval_requests",
+        backref="reaction_approval_request",
     )
 
     status = db.Column(
