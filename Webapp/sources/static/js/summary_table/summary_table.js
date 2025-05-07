@@ -436,3 +436,25 @@ function generateReactionApprovalRequest() {
       }
     });
 }
+
+function approveReaction(requestID) {
+  let workgroup = $("#active-workgroup").val();
+  fetch("/reaction_approval/approve", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      approvalID: requestID,
+      workgroup: workgroup,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.redirect_url) {
+        const url = new URL(data.redirect_url, window.location.origin);
+        url.searchParams.set("message", "Reaction approved!");
+        window.location.href = url.toString();
+      }
+    });
+}

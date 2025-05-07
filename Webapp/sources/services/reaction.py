@@ -489,7 +489,7 @@ class ReactionApprovalRequestStatus:
         update_query = (
             update(models.reaction_approval_request_approvers)
             .where(
-                models.reaction_.c.reaction_approval_request
+                models.reaction_approval_request_approvers.c.reaction_approval_request_id
                 == self.reaction_approval_request.id
             )
             .where(

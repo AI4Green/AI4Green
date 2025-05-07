@@ -37,7 +37,7 @@ def new_reaction_approval_request() -> Response:
 
 @reaction_approval_bp.route("/request_response/<token>", methods=["GET", "POST"])
 @login_required
-def reaction_approval_request_response(token: str) -> Response:
+def request_response(token: str) -> Response:
     (
         workgroup,
         workbook,
@@ -70,15 +70,14 @@ def reaction_approval_request_response(token: str) -> Response:
 
 @reaction_approval_bp.route("/approve", methods=["PATCH"])
 @login_required
-@principal_investigator_required
+# @principal_investigator_required
 def review_reaction_approve() -> Response:
     approval_request = models.ReactionApprovalRequest.query.get(
         request.json.get("approvalID")
     )
-    request_status = services.reaction.ApprovalRequestStatus(approval_request)
+    request_status = services.reaction.ReactionApprovalRequestStatus(approval_request)
     request_status.approve()
 
-    flash("Reaction approved!")
     return jsonify(
         {"message": "Reaction approved!", "redirect_url": url_for("main.index")}
     )
