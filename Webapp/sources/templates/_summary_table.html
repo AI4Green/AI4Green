@@ -361,7 +361,7 @@
                         <td colspan="2" style="text-align: center">
                             {% if review == "True" %}
                                 <button id="approve-reaction" class="btn btn-success" value="{{ approval_request.id }}" onclick="approveReaction(this.value)">✅ Approve Reaction</button>
-                                <button id="suggest-changes" class="btn btn-info" value="{{ approval_request.id }}" onclick="suggestChangesModal(this.value)">✏️ Suggest Changes </button>
+                                <button id="suggest-changes" class="btn btn-warning" value="{{ approval_request.id }}" onclick="suggestChangesModal(this.value)">✏️ Suggest Changes </button>
                                 <button id="reject-reaction" class="btn btn-danger" value="{{ approval_request.id }}" onclick="rejectReactionModal(this.value)">❌ Reject Reaction </button>
                             {% else %}
 
