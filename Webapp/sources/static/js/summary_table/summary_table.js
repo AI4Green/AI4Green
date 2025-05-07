@@ -163,8 +163,6 @@ function reloadSummary() {
   $("#other-risks-textbox").val(js_summary_table_data["other_hazards_text"]);
   // researcher
   $("#js-researcher").val(js_summary_table_data["researcher"]);
-  // supervisor
-  $("#js-supervisor").val(js_summary_table_data["supervisor"]);
   // refill risk score
   autofillRiskScore();
   // setTimeout(exportImage, 2000);

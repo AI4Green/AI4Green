@@ -371,7 +371,8 @@
                                   ⏳ Reaction Pending Approval
                                 </div>
                                 <div id="reaction-approved" {% if approval_request.status.value != "APPROVED" %} style="display: none" {% endif %}>
-                                    ✅ Reaction Approved By:  <input aria-label="reaction-approved-by" id="js-supervisor" type="text" size="25em" disabled>
+                                    ✅ Reaction Approved By:  <input aria-label="reaction-approved-by" id="js-supervisor" disabled value="{{ approval_request.reviewed_by_person.user.fullname }}">
+                                      {% set time = approval_request.time_of_review|string %} {{ time[:-7] }}
                                 </div>
                             {% endif %}
                         </td>
