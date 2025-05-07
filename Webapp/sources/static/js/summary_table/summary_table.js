@@ -457,10 +457,58 @@ function approveReaction(requestID) {
     });
 }
 
-function suggestChangesModal() {
-  $("#suggest-comment-modal").modal("show");
+function submitSuggestComment(requestID) {
+  let commentText = $("#suggest-comment-text").val();
+  fetch("/reaction_approval/suggest_changes", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      requestID: requestID,
+      comments: commentText,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.redirect_url) {
+        const url = new URL(data.redirect_url, window.location.origin);
+        url.searchParams.set("message", data.message);
+        window.location.href = url.toString();
+      }
+    });
 }
 
-function rejectReactionModal() {
+function submitRejectReaction(requestID) {
+  let commentText = $("#reject-comment-text").val();
+  fetch("/reaction_approval/reject_reaction", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      requestID: requestID,
+      comments: commentText,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.redirect_url) {
+        const url = new URL(data.redirect_url, window.location.origin);
+        url.searchParams.set("message", data.message);
+        window.location.href = url.toString();
+      }
+    });
+}
+
+function suggestChangesModal(requestID) {
+  $("#suggest-comment-modal").modal("show");
+  // sets request id as value for submit button
+  $("#submit-suggest-comments").val(requestID);
+}
+
+function rejectReactionModal(requestID) {
   $("#reject-reaction-modal").modal("show");
+  // sets request id as value for submit button
+  $("#reject-reaction-submit").val(requestID);
 }

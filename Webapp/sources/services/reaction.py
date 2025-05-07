@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import pytz
 from flask import request
@@ -500,7 +500,7 @@ class ReactionApprovalRequestStatus:
         )
         db.session.execute(update_query)
 
-    def _update_request_status(self, status: str):
+    def _update_request_status(self, status: str, comments: Union[str, None] = None):
         """
         status is ENUM, how to document?
         """
@@ -508,6 +508,8 @@ class ReactionApprovalRequestStatus:
         self.reaction_approval_request.status = status
         self.reaction_approval_request.reviewed_by = self.approver.id
         self.reaction_approval_request.time_of_review = datetime.now()
+        if comments is not None:
+            self.reaction_approval_request.comments = comments
 
         db.session.commit()
 
@@ -519,7 +521,7 @@ class ReactionApprovalRequestStatus:
         self._update_query(True)
         self._update_request_status("APPROVED")
 
-    def deny(self, comments):
+    def reject(self, comments):
         """
         Updates the status of a reaction approval request to as responded to (bool) and 'REJECTED' and notifies the requestor.
         """
@@ -541,4 +543,4 @@ class ReactionApprovalRequestStatus:
         Updates the status of a reaction approval request to as responded to (bool) and 'CHANGES_REQUESTED' and notifies the requestor.
         """
         self._update_query(False)
-        self._update_request_status("CHANGES_REQUESTED")
+        self._update_request_status("CHANGES_REQUESTED", comments=comments)
