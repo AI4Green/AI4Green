@@ -456,3 +456,11 @@ function approveReaction(requestID) {
       }
     });
 }
+
+function suggestChangesModal() {
+  $("#suggest-comment-modal").modal("show");
+}
+
+function rejectReactionModal() {
+  $("#reject-reaction-modal").modal("show");
+}
