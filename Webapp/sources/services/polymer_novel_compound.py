@@ -480,7 +480,7 @@ def canonicalise(smiles: str) -> str:
         ps = PolymerSmiles(smiles)
         smiles = ps.canonicalize
         return str(smiles).replace("[*]", "*")  # change dangling bonds label
-    except Exception as e:
+    except UserWarning as e:
         return f"Error: {str(e)}"
 
 

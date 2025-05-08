@@ -164,7 +164,7 @@ class SearchHandler:
                     "status": "error message",
                     "message": "Searching for polymers with known end groups is not yet supported",
                 }
-            )  # TODO: deal with end groups somehow
+            )  # TODO: deal with end groups and dummy atoms somehow
 
         # iterate through reactant, reagent, and product for each reaction and check for a match
         for reaction in self.reactions:
