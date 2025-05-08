@@ -360,12 +360,15 @@ def extract_inside_brackets(
     return inner_content, -1  # Return -1 if no matching parenthesis found
 
 
-def check_bracket_balance(s):
+def check_bracket_balance(smiles):
+    """
+    Returns the number of opening brackets compared to closing brackets in a SMILES string.
+    """
     balance = 0
-    for i in range(len(s)):
-        if s[i] == "(":
+    for i in range(len(smiles)):
+        if smiles[i] == "(":
             balance += 1
-        elif s[i] == ")":
+        elif smiles[i] == ")":
             balance -= 1
 
     return balance
