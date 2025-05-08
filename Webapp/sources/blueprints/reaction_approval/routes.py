@@ -65,18 +65,21 @@ def request_response(token: str) -> Response:
         current_user.Person in reaction_approval_request.required_approvers
         and security_pi_workgroup(workgroup.name)
     ):
-        # include response check here
-        return render_template(
-            "sketcher_reload.html",
-            reaction=reaction,
-            load_status="loading",
-            demo="not demo",
-            active_workgroup=workgroup.name,
-            active_workbook=workbook.name,
-            tutorial="no",
-            addenda=addenda,
-            review=True,
-        )
+        if reaction_approval_request.status.value == "PENDING":
+            return render_template(
+                "sketcher_reload.html",
+                reaction=reaction,
+                load_status="loading",
+                demo="not demo",
+                active_workgroup=workgroup.name,
+                active_workbook=workbook.name,
+                tutorial="no",
+                addenda=addenda,
+                review=True,
+            )
+        else:
+            flash("A review has already been submitted for this reaction!")
+            return redirect(url_for("main.index"))
 
     else:
         flash("You do not have permission to view this page")
@@ -96,12 +99,6 @@ def review_reaction_approve() -> Response:
     return jsonify(
         {"message": "Reaction approved!", "redirect_url": url_for("main.index")}
     )
-
-
-# TO DO
-# handle duplicates and already reviewed reactiosn (dont allow two reviews!)
-
-# option to resubmit after changes - new DB option
 
 
 @reaction_approval_bp.route("/reject", methods=["PATCH"])
