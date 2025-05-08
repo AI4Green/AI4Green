@@ -520,6 +520,7 @@ class ReactionApprovalRequestStatus:
         """
         self._update_query(True)
         self._update_request_status("APPROVED")
+        self._notify_requestor()
 
     def reject(self, comments):
         """
@@ -527,16 +528,7 @@ class ReactionApprovalRequestStatus:
         """
         self._update_query(False)
         self._update_request_status("REJECTED", comments)
-
-        # # notify requestor of rejection
-        # models.Notification.create(
-        #     person=self.reaction_approval_request.requestor,
-        #     type="Reaction Rejected",
-        #     info=f"Your reaction {self.reaction_approval_request.reaction.reaction_id}  in workbook "
-        #     f"{self.reaction_approval_request.workbook.name} has been rejected.",
-        #     time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
-        #     status="active",
-        # )
+        self._notify_requestor()
 
     def suggest_changes(self, comments):
         """
@@ -544,3 +536,43 @@ class ReactionApprovalRequestStatus:
         """
         self._update_query(False)
         self._update_request_status("CHANGES_REQUESTED", comments=comments)
+        self._notify_requestor()
+
+    def _notify_requestor(self):
+        """
+        Creates notification and sends email after response submitted
+        """
+        # notify requestor of response
+        models.Notification.create(
+            person=self.reaction_approval_request.requestor,
+            type="Your Reaction Approval Request",
+            info=self._requestor_response(),
+            time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
+            status="active",
+        )
+        services.email.send_reaction_approval_response(
+            user=self.reaction_approval_request.requestor_person.user,
+            reaction_approval_request=self.reaction_approval_request,
+        )
+
+    def _requestor_response(self):
+        return f"""
+                Your reaction {self.reaction_approval_request.Reaction.reaction_id} in workbook
+                {self.reaction_approval_request.WorkBook.name} has been reviewed.
+                <br><br>
+
+                <div style="text-align: center;">
+                    <table style="margin: 0 auto; border-collapse: collapse;">
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="text-align: center; padding: 8px; border: 1px solid #ddd;">Reviewer</th>
+                            <th style="text-align: center; padding: 8px; border: 1px solid #ddd;">Decision</th>
+                            <th style="text-align: center; padding: 8px; border: 1px solid #ddd;">Comments</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{self.reaction_approval_request.reviewed_by_person.user.fullname}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{self.reaction_approval_request.status.value.capitalize()}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{self.reaction_approval_request.comments}</td>
+                        </tr>
+                    </table>
+                </div>
+                """

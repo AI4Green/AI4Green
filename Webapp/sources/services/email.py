@@ -54,6 +54,31 @@ def send_reaction_approval_request(
     )
 
 
+def send_reaction_approval_response(
+    user: models.User,
+    reaction_approval_request: models.ReactionApprovalRequest,
+):
+    """
+    DOCSTRING HERE
+    """
+
+    mail.send_email(
+        "Your Reaction Approval Request",
+        sender=current_app.config["MAIL_ADMIN_SENDER"],
+        recipients=[user.email],
+        text_body=render_template(
+            "email/reaction_approval_response.txt",
+            reaction_approval_request=reaction_approval_request,
+            user=user,
+        ),
+        html_body=render_template(
+            "email/reaction_approval_response.html",
+            reaction_approval_request=reaction_approval_request,
+            user=user,
+        ),
+    )
+
+
 def verify_reaction_approval_request_token(
     token: str,
 ) -> Optional[
