@@ -1,3 +1,5 @@
+from json.decoder import JSONDecodeError
+
 from flask import Response, json, jsonify, render_template, request
 from flask_login import login_required
 from sources import models, services
@@ -120,16 +122,26 @@ class SearchHandler:
     ) -> None:
         """Exact structure search looking for matches in reactants, reagents, and products"""
         if reaction.reaction_smiles:
-            reactants1, products1 = reaction.reaction_smiles.split(">>")
-            reactants1, products1 = reactants1.split("."), products1.split(".")
-            reactants2, reagents, products2 = (
+            (
+                reactants_from_reaction_smiles,
+                products_from_reaction_smiles,
+            ) = reaction.reaction_smiles.split(">>")
+            (
+                reactants_from_reaction_smiles,
+                products_from_reaction_smiles,
+            ) = reactants_from_reaction_smiles.split(
+                "."
+            ), products_from_reaction_smiles.split(
+                "."
+            )
+            reactants_from_db, reagents, products_from_db = (
                 reaction.reactants,
                 reaction.reagents,
                 reaction.products,
             )
-            reactants, products = list(set(reactants1 + reactants2)), list(
-                set(products1 + products2)
-            )
+            reactants, products = list(
+                set(reactants_from_reaction_smiles + reactants_from_db)
+            ), list(set(products_from_reaction_smiles + products_from_db))
             components = [reactants, reagents, products]
             for component_type in components:
                 for component_smiles in component_type:
@@ -179,25 +191,35 @@ class SearchHandler:
             return
 
         if reaction.reaction_smiles:
-            reactants1, products1 = reaction.reaction_smiles.split(">>")
-            reactants1, products1 = reactants1.split("."), products1.split(".")
-            reactants2, reagents, products2 = (
+            (
+                reactants_from_reaction_smiles,
+                products_from_reaction_smiles,
+            ) = reaction.reaction_smiles.split(">>")
+            (
+                reactants_from_reaction_smiles,
+                products_from_reaction_smiles,
+            ) = reactants_from_reaction_smiles.split(
+                "."
+            ), products_from_reaction_smiles.split(
+                "."
+            )
+            reactants_from_db, reagents, products_from_db = (
                 reaction.reactants,
                 reaction.reagents,
                 reaction.products,
             )
 
             # load json strings and flatten lists
-            for smiles_list in reactants2, products2:
+            for smiles_list in reactants_from_db, products_from_db:
                 for i in range(len(smiles_list)):
                     try:
                         smiles_list[i] = json.loads(smiles_list[i])
-                    except:
+                    except JSONDecodeError:
                         smiles_list[i] = [smiles_list[i]]
 
-            reactants, products = list(set(reactants1 + sum(reactants2, []))), list(
-                set(products1 + sum(products2, []))
-            )
+            reactants, products = list(
+                set(reactants_from_reaction_smiles + sum(reactants_from_db, []))
+            ), list(set(products_from_reaction_smiles + sum(products_from_db, [])))
             components = [reactants, reagents, products]
             for component_type in components:
                 for component_smiles in component_type:
