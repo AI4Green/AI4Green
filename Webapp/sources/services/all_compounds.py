@@ -196,9 +196,7 @@ def mol_weight_from_smiles(smiles: Union[str, List]) -> Union[float, List]:
     """
     # MolWt accounts for the average across isotopes but ExactMolWt only takes the most abundant isotope.
     if isinstance(smiles, list):
-        mol_wts = []
-        for s in smiles:
-            mol_wts.append(round(Descriptors.MolWt(Chem.MolFromSmiles(s)), 2))
+        mol_wts = [round(Descriptors.MolWt(Chem.MolFromSmiles(s)), 2) for s in smiles]
     else:
         mol_wts = round(Descriptors.MolWt(Chem.MolFromSmiles(smiles)), 2)
 

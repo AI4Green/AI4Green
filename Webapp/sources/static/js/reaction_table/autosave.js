@@ -493,18 +493,10 @@ function getFieldData() {
     let reactantPhysicalForm = $(reactantPhysicalFormID).prop("selectedIndex");
     reactantPhysicalForms += reactantPhysicalForm + ";";
     let reactantMolecularWeightsID = "#js-reactant-molecular-weight" + i;
-    if (!$(reactantMolecularWeightsID).val()) {
-      // element id is different for polymers
-      let k = 1;
-      while ($(reactantMolecularWeightsID + "-" + k).val()) {
-        reactantMolecularWeights +=
-          $(reactantMolecularWeightsID + "-" + k).val() + ","; // change semicolon
-        k++;
-      }
-      reactantMolecularWeights = reactantMolecularWeights.replace(/.$/, ";");
-    } else {
-      reactantMolecularWeights += $(reactantMolecularWeightsID).val() + ";";
-    }
+    reactantMolecularWeights = getMolecularWeights(
+      reactantMolecularWeightsID,
+      reactantMolecularWeights,
+    );
     let reactantHazardsID = "#js-reactant-hazards" + i;
     reactantHazards += $(reactantHazardsID).val() + ";";
     reactantPhysicalFormsText += $(reactantPhysicalFormID).val() + ";";
@@ -613,18 +605,10 @@ function getFieldData() {
     let productNameID = "#js-product" + i;
     productNames += $(productNameID).val() + ";";
     let productMolecularWeightID = "#js-product-molecular-weight" + i;
-    if (!$(productMolecularWeightID).val()) {
-      // element id is different for polymers
-      let k = 1;
-      while ($(productMolecularWeightID + "-" + k).val()) {
-        productMolecularWeights +=
-          $(productMolecularWeightID + "-" + k).val() + +","; // change semicolon
-        k++;
-      }
-      productMolecularWeights = productMolecularWeights.replace(/.$/, ";");
-    } else {
-      productMolecularWeights += $(productMolecularWeightID).val() + ";";
-    }
+    productMolecularWeights = getMolecularWeights(
+      productMolecularWeightID,
+      productMolecularWeights,
+    );
     productEquivalentID = "#js-product-equivalent" + i;
     productEquivalents += $(productEquivalentID).val() + ";";
     let productHazardsID = "#js-product-hazard" + i;
@@ -936,4 +920,20 @@ function flashUserErrorSavingMessage() {
     .removeClass()
     .addClass("reaction-save-failure")
     .fadeIn("fast");
+}
+
+function getMolecularWeights(molecularWeightID, molecularWeights) {
+  // returns molecular weights from html
+  if (!$(molecularWeightID).val()) {
+    // element id is different for polymers
+    let k = 1;
+    while ($(molecularWeightID + "-" + k).val()) {
+      molecularWeights += $(molecularWeightID + "-" + k).val() + ","; // change semicolon
+      k++;
+    }
+    molecularWeights = molecularWeights.replace(/.$/, ";");
+  } else {
+    molecularWeights += $(molecularWeightID).val() + ";";
+  }
+  return molecularWeights;
 }
