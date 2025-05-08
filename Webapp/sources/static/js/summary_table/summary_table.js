@@ -435,6 +435,33 @@ function generateReactionApprovalRequest() {
     });
 }
 
+function resubmitChanges(requestID) {
+  let workbook = $("#js-active-workbook").val();
+  let workgroup = $("#js-active-workgroup").val();
+  let reactionId = $("#js-reaction-id").val();
+  fetch("/reaction_approval/resubmit_request", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      approvalID: requestID,
+      workgroup: workgroup,
+      workbook: workbook,
+      reactionID: reactionId,
+    }),
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (item) {
+      if (item.response === "success") {
+        $("#reaction-changes-suggested").hide();
+        $("#reaction-pending-review").show();
+      }
+    });
+}
+
 function approveReaction(requestID) {
   let workgroup = $("#active-workgroup").val();
   fetch("/reaction_approval/approve", {

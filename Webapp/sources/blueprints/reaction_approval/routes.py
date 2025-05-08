@@ -29,8 +29,22 @@ def new_reaction_approval_request() -> Response:
     Initiates a reaction approval request from reaction constructor
     """
     # CHECK FOR DUPLICATES AND PREVENT FOR MALICIOUS FRONT END CONTENT
-    new_request = services.reaction.NewReactionApprovalRequest()
+    new_request = services.reaction.ReactionApprovalRequestSubmission()
     new_request.submit_request()
+
+    return jsonify({"response": "success"})
+
+
+@reaction_approval_bp.route("/resubmit_request", methods=["PATCH"])
+def resubmit_approval_request() -> Response:
+    """
+    Resubmits a reaction approval request after suggested changes are made
+    """
+    approval_request = models.ReactionApprovalRequest.query.get(
+        request.json.get("approvalID")
+    )
+    current_request = services.reaction.ReactionApprovalRequestSubmission()
+    current_request.resubmit_request(approval_request)
 
     return jsonify({"response": "success"})
 
@@ -51,6 +65,7 @@ def request_response(token: str) -> Response:
         current_user.Person in reaction_approval_request.required_approvers
         and security_pi_workgroup(workgroup.name)
     ):
+        # include response check here
         return render_template(
             "sketcher_reload.html",
             reaction=reaction,
@@ -75,12 +90,18 @@ def review_reaction_approve() -> Response:
     approval_request = models.ReactionApprovalRequest.query.get(
         request.json.get("approvalID")
     )
-    request_status = services.reaction.ReactionApprovalRequestStatus(approval_request)
+    request_status = services.reaction.ReactionApprovalRequestResponse(approval_request)
     request_status.approve()
 
     return jsonify(
         {"message": "Reaction approved!", "redirect_url": url_for("main.index")}
     )
+
+
+# TO DO
+# handle duplicates and already reviewed reactiosn (dont allow two reviews!)
+
+# option to resubmit after changes - new DB option
 
 
 @reaction_approval_bp.route("/reject", methods=["PATCH"])
@@ -90,7 +111,7 @@ def review_reaction_reject() -> Response:
     approval_request = models.ReactionApprovalRequest.query.get(
         request.json.get("requestID")
     )
-    request_status = services.reaction.ReactionApprovalRequestStatus(approval_request)
+    request_status = services.reaction.ReactionApprovalRequestResponse(approval_request)
     request_status.reject(request.json.get("comments"))
 
     return jsonify(
@@ -107,7 +128,7 @@ def review_reaction_suggest_changes() -> Response:
     approval_request = models.ReactionApprovalRequest.query.get(
         request.json.get("requestID")
     )
-    request_status = services.reaction.ReactionApprovalRequestStatus(approval_request)
+    request_status = services.reaction.ReactionApprovalRequestResponse(approval_request)
     request_status.suggest_changes(request.json.get("comments"))
 
     return jsonify(

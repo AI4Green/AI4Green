@@ -395,7 +395,7 @@ def add(
     return reaction
 
 
-class NewReactionApprovalRequest:
+class ReactionApprovalRequestSubmission:
     """
     Class to handle creation of new reaction approval requests
     """
@@ -413,6 +413,13 @@ class NewReactionApprovalRequest:
     def submit_request(self):
         """Save request to database and notify and email approvers."""
         self._save_to_database()
+        self._notify_approvers()
+
+    def resubmit_request(self, current_request):
+        """Resubmit request after suggested changes"""
+        self.reaction_approval_request = current_request
+        current_request.status = "PENDING"
+        db.session.commit()
         self._notify_approvers()
 
     def _save_to_database(self):
@@ -473,7 +480,7 @@ class NewReactionApprovalRequest:
                 """
 
 
-class ReactionApprovalRequestStatus:
+class ReactionApprovalRequestResponse:
     """Class to update the request status when an approver approves or rejects a reaction"""
 
     def __init__(self, reaction_approval_request: models.ReactionApprovalRequest):
@@ -536,6 +543,10 @@ class ReactionApprovalRequestStatus:
         """
         self._update_query(False)
         self._update_request_status("CHANGES_REQUESTED", comments=comments)
+        self._notify_requestor()
+
+    def resubmit(self):
+        self._update_request_status("PENDING")
         self._notify_requestor()
 
     def _notify_requestor(self):

@@ -411,8 +411,9 @@
                                     <label for="change-comments">Reviewer Comments:</label>
                                     <textarea id="change-comments" disabled>{{ approval_request.comments }}</textarea>
                                 </div>
+                                <br>
+                                <button type="button" id="submit-suggest-comments" value="{{ approval_request.id }}" class="btn btn-warning" onclick="resubmitChanges(this.value)">Resubmit For Review</button>
                             </div>
-
                         {% endif %}
                     </td>
                 </tr>
@@ -425,9 +426,6 @@
 <script type="text/javascript" src="{{ url_for('static', filename='js/custom_colours.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/summary_table.js') }}"></script>
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_approval.css') }}">
-
-<p></p>
-
 
 <input type="hidden" value="{{ reactant_primary_keys }}" id="js-reactant-primary-keys">
 <input type="hidden" value="{{ product_primary_keys }}" id="js-product-primary-keys">
