@@ -17,7 +17,13 @@ def send_reaction_approval_request(
     reaction: models.Reaction,
 ):
     """
-    DOCSTRING HERE
+    Send reaction approval request email to a given user. They have 70 days to respond
+    Args:
+        user (models.User): User to send to.
+        reaction_approval_request (models.ReactionApprovalRequest): Reaction approval request.
+        workgroup (models.WorkGroup): Workgroup the reaction belongs to
+        workbook (models.WorkBook): Workbook the reaction belongs to
+        reaction (models.Reaction): The reaction for approval
     """
     token = get_encoded_token(
         time_limit=6048000,  # 70 days?
@@ -59,7 +65,10 @@ def send_reaction_approval_response(
     reaction_approval_request: models.ReactionApprovalRequest,
 ):
     """
-    DOCSTRING HERE
+    Send reaction approval request response email to reaction creator. Updates the creator of a reaction on the verdict of the approval request
+    Args:
+        user (models.User): User to send to.
+        reaction_approval_request (models.ReactionApprovalRequest): Reaction approval request.
     """
 
     mail.send_email(

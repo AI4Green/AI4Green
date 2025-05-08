@@ -29,14 +29,12 @@ def summary() -> Response:
         workgroup_name = str(request.form["workgroup"])
         workbook_name = str(request.form["workbook"])
         review = request.form.get("review")
-        print("review", review)
         if not auxiliary.security_member_workgroup_workbook(
             workgroup_name, workbook_name
         ):
             abort(401)
 
         reaction = services.reaction.get_current_from_request()
-        print("approval", reaction.reaction_approval_request)
         approval_request = next(
             iter(reaction.reaction_approval_request), {"status": "None"}
         )

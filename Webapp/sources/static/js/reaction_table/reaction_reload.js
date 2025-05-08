@@ -222,7 +222,6 @@ function controlNonCreatorFunctionality() {
   $("#approve-reaction").prop("disabled", false);
   $("#suggest-changes").prop("disabled", false);
   $("#reject-reaction").prop("disabled", false);
-  $("#suggest-comment-text").prop("disabled", false);
   $("#suggest-comment-modal").find(":disabled").prop("disabled", false);
   $("#reject-reaction-modal").find(":disabled").prop("disabled", false);
   $("#reaction-note-button").hide();

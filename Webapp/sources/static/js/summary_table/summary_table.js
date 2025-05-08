@@ -408,6 +408,11 @@ function flagMassEfficiency() {
   setColours();
 }
 
+/**
+ * Sends a POST request to create a new reaction approval request.
+ * Gathers the current workgroup, workbook, and reaction ID from the DOM,
+ * and updates the UI based on the server's response.
+ */
 function generateReactionApprovalRequest() {
   let workbook = $("#js-active-workbook").val();
   let workgroup = $("#js-active-workgroup").val();
@@ -435,6 +440,11 @@ function generateReactionApprovalRequest() {
     });
 }
 
+/**
+ * Sends a PATCH request to resubmit changes to a previously submitted reaction approval request.
+ *
+ * @param {string} requestID - The ID of the approval request being resubmitted.
+ */
 function resubmitChanges(requestID) {
   let workbook = $("#js-active-workbook").val();
   let workgroup = $("#js-active-workgroup").val();
@@ -462,6 +472,12 @@ function resubmitChanges(requestID) {
     });
 }
 
+/**
+ * Sends a PATCH request to approve a reaction approval request.
+ * Redirects the user to a provided URL with a success message.
+ *
+ * @param {string} requestID - The ID of the approval request to approve.
+ */
 function approveReaction(requestID) {
   let workgroup = $("#active-workgroup").val();
   fetch("/reaction_approval/approve", {
@@ -484,6 +500,12 @@ function approveReaction(requestID) {
     });
 }
 
+/**
+ * Sends a PATCH request to submit suggested changes for a reaction approval request.
+ * Collects comment text from the UI and redirects with success message upon success.
+ *
+ * @param {string} requestID - The ID of the request to which the comment applies.
+ */
 function submitSuggestComment(requestID) {
   let commentText = $("#suggest-comment-text").val();
   fetch("/reaction_approval/suggest_changes", {
@@ -506,6 +528,12 @@ function submitSuggestComment(requestID) {
     });
 }
 
+/**
+ * Sends a PATCH request to reject a reaction approval request with reviewer comments.
+ * Redirects the user and displays success message on success.
+ *
+ * @param {string} requestID - The ID of the approval request to reject.
+ */
 function submitRejectReaction(requestID) {
   let commentText = $("#reject-comment-text").val();
   fetch("/reaction_approval/reject", {
@@ -528,12 +556,24 @@ function submitRejectReaction(requestID) {
     });
 }
 
+/**
+ * Opens the modal dialog for suggesting changes to a reaction.
+ * Sets the approval request ID on the submit button.
+ *
+ * @param {string} requestID - The ID of the approval request to attach to the modal.
+ */
 function suggestChangesModal(requestID) {
   $("#suggest-comment-modal").modal("show");
   // sets request id as value for submit button
   $("#submit-suggest-comments").val(requestID);
 }
 
+/**
+ * Opens the modal dialog for rejecting a reaction.
+ * Sets the approval request ID on the submit button.
+ *
+ * @param {string} requestID - The ID of the approval request to attach to the modal.
+ */
 function rejectReactionModal(requestID) {
   $("#reject-reaction-modal").modal("show");
   // sets request id as value for submit button

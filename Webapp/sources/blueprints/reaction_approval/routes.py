@@ -27,6 +27,9 @@ from . import reaction_approval_bp
 def new_reaction_approval_request() -> Response:
     """
     Initiates a reaction approval request from reaction constructor
+
+    Returns:
+        flask.Response: success message
     """
     # CHECK FOR DUPLICATES AND PREVENT FOR MALICIOUS FRONT END CONTENT
     new_request = services.reaction.ReactionApprovalRequestSubmission()
@@ -39,6 +42,9 @@ def new_reaction_approval_request() -> Response:
 def resubmit_approval_request() -> Response:
     """
     Resubmits a reaction approval request after suggested changes are made
+
+    Returns:
+        flask.Response: success message
     """
     approval_request = models.ReactionApprovalRequest.query.get(
         request.json.get("approvalID")
@@ -52,6 +58,19 @@ def resubmit_approval_request() -> Response:
 @reaction_approval_bp.route("/request_response/<token>", methods=["GET", "POST"])
 @login_required
 def request_response(token: str) -> Response:
+    """
+    Render the reaction review interface if the user is authorized and the request is valid.
+
+    If the approval request is still pending, the reaction sketcher interface is rendered for review.
+    If the request has already been reviewed, the user is notified accordingly.
+
+    Args:
+        token (str): A secure token representing the reaction approval request.
+
+    Returns:
+        flask.Response: A rendered template for the reaction review, or a redirect with a flash message
+        depending on authorization and approval request status.
+    """
     (
         workgroup,
         workbook,
@@ -88,8 +107,13 @@ def request_response(token: str) -> Response:
 
 @reaction_approval_bp.route("/approve", methods=["PATCH"])
 @login_required
-# @principal_investigator_required
 def review_reaction_approve() -> Response:
+    """
+    Handle a PATCH request to approve a reaction approval request and redirect the user to the home page
+
+    Returns:
+        flask.Response: A Flask JSON response containing a success message and a redirect URL.
+    """
     approval_request = models.ReactionApprovalRequest.query.get(
         request.json.get("approvalID")
     )
@@ -103,8 +127,13 @@ def review_reaction_approve() -> Response:
 
 @reaction_approval_bp.route("/reject", methods=["PATCH"])
 @login_required
-# @principal_investigator_required
 def review_reaction_reject() -> Response:
+    """
+    Handle a PATCH request to reject a reaction approval request and redirect the user to the home page
+
+    Returns:
+        flask.Response: A Flask JSON response containing a success message and a redirect URL.
+    """
     approval_request = models.ReactionApprovalRequest.query.get(
         request.json.get("requestID")
     )
@@ -122,6 +151,12 @@ def review_reaction_reject() -> Response:
 @reaction_approval_bp.route("/suggest_changes", methods=["PATCH"])
 @login_required
 def review_reaction_suggest_changes() -> Response:
+    """
+    Handle a PATCH request to suggest changes to reaction approval request and redirect the user to the home page
+
+    Returns:
+        flask.Response: A Flask JSON response containing a success message and a redirect URL.
+    """
     approval_request = models.ReactionApprovalRequest.query.get(
         request.json.get("requestID")
     )

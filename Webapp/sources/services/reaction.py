@@ -401,7 +401,16 @@ class ReactionApprovalRequestSubmission:
     """
 
     def __init__(self):
-        """Creates an instance of NewReactionApprovalRequest from request.json"""
+        """
+        Creates an instance of NewReactionApprovalRequest from request.json
+
+        Attributes:
+            requestor (models.Person): The user initiating the approval request.
+            workgroup (models.WorkGroup): The workgroup specified in the request JSON.
+            workbook (models.WorkBook): The workbook associated with the workgroup.
+            reaction (models.Reaction): The reaction to be reviewed, extracted from the request.
+            reaction_approval_request (models.ReactionApprovalRequest | None): Initialized as None, to be set later.
+        """
         self.requestor = services.user.person_from_current_user()
         self.workgroup = services.workgroup.from_name(request.json.get("workgroup"))
         self.workbook = services.workbook.get_workbook_from_group_book_name_combination(
@@ -410,20 +419,38 @@ class ReactionApprovalRequestSubmission:
         self.reaction = get_current_from_request_json()
         self.reaction_approval_request = None
 
-    def submit_request(self):
-        """Save request to database and notify and email approvers."""
+    def submit_request(self) -> None:
+        """
+        Save request to database and notify and email approvers.
+
+        Returns:
+            None
+        """
         self._save_to_database()
         self._notify_approvers()
 
-    def resubmit_request(self, current_request):
-        """Resubmit request after suggested changes"""
+    def resubmit_request(self, current_request) -> None:
+        """
+        Resubmit request after suggested changes. Changes request status back to PENDING from CHANGES_REQUESTED
+
+        Args:
+            current_request (models.ReactionApprovalRequest): The current request to update
+
+        Returns:
+            None
+        """
         self.reaction_approval_request = current_request
         current_request.status = "PENDING"
         db.session.commit()
         self._notify_approvers()
 
-    def _save_to_database(self):
-        """Save the data export request to the database"""
+    def _save_to_database(self) -> None:
+        """
+        Save the data export request to the database
+
+        Returns:
+            None
+        """
         institution = services.workgroup.get_institution()
 
         self.reaction_approval_request = models.ReactionApprovalRequest.create(
@@ -436,9 +463,12 @@ class ReactionApprovalRequestSubmission:
             institution=institution.id,
         )
 
-    def _notify_approvers(self):
+    def _notify_approvers(self) -> None:
         """
         Send a notification and an email to each principal investigator of the reaction workgroup
+
+        Returns:
+            None
         """
         for principal_investigator in self.workgroup.principal_investigator:
             models.Notification.create(
@@ -456,7 +486,13 @@ class ReactionApprovalRequestSubmission:
                 self.reaction,
             )
 
-    def _message_content(self):
+    def _message_content(self) -> str:
+        """
+        Message content used for emailing approvers.
+
+        returns:
+            message_content (str): The message content.
+        """
         return f"""
                 <p>A user has requested your review for their reaction!</p>
                 <table style='border-collapse: collapse; width: 100%; max-width: 600px; font-family: Arial, sans-serif;'>
@@ -481,16 +517,30 @@ class ReactionApprovalRequestSubmission:
 
 
 class ReactionApprovalRequestResponse:
-    """Class to update the request status when an approver approves or rejects a reaction"""
+    """
+    Class to update the request status when an approver approves or rejects a reaction
+    """
 
     def __init__(self, reaction_approval_request: models.ReactionApprovalRequest):
-        """Creates an instance of the RequestStatus class."""
+        """
+        Creates an instance of the RequestStatus class.
+
+        Attributes:
+            reaction_approval_request (models.ReactionApprovalRequest): The reaction approval request to update
+            approver (models.User): the current user who will respond to the request
+        """
         self.reaction_approval_request = reaction_approval_request
         self.approver = services.person.from_current_user_email()
 
-    def _update_query(self, approved: bool):
+    def _update_query(self, approved: bool) -> None:
         """
-        Docstring for update_query.
+        Update the approval status in the required approvers association table
+
+        Args:
+            approved (bool): set to True if reaction_approval_request.status.value set to APPROVED else False
+
+        Returns:
+            None
         """
         # use update query because it is an association table. Normal query returns immutable Row.
         update_query = (
@@ -507,9 +557,17 @@ class ReactionApprovalRequestResponse:
         )
         db.session.execute(update_query)
 
-    def _update_request_status(self, status: str, comments: Union[str, None] = None):
+    def _update_request_status(
+        self,
+        status: str,
+        comments: Union[str, None] = None,
+    ):
         """
-        status is ENUM, how to document?
+        Update the status of the reaction approval request and save to database
+
+        Args:
+            status (str): the status of the reaction to update in the db. See ENUM in models.ReactionApprovalRequest.ReactionApprovalStatus for accepted values
+            comments (str | None): comments provided by reviewer to save in db, defaults to None
         """
 
         self.reaction_approval_request.status = status
@@ -520,38 +578,51 @@ class ReactionApprovalRequestResponse:
 
         db.session.commit()
 
-    def approve(self):
+    def approve(self) -> None:
         """
-        Approves a reaction approval request, updates the approval status of the current user's approval
-        in the data export request approvers association table, and updates the status of the reaction approval request.
+        Approves a reaction approval request
+
+        Returns:
+            None
         """
         self._update_query(True)
         self._update_request_status("APPROVED")
         self._notify_requestor()
 
-    def reject(self, comments):
+    def reject(self, comments: str) -> None:
         """
-        Updates the status of a reaction approval request to as responded to (bool) and 'REJECTED' and notifies the requestor.
+        Rejects a reaction approval request
+
+        Args:
+            comments (str): comments provided by reviewer to save in db, defaults to None
+
+        Returns:
+            None
         """
         self._update_query(False)
         self._update_request_status("REJECTED", comments)
         self._notify_requestor()
 
-    def suggest_changes(self, comments):
+    def suggest_changes(self, comments: str) -> None:
         """
-        Updates the status of a reaction approval request to as responded to (bool) and 'CHANGES_REQUESTED' and notifies the requestor.
+        Suggests changes for a reaction approval request
+
+        Args:
+            comments (str): comments provided by reviewer to save in db, defaults to None
+
+        Returns:
+            None
         """
         self._update_query(False)
         self._update_request_status("CHANGES_REQUESTED", comments=comments)
         self._notify_requestor()
 
-    def resubmit(self):
-        self._update_request_status("PENDING")
-        self._notify_requestor()
-
-    def _notify_requestor(self):
+    def _notify_requestor(self) -> None:
         """
-        Creates notification and sends email after response submitted
+        Creates notification and sends email after reaction approval response submitted
+
+        Returns:
+            None
         """
         # notify requestor of response
         models.Notification.create(
@@ -567,6 +638,12 @@ class ReactionApprovalRequestResponse:
         )
 
     def _requestor_response(self):
+        """
+        Message used in email for mailing reaction creators
+
+        Returns:
+            requestor_response (str): Message for email content
+        """
         return f"""
                 Your reaction {self.reaction_approval_request.Reaction.reaction_id} in workbook
                 {self.reaction_approval_request.WorkBook.name} has been reviewed.
