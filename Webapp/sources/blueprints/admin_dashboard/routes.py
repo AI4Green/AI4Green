@@ -51,7 +51,7 @@ def admin_dashboard(
     controlled_substance_usage = services.controlled_substances.list_all()
 
     return render_template(
-        "admin_dashboard.html",
+        "general/admin_dashboard.html",
         workgroups=workgroups,
         compound_data_error_reports=compound_data_error_reports,
         number_compounds_in_db=compound_count,

@@ -1,18 +1,18 @@
 import ast
+import json
 import os
 from typing import Dict, List
 
 import numpy as np
 import pandas as pd
-import json
 from flask import Response, render_template, request
 from sources import models
+from sources.blueprints.main.routes import get_custom_colours
 from sources.extensions import db
 
 from .best_closest import get_closest
-from .interactive.interactive_embeddings import GetEmbedding
 from .interactive.Embedder import cPCA
-from sources.blueprints.main.routes import get_custom_colours
+from .interactive.interactive_embeddings import GetEmbedding
 
 
 def extract_names(name_list: List) -> List:
@@ -42,7 +42,7 @@ def get_surfer_names() -> (List, List, List):
         )
     )
 
-    solvent_data = solvent_data.fillna('')
+    solvent_data = solvent_data.fillna("")
     names = extract_names(solvent_data["Solvent"].values.tolist())
     alt_names = extract_names(solvent_data["Alternative Name"].values.tolist())
 
@@ -94,7 +94,7 @@ def find_reaction_table_mode_variables(
     upper_name = name.upper()
 
     if upper_name in upper_names:
-        if name == '':
+        if name == "":
             point = []
         else:
             point = [upper_names.index(upper_name) - 1]
@@ -298,7 +298,7 @@ def get_suggest_solvent_table(point: List, df: pd.DataFrame) -> (Response, List)
     # renders suggest solvent table template based on the selected point. needs output df of get_pca()
 
     if len(point) > 0:
-        colour_dict = get_custom_colours().get_json()['colours']
+        colour_dict = get_custom_colours().get_json()["colours"]
         best_df = get_closest(point[0], df)
         best_solvents = best_df.to_dict("index")
         best_solvents = [value for value in best_solvents.values()]
@@ -309,7 +309,10 @@ def get_suggest_solvent_table(point: List, df: pd.DataFrame) -> (Response, List)
 
         # this is the solvent selected
         suggest_solvent_table = render_template(
-            "_suggest_solvent_table.html", solvents=best_solvents, sol=sol, colours=colour_dict
+            "solvents/_suggest_solvent_table.html",
+            solvents=best_solvents,
+            sol=sol,
+            colours=colour_dict,
         )
     else:
         suggest_solvent_table = None
@@ -409,11 +412,13 @@ def control_points_for_df(control_points: Dict, names: List) -> np.array:
 
     return c_points
 
+
 class NumpyEncoder(json.JSONEncoder):
     """
     Class for converting np.arrays to lists for JSON sterilization.
     Used only in jsonify_embedding_params
     """
+
     def default(self, obj):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
@@ -423,7 +428,6 @@ class NumpyEncoder(json.JSONEncoder):
 
 
 def json_decoder(embedding_dict: Dict) -> Dict:
-
     """
     Converts the embedding params from the database (which are saved as JSON)
     to the appropriate types.
@@ -475,7 +479,7 @@ def jsonify_embedding_params(embedding_algorithm: cPCA) -> json.dumps:
     save_dict = embedding_algorithm_dict.copy()
 
     # remove python classes from dict (these can't be converted to JSON)
-    del save_dict['parent']
-    del save_dict['embedder']
+    del save_dict["parent"]
+    del save_dict["embedder"]
 
     return json.dumps(save_dict, cls=NumpyEncoder)

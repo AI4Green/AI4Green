@@ -66,7 +66,7 @@ def index() -> Response:
             .all()
         )
         return render_template(
-            "home.html",
+            "general/home.html",
             user_role=user_role,
             user_confirmed=user_confirmed,
             news_items=news_items,
@@ -76,7 +76,7 @@ def index() -> Response:
         )
     # user is not authenticated, send to landing page.
     else:
-        return render_template("landing_page.html", form=form)
+        return render_template("general/landing_page.html", form=form)
 
 
 @main_bp.route("/load_icons", methods=["GET", "POST"])
@@ -167,7 +167,7 @@ def sketcher(
     else:
         load_status = "loaded"
     return render_template(
-        "sketcher_reload.html",
+        "reactions/sketcher_reload.html",
         reaction=reaction,
         load_status=load_status,
         demo="not demo",
@@ -197,7 +197,7 @@ def sketcher_tutorial(tutorial: str) -> Response:
         workgroups = get_workgroups()
         notification_number = get_notification_number()
     return render_template(
-        "sketcher_reload.html",
+        "reactions/sketcher_reload.html",
         reaction={
             "name": "Tutorial Reaction",
             "reaction_id": "TUT-001",
@@ -226,7 +226,7 @@ def demo() -> Response:
         workgroups = get_workgroups()
         notification_number = get_notification_number()
     return render_template(
-        "demo_sketcher.html",
+        "reactions/demo_sketcher.html",
         demo="demo",
         workgroups=workgroups,
         notification_number=notification_number,
@@ -246,7 +246,9 @@ def search() -> Response:
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
-        "search.html", workgroups=workgroups, notification_number=notification_number
+        "reactions/search.html",
+        workgroups=workgroups,
+        notification_number=notification_number,
     )
 
 
@@ -278,7 +280,7 @@ def manage_account() -> Response:
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
-        "manage_account.html",
+        "account_management/manage_account.html",
         workgroups=workgroups,
         notification_number=notification_number,
     )
@@ -299,7 +301,9 @@ def info() -> Response:
         workgroups = get_workgroups()
         notification_number = get_notification_number()
     return render_template(
-        "info.html", workgroups=workgroups, notification_number=notification_number
+        "general/info.html",
+        workgroups=workgroups,
+        notification_number=notification_number,
     )
 
 
@@ -318,7 +322,9 @@ def about() -> Response:
         workgroups = get_workgroups()
         notification_number = get_notification_number()
     return render_template(
-        "about.html", workgroups=workgroups, notification_number=notification_number
+        "general/about.html",
+        workgroups=workgroups,
+        notification_number=notification_number,
     )
 
 
@@ -358,7 +364,7 @@ def marvin_js_help() -> Response:
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
-        "marvin_js_help.html",
+        "general/marvin_js_help.html",
         workgroups=workgroups,
         notification_number=notification_number,
     )
@@ -377,7 +383,7 @@ def accessibility() -> Response:
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
-        "accessibility.html",
+        "account_management/accessibility.html",
         workgroups=workgroups,
         notification_number=notification_number,
     )

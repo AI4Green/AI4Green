@@ -208,7 +208,7 @@ class SearchHandler:
         reactions = services.reaction.to_dict(self.matches)
         self.images = services.reaction.make_reaction_image_list(self.matches)
         self.search_results = render_template(
-            "_saved_reactions.html", reactions=reactions, sort_crit="AZ"
+            "reactions/_saved_reactions.html", reactions=reactions, sort_crit="AZ"
         )
 
     def sort_matches(self) -> None:
