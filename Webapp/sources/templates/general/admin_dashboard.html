@@ -1,0 +1,615 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block scripts %}
+        <script type="text/javascript" src="{{ url_for('static', filename='js/admin_dashboard.js') }}"></script>
+{% endblock %}
+{% block content %}
+
+<body onload="userFocus()">
+    <div class="container" style="max-width:1250px">
+<!--        Title-->
+        <h2>Admin Dashboard</h2>
+        <!--Tabs    -->
+        <ul id="myTab" class="nav nav-tabs" role="tablist">
+          <li class="nav-item">
+              <a class="nav-link active" role="tab" data-toggle="tab" href="#pi_request_tab" aria-selected="true">PI Requests</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" role="tab" data-toggle="tab" href="#compound_data_error_report" aria-selected="false">Compound data error reports</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" role="tab" data-toggle="tab" href="#database_analysis_tab" aria-selected="false">Database</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" role="tab" data-toggle="tab" href="#users_tab" aria-selected="false">Users</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" role="tab" data-toggle="tab" href="#workgroups_tab" aria-selected="false">Workgroups</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" role="tab" data-toggle="tab" href="#workbooks-tab" aria-selected="false">Workbooks</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" role="tab" data-toggle="tab" href="#recent-reactions-tab" aria-selected="false">Recent Reactions</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" role="tab" data-toggle="tab" href="#solvent-surfer-tab" aria-selected="false">Recent Surfers</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" role="tab" data-toggle="tab" href="#retro-tab" aria-selected="false">Recent Retros</a>
+          </li>
+            <li class="nav-item">
+              <a class="nav-link" role="tab" data-toggle="tab" href="#substance-tab" aria-selected="false">Controlled Substances</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" role="tab" data-toggle="tab" href="#news_feed_tab" aria-selected="false" id="news-feed-tab">News Feed</a>
+          </li>
+        </ul>
+
+        <!--Tables  -->
+        <div class="tab-content">
+<!--            PI request table-->
+            <div class="tab-pane fade show active" id="pi_request_tab" role="tabpanel">
+                <table id="pi_request_table" class="table table-striped table-sm">
+                    <tr>
+                        <th>
+                            &#8470;
+                        </th>
+                        <th>
+                            Institution
+                        </th>
+                        <th>
+                            Workgroup Name
+                        </th>
+                        <th>
+                            Requester Email
+                        </th>
+                        <th>
+                            Additional Info
+                        </th>
+                        <th>
+                            Time
+                        </th>
+                        <th>
+                            Approval
+                        </th>
+                    </tr>
+                    {% for request in new_workgroup_requests %}
+                    <tr>
+                        <td class="align-middle">
+                            {{ loop.index }}
+                        </td>
+                        <td class="align-middle" id="institution-name{{ loop.index }}">
+                            {{ request.Institution.name }}
+                        </td>
+                        <td class="align-middle" id="workgroup-name{{ loop.index }}">
+                            {{ request.name }}
+                        </td>
+                        <td class="align-middle" id="pi-email{{ loop.index }}">
+                            {{ request.pi.user.email }}
+                        </td>
+                        <td class="align-middle">
+                            {{ request.info }}
+                        </td>
+                        <td class="align-middle">
+                            {% set time = request.time|string %}
+                            {{ time[:-7] }}
+                        </td>
+
+                        <td class="align-middle">
+                            <a id="request-approve{{ loop.index }}" class="btn btn-primary" href="{{ url_for('admin_dashboard.admin_dashboard', request_institution=request.Institution.name, request_name=request.name, decision='approve') }}">Approve</a>
+                            <a id="request-deny{{ loop.index }}"  class="btn btn-primary" onclick="denyWorkgroup(this.id)">Deny</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+<!--                Compound data error report table-->
+            <div id="compound_data_error_report" class="tab-pane fade in" role="tabpanel">
+                <table id="compound_data_error_report_table" class="table table-striped table-sm">
+                    <tr>
+                        <th>
+                            &#8470;
+                        </th>
+                        <th>
+                            Compound Name
+                        </th>
+                        <th>
+                            Error Type
+                        </th>
+                        <th>
+                            Additional Info
+                        </th>
+                        <th>
+                            Time
+                        </th>
+                        <th>
+                            PubChem
+                        </th>
+                    </tr>
+                    {% for report in compound_data_error_reports %}
+                    <tr>
+                        <td>
+                            {{ loop.index }}
+                        </td>
+                        <td>
+                            {{ report.compound_name }}
+                        </td>
+                        <td>
+                            {{ report.error_type }}
+                        </td>
+                        <td>
+                            {{ report.additional_info }}
+                        </td>
+                        <td>
+                            {{ report.time }}
+                        </td>
+                        <td>
+                            <p><a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ report.compound.CID }}" target=”_blank” class="btn btn-primary">View</a></p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+<!--            Database analysis table-->
+            <div class="tab-pane fade in" id="database_analysis_tab" role="tabpanel">
+                <table class="table table-striped table-sm">
+                    <tr>
+                        <th>
+                            Entity
+                        </th>
+                        <th>
+                            Number
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                            Users
+                        </td>
+                        <td>
+                            {{ users|length }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Workgroups
+                        </td>
+                        <td>
+                            {{ wgs|length }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Compounds
+                        </td>
+                        <td>
+                            {{ number_compounds_in_db }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Reactions
+                        </td>
+                        <td>
+                            {{ number_reactions_in_db }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Reactions
+                        </td>
+                        <td>
+                            {{ number_reactions_in_db }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Solvent Surfers
+                        </td>
+                        <td>
+                            {{ number_surfers_in_db }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+<!--            User table-->
+            <div class="tab-pane fade in" id="users_tab" role="tabpanel">
+                <table id="user_table" class="table table-striped table-sm">
+                    <tr>
+                        <th>
+                            &#8470;
+                        </th>
+                        <th>
+                            Username
+                        </th>
+                        <th>
+                            Email
+                        </th>
+                        <th>
+                            Verified Email?
+                        </th>
+                        <th>
+                            Full Name
+                        </th>
+                        <th>
+                            Time Added
+                        </th>
+                        <th>
+                            Role
+                        </th>
+                        <th>
+                            Delete User
+                        </th>
+                    </tr>
+                    {% for user in users %}
+                    <tr>
+                        <td class="align-middle">
+                            {{ user.id }}
+                        </td>
+                        <td class="align-middle">
+                            {{ user.username }}
+                        </td>
+                        <td class="align-middle">
+                            {{ user.email }}
+                        </td>
+                        <td class="align-middle">
+                            {{ user.is_verified }}
+                        </td>
+                        <td class="align-middle">
+                            {{ user.fullname }}
+                        </td>
+                        <td class="align-middle">
+                            {% set time = user.time_of_creation|string %}
+                            {{ time[:-7] }}
+                        </td>
+                        <td class="align-middle">
+                            {{ user.Role.name }}
+                        </td>
+                        <td class="align-middle">
+                            <a id="{{ user.id }}-{{ user.email }}-{{ user.fullname }}-{{ user.username }}-{{ user.Role.name }}"  class="btn btn-danger" onclick="deleteUser(this.id)">Delete</a>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </table>
+
+            </div>
+<!--            Workgroup table-->
+            <div class="tab-pane fade in" id="workgroups_tab" role="tabpanel">
+                <table id="workgroup_table" class="table table-striped table-sm">
+                    <tr>
+                        <th>
+                            &#8470;
+                        </th>
+                        <th>
+                            Name
+                        </th>
+                        <th>
+                            Institution
+                        </th>
+                        <th>
+                            PIs
+                        </th>
+                        <th>
+                            SRs
+                        </th>
+                        <th>
+                            SMs
+                        </th>
+                        <th>
+                            Workbooks
+                        </th>
+                        <th>
+                            Date of Creation
+                        </th>
+                    </tr>
+                    {% for wg in wgs %}
+                    <tr>
+                        <td>
+                            {{ wg.id }}
+                        </td>
+                        <td>
+                            {{ wg.name }}
+                        </td>
+                        <td>
+                            {{ wg.institution.name }}
+                        </td>
+                        <td>
+                            {% for pi in wg.principal_investigator %}
+                                {{ pi.user.email }}{% if not loop.last %},{% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for sr in wg.senior_researcher %}
+                                {{ sr.user.email }}{% if not loop.last %},{% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for sm in wg.standard_member %}
+                                {{ sm.user.email }}{% if not loop.last %},{% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for wb in wg.workbooks %}
+                                {{ wb.name }}{% if not loop.last %},{% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {{ wg.time_of_creation }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </table>
+            </div>
+<!--            Workbooks-->
+            <div class="tab-pane fade in" id="workbooks-tab" role="tabpanel">
+                <table id="workbooks-table" class="table table-striped table-sm">
+                    <tr>
+                        <th>
+                            Workbook Name
+                        </th>
+                        <th>
+                            Workbook Group
+                        </th>
+                        <th>
+                            User Count
+                        </th>
+                        <th>
+                            Reaction Count
+                        </th>
+                        <th>
+                            Date of creation
+                        </th>
+                    </tr>
+                    {% for workbook in workbooks %}
+                    <tr>
+                        <td>
+                            {{ workbook.name }}
+                        </td>
+                        <td>
+                            {{ workbook.WorkGroup.name }}
+                        </td>
+                        <td>
+                            {{ workbook.users|length }}
+                        </td>
+                        <td>
+                            {{ workbook.reactions|length }}
+                        </td>
+                        <td>
+                            {{ (workbook.time_of_creation|string)[:-7] }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+<!--            Recent Reactions-->
+            <div class="tab-pane fade in" id="recent-reactions-tab" role="tabpanel">
+                <table id="recent-reactions-table" class="table table-striped table-sm">
+                    <tr>
+                        <th>
+                            Reaction ID
+                        </th>
+                        <th>
+                            Creator
+                        </th>
+                        <th>
+                            Workbook
+                        </th>
+                        <th>
+                            Workgroup
+                        </th>
+                        <th>
+                            Date of creation
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                    </tr>
+                    {% for reaction in recent_reactions %}
+                    <tr>
+                        <td>
+                            {{ reaction.reaction_id }}
+                        </td>
+                        <td>
+                            {{ reaction.creator_person.user.email }}
+                        </td>
+                        <td>
+                            {{ reaction.WorkBook.name }}
+                        </td>
+                        <td>
+                            {{ reaction.WorkBook.WorkGroup.name }}
+                        </td>
+                        <td>
+                            {{ (reaction.time_of_creation|string)[:-7] }}
+                        </td>
+                        <td>
+                            {{ reaction.complete }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+<!--            Recent Surfers-->
+            <div class="tab-pane fade in" id="solvent-surfer-tab" role="tabpanel">
+                <table id="recent-surfers-table" class="table table-striped table-sm">
+                    <tr>
+                        <th>
+                            &#8470;
+                        </th>
+                        <th>
+                            Surfer Name
+                        </th>
+                        <th>
+                            Creator
+                        </th>
+                        <th>
+                            Reaction Class
+                        </th>
+                        <th>
+                            Colour
+                        </th>
+                        <th>
+                            Date of creation
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                    </tr>
+                    {% for surfer in all_solvent_surfers %}
+                    <tr>
+                        <td>
+                            {{ surfer.id }}
+                        </td>
+                        <td>
+                            {{ surfer.graph_name }}
+                        </td>
+                        <td>
+                            {{ surfer.creator_person.user.email }}
+                        </td>
+                        <td>
+                            {{ surfer.r_class|string }}
+                        </td>
+                        <td>
+                            {{ surfer.colour_selected|string }}
+                        </td>
+                        <td>
+                            {{ (surfer.time_of_creation|string) }}
+                        </td>
+                        <td>
+                            {{ surfer.status }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+<!--            Recent Retros -->
+            <div class="tab-pane fade in" id="retro-tab" role="tabpanel">
+                <table id="recent-retros-table" class="table table-striped table-sm">
+                    <tr>
+                        <th>
+                            &#8470;
+                        </th>
+                        <th>
+                            Creator
+                        </th>
+                        <th>
+                            Workbook
+                        </th>
+                        <th>
+                            Date of creation
+                        </th>
+                    </tr>
+                    {% for retro in all_retrosynthesis %}
+                    <tr>
+                        <td>
+                            {{ retro.id }}
+                        </td>
+                        <td>
+                            {{ retro.creator_person.user.email }}
+                        </td>
+                        <td>
+                            {{ retro.WorkBook.name }}
+                        </td>
+                        <td>
+                            {{ retro.time_of_creation|string }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+<!--            Controlled Substance Usage -->
+            <div class="tab-pane fade in" id="substance-tab" role="tabpanel">
+                <table id="controlled_substance-table" class="table table-striped table-sm">
+                    <tr>
+                        <th>
+                            &#8470;
+                        </th>
+                        <th>
+                            Creator
+                        </th>
+                        <th>
+                            Workgroup
+                        </th>
+                        <th>
+                            Workbook
+                        </th>
+                        <th>
+                            Reaction ID
+                        </th>
+                        <th>
+                            Date of creation
+                        </th>
+                        <th>
+                            Last Updated
+                        </th>
+                        <th>
+                            Substance Name
+                        </th>
+                        <th>
+                            Substance CAS
+                        </th>
+                        <th>
+                            Substance Smiles
+                        </th>
+                    </tr>
+                    {% for subst in controlled_substance_usage %}
+                    <tr>
+                        <td>
+                            {{ subst.id }}
+                        </td>
+                        <td>
+                            {{ subst.creator_person.user.email }}
+                        </td>
+                        <td>
+                            {{ subst.workgroup.name }}
+                        </td>
+                        <td>
+                            {{ subst.workbook.name }}
+                        </td>
+                        <td>
+                            {{ subst.reaction.reaction_id }}
+                        </td>
+                        <td>
+                            {{ (subst.time_of_creation|string)[:-7] }}
+                        </td>
+                        <td>
+                            {{ (subst.last_edited|string)[:-7] }}
+                        </td>
+                        <td>
+                            {{ subst.controlled_substance_name }}
+                        </td>
+                        <td>
+                            {{ subst.controlled_substance_cas }}
+                        </td>
+                        <td>
+                            {{ subst.controlled_substance_smiles }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+<!--            News feed-->
+            <div class="tab-pane fade in" id="news_feed_tab" role="tabpanel">
+                <br>
+                <h4><b>Post News Item</b></h4>
+                <form action="{{ url_for('news_feed.new_news_post') }}" method="post">
+                  <div class="form-group">
+                    <label for="newsPostTitle">Title</label>
+                    <input type="text" class="form-control" id="newsPostTitle" name="newsPostTitle">
+                  </div>
+                  <div class="form-group">
+                    <label for="newsPostMessage">Message</label>
+                    <textarea class="form-control" id="newsPostMessage" name="newsPostMessage" rows="3"></textarea>
+                  </div>
+                  <button class="btn btn-primary" type="submit" id="submit-post">Post</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock %}

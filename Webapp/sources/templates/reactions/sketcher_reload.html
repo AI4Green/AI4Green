@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+{% block title %}{{ reaction.reaction_id }}{% endblock %}
+{% block scripts %}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher_page.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/addendum.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/file_handling.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/polymer.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
+
+
+    <script>
+        // disable complete reaction button once reaction is completed
+        $(function () {
+            if ($("#js-complete").val() === "not complete") {
+                $("#mark-complete").attr("disabled", false)
+            }
+        })
+    </script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_constructor.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tutorial.css') }}">
+{% endblock %}
+{% block content %}
+
+<div id="page-contents" class="container-fluid">
+    <div id="name-id">
+        <h2> {{ reaction.name }} {%if tutorial == 'no' %}{% if reaction.creator_person.user.email != current_user.email %} <i class="fa fa-lock" style="font-size:20px; color:darkgrey;"></i>{% else %}{% endif %}{% endif %}</h2>
+        <h4>{{ reaction.reaction_id }}</h4>
+    </div>
+    Need some help getting started?
+    <br>
+    <input type="hidden" id="js-load-status" value="{{ load_status }}">
+    <a id="tutorial-mode" href="/sketcher_tutorial/yes" class="btn btn-success btn-sm" style="color: white;" target="_blank">Enter Tutorial Mode <i class="bi bi-box-arrow-in-up-right"></i></a>
+    <br><br>
+    <div id="editor-instructions">
+<!--        <p>Please sketch or upload your reaction to begin. Click <a target="_blank" href="{{ url_for('main.marvin_js_help') }}">here</a> to view our Marvin JS help guide.</p>-->
+        <p>Please note compounds drawn above or underneath the arrow will not be recognised.</p>
+    </div>
+    <div>
+        <form action="{{ url_for('reaction_table.process') }}" method="post">
+            <label> Polymer Mode?
+                <input type="checkbox" id="polymer-mode-select" name="polymer-mode-select" onchange="savePolymerMode()" {% if reaction.reaction_type.value == "POLYMER" %} checked {% endif %}>
+            </label>
+        </form>
+    </div>
+    <div id="sketchers-div">
+        <div>
+<!--            Selected Reaction Sketcher:-->
+<!--            <label> MarvinJS-->
+<!--                <input type="radio" id="marvin-select" name="sketcher-select" disabled>-->
+<!--            </label>-->
+            <label> Ketcher
+                <input type="radio" id="ketcher-select" name="sketcher-select" checked="checked" disabled>
+            </label>
+        </div>
+        <div class="loading-circle"></div>
+        <div id="ketcher-sketcher"></div>
+        <div id="marvin-sketcher" style="width: 1020px; height: 480px"></div>
+    </div>
+    <div id="editor-hint">
+        <p>Hint: You can copy & paste reaction schemes from ChemDraw by selecting the scheme and use CTRL + ALT + C to copy
+        and then CTRL + V to paste into this sketcher</p>
+    </div>
+
+    <input type="hidden" id="js-tutorial" value="{{ tutorial }}">
+    <input type="hidden" id="js-reaction-name" value="{{ reaction.name }}">
+    <input type="hidden" id="js-reaction-id" value="{{ reaction.reaction_id }}">
+    <input type="hidden" id="js-time-of-creation" value="{{ reaction.time_of_creation }}">
+    <input type="hidden" id="js-reaction-object" value="{{ reaction }}">
+    <input type="hidden" id="js-reaction-smiles" value="{{ reaction.reaction_smiles }}">
+    <input type="hidden" id="js-reaction-type" value="{{ reaction.reaction_type }}">
+    <input type="hidden" id="js-reaction-rxn" value="{{ reaction.reaction_rxn }}">
+    <input type="hidden" value="{{ reaction.reaction_table_data }}" id="js-reaction-table-data">
+    <input type="hidden" value="{{ reaction.summary_table_data }}" id="js-summary-table-data">
+    <input type="hidden" id="js-reloaded-image" value="0" style="{'width': 600, 'height': 400}">
+    <input type="hidden" value="{{ demo }}" id="js-demo">
+    <input type="hidden" value="{{ reaction.complete }}" id="js-complete">
+    <input type="hidden" value="{{ marvin_js_key }}" id="marvin-js-key">
+    <input type="hidden" value="{{ url_for('static', filename='ketcher/index.html') }}" id="ketcher-source">
+
+    {% if tutorial == 'no' %}
+        <input type="hidden" value="{{ reaction.creator_person.user.email }}" id="js-creator-email">
+        <input type="hidden" value="{{ current_user.email }}" id="js-email">
+    {% endif %}
+    <br>
+    <p><button id="demo-button" type="button" class="btn btn-primary" style="width: 100px;" onclick="loadExampleSmiles()">Example</button></p>
+    <p><button id="action-button-submit" type="button" class="btn btn-primary" onclick="createReactionTable()">Submit</button></p>
+    <a>
+        <button id="retrosynthesis-export" type="button" class="btn btn-primary" onclick="exportDataToRetrosynthesis()">Retrosynthesis</button>
+    </a>
+    <br>
+    <!--The loading bar div-->
+    <div class="loading-bar"></div>
+
+    <br>
+
+    <div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;"></div>
+
+    <!--Output of reaction table-->
+    <div id="reaction-table-div"></div>
+    <br>
+    <p id="summary-div"><input type="submit" value="Summary" id="action-summary" class="btn btn-primary" onclick="showSummary()" style="display: none; width: 100px;"></p>
+
+
+    <!--Output of reaction image and summary table-->
+
+
+    <div id="print-container" class="container-fluid" style="padding-left: 0px">
+        <div id="imageContainer" style="display: none;">
+            <img id="image" />
+        </div>
+        <p id="js-summary-table"></p>
+    </div>
+<!--    end of page buttons-->
+    <br>
+
+
+    <div id="reaction-file-attachments" class="mb-2" style="display:none;">
+        <p>Upload Experimental Data</p>
+        <div id="file-upload-div" class="input-group mb-3 w-25">
+            <input id="upload-files" class="form-control" type="file" multiple>
+            <div class="input-group-append">
+                <button id="file-upload" class="btn btn-outline-secondary" onclick="uploadFiles()" type="button">Upload</button>
+            </div>
+        </div>
+        <div id="file-list">
+{#            file attachments loaded here from get_file_attachment_list#}
+        </div>
+    </div>
+
+
+    <div id="complete-reaction-div" style="display:none;">
+        <button id="complete-reaction-button" type="button" class="btn btn-primary" data-toggle="modal" data-target="#lockingModal">Lock & Sign Reaction</button>
+        <!-- Modal -->
+        <div id="lockingModal" class="modal fade">
+          <div class="modal-dialog" style="top: 30%">
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-body">
+                <p>I provide my signature and confirm that to the best of my knowledge the contents of this reaction are accurate.</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="completeReaction()">Confirm</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+
+
+
+
+        {% if reaction.complete == 'complete' %}
+            <b>Reaction locked by {{ reaction.creator_person.user.fullname }} at: {{ (reaction.time_of_update|string)[:-7]  }}</b>
+        {% endif %}
+    </div>
+
+
+    <br>
+    <button id="print-pdf" onclick="window.print()" class="btn btn-primary" style="display: none; width:140px">Print Summary</button>
+    <div class="notToPrint" id="printoutput"></div>
+    <br>
+    <button id="reaction-note-button" data-toggle="modal" data-target="#new-reaction-note-modal" class="btn btn-primary">Add Note</button>
+<!--    addenda-->
+    <br>
+
+    <div id="addenda-content" class="row d-flex justify-content-left">
+        <div class="col-md-8 col-lg-6 mt-5">
+            <div id="addenda-cardholder" class="card shadow-0 border" style="background-color: #f0f2f5;">
+                {% if addenda %}
+                    {% for addendum in addenda %}
+                        <div id="addendum-card{{ loop.index }}" class="card mb-4">
+                            <div class="card-body">
+                                <p id="addendum-text{{ loop.index }}">{{ addendum.text }}</p>
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex flex-row align-items-center">
+                                        <p id="addendum-author{{ loop.index }}" class="small mb-0 ms-2 pt-5">{{ addendum.Author.user.fullname }}</p>
+                                    </div>
+                                    <div class="d-flex flex-row align-items-center">
+                                        {% set time = addendum.time_of_creation|string %}
+                                        <p id="addendum-time{{ loop.index }}" class="small mb-0 pt-5">{{ time[:-7] }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+<!--    end of addenda-->
+</div>
+<br>
+<br>
+<!--end of page contents-->
+<div id="blank-addendum"  style="display: none">
+    <div id="addendum-card-x-" class="card mb-4">
+        <div class="card-body">
+            <p id="addendum-text-x-"></p>
+            <div class="d-flex justify-content-between">
+                <div class="d-flex flex-row align-items-center">
+                    <p id="addendum-author-x-" class="small mb-0 ms-2 pt-5"></p>
+                </div>
+                <div class="d-flex flex-row align-items-center">
+                    <p id="addendum-time-x-" class="small mb-0 pt-5"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="blank-file-attachment" style="display: none">
+
+    <div id="file-button-group-x-" class="btn-group btn-group-justified mb-3" role="group" aria-label="">
+        <div class="btn-group" role="group">
+            <button id="download-file-button-x-" type="button" class="btn btn-outline-primary" onclick="downloadFile(this)" value=""><i class="bi bi-download"></i></button>
+        </div>
+        <div class="btn-group" role="group">
+            <button id="view-file-button-x-" type="button" class="btn btn-outline-dark" onclick="viewFile(this)" value=""></button>
+        </div>
+        <div class="btn-group" role="group">
+            <button id="delete-file-button-x-" type="button" onclick="deleteFile(this)" value="" class="btn btn-outline-danger"><i class="bi bi-x"></i></button>
+        </div>
+    </div>
+</div>
+
+
+
+<input type="hidden" value="{{ active_workgroup }}" id="js-active-workgroup">
+<input type="hidden" value="{{ active_workbook }}" id="js-active-workbook">
+<input type="hidden" value="{{ review }}" id="js-review">
+
+<div class="tutorial" id="tutorial-1">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Welcome to the reaction sketcher tutorial</h5>
+            <p class="card-text">This tutorial leads you through the key steps in building a reaction.</p>
+            <button class="btn btn-primary" style="color:white;" disabled>Back</button>
+            <a id="tut-1-next" onclick="tutorialNext(1)" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-2">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Autosave</h5>
+            <p class="card-text">Any changes you make to your reaction are automatically saved. Reactions can be reloaded from the relevant workgroup page.</p>
+            <a id="tut-2-back" onclick="tutorialBack(2)" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-2-next" onclick="tutorialNext(2);tutorial_3()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-3">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Reaction name and ID</h5>
+            <p class="card-text">The reaction name was specified when making the reaction. The reaction ID is automatically generated based on a workbook code and an incremental number.</p>
+            <a id="tut-3-back" onclick="tutorialBack(3);tutorial_2()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-3-next" onclick="tutorialNext(3);tutorial_4()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-4">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Reaction sketcher</h5>
+            <p class="card-text">Next sketch your reaction into the Marvin JS editor.</p>
+            <a id="tut-4-back" onclick="tutorialBack(4);tutorial_3()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-4-next" onclick="tutorialNext(4);tutorial_5()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-5">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Marvin JS Help</h5>
+            <p class="card-text">Consult our help guide for FAQ and how to import reactions from other editors including ChemDraw.</p>
+            <a id="tut-5-back" onclick="tutorialBack(5);tutorial_4()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-5-next" onclick="tutorialNext(5);tutorial_6()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-6">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Over the arrow</h5>
+            <p class="card-text">Note that reagents & solvents over or under the arrow are not currently supported. These may be added directly to the reaction table at the next stage.</p>
+            <a id="tut-6-back" onclick="tutorialBack(6);tutorial_5()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-6-next" onclick="tutorialNext(6);tutorial_7()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-7">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Proceed to Reaction Table</h5>
+            <p class="card-text">Once you are happy with your reaction, press "Submit" to proceed.</p>
+            <a id="tut-7-back" onclick="tutorialBack(7);tutorial_6()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-7-next" onclick="tutorialNext(7);tutorial_8()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-8">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Reaction name and description</h5>
+            <p class="card-text">The chosen reaction name is shown. There is space to record reaction description, including experimental procedure and observations.</p>
+            <a id="tut-8-back" onclick="tutorialBack(8);tutorial_7()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-8-next" onclick="tutorialNext(8);tutorial_9()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-9">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Reaction table</h5>
+            <p class="card-text">The reactant and product information is automatically filled from PubChem. You will be prompted at this point to add any novel compounds to the database. These compounds are only shared within your workbook.</p>
+            <a id="tut-9-back" onclick="tutorialBack(9);tutorial_8()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-9-next" onclick="tutorialNext(9);tutorial_10()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-10">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Reaction table</h5>
+            <p class="card-text">The required masses, equivalents, and physical forms required to proceed are highlighted in red.</p>
+            <a id="tut-10-back" onclick="tutorialBack(10);tutorial_9()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-10-next" onclick="tutorialNext(10);tutorial_11()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-11">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Reagents</h5>
+            <p class="card-text">Reagents can be added to the reaction. If the reagent is not in our database, it can be added.</p>
+            <a id="tut-11-back" onclick="tutorialBack(11);tutorial_10()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-11-next" onclick="tutorialNext(11);tutorial_12()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-12">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Reagents</h5>
+            <p class="card-text">Reagents can be added by CAS or name. If the reagent is not in the database you will be prompted to add this reagent to the database.</p>
+            <a id="tut-12-back" onclick="tutorialBack(12);tutorial_11()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-12-next" onclick="tutorialNext(12);tutorial_13()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-13">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Solvents</h5>
+            <p class="card-text">Solvents can be added to your reaction. These can be selected from our predefined list.</p>
+            <a id="tut-13-back" onclick="tutorialBack(13);tutorial_12()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-13-next" onclick="tutorialNext(13);tutorial_14()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-14">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Solvents</h5>
+            <p class="card-text">Solvent sustainability is shown in the four-tier system developed by CHEM21. Alternative solvents can be explored with the solvent guide.</p>
+            <a id="tut-14-back" onclick="tutorialBack(14);tutorial_13()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-14-next" onclick="tutorialNext(14);tutorial_15()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-15">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Proceed to Summary</h5>
+            <p class="card-text">Once you are happy with the reaction table, you may proceed to the summary.</p>
+            <a id="tut-15-back" onclick="tutorialBack(15);tutorial_14()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-15-next" onclick="tutorialNext(15);tutorial_16()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-16">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Summary Table</h5>
+            <p class="card-text">The summary gives an overview of the sustainability of the reaction, an overview of health and safety considerations, and a risk assessment.</p>
+            <a id="tut-16-back" onclick="tutorialBack(16);tutorial_15()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-16-next" onclick="tutorialNext(16);tutorial_17()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-17">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Summary Table</h5>
+            <p class="card-text">Some sustainability criteria are calculated automatically, others, like temperature and operating procedures, can be selected.</p>
+            <a id="tut-17-back" onclick="tutorialBack(17);tutorial_16()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-17-next" onclick="tutorialNext(17);tutorial_18()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-18">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Summary Table</h5>
+            <p class="card-text">After the reaction has been completed, unreacted mass and actual product mass can be entered to calculate more metrics.</p>
+            <a id="tut-18-back" onclick="tutorialBack(18);tutorial_17()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-18-next" onclick="tutorialNext(18);tutorial_19()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-19">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">Locking a reaction</h5>
+            <p class="card-text">Once a reaction is fully completed, it can be locked to further editing. There is also the option to print the reaction.</p>
+            <a id="tut-19-back" onclick="tutorialBack(19);tutorial_18()" class="btn btn-primary" style="color:white;">Back</a>
+            <a id="tut-19-next" onclick="tutorialNext(19);tutorial_20()" class="btn btn-primary" style="color:white;">Next</a>
+        </div>
+    </div>
+</div>
+<div class="tutorial" id="tutorial-20">
+    <div class="card" style="width: 450px;">
+        <button data-dismiss="alert" data-target="#tutorial-20" type="button" class="close" aria-label="Close" style="padding: 0.2rem; margin: 0.2rem; position:absolute; top:0; right:0;">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <div class="card-body">
+            <h5 class="card-title">Congratulations!</h5>
+            <p class="card-text">You have finished this tutorial on building a reaction. You may now close this window.</p>
+            <a id="tut-20-back" onclick="tutorialBack(20);tutorial_19()" class="btn btn-primary" style="color:white;">Back</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

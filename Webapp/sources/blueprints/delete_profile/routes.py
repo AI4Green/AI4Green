@@ -27,7 +27,7 @@ def delete_profile() -> Response:
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
-        "delete_profile.html",
+        "account_management/delete_profile.html",
         workgroups=workgroups,
         notification_number=notification_number,
     )
@@ -158,7 +158,7 @@ def confirm_delete_profile() -> Response:
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     return render_template(
-        "delete_confirm.html",
+        "account_management/delete_confirm.html",
         workgroups=workgroups,
         notification_number=notification_number,
         wgs_pi=wgs_pi,

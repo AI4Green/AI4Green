@@ -1,0 +1,73 @@
+{% block scripts %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_list.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/new_reaction.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
+    <script>
+        $(async function() {
+            if (window.location.pathname.split("/")[1] !== 'search') {
+                await showSavedReactionsImages()
+            }
+        });
+    </script>
+{% endblock %}
+{% from "macros/modals.html" import render_new_reaction_modal %}
+{% if reactions %}
+
+<div class="btn-group btn-group-toggle" data-toggle="buttons">
+  <label onclick="sortReactionsAlphabetically()" for="sort-a-z" class="btn btn-secondary btn-sm{% if sort_crit == "AZ" %} active{% else %}{% endif %}" id="AZ">
+    <input value="1" type="radio" name="options" id="sort-a-z" autocomplete="off"{% if sort_crit == "AZ" %} checked{% else %}{% endif %} /> A-Z &#8645;
+  </label>
+  <label onclick="sortReactionsByTime()" for="sort-time" class="btn btn-secondary btn-sm{% if sort_crit == "time" %} active{% else %}{% endif %}" id="time">
+    <input value="2" type="radio" name="options" id="sort-time" autocomplete="off"{% if sort_crit == "time" %} checked{% else %}{% endif %} /> Date Created (Newest First) &#8645;
+  </label>
+</div>
+
+<div id="reaction-list">
+    {% for reaction in reactions %}
+        <div id="reaction-{{ loop.index }}" class="reaction-card">
+            <input type="hidden" value="{{ reaction.reaction_id }}" id="reaction-id">
+            <input type="hidden" value="{{ reaction.workbook }}" id="workbook">
+            <input type="hidden" value="{{ reaction.workgroup }}" id="workgroup">
+            <div id="reaction-name{{ loop.index }}" class="reaction-name"><h4>{{ reaction.name }}</h4></div>
+            <div id="reaction-id{{ loop.index }}"><h5>{{ reaction.reaction_id }}</h5></div>
+            <div class="description">{{ reaction.description }}</div>
+            <img id="image{{ loop.index }}" style="width: 100%; height: auto;"/>
+            <div class="reaction-time">Created: {{ reaction.time_of_creation[:-7] }}</div>
+            <div class="reaction-time">Edited: {{ reaction.time_of_update[:-7] }}</div>
+            <button
+                    id="{{ reaction.reaction_id }}" onclick="redirectToReloadReaction(this)" class="btn btn-success reload-btn"
+                    data-workgroup="{{ reaction.workgroup }}" data-workbook="{{ reaction.workbook }}">Reload
+            </button>
+            {% if reaction.creator_email == current_user.email %}
+                <button
+                        id="{{ reaction.reaction_id }}" onclick="deleteReaction(this)" name="delete-reaction" class="btn btn-danger"
+                        data-workgroup="{{ reaction.workgroup }}" data-workbook="{{ reaction.workbook }}">Delete
+                </button>
+            {% endif %}
+            <button
+                    onclick="cloneReactionModalWindow(this)" id="{{ reaction.reaction_id }}" class="btn btn-info"
+                    data-target="#new-reaction-modal" title="Create New Reaction" data-workbook="{{ reaction.workbook }}" data-workgroup="{{ reaction.workgroup }}">Clone
+            </button>
+            {% if reaction.completion_status == "complete" %}
+                <i class="fa fa-lock" style="font-size:20px; color:darkgrey;"></i><b style="font-size:12px; color:darkgrey;">  Reaction Locked</b>
+            {% endif %}
+            {% if reaction.creator_email != current_user.email %}
+                <i class="fa fa-lock" style="font-size:20px; color:darkgrey;"></i><b style="font-size:12px; color:darkgrey;">  Read-only reaction created by {{ reaction.creator_username }}</b>
+            {% endif %}
+            {% if reaction.addenda %}
+                <i class="bi bi-chat-dots" style="font-size:20px; color:darkgrey;"></i><b style="font-size:12px; color:darkgrey;">  Contains Amendments</b>
+            {% endif %}
+            <hr class="line">
+        </div>
+    {% endfor %}
+</div>
+{% else %}
+
+{% endif %}
+
+{{ render_new_reaction_modal() }}
+<input type="hidden" value="{{ reactions|length }}" id="js-number-of-reactions">
+<input type="hidden" value="{{ sort_crit }}" id="js-sort-crit">
+
+<iframe id="ketcher-editor" src="{{ url_for('static', filename='ketcher/index.html') }}" style="display: none"></iframe>
