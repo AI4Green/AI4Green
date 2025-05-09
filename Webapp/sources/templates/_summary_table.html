@@ -374,7 +374,7 @@
 
                             <div id="reaction-approved" class="reaction-approval-status reaction-approved" {% if approval_request.status.value != "APPROVED" %} style="display: none" {% endif %}>
                                 <div class="header">
-                                    ✅ <strong>Reaction Approved</strong> by:
+                                    ✅ <strong>Reaction Approved by:</strong>
                                     <input aria-label="reaction-approved-by" id="js-supervisor-approved" disabled value="{% if approval_request.reviewed_by_person %}{{ approval_request.reviewed_by_person.user.fullname }}{% endif %}">
                                     <span class="timestamp">
                                         {% set time = approval_request.time_of_review|string %}{{ time[:-7] }}
