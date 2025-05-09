@@ -80,7 +80,7 @@ def workgroup(
         new_reaction_id = None
 
     return render_template(
-        "workgroup.html",
+        "work_structures/workgroup.html",
         workgroup_selected=workgroup_selected,
         workbooks=workbooks,
         workgroups=workgroups,

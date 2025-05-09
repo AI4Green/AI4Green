@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block content %}
-<head>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/auxiliary.js') }}"></script>
+{% block title %}Data Export | AI4Green{% endblock %}
+{% block scripts %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/export_data.js') }}"></script>
-</head>
+{% endblock %}
+{% block content %}
 <body>
 <div class="container-fluid mt-5">
     <div class="row">

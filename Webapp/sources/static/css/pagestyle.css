@@ -1,252 +1,52 @@
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  padding-bottom: 6.25rem;
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-30px);
+    }
+    60% {
+        transform: translateY(-15px);
+    }
 }
 
-#content {
-    margin-top: 6rem;
-}
-
-.jumbotron {
-    margin-top: -2.5rem;
-}
-
-:root {
---primary-green: #82F5A8;
---primary-green-hover: #62BA79;
---primary-grey: #777778;
---primary-grey-hover: #686868;
---secondary-green: #62BA79;
---icon-background: #caf7e3;
---primary-blue: #83F5F2;
---primary-blue-hover: #63B1B9;
---primary-red: #F58683;
---primary-red-hover: #BB6A61;
+.bounce {
+    animation: bounce 2s ease-in-out 2;
 }
 
 .jumbotron.jumbotron-fluid.home {
-  margin-top: -2.5rem;
   background: linear-gradient(90deg, var(--primary-grey) 50%, var(--primary-green));
-
 }
 
-.bg-faded-green {
-    background: linear-gradient(rgba(130, 245, 168, 0.1), rgba(130, 245, 168, 0.2));
+.non-spaced-page-content {
+    margin-top: -2.5rem;
 }
 
-.bg-faded-grey {
-    background: linear-gradient(rgba(119, 119, 120, 0.1), rgba(119, 119, 120, 0.2));
+.line {
+    height: 2px;
+    border-width: 0;
+    color: gray;
+    background-color: gray;
 }
 
-.bg-grey {
-    background: var(--primary-grey);
+.line-news {
+    height: 2px;
+    border-width: 0;
+    color: black;
+    background-color: black;
 }
 
-.bg-green {
-    background: var(--primary-green);
-}
-.text-primary-green {
-    color: var(--primary-green);
+.scrollClass {
+  height:400px;
+  overflow-y: scroll;
 }
 
-.text-secondary-green {
-    color: var(--secondary-green);
-}
-
-.text-grey {
-    color: var(--primary-grey);
-}
-
-.btn.icon {
-    height: 70px;
-    width: 70px;
-    background-color: var(--icon-background);
-    border-color: var(--icon-background);
-    border-radius: 35px;
-    text-align: center;
-    margin: 7px;
-    line-height: 80px;
-    color: var(--primary-grey);
-    transition: all 0.3s linear;
-    font-size: 40;
-}
-
-.icon:hover {
-  background-color: var(--primary-grey);
-  border-color: var(--primary-grey);
-  color: var(--primary-green);
-  transform: scale(1.1);
-}
-
-.icon.focused {
-  background-color: var(--primary-grey);
-  border-color: var(--primary-green);
-  border-width: 3;
-  color: var(--primary-green);
-  transform: scale(1.1);
-}
-
-
-.btn.btn-primary {
-  background-color: var(--primary-grey);
-  border-color: var(--primary-grey);
-  color: var(--primary-green);
-}
-
-.btn.btn-primary:hover {
-  background-color: var(--primary-grey-hover);
-  border-color: var(--primary-grey-hover);
-}
-
-.btn.btn-outline-primary {
-  border-color: var(--primary-grey);
-  color: var(--primary-grey);
-}
-
-.btn.btn-outline-primary:hover {
-  color: var(--primary-grey);
-  background-color: var(--primary-green);
-}
-
-.btn.btn-secondary {
-  background-color: var(--primary-green);
-  border-color: var(--primary-green);
-  color: var(--primary-grey);
-}
-
-.btn.btn-secondary:hover {
-  background-color: var(--primary-green-hover);
-  border-color: var(--primary-green-hover);
-}
-
-.btn.btn-success {
-    background-color: var(--primary-green);
-  border-color: var(--primary-green);
-  color: var(--primary-grey);
-}
-
-.btn.btn-success:hover {
-  background-color: var(--primary-green-hover);
-  border-color: var(--primary-green-hover);
-  color: white
-}
-
-.btn.btn-info {
-  background-color: var(--primary-blue);
-  border-color: var(--primary-blue);
-  color: var(--primary-grey);
-}
-
-.btn.btn-info:hover {
-  background-color: var(--primary-blue-hover);
-  border-color: var(--primary-blue-hover);
-  color: white
-}
-
-.btn.btn-danger{
-    background-color: var(--primary-red);
-    border-color: var(--primary-red);
-    color: var(--primary-grey);
-}
-
-.btn.btn-danger:hover {
-  background-color: var(--primary-red-hover);
-  border-color: var(--primary-red-hover);
-  color: white
-}
 
 #retrosynthesis-cytoscape {
   border-color: #333333;
   border-width: thick;
   border-style: dashed;
-}
-
-.btn-toolbar .btn-label {
-  float: left;
-}
-
-
-
-
-.img-big {
-  width: 100%;
-  height: auto;
-  padding: 10px;
-}
-
-.reaction-save-success{
-    padding-right: 15px;
-    display: inline;
-    color: white
-}
-
-.reaction-save-failure{
-    padding-right: 15px;
-    display: inline;
-    color: white;
-}
-
-.reaction-save-hidden{
-    padding-right: 15px;
-    display: none;
-}
-
-datalist {
-    position: absolute;
-    width: 17em;
-}
-
-.solvent-datalist{
-    padding-bottom: 5rem;
-}
-
-option {
-    cursor: pointer;
-    width: 17em;
-}
-
-datalist>option:hover, datalist>option.active {
-    border: 2px solid blue;
-}
-
-.loading-circle {
-  width: 60px;
-  height: 60px;
-  border: 3px solid #ccc;
-  border-radius: 50%;
-  border-top: 3px solid #007bff; /* Change the color to your preferred loading color */
-  animation: spin 1s linear infinite; /* The spin animation will rotate the circle */
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-
-.loading-bar{
-    display: none; /* by default hidden */
-    position: fixed;
-    z-index: 1000; /* always on top */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%; /* full screen */
-    background-image: url('http://i.stack.imgur.com/FhHRx.gif');
-    background-position: 50% 50%; /* centre */
-    background-color: rgba(255, 255, 255, 0.8); /* transparency */
-    background-repeat: no-repeat;
-}
-body.loading{ /* when body has loading class */
-    overflow: hidden; /* hide scrolling bar */
-}
-body.loading .loading-bar{
-    display: block; /* when body has loading class, display tha loader */
+  margin-bottom: 1rem;
 }
 
 /* Fullscreen overlay styling */
@@ -284,4 +84,30 @@ body.loading .loading-bar{
 
 #privacy-popup a:hover {
     text-decoration: underline;
+}
+
+/* Bootstrap 5.3.2 font stack for use on about.html */
+.lead, .display-3, .display-6 {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Ensure .lead matches Bootstrap 5.3.2 */
+.lead {
+    font-size: 1.25rem;
+    font-weight: 300;
+    line-height: 1.5;
+}
+
+/* Replicate .display-6 from Bootstrap 5.3.2 */
+.display-6 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    line-height: 1.2;
+}
+
+/* Ensure .display-3 matches Bootstrap 5.3.2 */
+.display-3 {
+    font-size: 4.5rem;
+    font-weight: 300;
+    line-height: 1.2;
 }

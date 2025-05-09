@@ -101,34 +101,7 @@ def new_reaction() -> Response:
             }
         )
 
-        summary_table = json.dumps(
-            {
-                "real_product_mass": "",
-                "unreacted_reactant_mass": "",
-                "polymer_mn": "",
-                "polymer_mw": "",
-                "polymer_dispersity": "",
-                "polymer_mass_method": "-select-",
-                "polymer_mass_calibration": "",
-                "polymer_tg": "",
-                "polymer_tm": "",
-                "polymer_tc": "",
-                "polymer_thermal_method": "-select-",
-                "polymer_thermal_calibration": "",
-                "reaction_temperature": "",
-                "batch_flow": "-select-",
-                "element_sustainability": "undefined",
-                "isolation_method": "undefined",
-                "catalyst_used": "-select-",
-                "catalyst_recovered": "-select-",
-                "custom_protocol1": "",
-                "custom_protocol2": "",
-                "other_hazards_text": "",
-                "researcher": "",
-                "supervisor": "",
-                "radio_buttons": [],
-            }
-        )
+        summary_table = services.summary.empty_summary_table
         # add reaction to database
         services.reaction.add(
             reaction_name,
@@ -341,7 +314,9 @@ def autosave() -> Response:
     conversion = request.form["conversion"]
     to_export = request.form["toExport"]
 
-    summary_table = json.dumps(
+    summary_table = json.loads(reaction.summary_table_data)
+
+    summary_table.update(
         {
             "real_product_mass": real_product_mass,
             "unreacted_reactant_mass": unreacted_reactant_mass,
@@ -374,6 +349,7 @@ def autosave() -> Response:
             "to_export": to_export,
         }
     )
+    summary_table = json.dumps(summary_table)
 
     # value is "complete" if user is trying to lock reaction.
     complete = request.form["complete"]

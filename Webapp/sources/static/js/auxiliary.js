@@ -115,3 +115,21 @@ function updateSelectedWorkGroup(origin_page = "") {
     });
   });
 }
+
+/**
+ * Capitalizes the first character of a string and returns the result.
+ * @param {string} str - The input string to capitalize
+ * @returns {string} The string with its first character capitalized
+ */
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/**
+ * Converts the first character of a string to lowercase and returns the result.
+ * @param {string} str - The input string to modify
+ * @returns {string} The string with its first character in lowercase
+ */
+function lower(str) {
+  return str.charAt(0).toLowerCase() + str.slice(1);
+}

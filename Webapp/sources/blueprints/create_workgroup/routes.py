@@ -79,22 +79,30 @@ def create_workgroup() -> Response:
                 "You cannot create another workgroup until your first workgroup has been approved"
             )
             return render_template(
-                "create_workgroup.html", form=form, workgroups=workgroups
+                "work_structures/create_workgroup.html",
+                form=form,
+                workgroups=workgroups,
             )
         if workgroup_name == "":
             flash("Please choose a name for your Workgroup")
             return render_template(
-                "create_workgroup.html", form=form, workgroups=workgroups
+                "work_structures/create_workgroup.html",
+                form=form,
+                workgroups=workgroups,
             )
         if not workgroup_name_delimiters_removed.isalnum():
             flash("Workgroup names cannot contain special characters!")
             return render_template(
-                "create_workgroup.html", form=form, workgroups=workgroups
+                "work_structures/create_workgroup.html",
+                form=form,
+                workgroups=workgroups,
             )
         if info == "":
             flash("Please indicate why you need to set up a Workgroup")
             return render_template(
-                "create_workgroup.html", form=form, workgroups=workgroups
+                "work_structures/create_workgroup.html",
+                form=form,
+                workgroups=workgroups,
             )
 
         # make sure workgroup of same name does not exist (add back in institution later)
@@ -111,7 +119,9 @@ def create_workgroup() -> Response:
                 "A Workgroup of this name already exists. Please choose a different name."
             )
             return render_template(
-                "create_workgroup.html", form=form, workgroups=workgroups
+                "work_structures/create_workgroup.html",
+                form=form,
+                workgroups=workgroups,
             )
 
         existing_request = (
@@ -124,7 +134,9 @@ def create_workgroup() -> Response:
                 "This request has already been made. You will receive a notification when your request has been considered."
             )
             return render_template(
-                "create_workgroup.html", form=form, workgroups=workgroups
+                "work_structures/create_workgroup.html",
+                form=form,
+                workgroups=workgroups,
             )
 
         # use the one default institution for now
@@ -186,4 +198,6 @@ def create_workgroup() -> Response:
             "You will receive a notification when your request has been approved."
         )
         return redirect(url_for("main.index"))
-    return render_template("create_workgroup.html", form=form, workgroups=workgroups)
+    return render_template(
+        "work_structures/create_workgroup.html", form=form, workgroups=workgroups
+    )

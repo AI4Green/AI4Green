@@ -3,7 +3,6 @@ from typing import Tuple
 
 from flask import Flask
 from flask.testing import FlaskClient
-from flask_login import current_user
 from sources import models, services
 from sources.extensions import db
 from tests.utils import login

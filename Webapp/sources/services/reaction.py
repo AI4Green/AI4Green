@@ -1,11 +1,8 @@
-import re
 from datetime import datetime, timedelta
 from typing import Dict, List
 
 import pytz
 from flask import request
-from rdkit.Chem import AllChem
-from rdkit.Chem.Draw import rdMolDraw2D
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
