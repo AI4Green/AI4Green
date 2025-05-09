@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-reaction_list_bp = Blueprint("reaction_list", __name__)
+reaction_list_bp = APIBlueprint("reaction_list", __name__)
 
 from . import routes

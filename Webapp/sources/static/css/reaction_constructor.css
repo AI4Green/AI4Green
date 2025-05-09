@@ -1,0 +1,149 @@
+.readonly-cell {
+    background-color: transparent;
+    border: none;
+}
+
+.editable-cell {
+    background-color: white;
+    border-color: black;
+    border-width: thin;
+}
+
+.remove-highlight-summary-cell {
+    border-color: transparent;
+    border-width: thin;
+}
+
+.remove-highlight-filled-cell {
+    border-color: black;
+    border-width: thin;
+    background-color: white;
+}
+
+.add-highlight-unfilled-cell {
+    border-color: red;
+    border-width: medium;
+}
+
+
+#loading-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 1000;
+}
+
+#loading-message {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+  text-align: center;
+}
+
+#summary-loading-icon {
+  position: absolute;
+  top: 50%;
+  left: 48%;
+  transform: translate(-50%, -50%);
+  font-size: 60px;
+
+    color: #82f5a8;
+    animation: spin2 1s linear infinite;
+    -webkit-text-stroke: 2px #7c7d7c;/* White border around the flask icon */
+}
+
+@keyframes spin2 {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#loading-message {
+    white-space: pre-line;
+}
+
+/* used for the periodic table of element sustainability */
+.img-big {
+  width: 100%;
+  height: auto;
+  padding: 10px;
+}
+
+.reaction-save-success{
+    padding-right: 15px;
+    display: inline;
+    color: white
+}
+
+.reaction-save-failure{
+    padding-right: 15px;
+    display: inline;
+    color: white;
+}
+
+.reaction-save-hidden{
+    padding-right: 15px;
+    display: none;
+}
+
+datalist {
+    position: absolute;
+    width: 17em;
+}
+
+.solvent-datalist{
+    padding-bottom: 5rem;
+}
+
+option {
+    cursor: pointer;
+    width: 17em;
+}
+
+datalist>option:hover, datalist>option.active {
+    border: 2px solid blue;
+}
+
+.loading-circle {
+  width: 60px;
+  height: 60px;
+  border: 3px solid #ccc;
+  border-radius: 50%;
+  border-top: 3px solid #007bff;
+  animation: spin 1s linear infinite; /* The spin animation will rotate the circle */
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+.loading-bar{
+    display: none; /* by default hidden */
+    position: fixed;
+    z-index: 1000; /* always on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%; /* full screen */
+    background-image: url('http://i.stack.imgur.com/FhHRx.gif');
+    background-position: 50% 50%; /* centre */
+    background-color: rgba(255, 255, 255, 0.8); /* transparency */
+    background-repeat: no-repeat;
+}
+body.loading{ /* when body has loading class */
+    overflow: hidden; /* hide scrolling bar */
+}
+body.loading .loading-bar{
+    display: block; /* when body has loading class, display tha loader */
+}

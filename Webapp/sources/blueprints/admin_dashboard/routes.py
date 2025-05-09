@@ -3,11 +3,8 @@ from datetime import datetime
 from flask import Response, flash, redirect, render_template, url_for
 from flask_login import login_required
 from sources import models, services
-from sources.auxiliary import (
-    get_notification_number,
-    get_workgroups,
-    security_admin_only,
-)
+from sources.auxiliary import get_notification_number, get_workgroups
+from sources.decorators import admin_required
 from sources.extensions import db
 
 from . import admin_dashboard_bp
@@ -19,16 +16,17 @@ from . import admin_dashboard_bp
     methods=["GET", "POST"],
 )
 @login_required
+@admin_required
+@admin_dashboard_bp.doc(
+    security="sessionAuth",
+    description="Requires login and admin user role.",
+)
 def admin_dashboard(
     request_institution: str = None, request_name: str = None, decision: str = None
 ) -> Response:
     """These routes display all active requests from database and perform the actions on approval/denial"""
-    # must be logged in and admin
     workgroups = get_workgroups()
     notification_number = get_notification_number()
-    if not security_admin_only():
-        flash("You do not have permission to view this page")
-        return redirect(url_for("main.index"))
 
     # if admin responds to a new workgroup request this block of code will process it and flash a message to the admin
     if request_institution:
@@ -50,9 +48,10 @@ def admin_dashboard(
         services.retrosynthesis.predictive_chemistry.saved_retrosyntheses.list_all()
     )
     recent_reactions = services.reaction.list_recent()
+    controlled_substance_usage = services.controlled_substances.list_all()
 
     return render_template(
-        "admin_dashboard.html",
+        "general/admin_dashboard.html",
         workgroups=workgroups,
         compound_data_error_reports=compound_data_error_reports,
         number_compounds_in_db=compound_count,
@@ -66,10 +65,16 @@ def admin_dashboard(
         recent_reactions=recent_reactions,
         all_solvent_surfers=all_solvent_surfers,
         all_retrosynthesis=all_retrosynthesis,
+        controlled_substance_usage=controlled_substance_usage,
     )
 
 
 @admin_dashboard_bp.route("/admin_delete_user/<user_id>", methods=["GET", "POST"])
+@admin_required
+@admin_dashboard_bp.doc(
+    security="sessionAuth",
+    description="Requires login and admin user role.",
+)
 def delete_user(user_id=None):
     user = services.user.from_id(user_id)
 
@@ -167,8 +172,6 @@ def handle_new_workgroup_request(
                     type="Your Request to Create a Workgroup",
                     info="Your Workgroup request for "
                     + new_workgroup_request.name
-                    + " at "
-                    + new_workgroup_request.Institution.name
                     + " has been approved.",
                     time=datetime.now(),
                     status="active",

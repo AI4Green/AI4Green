@@ -4,10 +4,6 @@ from sources import models, services
 from sources.auxiliary import get_workbooks, get_workgroups
 from sources.extensions import db
 
-#     workgroup = request.form["workgroup"]
-#     workbook = request.form["workbook"]
-from sources.models import reaction
-
 from . import search_bp
 
 # @search_bp.route("/text_search_handler", methods=["POST"])
@@ -20,8 +16,14 @@ from . import search_bp
 
 @search_bp.route("/structure_search_handler", methods=["POST"])
 @login_required
+@search_bp.doc(security="sessionAuth")
 def structure_search_handler() -> Response:
-    """Receives ajax request from search.js"""
+    """
+    Returns search results for exact structure search.
+
+    Returns:
+        flask.Response: returns the search results as a json object
+    """
     search = SearchHandler()
     if not search.reactions:
         # if no reactions exit search and post exception to frontend
@@ -139,7 +141,7 @@ class SearchHandler:
 
     def exact_polymer_structure_search(self) -> Response:  # different func if polymer
         """Performs an exact structure search on the reaction list"""
-        # get search smiles and convert to inchi
+        # get search smiles
         smiles = request.form["smiles"]
         smiles = smiles.split(" |")[0]
         if smiles.count("*") == 2:
@@ -206,7 +208,7 @@ class SearchHandler:
         reactions = services.reaction.to_dict(self.matches)
         self.images = services.reaction.make_reaction_image_list(self.matches)
         self.search_results = render_template(
-            "_saved_reactions.html", reactions=reactions, sort_crit="AZ"
+            "reactions/_saved_reactions.html", reactions=reactions, sort_crit="AZ"
         )
 
     def sort_matches(self) -> None:

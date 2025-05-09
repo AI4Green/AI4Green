@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}New Workgroup{% endblock %}
+{% block content %}
+
+<div class="container">
+    <h2>Create Workgroup</h2>
+    <p style="color:red">
+        Please note that you must be a Principal Investigator to set up a Workgroup. All other researchers should contact their PI directly and ask them to set up a Workgroup for their research group.
+    </p>
+    <b>Please ensure the information you enter in these fields is as accurate as possible. If nonsensical inputs are provided, we will be unlikely to be able to approve the Workgroup.
+        If you have any questions please email <a id="email-link" href="mailto:ai4green@nottingham.ac.uk">ai4green@nottingham.ac.uk</a>.</b>
+    <form method="POST">
+        {{ form.csrf_token }}
+{#        Institution:<br>#}
+{#        {{ form.institution }}<br><br>#}
+        Workgroup Name:<br>
+        {{ form.workgroup }}<br>
+        {% for error in form.workgroup.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+        <br>
+        Please indicate why you need to set up a Workgroup:<br>
+        {{ form.info }}<br>
+        {% for error in form.info.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+        <br>
+        {{ form.submit }}
+    </form>
+</div>
+{% endblock %}

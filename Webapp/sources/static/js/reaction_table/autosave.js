@@ -1,5 +1,5 @@
 // run observer if not in tutorial mode
-if ($("#js-tutorial").val() === "no" && $("#js-demo").val() !== "demo") {
+if ($("#js-tutorial").val() === "no") {
   observer();
 }
 
@@ -24,9 +24,6 @@ function observer() {
  * @param {boolean} [sketcher=false] - true if the changed element is a chemical sketcher
  */
 function autoSaveCheck(e = null, sketcher = false) {
-  if (!checkIfSaveEnabled()) {
-    return;
-  }
   let listOfClasses = [];
   if (e !== null) {
     listOfClasses = e.currentTarget.classList.value;
@@ -46,11 +43,7 @@ function autoSaveCheck(e = null, sketcher = false) {
     if (sketcher === false) {
       autoSave();
     } else if (sketcher === true) {
-      // dont autosave sketcher if reaction table has loaded
-      let reactionDiv = document.getElementById("reaction-table-div");
-      if (reactionDiv.childNodes.length === 0) {
-        sketcherAutoSave();
-      }
+      sketcherAutoSave();
     }
   }
 }
@@ -88,38 +81,89 @@ async function sketcherAutoSave() {
     // catches if autosave occurs during a sketcher crash
     return;
   }
+  // change here for reagent support
   let smilesNew = removeReagentsFromSmiles(smiles);
   $("#js-reaction-smiles").val(smilesNew);
   $("#js-reaction-rxn").val(rxn);
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
   let reactionID = $("#js-reaction-id").val();
+  let polymerIndices = identifyPolymers(rxn);
   let userEmail = "{{ current_user.email }}";
-  $.ajax({
-    url: "/_autosave_sketcher",
-    type: "post",
-    data: {
+  let demo = $("#js-demo").val();
+  let tutorial = $("#js-tutorial").val();
+  // change here for reagent support
+  if (smiles.includes(">>")) {
+    updateReactionTable(
+      smilesNew,
+      workgroup,
+      workbook,
+      reactionID,
+      polymerIndices,
+      demo,
+      tutorial,
+    );
+    if (demo !== "demo") {
+      $.ajax({
+        url: "/_autosave_sketcher",
+        type: "post",
+        data: {
+          workgroup: workgroup,
+          workbook: workbook,
+          reactionID: reactionID,
+          userEmail: userEmail,
+          reactionSmiles: smilesNew,
+          reactionRXN: rxn,
+          polymerIndices: JSON.stringify(polymerIndices),
+        },
+        dataType: "json",
+        success: function () {
+          flashUserSaveMessage("Reaction Changes Saved");
+        },
+        error: function () {
+          flashUserErrorSavingMessage();
+        },
+      });
+    }
+  }
+}
+
+function updateReactionTable(
+  smiles,
+  workgroup,
+  workbook,
+  reactionID,
+  polymerIndices,
+  demo,
+  tutorial,
+) {
+  fetch("/autoupdate_reaction_table", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      reaction_smiles: smiles,
       workgroup: workgroup,
       workbook: workbook,
-      reactionID: reactionID,
-      userEmail: userEmail,
-      reactionSmiles: smilesNew,
-      reactionRXN: rxn,
-    },
-    dataType: "json",
-    success: function () {
-      flashUserSaveMessage();
-    },
-    error: function () {
-      flashUserErrorSavingMessage();
-    },
-  });
+      reaction_id: reactionID,
+      polymer_indices: polymerIndices,
+      demo: demo,
+      tutorial: tutorial,
+    }),
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (item) {
+      generateReactionTable(item);
+    });
 }
 
 function postReactionData(complete = "not complete") {
   // this function posts data to the backend for saving and then updates the save indicator
   let {
-    polymerMode,
+    reactionClass,
     polymerIndices,
     polymerisationType,
     reactionID,
@@ -231,7 +275,7 @@ function postReactionData(complete = "not complete") {
     url: "/_autosave",
     type: "post",
     data: {
-      polymerMode: polymerMode,
+      reactionClass: reactionClass,
       polymerIndices: polymerIndices,
       polymerisationType: polymerisationType,
       workgroup: workgroup,
@@ -387,7 +431,7 @@ function postReactionData(complete = "not complete") {
         }
       } else {
         // if not locking reaction save as normal
-        flashUserSaveMessage();
+        flashUserSaveMessage("AUTOSAVE");
       }
     },
     error: function () {
@@ -421,7 +465,6 @@ function controlLockedReactionFunctionality() {
 }
 
 function getFieldData() {
-  let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
   let polymerisationType = $("#js-polymerisation-type").val();
   if (!polymerisationType) {
     polymerisationType = "";
@@ -441,6 +484,8 @@ function getFieldData() {
   if (!reactionImage) {
     reactionImage = "";
   }
+  let reactionClass = $("#reaction-class").val();
+  console.log(reactionClass);
   let limitingReactantTableNumber = $(
     "#js-limiting-reactant-table-number",
   ).val();
@@ -476,7 +521,7 @@ function getFieldData() {
     let reactantAmountRawID = "#js-reactant-amount" + i;
     reactantAmountsRaw += $(reactantAmountRawID).val() + ";";
     let reactantVolumeRawID = "#js-reactant-volume" + i;
-    reactantVolumesRaw = $(reactantVolumeRawID).val() + ";";
+    reactantVolumesRaw += $(reactantVolumeRawID).val() + ";";
     let reactantVolumeID = "#js-reactant-rounded-volume" + i;
     reactantVolumes += $(reactantVolumeID).val() + ";";
     let reactantDensityID = "#js-reactant-density" + i;
@@ -614,7 +659,7 @@ function getFieldData() {
   }
   // unit data
   let amountUnits = unitData("#js-amount-unit", "mmol");
-  let volumeUnits = unitData("#js-solvent-volume-unit", "mL");
+  let volumeUnits = unitData("#js-volume-unit", "mL");
   let massUnits = unitData("#js-mass-unit", "mg");
   let solventVolumeUnits = unitData("#js-solvent-volume-unit", "mL");
   let productAmountUnits = unitData("#js-product-amount-unit", "mmol");
@@ -744,7 +789,7 @@ function getFieldData() {
     }
   }
   return {
-    polymerMode: polymerMode,
+    reactionClass: reactionClass,
     polymerIndices: polymerIndices,
     polymerisationType: polymerisationType,
     reactionID: reactionID,
@@ -885,9 +930,9 @@ function fade_save_message() {
   $("#reaction-saved-indicator").fadeOut("slow");
 }
 
-function flashUserSaveMessage() {
+function flashUserSaveMessage(message) {
   let $reactionSaveIndicator = $("#reaction-saved-indicator");
-  $reactionSaveIndicator.text("Reaction Changes Saved");
+  $reactionSaveIndicator.text(message);
   $reactionSaveIndicator
     .removeClass()
     .addClass("reaction-save-success")

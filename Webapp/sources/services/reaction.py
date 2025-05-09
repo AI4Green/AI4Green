@@ -1,11 +1,8 @@
-import re
 from datetime import datetime, timedelta
 from typing import Dict, List
 
 import pytz
 from flask import request
-from rdkit.Chem import AllChem
-from rdkit.Chem.Draw import rdMolDraw2D
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
@@ -293,6 +290,24 @@ def add_addendum(
     db.session.add(new_addendum)
     db.session.commit()
     return new_addendum
+
+
+def get_addenda(reaction: models.Reaction) -> List[models.ReactionNote]:
+    """
+    Get all addenda for a reaction
+    Args:
+        reaction: The reaction object for which addenda are retrieved
+
+    Returns:
+        List of ReactionNote (addenda) objects
+
+    """
+    return (
+        db.session.query(models.ReactionNote)
+        .join(models.Reaction)
+        .filter(models.Reaction.id == reaction.id)
+        .all()
+    )
 
 
 def most_recent_in_workbook(workbook_id: int) -> models.Reaction:

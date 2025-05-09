@@ -2,41 +2,49 @@
  * Save polymer mode - updates reaction dict
  */
 function savePolymerMode() {
-  let workgroup = $("#js-active-workgroup").val();
-  let workbook = $("#js-active-workbook").val();
-  let reactionID = $("#js-reaction-id").val();
-  let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
-  let reactionType;
-  if (polymerMode) {
-    reactionType = "POLYMER";
-  } else {
-    reactionType = "STANDARD";
-  }
+  // save only if reaction table has not loaded
+  let reactionDiv = document.getElementById("reaction-table-div");
+  if (reactionDiv.childNodes.length === 0) {
+    let workgroup = $("#js-active-workgroup").val();
+    let workbook = $("#js-active-workbook").val();
+    let reactionID = $("#js-reaction-id").val();
+    let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
+    let reactionType;
+    if (polymerMode) {
+      reactionType = "POLYMER";
+    } else {
+      reactionType = "STANDARD";
+    }
 
-  $.ajax({
-    url: "/_save_polymer_mode",
-    type: "post",
-    data: {
-      workgroup: workgroup,
-      workbook: workbook,
-      reactionID: reactionID,
-      reactionType: reactionType,
-    },
-    success: function (response) {
-      // Handle success
-      console.log(response);
-    },
-    error: function (error) {
-      // Handle error
-      console.error(error);
-    },
-  });
+    $.ajax({
+      url: "/_save_polymer_mode",
+      type: "post",
+      data: {
+        workgroup: workgroup,
+        workbook: workbook,
+        reactionID: reactionID,
+        reactionType: reactionType,
+      },
+      success: function (response) {
+        flashUserSaveMessage();
+      },
+      error: function (error) {
+        // Handle error
+        console.error(error);
+      },
+    });
+  }
 }
 
 /**
  * Retrieve polymer mode - reads reaction dict
  */
 async function getPolymerMode() {
+  let demo = $("#js-demo").val();
+  let tutorial = $("#js-tutorial").val();
+  if (demo === "demo" || tutorial === "yes") {
+    return false;
+  }
   return new Promise((resolve, reject) => {
     let workgroup = $("#js-active-workgroup").val();
     let workbook = $("#js-active-workbook").val();
@@ -170,32 +178,32 @@ function getExamplePolymer() {
 /**
  * Reads RXN files to identify polymer(s) by "SRU" tag
  *
- * @param {string} rxn The reaction RXN string
- * @returns {list} indices where polymer is.
+ * @returns {*[]} indices where polymer is.
  */
 function identifyPolymers(rxn) {
   let array = rxn.split("$MOL");
-  let header_lines = array[0].split("\n");
-  let num_species = header_lines[header_lines.length - 2]
-    .match(/\d+/g)
-    .map(Number); //get last line in RXN header for number of reactants and products
-  let num_reactants = num_species[0];
-  let num_products = num_species[1];
-
   let indices = [];
-  for (let i = 0; i < num_reactants; i++) {
-    if (array[i + 1].includes("SRU")) {
-      //if mol contains SRU group
-      indices.push(i + 1);
+  if (array.length >= 2) {
+    let header_lines = array[0].split("\n");
+    let num_species = header_lines[header_lines.length - 2]
+      .match(/\d+/g)
+      .map(Number); //get last line in RXN header for number of reactants and products
+    let num_reactants = num_species[0];
+    let num_products = num_species[1];
+
+    for (let i = 0; i < num_reactants; i++) {
+      if (array[i + 1].includes("SRU")) {
+        //if mol contains SRU group
+        indices.push(i + 1);
+      }
+    }
+
+    for (let h = 0; h < num_products; h++) {
+      if (array[h + num_reactants + 1].includes("SRU")) {
+        //if mol contains SRU group
+        indices.push(h + num_reactants + 1);
+      }
     }
   }
-
-  for (let h = 0; h < num_products; h++) {
-    if (array[h + num_reactants + 1].includes("SRU")) {
-      //if mol contains SRU group
-      indices.push(h + num_reactants + 1);
-    }
-  }
-
   return indices;
 }

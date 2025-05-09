@@ -1,0 +1,139 @@
+:root {
+  /* Navbar colour variables */
+  --hover-underline-color: var(--primary-green);
+  --active-text-color: var(--tertiary-green);
+}
+
+/* Base navbar styling */
+#main-navbar {
+  background: var(--primary-grey) !important;
+  margin-bottom: 2.5rem;
+}
+
+/* ------ Navigation Items ------ */
+/* Active state styling */
+.navbar-nav .nav-item.active .nav-link {
+  font-weight: bold;
+  color: var(--active-text-color);
+}
+
+/* Hover and focus state styling - changes text colour to green*/
+.navbar-nav .nav-item .nav-link:hover,
+.navbar-nav .nav-item .nav-link:focus,
+.navbar-nav .dropdown-toggle:focus,
+.navbar-nav .dropdown.show .dropdown-toggle {
+  text-decoration: none;
+  position: relative;
+  color: var(--active-text-color);
+}
+
+/* Underline effect - Ensures dropdown toggle retains styling when focused or dropdown is open */
+.navbar-nav .nav-item .nav-link:hover::before,
+.navbar-nav .nav-item .nav-link:focus::before,
+.navbar-nav .dropdown-toggle:focus::before,
+.navbar-nav .dropdown.show .dropdown-toggle::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 3px;
+  background-color: var(--hover-underline-color);
+  border-radius: 1.5px;
+  z-index: 1;
+}
+
+/* ------ Dropdown Styling ------ */
+/* Dropdown arrow styling */
+.navbar-nav .dropdown-toggle::after {
+  display: inline-block;
+  margin-left: 0.255em;
+  vertical-align: 0.255em;
+  content: "";
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+  transition: transform 0.2s ease;
+}
+
+/* Arrow rotation when dropdown is open */
+.navbar-nav .show .dropdown-toggle::after {
+  transform: rotate(180deg);
+}
+
+/* Dropdown menu container */
+.dropdown-menu {
+  width: 250px;
+  background-color: var(--secondary-grey);
+  border: 1px solid var(--primary-grey);
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+  top: 100%;
+  left: 0;
+  transform: none;
+}
+
+/* Right-align the user dropdown menu */
+.navbar-nav > li:last-child .dropdown-menu,
+#user-dropdown + .dropdown-menu {
+  right: 0;
+  left: auto;
+}
+
+/* Dropdown items */
+.dropdown-menu .dropdown-item {
+  padding: 0.5rem 1.5rem;
+  color: #fff;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+  color: var(--active-text-color);
+  background-color: var(--secondary-grey);
+  font-weight: bold;
+}
+
+/*!* Ensure dropdown shows properly *!*/
+/*.dropdown-menu.show {*/
+/*  display: block;*/
+/*}*/
+
+/* ------ Layout & Positioning ------ */
+/* Prevent layout shift - consistent width */
+.nav-item.dropdown .nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding-right: 1.5em;
+  position: relative;
+}
+
+/* Spacing between navbar items */
+.navbar-nav .nav-item {
+  margin: 0 2px;
+}
+
+/* ------ Visual Elements ------ */
+/* Notification badge*/
+.badge-danger {
+  background-color: var(--primary-red);
+}
+
+
+/* ------ Mobile adjustments ------ */
+@media (max-width: 767.98px) {
+  .dropdown-menu {
+    width: 100%;
+    max-width: none;
+    left: 0;
+    right: auto ;
+  }
+  .navbar-nav .nav-item .nav-link:hover::before,
+  .navbar-nav .nav-item .nav-link:focus::before {
+    bottom: 0;
+  }
+}

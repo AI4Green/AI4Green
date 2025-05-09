@@ -2,7 +2,6 @@ import html
 
 from flask import Response, jsonify, render_template, request
 from flask_login import current_user, login_required
-
 from sources import models
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db
@@ -12,8 +11,14 @@ from . import notifications_bp
 
 @notifications_bp.route("/notifications", methods=["GET", "POST"])
 @login_required
+@notifications_bp.doc(security="sessionAuth")
 def notifications() -> Response:
-    # must be logged in
+    """
+    Renders the notification page to display the notifications for the current user
+
+    Returns:
+        flask.Response: The notifications page with all the notifications for the current user
+    """
     workgroups = get_workgroups()
     notifications_obj = (
         db.session.query(models.Notification)
@@ -29,7 +34,7 @@ def notifications() -> Response:
     db.session.commit()
     notification_number = get_notification_number()
     return render_template(
-        "notifications.html",
+        "account_management/notifications.html",
         notifications=notifications_obj,
         workgroups=workgroups,
         notification_number=notification_number,
@@ -38,8 +43,15 @@ def notifications() -> Response:
 
 @notifications_bp.route("/archive_notification", methods=["GET", "POST"])
 @login_required
+@notifications_bp.doc(security="sessionAuth")
 def archive_notification() -> Response:
-    # must be logged in
+    """
+    Archive a notification
+
+    Returns:
+        flask.Response: A JSON response indicating whether the notification was successfully archived
+
+    """
     type_str = str(request.form["type"])
     info_str = str(request.form["info"])
     time = str(request.form["time"])

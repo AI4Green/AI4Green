@@ -1,15 +1,17 @@
 /**
  * Makes a ketcher sketcher, hides it and sets up the autosave
- * @param {string} [width="1020px"] - width of the sketcher in pixels
+ * @param {string} [width="1080px"] - width of the sketcher in pixels
+ * @param {string} [height="540px"] - width of the sketcher in pixels
  */
-function setupNewKetcherSketcher(width = "1020px") {
-  let ketcherHTML = `<iframe id="ketcher-editor" src=/static/ketcher/index.html width=${width} height="480px"></iframe>`;
+function setupNewKetcherSketcher(width = "1080px", height = "540px") {
+  let ketcherHTML = `<iframe id="ketcher-editor" src=/static/ketcher/index.html width=${width} height=${height}></iframe>`;
   $("#ketcher-sketcher").empty().append(ketcherHTML).hide();
   $("#ketcher-select").prop("disabled", false);
 }
 
 /**
  * Displays the ketcher sketcher nd exports SMILES from Marvin to Ketcher
+ * ** Might break after async update to getKetcher function **
  * @return {Promise<void>}
  */
 async function switchToKetcherSketcher() {
@@ -30,14 +32,16 @@ function displayKetcher() {
  * Autosave when the sketcher is edited
  */
 function setupKetcherAutosave() {
-  let ketcher = getKetcher();
-  ketcher.editor.subscribe("change", function () {
-    setTimeout(autoSaveCheck(null, true), 100);
+  getKetcher().then((ketcher) => {
+    ketcher.editor.subscribe("change", function () {
+      setTimeout(autoSaveCheck(null, true), 100);
+    });
   });
 }
 
 /**
  * Exports structures from Marvin to Ketcher vin via SMILES (or RXN in polymer mode)
+ * ** Might break after async update to getKetcher function **
  */
 async function exportReactionFromMarvinToKetcher() {
   let reaction;
@@ -49,7 +53,7 @@ async function exportReactionFromMarvinToKetcher() {
       reaction = await exportSmilesFromMarvin();
     }
     if (reaction) {
-      let ketcher = getKetcher();
+      let ketcher = await getKetcher();
 
       ketcher.setMolecule(reaction);
     }
@@ -62,7 +66,7 @@ async function exportReactionFromMarvinToKetcher() {
  * in format: "reactant1.reactantX>reagent1.reagentX>product1.productX"
  */
 async function exportSmilesFromKetcher() {
-  let ketcher = getKetcher();
+  let ketcher = await getKetcher();
   return ketcher.getSmiles();
 }
 
@@ -71,7 +75,7 @@ async function exportSmilesFromKetcher() {
  * @return {Promise<string>} RXN file
  */
 async function exportRXNFromKetcher() {
-  let ketcher = getKetcher();
+  let ketcher = await getKetcher();
   await sleep(2000);
   try {
     return await ketcher.getRxn();
@@ -85,7 +89,7 @@ async function exportRXNFromKetcher() {
  * @return {Promise<string>} MOL file
  */
 async function exportMOLFromKetcher() {
-  let ketcher = getKetcher();
+  let ketcher = await getKetcher();
   await sleep(2000);
   try {
     return await ketcher.getMolfile();
@@ -99,25 +103,32 @@ async function exportMOLFromKetcher() {
  */
 function ketcherExampleSmiles() {
   let smiles = "OC(=O)C1=CC=CC=C1.CCN>>CCNC(=O)C1=CC=CC=C1";
-  let ketcher = getKetcher();
-
-  getPolymerMode().then((polymerMode) => {
-    if (polymerMode === true) {
-      ketcher.setMolecule(getExamplePolymer());
-    } else {
-      ketcher.setMolecule(smiles);
-    }
+  getKetcher().then((ketcher) => {
+    getPolymerMode().then((polymerMode) => {
+      if (polymerMode === true) {
+        ketcher.setMolecule(getExamplePolymer());
+      } else {
+        ketcher.setMolecule(smiles);
+      }
+    });
   });
 }
 
 /**
- * Gets the Ketcher editor as an object with access to its methods
+ * Gets the Ketcher editor as an object with access to its methods. Interval ensures ketcher loads before subsequent steps
  * @return {Object} Ketcher Object
  */
 function getKetcher() {
   let ketcherFrame = document.getElementById("ketcher-editor");
-  if ("contentDocument" in ketcherFrame)
-    return ketcherFrame.contentWindow.ketcher;
+  return new Promise((resolve) => {
+    let checkInterval = setInterval(() => {
+      let ketcher = ketcherFrame.contentWindow?.ketcher;
+      if (ketcher) {
+        clearInterval(checkInterval); // Stop checking
+        resolve(ketcher); // Return the Ketcher instance
+      }
+    }, 500); // Check every 500ms
+  });
 }
 
 /**
@@ -142,11 +153,9 @@ async function exportKetcherImage(smiles) {
  * @param {string} smiles - The SMILES string representing the molecule.
  * @returns {Promise<Blob>} A Promise that resolves to the generated image Blob.
  */
-function generateImageBlob(smiles) {
-  let ketcher = getKetcher();
-  return new Promise((resolve, reject) => {
-    ketcher.generateImage(smiles).then(resolve).catch(reject);
-  });
+async function generateImageBlob(smiles) {
+  let ketcher = await getKetcher(); // Ensure Ketcher is loaded
+  return ketcher.generateImage(smiles); // Return the promise that resolves to the Blob
 }
 
 /**

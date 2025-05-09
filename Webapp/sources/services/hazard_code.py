@@ -61,6 +61,7 @@ def get_multiple_compounds_data(component_dict: Dict, component_type: str):
     component_dict[f"{component_type}_exposure_potentials"] = []
     component_dict[f"{component_type}_risk_ratings"] = []
     component_dict[f"{component_type}_risk_colours"] = []
+    component_dict[f"{component_type}_hazard_codes"] = []
     # iterate through the compounds
 
     for compound_hazard_codes, physical_form in zip(
@@ -72,6 +73,11 @@ def get_multiple_compounds_data(component_dict: Dict, component_type: str):
             continue
         compound_data = get_single_compound_data(compound_hazard_codes, physical_form)
         # append the data to the relevant lists
+
+        component_dict[f"{component_type}_hazard_codes"].extend(
+            compound_data["hazard_codes"]
+        )
+
         component_dict[f"{component_type}_most_severe_hazard_numerical_ratings"].append(
             compound_data["most_severe_hazard_numerical_rating"]
         )
@@ -118,7 +124,9 @@ def get_single_compound_data(compound_hazard_codes: str, physical_form: str) -> 
 
     """
     # first get the hazard data
-    hazard_sentence, hazard_ratings = get_single_compound_hazard(compound_hazard_codes)
+    hazard_sentence, hazard_ratings, hazard_codes = get_single_compound_hazard(
+        compound_hazard_codes
+    )
     # find the most severe hazard rating as int and str
     most_severe_hazard_numerical_rating = max(
         [numerical_rating_from_str[rating] for rating in hazard_ratings]
@@ -149,10 +157,13 @@ def get_single_compound_data(compound_hazard_codes: str, physical_form: str) -> 
         "hazard_exposure_combination": hazard_exposure_combination,
         "risk_ratings": risk_rating,
         "risk_colour_code": risk_colour_code,
+        "hazard_codes": hazard_codes,
     }
 
 
-def get_single_compound_hazard(compound_hazard_codes: str) -> Tuple[str, List[str]]:
+def get_single_compound_hazard(
+    compound_hazard_codes: str,
+) -> Tuple[str, List[str], List[str]]:
     """
     For a single compound use the h codes, if present, to find and return the hazard sentences, and categories.
 
@@ -162,6 +173,7 @@ def get_single_compound_hazard(compound_hazard_codes: str) -> Tuple[str, List[st
     Returns:
         compound_hazard_sentence - combines the H-code and associated phrase
         compound_hazard_ratings - list of ['VH', 'L',...] low to very high hazard level of hazard codes for a compound
+        Compound hazard codes - list of H codes for a compound
     """
 
     if (
@@ -170,7 +182,7 @@ def get_single_compound_hazard(compound_hazard_codes: str) -> Tuple[str, List[st
         == "No hazard codes found"  # compound table value from pubchem
     ):
         # if there is no hazard data for the compound return these null values
-        return compound_hazard_codes, ["L"]
+        return compound_hazard_codes, ["L"], []
     # if a string of hazard codes is present we first convert this to a list
     hazard_code_list = string_to_list(compound_hazard_codes)
     # we iterate through this list and for each hazard code we append the data to the appropriate list
@@ -184,7 +196,7 @@ def get_single_compound_hazard(compound_hazard_codes: str) -> Tuple[str, List[st
     # post processing to remove delimiter from sentence string
     compound_hazard_sentence = compound_hazard_sentence[:-2]
     # we want the maximum risk rate from the compound_hazard_categories
-    return compound_hazard_sentence, compound_hazard_ratings
+    return compound_hazard_sentence, compound_hazard_ratings, hazard_code_list
 
 
 def replace_substrings(input_string: str, replace_dict: dict) -> str:
@@ -254,3 +266,39 @@ def get(h_code: str) -> models.HazardCode:
         .filter(models.HazardCode.code == h_code)
         .first()
     )
+
+
+def get_toxicities(hazard_codes: List[str]) -> List[str]:
+    """
+    Checks a list of hazard codes to see if any are reproductive toxins, carcinogenic, or mutagenic.
+    Args:
+        hazard_codes: List of GHS H codes e.g., H360
+
+    Returns:
+        List of strings indicating whether reproductive, carcinogenic or mutagenic toxicities that are present
+    """
+    toxicity_types = []
+    # some of the reproductive toxin H codes may be superfluous currently, but adding them all guards
+    # against future updates
+    hazard_categories = {
+        "carcinogen": ["H350", "H350i", "H351"],
+        "mutagen": ["H340", "H341"],
+        "reproductive toxin": [
+            "H360",
+            "H360D",
+            "H360Df",
+            "H360F",
+            "H360FD",
+            "H360Fd",
+            "H361",
+            "H361d",
+            "H361f",
+            "H361fd",
+            "H362",
+        ],
+    }
+
+    for category, h_codes in hazard_categories.items():
+        if any(h_code in hazard_codes for h_code in h_codes):
+            toxicity_types.append(category)
+    return toxicity_types

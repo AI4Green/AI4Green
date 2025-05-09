@@ -54,7 +54,7 @@ def insert_test_data():
     )
 
     # add unverified user
-    p2 = add_test_user(
+    add_test_user(
         username="not_verified",
         email="not_verified@test.com",
         fullname="Test Daley",
@@ -62,7 +62,7 @@ def insert_test_data():
         verified=False,
     )
 
-    p3 = add_test_user(
+    add_test_user(
         username="password_reset",
         email="password_reset@test.com",
         fullname="TEST",
@@ -140,6 +140,16 @@ def insert_test_data():
         molec_weight=255,
         smiles="CCP",
     )
+    # for controlled substance test
+    mustard_gas = models.Compound(
+        name="Mustard Gas",
+        cas="505-60-2",
+        cid=-8,
+        hphrase="H900",
+        molec_weight=255,
+        smiles="ClCCSCCCl",
+    )
+
     for compound in [
         compound1,
         compound2,
@@ -148,6 +158,7 @@ def insert_test_data():
         compound5,
         compound6,
         compound7,
+        mustard_gas
     ]:
         # add inchi using SMILES then add to db
         mol = Chem.MolFromSmiles(compound.smiles)
@@ -227,6 +238,23 @@ def insert_test_data():
         inchi=inchi_1,
         inchikey="MRGYEWYAVKQUEA-UHFFFAOYSA-N",
     )
+
+    # add controlled substance as novel compound
+    inchi_1 = "InChI=1S/C6H6N12O12/c19-13(20)7-1-2-8(14(21)22)5(7)6-9(15(23)24)3(11(1)17(27)28)4(10(6)16(25)26)12(2)18(29)30/h1-6H"
+    models.NovelCompound.create(
+        name="Explosion Risk Test",
+        cas="",
+        workbook=workbook.id,
+        molec_formula="C21H15NO",
+        hphrase="Unknown",
+        density=None,
+        concentration=None,
+        molec_weight=297.12,
+        smiles="[O-][N+](=O)N1C2C3N(C1C4N(C(C(N3[N+]([O-])=O)N4[N+]([O-])=O)N2[N+]([O-])=O)[N+]([O-])=O)[N+]([O-])=O",
+        inchi=inchi_1,
+        inchikey="NDYLCHGXSQOGMS-UHFFFAOYSA-N",
+    )
+
 
     # add a polymer novel compound
     models.PolymerNovelCompound.create(

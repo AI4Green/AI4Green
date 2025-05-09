@@ -1,12 +1,8 @@
 from datetime import datetime
 
 import pytz
-from flask import redirect  # renders html templates
-from flask import Response, flash, render_template, request, url_for
-from flask_login import (  # protects a view function against anonymous users
-    current_user,
-    login_required,
-)
+from flask import Response, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
 from sources import auxiliary, models, services
 from sources.auxiliary import get_notification_number, get_workgroups
@@ -16,7 +12,7 @@ from sqlalchemy import func
 from wtforms import StringField, SubmitField
 from wtforms.validators import Length
 
-from . import create_workbook_bp  # imports the blueprint of the dummy route
+from . import create_workbook_bp
 
 
 class CreateWorkbookForm(FlaskForm):
@@ -32,9 +28,21 @@ class CreateWorkbookForm(FlaskForm):
 @create_workbook_bp.route("/create_workbook/<workgroup>", methods=["GET", "POST"])
 @login_required
 @principal_investigator_or_senior_researcher_required
+@create_workbook_bp.doc(
+    security="sessionAuth",
+    description="Requires login and Principal Investigator or Senior Researcher role in the specified workgroup.",
+)
 def create_workbook(workgroup: str) -> Response:
-    """Creates a workbook using a FlaskForm. The book is created by a PI or SR and they must provide the name
-    and workgroup the workbook should belong to"""
+    """Creates a workbook using a FlaskForm. The book is created by a principal investigator
+     or senior researcher and they must provide the name and workgroup the workbook should belong to
+
+    Args:
+        workgroup (str): The workgroup the workbook should belong to
+
+    Returns:
+        flask.Response: The rendered template for creating a workbook
+        or a redirect to the manage workbook page for the new workbook
+    """
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     form = CreateWorkbookForm()
@@ -54,7 +62,9 @@ def create_workbook(workgroup: str) -> Response:
         if not workbook_name.replace(" ", "").replace("-", "").isalnum():
             flash("Workgroup names cannot contain special characters!")
             return render_template(
-                "create_workgroup.html", form=form, workgroups=workgroups
+                "work_structures/create_workgroup.html",
+                form=form,
+                workgroups=workgroups,
             )
 
         # make sure workbook of same name does exist within workbook
@@ -72,7 +82,7 @@ def create_workbook(workgroup: str) -> Response:
         ]:
             flash("A workbook of this name already exists!")
             return render_template(
-                "create_workbook.html",
+                "work_structures/create_workbook.html",
                 form=form,
                 workgroups=workgroups,
                 notification_number=notification_number,
@@ -84,7 +94,7 @@ def create_workbook(workgroup: str) -> Response:
         if not workbook_abbreviation.isalnum():
             flash("Workbook abbreviation must only consist of alphanumeric characters!")
             return render_template(
-                "create_workbook.html",
+                "work_structures/create_workbook.html",
                 form=form,
                 workgroups=workgroups,
                 notification_number=notification_number,
@@ -103,7 +113,7 @@ def create_workbook(workgroup: str) -> Response:
         if existing_abbreviations:
             flash("A workbook with this abbreviation already exists!")
             return render_template(
-                "create_workbook.html",
+                "work_structures/create_workbook.html",
                 form=form,
                 workgroups=workgroups,
                 notification_number=notification_number,
@@ -149,7 +159,7 @@ def create_workbook(workgroup: str) -> Response:
         )
     else:
         return render_template(
-            "create_workbook.html",
+            "work_structures/create_workbook.html",
             form=form,
             workgroups=workgroups,
             notification_number=notification_number,

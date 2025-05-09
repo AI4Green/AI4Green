@@ -1,8 +1,10 @@
 import contextlib
-from typing import Tuple
+import datetime
+from typing import Dict, Tuple, Union
 
+import ipinfo
 import toml
-from flask import current_app
+from flask import current_app, request
 
 
 def camelCase_to_snake_case(string: str) -> str:
@@ -34,6 +36,16 @@ def get_app_version() -> Tuple[str, str]:
             git_hash = f.read().strip()
 
     return app_version, git_hash
+
+
+def get_privacy_policy_date() -> datetime.datetime:
+    """
+    Returns the date the current privacy policy was introduced in to the app.
+
+    Returns:
+        datetime.datetime, datetime the privacy policy was introduced in to the app.
+    """
+    return datetime.datetime(2025, 3, 18)
 
 
 def check_is_number(string: str) -> bool:
@@ -70,6 +82,38 @@ def remove_duplicates_keep_first(lst: list) -> list:
             seen_items.add(item)
 
     return new_list
+
+
+def get_ip_address() -> Union[str, None]:
+    """Returns current IP address"""
+    if request.headers.get("X-Forwarded-For"):
+        ip = request.headers.get("X-Forwarded-For").split(",")[0].strip()
+        return ip.split(":")[0]
+    return None
+
+
+def get_location() -> Dict[str, str]:
+    """
+    Uses IPInfo call to get user location
+
+    Returns:
+        Dict[str, str]: dictionary with IP address, country name and city of the request
+    """
+    handler = ipinfo.getHandler(current_app.config["IPINFO_API_KEY"])
+    ip = get_ip_address()
+    if ip is not None:
+        location = handler.getDetails(ip)
+        return {
+            "IP_address": ip,
+            "country": location.country_name,
+            "city": location.city,
+        }
+    # location information is not supported for local instances
+    return {
+        "IP_address": "Location Not Found",
+        "country": "Location Not Found",
+        "city": "Location Not Found",
+    }
 
 
 def remove_spaces_and_dashes(name: str) -> str:

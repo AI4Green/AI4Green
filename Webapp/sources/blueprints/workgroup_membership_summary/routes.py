@@ -1,14 +1,10 @@
-from flask import Response, render_template  # renders html templates
-from flask_login import \
-    login_required  # protects a view function against anonymous users
+from flask import Response, render_template
+from flask_login import login_required
 from flask_wtf import FlaskForm
+from sources.auxiliary import get_notification_number, get_workbooks, get_workgroups
 from wtforms import SelectField, SubmitField
 
-from sources.auxiliary import (get_notification_number, get_workbooks,
-                               get_workgroups)
-
-from . import \
-    workgroup_membership_summary_bp  # imports the blueprint of the dummy route
+from . import workgroup_membership_summary_bp
 
 
 class SelectWorkgroupForm(FlaskForm):
@@ -16,18 +12,22 @@ class SelectWorkgroupForm(FlaskForm):
     submit = SubmitField("Find Workbooks")
 
 
-# put routes here
 @workgroup_membership_summary_bp.route(
     "/workgroup_membership_summary", methods=["GET", "POST"]
 )
 @login_required
+@workgroup_membership_summary_bp.doc(security="sessionAuth")
 def workgroup_membership_summary() -> Response:
-    # must be logged in
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
+    """
+    Workgroup membership summary page, all the workgroups the user belongs to and can find the workbooks
+    in each workgroup they are a member of.
+
+    Returns:
+        flask.Response: renders the workgroup membership summary page
+    """
+    workgroups = get_workgroups() or ["-select-"]
     # create the form
     form = SelectWorkgroupForm()
-    workgroups.insert(0, "-select-")
     form.workgroups.choices = workgroups
     # on valid submit
     if form.validate_on_submit() and form.workgroups.data != "-select-":
@@ -35,16 +35,14 @@ def workgroup_membership_summary() -> Response:
         if not workbooks:
             workbooks.append("You are not a member of any workbooks in this workgroup")
         return render_template(
-            "workgroup_membership_summary.html",
+            "work_structures/workgroup_membership_summary.html",
             form=form,
             workgroup=form.workgroups.data,
             workbooks=workbooks,
             workgroups=workgroups,
-            notification_number=notification_number,
         )
     return render_template(
-        "workgroup_membership_summary.html",
+        "work_structures/workgroup_membership_summary.html",
         form=form,
         workgroups=workgroups,
-        notification_number=notification_number,
     )

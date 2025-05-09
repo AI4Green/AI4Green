@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 from typing import Optional, Tuple
 
-from flask import abort, request
+from flask import abort, jsonify, request
 from flask_login import current_user
 from psmiles import PolymerSmiles
 from rdkit import Chem
@@ -13,7 +13,10 @@ from sources.extensions import db
 from sqlalchemy import func
 
 
-def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> str:
+def get_smiles(
+    primary_key: Tuple[str, int],
+    person: models.Person = None,
+) -> str:
     """
     Gets the novel compound's SMILES string from the primary key if the entry has the SMILES attribute
     Args:
@@ -23,6 +26,7 @@ def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> st
     Returns:
         The SMILES string corresponding to the primary key or None
     """
+    print("ploymer get smiles", primary_key)
     primary_key = (primary_key[0], int(primary_key[1]))
     workbook = services.workbook.get(primary_key[1])
     if (person and person not in workbook.users) or (
@@ -32,7 +36,7 @@ def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> st
 
     return (
         db.session.query(models.PolymerNovelCompound.smiles)
-        .filter(models.PolymerNovelCompound.name == primary_key[0].lower())
+        .filter(func.lower(models.PolymerNovelCompound.name) == primary_key[0].lower())
         .join(models.WorkBook)
         .filter(models.WorkBook.id == primary_key[1])
         .first()
@@ -277,7 +281,7 @@ def check_positive_number(s: float) -> bool:
 def extract_inside_brackets(
     s: str,
     start_index: int,
-) -> str:
+) -> tuple[str, int]:
     """
     Extracts contents of brackets to identify branching in polymer SMILES.
     Handles nested branching.
@@ -331,7 +335,7 @@ def is_within_brackets(expression, target="{+n}"):
     return balance > 0
 
 
-def get_last_bracketed_expression(expression):
+def get_last_bracketed_expression(expression: str) -> str:
     """
     Returns the last set of brackets, including its content, in a given expression.
 
@@ -364,7 +368,7 @@ def get_last_bracketed_expression(expression):
     return ""
 
 
-def reformat_smiles(smiles):
+def reformat_smiles(smiles: str) -> str:
     branch = smiles.split(")")[-1]
     smiles = smiles[: smiles.rfind(branch)]
     inner = get_last_bracketed_expression(smiles)
@@ -384,31 +388,49 @@ def find_polymer_repeat_unit(
     start_marker = compound.find("{-}")
     end_marker = compound.find("{+n}")
 
-    # If both {-} and {+} are found
-    if start_marker != -1 and end_marker != -1:
-        # Reformat if end of SRU is treated as a branch. e.g. *C{-}(CC{+n}*)C where {+n} is within brackets
-        while is_within_brackets(compound, "{+n}"):
-            compound = reformat_smiles(compound)
-            start_marker = compound.find("{-}")
-            end_marker = compound.find("{+n}")
+    # if either {-} or {+} is not found
+    if start_marker == -1 or end_marker == -1:
+        return ""
 
-        # Start is the character just before {-}, and end is the character just before {+}
+    # Reformat if end of SRU is treated as a branch. e.g. *C{-}(CC{+n}*)C where {+n} is within brackets
+    while is_within_brackets(compound, "{+n}") != is_within_brackets(compound, "{-}"):
+        compound = reformat_smiles(compound)
+        if compound == reformat_smiles(compound):
+            return ""  # avoid infinite loop
+        start_marker = compound.find("{-}")
+        end_marker = compound.find("{+n}")
+
+    # Start is the letter before {-}, and end is the character just before {+}
+    if compound[start_marker - 1].isupper():
         result = compound[start_marker - 1] + compound[start_marker + 3 : end_marker]
+    elif (
+        compound[start_marker - 1] == "]"
+    ):  # for polymers with [] groups e.g C[SiH2]{-}CC{+n}C
+        i = 2
+        while compound[start_marker - i] != "[" and start_marker - i > 0:
+            i += 1  # search backwards
+        result = compound[start_marker - i : end_marker].replace("{-}", "")
+    else:  # for polymers with rings e.g *C1{-}CC{+n}(CCC1)*
+        i = 2
+        while not compound[start_marker - i].isupper() and start_marker - i > 0:
+            i += 1  # search backwards
+        result = compound[start_marker - i : end_marker].replace("{-}", "")
 
-        # Check for branching: if the character after {+} is '('
-        if end_marker + 4 < len(compound) and compound[end_marker + 4] == "(":
-            branch, close_paren = extract_inside_brackets(compound, end_marker + 4)
+    # Check for branching: if the character after {+} is '('
+    if end_marker + 4 < len(compound) and compound[end_marker + 4] == "(":
+        branch, close_paren = extract_inside_brackets(compound, end_marker + 4)
+        if close_paren != -1:
+            result += branch
+
+        # check for more branching
+        while close_paren + 1 < len(compound) and compound[close_paren + 1] == "(":
+            branch, close_paren = extract_inside_brackets(compound, close_paren + 1)
             if close_paren != -1:
                 result += branch
 
-            # check for more branching
-            while close_paren + 1 < len(compound) and compound[close_paren + 1] == "(":
-                branch, close_paren = extract_inside_brackets(compound, close_paren + 1)
-                if close_paren != -1:
-                    result += branch
-        return result
-    # if either {-} or {+} is not found
-    return ""
+    result = result.replace("/", "").replace("\\", "")  # ignore stereochemistry
+
+    return result
 
 
 def clean_polymer_smiles(
@@ -420,23 +442,28 @@ def clean_polymer_smiles(
     return compound.replace("{+n}", "").replace("{-}", "").replace("-", "")
 
 
-def canonicalise(smiles):
+def canonicalise(smiles: str) -> str:
     """
     Canonicalise a polymer SMILES string. Not for use when endgroups are known (must have two '*'s)
     """
     ps = PolymerSmiles(smiles)
     smiles = ps.canonicalize
-    return str(smiles).replace("[", "").replace("]", "")
+    return str(smiles).replace("[*]", "*")  # change dangling bonds label
 
 
-def find_repeat_clean_canonicalise(smiles):
+def find_canonical_repeat(smiles: str) -> str:
     """
-    Find repeat unit, clean, and canonicalise a polymer smiles string.
+    Find repeat unit, and canonicalise a polymer smiles string.
+    REMOVES END GROUPS
+    Args:
+        smiles - the unedited smiles from ketcher output. e.g. CC{-}C{+n}C
+    Returns:
+        canon_smiles - the canonicalised repeat unit. e.g *C*
     """
     repeat_unit = find_polymer_repeat_unit(smiles)
-    smiles = clean_polymer_smiles(smiles)
-    if smiles.count("*") == 2:
-        smiles = canonicalise(smiles)
-        # TODO: update repeat unit to after canonicalising?
+    if "*" in repeat_unit:  # block dummy atoms like R groups
+        return ""
+    smiles = "*" + repeat_unit + "*"
+    smiles = canonicalise(smiles)
 
-    return smiles, repeat_unit
+    return smiles

@@ -1,9 +1,10 @@
+from datetime import datetime
 from typing import List
 
-from sqlalchemy import func
 from flask_login import current_user
-from sources import models
+from sources import models, services
 from sources.extensions import db
+from sqlalchemy import func
 
 
 def list_all() -> List[models.User]:
@@ -39,6 +40,7 @@ def add(
         fullname=fullname,
         Person=person,
         password_hash=models.User.set_password(password_data),
+        privacy_policy_accepted_on=datetime.now(),
     )
 
 
@@ -57,11 +59,15 @@ def from_id(user_id: int) -> models.User:
 
 def from_email(user_email: str) -> models.User:
     """
-        Gets user from User email
-        Args:
-            user_email: email of user to search for
+    Gets user from User email
+    Args:
+        user_email: email of user to search for
 
-        Returns:
-            models.User with matching email
-        """
-    return db.session.query(models.User).filter(func.lower(models.User.email) == user_email.lower()).first()
+    Returns:
+        models.User with matching email
+    """
+    return (
+        db.session.query(models.User)
+        .filter(func.lower(models.User.email) == user_email.lower())
+        .first()
+    )

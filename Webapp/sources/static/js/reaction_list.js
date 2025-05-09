@@ -337,10 +337,7 @@ function saveNewImages(sortCriteria, workbook, workgroup, images) {
       workbook: workbook,
       images: JSON.stringify(images),
     },
-    success: function (response) {
-      // Handle success
-      console.log(response);
-    },
+    success: function (response) {},
     error: function (error) {
       // Handle error
       console.error(error);
@@ -349,10 +346,14 @@ function saveNewImages(sortCriteria, workbook, workgroup, images) {
 }
 
 /**
- * Generate images with hidden ketcher element
- * Returns list of images
+ * Generate missing images with hidden ketcher element
+ * @param sortCriteria {string} - the sort criteria, either a-z or time
+ * @param workbook {string} - the active workbook name
+ * @param workgroup {string} - the active workgroup name
+ * @param images {Array} - incomplete list of image strings, where missing are ""
+ * @return {Promise<Array>} - Returns list of images
  */
-async function regenerateImages(sortCriteria, workbook, workgroup) {
+async function regenerateImages(sortCriteria, workbook, workgroup, images) {
   let ketcherFrame = document.getElementById("ketcher-editor");
   await new Promise((resolve) => {
     ketcherFrame.onload = () => resolve();
@@ -360,24 +361,44 @@ async function regenerateImages(sortCriteria, workbook, workgroup) {
 
   let rxns = await getRXNs(sortCriteria, workbook, workgroup);
   let smiles = await getSmiles(sortCriteria, workbook, workgroup);
-  let images = [];
+
+  //indices of empty images
+  const missingImagesIdx = images
+    .map((entry, index) => (entry === "" ? index : -1))
+    .filter((index) => index !== -1);
+  let missingImages = [];
 
   for (const [idx, smile] of smiles.entries()) {
+    if (!missingImagesIdx.includes(idx)) {
+      // only generate missing imgs
+      continue;
+    }
+    if (smile === "") {
+      missingImages.push("Empty Reaction");
+      continue;
+    }
     try {
       let rxn = rxns[idx];
       let source = await ketcherFrame.contentWindow.ketcher.generateImage(rxn);
-      const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 100);
+      const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 50);
       let imgSource = await convertBlobToBase64(shrunkenBlob);
-      images.push(imgSource);
+      missingImages.push(imgSource);
     } catch (error) {
-      console.log("error");
       // catch reactions with no rxn file, use smiles instead.
       let source = await ketcherFrame.contentWindow.ketcher.generateImage(
         smile,
       );
-      const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 100);
+      const shrunkenBlob = await shrinkBlobImage(source, 600, 400, 50);
       let imgSource = await convertBlobToBase64(shrunkenBlob);
-      images.push(imgSource);
+      missingImages.push(imgSource);
+    }
+  }
+  // Replace "" with the corresponding image
+  for (let i = 0; i < images.length; i++) {
+    if (images[i] === "") {
+      images[i] = missingImages[0];
+      //remove missingImages[0] from list
+      missingImages.shift();
     }
   }
   saveNewImages(sortCriteria, workbook, workgroup, images);
@@ -397,12 +418,20 @@ async function showSavedReactionsImages() {
   let images = await getReactionImages(sortCriteria, workbook, workgroup);
   if (images.some((entry) => entry === "")) {
     // if any of the images arent in db, generate now
-    images = await regenerateImages(sortCriteria, workbook, workgroup);
+    images = await regenerateImages(sortCriteria, workbook, workgroup, images);
   }
 
   for (const [idx, imgSource] of images.entries()) {
     let idx1 = idx + 1;
     let $image = $(`#image${idx1}`);
+
+    if (imgSource === "Empty Reaction") {
+      // change img div to text div
+      $image.replaceWith(
+        '<div id="image${idx1}" style="text-align: center; padding: 20px;">[Empty Reaction]</div>',
+      );
+    }
+
     $image.attr("src", imgSource);
   }
 }

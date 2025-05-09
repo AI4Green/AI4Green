@@ -1,22 +1,23 @@
-from flask import redirect  # renders html templates
-from flask import Response, flash, render_template, request, url_for
-from flask_login import (  # protects a view function against anonymous users
-    current_user,
-    login_required,
-)
+from flask import Response, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 from sources import models, services
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db
 
-from . import update_email_bp  # imports the blueprint of the dummy route
+from . import update_email_bp
 from .forms import UpdateEmailForm
 
 
-# Go to the update email/password page
 @update_email_bp.route("/update_email_password", methods=["GET", "POST"])
 @login_required
+@update_email_bp.doc(security="sessionAuth")
 def update_email_password() -> Response:
-    # must be logged in
+    """
+    Update email and password page
+
+    Returns:
+        flask.Response: renders the update email and password page
+    """
     current_email = current_user.email
     user = (
         db.session.query(models.User)
@@ -32,21 +33,22 @@ def update_email_password() -> Response:
                 "Please check your email for instructions on how to change your password"
             )
             return redirect(url_for("main.index"))
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
     return render_template(
-        "update_email_password.html",
+        "account_management/update_email_password.html",
         email=current_email,
-        workgroups=workgroups,
-        notification_number=notification_number,
     )
 
 
-# Go to the update email page
 @update_email_bp.route("/update_email", methods=["GET", "POST"])
 @login_required
+@update_email_bp.doc(security="sessionAuth")
 def update_email() -> Response:
-    # must be logged in
+    """
+    Update email and sends verification email to the new email address.
+
+    Returns:
+        flask.Response: renders the update email page.
+    """
     form = UpdateEmailForm()
     if form.validate_on_submit():
         # if authentication is successful
@@ -73,13 +75,11 @@ def update_email() -> Response:
         user.update()
         services.email.send_email_verification(user)
         # alert user of success and redirect to home
-        flash("Your email address has been successfully updated! Please check your inbox for instructions on how to verify this new address!")
+        flash(
+            "Your email address has been successfully updated! Please check your inbox for instructions on how to verify this new address!"
+        )
         return redirect(url_for("main.index"))
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
     return render_template(
-        "update_email.html",
+        "account_management/update_email.html",
         form=form,
-        workgroups=workgroups,
-        notification_number=notification_number,
     )

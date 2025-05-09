@@ -1,5 +1,5 @@
-from flask import Blueprint
+from apiflask import APIBlueprint
 
-export_data_bp = Blueprint("export_data", __name__)
+export_data_bp = APIBlueprint("export_data", __name__)
 
 from . import routes

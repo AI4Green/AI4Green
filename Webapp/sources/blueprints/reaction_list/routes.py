@@ -26,8 +26,23 @@ from . import reaction_list_bp
 )
 @login_required
 @workbook_member_required
+@reaction_list_bp.doc(
+    security="sessionAuth",
+    description="Requires login and membership in the specified workbook and be the creator of the reaction.",
+)
 def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response:
-    # must be logged in, a member of the workgroup and workbook and the creator of the reaction
+    """
+    Deletes a reaction from the list of reactions in the workbook by changing its status to 'inactive'.
+
+    Args:
+        reaction_id: the id of the reaction to be deleted
+        workgroup: the name of the workgroup that the workbook belongs to
+        workbook: the name of the workbook that the reaction belongs to
+    Returns:
+        flask.Response: Redirects to the workgroup page
+
+
+    """
     # find reaction
     reaction = (
         db.session.query(models.Reaction)
@@ -59,8 +74,14 @@ def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response
 
 @reaction_list_bp.route("/get_reactions", methods=["GET", "POST"])
 @login_required
+@reaction_list_bp.doc(security="sessionAuth")
 def get_reactions() -> Response:
-    """Gets a list of reactions for the active workbook. Reaction data is sent as a list of dictionaries."""
+    """
+    Gets a list of reactions for the active workbook. Reaction data is sent as a list of dictionaries.
+
+    Returns:
+        flask.Response: A JSON response with the reaction data
+    """
     sort_crit = str(request.form.get("sortCriteria"))
     workbook_name = str(request.form.get("workbook"))
     workgroup_name = str(request.form.get("workgroup"))
@@ -74,7 +95,7 @@ def get_reactions() -> Response:
     new_reaction_id = services.reaction.get_next_reaction_id_for_workbook(workbook.id)
     reactions = services.reaction.to_dict(reactions)
     reaction_details = render_template(
-        "_saved_reactions.html",
+        "reactions/_saved_reactions.html",
         reactions=reactions,
         sort_crit=escape(sort_crit),
         workgroup=workgroup_name,
@@ -86,9 +107,16 @@ def get_reactions() -> Response:
 @reaction_list_bp.route("/get_reaction_images", methods=["GET", "POST"])
 @login_required
 @workbook_member_required
+@reaction_list_bp.doc(
+    security="sessionAuth",
+    description="Requires login and membership in the specified workbook.",
+)
 def get_reaction_images(workgroup, workbook) -> Response:
     """
     Gets a list of reaction images for the active workbook.
+
+    Returns:
+        flask.Response: A JSON response with the reaction images
     """
     sort_crit = str(request.form.get("sortCriteria"))
     reaction_list = services.reaction.list_active_in_workbook(
@@ -101,9 +129,16 @@ def get_reaction_images(workgroup, workbook) -> Response:
 @reaction_list_bp.route("/get_smiles", methods=["GET", "POST"])
 @login_required
 @workbook_member_required
+@reaction_list_bp.doc(
+    security="sessionAuth",
+    description="Requires login and membership in the specified workbook.",
+)
 def get_smiles(workgroup, workbook) -> Response:
     """
     Gets a list of reaction smiles for the active workbook.
+
+    Returns:
+        flask.Response: A JSON response with the reaction smiles
     """
     sort_crit = str(request.form.get("sortCriteria"))
     reaction_list = services.reaction.list_active_in_workbook(
@@ -116,9 +151,16 @@ def get_smiles(workgroup, workbook) -> Response:
 @reaction_list_bp.route("/get_rxns", methods=["GET", "POST"])
 @login_required
 @workbook_member_required
+@reaction_list_bp.doc(
+    security="sessionAuth",
+    description="Requires login and membership in the specified workbook.",
+)
 def get_rxns(workgroup, workbook) -> Response:
     """
     Gets a list of reaction RXNs for the active workbook.
+
+    Returns:
+        flask.Response: A JSON response with the reaction RXNs
     """
     sort_crit = str(request.form.get("sortCriteria"))
     reaction_list = services.reaction.list_active_in_workbook(
@@ -130,9 +172,14 @@ def get_rxns(workgroup, workbook) -> Response:
 
 @reaction_list_bp.route("/_save_new_images", methods=["POST"])
 @login_required
+@reaction_list_bp.doc(security="sessionAuth")
 def save_new_images():
-    """Updates reaction dict with images"""
-    # must be logged in
+    """
+    Updates reaction dict with images
+
+    Returns:
+        flask.Response: A JSON response with feedback
+    """
     workbook_name = str(request.form.get("workbook"))
     workgroup_name = str(request.form.get("workgroup"))
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
@@ -145,9 +192,6 @@ def save_new_images():
     )
     images = json.loads(request.form.get("images"))
     for idx, reaction in enumerate(reaction_list):
-        services.auth.edit_reaction(
-            reaction, file_attachment=True
-        )  # allow changes of locked reactions
         update_dict = {"reaction_image": images[idx]}
         reaction.update(**update_dict)
     feedback = "Reaction Updated!"
@@ -156,7 +200,14 @@ def save_new_images():
 
 @reaction_list_bp.route("/get_new_reaction_id", methods=["GET", "POST"])
 @login_required
+@reaction_list_bp.doc(security="sessionAuth")
 def get_new_reaction_id() -> Response:
+    """
+    Gets the next reaction id for the active workbook
+
+    Returns:
+        flask.Response: A JSON response with the new reaction id
+    """
     workbook_name = request.json.get("workbook")
     workgroup_name = request.json.get("workgroup")
 

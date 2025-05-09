@@ -6,17 +6,17 @@ from sources.auxiliary import abort_if_user_not_in_workbook, sanitise_user_input
 from sources.extensions import db
 from sqlalchemy import func
 
-# request parses incoming request data and gives access to it
-# jsonify is used to send a JSON response to the browser
-from . import solvents_bp  # imports the blueprint of the reagents route
+from . import solvents_bp
 
 
-# Getting the solvent name from browser and returning its data
 @solvents_bp.route("/_solvents", methods=["POST"])
 def solvents() -> Response:
-    """This function gets a solvent name from browser,
-    makes request to the solvent database, and returns
-    its data back to show it in the reaction table"""
+    """
+    This function gets a solvent identifier and returns the solvent data.
+
+    Returns:
+        flask.Response: returns the solvent data as a json object
+    """
     solvent = sanitise_user_input(
         request.form["solvent"]
     )  # gets the solvent from browser
@@ -28,19 +28,15 @@ def solvents() -> Response:
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
 
     number = request.form["number"]  # gets the solvent number from the browser
-    flag_rate = {
-        1: "hazard-highly-hazardous",
-        4: "hazard-acceptable",
-        3: "hazard-warning",
-        2: "hazard-hazardous",
-        5: "non-chem21",
-    }  # flag rate dictionary
+
     cas_regex = r"\b[1-9]{1}[0-9]{1,6}-\d{2}-\d\b"
     flag_color = "white"
     hazards = ""
     primary_key = ""
     alert_message = ""
     new_solvent = False
+
+    flag_rate = services.solvent.get_flag_rate()
     cas_number = re.findall(cas_regex, solvent)
     if cas_number:  # if it's a cas, find the corresponding name
         solvent = cas_number[0]
