@@ -50,7 +50,7 @@ def upgrade():
                 id,
                 regexp_split_to_table(smiles, '\\s*,\\s*') AS smiles,
                 regexp_split_to_table(molec_weight, '\\s*,\\s*') AS molec_weight,
-                molec_formula,
+                regexp_split_to_table(molec_formula, '\\s*,\\s*') AS molec_formula,
                 workbook
             FROM "PolymerNovelCompound"
         )
@@ -107,7 +107,7 @@ def downgrade():
                 polymer_id,
                 string_agg(smiles, ', ' ORDER BY id) AS smiles,
                 string_agg(molec_weight::text, ', ' ORDER BY id) AS molec_weight,
-                molec_formula
+                string_agg(molec_formula, ', ' ORDER BY id) AS molec_formula
             FROM "PolymerRepeatUnit"
             GROUP BY polymer_id
         ) AS u
