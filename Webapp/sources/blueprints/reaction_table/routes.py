@@ -375,7 +375,7 @@ def autoupdate_reaction_table():
             reactants_smiles_list, product_smiles_list
         )
 
-    reaction_table_html = "_reaction_table.html"
+    reaction_table_html = "reactions/_reaction_table.html"
 
     # Now it renders the reaction table template
     reaction_table = render_template(
@@ -425,7 +425,7 @@ def reload_reaction_table():
 
     # Now it renders the reaction table template
     reaction_table = render_template(
-        "_reaction_table.html",
+        "reactions/_reaction_table.html",
         reactants=compounds["reactant"],
         reagents=compounds["reagent"],
         solvents=compounds["solvent"],
