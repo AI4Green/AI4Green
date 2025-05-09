@@ -4,11 +4,128 @@ from typing import Dict, Optional, Tuple
 import jwt
 from flask import current_app, render_template
 from flask_login import current_user
-
+from qrcode import QRCode
 from sources import models, services
 from sources.extensions import mail
 
-from qrcode import QRCode
+
+def send_reaction_approval_request(
+    user: models.User,
+    reaction_approval_request: models.ReactionApprovalRequest,
+    workgroup: models.WorkGroup,
+    workbook: models.WorkBook,
+    reaction: models.Reaction,
+):
+    """
+    Send reaction approval request email to a given user. They have 70 days to respond
+    Args:
+        user (models.User): User to send to.
+        reaction_approval_request (models.ReactionApprovalRequest): Reaction approval request.
+        workgroup (models.WorkGroup): Workgroup the reaction belongs to
+        workbook (models.WorkBook): Workbook the reaction belongs to
+        reaction (models.Reaction): The reaction for approval
+    """
+    token = get_encoded_token(
+        time_limit=6048000,  # 70 days?
+        arg_dict={
+            "reaction_approval_request": reaction_approval_request.id,
+            "workbook": workbook.id,
+            "workgroup": workgroup.id,
+            "reaction": reaction.id,
+        },
+    )
+    protocol = get_protocol_type()
+    mail.send_email(
+        "AI4Green Reaction Approval Request",
+        sender=current_app.config["MAIL_ADMIN_SENDER"],
+        recipients=[user.email],
+        text_body=render_template(
+            "email/reaction_approval_request.txt",
+            reaction_approval_request=reaction_approval_request,
+            user=user,
+            workbook=workbook,
+            workgroup=workgroup,
+            token=token,
+            protocol=protocol,
+        ),
+        html_body=render_template(
+            "email/reaction_approval_request.html",
+            reaction_approval_request=reaction_approval_request,
+            user=user,
+            workbook=workbook,
+            workgroup=workgroup,
+            token=token,
+            protocol=protocol,
+        ),
+    )
+
+
+def send_reaction_approval_response(
+    user: models.User,
+    reaction_approval_request: models.ReactionApprovalRequest,
+):
+    """
+    Send reaction approval request response email to reaction creator. Updates the creator of a reaction on the verdict of the approval request
+    Args:
+        user (models.User): User to send to.
+        reaction_approval_request (models.ReactionApprovalRequest): Reaction approval request.
+    """
+
+    mail.send_email(
+        "Your Reaction Approval Request",
+        sender=current_app.config["MAIL_ADMIN_SENDER"],
+        recipients=[user.email],
+        text_body=render_template(
+            "email/reaction_approval_response.txt",
+            reaction_approval_request=reaction_approval_request,
+            user=user,
+        ),
+        html_body=render_template(
+            "email/reaction_approval_response.html",
+            reaction_approval_request=reaction_approval_request,
+            user=user,
+        ),
+    )
+
+
+def verify_reaction_approval_request_token(
+    token: str,
+) -> Optional[
+    Tuple[
+        models.WorkGroup,
+        models.WorkBook,
+        models.Reaction,
+        models.ReactionApprovalRequest,
+    ]
+]:
+    """
+    Verify token link is valid and return workgroup, workbook and reaction ids for reaction to review
+
+    Args:
+        token: Token to verify.
+
+    Returns:
+        Tuple containing the workgroup, workbook, reaction and reaction_approval_request associated with the token.
+        If token is invalid, returns None for all fields
+    """
+    decoded_token = decode_token(token)
+
+    if decoded_token:
+        workgroup_id = decoded_token.get("workgroup")
+        workbook_id = decoded_token.get("workbook")
+        reaction_id = decoded_token.get("reaction")
+        reaction_approval_request_id = decoded_token.get("reaction_approval_request")
+
+        workgroup = models.WorkGroup.query.get(workgroup_id)
+        workbook = models.WorkBook.query.get(workbook_id)
+        reaction = models.Reaction.query.get(reaction_id)
+        reaction_approval_request = models.ReactionApprovalRequest.query.get(
+            reaction_approval_request_id
+        )
+
+        return workgroup, workbook, reaction, reaction_approval_request
+
+    return None, None, None, None
 
 
 def send_data_export_approval_request(
@@ -260,7 +377,9 @@ def send_password_reset_test(user: models.User) -> Tuple[str, str]:
     )
 
 
-def send_controlled_substance_alert(substance: str, location: Dict[str,str], reaction: models.Reaction) -> str:
+def send_controlled_substance_alert(
+    substance: str, location: Dict[str, str], reaction: models.Reaction
+) -> str:
     """
     Send an email to AI4Green admin if use of a controlled substance has been detected in a country with
     a UK arms embargo.
@@ -277,7 +396,7 @@ def send_controlled_substance_alert(substance: str, location: Dict[str,str], rea
         sender=current_app.config["MAIL_ADMIN_SENDER"],
         recipients=[
             current_app.config["EXPORT_CONTROL_EMAIL_ADDRESS"],
-            current_app.config["MAIL_ADMIN_SENDER"]
+            current_app.config["MAIL_ADMIN_SENDER"],
         ],
         text_body=render_template(
             "email/controlled_substance_alert.txt",
@@ -293,7 +412,7 @@ def send_controlled_substance_alert(substance: str, location: Dict[str,str], rea
             reaction_smiles=reaction.reaction_smiles,
             workbook=reaction.workbook,
             date_created=reaction.time_of_creation,
-            time_of_update=reaction.time_of_update
+            time_of_update=reaction.time_of_update,
         ),
         html_body=render_template(
             "email/controlled_substance_alert.html",
@@ -307,10 +426,9 @@ def send_controlled_substance_alert(substance: str, location: Dict[str,str], rea
             reaction_smiles=reaction.reaction_smiles,
             workbook=reaction.workbook,
             date_created=reaction.time_of_creation,
-            time_of_update=reaction.time_of_update
+            time_of_update=reaction.time_of_update,
         ),
     )
-
 
 
 # send reset email test

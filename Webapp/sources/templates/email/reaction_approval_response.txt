@@ -1,0 +1,15 @@
+Dear {{ user.username }},
+
+
+Your reaction {{reaction_approval_request.Reaction.reaction_id}} in workbook {{reaction_approval_request.WorkBook.name}} has been reviewed.
+
+To view this reaction click on the following link:
+{{ url_for("main.sketcher",
+            workgroup=reaction_approval_request.WorkGroup.name,
+            workbook=reaction_approval_request.WorkBook.name,
+            reaction_id=reaction_approval_request.Reaction.reaction_id,
+            tutorial='no', _external=True, _scheme="protocol")
+            }}
+
+Sincerely,
+The AI4Green Team

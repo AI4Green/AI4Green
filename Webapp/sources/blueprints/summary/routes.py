@@ -20,20 +20,26 @@ def summary() -> Response:
         flask.Response: returns the summary table as a json object
     """
     reaction = None
+    approval_request = {"status": "None"}  # mimic approval request for front end logic
+    review = False
     if not (
         str(request.form["demo"]) == "demo" or str(request.form["tutorial"]) == "yes"
     ):
         # check user permission
         workgroup_name = str(request.form["workgroup"])
         workbook_name = str(request.form["workbook"])
+        review = request.form.get("review")
         if not auxiliary.security_member_workgroup_workbook(
             workgroup_name, workbook_name
         ):
             abort(401)
 
         reaction = services.reaction.get_current_from_request()
-        # also handle if reactants/reagents/solvents/products have changed since reload
+        approval_request = next(
+            iter(reaction.reaction_approval_request), {"status": "None"}
+        )
 
+        # also handle if reactants/reagents/solvents/products have changed since reload
         polymer_mode = request.form["polymerMode"]
         # change summary table in polymer mode
         if polymer_mode.lower() == "true":
@@ -164,6 +170,8 @@ def summary() -> Response:
             risk_rating=risk_data["risk_rating"],
             risk_color=risk_data["risk_colour"],
             number_of_solvents=solvent_data["number_of_solvents"],
+            approval_request=approval_request,
+            review=review,
         )
         return jsonify({"summary": summary_table})
     else:
