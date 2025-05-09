@@ -80,11 +80,22 @@
             <td><input  type="radio" step="any"
                     name="reactant-limiting" id="js-reactant-limiting{{ loop.index }}" value={{ loop.index }}  class="js-reactant-limiting">
             </td>
-            <td><input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ reactant_mol_weights[loop.index0] }}"
-                    id="js-reactant-molecular-weight{{ loop.index }}" readonly>
+            <td>{% if reactant_mol_weights[loop.index0] is iterable %}
+                    {% set outer_index = loop.index0 %}
+                    {% for weight in reactant_mol_weights[outer_index] %}
+                        <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ weight }}"
+                            id="js-reactant-molecular-weight{{ outer_index + 1 }}-{{ loop.index }}" readonly>
+                    {% endfor %}
+                {% else %}
+                    <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ reactant_mol_weights[loop.index0] }}"
+                        id="js-reactant-molecular-weight{{ loop.index }}" readonly>
+                {% endif %}
                 <br>
                 {% if loop.index in polymer_indices %}
                     <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
+                    <span style="font-weight: bold; font-size: 90%"><br>M<sub>n</sub> = </span>
+                    <input style="width: 70px;" type="number" step="any" min="0" placeholder="{{ reactant_mol_weights[loop.index0] | sum() }}"
+                           value="js-reactant-mn{{ loop.index }}" id="js-reactant-mn{{ loop.index }}">
                 {% endif %}
             </td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
@@ -231,8 +242,8 @@
             <td></td>
             <td><b>Product</b></td>
             <td><b>Desired Product?</b></td>
-            <td></td>
-            <td></td>
+            <td><b>Mol.Wt</b></td>
+            <td><b>Intended M<sub>n</sub></b></td>
             <td></td>
             <td></td>
             <td><select size="1" name="productAmountUnit" id="js-product-amount-unit">
@@ -260,16 +271,29 @@
                 <script>
                 $('input[name="js-main-product"]').first().prop('checked', true)
                 </script>
-            <td><input type="number" step="any" value="{{ product_mol_weights[loop.index0] }}"
-                       id="js-product-molecular-weight{{ loop.index }}" style="width: 70px; border:none" readonly>
+            <td>{% if product_mol_weights[loop.index0] is iterable %}
+                    {% set outer_index = loop.index0 %}
+                    {% for weight in product_mol_weights[outer_index] %}
+                        <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ weight }}"
+                            id="js-product-molecular-weight{{ outer_index + 1 }}-{{ loop.index }}" readonly>
+                    {% endfor %}
+                {% else %}
+                    <input style="width: 70px; border-width:0px;" type="number" step="any" value="{{ product_mol_weights[loop.index0] }}"
+                        id="js-product-molecular-weight{{ loop.index }}" readonly>
+                {% endif %}
                 <br>
                 {% if (loop.index + number_of_reactants) in polymer_indices %}
                     <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
                 {% endif %}
             </td>
+            <td>{% if (loop.index + number_of_reactants) in polymer_indices %}
+                <input type="number" step="any" min="0" value="js-product-mn{{ loop.index }}" placeholder="{{ product_mol_weights[loop.index0] | sum() }}"
+                       id="js-product-mn{{ loop.index }}" style="width: 70px">
+                {% endif %}
+            </td>
             <td></td>
-            <td></td>
-            <td></td>
+            <td><input style="width: 60px;" type="number" step="any" min="0" placeholder="1" id="js-product-equivalent{{ loop.index }}"
+                       value="{{ product_equivalents[loop.index0] if product_equivalents else 1 }}"></td>
             <td><input type="number" step="any" placeholder="-" min="0"
                 {% if rounded_product_amounts %}value="{{ rounded_product_amounts[loop.index0] }}"{% endif %}
                 id="js-product-rounded-amount{{ loop.index }}" style="width: 60px; border:none" readonly></td>
