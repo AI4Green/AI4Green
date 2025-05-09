@@ -13,7 +13,10 @@ from sources.extensions import db
 from sqlalchemy import func
 
 
-def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> str:
+def get_smiles(
+    primary_key: Tuple[str, int],
+    person: models.Person = None,
+) -> str:
     """
     Gets the novel compound's SMILES string from the primary key if the entry has the SMILES attribute
     Args:
@@ -23,6 +26,7 @@ def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> st
     Returns:
         The SMILES string corresponding to the primary key or None
     """
+    print("ploymer get smiles", primary_key)
     primary_key = (primary_key[0], int(primary_key[1]))
     workbook = services.workbook.get(primary_key[1])
     if (person and person not in workbook.users) or (
