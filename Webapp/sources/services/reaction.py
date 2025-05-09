@@ -511,8 +511,6 @@ class ReactionApprovalRequestSubmission:
                     <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction.reaction_id}</td>
                   </tr>
                 </table>
-                <br>
-                <button class='btn btn-primary'>Review Reaction</button>
                 """
 
 
