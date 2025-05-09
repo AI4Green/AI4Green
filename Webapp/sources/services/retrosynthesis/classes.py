@@ -18,7 +18,7 @@ class Dash(dash.Dash):
         renderer="",
     ):
         return render_template(
-            "dash.html",
+            "retrosynthesis/dash.html",
             metas=Markup(metas),
             css=Markup(css),
             dash_config=Markup(config),

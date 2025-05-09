@@ -125,7 +125,7 @@ def process():
                 reactant_smiles
             )
             novel_reactant_html = render_template(
-                "_novel_compound.html",
+                "reactions/_novel_compound.html",
                 component="Reactant",
                 name=reactant_name,
                 number=idx,
@@ -177,7 +177,7 @@ def process():
                 product_smiles
             )
             novel_product_html = render_template(
-                "_novel_compound.html",
+                "reactions/_novel_compound.html",
                 component="Product",
                 name=product_name,
                 number=idx,
@@ -204,11 +204,11 @@ def process():
 
     # change rxn table in polymer mode
     if polymer_mode.lower() == "true":
-        reaction_table_html = "_polymer_reaction_table.html"
+        reaction_table_html = "reactions/_polymer_reaction_table.html"
         r_class = None
         r_classes = None
     else:
-        reaction_table_html = "_reaction_table.html"
+        reaction_table_html = "reactions/_reaction_table.html"
         r_class, r_classes = services.reaction_classification.classify_reaction(
             reactants_smiles_list, products_smiles_list
         )

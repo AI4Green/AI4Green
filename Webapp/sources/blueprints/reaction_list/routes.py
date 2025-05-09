@@ -95,7 +95,7 @@ def get_reactions() -> Response:
     new_reaction_id = services.reaction.get_next_reaction_id_for_workbook(workbook.id)
     reactions = services.reaction.to_dict(reactions)
     reaction_details = render_template(
-        "_saved_reactions.html",
+        "reactions/_saved_reactions.html",
         reactions=reactions,
         sort_crit=escape(sort_crit),
         workgroup=workgroup_name,

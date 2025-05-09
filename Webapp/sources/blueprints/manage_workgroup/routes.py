@@ -81,7 +81,7 @@ def manage_workgroup(workgroup: str, has_request: str = "no") -> Response:
     requests = services.requests.get_active_in_workgroup_for_pi(user, wg)
 
     return render_template(
-        "manage_workgroup.html",
+        "work_structures/manage_workgroup.html",
         workgroups=workgroups,
         current_workgroup=current_workgroup,
         pi=pi,

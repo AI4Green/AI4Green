@@ -35,14 +35,14 @@ def workgroup_membership_summary() -> Response:
         if not workbooks:
             workbooks.append("You are not a member of any workbooks in this workgroup")
         return render_template(
-            "workgroup_membership_summary.html",
+            "work_structures/workgroup_membership_summary.html",
             form=form,
             workgroup=form.workgroups.data,
             workbooks=workbooks,
             workgroups=workgroups,
         )
     return render_template(
-        "workgroup_membership_summary.html",
+        "work_structures/workgroup_membership_summary.html",
         form=form,
         workgroups=workgroups,
     )

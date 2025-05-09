@@ -102,7 +102,7 @@ def manage_workbook(
             workbook = form.workbooks.choices[0][0]
         except IndexError:
             return render_template(
-                "manage_workbook.html",
+                "work_structures/manage_workbook.html",
                 form=form,
                 workgroups=workgroups,
                 workbook=workbook,
@@ -147,7 +147,7 @@ def manage_workbook(
         .all()
     )
     return render_template(
-        "manage_workbook.html",
+        "work_structures/manage_workbook.html",
         form=form,
         workgroups=workgroups,
         workbook=workbook,
@@ -327,7 +327,7 @@ def join_workbook(workgroup: str) -> Response:
         if current_user.email in email_list:
             flash("You are already a member of this workbook!")
             return render_template(
-                "join_workbook.html",
+                "work_structures/join_workbook.html",
                 form=form,
                 workgroups=workgroups,
                 notification_number=notification_number,
@@ -404,7 +404,7 @@ def join_workbook(workgroup: str) -> Response:
         )
         return redirect(url_for("main.index"))
     return render_template(
-        "join_workbook.html",
+        "work_structures/join_workbook.html",
         form=form,
         workgroups=workgroups,
         notification_number=notification_number,

@@ -34,7 +34,7 @@ def update_email_password() -> Response:
             )
             return redirect(url_for("main.index"))
     return render_template(
-        "update_email_password.html",
+        "account_management/update_email_password.html",
         email=current_email,
     )
 
@@ -80,6 +80,6 @@ def update_email() -> Response:
         )
         return redirect(url_for("main.index"))
     return render_template(
-        "update_email.html",
+        "account_management/update_email.html",
         form=form,
     )
