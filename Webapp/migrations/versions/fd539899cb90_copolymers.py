@@ -44,8 +44,18 @@ def upgrade():
     # migrate data
     op.execute(
         """
+        WITH polymer_data AS (
+            SELECT
+                name,
+                id,
+                regexp_split_to_table(smiles, '\\s*,\\s*') AS smiles,
+                regexp_split_to_table(molec_weight, '\\s*,\\s*') AS molec_weight,
+                molec_formula,
+                workbook
+            FROM "PolymerNovelCompound"
+        )
         INSERT INTO "PolymerRepeatUnit" (name, polymer_id, smiles, molec_weight, molec_formula, workbook, time_of_creation)
-        SELECT name, id, smiles, molec_weight, molec_formula, 1, NOW() FROM "PolymerNovelCompound"
+        SELECT name, id, smiles, molec_weight::double precision, molec_formula, workbook, NOW() FROM polymer_data
     """
     )
 
@@ -72,7 +82,7 @@ def downgrade():
         batch_op.add_column(
             sa.Column(
                 "molec_weight",
-                sa.DOUBLE_PRECISION(precision=53),
+                sa.TEXT(),  # save as text to allow comma separated values
                 autoincrement=False,
                 nullable=True,
             )
@@ -92,8 +102,16 @@ def downgrade():
         """
         UPDATE "PolymerNovelCompound" AS p
         SET smiles = u.smiles, molec_weight = u.molec_weight, molec_formula = u.molec_formula
-        FROM "PolymerRepeatUnit" AS u
-        WHERE u.polymer_id = p.id
+        FROM (
+            SELECT
+                polymer_id,
+                string_agg(smiles, ', ' ORDER BY id) AS smiles,
+                string_agg(molec_weight::text, ', ' ORDER BY id) AS molec_weight,
+                molec_formula
+            FROM "PolymerRepeatUnit"
+            GROUP BY polymer_id
+        ) AS u
+        WHERE p.id = u.polymer_id
     """
     )
 

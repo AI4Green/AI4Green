@@ -164,7 +164,7 @@ def add(
             polymer=polymer,
             smiles=smiles[idx],
             molec_weight=mol_weight[idx],
-            molec_formula=mol_formula,
+            molec_formula=mol_formula[idx],
             workbook=workbook_id,
         )
         db.session.add(nr)
