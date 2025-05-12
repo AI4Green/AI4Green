@@ -3,6 +3,9 @@
 <head>
     <title>React Page</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_set.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/polymer.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
@@ -122,6 +125,7 @@
                                 <div class="loading-circle"></div>
                                 <div id="ketcher-sketcher" style="max-width: 100%; width: 100%;"></div>
                                 <div id="marvin-sketcher" style="max-width: 100%; width: 100%;"></div>
+                                <br>
                                 <div class="container-fluid">
                                     <div class="row">
                                         <div class="col-2">
@@ -131,6 +135,7 @@
                                             <p><button id="apply-to-all" type="button" class="btn btn-success" style="width: 100%;">Apply to All</button></p>
                                         </div>
                                     </div>
+                                    <div id="reaction-table-div"></div>
                                 </div>
                             </div>
                         </div>

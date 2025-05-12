@@ -3,6 +3,8 @@ const getReactionDetails = (row, col) => {
   return `Reaction at row ${row + 1}, column ${col + 1}`;
 };
 
+observer();
+
 function createGrid() {
   const cols = document.getElementById("column-size").value;
   const rows = document.getElementById("row-size").value;

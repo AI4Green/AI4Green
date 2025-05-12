@@ -23,8 +23,8 @@ class ReactionSet(Model):
         super().__init__(**kwargs)
 
     __table_args__ = (
-        db.UniqueConstraint("workbooks", "name"),
-        db.UniqueConstraint("workbooks", "reaction_id"),
+        db.UniqueConstraint("workbook_id", "name"),
+        db.UniqueConstraint("workbook_id", "set_id"),
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -52,28 +52,9 @@ class ReactionSet(Model):
     complete = db.Column(db.Text, nullable=False)
     status = db.Column(db.Text, nullable=False)
 
-    file_attachments = db.relationship("ReactionDataFile", backref="reaction_file")
-    addenda = db.relationship("ReactionNote", backref="reaction_addenda")
+    # file_attachments = db.relationship("ReactionDataFile", backref="reaction_file")
+    # addenda = db.relationship("ReactionNote", backref="reaction_addenda")
 
     data_export_request_id = db.Column(
         db.Integer, db.ForeignKey("DataExportRequest.id")
     )
-
-
-t_Reaction_Reaction = db.Table(
-    "Reaction_Reaction",
-    metadata,
-    db.Column(
-        "reaction",
-        db.ForeignKey("Reaction.id", ondelete="CASCADE"),
-        primary_key=True,
-        nullable=False,
-    ),
-    db.Column(
-        "reaction_2",
-        db.ForeignKey("Reaction.id", ondelete="CASCADE"),
-        primary_key=True,
-        nullable=False,
-        index=True,
-    ),
-)

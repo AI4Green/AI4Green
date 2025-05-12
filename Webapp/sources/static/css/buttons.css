@@ -100,6 +100,18 @@
     text-decoration:underline;
 }
 
+.btn.btn-reactwise {
+    background-color: #FD6262;
+  border-color: #FD6262;
+  color: black;
+}
+
+.btn.btn-success:hover {
+  background-color: var(--primary-green-hover);
+  border-color: var(--primary-green-hover);
+    text-decoration:underline;
+}
+
 .btn-toolbar .btn-label {
   float: left;
 }

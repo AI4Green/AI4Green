@@ -29,6 +29,7 @@ from .polymer_novel_compound import PolymerNovelCompound
 from .reaction import Reaction, t_Reaction_Reaction
 from .reaction_data_file import ReactionDataFile
 from .reaction_note import ReactionNote
+from .reaction_sets import ReactionSet
 from .retrosynthesis import Retrosynthesis
 from .role import Role
 from .solvent import Solvent
