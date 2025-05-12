@@ -74,6 +74,7 @@ def new_reaction() -> Response:
                 "reactant_physical_forms": [],
                 "reactant_densities": [],
                 "reactant_concentrations": [],
+                "reactant_mns": [],
                 "reagent_names": [],
                 "reagent_molecular_weights": [],
                 "reagent_densities": [],
@@ -92,9 +93,10 @@ def new_reaction() -> Response:
                 "solvent_concentrations": [],
                 "solvent_hazards": [],
                 "solvent_physical_forms": [],
-                # "product_intended_dps": [], not yet implemented
+                "product_mns": [],
                 "product_amounts": [],
                 "product_amounts_raw": [],
+                "product_equivalents": [],
                 "product_masses": [],
                 "product_masses_raw": [],
                 "product_physical_forms": [],
@@ -145,6 +147,10 @@ def autosave() -> Response:
     reactant_smiles_ls = services.all_compounds.get_smiles_list(
         reactant_primary_keys_ls, polymer_indices
     )
+    reactant_smiles_ls = [
+        smiles if type(smiles) == str else json.dumps(smiles)
+        for smiles in reactant_smiles_ls
+    ]
     reactant_masses = get_data("reactantMasses")[:-1]
     reactant_masses_raw = get_data("reactantMassesRaw")[:-1]
     reactant_amounts = get_data("reactantAmounts")[:-1]
@@ -159,6 +165,7 @@ def autosave() -> Response:
     reactant_molecular_weights = get_data("reactantMolecularWeights")[:-1]
     reactant_hazards = get_data("reactantHazards")[:-1]
     reactant_physical_forms_text = get_data("reactantPhysicalFormsText")[:-1]
+    reactant_mns = get_data("reactantMns")[:-1]
     # reagents data from the ajax post
     reagent_smiles_ls = get_data("reagentSmiles")
     reagent_names = get_data("reagentNames")[:-1]
@@ -193,16 +200,21 @@ def autosave() -> Response:
         polymer_indices,
         number_of_reactants=len(reactant_smiles_ls),
     )
+    product_smiles_ls = [
+        smiles if type(smiles) == str else json.dumps(smiles)
+        for smiles in product_smiles_ls
+    ]
     product_physical_form = get_data("productPhysicalForms")[:-1]
     product_amounts = get_data("productAmounts")[:-1]
     product_amounts_raw = get_data("productAmountsRaw")[:-1]
+    product_equivalents = get_data("productEquivalents")[:-1]
     product_masses = get_data("productMasses")[:-1]
     product_masses_raw = get_data("productMassesRaw")[:-1]
     product_names = get_data("productNames")[:-1]
     product_molecular_weights = get_data("productMolecularWeights")
     product_hazards = get_data("productHazards")
     product_physical_forms_text = get_data("productPhysicalFormsText")
-    # product_intended_dps = get_data("productIntendedDPs") not yet implemented
+    product_mns = get_data("productMns")
     amount_units = str(request.form["amountUnits"])
     mass_units = str(request.form["massUnits"])
     volume_units = str(request.form["volumeUnits"])
@@ -252,6 +264,7 @@ def autosave() -> Response:
             "solvent_physical_forms": solvent_physical_forms,
             "product_amounts": product_amounts,
             "product_amounts_raw": product_amounts_raw,
+            "product_equivalents": product_equivalents,
             "product_masses": product_masses,
             "product_masses_raw": product_masses_raw,
             "product_smiles": product_smiles_ls,
@@ -267,13 +280,14 @@ def autosave() -> Response:
             "reactant_molecular_weights": reactant_molecular_weights,
             "reactant_hazards": reactant_hazards,
             "reactant_physical_forms_text": reactant_physical_forms_text,
+            "reactant_mns": reactant_mns,
             "reagent_physical_forms_text": reagent_physical_forms_text,
             "solvent_physical_forms_text": solvent_physical_forms_text,
             "product_names": product_names,
             "product_molecular_weights": product_molecular_weights,
             "product_hazards": product_hazards,
             "product_physical_forms_text": product_physical_forms_text,
-            # "product_intended_dps": product_intended_dps, not yet implemented
+            "product_mns": product_mns,
         }
     )
 

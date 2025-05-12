@@ -6,9 +6,8 @@ from sources.extensions import db
 from .base import Model
 
 
-class PolymerNovelCompound(Model):
-    __tablename__ = "PolymerNovelCompound"
-    __table_args__ = (db.UniqueConstraint("name", "workbook"),)
+class PolymerRepeatUnit(Model):
+    __tablename__ = "PolymerRepeatUnit"
 
     def __init__(self, **kwargs) -> None:
         self.time_of_creation = datetime.now(pytz.timezone("Europe/London")).replace(
@@ -18,16 +17,16 @@ class PolymerNovelCompound(Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
-    repeat_units = db.relationship(
-        "PolymerRepeatUnit", backref="PolymerNovelCompound", cascade="all, delete"
+    polymer_id = db.Column(
+        db.ForeignKey("PolymerNovelCompound.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
-    density = db.Column(db.Float(53))
-    concentration = db.Column(db.Float(53))
-    state = db.Column(db.Text)
-    form = db.Column(db.Text)
-    hphrase = db.Column(db.Text)
+    polymer = db.relationship("PolymerNovelCompound", backref="PolymerRepeatUnit")
+    smiles = db.Column(db.Text, nullable=False)
+    molec_weight = db.Column(db.Float(53))
+    molec_formula = db.Column(db.Text, nullable=False)
     workbook = db.Column(
         db.ForeignKey("WorkBook.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    solvent = db.Column(db.ForeignKey("Solvent.name", ondelete="SET NULL"), index=True)
     time_of_creation = db.Column(db.DateTime)
