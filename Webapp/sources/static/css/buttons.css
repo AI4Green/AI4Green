@@ -106,9 +106,9 @@
   color: black;
 }
 
-.btn.btn-success:hover {
-  background-color: var(--primary-green-hover);
-  border-color: var(--primary-green-hover);
+.btn.btn-reactwise:hover {
+  background-color: #D91E05;
+  border-color: #D91E05;
     text-decoration:underline;
 }
 
