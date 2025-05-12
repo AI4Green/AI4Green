@@ -102,6 +102,12 @@ class Reaction(Model):
         db.Integer, db.ForeignKey("DataExportRequest.id")
     )
 
+    reaction_set_id = db.Column(
+        db.Integer, db.ForeignKey("ReactionSet.id"), nullable=True
+    )
+
+    reaction_set = db.relationship("ReactionSet", back_populates="reactions")
+
 
 t_Reaction_Reaction = db.Table(
     "Reaction_Reaction",
