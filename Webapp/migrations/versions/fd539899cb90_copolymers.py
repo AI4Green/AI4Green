@@ -49,7 +49,7 @@ def upgrade():
                 name,
                 id,
                 regexp_split_to_table(smiles, '\\s*,\\s*') AS smiles,
-                regexp_split_to_table(molec_weight, '\\s*,\\s*') AS molec_weight,
+                regexp_split_to_table(molec_weight::text, '\\s*,\\s*') AS molec_weight,
                 regexp_split_to_table(molec_formula, '\\s*,\\s*') AS molec_formula,
                 workbook
             FROM "PolymerNovelCompound"
