@@ -213,6 +213,7 @@ function postReactionData(complete = "not complete") {
     productPhysicalForms,
     productAmounts,
     productAmountsRaw,
+    productEquivalents,
     productMasses,
     productMassesRaw,
     mainProductTableNumber,
@@ -252,13 +253,14 @@ function postReactionData(complete = "not complete") {
     reactantMolecularWeights,
     reactantHazards,
     reactantPhysicalFormsText,
+    reactantMns,
     reagentPhysicalFormsText,
     solventPhysicalFormsText,
     productNames,
     productMolecularWeights,
     productHazards,
     productPhysicalFormsText,
-    productIntendedDPs,
+    productMns,
     massEfficiency,
     conversion,
     selectivity,
@@ -325,6 +327,7 @@ function postReactionData(complete = "not complete") {
       productPhysicalForms: productPhysicalForms,
       productAmounts: productAmounts,
       productAmountsRaw: productAmountsRaw,
+      productEquivalents: productEquivalents,
       productMasses: productMasses,
       productMassesRaw: productMassesRaw,
       mainProductTableNumber: mainProductTableNumber,
@@ -363,13 +366,14 @@ function postReactionData(complete = "not complete") {
       reactantMolecularWeights: reactantMolecularWeights,
       reactantHazards: reactantHazards,
       reactantPhysicalFormsText: reactantPhysicalFormsText,
+      reactantMns: reactantMns,
       reagentPhysicalFormsText: reagentPhysicalFormsText,
       solventPhysicalFormsText: solventPhysicalFormsText,
       productNames: productNames,
       productMolecularWeights: productMolecularWeights,
       productHazards: productHazards,
       productPhysicalFormsText: productPhysicalFormsText,
-      productIntendedDPs: productIntendedDPs,
+      productMns: productMns,
       summary_to_print: summary_to_print,
       massEfficiency: massEfficiency,
       conversion: conversion,
@@ -506,6 +510,7 @@ function getFieldData() {
   let reactantMolecularWeights = "";
   let reactantHazards = "";
   let reactantPhysicalFormsText = "";
+  let reactantMns = "";
 
   for (let i = 1; i <= numberOfReactants; i++) {
     let reactantNamesID = "#js-reactant" + i;
@@ -534,10 +539,15 @@ function getFieldData() {
     let reactantPhysicalForm = $(reactantPhysicalFormID).prop("selectedIndex");
     reactantPhysicalForms += reactantPhysicalForm + ";";
     let reactantMolecularWeightsID = "#js-reactant-molecular-weight" + i;
-    reactantMolecularWeights += $(reactantMolecularWeightsID).val() + ";";
+    reactantMolecularWeights = getMolecularWeights(
+      reactantMolecularWeightsID,
+      reactantMolecularWeights,
+    );
     let reactantHazardsID = "#js-reactant-hazards" + i;
     reactantHazards += $(reactantHazardsID).val() + ";";
     reactantPhysicalFormsText += $(reactantPhysicalFormID).val() + ";";
+    let reactantMnsID = "#js-reactant-mn" + i;
+    reactantMns += $(reactantMnsID).val() + ";";
   }
   // reagent data
   let reagentPrimaryKeys = "";
@@ -625,10 +635,12 @@ function getFieldData() {
   let productHazards = "";
   let mainProductTableNumber = $("#js-main-product-table-number").val();
   let numberOfProducts = Number($("#js-number-of-products").val());
+  let productEquivalentID;
+  let productEquivalents = "";
   let productPhysicalFormID;
   let productPhysicalForms = "";
   let productPhysicalFormsText = "";
-  let productIntendedDPs = "";
+  let productMns = "";
   let productMassesRaw = "";
   let productAmounts = "";
   let productAmountsRaw = "";
@@ -639,15 +651,20 @@ function getFieldData() {
     let productNameID = "#js-product" + i;
     productNames += $(productNameID).val() + ";";
     let productMolecularWeightID = "#js-product-molecular-weight" + i;
-    productMolecularWeights += $(productMolecularWeightID).val() + ";";
+    productMolecularWeights = getMolecularWeights(
+      productMolecularWeightID,
+      productMolecularWeights,
+    );
+    productEquivalentID = "#js-product-equivalent" + i;
+    productEquivalents += $(productEquivalentID).val() + ";";
     let productHazardsID = "#js-product-hazard" + i;
     productHazards += $(productHazardsID).val() + ";";
     productPhysicalFormID = "#js-product-physical-form" + i;
     let productPhysicalForm = $(productPhysicalFormID).prop("selectedIndex");
     productPhysicalForms += productPhysicalForm + ";";
     productPhysicalFormsText += $(productPhysicalFormID).val() + ";";
-    let productIntendedDPID = "#js-product-intended-dp" + i;
-    productIntendedDPs += $(productIntendedDPID).val() + ";";
+    let productMnID = "#js-product-mn" + i;
+    productMns += $(productMnID).val() + ";";
     let productMassFormID = "#js-product-rounded-mass" + i;
     productMasses += $(productMassFormID).val() + ";";
     let productMassRawFormID = "#js-product-mass" + i;
@@ -841,6 +858,7 @@ function getFieldData() {
     productAmountsRaw: productAmountsRaw,
     productMasses: productMasses,
     productMassesRaw: productMassesRaw,
+    productEquivalents: productEquivalents,
     mainProductTableNumber: mainProductTableNumber,
     amountUnits: amountUnits,
     massUnits: massUnits,
@@ -876,13 +894,14 @@ function getFieldData() {
     reactantMolecularWeights: reactantMolecularWeights,
     reactantHazards: reactantHazards,
     reactantPhysicalFormsText: reactantPhysicalFormsText,
+    reactantMns: reactantMns,
     reagentPhysicalFormsText: reagentPhysicalFormsText,
     solventPhysicalFormsText: solventPhysicalFormsText,
     productNames: productNames,
     productMolecularWeights: productMolecularWeights,
     productHazards: productHazards,
     productPhysicalFormsText: productPhysicalFormsText,
-    productIntendedDPs: productIntendedDPs,
+    productMns: productMns,
     massEfficiency: mass_efficiency,
     conversion: conversion,
     selectivity: selectivity,
@@ -948,4 +967,20 @@ function flashUserErrorSavingMessage() {
     .removeClass()
     .addClass("reaction-save-failure")
     .fadeIn("fast");
+}
+
+function getMolecularWeights(molecularWeightID, molecularWeights) {
+  // returns molecular weights from html
+  if (!$(molecularWeightID).val()) {
+    // element id is different for polymers
+    let k = 1;
+    while ($(molecularWeightID + "-" + k).val()) {
+      molecularWeights += $(molecularWeightID + "-" + k).val() + ","; // change semicolon
+      k++;
+    }
+    molecularWeights = molecularWeights.replace(/.$/, ";");
+  } else {
+    molecularWeights += $(molecularWeightID).val() + ";";
+  }
+  return molecularWeights;
 }
