@@ -192,7 +192,7 @@ def add_remove_user_from_workbook(
         .first()
     )
     wb = db.session.query(models.WorkBook).get(workbook)
-    workgroup = db.session.query(models.WorkGroup).get(workgroup)
+    workgroup = db.session.query(models.WorkGroup).filter_by(name=workgroup).first()
     if mode == "remove":
         # remove user
         user.workbook_user.remove(wb)

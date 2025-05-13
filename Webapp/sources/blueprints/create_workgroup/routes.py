@@ -195,7 +195,7 @@ def create_workgroup() -> Response:
 
         # record role change
         services.data_access_changes.add(
-            PI, new_workgroup.id, old_role="No Access", new_role="pi"
+            PI, new_workgroup, old_role="No Access", new_role="pi"
         )
 
         # flash success message and redirect to manage workgroup page
