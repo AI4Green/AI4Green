@@ -448,14 +448,14 @@ async function showSavedReactionsImages() {
 }
 
 function importFromReactwise() {
-  let reactwiseID = fetch("/import_from_reactwise", {
+  let reactwiseID = $("#import-from-rw-id-input").val();
+  fetch("/import_from_reactwise", {
     headers: {
       "Content-Type": "application/json",
     },
     method: "POST",
     body: JSON.stringify({
-      class_selected: r_class,
-      name_selected: name,
+      reactwiseID: reactwiseID,
     }),
   });
 }
