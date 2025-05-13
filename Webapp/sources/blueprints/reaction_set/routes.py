@@ -18,3 +18,8 @@ def reaction_set():
 @reaction_set_bp.route("/click_and_drag")
 def click_and_drag():
     return render_template("click-and-drag.html")
+
+
+@reaction_set_bp.route("/import_from_reactwise", methods=["GET", "POST"])
+def import_from_reactwise():
+    pass

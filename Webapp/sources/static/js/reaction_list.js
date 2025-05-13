@@ -446,3 +446,16 @@ async function showSavedReactionsImages() {
     $image.attr("src", imgSource);
   }
 }
+
+function importFromReactwise() {
+  let reactwiseID = fetch("/import_from_reactwise", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      class_selected: r_class,
+      name_selected: name,
+    }),
+  });
+}
