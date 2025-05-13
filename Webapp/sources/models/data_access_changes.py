@@ -22,6 +22,9 @@ class DataAccessChanges(Model):
     workgroup_id = db.Column(
         db.ForeignKey("WorkGroup.id", ondelete="CASCADE"), nullable=False, index=True
     )
+    workbook_id = db.Column(
+        db.ForeignKey("WorkBook.id", ondelete="CASCADE"), nullable=True, index=True
+    )
     old_role = db.Column(db.Text, nullable=False)
     new_role = db.Column(db.Text, nullable=False)
 

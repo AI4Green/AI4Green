@@ -147,6 +147,12 @@ def create_workbook(workgroup: str) -> Response:
             .filter(models.WorkGroup.name == workgroup)
             .first()
         )
+
+        # record access change
+        services.data_access_changes.add(
+            user_obj, workgroup, "No Access", "Access", wb_obj
+        )
+
         # flash success message and redirect to manage workgroup page
         flash("Workbook has been created!")
         return redirect(
