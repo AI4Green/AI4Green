@@ -10,6 +10,7 @@ from . import base
 from .compound import Compound
 from .compound_data_error_report import CompoundDataErrorReport
 from .controlled_substances import ControlledSubstanceUsage
+from .data_access_changes import DataAccessChanges
 from .data_export_request import DataExportRequest, data_export_request_approvers
 from .element import Element
 from .hazard_code import HazardCode

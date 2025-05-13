@@ -29,6 +29,9 @@ class Person(Model):
 
     id = db.Column(db.Integer, primary_key=True)
     time_of_creation = db.Column(db.DateTime)
+    data_access_changes = db.relationship(
+        "DataAccessChanges", backref="Person", cascade="all, delete"
+    )
 
     user = db.relationship("User", backref="Person", uselist=False)
     workgroup_principal_investigator = db.relationship(

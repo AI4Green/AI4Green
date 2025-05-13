@@ -133,6 +133,12 @@ def make_change_to_workgroup(
         # uses the current_status variable as a dict key to determine the attribute being removed.
         getattr(person, workgroup_dict[current_status]["person_to_wg_attr"]).remove(wg)
         db.session.commit()
+
+        # record role change
+        services.data_access_changes.add(
+            person, wg, old_role=current_status, new_role="No Access"
+        )
+
         return jsonify(
             {
                 "feedback": f"{person.user.fullname} "
@@ -149,6 +155,8 @@ def make_change_to_workgroup(
         getattr(person, workgroup_dict[old_role]["person_to_wg_attr"]).remove(wg)
         getattr(person, workgroup_dict[new_role]["person_to_wg_attr"]).add(wg)
         db.session.commit()
+        # record role change
+        services.data_access_changes.add(person, wg, old_role, new_role)
         return jsonify(
             {
                 "feedback": f"{person.user.fullname} has changed role from "
