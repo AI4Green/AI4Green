@@ -1,16 +1,16 @@
 """reaction_sets
 
-Revision ID: 930390a78c50
-Revises: 583f3c4423e8
-Create Date: 2025-05-12 09:46:42.077387
+Revision ID: 73dc22cc07e2
+Revises: fd539899cb90
+Create Date: 2025-05-13 08:49:59.135033
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "930390a78c50"
-down_revision = "583f3c4423e8"
+revision = "73dc22cc07e2"
+down_revision = "fd539899cb90"
 branch_labels = None
 depends_on = None
 
