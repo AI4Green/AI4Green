@@ -1,4 +1,5 @@
-from flask import render_template
+import requests
+from flask import current_app, render_template, request
 
 from . import reaction_set_bp
 
@@ -22,4 +23,13 @@ def click_and_drag():
 
 @reaction_set_bp.route("/import_from_reactwise", methods=["GET", "POST"])
 def import_from_reactwise():
-    pass
+    step_id = request.json["step_id"]
+
+    url = f"https://api.reactwise.com/views/step-experiments/{step_id}"
+
+    payload = {}
+    headers = {"Authorization": "Bearer " + current_app.config["REACTWISE_API_KEY"]}
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+
+    print(response.text)
