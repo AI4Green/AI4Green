@@ -104,7 +104,7 @@ def hazard_disclaimer() -> Response:
     return render_template("general/hazards_disclaimer.html")
 
 
-@auth_bp.route("/oidc-login")
+@auth_bp.route("/oidc_login")
 def oidc_login() -> Response:
     """Redirect the user to the OpenID Connect login page.
 
