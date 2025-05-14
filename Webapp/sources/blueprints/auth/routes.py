@@ -6,7 +6,7 @@ login, logout, and register
 from flask import Response, flash, redirect, render_template, request, url_for
 from flask_login import current_user, logout_user
 from sources import auxiliary, models, services
-from sources.extensions import db
+from sources.extensions import db, oidc
 
 from . import auth_bp
 from .forms import LoginForm, RegistrationForm
@@ -102,3 +102,13 @@ def hazard_disclaimer() -> Response:
         flask.Response The hazard disclaimer page
     """
     return render_template("general/hazards_disclaimer.html")
+
+
+@auth_bp.route("/oidc-login")
+def oidc_login() -> Response:
+    """Redirect the user to the OpenID Connect login page.
+
+    Returns:
+        Response: redirect to the OIDC login page.
+    """
+    return oidc.redirect_to_auth_server()
