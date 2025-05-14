@@ -155,6 +155,8 @@ def oidc_callback() -> Response:
             password_data=user_info["sub"],
             person=person,
         )
+        # send verification email
+        services.email.send_email_verification(person.user)
 
     # OIDC and regular login are different. Use `login_user` to hook into
     # the regular login/out system
