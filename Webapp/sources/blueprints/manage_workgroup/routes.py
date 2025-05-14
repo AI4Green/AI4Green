@@ -156,7 +156,12 @@ def make_change_to_workgroup(
         getattr(person, workgroup_dict[new_role]["person_to_wg_attr"]).add(wg)
         db.session.commit()
         # record role change
-        services.data_access_changes.add(person, wg, old_role, new_role)
+        services.data_access_changes.add(
+            person,
+            wg,
+            workgroup_dict[old_role]["display_string"],
+            workgroup_dict[new_role]["display_string"],
+        )
         return jsonify(
             {
                 "feedback": f"{person.user.fullname} has changed role from "

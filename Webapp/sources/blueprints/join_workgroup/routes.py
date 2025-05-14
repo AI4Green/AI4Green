@@ -147,7 +147,10 @@ def join_workgroup_response(notification=None, decision=None):
 
             # record role change
             services.data_access_changes.add(
-                person, workgroup, old_role="No Access", new_role=user_type
+                person,
+                workgroup,
+                old_role="No Access",
+                new_role=workgroup_dict[user_type]["display_string"],
             )
 
             flash(
