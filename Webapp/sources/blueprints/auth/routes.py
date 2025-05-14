@@ -3,8 +3,15 @@ This module contains user authentication functions:
 login, logout, and register
 """
 
-from flask import Response, flash, redirect, render_template, request, url_for
-from flask_login import current_user, logout_user
+from flask import (
+    Response,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
+from flask_login import current_user, login_user, logout_user
 from sources import auxiliary, models, services
 from sources.extensions import db, oidc
 
@@ -40,7 +47,13 @@ def logout() -> Response:
     Returns:
         flask.Response The landing page
     """
+    # Log out of the flask user system
     logout_user()
+
+    # Log out of the OIDC system if the user signed in that way.
+    if oidc.user_loggedin:
+        return oidc.logout(return_to=url_for("main.index"))
+
     return redirect(url_for("main.index"))
 
 
@@ -111,4 +124,40 @@ def oidc_login() -> Response:
     Returns:
         Response: redirect to the OIDC login page.
     """
-    return oidc.redirect_to_auth_server()
+    return oidc.redirect_to_auth_server(url_for("auth.oidc_callback"))
+
+
+@auth_bp.route("/authorize")
+@oidc.require_login
+def oidc_callback() -> Response:
+    """Callback endpoint for when a user logs in or registers via OIDC.
+
+    When an existing user is logging in, simply redirect them to the main screen.
+    When a new user registers an account via OIDC, add the new user to the AI4Green
+    database.
+
+    Returns:
+        Response: Redirect the to main screen when the user logs in.
+    """
+    # Attempt to find a user in the AI4Green database with an email from the OIDC provider
+    user_info = oidc.user_getinfo(["sub", "email", "name"])
+    user = services.user.from_email(user_email=user_info["email"])
+
+    # If the user doesn't exist, add them.
+    if user is None:
+        person = models.Person()
+        db.session.add(person)
+        services.user.add(
+            username=user_info["name"],
+            email=user_info["email"],
+            fullname=user_info["name"],
+            # user sub is a UUID
+            password_data=user_info["sub"],
+            person=person,
+        )
+
+    # OIDC and regular login are different. Use `login_user` to hook into
+    # the regular login/out system
+    login_user(user=user)
+
+    return redirect(url_for("main.index"))
