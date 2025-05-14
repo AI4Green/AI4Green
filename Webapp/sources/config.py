@@ -6,7 +6,10 @@ This is a configuration module for the app
 import os
 
 from dotenv import load_dotenv
-from sources.services.controlled_substances import uk_arms_embargoes, controlled_substance_inchi
+from sources.services.controlled_substances import (
+    uk_arms_embargoes,
+    controlled_substance_inchi,
+)
 
 load_dotenv()
 
@@ -18,7 +21,7 @@ class BaseConfig(object):  # class to store configuration variables
     key as a cryptographic key to generate signatures or tokens.
     The Flask-WTF extension uses it to protect web forms against
     Cross-Site Request Forgery."""
-    SERVER_NAME = os.getenv("SERVER_NAME", "127.0.0.1:80")
+    SERVER_NAME = os.getenv("SERVER_NAME", "127.0.0.1:5000")
     SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
     WTF_CSRF_ENABLED = False
     LIVESERVER_TIMEOUT = 10
@@ -128,13 +131,28 @@ class BaseConfig(object):  # class to store configuration variables
 
     CONDITIONS_API_URL = os.getenv("CONDITIONS_API_URL", "http://127.0.0.1:9901")
 
-    IPINFO_API_KEY = os.getenv("IPINFO_API_KEY", "") # change to your own
+    IPINFO_API_KEY = os.getenv("IPINFO_API_KEY", "")  # change to your own
 
-    EXPORT_CONTROL_EMAIL_ADDRESS = os.getenv("EXPORT_CONTROL_EMAIL_ADDRESS", "") # who to alert for controlled substance usage
+    EXPORT_CONTROL_EMAIL_ADDRESS = os.getenv(
+        "EXPORT_CONTROL_EMAIL_ADDRESS", ""
+    )  # who to alert for controlled substance usage
 
     CONTROLLED_SUBSTANCES = controlled_substance_inchi()
 
     EMBARGOED_COUNTRIES = uk_arms_embargoes()
+
+    OIDC_CLIENT_SECRETS = {
+        "web": {
+            "client_id": os.getenv("OIDC_CLIENT_ID", ""),
+            "client_secret": os.getenv("OIDC_CLIENT_SECRET", ""),
+            "auth_uri": os.getenv("OIDC_AUTH_URI", ""),
+            "token_uri": os.getenv("OIDC_TOKEN_URI", ""),
+            "userinfo_uri": os.getenv("OIDC_USERINFO_URI", ""),
+            "issuer": os.getenv("OIDC_ISSUER", ""),
+            # pass redirect uris as a comma-separated string (uri1,uri2,...)
+            "redirect_uris": str.split(os.getenv("OIDC_REDIRECT_URIS", ""), ","),
+        }
+    }
 
 
 class TestConfig(BaseConfig):
