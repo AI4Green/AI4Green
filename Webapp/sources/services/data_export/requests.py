@@ -14,7 +14,7 @@ class NewRequest:
 
     def __init__(self):
         """Creates an instance of the NewRequest class using from the request json."""
-        self.requestor = services.user.person_from_current_user()
+        self.requestor = services.person.from_current_user_email()
         self.data_format = request.json["exportFormat"]
         self.invalid_workbooks = None
         self.workgroup = services.workgroup.from_name(request.json["workgroup"])
