@@ -13,6 +13,7 @@
         <p>Email: {{ current_user.email }}</p>
         <p><a href="{{ url_for('update_email.update_email_password') }}" id="update-email-password" class="btn btn-success">Change Email or Password</a></p>
         <p><a class="btn btn-success" onclick="getAccessHistory()">Download Account Role History</a></p>
+        <p><a class="btn btn-success" onclick="getExportHistory()">Download Export History</a></p>
         <p><a href="{{ url_for('delete_profile.delete_profile') }}" id="delete-profile" class="btn btn-primary">Delete Profile</a></p>
     </div>
 </div>
