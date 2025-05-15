@@ -3,6 +3,7 @@ This module contains user authentication functions:
 login, logout, and register
 """
 
+import uuid
 from flask import (
     Response,
     flash,
@@ -151,12 +152,14 @@ def oidc_callback() -> Response:
             username=user_info["name"],
             email=user_info["email"],
             fullname=user_info["name"],
-            # user sub is a UUID
-            password_data=user_info["sub"],
+            # generate UUID for mandatory field
+            password_data=str(uuid.uuid4()),
             person=person,
         )
         # send verification email
         services.email.send_email_verification(person.user)
+        # get the new user
+        user = services.user.from_email(user_email=user_info["email"])
 
     # OIDC and regular login are different. Use `login_user` to hook into
     # the regular login/out system
