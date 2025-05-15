@@ -4,7 +4,8 @@ from typing import List, Literal
 import pytz
 from flask import flash, request
 from flask_login import current_user
-from sources import db, models, services
+from sources import models, services
+from sources.extensions import db
 from sqlalchemy import update
 
 
@@ -13,7 +14,7 @@ class NewRequest:
 
     def __init__(self):
         """Creates an instance of the NewRequest class using from the request json."""
-        self.requestor = services.user.person_from_current_user()
+        self.requestor = services.person.from_current_user_email()
         self.data_format = request.json["exportFormat"]
         self.invalid_workbooks = None
         self.workgroup = services.workgroup.from_name(request.json["workgroup"])
@@ -253,3 +254,72 @@ class RequestLinkVerification:
             .first()
         )
         return approver_responded[-1]
+
+
+def get_approved_exports_from_person(person_id: int):
+    """
+    Returns the approved exports for a Person in the data_export_request_approvers table
+    """
+    return (
+        db.session.query(models.data_export_request_approvers)
+        .filter(models.data_export_request_approvers.c.person_id == person_id)
+        .filter(models.data_export_request_approvers.c.approved.is_(True))
+        .all()
+    )
+
+
+def get_export_from_id(request_id: int):
+    """
+    Returns an export in the DataExportRequest model from its ID
+    """
+    return (
+        db.session.query(models.DataExportRequest)
+        .filter(models.DataExportRequest.id == request_id)
+        .first()
+    )
+
+
+def get_workgroup_name_from_id(request_id: int):
+    """
+    Returns the workgroup name from the workgroup ID in the DataExportRequest model from its ID
+    """
+    workgroup_id = get_export_from_id(request_id).workgroup
+
+    return services.workgroup.from_id(workgroup_id).name
+
+
+def get_workbook_name_from_id(request_id: int):
+    """
+    Returns the workbook name from it workbook ID in the data_export_request_workbook_association table  from its ID
+    """
+    workbook_id = (
+        db.session.query(models.data_export_request_workbooks)
+        .filter(
+            models.data_export_request_workbooks.c.data_export_request_id == request_id
+        )
+        .first()
+    ).workbook_id
+
+    return services.workbook.get(workbook_id).name
+
+
+def get_reaction_id_list_from_id(request_id: int):
+    """
+    Returns a list of reactions in the data_export_request_reactions table from its ID
+    """
+    reactions = (
+        db.session.query(models.data_export_request_reactions)
+        .filter(
+            models.data_export_request_reactions.c.data_export_request_id == request_id
+        )
+        .all()
+    )
+
+    reaction_ids = [reaction.reaction_id for reaction in reactions]
+
+    reaction_abbreviations = [
+        services.reaction.get_reaction_id_from_primary_key(reaction_id)
+        for reaction_id in reaction_ids
+    ]
+
+    return reaction_abbreviations
