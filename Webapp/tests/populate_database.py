@@ -182,7 +182,7 @@ def insert_test_data():
 
     summary_table = json.dumps(summary_json_contents())
 
-    models.Reaction.create(
+    reaction1 = models.Reaction.create(
         creator=p1.id,
         time_of_creation=time_of_creation,
         reaction_id="TW1-001",
@@ -273,6 +273,25 @@ def insert_test_data():
         molec_formula="C",
         molec_weight=12.01,
         smiles="*C*",
+    )
+
+    # add audit log data
+    models.DataAccessChanges.create(
+        person_id=p1.id,
+        workgroup_id=workgroup.id,
+        workbook_id=None,
+        old_role="Senior Researcher",
+        new_role="Principal Investigator",
+    )
+    models.DataExportRequest.create(
+        data_format="CSV",
+        requestor=p1.id,
+        required_approvers=[p1],
+        status="APPROVED",
+        reactions=[reaction1],
+        workbooks=[workbook],
+        workgroup=workgroup.id,
+        institution=institution1.id,
     )
 
     seed_limited_element_sustainability_data()

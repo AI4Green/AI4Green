@@ -236,6 +236,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(data_access_changes_bp)
 
+    from sources.blueprints.data_access_changes import data_export_changes_bp
+
+    app.register_blueprint(data_export_changes_bp)
+
     from sources.blueprints.search import search_bp
 
     app.register_blueprint(search_bp)
