@@ -27,12 +27,3 @@ class DataAccessHistory(Model):
     )
     old_role = db.Column(db.Text, nullable=False)
     new_role = db.Column(db.Text, nullable=False)
-
-
-# TODO: many functions for account deletion - only relevant if changes need to be visable on a workgroup/book not profile.
-# delete_profile/routes
-
-# TODO: make js to get blueprint
-# TODO: make frontend / csv generation
-
-# refactor changes>history
