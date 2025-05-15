@@ -7,7 +7,7 @@ from tests.utils import login
 
 
 def test_data_access_changes(app: Flask, client: FlaskClient):
-    """Tests the response when"""
+    """Tests get_data_access_changes can retrieve from DataAccessChanges table"""
     login(client)
 
     # Send a GET request to the route with the form data and confirm response
@@ -19,7 +19,7 @@ def test_data_access_changes(app: Flask, client: FlaskClient):
 
 
 def test_data_export_changes(app: Flask, client: FlaskClient):
-    """Tests the response when"""
+    """Tests get_data_export_changes can retrieve from DataExportRequest tables"""
     login(client)
 
     with app.app_context():
@@ -36,7 +36,7 @@ def test_data_export_changes(app: Flask, client: FlaskClient):
 
 
 def create_data_export():
-    """"""
+    """updates the data export request to be approved"""
     update_query = (
         update(models.data_export_request_approvers)
         .where(models.data_export_request_approvers.c.data_export_request_id == 1)

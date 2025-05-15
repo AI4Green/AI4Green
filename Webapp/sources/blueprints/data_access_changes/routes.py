@@ -16,7 +16,9 @@ def get_data_access_changes():
             "workgroup": services.workgroup.from_id(
                 change.workgroup_id
             ).name,  # convert id to name
-            "workbook": services.workbook.get(change.workbook_id).name,
+            "workbook": services.workbook.get(change.workbook_id).name
+            if change.workbook_id
+            else None,
             "old_role": change.old_role,
             "new_role": change.new_role,
             "time": change.time,
