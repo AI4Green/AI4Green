@@ -37,19 +37,20 @@ def create_workbook(workgroup: str) -> Response:
      or senior researcher and they must provide the name and workgroup the workbook should belong to
 
     Args:
-        workgroup (str): The workgroup the workbook should belong to
+        workgroup (str): The name of the workgroup the workbook should belong to
 
     Returns:
         flask.Response: The rendered template for creating a workbook
         or a redirect to the manage workbook page for the new workbook
     """
+    workgroup_name = workgroup  # make variable names consistent with other files
     workgroups = get_workgroups()
     notification_number = get_notification_number()
     form = CreateWorkbookForm()
 
-    wg = (
+    workgroup = (
         db.session.query(models.WorkGroup)
-        .filter(models.WorkGroup.name == workgroup)
+        .filter(models.WorkGroup.name == workgroup_name)
         .first()
     )
     # on valid submit
@@ -71,7 +72,7 @@ def create_workbook(workgroup: str) -> Response:
         existing_workbook_names = (
             db.session.query(models.WorkBook)
             .join(models.WorkGroup)
-            .filter(models.WorkGroup.id == wg.id)
+            .filter(models.WorkGroup.id == workgroup.id)
             .all()
         )
         if [
@@ -86,7 +87,7 @@ def create_workbook(workgroup: str) -> Response:
                 form=form,
                 workgroups=workgroups,
                 notification_number=notification_number,
-                workgroup=workgroup,
+                workgroup=workgroup_name,
             )
 
         # validate workbook abbreviation
@@ -98,7 +99,7 @@ def create_workbook(workgroup: str) -> Response:
                 form=form,
                 workgroups=workgroups,
                 notification_number=notification_number,
-                workgroup=workgroup,
+                workgroup=workgroup_name,
             )
         existing_abbreviations = (
             db.session.query(models.WorkBook)
@@ -107,7 +108,7 @@ def create_workbook(workgroup: str) -> Response:
                 == workbook_abbreviation.lower()
             )
             .join(models.WorkGroup)
-            .filter(models.WorkGroup.id == wg.id)
+            .filter(models.WorkGroup.id == workgroup.id)
             .first()
         )
         if existing_abbreviations:
@@ -117,11 +118,11 @@ def create_workbook(workgroup: str) -> Response:
                 form=form,
                 workgroups=workgroups,
                 notification_number=notification_number,
-                workgroup=workgroup,
+                workgroup=workgroup_name,
             )
 
-        # find user object
-        user_obj = (
+        # find person object
+        person = (
             db.session.query(models.Person)
             .join(models.User)
             .filter(models.User.email == current_user.email)
@@ -130,35 +131,37 @@ def create_workbook(workgroup: str) -> Response:
 
         # Create new workbook
         current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
-        workbook = models.WorkBook(
+        new_workbook = models.WorkBook(
             name=workbook_name,
             abbreviation=workbook_abbreviation,
-            group=wg.id,
-            users=[user_obj],
+            group=workgroup.id,
+            users=[person],
             time_of_creation=current_time,
         )
-        db.session.add(workbook)
+        db.session.add(new_workbook)
         db.session.commit()
 
-        wb_obj = (
+        workbook = (
             db.session.query(models.WorkBook)
             .filter(models.WorkBook.name == workbook_name)
             .join(models.WorkGroup)
-            .filter(models.WorkGroup.name == workgroup)
+            .filter(models.WorkGroup.name == workgroup_name)
             .first()
         )
 
         # record access change
-        services.data_access_changes.add(user_obj, wg, "No Access", "Access", wb_obj)
+        services.data_access_changes.add(
+            person, workgroup, "No Access", "Access", workbook
+        )
 
-        # flash success message and redirect to manage workgroup page
+        # flash success message and redirect to manage workgroup_name page
         flash("Workbook has been created!")
         return redirect(
             url_for(
                 "manage_workbook.manage_workbook",
-                workgroup=workgroup,
+                workgroup=workgroup_name,
                 has_request="no",
-                workbook=wb_obj.id,
+                workbook=workbook.id,
             )
         )
     else:
@@ -167,5 +170,5 @@ def create_workbook(workgroup: str) -> Response:
             form=form,
             workgroups=workgroups,
             notification_number=notification_number,
-            workgroup=workgroup,
+            workgroup=workgroup_name,
         )
