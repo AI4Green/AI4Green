@@ -276,7 +276,7 @@ def insert_test_data():
     )
 
     # add audit log data
-    models.DataAccessChanges.create(
+    models.DataAccessHistory.create(
         person_id=p1.id,
         workgroup_id=workgroup.id,
         workbook_id=None,

@@ -6,27 +6,27 @@ from sqlalchemy import update
 from tests.utils import login
 
 
-def test_data_access_changes(app: Flask, client: FlaskClient):
-    """Tests get_data_access_changes can retrieve from DataAccessChanges table"""
+def test_data_access_history(app: Flask, client: FlaskClient):
+    """Tests get_data_access_history can retrieve from DataAccessHistory table"""
     login(client)
 
     # Send a GET request to the route with the form data and confirm response
-    response = client.get("/data_access_changes")
+    response = client.get("/data_access_history")
     # Assert that the response is as expected
     assert response.status_code == 200
     assert response.json[0]["workgroup"] == "Test-Workgroup"
     assert response.json[0]["old_role"] == "Senior Researcher"
 
 
-def test_data_export_changes(app: Flask, client: FlaskClient):
-    """Tests get_data_export_changes can retrieve from DataExportRequest tables"""
+def test_data_export_history(app: Flask, client: FlaskClient):
+    """Tests get_data_export_history can retrieve from DataExportRequest tables"""
     login(client)
 
     with app.app_context():
         create_data_export()
 
     # Send a GET request to the route with the form data and confirm response
-    response = client.get("/data_export_changes")
+    response = client.get("/data_export_history")
 
     # Assert that the response is as expected
     assert response.status_code == 200

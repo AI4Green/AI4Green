@@ -2,14 +2,14 @@ from flask import jsonify
 from flask_login import login_required
 from sources import services
 
-from . import data_access_changes_bp, data_export_changes_bp
+from . import data_access_history_bp, data_export_history_bp
 
 
-@data_access_changes_bp.route("/data_access_changes", methods=["GET"])
+@data_access_history_bp.route("/data_access_history", methods=["GET"])
 @login_required
-def get_data_access_changes():
+def get_data_access_history():
     person = services.person.from_current_user_email()
-    changes = services.data_access_changes.get_changes_from_person(person.id)
+    changes = services.data_access_history.get_history_from_person(person.id)
 
     result = [
         {
@@ -29,9 +29,9 @@ def get_data_access_changes():
     return jsonify(result)
 
 
-@data_export_changes_bp.route("/data_export_changes", methods=["GET"])
+@data_export_history_bp.route("/data_export_history", methods=["GET"])
 @login_required
-def get_data_export_changes():
+def get_data_export_history():
     person = services.person.from_current_user_email()
     approved_exports = services.data_export.requests.get_approved_exports_from_person(
         person.id

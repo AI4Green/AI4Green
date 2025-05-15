@@ -29,8 +29,8 @@ class Person(Model):
 
     id = db.Column(db.Integer, primary_key=True)
     time_of_creation = db.Column(db.DateTime)
-    data_access_changes = db.relationship(
-        "DataAccessChanges", backref="Person", cascade="all, delete"
+    data_access_history = db.relationship(
+        "DataAccessHistory", backref="Person", cascade="all, delete"
     )
 
     user = db.relationship("User", backref="Person", uselist=False)

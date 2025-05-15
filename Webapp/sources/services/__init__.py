@@ -4,7 +4,7 @@ from . import (
     auth,
     compound,
     controlled_substances,
-    data_access_changes,
+    data_access_history,
     data_export,
     email,
     file_attachments,

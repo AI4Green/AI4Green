@@ -232,13 +232,13 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(export_data_bp)
 
-    from sources.blueprints.data_access_changes import data_access_changes_bp
+    from sources.blueprints.data_access_history import data_access_history_bp
 
-    app.register_blueprint(data_access_changes_bp)
+    app.register_blueprint(data_access_history_bp)
 
-    from sources.blueprints.data_access_changes import data_export_changes_bp
+    from sources.blueprints.data_access_history import data_export_history_bp
 
-    app.register_blueprint(data_export_changes_bp)
+    app.register_blueprint(data_export_history_bp)
 
     from sources.blueprints.search import search_bp
 

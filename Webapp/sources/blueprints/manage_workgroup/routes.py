@@ -135,7 +135,7 @@ def make_change_to_workgroup(
         db.session.commit()
 
         # record role change
-        services.data_access_changes.add(
+        services.data_access_history.add(
             person, wg, old_role=current_status, new_role="No Access"
         )
 
@@ -156,7 +156,7 @@ def make_change_to_workgroup(
         getattr(person, workgroup_dict[new_role]["person_to_wg_attr"]).add(wg)
         db.session.commit()
         # record role change
-        services.data_access_changes.add(
+        services.data_access_history.add(
             person,
             wg,
             workgroup_dict[old_role]["display_string"],

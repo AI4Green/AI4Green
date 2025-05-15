@@ -6,8 +6,8 @@ from sources.extensions import db
 from .base import Model
 
 
-class DataAccessChanges(Model):
-    __tablename__ = "DataAccessChanges"
+class DataAccessHistory(Model):
+    __tablename__ = "DataAccessHistory"
 
     def __init__(self, **kwargs) -> None:
         self.time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
@@ -17,7 +17,7 @@ class DataAccessChanges(Model):
     person_id = db.Column(
         db.ForeignKey("Person.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    person = db.relationship("Person", backref="DataAccessChanges")
+    person = db.relationship("Person", backref="DataAccessHistory")
     time = db.Column(db.DateTime, nullable=False)
     workgroup_id = db.Column(
         db.ForeignKey("WorkGroup.id", ondelete="CASCADE"), nullable=False, index=True
@@ -29,7 +29,10 @@ class DataAccessChanges(Model):
     new_role = db.Column(db.Text, nullable=False)
 
 
-# TODO: write services to fill db on changes
-# TODO: write services to access db
-# TODO: check display string
-# TODO: put function on account creation??? mightve already done this
+# TODO: many functions for account deletion - only relevant if changes need to be visable on a workgroup/book not profile.
+# delete_profile/routes
+
+# TODO: make js to get blueprint
+# TODO: make frontend / csv generation
+
+# refactor changes>history

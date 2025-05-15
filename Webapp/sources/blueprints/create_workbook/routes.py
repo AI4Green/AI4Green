@@ -150,7 +150,7 @@ def create_workbook(workgroup: str) -> Response:
         )
 
         # record access change
-        services.data_access_changes.add(
+        services.data_access_history.add(
             person, workgroup, "No Access", "Access", workbook
         )
 

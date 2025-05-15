@@ -194,7 +194,7 @@ def create_workgroup() -> Response:
         db.session.commit()
 
         # record role change
-        services.data_access_changes.add(
+        services.data_access_history.add(
             PI, new_workgroup, old_role="No Access", new_role="Principal Investigator"
         )
 

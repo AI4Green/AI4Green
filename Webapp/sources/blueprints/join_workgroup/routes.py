@@ -146,7 +146,7 @@ def join_workgroup_response(notification=None, decision=None):
             )
 
             # record role change
-            services.data_access_changes.add(
+            services.data_access_history.add(
                 person,
                 workgroup,
                 old_role="No Access",
