@@ -10,7 +10,7 @@ from apiflask import APIFlask
 from flask import Flask
 from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
-from sources.extensions import db, login, ma, mail, migrate
+from sources.extensions import db, login, ma, mail, migrate, oidc
 
 
 def create_app(c: str = "dev") -> Flask:
@@ -86,6 +86,8 @@ def register_extensions(app: Flask) -> None:
 
     login.init_app(app)
     login.login_view = "auth.login"
+
+    oidc.init_app(app)
 
     @login.user_loader
     def load_user(user_id: int):
