@@ -21,7 +21,7 @@ class BaseConfig(object):  # class to store configuration variables
     key as a cryptographic key to generate signatures or tokens.
     The Flask-WTF extension uses it to protect web forms against
     Cross-Site Request Forgery."""
-    SERVER_NAME = os.getenv("SERVER_NAME", "127.0.0.1:5000")
+    SERVER_NAME = os.getenv("SERVER_NAME", "127.0.0.1:80")
     SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
     WTF_CSRF_ENABLED = False
     LIVESERVER_TIMEOUT = 10
