@@ -141,7 +141,7 @@ def oidc_callback() -> Response:
         Response: Redirect the to main screen when the user logs in.
     """
     # Attempt to find a user in the AI4Green database with an email from the OIDC provider
-    user_info = oidc.user_getinfo(["sub", "email", "name"])
+    user_info = oidc.user_getinfo(["email", "name"])
     user = services.user.from_email(user_email=user_info["email"])
 
     # If the user doesn't exist, add them.
