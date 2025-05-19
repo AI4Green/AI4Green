@@ -11,6 +11,7 @@ from flask import Flask
 from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db, login, ma, mail, migrate, oidc
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 def create_app(c: str = "dev") -> Flask:
@@ -27,6 +28,7 @@ def create_app(c: str = "dev") -> Flask:
 
     """
     app = APIFlask(__name__, title="AI4Green OpenAPI", version="1.6.0")
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
     app.security_schemes = {
         "sessionAuth": {
