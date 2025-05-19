@@ -125,7 +125,7 @@ def oidc_login() -> Response:
     Returns:
         Response: redirect to the OIDC login page.
     """
-    return oidc.redirect_to_auth_server(url_for("auth.oidc_callback"))
+    return oidc.redirect_to_auth_server(url_for("auth.oidc_callback", _external=True))
 
 
 @auth_bp.route("/authorize")
