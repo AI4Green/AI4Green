@@ -223,6 +223,20 @@ tests = ["cloudpickle", "hypothesis", "mypy (>=1.11.1)", "pympler", "pytest (>=4
 tests-mypy = ["mypy (>=1.11.1)", "pytest-mypy-plugins"]
 
 [[package]]
+name = "authlib"
+version = "1.5.2"
+description = "The ultimate Python library in building OAuth and OpenID Connect servers and clients."
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "authlib-1.5.2-py2.py3-none-any.whl", hash = "sha256:8804dd4402ac5e4a0435ac49e0b6e19e395357cfa632a3f624dcb4f6df13b4b1"},
+    {file = "authlib-1.5.2.tar.gz", hash = "sha256:fe85ec7e50c5f86f1e2603518bb3b4f632985eb4a355e52256530790e326c512"},
+]
+
+[package.dependencies]
+cryptography = "*"
+
+[[package]]
 name = "azure-core"
 version = "1.32.0"
 description = "Microsoft Azure Core Library for Python"
@@ -1150,6 +1164,23 @@ Flask-SQLAlchemy = ">=1.0"
 [package.extras]
 dev = ["flake8", "pytest", "tox"]
 docs = ["sphinx"]
+
+[[package]]
+name = "flask-oidc"
+version = "2.3.1"
+description = "OpenID Connect extension for Flask"
+optional = false
+python-versions = "<4.0,>=3.8"
+files = [
+    {file = "flask_oidc-2.3.1-py3-none-any.whl", hash = "sha256:ecf04a79fe27410e111ff861a40ec63ce73d641deecddad91b68fbae6f06f733"},
+    {file = "flask_oidc-2.3.1.tar.gz", hash = "sha256:f30f64549a14a622cbd427232ea535c85b3b1c33576c5270ae0e531c31ec0088"},
+]
+
+[package.dependencies]
+authlib = ">=1.2.0,<2.0.0"
+blinker = ">=1.4.0,<2.0.0"
+flask = ">=0.12.2,<4.0.0"
+requests = ">=2.20.0,<3.0.0"
 
 [[package]]
 name = "flask-sqlalchemy"
@@ -3986,4 +4017,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "6db4fa5335e4a836179a09326d1168a691be84027c8f05b1e184369292af103a"
+content-hash = "5ee374e922310fd1064cf5658b8b22914cb2aa09de73558b2fa06e925f5005d7"
