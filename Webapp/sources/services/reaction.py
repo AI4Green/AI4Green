@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List
 
 import pytz
-from flask import request
+from flask import json, request
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
@@ -393,3 +393,52 @@ def add(
     db.session.add(reaction)
     db.session.commit()
     return reaction
+
+
+def empty_reaction_table():
+    return json.dumps(
+        {
+            "amount_units": "mmol",
+            "mass_units": "mg",
+            "volume_units": "mL",
+            "solvent_volume_units": "mL",
+            "product_amount_units": "mmol",
+            "product_mass_units": "mg",
+            "reactant_masses": [],
+            "reactant_masses_raw": [],
+            "reactant_amounts": [],
+            "reactant_amounts_raw": [],
+            "reactant_volumes": [],
+            "reactant_volumes_raw": [],
+            "reactant_equivalents": [],
+            "reactant_physical_forms": [],
+            "reactant_densities": [],
+            "reactant_concentrations": [],
+            "reactant_mns": [],
+            "reagent_names": [],
+            "reagent_molecular_weights": [],
+            "reagent_densities": [],
+            "reagent_concentrations": [],
+            "reagent_amounts": [],
+            "reagent_amounts_raw": [],
+            "reagent_equivalents": [],
+            "reagent_physical_forms": [],
+            "reagent_hazards": [],
+            "reagent_masses": [],
+            "reagent_masses_raw": [],
+            "reagent_volumes": [],
+            "reagent_volumes_raw": [],
+            "solvent_volumes": [],
+            "solvent_names": [],
+            "solvent_concentrations": [],
+            "solvent_hazards": [],
+            "solvent_physical_forms": [],
+            "product_mns": [],
+            "product_amounts": [],
+            "product_amounts_raw": [],
+            "product_equivalents": [],
+            "product_masses": [],
+            "product_masses_raw": [],
+            "product_physical_forms": [],
+        }
+    )
