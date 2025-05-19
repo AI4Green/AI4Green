@@ -40,7 +40,7 @@ def import_from_reactwise():
     data.load_step_experiments()
     creator = services.user.person_from_current_user()
 
-    set_name = "REACTWISENAME"
+    set_name = "ReactWise Set " + str(step_id)
     reactions = []
 
     for reactwise_id, details in data.experimental_details.items():
