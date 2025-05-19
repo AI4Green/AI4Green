@@ -391,7 +391,7 @@ def add(
         summary_table_data=summary_table,
     )
     db.session.add(reaction)
-    db.session.commit()
+    # db.session.commit()
     return reaction
 
 

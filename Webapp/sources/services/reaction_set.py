@@ -8,14 +8,14 @@ def add(
     name: str,
     set_id: str,
     creator: models.Person,
-    workbook_id: str,
+    workbook: models.WorkBook,
     reactions: List[models.Reaction],
 ):
-    reaction_set = models.Reaction(
+    reaction_set = models.ReactionSet(
         name=name,
         set_id=set_id,
-        creator=creator.id,
-        workbook=workbook_id,
+        creator_id=creator.id,
+        workbook_id=workbook.id,
         status="active",
         complete="not complete",
         reactions=reactions,
@@ -39,7 +39,7 @@ def most_recent_in_workbook(workbook_id):
         db.session.query(models.ReactionSet)
         .join(models.WorkBook)
         .filter(models.WorkBook.id == workbook_id)
-        .order_by(models.Reaction.reaction_id.desc())
+        .order_by(models.ReactionSet.set_id.desc())
         .first()
     )
 

@@ -449,6 +449,8 @@ async function showSavedReactionsImages() {
 
 function importFromReactwise() {
   let reactwiseID = $("#import-from-rw-id-input").val();
+  let workbook = $("#active-workbook").val();
+  let workgroup = $("#active-workgroup").val();
   fetch("/import_from_reactwise", {
     headers: {
       "Content-Type": "application/json",
@@ -456,6 +458,8 @@ function importFromReactwise() {
     method: "POST",
     body: JSON.stringify({
       reactwiseID: reactwiseID,
+      workbook: workbook,
+      workgroup: workgroup,
     }),
   });
 }
