@@ -4,6 +4,7 @@ The code here is for constructing the chemical database using the XML from PubCh
 
 import contextlib
 import csv
+import os
 import re
 import sqlite3 as sql
 from datetime import datetime
@@ -14,11 +15,10 @@ import pytz
 from chemspipy import ChemSpider
 from compound_database.auxiliary import compound_database_dir
 from lxml import etree as et
-import os
 from rdkit import Chem
 from sources import models
 from sources.extensions import db
-from utilities import read_yaml, basedir
+from utilities import basedir, read_yaml
 
 ns = {
     "xmlns": "http://pubchem.ncbi.nlm.nih.gov/pug_view",  # Defines the url used in the xml tags
@@ -492,7 +492,7 @@ def compound_assertions(
             15 > density
         ), "Density higher than 15, expected highest is ~14 for Mercury"
 
-    if hazard_codes != "No hazard codes found":
+    if hazard_codes != "No hazard codes found" and hazard_codes != "Not-Reported":
         split_codes = hazard_codes.split("-")
         for code in split_codes:
             if code:
@@ -762,10 +762,14 @@ def seed_predefined_data():
     )
 
     # Adding predefined data from the yaml file.
-    seed_data_yaml_filepath = os.path.join(os.path.dirname(basedir), 'Webapp', 'seed_data.yaml')
+    seed_data_yaml_filepath = os.path.join(
+        os.path.dirname(basedir), "Webapp", "seed_data.yaml"
+    )
     users_to_add = read_yaml(["predefined_users"], seed_data_yaml_filepath)
     try:
-        workgroups_to_add = read_yaml(["predefined_workgroups"], seed_data_yaml_filepath)
+        workgroups_to_add = read_yaml(
+            ["predefined_workgroups"], seed_data_yaml_filepath
+        )
     except Exception:
         workgroups_to_add = None
     for user in users_to_add.values():
@@ -791,7 +795,7 @@ def seed_predefined_data():
             person=p.id,
             password_hash=models.User.set_password(user["password"]),
             role=role.id,
-            is_verified=True
+            is_verified=True,
         )
     if workgroups_to_add:
         for workgroup in workgroups_to_add.values():
