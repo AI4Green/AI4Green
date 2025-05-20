@@ -21,7 +21,6 @@ def reaction_set(set_name, workgroup_name, workbook_name):
     r_set = services.reaction_set.get_from_names(
         set_name, workgroup_name, workbook_name
     )
-    print(r_set.name)
 
     return render_template(
         "reaction_set.html",
@@ -61,7 +60,7 @@ def import_from_reactwise():
             workbook_id=workbook.id,
             reaction_table={},
             summary_table={},
-            reaction_smiles="CC.CC>>CC.CCC",  # change this obvs
+            reaction_smiles="C1C=CC=CC=1B(O)O.C1C=C(F)C=CC=1Br>>C1C=CC=CC=1C1C=CC(F)=CC=1",
         )
         reactions.append(reaction)
 

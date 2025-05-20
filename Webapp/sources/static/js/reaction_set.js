@@ -5,6 +5,16 @@ const getReactionDetails = (row, col) => {
 
 observer();
 
+function initialiseReactors() {
+  // include additional logic for handling reactor shape
+  let numberOfReactions = $("#js-number-of-reactions").val();
+  let reactionSet = $("#js-reaction-set").val();
+  $("#reactor-type").val("carousel");
+  $("#carousel-reactions").val(numberOfReactions);
+  updateReactorType();
+  createCarousel();
+}
+
 function createGrid() {
   const cols = document.getElementById("column-size").value;
   const rows = document.getElementById("row-size").value;
@@ -288,5 +298,5 @@ function applyToWellModal() {
 
 // Initialize the page with the correct reactor type settings
 window.onload = function () {
-  createGrid(); // Ensure the page is loaded with the correct display settings
+  initialiseReactors(); // Ensure the page is loaded with the correct display settings
 };
