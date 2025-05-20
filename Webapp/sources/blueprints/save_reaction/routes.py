@@ -113,6 +113,10 @@ def new_reaction() -> Response:
             reaction_table,
             summary_table,
         )
+        # record new reaction history
+        services.reaction_editing_history.add_new_reaction(
+            creator, workbook_object, reaction_id, reaction_name
+        )
         # load sketcher
         feedback = "New reaction made"
         return jsonify({"feedback": feedback})
@@ -412,7 +416,13 @@ def autosave() -> Response:
         "summary_table_data": summary_table,
         "polymerisation_type": polymerisation_type,
     }
+    # get current state before updating
+    old_reaction_details = services.reaction.get_reaction_details(reaction)
     reaction.update(**update_dict)
+    # record new reaction history
+    services.reaction_editing_history.autosave_reaction(
+        services.person.from_current_user_email(), reaction, old_reaction_details
+    )
     services.controlled_substances.check_reaction_for_controlled_substances(reaction)
     return jsonify({"feedback": feedback})
 
@@ -497,7 +507,10 @@ def clone_reaction() -> Response:
                 "reaction_rxn": old_reaction.reaction_rxn,
             }
         )
-
+        # record new reaction history
+        services.reaction_editing_history.clone_reaction(
+            creator, workbook_object, new_reaction, old_reaction
+        )
         feedback = "New reaction made"
         return jsonify({"feedback": feedback})
     else:
@@ -529,7 +542,21 @@ def autosave_sketcher() -> Response:
         "reaction_rxn": reaction_rxn,
         "reaction_type": reaction_type,
     }
+    # get current state before updating
+    old_reaction_details = {
+        "reaction_smiles": reaction.reaction_smiles,
+        "reaction_type": reaction.reaction_type,
+    }
     reaction.update(**update_dict)
+    # record new reaction history
+    update_dict.pop("time_of_update")
+    update_dict.pop("reaction_rxn")
+    services.reaction_editing_history.edit_reaction(
+        services.person.from_current_user_email(),
+        reaction,
+        old_reaction_details,
+        update_dict,
+    )
     feedback = "Reaction Updated!"
     return jsonify({"feedback": feedback})
 
@@ -544,7 +571,16 @@ def save_polymer_mode():
 
     reaction_type = request.form["reactionType"]
     update_dict = {"reaction_type": reaction_type}
+    # get current state before updating
+    old_reaction_details = {"reaction_type": reaction.reaction_type}
     reaction.update(**update_dict)
+    # record new reaction history
+    services.reaction_editing_history.edit_reaction(
+        services.person.from_current_user_email(),
+        reaction,
+        old_reaction_details,
+        update_dict,
+    )
     feedback = "Reaction Updated!"
     return jsonify({"feedback": feedback})
 

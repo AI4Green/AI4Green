@@ -17,6 +17,7 @@ from . import (
     polymer_novel_compound,
     reaction,
     reaction_classification,
+    reaction_editing_history,
     requests,
     retrosynthesis,
     solvent,

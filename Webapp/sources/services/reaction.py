@@ -404,3 +404,21 @@ def add(
     db.session.add(reaction)
     db.session.commit()
     return reaction
+
+
+def get_reaction_details(reaction):
+    """Gets reaction details from its db object - used for logging editing history"""
+    reaction_details = {
+        "complete": reaction.complete,
+        "reaction_smiles": reaction.reaction_smiles,
+        "description": reaction.description,
+        "reactants": reaction.reactants,
+        "products": reaction.products,
+        "reagents": reaction.reagents,
+        "solvent": reaction.solvent,
+        "reaction_table_data": reaction.reaction_table_data,
+        "summary_table_data": reaction.summary_table_data,
+        "polymerisation_type": reaction.polymerisation_type,
+    }
+
+    return reaction_details
