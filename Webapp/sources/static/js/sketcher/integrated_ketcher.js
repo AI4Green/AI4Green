@@ -122,6 +122,11 @@ function getKetcher() {
   let ketcherFrame = document.getElementById("ketcher-editor");
   return new Promise((resolve) => {
     let checkInterval = setInterval(() => {
+      if (!ketcherFrame) {
+        // Try to get it again if not found yet
+        ketcherFrame = document.getElementById("ketcher-editor");
+        if (!ketcherFrame) return; // Still null, wait for next interval
+      }
       let ketcher = ketcherFrame.contentWindow?.ketcher;
       if (ketcher) {
         clearInterval(checkInterval); // Stop checking

@@ -8,11 +8,40 @@ observer();
 function initialiseReactors() {
   // include additional logic for handling reactor shape
   let numberOfReactions = $("#js-number-of-reactions").val();
-  let reactionSet = $("#js-reaction-set").val();
+  let reactionSet = JSON.parse($("#js-reaction-set").val());
+  console.log(reactionSet);
   $("#reactor-type").val("carousel");
   $("#carousel-reactions").val(numberOfReactions);
   updateReactorType();
   createCarousel();
+  assignReactions(reactionSet.reactions);
+  // focus first well
+  focusWell("0");
+}
+
+function focusWell(index) {
+  $(".focused").removeClass("focused");
+  let wellId = `circle-${index}`;
+  let well = $(`[data-id='${wellId}']`);
+
+  if (well) {
+    well.addClass("focused");
+    // load smiles and reaction data here
+  }
+}
+
+function assignReactions(reactions) {
+  reactions.forEach((reaction, index) => {
+    let wellId = `circle-${index}`;
+    let well = $(`[data-id='${wellId}']`);
+    if (well) {
+      well.attr("data-reaction-id", reaction.reaction_id);
+      well.attr("data-name", reaction.name);
+      well.attr("data-smiles", reaction.smiles);
+      // well.attr("title", reaction.reaction_id);
+      well.attr("tabindex", "0"); // Make div focusable
+    }
+  });
 }
 
 function createGrid() {
@@ -77,26 +106,29 @@ function createCarousel() {
     const circle = document.createElement("div");
     circle.className = "btn icon";
     circle.style.position = "absolute";
+    circle.style.fontsize = "30px";
     circle.style.left = `${x - centerX + radius - 42}px`;
     circle.style.top = `${y - centerY + radius - 42}px`;
     circle.dataset.id = `circle-${i}`; // Assign a unique ID
+    circle.onclick = () => focusWell(i);
+    circle.textContent = i + 1;
 
-    // // Tooltip for reaction details
-    // const tooltip = document.createElement('div');
-    // tooltip.className = 'tooltip';
-    // tooltip.textContent = `Reaction at Point ${i + 1}`;
-    // circle.appendChild(tooltip);
-    //
-    // // Add click event to focus on the circle
-    // circle.addEventListener('click', () => {
-    //     // Populate the side panel with reaction details
-    //     sidePanel.innerHTML = `
-    //     <div class="reaction-header">Reaction Constructor</div>
-    //     <p>Details for Point ${i + 1}:</p>
-    //     <p>This is a placeholder for the reaction constructor.</p>
-    // `;
-    //     sidePanel.classList.add('active');
-    // });
+    // Tooltip for reaction details
+    const tooltip = document.createElement("div");
+    tooltip.className = "tooltip";
+    tooltip.textContent = `Reaction at Point ${i + 1}`;
+    circle.appendChild(tooltip);
+
+    // Add click event to focus on the circle
+    circle.addEventListener("click", () => {
+      // Populate the side panel with reaction details
+      sidePanel.innerHTML = `
+        <div class="reaction-header">Reaction Constructor</div>
+        <p>Details for Point ${i + 1}:</p>
+        <p>This is a placeholder for the reaction constructor.</p>
+    `;
+      sidePanel.classList.add("active");
+    });
 
     carousel.appendChild(circle);
   }

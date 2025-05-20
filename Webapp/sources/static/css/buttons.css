@@ -6,10 +6,10 @@
     border-radius: 35px;
     text-align: center;
     margin: 7px;
-    line-height: 80px;
+    line-height: 60px;
     color: var(--primary-grey);
     transition: all 0.3s linear;
-    font-size: 40;
+    font-size: 40px;
 }
 
 .icon:hover {

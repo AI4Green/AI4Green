@@ -22,11 +22,30 @@ def reaction_set(set_name, workgroup_name, workbook_name):
         set_name, workgroup_name, workbook_name
     )
 
+    serialised_set = serialise_reaction_set(r_set)
+
     return render_template(
         "reaction_set.html",
-        reaction_set=r_set,
+        reaction_set=serialised_set,
         number_of_reactions=len(r_set.reactions),
     )
+
+
+def serialise_reaction_set(reaction_set: models.ReactionSet):
+    return {
+        "id": reaction_set.id,
+        "name": reaction_set.name,
+        "reactions": [serialise_reaction(r) for r in reaction_set.reactions],
+    }
+
+
+def serialise_reaction(reaction: models.Reaction) -> Dict[str, str]:
+    return {
+        "reaction_id": reaction.reaction_id,
+        "name": reaction.name,
+        "smiles": reaction.reaction_smiles,
+        # maybe more
+    }
 
 
 @reaction_set_bp.route("/click_and_drag")
@@ -49,29 +68,38 @@ def import_from_reactwise():
     creator = services.user.person_from_current_user()
 
     set_name = "ReactWise Set " + str(step_id)
-    reactions = []
 
-    for reactwise_id, details in data.experimental_details.items():
-        reaction_id = services.reaction.get_next_reaction_id_for_workbook(workbook.id)
-        reaction = services.reaction.add(
-            name="reactwise-" + reactwise_id,
-            creator=creator,
-            reaction_id=reaction_id,
-            workbook_id=workbook.id,
-            reaction_table={},
-            summary_table={},
-            reaction_smiles="C1C=CC=CC=1B(O)O.C1C=C(F)C=CC=1Br>>C1C=CC=CC=1C1C=CC(F)=CC=1",
-        )
-        reactions.append(reaction)
-
-    set_id = services.reaction_set.next_id_in_workbook(workbook.id)
-    services.reaction_set.add(
-        name=set_name,
-        set_id=set_id,
-        creator=creator,
-        workbook=workbook,
-        reactions=reactions,
+    # check if set already exists
+    set_obj = services.reaction_set.get_from_names(
+        set_name, workgroup_name, workbook_name
     )
+
+    if not set_obj:
+        reactions = []
+
+        for reactwise_id, details in data.experimental_details.items():
+            reaction_id = services.reaction.get_next_reaction_id_for_workbook(
+                workbook.id
+            )
+            reaction = services.reaction.add(
+                name="reactwise-" + reactwise_id,
+                creator=creator,
+                reaction_id=reaction_id,
+                workbook_id=workbook.id,
+                reaction_table={},
+                summary_table={},
+                reaction_smiles="OB(O)C1=CC=CC=C1.FC2=CC=C(Br)C=C2>>FC3=CC=C(C=C3)C4=CC=CC=C4",
+            )
+            reactions.append(reaction)
+
+        set_id = services.reaction_set.next_id_in_workbook(workbook.id)
+        services.reaction_set.add(
+            name=set_name,
+            set_id=set_id,
+            creator=creator,
+            workbook=workbook,
+            reactions=reactions,
+        )
 
     return jsonify(
         {
