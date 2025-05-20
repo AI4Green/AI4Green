@@ -1,16 +1,15 @@
-import pprint
 from typing import Dict, List, Union
 
 import requests
-from flask import current_app, render_template, request
+from flask import current_app, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 from sources import models, services
 
 from . import reaction_set_bp
 
 
-@reaction_set_bp.route("/reaction_set")
-def reaction_set():
+@reaction_set_bp.route("/reaction_set/<workgroup_name>/<workbook_name>/<set_name>")
+def reaction_set(set_name, workgroup_name, workbook_name):
     # to do
     # add workbook, workgroup to reaction set page
     # fix atuosave sketcher to only update reaction table in set mode (do we want to try autosaving?)
@@ -18,7 +17,17 @@ def reaction_set():
     # colours for unsaved/edited wells
     # import from reactwise (try at least one small bit of data)
     #
-    return render_template("reaction_set.html")
+
+    r_set = services.reaction_set.get_from_names(
+        set_name, workgroup_name, workbook_name
+    )
+    print(r_set.name)
+
+    return render_template(
+        "reaction_set.html",
+        reaction_set=r_set,
+        number_of_reactions=len(r_set.reactions),
+    )
 
 
 @reaction_set_bp.route("/click_and_drag")
@@ -26,7 +35,7 @@ def click_and_drag():
     return render_template("click-and-drag.html")
 
 
-@reaction_set_bp.route("/import_from_reactwise", methods=["GET", "POST"])
+@reaction_set_bp.route("/import_from_reactwise", methods=["POST", "GET"])
 def import_from_reactwise():
     step_id = request.json.get("reactwiseID", None)
     workbook_name = request.json.get("workbook", None)
@@ -36,7 +45,7 @@ def import_from_reactwise():
         workgroup_name, workbook_name
     )
 
-    data = ReactWiseStep(step_id)
+    data = ReactWiseStep(int(step_id))
     data.load_step_experiments()
     creator = services.user.person_from_current_user()
 
@@ -45,7 +54,6 @@ def import_from_reactwise():
 
     for reactwise_id, details in data.experimental_details.items():
         reaction_id = services.reaction.get_next_reaction_id_for_workbook(workbook.id)
-        print(reaction_id)
         reaction = services.reaction.add(
             name="reactwise-" + reactwise_id,
             creator=creator,
@@ -58,7 +66,7 @@ def import_from_reactwise():
         reactions.append(reaction)
 
     set_id = services.reaction_set.next_id_in_workbook(workbook.id)
-    reaction_set = services.reaction_set.add(
+    services.reaction_set.add(
         name=set_name,
         set_id=set_id,
         creator=creator,
@@ -66,9 +74,15 @@ def import_from_reactwise():
         reactions=reactions,
     )
 
-    return render_template(
-        "reaction_set.html",
-        reaction_set=reaction_set,
+    return jsonify(
+        {
+            "redirect_url": url_for(
+                "reaction_set.reaction_set",
+                set_name=set_name,
+                workgroup_name=workgroup_name,
+                workbook_name=workbook_name,
+            )
+        }
     )
 
 

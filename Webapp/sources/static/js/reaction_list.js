@@ -451,6 +451,7 @@ function importFromReactwise() {
   let reactwiseID = $("#import-from-rw-id-input").val();
   let workbook = $("#active-workbook").val();
   let workgroup = $("#active-workgroup").val();
+
   fetch("/import_from_reactwise", {
     headers: {
       "Content-Type": "application/json",
@@ -461,5 +462,17 @@ function importFromReactwise() {
       workbook: workbook,
       workgroup: workgroup,
     }),
-  });
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.redirect_url) {
+        window.location.href = data.redirect_url;
+      } else {
+        alert("No redirect URL received.");
+      }
+    })
+    .catch((error) => {
+      console.error("Import failed:", error);
+      alert("An error occurred during import.");
+    });
 }

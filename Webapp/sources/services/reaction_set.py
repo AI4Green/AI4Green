@@ -68,3 +68,28 @@ def next_id_in_workbook(workbook_id):
     ).zfill(3)
     new_set_id = workbook_abbreviation + "-" + new_reaction_id_number
     return new_set_id
+
+
+def get_from_names(
+    set_name: str, workgroup_name: str, workbook_name: str
+) -> models.ReactionSet:
+    """
+    Gets a reaction set with the given name that belongs to the given workgroup and workbook.
+
+    Args:
+        set_name (str): The name of the reaction set.
+        workgroup_name (str): The name of the workgroup the set belongs to.
+        workbook_name (str): The name of the workbook the set belongs to.
+
+    Returns:
+        models.ReactionSet: The reaction set with the given name.
+    """
+    return (
+        db.session.query(models.ReactionSet)
+        .filter(models.ReactionSet.name == set_name)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.name == workbook_name)
+        .join(models.WorkGroup)
+        .filter(models.WorkGroup.name == workgroup_name)
+        .first()
+    )
