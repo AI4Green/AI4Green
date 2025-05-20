@@ -110,7 +110,7 @@ class SketcherCompound:
         # generate molweight
         mol_wt = services.all_compounds.mol_weight_from_smiles(self.smiles)
         novel_reactant_html = render_template(
-            "_novel_compound.html",
+            "reactions/_novel_compound.html",
             component=self.reaction_component,
             name=compound_name,
             # chenage for novel compound table

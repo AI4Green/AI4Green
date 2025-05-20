@@ -28,6 +28,8 @@ def reaction_set(set_name, workgroup_name, workbook_name):
         "reaction_set.html",
         reaction_set=serialised_set,
         number_of_reactions=len(r_set.reactions),
+        workgroup_name=workgroup_name,
+        workbook_name=workbook_name,
     )
 
 

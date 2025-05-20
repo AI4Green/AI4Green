@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_set.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/reaction_table.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/polymer.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
@@ -185,6 +186,8 @@
 
 <input type="hidden" value="{{ number_of_reactions }}" id="js-number-of-reactions">
 <input type="hidden" value='{{ reaction_set | tojson | safe }}' id="js-reaction-set">
+<input type="hidden" value='{{ workgroup_name }}' id="js-active-workgroup">
+<input type="hidden" value='{{ workbook_name }}' id="js-active-workbook">
 
 </body>
 {% endblock %}

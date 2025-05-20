@@ -26,7 +26,16 @@ function focusWell(index) {
 
   if (well) {
     well.addClass("focused");
-    // load smiles and reaction data here
+    let smiles = well.attr("data-smiles");
+
+    setTimeout(function () {
+      console.log("This runs after 2 seconds");
+      let ketcherFrame = document.getElementById("ketcher-editor");
+      let ketcher = ketcherFrame.contentWindow?.ketcher;
+      console.log(ketcher);
+      console.log(smiles);
+      ketcher.setMolecule(smiles);
+    }, 1000);
   }
 }
 
@@ -113,22 +122,22 @@ function createCarousel() {
     circle.onclick = () => focusWell(i);
     circle.textContent = i + 1;
 
-    // Tooltip for reaction details
-    const tooltip = document.createElement("div");
-    tooltip.className = "tooltip";
-    tooltip.textContent = `Reaction at Point ${i + 1}`;
-    circle.appendChild(tooltip);
-
-    // Add click event to focus on the circle
-    circle.addEventListener("click", () => {
-      // Populate the side panel with reaction details
-      sidePanel.innerHTML = `
-        <div class="reaction-header">Reaction Constructor</div>
-        <p>Details for Point ${i + 1}:</p>
-        <p>This is a placeholder for the reaction constructor.</p>
-    `;
-      sidePanel.classList.add("active");
-    });
+    // // Tooltip for reaction details
+    // const tooltip = document.createElement("div");
+    // tooltip.className = "tooltip";
+    // tooltip.textContent = `Reaction at Point ${i + 1}`;
+    // circle.appendChild(tooltip);
+    //
+    // // Add click event to focus on the circle
+    // circle.addEventListener("click", () => {
+    //   // Populate the side panel with reaction details
+    //   sidePanel.innerHTML = `
+    //     <div class="reaction-header">Reaction Constructor</div>
+    //     <p>Details for Point ${i + 1}:</p>
+    //     <p>This is a placeholder for the reaction constructor.</p>
+    // `;
+    //   sidePanel.classList.add("active");
+    // });
 
     carousel.appendChild(circle);
   }
