@@ -11,7 +11,7 @@
     </script>
 {% endblock %}
 {% block content %}
-{% from "macros/modals.html" import render_new_reaction_modal %}
+{% from "macros/modals.html" import render_new_reaction_modal, new_reaction_set_modal %}
 
 <body>
     <div class="container">
@@ -60,6 +60,8 @@
                 <div id="reaction-column" style="display: none;">
                     <br>
                     <p><button onclick=newReactionModalWindow() id="new-reaction" class="btn btn-primary"  data-toggle="modal" data-target="#new-reaction-modal" title="Create New Reaction">+ New Reaction</button></p>
+                    <p><button id="new-reaction-set" class="btn btn-primary"  data-toggle="modal" data-target="#new-reaction-set-modal" title="Create New Reaction Set">+ New Reaction Set</button></p>
+
                 </div>
             </div>
             <div class="col-6">
@@ -88,6 +90,7 @@
     <input type="hidden" value="{{ sort_crit }}" id="js-sort-crit">
     <input id="workbook_corresponding_next_reaction_ids" type="hidden" value="{{ workbook_next_reaction_ids }}">
     {{ render_new_reaction_modal() }}
+    {{ new_reaction_set_modal() }}
 
 </body>
 
