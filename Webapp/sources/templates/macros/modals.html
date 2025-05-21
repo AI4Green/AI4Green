@@ -87,19 +87,26 @@
             </div>
 
             <div class="form-group">
-              <label for="new-reaction-count">Number of Reactions</label>
-              <input id="new-reaction-count" type="number" class="form-control" min="1">
-            </div>
-
-            <div class="form-group">
               <label for="reactor-type">Reactor Type</label>
-              <select id="reactor-type" class="form-control" onchange="toggleWellPlateOptions()">
+              <select id="reactor-type" class="form-control" onchange="toggleReactorOptions()">
                 <option value="">Select Reactor</option>
                 <option value="well-plate">Well Plate</option>
                 <option value="carousel">Carousel</option>
               </select>
             </div>
 
+            <!-- Carousel-only reactions dropdown -->
+            <div class="form-group" id="carousel-reaction-count" style="display: none;">
+              <label for="new-reaction-count">Number of Reactions</label>
+              <select id="new-reaction-count" class="form-control">
+                <option value="">Select number</option>
+                {% for i in range(1, 13) %}
+                  <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Well Plate options -->
             <div id="well-plate-options" class="form-group" style="display:none;">
               <label>Well Plate Format</label>
               <div class="btn-group btn-group-toggle d-flex mb-2" data-toggle="buttons">
@@ -148,14 +155,20 @@
 </div>
 
 <script>
-function toggleWellPlateOptions() {
-  const reactorType = document.getElementById('reactor-type').value;
-  const wellPlateOptions = document.getElementById('well-plate-options');
-  const customInputs = document.getElementById('custom-size-inputs');
-  wellPlateOptions.style.display = (reactorType === 'well-plate') ? 'block' : 'none';
-  if (reactorType !== 'well-plate') {
-    clearAllWellPlateInputs();
-    customInputs.style.display = 'none';
+function toggleReactorOptions() {
+  const reactor = document.getElementById('reactor-type').value;
+  const wellOptions = document.getElementById('well-plate-options');
+  const carouselCount = document.getElementById('carousel-reaction-count');
+
+  // Reset both
+  wellOptions.style.display = 'none';
+  carouselCount.style.display = 'none';
+  clearAllWellPlateInputs();
+
+  if (reactor === 'well-plate') {
+    wellOptions.style.display = 'block';
+  } else if (reactor === 'carousel') {
+    carouselCount.style.display = 'block';
   }
 }
 
@@ -173,6 +186,7 @@ function clearAllWellPlateInputs() {
   document.querySelectorAll('input[name="well-plate-option"]').forEach(r => r.checked = false);
   document.getElementById('custom-rows').value = '';
   document.getElementById('custom-columns').value = '';
+  document.getElementById('custom-size-inputs').style.display = 'none';
 }
 </script>
 {%- endmacro %}
