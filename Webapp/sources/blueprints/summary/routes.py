@@ -39,7 +39,6 @@ def summary() -> Response:
             iter(reaction.reaction_approval_request), {"status": "None"}
         )
 
-        # also handle if reactants/reagents/solvents/products have changed since reload
         polymer_mode = request.form["polymerMode"]
         # change summary table in polymer mode
         if polymer_mode.lower() == "true":
