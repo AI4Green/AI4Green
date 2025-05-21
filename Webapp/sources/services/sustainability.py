@@ -78,14 +78,44 @@ class SustainabilityMetrics:
         return element_flag_dict[self.sustainability_data["element_sustainability"]]
 
     def get_atom_economy(self) -> Optional[float]:
+        main_product_molecular_weight = self.product_data["product_molecular_weights"][
+            self.product_data["main_product_index"]
+        ]
+
+        if "," in str(main_product_molecular_weight):
+            # copolymer found: get weight of all non-copolymer products to calculate (100-atom economy)
+            not_main_product = sum(
+                value
+                for index, value in enumerate(
+                    self.product_data["product_molecular_weights"]
+                )
+                if (index != self.product_data["main_product_index"])
+                and ("," not in value)
+            )
+            ae = (
+                100
+                - round(
+                    100
+                    * not_main_product
+                    / (
+                        self.reactant_data["reactant_molecular_weight_sum"]
+                        + self.reagent_data["reagent_molecular_weight_sum"]
+                    ),
+                    1,
+                )
+                if (
+                    self.reactant_data["reactant_molecular_weight_sum"]
+                    + self.reagent_data["reagent_molecular_weight_sum"]
+                )
+                > 0
+                else 0
+            )
+            return ae
+
         return (
             round(
                 100
-                * float(
-                    self.product_data["product_molecular_weights"][
-                        self.product_data["main_product_index"]
-                    ]
-                )
+                * float(main_product_molecular_weight)
                 / (
                     self.reactant_data["reactant_molecular_weight_sum"]
                     + self.reagent_data["reagent_molecular_weight_sum"]
