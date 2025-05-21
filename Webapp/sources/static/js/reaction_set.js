@@ -47,7 +47,7 @@ function assignReactions(reactions) {
       well.attr("data-reaction-id", reaction.reaction_id);
       well.attr("data-name", reaction.name);
       well.attr("data-smiles", reaction.smiles);
-      // well.attr("title", reaction.reaction_id);
+      well.attr("title", reaction.reaction_id);
       well.attr("tabindex", "0"); // Make div focusable
     }
   });
