@@ -113,7 +113,7 @@ def load_icons() -> Response:
         bootstrap_icon = "bi bi-eyedropper"
 
     # load macro template with assigned variables
-    icon_macro = get_template_attribute("macros.html", "icon_panel")
+    icon_macro = get_template_attribute("macros/icons.html", "icon_panel")
     return jsonify(icon_macro(icon_names, load_type, header, bootstrap_icon))
 
 
