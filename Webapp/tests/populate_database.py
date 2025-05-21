@@ -158,7 +158,7 @@ def insert_test_data():
         compound5,
         compound6,
         compound7,
-        mustard_gas
+        mustard_gas,
     ]:
         # add inchi using SMILES then add to db
         mol = Chem.MolFromSmiles(compound.smiles)
@@ -255,15 +255,22 @@ def insert_test_data():
         inchikey="NDYLCHGXSQOGMS-UHFFFAOYSA-N",
     )
 
-
     # add a polymer novel compound
-    models.PolymerNovelCompound.create(
+    polymer = models.PolymerNovelCompound.create(
         name="Polymer Compound",
         workbook=workbook.id,
-        molec_formula="C",
         hphrase="Unknown",
         density=None,
         concentration=None,
+    )
+
+    # add repeat unit
+    models.PolymerRepeatUnit.create(
+        name="Polymer Compound",
+        polymer=polymer,
+        polymer_id=polymer.id,
+        workbook=workbook.id,
+        molec_formula="C",
         molec_weight=12.01,
         smiles="*C*",
     )

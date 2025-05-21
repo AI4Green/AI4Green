@@ -26,6 +26,7 @@ from .person import (
     t_Person_WorkGroup_3,
 )
 from .polymer_novel_compound import PolymerNovelCompound
+from .polymer_repeat_unit import PolymerRepeatUnit
 from .reaction import Reaction, t_Reaction_Reaction
 from .reaction_approval_request import (
     ReactionApprovalRequest,

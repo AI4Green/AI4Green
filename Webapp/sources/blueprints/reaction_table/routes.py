@@ -8,7 +8,7 @@ from typing import Dict, List, Tuple, Union
 from urllib.parse import quote
 from urllib.request import urlopen
 
-from flask import jsonify, render_template, request
+from flask import json, jsonify, render_template, request
 from flask_login import login_required
 from rdkit import Chem
 from sources import models, services
@@ -77,6 +77,7 @@ def process():
         "hazard_list": [],
         "density_list": [],
         "primary_key_list": [],
+        "mns": [],
     }
     product_data = {
         "molecular_weight_list": [],
@@ -85,7 +86,7 @@ def process():
         "density_list": [],
         "primary_key_list": [],
         "table_numbers": [],
-        "intended_dps": [],
+        "mns": [],
     }
 
     # Find reactants in database then add data to the dictionary
@@ -94,16 +95,10 @@ def process():
 
         if idx in polymer_indices:
             polymer = True
-            if reactant_smiles.count("{+n}") > 1:
-                return jsonify(
-                    {
-                        "error": f"Cannot process Reactant {idx} structure: copolymers are not yet supported"
-                    }
-                )
-            reactant_smiles = services.polymer_novel_compound.find_canonical_repeat(
+            reactant_smiles = services.polymer_novel_compound.find_canonical_repeats(
                 reactant_smiles
             )
-            if reactant_smiles == "":
+            if reactant_smiles == "dummy":
                 return jsonify(
                     {
                         "error": f"Cannot process Reactant {idx} structure: dummy atoms are not yet supported"
@@ -111,8 +106,7 @@ def process():
                 )
 
         # check if valid SMILES
-        mol = Chem.MolFromSmiles(reactant_smiles)
-        if mol is None:
+        if not services.all_compounds.check_valid_smiles(reactant_smiles):
             return jsonify({"error": f"Cannot process Reactant {idx} structure"})
 
         # find compound in database
@@ -135,8 +129,8 @@ def process():
                 component="Reactant",
                 name=reactant_name,
                 number=idx,
-                mw=reactant_mol_wt,
-                smiles=reactant_smiles,
+                mw=json.dumps(reactant_mol_wt),
+                smiles=json.dumps(reactant_smiles),
                 polymer=polymer,
             )
             return jsonify(
@@ -153,16 +147,10 @@ def process():
 
         if (idx + number_of_reactants) in polymer_indices:  # if polymer:
             polymer = True
-            if product_smiles.count("{+n}") > 1:
-                return jsonify(
-                    {
-                        "error": f"Cannot process Product {idx} structure: copolymers are not yet supported"
-                    }
-                )
-            product_smiles = services.polymer_novel_compound.find_canonical_repeat(
+            product_smiles = services.polymer_novel_compound.find_canonical_repeats(
                 product_smiles
             )
-            if product_smiles == "":
+            if product_smiles == "dummy":
                 return jsonify(
                     {
                         "error": f"Cannot process Product {idx} structure: dummy atoms are not yet supported"
@@ -170,8 +158,7 @@ def process():
                 )
 
         # check if valid SMILES
-        mol = Chem.MolFromSmiles(product_smiles)
-        if mol is None:
+        if not services.all_compounds.check_valid_smiles(product_smiles):
             return jsonify({"error": f"Cannot process Product {idx} structure"})
 
         # find compound in database
@@ -194,8 +181,8 @@ def process():
                 component="Product",
                 name=product_name,
                 number=idx,
-                mw=product_mol_wt,
-                smiles=product_smiles,
+                mw=json.dumps(product_mol_wt),
+                smiles=json.dumps(product_smiles),
                 polymer=polymer,
             )
             return jsonify({"reactionTable": novel_product_html, "novelCompound": True})
@@ -234,6 +221,7 @@ def process():
         reactant_densities=reactant_data["density_list"],
         reactant_hazards=reactant_data["hazard_list"],
         reactant_primary_keys=reactant_data["primary_key_list"],
+        reactant_mns=reactant_data["mns"],
         number_of_reactants=number_of_reactants,
         number_of_products=number_of_products,
         identifiers=identifiers,
@@ -243,7 +231,7 @@ def process():
         product_hazards=product_data["hazard_list"],
         product_primary_keys=product_data["primary_key_list"],
         product_table_numbers=product_data["table_numbers"],
-        # product_intended_dps=product_data["intended_dps"],
+        product_mns=product_data["mns"],
         reagent_table_numbers=[],
         reaction_table_data="",
         summary_table_data="",
@@ -309,7 +297,7 @@ def get_compound_all_tables(smiles, workbook, polymer, demo):
     Retrieves a compound from the database, checking the Compound, NovelCompound, and PolymerNovelCompound tables.
 
     Args:
-        smiles (str): The SMILES string for the compound.
+        smiles (str or list): The SMILES string for the compound.
         workbook (str):
         polymer (bool): True if compound is a polymer.
         demo (str): "demo" if in demo mode.
@@ -359,9 +347,15 @@ def get_compound_data(
     """
 
     # now we have the compound/novel_compound object, we can get all the data
-    molecular_weight = (
-        float(compound.molec_weight) if compound.molec_weight != "" else 0
-    )
+    if isinstance(compound, models.PolymerNovelCompound):
+        molecular_weight = services.polymer_novel_compound.get_repeat_unit_weights(
+            compound.id, compound.workbook
+        )
+    else:
+        molecular_weight = (
+            float(compound.molec_weight) if compound.molec_weight != "" else 0
+        )
+
     compound_data["molecular_weight_list"].append(molecular_weight)
 
     compound_name = compound.name if compound.name != "" else "Not found"
