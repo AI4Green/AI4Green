@@ -8,12 +8,18 @@ from sources.extensions import db
 
 class SustainabilityMetrics:
     def __init__(
-        self, reactant_data: Dict, reagent_data: Dict, solvent_data, product_data: Dict
+        self,
+        reactant_data: Dict,
+        reagent_data: Dict,
+        solvent_data,
+        product_data: Dict,
+        polymer_indices: List,
     ):
         self.reactant_data = reactant_data
         self.reagent_data = reagent_data
         self.solvent_data = solvent_data
         self.product_data = product_data
+        self.polymer_indices = polymer_indices
         self.sustainability_data = {}
 
     def get_sustainability_metrics(self) -> Dict:
@@ -81,9 +87,14 @@ class SustainabilityMetrics:
         main_product_molecular_weight = self.product_data["product_molecular_weights"][
             self.product_data["main_product_index"]
         ]
-
-        if "," in str(main_product_molecular_weight):
-            # copolymer found: get weight of all non-copolymer products to calculate (100-atom economy)
+        # get full index of product
+        product_idx = (
+            self.product_data["main_product_index"]
+            + len(self.reactant_data["reactant_molecular_weights"])
+            + 1
+        )
+        if product_idx in self.polymer_indices:
+            # polymer found: get weight of all non-polymer products to calculate (100-atom economy)
             not_main_product = sum(
                 value
                 for index, value in enumerate(
@@ -92,6 +103,8 @@ class SustainabilityMetrics:
                 if (index != self.product_data["main_product_index"])
                 and ("," not in value)
             )
+            if not_main_product == 0:
+                return 100  # no side products
             ae = (
                 100
                 - round(
