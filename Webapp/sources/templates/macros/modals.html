@@ -63,36 +63,3 @@
         </div>
     </div>
 {% endmacro %}
-
-{% macro import_from_reactwise_modal() -%}
-<!-- new reaction modal -->
-    <div class="modal fade" id="import-from-rw-modal" tabindex="-1" role="dialog" aria-labelledby="import-from-rw-modal-title">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="import-from-rw-modal-title">Enter ReactWise Step ID</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div id="import-from-rw-body">
-              <div id="new-reaction-inner-body">
-                  <br>
-                  <form>
-                      <label class="new-reaction-label">
-                          Step ID
-                          <input id="import-from-rw-id-input" class="new-reaction-input">
-                      </label>
-                  </form>
-                  <div style="padding-left: 5px; color: red" id="error-warning-import-from-rw"></div>
-              </div>
-
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-danger" data-dismiss="modal" id="import-from-rw-data-close">Cancel</button>
-            <button type="button" class="btn btn-success" id="import-from-rw-data-submit" onclick="importFromReactwise()">Create</button>
-              <input type="hidden" id="old-reaction-id">
-
-          </div>
-        </div>
-      </div>
-    </div>
-{%- endmacro %}

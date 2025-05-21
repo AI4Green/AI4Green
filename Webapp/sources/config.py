@@ -141,8 +141,6 @@ class BaseConfig(object):  # class to store configuration variables
 
     EMBARGOED_COUNTRIES = uk_arms_embargoes()
 
-    REACTWISE_API_KEY = os.getenv("REACTWISE_API_KEY", "")
-
 
 class TestConfig(BaseConfig):
     TESTING = True

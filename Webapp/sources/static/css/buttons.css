@@ -100,18 +100,6 @@
     text-decoration:underline;
 }
 
-.btn.btn-reactwise {
-    background-color: #FD6262;
-  border-color: #FD6262;
-  color: black;
-}
-
-.btn.btn-reactwise:hover {
-  background-color: #D91E05;
-  border-color: #D91E05;
-    text-decoration:underline;
-}
-
 .btn-toolbar .btn-label {
   float: left;
 }
