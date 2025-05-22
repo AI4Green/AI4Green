@@ -144,6 +144,15 @@ def join_workgroup_response(notification=None, decision=None):
             getattr(person, workgroup_dict[user_type]["person_to_wg_attr"]).add(
                 workgroup
             )
+
+            # record role change
+            services.data_access_history.add(
+                person,
+                workgroup,
+                old_role="No Access",
+                new_role=workgroup_dict[user_type]["display_string"],
+            )
+
             flash(
                 f"You have been successfully added to the Workgroup: {workgroup.name}"
             )

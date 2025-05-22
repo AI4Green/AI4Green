@@ -192,6 +192,12 @@ def create_workgroup() -> Response:
 
             services.email.send_notification(admin.Person)
         db.session.commit()
+
+        # record role change
+        services.data_access_history.add(
+            PI, new_workgroup, old_role="No Access", new_role="Principal Investigator"
+        )
+
         # flash success message and redirect to manage workgroup page
         flash(
             "Your Workgroup has been created. It will show as under moderation until it has been approved by the site admin."

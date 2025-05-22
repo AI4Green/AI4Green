@@ -63,6 +63,8 @@ def delete_reaction(reaction_id: str, workgroup: str, workbook: str) -> Response
     # change to inactive
     reaction.status = "inactive"
     db.session.commit()
+    # record reaction change
+    services.reaction_editing_history.delete_reaction(reaction)
     return redirect(
         url_for(
             "workgroup.workgroup",

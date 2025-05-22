@@ -29,6 +29,17 @@ def get_from_name_and_workbook_id(name: str, workbook_id: int) -> models.Reactio
     )
 
 
+def get_reaction_id_from_primary_key(primary_key: int):
+    """
+    Retrieves a reaction ID based on its primary key.
+    """
+    return (
+        db.session.query(models.Reaction)
+        .filter(models.Reaction.id == primary_key)
+        .first()
+    ).reaction_id
+
+
 def get_current_from_request() -> models.Reaction:
     """
     Gets the current reaction for a request from the frontend. Either using request.form or request.json
@@ -393,3 +404,21 @@ def add(
     db.session.add(reaction)
     db.session.commit()
     return reaction
+
+
+def get_reaction_details(reaction):
+    """Gets reaction details from its db object - used for logging editing history"""
+    reaction_details = {
+        "complete": reaction.complete,
+        "reaction_smiles": reaction.reaction_smiles,
+        "description": reaction.description,
+        "reactants": reaction.reactants,
+        "products": reaction.products,
+        "reagents": reaction.reagents,
+        "solvent": reaction.solvent,
+        "reaction_table_data": reaction.reaction_table_data,
+        "summary_table_data": reaction.summary_table_data,
+        "polymerisation_type": reaction.polymerisation_type,
+    }
+
+    return reaction_details
