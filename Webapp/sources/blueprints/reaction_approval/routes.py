@@ -119,6 +119,14 @@ def review_reaction_approve() -> Response:
     approval_request = models.ReactionApprovalRequest.query.get(
         request.json.get("approvalID")
     )
+    if approval_request is None:
+        return jsonify(
+            {
+                "message": "This review request could not be found! Please contact the reaction creator.",
+                "redirect_url": url_for("main.index"),
+            }
+        )
+
     request_status = services.reaction.ReactionApprovalRequestResponse(approval_request)
     request_status.approve()
 
@@ -139,6 +147,14 @@ def review_reaction_reject() -> Response:
     approval_request = models.ReactionApprovalRequest.query.get(
         request.json.get("requestID")
     )
+    if approval_request is None:
+        return jsonify(
+            {
+                "message": "This review request could not be found! Please contact the reaction creator.",
+                "redirect_url": url_for("main.index"),
+            }
+        )
+
     request_status = services.reaction.ReactionApprovalRequestResponse(approval_request)
     request_status.reject(request.json.get("comments"))
 
@@ -162,6 +178,14 @@ def review_reaction_suggest_changes() -> Response:
     approval_request = models.ReactionApprovalRequest.query.get(
         request.json.get("requestID")
     )
+    if approval_request is None:
+        return jsonify(
+            {
+                "message": "This review request could not be found! Please contact the reaction creator.",
+                "redirect_url": url_for("main.index"),
+            }
+        )
+
     request_status = services.reaction.ReactionApprovalRequestResponse(approval_request)
     request_status.suggest_changes(request.json.get("comments"))
 
