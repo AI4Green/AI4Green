@@ -4,7 +4,11 @@ function getAccessHistory() {
     type: "get",
     success: function (response) {
       // Handle success
-      downloadAccessHistoryCSV(response);
+      if (Array.isArray(response)) {
+        downloadAccessHistoryCSV(response);
+      } else {
+        alert("No Records Found");
+      }
     },
     error: function (error) {
       // Handle error
@@ -47,7 +51,11 @@ function getAccessHistoryWorkgroup() {
     data: { workgroupName: workgroupName },
     success: function (response) {
       // Handle success
-      downloadAccessHistoryWorkgroupCSV(response);
+      if (Array.isArray(response)) {
+        downloadAccessHistoryWorkgroupCSV(response);
+      } else {
+        alert("No Records Found");
+      }
     },
     error: function (error) {
       // Handle error
@@ -88,7 +96,11 @@ function getExportHistory() {
     type: "get",
     success: function (response) {
       // Handle success
-      downloadExportHistoryCSV(response);
+      if (Array.isArray(response)) {
+        downloadExportHistoryCSV(response);
+      } else {
+        alert("No Records Found");
+      }
     },
     error: function (error) {
       // Handle error
@@ -130,7 +142,11 @@ function getExportHistoryWorkgroup() {
     data: { workgroupName: workgroupName },
     success: function (response) {
       // Handle success
-      downloadExportHistoryWorkgroupCSV(response);
+      if (Array.isArray(response)) {
+        downloadExportHistoryWorkgroupCSV(response);
+      } else {
+        alert("No Records Found");
+      }
     },
     error: function (error) {
       // Handle error

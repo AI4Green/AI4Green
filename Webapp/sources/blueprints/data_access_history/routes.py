@@ -1,6 +1,7 @@
 from flask import jsonify, request
 from flask_login import login_required
 from sources import services
+from sources.decorators import principal_investigator_required
 
 from . import (
     data_access_history_bp,
@@ -38,6 +39,7 @@ def get_data_access_history():
     "/data_access_history_workgroup", methods=["GET"]
 )
 @login_required
+@principal_investigator_required
 def get_data_access_history_workgroup():
     workgroup_name = request.args.get("workgroupName")
     workgroup_id = services.workgroup.from_name(workgroup_name).id
@@ -90,6 +92,7 @@ def get_data_export_history():
     "/data_export_history_workgroup", methods=["GET"]
 )
 @login_required
+@principal_investigator_required
 def get_data_export_history_workgroup():
     workgroup_name = request.args.get("workgroupName")
     workgroup_id = services.workgroup.from_name(workgroup_name).id
