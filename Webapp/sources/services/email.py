@@ -26,7 +26,7 @@ def send_reaction_approval_request(
         reaction (models.Reaction): The reaction for approval
     """
     token = get_encoded_token(
-        time_limit=6048000,  # 70 days?
+        time_limit=60 * 60 * 24 * 70,  # 70 days
         arg_dict={
             "reaction_approval_request": reaction_approval_request.id,
             "workbook": workbook.id,
