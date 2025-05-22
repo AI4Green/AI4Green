@@ -258,12 +258,24 @@ class RequestLinkVerification:
 
 def get_approved_exports_from_person(person_id: int):
     """
-    Returns the approved exports for a Person in the data_export_request_approvers table
+    Returns the approved exports for a Person in the DataExportRequest table
     """
     return (
-        db.session.query(models.data_export_request_approvers)
-        .filter(models.data_export_request_approvers.c.person_id == person_id)
-        .filter(models.data_export_request_approvers.c.approved.is_(True))
+        db.session.query(models.DataExportRequest)
+        .filter(models.DataExportRequest.requestor == person_id)
+        .filter(models.DataExportRequest.status == "APPROVED")
+        .all()
+    )
+
+
+def get_approved_exports_from_workgroup(workgroup_id: int):
+    """
+    Returns the approved exports for a WorkGroup in the DataExportRequest table
+    """
+    return (
+        db.session.query(models.DataExportRequest)
+        .filter(models.DataExportRequest.workgroup == workgroup_id)
+        .filter(models.DataExportRequest.status == "APPROVED")
         .all()
     )
 
@@ -277,15 +289,6 @@ def get_export_from_id(request_id: int):
         .filter(models.DataExportRequest.id == request_id)
         .first()
     )
-
-
-def get_workgroup_name_from_id(request_id: int):
-    """
-    Returns the workgroup name from the workgroup ID in the DataExportRequest model from its ID
-    """
-    workgroup_id = get_export_from_id(request_id).workgroup
-
-    return services.workgroup.from_id(workgroup_id).name
 
 
 def get_workbook_name_from_id(request_id: int):
