@@ -73,12 +73,19 @@ def request_response(token: str) -> Response:
         flask.Response: A rendered template for the reaction review, or a redirect with a flash message
         depending on authorization and approval request status.
     """
-    (
-        workgroup,
-        workbook,
-        reaction,
-        reaction_approval_request,
-    ) = services.email.verify_reaction_approval_request_token(token)
+    result = services.email.verify_reaction_approval_request_token(token)
+
+    if result is None:
+        flash("This link has expired or is invalid.")
+        return redirect(url_for("main.index"))
+
+    workgroup, workbook, reaction, reaction_approval_request = (
+        result["workgroup"],
+        result["workbook"],
+        result["reaction"],
+        result["reaction_approval_request"],
+    )
+
     addenda = services.reaction.get_addenda(reaction)
 
     # check user is a required approver AND a PI in the workgroup

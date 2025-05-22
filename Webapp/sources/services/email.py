@@ -1,5 +1,5 @@
 from time import time
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union
 
 import jwt
 from flask import current_app, render_template
@@ -91,11 +91,14 @@ def send_reaction_approval_response(
 def verify_reaction_approval_request_token(
     token: str,
 ) -> Optional[
-    Tuple[
-        models.WorkGroup,
-        models.WorkBook,
-        models.Reaction,
-        models.ReactionApprovalRequest,
+    Dict[
+        str,
+        Union[
+            models.WorkGroup,
+            models.WorkBook,
+            models.Reaction,
+            models.ReactionApprovalRequest,
+        ],
     ]
 ]:
     """
@@ -106,26 +109,32 @@ def verify_reaction_approval_request_token(
 
     Returns:
         Tuple containing the workgroup, workbook, reaction and reaction_approval_request associated with the token.
-        If token is invalid, returns None for all fields
+        If token is invalid, returns None
     """
     decoded_token = decode_token(token)
 
-    if decoded_token:
-        workgroup_id = decoded_token.get("workgroup")
-        workbook_id = decoded_token.get("workbook")
-        reaction_id = decoded_token.get("reaction")
-        reaction_approval_request_id = decoded_token.get("reaction_approval_request")
+    if not decoded_token:
+        return None
 
-        workgroup = models.WorkGroup.query.get(workgroup_id)
-        workbook = models.WorkBook.query.get(workbook_id)
-        reaction = models.Reaction.query.get(reaction_id)
-        reaction_approval_request = models.ReactionApprovalRequest.query.get(
-            reaction_approval_request_id
-        )
+    workgroup_id = decoded_token.get("workgroup")
+    workbook_id = decoded_token.get("workbook")
+    reaction_id = decoded_token.get("reaction")
+    reaction_approval_request_id = decoded_token.get("reaction_approval_request")
 
-        return workgroup, workbook, reaction, reaction_approval_request
+    result = {
+        "workgroup": models.WorkGroup.query.get(decoded_token.get(workgroup_id)),
+        "workbook": models.WorkBook.query.get(decoded_token.get(workbook_id)),
+        "reaction": models.Reaction.query.get(decoded_token.get(reaction_id)),
+        "reaction_approval_request": models.ReactionApprovalRequest.query.get(
+            decoded_token.get(reaction_approval_request_id)
+        ),
+    }
 
-    return None, None, None, None
+    # if any result fails return none
+    if not all(result.values()):
+        return None
+
+    return result
 
 
 def send_data_export_approval_request(
