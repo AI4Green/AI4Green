@@ -24,6 +24,7 @@ from . import reaction_approval_bp
 
 
 @reaction_approval_bp.route("/new_request", methods=["POST"])
+@login_required
 def new_reaction_approval_request() -> Response:
     """
     Initiates a reaction approval request from reaction constructor
@@ -39,6 +40,7 @@ def new_reaction_approval_request() -> Response:
 
 
 @reaction_approval_bp.route("/resubmit_request", methods=["PATCH"])
+@login_required
 def resubmit_approval_request() -> Response:
     """
     Resubmits a reaction approval request after suggested changes are made
