@@ -60,13 +60,13 @@ def next_id_in_workbook(workbook_id):
     newest_set = most_recent_in_workbook(workbook_id)
     if not newest_set:
         # if no reactions in workbook yet, then start with 001
-        return workbook_abbreviation + "SET-001"
-    most_recent_reaction_id = newest_set.reaction_id
+        return workbook_abbreviation + "-SET-001"
+    most_recent_set_id = newest_set.set_id
     # take the number on the rhs of the set id, remove the 0s, convert to int, add 1, convert to str, add 0s
-    new_reaction_id_number = str(
-        int(most_recent_reaction_id.split("-")[-1].lstrip("0")) + 1
+    new_set_id_number = str(
+        int(most_recent_set_id.split("-")[-1].lstrip("0")) + 1
     ).zfill(3)
-    new_set_id = workbook_abbreviation + "-" + new_reaction_id_number
+    new_set_id = workbook_abbreviation + "-SET-" + new_set_id_number
     return new_set_id
 
 

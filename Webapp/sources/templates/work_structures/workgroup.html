@@ -60,7 +60,7 @@
                 <div id="reaction-column" style="display: none;">
                     <br>
                     <p><button onclick=newReactionModalWindow() id="new-reaction" class="btn btn-primary"  data-toggle="modal" data-target="#new-reaction-modal" title="Create New Reaction">+ New Reaction</button></p>
-                    <p><button id="new-reaction-set" class="btn btn-primary"  data-toggle="modal" data-target="#new-reaction-set-modal" title="Create New Reaction Set">+ New Reaction Set</button></p>
+                    <p><button onclick=newReactionSetModalWindow() id="new-reaction-set" class="btn btn-primary"  data-toggle="modal" data-target="#new-reaction-set-modal" title="Create New Reaction Set">+ New Reaction Set</button></p>
 
                 </div>
             </div>
@@ -89,6 +89,7 @@
     <input id="active-workgroup" type="hidden" value="{{ workgroup_selected }}" >
     <input type="hidden" value="{{ sort_crit }}" id="js-sort-crit">
     <input id="workbook_corresponding_next_reaction_ids" type="hidden" value="{{ workbook_next_reaction_ids }}">
+    <input id="workbook_corresponding_next_set_ids" type="hidden" value="{{ workbook_next_set_ids }}">
     {{ render_new_reaction_modal() }}
     {{ new_reaction_set_modal() }}
 

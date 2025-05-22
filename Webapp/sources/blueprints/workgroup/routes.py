@@ -52,11 +52,15 @@ def workgroup(
     )
 
     workbook_new_reaction_ids_dic = {}
+    workbook_new_set_ids_dic = {}
     for workbook in workbooks:
         next_reaction_id = services.reaction.get_next_reaction_id_for_workbook(
             workbook.id
         )
+        next_set_id = services.reaction_set.next_id_in_workbook(workbook.id)
+
         workbook_new_reaction_ids_dic[workbook.name] = next_reaction_id
+        workbook_new_set_ids_dic[workbook.name] = next_set_id
     # select workbook with newest reaction in as active workbook to be selected by default
     if workbooks:
         newest_reaction = services.workbook.get_newest_reaction_in_workbooks(workbooks)
@@ -89,5 +93,6 @@ def workgroup(
         workbook_selected=workbook_selected,
         approval_status=approval_status,
         workbook_next_reaction_ids=json.dumps(workbook_new_reaction_ids_dic),
+        workbook_next_set_ids=json.dumps(workbook_new_set_ids_dic),
         new_reaction_id=new_reaction_id,
     )

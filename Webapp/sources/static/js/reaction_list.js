@@ -50,6 +50,15 @@ function newReactionModalWindow() {
   $("#error-warning-new-reaction").html("");
 }
 
+function newReactionSetModalWindow() {
+  let setIDsDic = JSON.parse(getVal("#workbook_corresponding_next_set_ids"));
+  let workbook = getVal("#active-workbook");
+  let activeSetID = setIDsDic[workbook];
+  $("#new-reaction-set-id-input").val(activeSetID);
+  $("#new-reaction-set-name").val("");
+  $("#error-warning-new-reaction").html("");
+}
+
 function cloneReactionModalWindow(reaction) {
   let workbook = getData(reaction, "workbook");
   let workgroup = getData(reaction, "workgroup");
