@@ -93,6 +93,20 @@ def delete_reaction(reaction):
     add(reaction.creator_person, reaction.workbook, reaction.id, "Deleted Reaction", "")
 
 
+def upload_file(person, reaction, file_names):
+    """Record that one or more experimental files were added to a reaction"""
+    field_name = "Uploaded Files"
+    change_details = {"file_names": file_names}
+    add(person, reaction.workbook, reaction.id, field_name, json.dumps(change_details))
+
+
+def delete_file(person, reaction, file_name):
+    """Record that an experimental file was removed from a reaction"""
+    field_name = "Deleted File"
+    change_details = {"file_name": file_name}
+    add(person, reaction.workbook, reaction.id, field_name, json.dumps(change_details))
+
+
 def normalise_json_fields(data):
     """converts dict with json strings to nested dict"""
     for key, value in data.items():

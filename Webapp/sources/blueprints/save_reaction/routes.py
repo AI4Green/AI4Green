@@ -647,6 +647,12 @@ def upload_experiment_files():
     new_upload = services.file_attachments.UploadExperimentDataFiles(request)
     new_upload.validate_files()
     new_upload.save_validated_files()
+    # record new reaction history
+    services.reaction_editing_history.upload_file(
+        services.person.from_current_user_email(),
+        services.reaction.get_current_from_request(),
+        [file.filename for file in new_upload.validated_files],
+    )
     return jsonify({"uploaded_files": new_upload.uploaded_files})
 
 
@@ -698,5 +704,17 @@ def download_experiment_files():
 @save_reaction_bp.doc(security="sessionAuth")
 def delete_reaction_attachment():
     """Delete file attached to reaction"""
+    # get current state before updating
+    file_uuid = request.form["uuid"]
+    file_object = services.file_attachments.database_object_from_uuid(file_uuid)
+    display_name = file_object.display_name
+
     services.file_attachments.delete_file_attachment(request_source="user")
+
+    # record new reaction history
+    services.reaction_editing_history.delete_file(
+        services.person.from_current_user_email(),
+        services.reaction.get_current_from_request(),
+        display_name,
+    )
     return "success"
