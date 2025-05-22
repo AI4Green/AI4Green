@@ -1,7 +1,7 @@
 """reaction_approval
 
 Revision ID: e4ac09fbff85
-Revises: 583f3c4423e8
+Revises: fd539899cb90
 Create Date: 2025-05-07 12:14:35.302784
 
 """
@@ -10,7 +10,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "e4ac09fbff85"
-down_revision = "583f3c4423e8"
+down_revision = "fd539899cb90"
 branch_labels = None
 depends_on = None
 
