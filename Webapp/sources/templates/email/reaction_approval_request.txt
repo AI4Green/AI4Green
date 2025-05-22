@@ -6,7 +6,7 @@ To review this reaction click on the following link:
 
 {{ url_for("reaction_approval.request_response", token=token, _external=True, _scheme="protocol") }}
 
-If you do not respond, this request will expire in 70 days and the data will not be exported.
+If you do not respond, this request will expire in 70 days.
 
 Sincerely,
 
