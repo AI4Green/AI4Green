@@ -116,17 +116,12 @@ def verify_reaction_approval_request_token(
     if not decoded_token:
         return None
 
-    workgroup_id = decoded_token.get("workgroup")
-    workbook_id = decoded_token.get("workbook")
-    reaction_id = decoded_token.get("reaction")
-    reaction_approval_request_id = decoded_token.get("reaction_approval_request")
-
     result = {
-        "workgroup": models.WorkGroup.query.get(decoded_token.get(workgroup_id)),
-        "workbook": models.WorkBook.query.get(decoded_token.get(workbook_id)),
-        "reaction": models.Reaction.query.get(decoded_token.get(reaction_id)),
+        "workgroup": models.WorkGroup.query.get(decoded_token.get("workgroup")),
+        "workbook": models.WorkBook.query.get(decoded_token.get("workbook")),
+        "reaction": models.Reaction.query.get(decoded_token.get("reaction")),
         "reaction_approval_request": models.ReactionApprovalRequest.query.get(
-            decoded_token.get(reaction_approval_request_id)
+            decoded_token.get("reaction_approval_request")
         ),
     }
 
