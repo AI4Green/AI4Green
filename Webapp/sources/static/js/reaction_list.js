@@ -56,7 +56,7 @@ function newReactionSetModalWindow() {
   let activeSetID = setIDsDic[workbook];
   $("#new-reaction-set-id-input").val(activeSetID);
   $("#new-reaction-set-name").val("");
-  $("#error-warning-new-reaction").html("");
+  $("#error-warning-new-reaction-set").html("");
 }
 
 function cloneReactionModalWindow(reaction) {
@@ -146,6 +146,91 @@ function newReactionCreate() {
       }
     },
   });
+}
+
+function newSetCreate() {
+  // creates new reaction if name and ID pass validation in the backend routes.
+  let workgroup = $("#active-workgroup").val();
+  let workbook = $("#active-workbook").val();
+  let setName = $("#new-reaction-set-name").val();
+  let setID = $("#new-reaction-set-id-input").val();
+  let reactorDimensions = getReactorDimensions();
+
+  if (reactorType === "carousel")
+    fetch("/new_reaction_set", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({
+        workgroup: workgroup,
+        workbook: workbook,
+        setName: setName,
+        setID: setID,
+      }),
+    })
+      .then(function (response) {
+        return response.json();
+      })
+
+      .then(function (data) {
+        // logic to redirect to reactionset?
+      });
+}
+
+function getReactorDimensions() {
+  const reactorType = $("#reactor-type").val();
+
+  if (reactorType === "carousel") {
+    let count = parseInt($("#new-reaction-count").val(), 10);
+    return isNaN(count)
+      ? null
+      : {
+          reactorType: reactorType,
+          numberOfReactions: count,
+        };
+  }
+
+  if (reactorType === "well-plate") {
+    const selected = document.querySelector(
+      'input[name="well-plate-option"]:checked',
+    );
+    if (!selected) return null;
+
+    const format = selected.value;
+
+    if (format === "custom") {
+      const rows = parseInt(document.getElementById("custom-rows").value, 10);
+      const columns = parseInt(
+        document.getElementById("custom-columns").value,
+        10,
+      );
+      return isNaN(rows) || isNaN(columns)
+        ? null
+        : {
+            reactorType,
+            rows,
+            columns,
+          };
+    }
+
+    // Predefined format: return rows/columns directly
+    const formatMap = {
+      96: { rows: 8, columns: 12 },
+      48: { rows: 6, columns: 8 },
+      24: { rows: 4, columns: 6 },
+    };
+
+    const dims = formatMap[parseInt(format, 10)];
+    return dims
+      ? {
+          reactorType,
+          ...dims,
+        }
+      : null;
+  }
+
+  return null;
 }
 
 /**

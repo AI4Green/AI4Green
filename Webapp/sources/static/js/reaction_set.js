@@ -1,6 +1,6 @@
-// Mock database function to get reaction details
-const getReactionDetails = (row, col) => {
-  return `Reaction at row ${row + 1}, column ${col + 1}`;
+// Initialize the page with the correct reactor type settings
+window.onload = function () {
+  initialiseReactors(); // Ensure the page is loaded with the correct display settings
 };
 
 observer();
@@ -10,7 +10,7 @@ function initialiseReactors() {
   let numberOfReactions = $("#js-number-of-reactions").val();
   let reactionSet = JSON.parse($("#js-reaction-set").val());
   console.log(reactionSet);
-  $("#reactor-type").val("carousel");
+  let reactorType = $("#js-reactor-type").val();
   $("#carousel-reactions").val(numberOfReactions);
   updateReactorType();
   createCarousel();
@@ -155,7 +155,8 @@ function getCarouselDimensions() {
 }
 
 function updateReactorType() {
-  const reactorType = document.getElementById("reactor-type").value; // Get selected reactor type
+  let reactorType = $("#js-reactor-type").val(); // Get selected reactor type
+  console.log(reactorType);
 
   // Get references to selectors and reactor containers
   const wellplateContainer = document.getElementById("wellplate-selector");
@@ -163,7 +164,7 @@ function updateReactorType() {
   const multiwellReactor = document.getElementById("wellplate-container");
   const carouselReactor = document.getElementById("carousel-container");
 
-  if (reactorType === "well-plate") {
+  if (reactorType === "well_plate") {
     // Show multiwell setup and reactor, hide carousel
     wellplateContainer.style.display = "block";
     multiwellReactor.style.display = "block";
@@ -336,8 +337,3 @@ function applyToWellModal() {
   // Show the modal
   $("#apply-to-well-modal").modal("show");
 }
-
-// Initialize the page with the correct reactor type settings
-window.onload = function () {
-  initialiseReactors(); // Ensure the page is loaded with the correct display settings
-};

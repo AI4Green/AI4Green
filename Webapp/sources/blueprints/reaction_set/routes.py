@@ -2,13 +2,14 @@ from typing import Dict, List, Union
 
 import requests
 from flask import current_app, jsonify, redirect, render_template, request, url_for
-from flask_login import current_user
+from flask_login import current_user, login_required
 from sources import models, services
 
 from . import reaction_set_bp
 
 
 @reaction_set_bp.route("/reaction_set/<workgroup_name>/<workbook_name>/<set_name>")
+@login_required
 def reaction_set(set_name, workgroup_name, workbook_name):
     # to do
     # add workbook, workgroup to reaction set page
@@ -29,6 +30,7 @@ def reaction_set(set_name, workgroup_name, workbook_name):
         number_of_reactions=len(r_set.reactions),
         workgroup_name=workgroup_name,
         workbook_name=workbook_name,
+        reactor_type=r_set.reactor_type,
     )
 
 
@@ -52,3 +54,9 @@ def serialise_reaction(reaction: models.Reaction) -> Dict[str, str]:
 @reaction_set_bp.route("/click_and_drag")
 def click_and_drag():
     return render_template("click-and-drag.html")
+
+
+@reaction_set_bp.route("/new_reaction_set", methods=["GET", "POST"])
+@login_required
+def new_reaction_set():
+    pass
