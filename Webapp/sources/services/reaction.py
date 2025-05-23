@@ -495,6 +495,8 @@ class ReactionApprovalRequestSubmission:
         """
         return f"""
                 <p>A user has requested your review for their reaction!</p>
+                <br>
+                <p>Please follow the link sent to your email to submit your review.</p>
                 <table style='border-collapse: collapse; width: 100%; max-width: 600px; font-family: Arial, sans-serif;'>
                   <tr style='background-color: #f2f2f2;'>
                     <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>User</th>
