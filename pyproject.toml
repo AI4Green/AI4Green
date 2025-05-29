@@ -57,7 +57,7 @@ qrcode = "^7.4.2"
 psmiles = {git = "https://github.com/Ramprasad-Group/psmiles.git"}
 ipinfo = "^5.1.1"
 flask-oidc = "^2.3.1"
-confluent-kafka = "^2.10.0"
+kafka-python = "^2.2.10"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
