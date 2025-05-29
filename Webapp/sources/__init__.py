@@ -8,6 +8,7 @@ from typing import Dict
 
 from apiflask import APIFlask
 from flask import Flask
+from sources.services.message_queue import QueueProducer
 from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db, login, ma, mail, migrate, oidc
@@ -94,6 +95,10 @@ def register_extensions(app: Flask) -> None:
     @login.user_loader
     def load_user(user_id: int):
         return models.User.query.get(user_id)
+
+    # configure the message queue, e.g. kafka
+    producer = QueueProducer(**app.config["MESSAGE_QUEUE_CONFIG"])
+    app.config["MESSAGE_QUEUE_PRODUCER"] = producer
 
     mail.init_app(app)
 
