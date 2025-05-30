@@ -1,4 +1,6 @@
 import json
+import socket
+from flask import current_app
 from kafka import KafkaProducer
 
 
@@ -17,7 +19,7 @@ class QueueProducer:
             # but kafka accepts messages as binary strings.
             # This lambda converts dicts to strings and then to binary.
             value_serializer=lambda x: json.dumps(x).encode(),
-            client_id="daniel",
+            # client_id="daniel", TODO: find a good value for the client id
         )
 
     def send(self, topic: str, msg: dict):
