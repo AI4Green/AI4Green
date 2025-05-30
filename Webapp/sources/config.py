@@ -155,7 +155,7 @@ class BaseConfig(object):  # class to store configuration variables
     }
 
     MESSAGE_QUEUE_CONFIG = {
-        "hostname": os.getenv("MESSAGE_QUEUE_HOSTNAME", "http://localhost:9092")
+        "hostname": os.getenv("MESSAGE_QUEUE_HOSTNAME", "localhost:9092")
     }
 
 
