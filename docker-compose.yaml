@@ -61,6 +61,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
+    restart: always
 
   kafka-ui:
     container_name: kafka-ui
@@ -69,3 +70,6 @@ services:
       - 8080:8080
     environment:
       DYNAMIC_CONFIG_ENABLED: 'true'
+    depends_on:
+      - kafka
+    restart: always
