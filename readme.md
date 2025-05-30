@@ -151,6 +151,8 @@ The `docker-compose.yaml` file contains the `kafka` service (which is supported 
 When you first start the services and navigate to the `kafka-ui` in the browser, you will be asked to configure a cluster. Enter a name in the "Cluster name" field, then under "Bootstrap Servers", enter "kafka" in the "Host" field and 29092 in the "Port" field. Click the "Validate" button to make sure it's working, then click "Submit" if you get the green dialog box.
 
 Next you can start creating topics. On the left-side of the screen, you will see a menu with your configured cluster(s) below "Dashboard". Click your cluster to expand the drop-down and click "Topics". In the top-right, click the "Add a Topic" button. Give your topic a name, choose a number of partitions, the cleanup policy (you can use delete for testing purposes) and choose a retention time (there are presets to choose from). Then press "Create topic".
+
+When running the flask app, you can set the `MESSAGE_QUEUE_HOSTNAME` environment variable in a `.env` file or it defaults to `localhost:9092`.
 ___
 ## Troubleshooting
 
