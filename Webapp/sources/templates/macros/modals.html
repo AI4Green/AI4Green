@@ -64,6 +64,58 @@
     </div>
 {% endmacro %}
 
+
+{% macro suggest_comment_modal() -%}
+<!-- suggest comment modal -->
+<div class="modal fade" id="suggest-comment-modal" tabindex="-1" role="dialog" aria-labelledby="suggest-comment-modal-title">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="suggest-comment-modal-title">Suggest Comment</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <label for="suggest-comment-text">Comments</label>
+          <textarea id="suggest-comment-text" class="form-control" rows="4" placeholder="Enter your suggestion..."></textarea>
+        </form>
+        <div style="padding-left: 5px; color: red" id="error-warning-suggest-comment"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button type="button" id="submit-suggest-comments" class="btn btn-warning" onclick="submitSuggestComment(this.value)">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+{%- endmacro %}
+
+
+{% macro reject_reaction_modal() -%}
+<!-- reject reaction modal -->
+<div class="modal fade" id="reject-reaction-modal" tabindex="-1" role="dialog" aria-labelledby="reject-reaction-modal-title">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reject-reaction-modal-title">Reject Reaction</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <label for="reject-comment-text">Rejection Comments</label>
+          <textarea id="reject-comment-text" class="form-control" rows="4" placeholder="Why is this reaction rejected?"></textarea>
+        </form>
+        <div style="padding-left: 5px; color: red" id="error-warning-reject-comment"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button type="button" id="reject-reaction-submit" class="btn btn-danger" onclick="submitRejectReaction(this.value)" style="background-color: #ff1a1a; border-color: #cc0000;">❌ Reject</button>
+      </div>
+    </div>
+  </div>
+</div>
+{%- endmacro %}
+
 {% macro new_reaction_set_modal() -%}
 <!-- new reaction set modal -->
 <div class="modal fade" id="new-reaction-set-modal" tabindex="-1" role="dialog" aria-labelledby="new-reaction-modal-title">

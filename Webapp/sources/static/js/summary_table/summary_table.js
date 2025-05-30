@@ -163,8 +163,6 @@ function reloadSummary() {
   $("#other-risks-textbox").val(js_summary_table_data["other_hazards_text"]);
   // researcher
   $("#js-researcher").val(js_summary_table_data["researcher"]);
-  // supervisor
-  $("#js-supervisor").val(js_summary_table_data["supervisor"]);
   // refill risk score
   autofillRiskScore();
   // setTimeout(exportImage, 2000);
@@ -408,4 +406,176 @@ function flagMassEfficiency() {
   $("#js-me").attr("class", meFlag);
   $("#js-me-cell").attr("class", meFlag);
   setColours();
+}
+
+/**
+ * Sends a POST request to create a new reaction approval request.
+ * Gathers the current workgroup, workbook, and reaction ID from the DOM,
+ * and updates the UI based on the server's response.
+ */
+function generateReactionApprovalRequest() {
+  let workbook = $("#js-active-workbook").val();
+  let workgroup = $("#js-active-workgroup").val();
+  let reactionId = $("#js-reaction-id").val();
+
+  fetch("/reaction_approval/new_request", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      workgroup: workgroup,
+      workbook: workbook,
+      reactionID: reactionId,
+    }),
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (item) {
+      if (item.response === "success") {
+        $("#review-button").hide();
+        $("#reaction-pending-review").show();
+      }
+    });
+}
+
+/**
+ * Sends a PATCH request to resubmit changes to a previously submitted reaction approval request.
+ *
+ * @param {string} requestID - The ID of the approval request being resubmitted.
+ */
+function resubmitChanges(requestID) {
+  let workbook = $("#js-active-workbook").val();
+  let workgroup = $("#js-active-workgroup").val();
+  let reactionId = $("#js-reaction-id").val();
+  fetch("/reaction_approval/resubmit_request", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      approvalID: requestID,
+      workgroup: workgroup,
+      workbook: workbook,
+      reactionID: reactionId,
+    }),
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (item) {
+      if (item.response === "success") {
+        $("#reaction-changes-suggested").hide();
+        $("#reaction-pending-review").show();
+      }
+    });
+}
+
+/**
+ * Sends a PATCH request to approve a reaction approval request.
+ * Redirects the user to a provided URL with a success message.
+ *
+ * @param {string} requestID - The ID of the approval request to approve.
+ */
+function approveReaction(requestID) {
+  let workgroup = $("#active-workgroup").val();
+  fetch("/reaction_approval/approve", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      approvalID: requestID,
+      workgroup: workgroup,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.redirect_url) {
+        const url = new URL(data.redirect_url, window.location.origin);
+        url.searchParams.set("message", "Reaction approved!");
+        window.location.href = url.toString();
+      }
+    });
+}
+
+/**
+ * Sends a PATCH request to submit suggested changes for a reaction approval request.
+ * Collects comment text from the UI and redirects with success message upon success.
+ *
+ * @param {string} requestID - The ID of the request to which the comment applies.
+ */
+function submitSuggestComment(requestID) {
+  let commentText = $("#suggest-comment-text").val();
+  fetch("/reaction_approval/suggest_changes", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      requestID: requestID,
+      comments: commentText,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.redirect_url) {
+        const url = new URL(data.redirect_url, window.location.origin);
+        url.searchParams.set("message", data.message);
+        window.location.href = url.toString();
+      }
+    });
+}
+
+/**
+ * Sends a PATCH request to reject a reaction approval request with reviewer comments.
+ * Redirects the user and displays success message on success.
+ *
+ * @param {string} requestID - The ID of the approval request to reject.
+ */
+function submitRejectReaction(requestID) {
+  let commentText = $("#reject-comment-text").val();
+  fetch("/reaction_approval/reject", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      requestID: requestID,
+      comments: commentText,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.redirect_url) {
+        const url = new URL(data.redirect_url, window.location.origin);
+        url.searchParams.set("message", data.message);
+        window.location.href = url.toString();
+      }
+    });
+}
+
+/**
+ * Opens the modal dialog for suggesting changes to a reaction.
+ * Sets the approval request ID on the submit button.
+ *
+ * @param {string} requestID - The ID of the approval request to attach to the modal.
+ */
+function suggestChangesModal(requestID) {
+  $("#suggest-comment-modal").modal("show");
+  // sets request id as value for submit button
+  $("#submit-suggest-comments").val(requestID);
+}
+
+/**
+ * Opens the modal dialog for rejecting a reaction.
+ * Sets the approval request ID on the submit button.
+ *
+ * @param {string} requestID - The ID of the approval request to attach to the modal.
+ */
+function rejectReactionModal(requestID) {
+  $("#reject-reaction-modal").modal("show");
+  // sets request id as value for submit button
+  $("#reject-reaction-submit").val(requestID);
 }

@@ -141,6 +141,19 @@ class BaseConfig(object):  # class to store configuration variables
 
     EMBARGOED_COUNTRIES = uk_arms_embargoes()
 
+    OIDC_CLIENT_SECRETS = {
+        "web": {
+            "client_id": os.getenv("OIDC_CLIENT_ID", ""),
+            "client_secret": os.getenv("OIDC_CLIENT_SECRET", ""),
+            "auth_uri": os.getenv("OIDC_AUTH_URI", ""),
+            "token_uri": os.getenv("OIDC_TOKEN_URI", ""),
+            "userinfo_uri": os.getenv("OIDC_USERINFO_URI", ""),
+            "issuer": os.getenv("OIDC_ISSUER", ""),
+            # pass redirect uris as a comma-separated string (uri1,uri2,...)
+            "redirect_uris": str.split(os.getenv("OIDC_REDIRECT_URIS", ""), ","),
+        }
+    }
+
 
 class TestConfig(BaseConfig):
     TESTING = True
