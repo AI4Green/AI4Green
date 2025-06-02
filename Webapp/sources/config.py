@@ -136,6 +136,10 @@ class BaseConfig(object):  # class to store configuration variables
 
     EMBARGOED_COUNTRIES = uk_arms_embargoes()
 
+    MESSAGE_QUEUE_CONFIG = {
+        "hostname": os.getenv("MESSAGE_QUEUE_HOSTNAME", "localhost:9092")
+    }
+
 
 class TestConfig(BaseConfig):
     TESTING = True

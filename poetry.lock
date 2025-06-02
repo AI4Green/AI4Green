@@ -1634,6 +1634,25 @@ files = [
 ]
 
 [[package]]
+name = "kafka-python"
+version = "2.2.10"
+description = "Pure Python client for Apache Kafka"
+optional = false
+python-versions = "*"
+files = [
+    {file = "kafka_python-2.2.10-py2.py3-none-any.whl", hash = "sha256:cfca1af8d6277f31d135496587c64f1de0b4021cada8d6376589e8572484068c"},
+    {file = "kafka_python-2.2.10.tar.gz", hash = "sha256:0411d2631719dae53a81716c8be8af13e47470123ba49914d7faba317379e85b"},
+]
+
+[package.extras]
+benchmarks = ["pyperf"]
+crc32c = ["crc32c"]
+lz4 = ["lz4"]
+snappy = ["python-snappy"]
+testing = ["mock", "pytest", "pytest-mock", "pytest-timeout"]
+zstd = ["zstandard"]
+
+[[package]]
 name = "kiwisolver"
 version = "1.4.7"
 description = "A fast implementation of the Cassowary constraint solver"

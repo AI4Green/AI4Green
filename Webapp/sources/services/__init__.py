@@ -11,6 +11,7 @@ from . import (
     hazard_code,
     interactive,
     ions,
+    message_queue,
     notifications,
     novel_compound,
     person,
