@@ -8,10 +8,11 @@ from typing import Dict
 
 from apiflask import APIFlask
 from flask import Flask
-from sources.services.message_queue import QueueProducer, QueueConsumer
 from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
-from sources.extensions import db, login, ma, mail, migrate
+from sources.extensions import db, login, ma, mail, migrate, oidc
+from sources.services.message_queue import QueueConsumer, QueueProducer
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 def create_app(c: str = "dev") -> Flask:
@@ -28,6 +29,7 @@ def create_app(c: str = "dev") -> Flask:
 
     """
     app = APIFlask(__name__, title="AI4Green OpenAPI", version="1.6.0")
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
     app.security_schemes = {
         "sessionAuth": {
@@ -87,6 +89,8 @@ def register_extensions(app: Flask) -> None:
 
     login.init_app(app)
     login.login_view = "auth.login"
+
+    oidc.init_app(app)
 
     @login.user_loader
     def load_user(user_id: int):

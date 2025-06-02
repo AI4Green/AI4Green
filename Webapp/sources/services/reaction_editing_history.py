@@ -1,4 +1,4 @@
-from flask import json
+from flask import current_app, json
 from sources import models, services
 from sources.extensions import db
 
@@ -70,12 +70,11 @@ def autosave_reaction(person, reaction, old_reaction_details):
             "workbook": reaction.workbook.id,
             "reaction": reaction.id,
             "field_name": field_name,
-            "change_details": change_details
+            "change_details": change_details,
         }
 
         producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
         producer.send("reaction_editing_history", json.dumps(message))
-
 
 
 def clone_reaction(person, workbook, new_reaction, old_reaction):

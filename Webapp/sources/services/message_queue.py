@@ -1,7 +1,8 @@
 import json
-from kafka import KafkaProducer, KafkaConsumer
 import time
 from collections import defaultdict
+
+from kafka import KafkaConsumer, KafkaProducer
 
 
 class QueueProducer:
@@ -35,6 +36,7 @@ class QueueProducer:
 
 class QueueConsumer:
     """This class is a service which is used to receive messages from a kafka cluster."""
+
     def __init__(self, hostname, topic):
         """Create a consumer which can receive messages from a kafka cluster.
 
@@ -47,8 +49,8 @@ class QueueConsumer:
             bootstrap_servers=hostname,
             group_id="audit-log-consumer-group",
             value_deserializer=lambda x: json.loads(x.decode()),
-            auto_offset_reset='earliest',
-            enable_auto_commit=True
+            auto_offset_reset="earliest",
+            enable_auto_commit=True,
         )
         self.topic = topic
 
@@ -88,7 +90,7 @@ def process_batch(messages):
     # group messages by (reaction, field_name, person)
     grouped = defaultdict(list)
     for item in message_dicts:
-        key = (item['reaction'], item['field_name'], item['person'])
+        key = (item["reaction"], item["field_name"], item["person"])
         grouped[key].append(item)
 
     # Merge diffs within each group
@@ -99,8 +101,8 @@ def process_batch(messages):
         # Extract all change_details from messages and load if needed
         change_details_list = []
         for msg in messages:
-            change_details = msg['change_details']
-            if isinstance(change_details, str): # TODO: probably always a string?
+            change_details = msg["change_details"]
+            if isinstance(change_details, str):  # TODO: probably always a string?
                 change_details = json.loads(change_details)
             change_details_list.append(change_details)
 
@@ -116,15 +118,16 @@ def process_batch(messages):
         # put results in original message format
         results_dict = {
             "person": person,
-            "workbook": messages[0]['workbook'],
+            "workbook": messages[0]["workbook"],
             "reaction": reaction,
             "field_name": field_name,
-            "change_details": change_details_merged
+            "change_details": change_details_merged,
         }
 
         merged_results.append(results_dict)
 
     return merged_results
+
 
 def store_batch(messages):
     """Send the processed list of messages to storage"""
@@ -145,7 +148,7 @@ def merge_diffs(diff1, diff2):
         if key in diff1 and key in diff2:
             merged[key] = {
                 "old_value": diff1[key]["old_value"],
-                "new_value": diff2[key]["new_value"]
+                "new_value": diff2[key]["new_value"],
             }
         elif key in diff1:
             merged[key] = diff1[key]
