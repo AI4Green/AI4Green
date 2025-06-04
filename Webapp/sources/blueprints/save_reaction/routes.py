@@ -572,7 +572,7 @@ def save_polymer_mode():
     reaction_type = request.form["reactionType"]
     update_dict = {"reaction_type": reaction_type}
     # get current state before updating
-    old_reaction_details = {"reaction_type": reaction.reaction_type}
+    old_reaction_details = {"reaction_type": reaction.reaction_type.value}
     reaction.update(**update_dict)
     # record new reaction history
     services.reaction_editing_history.edit_reaction(

@@ -135,9 +135,10 @@ def make_change_to_workgroup(
         db.session.commit()
 
         # record role change
-        services.data_access_history.add(
-            person, wg, old_role=current_status, new_role="No Access"
+        message = services.data_access_history.DataAccessMessage(
+            person.id, wg.id, old_role=current_status, new_role="No Access"
         )
+        services.data_access_history.send_message(message)
 
         return jsonify(
             {
@@ -156,12 +157,13 @@ def make_change_to_workgroup(
         getattr(person, workgroup_dict[new_role]["person_to_wg_attr"]).add(wg)
         db.session.commit()
         # record role change
-        services.data_access_history.add(
-            person,
-            wg,
+        message = services.data_access_history.DataAccessMessage(
+            person.id,
+            wg.id,
             workgroup_dict[old_role]["display_string"],
             workgroup_dict[new_role]["display_string"],
         )
+        services.data_access_history.send_message(message)
         return jsonify(
             {
                 "feedback": f"{person.user.fullname} has changed role from "

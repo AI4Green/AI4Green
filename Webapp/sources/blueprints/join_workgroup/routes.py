@@ -146,12 +146,13 @@ def join_workgroup_response(notification=None, decision=None):
             )
 
             # record role change
-            services.data_access_history.add(
-                person,
-                workgroup,
+            message = services.data_access_history.DataAccessMessage(
+                person.id,
+                workgroup.id,
                 old_role="No Access",
                 new_role=workgroup_dict[user_type]["display_string"],
             )
+            services.data_access_history.send_message(message)
 
             flash(
                 f"You have been successfully added to the Workgroup: {workgroup.name}"

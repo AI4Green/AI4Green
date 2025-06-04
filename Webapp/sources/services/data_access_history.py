@@ -1,21 +1,30 @@
+from dataclasses import asdict, dataclass
+from typing import Optional
+
+from flask import current_app, json
 from sources import models
 from sources.extensions import db
 
 
-def add(person, workgroup, old_role, new_role, workbook=None):
-    """
-    Add an entry to the DataAccessHistory table to record a change in data access.
-    """
+@dataclass
+class DataAccessMessage:
+    """Class for creating kafka message"""
 
-    models.DataAccessHistory.create(
-        person_id=person.id,
-        workgroup_id=workgroup.id,
-        workbook_id=workbook.id if workbook else None,
-        old_role=old_role,
-        new_role=new_role,
-    )
+    person: int
+    workgroup: int
+    old_role: str
+    new_role: str
+    workbook: Optional[int] = None
 
 
+def send_message(message):
+    producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
+    producer.send("data_access_history", json.dumps(asdict(message)))
+
+
+# TODO: record account deletion
+
+'''
 def get_history_from_person(person_id: int):
     """
     Returns the role history for a Person for all WorkGroups
@@ -23,18 +32,6 @@ def get_history_from_person(person_id: int):
     return (
         db.session.query(models.DataAccessHistory)
         .filter(models.DataAccessHistory.person_id == person_id)
-        .all()
-    )
-
-
-def get_history_from_person_and_workgroup(person_id: int, workgroup_id: int):
-    """
-    Returns the role history for a Person for a particular WorkGroup
-    """
-    return (
-        db.session.query(models.DataAccessHistory)
-        .filter(models.DataAccessHistory.person_id == person_id)
-        .filter(models.DataAccessHistory.workgroup_id == workgroup_id)
         .all()
     )
 
@@ -48,3 +45,4 @@ def get_history_from_workgroup(workgroup_id: int):
         .filter(models.DataAccessHistory.workgroup_id == workgroup_id)
         .all()
     )
+'''
