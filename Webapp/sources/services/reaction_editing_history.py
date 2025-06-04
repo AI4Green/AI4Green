@@ -1,31 +1,23 @@
+from dataclasses import asdict, dataclass
+
 from flask import current_app, json
-from sources import models, services
-from sources.extensions import db
+from sources import services
 
 
-def add(person, workbook, reaction_id, field_name, change_details):
-    """
-    Add an entry to the ReactionEditingHistory table to record a change in a reaction.
-    """
+@dataclass
+class ReactionEditMessage:
+    """Class for creating kafka message"""
 
-    models.ReactionEditingHistory.create(
-        person_id=person.id,
-        workbook_id=workbook.id,
-        reaction_id=reaction_id,
-        field_name=field_name,
-        change_details=change_details,
-    )
+    person: int
+    workbook: int
+    reaction: int
+    field_name: str
+    change_details: dict
 
 
-def get_history_from_reaction(reaction_id: int):
-    """
-    Returns the reaction editing history for reaction
-    """
-    return (
-        db.session.query(models.ReactionEditingHistory)
-        .filter(models.ReactionEditingHistory.reaction_id == reaction_id)
-        .all()
-    )
+def send_message(message):
+    producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
+    producer.send("reaction_editing_history", json.dumps(asdict(message)))
 
 
 def add_new_reaction(person, workbook, reaction_id, reaction_name):
@@ -34,19 +26,30 @@ def add_new_reaction(person, workbook, reaction_id, reaction_name):
     reaction = services.reaction.get_from_reaction_id_and_workbook_id(
         reaction_id, workbook.id
     )
-
-    field_name = "New Reaction"
     change_details = {"reaction_name": reaction_name}  # TODO: come back to this
-    add(person, workbook, reaction.id, field_name, json.dumps(change_details))
+
+    message = ReactionEditMessage(
+        person=person.id,
+        workbook=workbook.id,
+        reaction=reaction.id,
+        field_name="New Reaction",
+        change_details=change_details,
+    )
+    send_message(message)
 
 
 def edit_reaction(person, reaction, old_reaction_details, new_reaction_details):
     """Record that a reaction was edited through the sketcher autosave or other means"""
-    field_name = "Edited Reaction"
     diff = get_differences(old_reaction_details, new_reaction_details)
     if diff:
-        change_details = json.dumps(diff)
-        add(person, reaction.workbook, reaction.id, field_name, change_details)
+        message = ReactionEditMessage(
+            person=person.id,
+            workbook=reaction.workbook.id,
+            reaction=reaction.id,
+            field_name="Edited Reaction",
+            change_details=diff,
+        )
+        send_message(message)
 
 
 def autosave_reaction(person, reaction, old_reaction_details):
@@ -60,26 +63,18 @@ def autosave_reaction(person, reaction, old_reaction_details):
     # find difference
     diff = get_differences(old_data_normalised, new_data_normalised, exclude_paths=True)
     if diff:
-        field_name = "Edited Reaction"
-        change_details = json.dumps(diff)
-
-        add(person, reaction.workbook, reaction.id, field_name, change_details)
-
-        message = {
-            "person": person.id,
-            "workbook": reaction.workbook.id,
-            "reaction": reaction.id,
-            "field_name": field_name,
-            "change_details": change_details,
-        }
-
-        producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-        producer.send("reaction_editing_history", json.dumps(message))
+        message = ReactionEditMessage(
+            person=person.id,
+            workbook=reaction.workbook.id,
+            reaction=reaction.id,
+            field_name="Edited Reaction",
+            change_details=diff,
+        )
+        send_message(message)
 
 
 def clone_reaction(person, workbook, new_reaction, old_reaction):
     """Record that a reaction was cloned"""
-    field_name = "Cloned Reaction"
     change_details = {
         "reaction_id": {
             "old_value": old_reaction.reaction_id,
@@ -87,26 +82,53 @@ def clone_reaction(person, workbook, new_reaction, old_reaction):
         },
         "reaction_name": {"old_value": None, "new_value": new_reaction.name},
     }
-    add(person, workbook, old_reaction.id, field_name, json.dumps(change_details))
+
+    message = ReactionEditMessage(
+        person=person.id,
+        workbook=workbook.id,
+        reaction=old_reaction.id,
+        field_name="Cloned Reaction",
+        change_details=change_details,
+    )
+    send_message(message)
 
 
 def delete_reaction(reaction):
     """Record that a reaction was deleted"""
-    add(reaction.creator_person, reaction.workbook, reaction.id, "Deleted Reaction", "")
+    message = ReactionEditMessage(
+        person=reaction.creator_person,
+        workbook=reaction.workbook.id,
+        reaction=reaction.id,
+        field_name="Deleted Reaction",
+        change_details={},
+    )
+    send_message(message)
 
 
 def upload_file(person, reaction, file_names):
     """Record that one or more experimental files were added to a reaction"""
-    field_name = "Uploaded Files"
     change_details = {"file_names": file_names}
-    add(person, reaction.workbook, reaction.id, field_name, json.dumps(change_details))
+    message = ReactionEditMessage(
+        person=person.id,
+        workbook=reaction.workbook.id,
+        reaction=reaction.id,
+        field_name="Uploaded Files",
+        change_details=change_details,
+    )
+    send_message(message)
 
 
 def delete_file(person, reaction, file_name):
     """Record that an experimental file was removed from a reaction"""
-    field_name = "Deleted File"
-    change_details = {"file_name": file_name}
-    add(person, reaction.workbook, reaction.id, field_name, json.dumps(change_details))
+    change_details = {"file_names": file_name}
+    message = ReactionEditMessage(
+        person=person.id,
+        workbook=reaction.workbook.id,
+        reaction=reaction.id,
+        field_name="Deleted Files",
+        change_details=change_details,
+    )
+    send_message(message)
 
 
 def normalise_json_fields(data):

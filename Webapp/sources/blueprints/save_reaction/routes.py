@@ -545,7 +545,7 @@ def autosave_sketcher() -> Response:
     # get current state before updating
     old_reaction_details = {
         "reaction_smiles": reaction.reaction_smiles,
-        "reaction_type": reaction.reaction_type,
+        "reaction_type": reaction.reaction_type.value,
     }
     reaction.update(**update_dict)
     # record new reaction history
@@ -696,7 +696,7 @@ def download_experiment_files():
     display_name = file_object.display_name
     return jsonify(
         {"stream": file_attachment, "mimetype": mimetype, "name": display_name}
-    )
+    )  # TODO: does this count as data export
 
 
 @save_reaction_bp.route("/_delete_reaction_attachment", methods=["DELETE"])

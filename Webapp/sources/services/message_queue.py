@@ -74,7 +74,8 @@ class QueueConsumer:
 
         # compress messages and send to storage
         processed_messages = process_batch(messages)
-        store_batch(processed_messages)
+        if processed_messages:
+            store_batch(processed_messages)
 
 
 def process_batch(messages):
@@ -98,13 +99,8 @@ def process_batch(messages):
     for key, messages in grouped.items():
         reaction, field_name, person = key
 
-        # Extract all change_details from messages and load if needed
-        change_details_list = []
-        for msg in messages:
-            change_details = msg["change_details"]
-            if isinstance(change_details, str):  # TODO: probably always a string?
-                change_details = json.loads(change_details)
-            change_details_list.append(change_details)
+        # Extract all change_details from messages
+        change_details_list = [msg["change_details"] for msg in messages]
 
         # initially set result to the first change
         change_details_merged = change_details_list[0]
@@ -114,6 +110,8 @@ def process_batch(messages):
             for diff in change_details_list[1:]:
                 change_details_merged = merge_diffs(change_details_merged, diff)
         print(change_details_merged)
+        if not change_details_merged:  # no net change
+            return {}
 
         # put results in original message format
         results_dict = {
@@ -146,10 +144,11 @@ def merge_diffs(diff1, diff2):
 
     for key in all_keys:
         if key in diff1 and key in diff2:
-            merged[key] = {
-                "old_value": diff1[key]["old_value"],
-                "new_value": diff2[key]["new_value"],
-            }
+            if diff1[key]["old_value"] != diff2[key]["new_value"]:
+                merged[key] = {
+                    "old_value": diff1[key]["old_value"],
+                    "new_value": diff2[key]["new_value"],
+                }
         elif key in diff1:
             merged[key] = diff1[key]
         elif key in diff2:
