@@ -11,7 +11,7 @@ from flask import Flask
 from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db, login, ma, mail, migrate, oidc
-from sources.services.message_queue import QueueConsumer, QueueProducer
+from sources.services.message_queue import QueueProducer
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 

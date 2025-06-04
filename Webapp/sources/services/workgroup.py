@@ -23,11 +23,6 @@ def from_name(name: str) -> models.WorkGroup:
     )
 
 
-def from_id(id: int) -> models.WorkGroup:
-    """Returns the database workgroup object from the id"""
-    return db.session.query(models.WorkGroup).filter(models.WorkGroup.id == id).first()
-
-
 def get_institution() -> models.Institution:
     """Returns the active institution"""
     # currently all users share institution. May change in future

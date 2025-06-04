@@ -29,17 +29,6 @@ def get_from_name_and_workbook_id(name: str, workbook_id: int) -> models.Reactio
     )
 
 
-def get_reaction_id_from_primary_key(primary_key: int):
-    """
-    Retrieves a reaction ID based on its primary key.
-    """
-    return (
-        db.session.query(models.Reaction)
-        .filter(models.Reaction.id == primary_key)
-        .first()
-    ).reaction_id
-
-
 def get_current_from_request() -> models.Reaction:
     """
     Gets the current reaction for a request from the frontend. Either using request.form or request.json
