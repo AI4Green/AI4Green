@@ -15,7 +15,11 @@ class ReactionEditMessage:
     change_details: dict
 
 
-def send_message(message):
+def send_message(message: ReactionEditMessage):
+    """Send a message to the kafka producer in the reaction_editing_history topic.
+    Args:
+        message (ReactionEditMessage): The message to send to the queue in the ReactionEditMessage format
+    """
     # producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
     # producer.send("reaction_editing_history", json.dumps(asdict(message)))
     return
@@ -145,13 +149,19 @@ def normalise_json_fields(data):
 
 
 def get_differences(old_dict, new_dict, exclude_paths=False, parent_key=""):
+    """Identify the differences between two dicts, and return with nested keys 'old_value' and 'new_value'.
+    Args:
+        old_dict (dict): original dict
+        new_dict (dict): updated dict
+        exclude_paths (bool, optional): whether to exclude all paths not listed in included_paths()
+        parent_key (str, optional): only used internally, for recursive calls to nested keys
+    """
     diffs = {}
 
     all_keys = set(old_dict.keys()) | set(new_dict.keys())
 
     for key in all_keys:
         if exclude_paths and key not in included_paths():
-            print(key)
             continue
         full_key = f"{parent_key}.{key}" if parent_key else key
         old_value = old_dict.get(key, None)

@@ -15,7 +15,11 @@ class DataAccessMessage:
     workbook: Optional[int] = None
 
 
-def send_message(message):
+def send_message(message: DataAccessMessage):
+    """Send a message to the kafka producer in the data_access_history topic.
+    Args:
+        message (ReactionEditMessage): The message to send to the queue in the DataAccessMessage format
+    """
     # producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
     # producer.send("data_access_history", json.dumps(asdict(message)))
     return
