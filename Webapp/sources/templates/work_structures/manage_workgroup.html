@@ -2,7 +2,6 @@
 {% block title %}{{ current_workgroup }}{% endblock %}
 {% block scripts %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/manage_workgroup.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/data_access_history.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/new_reaction.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/printstyle.css') }}">
 {% endblock %}
@@ -49,10 +48,6 @@
             <li class="nav-item">
                 <a class="nav-link" role="tab" data-toggle="tab" href="#add-users"
                    aria-selected="{% if has_request == "no" %}false{% else %}true{% endif %}">Add Users</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" role="tab" data-toggle="tab" href="#audit-logs"
-                   aria-selected="{% if has_request == "no" %}false{% else %}true{% endif %}">Audit Logs</a>
             </li>
         </ul>
         <div class="tab-content">
@@ -385,12 +380,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <!--add users tab-->
-            <div class="tab-pane fade in" id="audit-logs" role="tabpanel">
-                <br>
-                <p><a class="btn btn-success" onclick="getAccessHistoryWorkgroup()">Download Access History</a></p>
-                <p><a class="btn btn-success" onclick="getExportHistoryWorkgroup()">Download Export History</a></p>
             </div>
         </div>
     </div>

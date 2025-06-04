@@ -1,7 +1,4 @@
 {% extends "base.html" %}
-{% block scripts %}
-    <script type="text/javascript" src="{{ url_for('static', filename='js/data_access_history.js') }}"></script>
-{% endblock %}
 {% block title %}Manage Account{% endblock %}
 {% block content %}
 
@@ -9,11 +6,9 @@
 <div class="jumbotron non-spaced-page-content">
     <div class="container">
         <h2>Manage Account</h2>
-        <p id="current-user">Username: {{ current_user.username }}</p>
+        <p>Username: {{ current_user.username }}</p>
         <p>Email: {{ current_user.email }}</p>
         <p><a href="{{ url_for('update_email.update_email_password') }}" id="update-email-password" class="btn btn-success">Change Email or Password</a></p>
-        <p><a class="btn btn-success" onclick="getAccessHistory()">Download Account Role History</a></p>
-        <p><a class="btn btn-success" onclick="getExportHistory()">Download Export History</a></p>
         <p><a href="{{ url_for('delete_profile.delete_profile') }}" id="delete-profile" class="btn btn-primary">Delete Profile</a></p>
     </div>
 </div>
