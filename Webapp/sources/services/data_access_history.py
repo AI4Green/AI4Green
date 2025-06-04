@@ -8,7 +8,7 @@ from sources.extensions import db
 
 @dataclass
 class DataAccessMessage:
-    """Class for creating kafka message"""
+    """Class for creating a kafka message for the data_access_history topic"""
 
     person: int
     workgroup: int

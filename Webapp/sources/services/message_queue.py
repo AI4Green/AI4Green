@@ -96,7 +96,7 @@ def process_batch(messages):
 
     # Merge diffs within each group
     merged_results = []
-    for key, messages in grouped.items():
+    for key, messages in grouped.items():  # TODO: handle upload/delete files correctly
         reaction, field_name, person = key
 
         # Extract all change_details from messages

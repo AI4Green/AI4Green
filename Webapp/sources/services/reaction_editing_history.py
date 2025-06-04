@@ -6,7 +6,7 @@ from sources import services
 
 @dataclass
 class ReactionEditMessage:
-    """Class for creating kafka message"""
+    """Class for creating a kafka message for the reaction_editing_history topic"""
 
     person: int
     workbook: int
@@ -96,7 +96,7 @@ def clone_reaction(person, workbook, new_reaction, old_reaction):
 def delete_reaction(reaction):
     """Record that a reaction was deleted"""
     message = ReactionEditMessage(
-        person=reaction.creator_person,
+        person=reaction.creator_person.id,
         workbook=reaction.workbook.id,
         reaction=reaction.id,
         field_name="Deleted Reaction",

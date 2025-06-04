@@ -144,6 +144,7 @@ def confirm_delete_profile() -> Response:
 
         db.session.delete(user)
         db.session.commit()
+        # TODO: record new data access history
         flash("Your profile has been deleted!")
         return redirect(url_for("auth.logout"))
 

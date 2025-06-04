@@ -150,9 +150,10 @@ def create_workbook(workgroup: str) -> Response:
         )
 
         # record access change
-        services.data_access_history.add(
-            person, workgroup, "No Access", "Access", workbook
+        message = services.data_access_history.DataAccessMessage(
+            person.id, workgroup.id, "No Access", "Access", workbook.id
         )
+        services.data_access_history.send_message(message)
 
         # flash success message and redirect to manage workgroup_name page
         flash("Workbook has been created!")

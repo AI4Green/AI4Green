@@ -47,7 +47,7 @@ def get_data_access_history_workgroup():
 
     result = [
         {
-            "person": change.person_id,
+            "person": change.person_id,  # TODO: give username
             "workbook": services.workbook.get(
                 change.workbook_id
             ).name  # convert id to name

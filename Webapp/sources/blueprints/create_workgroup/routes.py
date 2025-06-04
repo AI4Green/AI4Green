@@ -194,9 +194,13 @@ def create_workgroup() -> Response:
         db.session.commit()
 
         # record role change
-        services.data_access_history.add(
-            PI, new_workgroup, old_role="No Access", new_role="Principal Investigator"
+        message = services.data_access_history.DataAccessMessage(
+            PI.id,
+            new_workgroup.id,
+            old_role="No Access",
+            new_role="Principal Investigator",
         )
+        services.data_access_history.send_message(message)
 
         # flash success message and redirect to manage workgroup page
         flash(
