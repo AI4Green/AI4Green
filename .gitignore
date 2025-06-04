@@ -23,3 +23,6 @@ Pubchem-update
 pytest-coverage.txt
 .coverage
 /.mypy_cache/
+
+# kafka stuff
+connect-plugins
