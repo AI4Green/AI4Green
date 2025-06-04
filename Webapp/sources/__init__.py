@@ -97,8 +97,8 @@ def register_extensions(app: Flask) -> None:
         return models.User.query.get(user_id)
 
     # configure the message queue, e.g. kafka
-    producer = QueueProducer(**app.config["MESSAGE_QUEUE_CONFIG"])
-    app.config["MESSAGE_QUEUE_PRODUCER"] = producer
+    # producer = QueueProducer(**app.config["MESSAGE_QUEUE_CONFIG"])
+    # app.config["MESSAGE_QUEUE_PRODUCER"] = producer
 
     mail.init_app(app)
 

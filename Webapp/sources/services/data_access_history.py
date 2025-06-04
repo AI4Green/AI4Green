@@ -16,8 +16,9 @@ class DataAccessMessage:
 
 
 def send_message(message):
-    producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    producer.send("data_access_history", json.dumps(asdict(message)))
+    # producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
+    # producer.send("data_access_history", json.dumps(asdict(message)))
+    return
 
 
 # TODO: record account deletion

@@ -16,8 +16,9 @@ class ReactionEditMessage:
 
 
 def send_message(message):
-    producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    producer.send("reaction_editing_history", json.dumps(asdict(message)))
+    # producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
+    # producer.send("reaction_editing_history", json.dumps(asdict(message)))
+    return
 
 
 def add_new_reaction(person, workbook, reaction_id, reaction_name):
