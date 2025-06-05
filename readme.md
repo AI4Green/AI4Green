@@ -146,7 +146,9 @@ flask db upgrade # update the database
 ```
 
 ### Apache Kafka
-The `docker-compose.yaml` file contains the `kafka` service (which is supported by `zookerper`) and the `kafka-ui` service. `kafka-ui` can be used to set up a cluster and topics in the browser at http://localhost:8080.
+The `docker-compose.yaml` file contains the `kafka` service (which is supported by `zookerper`) and the `kafka-ui` service. `kafka-ui` can be used to set up a cluster and topics in the browser at http://localhost:8080. 
+
+**When using Kafka, make sure you set the environment variable `USE_KAFKA` to 1. Otherwise messages will be logged to the standard output. This behaviour is only for testing purposes where a Kafka instance is not required.**
 
 When you first start the services and navigate to the `kafka-ui` in the browser, you will be asked to configure a cluster. Enter a name in the "Cluster name" field, then under "Bootstrap Servers", enter "kafka" in the "Host" field and 29092 in the "Port" field. Click the "Validate" button to make sure it's working, then click "Submit" if you get the green dialog box.
 

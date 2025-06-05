@@ -11,7 +11,7 @@ from flask import Flask
 from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db, login, ma, mail, migrate, oidc
-from sources.services.message_queue import QueueProducer
+from sources.services.message_queue import LoggingQueueProducer, QueueProducer
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
@@ -97,8 +97,16 @@ def register_extensions(app: Flask) -> None:
         return models.User.query.get(user_id)
 
     # configure the message queue, e.g. kafka
-    # producer = QueueProducer(**app.config["MESSAGE_QUEUE_CONFIG"])
-    # app.config["MESSAGE_QUEUE_PRODUCER"] = producer
+    if app.config.get("USE_KAFKA", False):
+        # In production or situations where Kafka is required,
+        # use the kafka queue producer.
+        # N.B. reuqires the kafka services to be running!
+        producer = QueueProducer(**app.config["MESSAGE_QUEUE_CONFIG"])
+    else:
+        # Use a queue producer which sends messages to the standard output
+        # via the built-in logger in Flask.
+        producer = LoggingQueueProducer()
+    app.config["MESSAGE_QUEUE_PRODUCER"] = producer
 
     mail.init_app(app)
 

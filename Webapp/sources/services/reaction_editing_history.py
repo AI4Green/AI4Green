@@ -20,9 +20,8 @@ def send_message(message: ReactionEditMessage):
     Args:
         message (ReactionEditMessage): The message to send to the queue in the ReactionEditMessage format
     """
-    # producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    # producer.send("reaction_editing_history", json.dumps(asdict(message)))
-    return
+    producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
+    producer.send("reaction_editing_history", json.dumps(asdict(message)))
 
 
 def add_new_reaction(person, workbook, reaction_id, reaction_name):

@@ -18,11 +18,10 @@ class DataAccessMessage:
 def send_message(message: DataAccessMessage):
     """Send a message to the kafka producer in the data_access_history topic.
     Args:
-        message (ReactionEditMessage): The message to send to the queue in the DataAccessMessage format
+        message (DataAccessMessage): The message to send to the queue in the DataAccessMessage format
     """
-    # producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    # producer.send("data_access_history", json.dumps(asdict(message)))
-    return
+    producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
+    producer.send("data_access_history", json.dumps(asdict(message)))
 
 
 # TODO: record account deletion
