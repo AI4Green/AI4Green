@@ -1,4 +1,5 @@
 from dataclasses import asdict, dataclass
+from datetime import datetime
 
 from flask import current_app, json
 from sources import services
@@ -13,6 +14,7 @@ class ReactionEditMessage:
     reaction: int
     field_name: str
     change_details: dict
+    date: str
 
 
 def send_message(message: ReactionEditMessage):
@@ -38,6 +40,7 @@ def add_new_reaction(person, workbook, reaction_id, reaction_name):
         reaction=reaction.id,
         field_name="New Reaction",
         change_details=change_details,
+        date=datetime.now().strftime("%Y-%m-%d"),
     )
     send_message(message)
 
@@ -52,6 +55,7 @@ def edit_reaction(person, reaction, old_reaction_details, new_reaction_details):
             reaction=reaction.id,
             field_name="Edited Reaction",
             change_details=diff,
+            date=datetime.now().strftime("%Y-%m-%d"),
         )
         send_message(message)
 
@@ -73,6 +77,7 @@ def autosave_reaction(person, reaction, old_reaction_details):
             reaction=reaction.id,
             field_name="Edited Reaction",
             change_details=diff,
+            date=datetime.now().strftime("%Y-%m-%d"),
         )
         send_message(message)
 
@@ -93,6 +98,7 @@ def clone_reaction(person, workbook, new_reaction, old_reaction):
         reaction=old_reaction.id,
         field_name="Cloned Reaction",
         change_details=change_details,
+        date=datetime.now().strftime("%Y-%m-%d"),
     )
     send_message(message)
 
@@ -105,6 +111,7 @@ def delete_reaction(reaction):
         reaction=reaction.id,
         field_name="Deleted Reaction",
         change_details={},
+        date=datetime.now().strftime("%Y-%m-%d"),
     )
     send_message(message)
 
@@ -118,6 +125,7 @@ def upload_file(person, reaction, file_names):
         reaction=reaction.id,
         field_name="Uploaded Files",
         change_details=change_details,
+        date=datetime.now().strftime("%Y-%m-%d"),
     )
     send_message(message)
 
@@ -131,6 +139,7 @@ def delete_file(person, reaction, file_name):
         reaction=reaction.id,
         field_name="Deleted Files",
         change_details=change_details,
+        date=datetime.now().strftime("%Y-%m-%d"),
     )
     send_message(message)
 

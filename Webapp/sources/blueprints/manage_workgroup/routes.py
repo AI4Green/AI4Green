@@ -136,7 +136,11 @@ def make_change_to_workgroup(
 
         # record role change
         message = services.data_access_history.DataAccessMessage(
-            person.id, wg.id, old_role=current_status, new_role="No Access"
+            person.id,
+            wg.id,
+            old_role=current_status,
+            new_role="No Access",
+            date=datetime.now().strftime("%Y-%m-%d"),
         )
         services.data_access_history.send_message(message)
 
@@ -162,6 +166,7 @@ def make_change_to_workgroup(
             wg.id,
             workgroup_dict[old_role]["display_string"],
             workgroup_dict[new_role]["display_string"],
+            date=datetime.now().strftime("%Y-%m-%d"),
         )
         services.data_access_history.send_message(message)
         return jsonify(

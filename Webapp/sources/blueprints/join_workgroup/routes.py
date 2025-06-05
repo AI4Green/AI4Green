@@ -151,6 +151,7 @@ def join_workgroup_response(notification=None, decision=None):
                 workgroup.id,
                 old_role="No Access",
                 new_role=workgroup_dict[user_type]["display_string"],
+                date=datetime.now().strftime("%Y-%m-%d"),
             )
             services.data_access_history.send_message(message)
 

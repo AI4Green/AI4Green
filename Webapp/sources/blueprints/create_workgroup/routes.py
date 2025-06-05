@@ -199,6 +199,7 @@ def create_workgroup() -> Response:
             new_workgroup.id,
             old_role="No Access",
             new_role="Principal Investigator",
+            date=datetime.now().strftime("%Y-%m-%d"),
         )
         services.data_access_history.send_message(message)
 

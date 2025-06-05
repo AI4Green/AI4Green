@@ -12,6 +12,7 @@ class DataAccessMessage:
     workgroup: int
     old_role: str
     new_role: str
+    date: str
     workbook: Optional[int] = None
 
 

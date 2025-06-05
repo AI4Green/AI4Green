@@ -199,7 +199,12 @@ def add_remove_user_from_workbook(
         db.session.commit()
         # record access change
         message = services.data_access_history.DataAccessMessage(
-            user.id, workgroup.id, "Access", "No Access", wb.id
+            user.id,
+            workgroup.id,
+            "Access",
+            "No Access",
+            datetime.now().strftime("%Y-%m-%d"),
+            wb.id,
         )
         services.data_access_history.send_message(message)
         return jsonify({"feedback": "This user has been removed from the workbook!"})
