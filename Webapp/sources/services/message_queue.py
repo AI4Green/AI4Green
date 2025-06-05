@@ -1,10 +1,21 @@
 import json
-import socket
-from flask import current_app
+from typing import Any, Optional
 from kafka import KafkaProducer
 
 
-class QueueProducer:
+class BaseQueueProducer:
+
+    def send(self, topic: Optional[str] = None, msg: Optional[Any] = None):
+        """Send a message to the message queue with the given topic.
+
+        Args:
+            topic (Optional[str]): The topic to send the message to.
+            msg (Optional[Any]): The message to send to the queue.
+        """
+        raise NotImplementedError
+
+
+class QueueProducer(BaseQueueProducer):
     """This class is a service which is used to send messages to a kafka cluster."""
 
     def __init__(self, hostname: str):
@@ -22,12 +33,12 @@ class QueueProducer:
             # client_id="daniel", TODO: find a good value for the client id
         )
 
-    def send(self, topic: str, msg: dict):
+    def send(self, topic: Optional[str] = None, msg: Optional[Any] = None):
         """Send a message to the message queue with the given topic.
 
         Args:
-            topic (str): The topic to send the message to.
-            msg (dict): The message to send to the queue.
+            topic (Optional[str]): The topic to send the message to.
+            msg (Optional[Any]): The message to send to the queue.
         """
         self.producer.send(topic, value=msg)
         self.producer.flush()
