@@ -1,8 +1,9 @@
 {
     "name": "minio-sink-connector",
     "config": {
-      "topics": "your-topic",  
+      "topics": "your,topics,here",
       "s3.bucket.name": "your-bucket-name",
+      "partition.field.name": "your,topics,here",
       "store.url": "http://minio:9000",
       "s3.endpoint": "http://minio:9000",
       "aws.access.key.id": "minio-accees-key-id",
@@ -15,7 +16,11 @@
       "storage.class": "io.confluent.connect.s3.storage.S3Storage",
       "format.class": "io.confluent.connect.s3.format.json.JsonFormat",
       "schema.compatibility": "NONE",
-      "s3.path.style.access": "true"
+      "s3.path.style.access": "true",
+      "partitioner.class": "io.confluent.connect.storage.partitioner.FieldPartitioner",
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "value.converter.schemas.enable": "true",
+      "key.converter": "org.apache.kafka.connect.storage.StringConverter"
     }
   }
   
