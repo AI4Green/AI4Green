@@ -21,6 +21,7 @@ async function showSummary(mode) {
   let massUnit = $("#js-mass-unit").val();
   let solventVolumeUnit = $("#js-solvent-volume-unit").val();
   let productMassUnit = $("#js-product-mass-unit").val();
+  let review = $("#js-review").val();
   let reactantID,
     reactantMolecularWeightID,
     reagentMolecularWeightID,
@@ -381,6 +382,7 @@ async function showSummary(mode) {
       demo: demo,
       tutorial: tutorial,
       reactionID: reactionID,
+      review: review,
     },
     dataType: "json",
     success: async function (response) {

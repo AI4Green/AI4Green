@@ -215,6 +215,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(save_reaction_bp)
 
+    from sources.blueprints.reaction_approval import reaction_approval_bp
+
+    app.register_blueprint(reaction_approval_bp, url_prefix="/reaction_approval")
+
     from sources.blueprints.reset_password import reset_password_bp
 
     app.register_blueprint(reset_password_bp)
