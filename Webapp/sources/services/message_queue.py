@@ -1,11 +1,11 @@
 import json
 from typing import Any, Optional
+
 from flask import current_app
 from kafka import KafkaProducer
 
 
 class BaseQueueProducer:
-
     def send(self, topic: Optional[str] = None, msg: Optional[Any] = None):
         """Send a message to the message queue with the given topic.
 

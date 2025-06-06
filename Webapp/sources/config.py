@@ -7,8 +7,8 @@ import os
 
 from dotenv import load_dotenv
 from sources.services.controlled_substances import (
-    uk_arms_embargoes,
     controlled_substance_inchi,
+    uk_arms_embargoes,
 )
 
 load_dotenv()

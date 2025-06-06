@@ -192,15 +192,31 @@ def add_remove_user_from_workbook(
         .first()
     )
     wb = db.session.query(models.WorkBook).get(workbook)
+    workgroup = db.session.query(models.WorkGroup).filter_by(name=workgroup).first()
     if mode == "remove":
         # remove user
         user.workbook_user.remove(wb)
         db.session.commit()
+        # record access change
+        message = services.data_access_history.DataAccessMessage(
+            user.id,
+            workgroup.id,
+            "Access",
+            "No Access",
+            datetime.now().strftime("%Y-%m-%d"),
+            wb.id,
+        )
+        services.data_access_history.send_message(message)
         return jsonify({"feedback": "This user has been removed from the workbook!"})
     else:
         # add user
         user.workbook_user.append(wb)
         db.session.commit()
+        # record access change
+        message = services.data_access_history.DataAccessMessage(
+            user.id, workgroup.id, "No Access", "Access", wb.id
+        )
+        services.data_access_history.send_message(message)
         return jsonify({"feedback": "This user has been added to this workbook!"})
 
 
