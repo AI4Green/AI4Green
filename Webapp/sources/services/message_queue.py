@@ -3,6 +3,7 @@ from typing import Any, Optional
 import time
 from collections import defaultdict
 
+from sources import services
 from flask import current_app
 from kafka import KafkaProducer, KafkaConsumer
 
@@ -88,6 +89,7 @@ class QueueConsumer:  # TODO: implement base class for ci/cd
 
     def poll_and_process(self, poll_duration_sec=10):  # TODO: adjust poll duration
         """Poll messages from topics and process them.
+        Returns compressed messages to kafka reaction_editing_history_compressed topic.
 
         Args:
             poll_duration_sec (int): Length of time to poll kafka for, in seconds
@@ -104,21 +106,19 @@ class QueueConsumer:  # TODO: implement base class for ci/cd
 
         print(f"Collected {len(messages)} messages.")
 
-        # compress messages and send to storage
-        processed_messages = process_batch(messages)
-        if processed_messages:
-            store_batch(processed_messages)
+        # compress messages and send back to kafka
+        process_batch(messages)
 
 
 def process_batch(messages):
     """Process a batch of kafka message to find net change in change_details dict.
+    Returns compressed messages to kafka reaction_editing_history_compressed topic.
     Args:
         messages (list): list of json messages from kafka consumer
     """
     print(f"Processing {len(messages)} messages...")
 
     message_dicts = [json.loads(msg) for msg in messages]
-    print(message_dicts)
 
     # group messages by (reaction, field_name, person)
     grouped = defaultdict(list)
@@ -127,7 +127,6 @@ def process_batch(messages):
         grouped[key].append(item)
 
     # Merge diffs within each group
-    merged_results = []
     for key, messages in grouped.items():
         reaction, field_name, person = key
 
@@ -141,28 +140,22 @@ def process_batch(messages):
         if len(change_details_list) > 1:
             for diff in change_details_list[1:]:
                 change_details_merged = merge_diffs(change_details_merged, diff)
-        print(change_details_merged)
+
         if not change_details_merged:  # no net change
-            return {}
+            continue
 
         # put results in original message format
-        results_dict = {
-            "person": person,
-            "workbook": messages[0]["workbook"],
-            "reaction": reaction,
-            "field_name": field_name,
-            "change_details": change_details_merged,
-            "date": messages[0]["date"],  # TODO: put in class format?
-        }
+        message = services.reaction_editing_history.ReactionEditMessage(
+            person,
+            messages[0]["workbook"],
+            reaction,
+            field_name,
+            change_details_merged,
+            messages[0]["date"]
+        )
 
-        merged_results.append(results_dict)
-
-    return merged_results
-
-
-def store_batch(messages):
-    """Send the processed list of messages to storage"""
-    return
+        # send back to kafka
+        services.reaction_editing_history.send(message, topic="reaction_editing_history_compressed")
 
 
 def merge_diffs(diff1, diff2):
