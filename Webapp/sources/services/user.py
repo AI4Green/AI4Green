@@ -21,16 +21,6 @@ def list_all() -> List[models.User]:
     )
 
 
-def person_from_current_user() -> models.Person:
-    """Returns the Person entry in the database Table corresponding to the email of the current user"""
-    return (
-        db.session.query(models.Person)
-        .join(models.User)
-        .filter(models.User.email == current_user.email)
-        .first()
-    )
-
-
 def add(
     username: str, email: str, fullname: str, password_data: str, person: models.Person
 ):

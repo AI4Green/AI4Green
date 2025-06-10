@@ -7,8 +7,8 @@ import os
 
 from dotenv import load_dotenv
 from sources.services.controlled_substances import (
-    uk_arms_embargoes,
     controlled_substance_inchi,
+    uk_arms_embargoes,
 )
 
 load_dotenv()
@@ -153,6 +153,12 @@ class BaseConfig(object):  # class to store configuration variables
             "redirect_uris": str.split(os.getenv("OIDC_REDIRECT_URIS", ""), ","),
         }
     }
+
+    MESSAGE_QUEUE_CONFIG = {
+        "hostname": os.getenv("MESSAGE_QUEUE_HOSTNAME", "localhost:9092")
+    }
+
+    USE_KAFKA = bool(os.getenv("USE_KAFKA", False))
 
 
 class TestConfig(BaseConfig):
