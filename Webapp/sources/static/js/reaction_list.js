@@ -155,81 +155,87 @@ function newSetCreate() {
   let setName = $("#new-reaction-set-name").val();
   let setID = $("#new-reaction-set-id-input").val();
   let reactorDimensions = getReactorDimensions();
+  console.log(reactorDimensions);
 
-  if (reactorType === "carousel")
-    fetch("/new_reaction_set", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify({
-        workgroup: workgroup,
-        workbook: workbook,
-        setName: setName,
-        setID: setID,
-      }),
+  fetch("/new_reaction_set", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      workgroup,
+      workbook,
+      setName,
+      setID,
+      reactorDimensions,
+    }),
+  })
+    .then(function (response) {
+      return response.json();
     })
-      .then(function (response) {
-        return response.json();
-      })
 
-      .then(function (data) {
-        // logic to redirect to reactionset?
-      });
+    .then(function (data) {
+      if (data.feedback === "Set Created!") {
+        window.location.href = `/reaction_set/${workgroup}/${workbook}/${setName}`;
+      }
+    });
+}
+
+function getCarouselDimensions(reactorType) {
+  let numberOfReactions = parseInt($("#new-reaction-count").val(), 10);
+  // if numberOfReactions is Nan return null else return dimensions
+  return isNaN(numberOfReactions)
+    ? null
+    : {
+        reactorType,
+        numberOfReactions,
+      };
+}
+
+function getWellPlateDimensions(reactorType) {
+  const selected = $('input[name="well-plate-option"]:checked')[0];
+  if (!selected) return null;
+
+  const format = selected.value;
+
+  if (format === "custom") {
+    const rows = parseInt($("#custom-rows").val(), 10);
+    const columns = parseInt($("#custom-columns").val(), 10);
+    return isNaN(rows) || isNaN(columns)
+      ? null
+      : {
+          reactorType,
+          rows,
+          columns,
+        };
+  }
+
+  // Predefined format: for pre defined plate sizes
+  const formatMap = {
+    96: { rows: 8, columns: 12 },
+    48: { rows: 6, columns: 8 },
+    24: { rows: 4, columns: 6 },
+  };
+
+  const dims = formatMap[parseInt(format, 10)];
+  return dims
+    ? {
+        reactorType,
+        ...dims,
+      }
+    : null;
 }
 
 function getReactorDimensions() {
   const reactorType = $("#reactor-type").val();
 
   if (reactorType === "carousel") {
-    let count = parseInt($("#new-reaction-count").val(), 10);
-    return isNaN(count)
-      ? null
-      : {
-          reactorType: reactorType,
-          numberOfReactions: count,
-        };
+    return getCarouselDimensions(reactorType);
   }
 
   if (reactorType === "well-plate") {
-    const selected = document.querySelector(
-      'input[name="well-plate-option"]:checked',
-    );
-    if (!selected) return null;
-
-    const format = selected.value;
-
-    if (format === "custom") {
-      const rows = parseInt(document.getElementById("custom-rows").value, 10);
-      const columns = parseInt(
-        document.getElementById("custom-columns").value,
-        10,
-      );
-      return isNaN(rows) || isNaN(columns)
-        ? null
-        : {
-            reactorType,
-            rows,
-            columns,
-          };
-    }
-
-    // Predefined format: return rows/columns directly
-    const formatMap = {
-      96: { rows: 8, columns: 12 },
-      48: { rows: 6, columns: 8 },
-      24: { rows: 4, columns: 6 },
-    };
-
-    const dims = formatMap[parseInt(format, 10)];
-    return dims
-      ? {
-          reactorType,
-          ...dims,
-        }
-      : null;
+    return getWellPlateDimensions(reactorType);
   }
-
   return null;
 }
 
