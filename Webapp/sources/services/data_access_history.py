@@ -3,9 +3,11 @@ from typing import Optional
 
 from flask import current_app, json
 
+from sources.services.message_queue import MessageSerialiserMixin
+
 
 @dataclass
-class DataAccessMessage:
+class DataAccessMessage(MessageSerialiserMixin):
     """Class for creating a kafka message for the data_access_history topic"""
 
     person: int
@@ -14,6 +16,23 @@ class DataAccessMessage:
     new_role: str
     date: str
     workbook: Optional[int] = None
+
+    def serialise(self):
+        schema = {
+            "type": "struct",
+            "optional": False,
+            "fields": [
+                {"field": "person", "type": "int32"},
+                {"field": "workgroup", "type": "int32"},
+                {"field": "old_role", "type": "string"},
+                {"field": "new_role", "type": "string"},
+                {"field": "date", "type": "string"},
+                {"field": "workbook", "type": "int32", "optional": True},
+            ],
+        }
+        payload = asdict(self)
+        serialised = json.dumps({"schema": schema, "payload": payload})
+        return serialised
 
 
 def send_message(message: DataAccessMessage):
