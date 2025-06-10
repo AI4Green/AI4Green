@@ -11,6 +11,7 @@ class ReactionEditMessage(MessageSerialiserMixin):
     """Class for creating a kafka message for the reaction_editing_history topic"""
 
     person: int
+    workgroup: int
     workbook: int
     reaction: int
     field_name: str
@@ -63,10 +64,11 @@ def add_new_reaction(person, workbook, reaction_id, reaction_name):
     reaction = services.reaction.get_from_reaction_id_and_workbook_id(
         reaction_id, workbook.id
     )
-    change_details = {"reaction_name": reaction_name}  # TODO: come back to this
+    change_details = {"reaction_name": reaction_name}
 
     message = ReactionEditMessage(
         person=person.id,
+        workgroup=workbook.group,
         workbook=workbook.id,
         reaction=reaction.id,
         field_name="New Reaction",
@@ -82,6 +84,7 @@ def edit_reaction(person, reaction, old_reaction_details, new_reaction_details):
     if diff:
         message = ReactionEditMessage(
             person=person.id,
+            workgroup=reaction.workbook.group,
             workbook=reaction.workbook.id,
             reaction=reaction.id,
             field_name="Edited Reaction",
@@ -104,6 +107,7 @@ def autosave_reaction(person, reaction, old_reaction_details):
     if diff:
         message = ReactionEditMessage(
             person=person.id,
+            workgroup=reaction.workbook.group,
             workbook=reaction.workbook.id,
             reaction=reaction.id,
             field_name="Edited Reaction",
@@ -125,6 +129,7 @@ def clone_reaction(person, workbook, new_reaction, old_reaction):
 
     message = ReactionEditMessage(
         person=person.id,
+        workgroup=workbook.group,
         workbook=workbook.id,
         reaction=old_reaction.id,
         field_name="Cloned Reaction",
@@ -138,6 +143,7 @@ def delete_reaction(reaction):
     """Record that a reaction was deleted"""
     message = ReactionEditMessage(
         person=reaction.creator_person.id,
+        workgroup=reaction.workbook.group,
         workbook=reaction.workbook.id,
         reaction=reaction.id,
         field_name="Deleted Reaction",
@@ -152,6 +158,7 @@ def upload_file(person, reaction, file_names):
     change_details = {"file_names": file_names}
     message = ReactionEditMessage(
         person=person.id,
+        workgroup=reaction.workbook.group,
         workbook=reaction.workbook.id,
         reaction=reaction.id,
         field_name="Uploaded Files",
@@ -166,6 +173,7 @@ def delete_file(person, reaction, file_name):
     change_details = {"file_names": file_name}
     message = ReactionEditMessage(
         person=person.id,
+        workgroup=reaction.workbook.group,
         workbook=reaction.workbook.id,
         reaction=reaction.id,
         field_name="Deleted Files",
