@@ -62,3 +62,19 @@ class LoggingQueueProducer(BaseQueueProducer):
             msg (Any, optional): The message to send to the queue. Defaults to None.
         """
         current_app.logger.info(msg=msg)
+
+
+class MessageSerialiserMixin:
+    def serialise(self) -> dict:
+        """Convert a message into a JSON object with a schema and payload.
+
+        The schema is an object that lists the fields and their types.
+        The payload is an object representing the message class in JSON format.
+
+        Raises:
+            NotImplementedError: You must implement this method in classes that implement this mixin.
+
+        Returns:
+            dict: The message class formated with shcema and payload.
+        """
+        raise NotImplementedError
