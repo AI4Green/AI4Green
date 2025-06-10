@@ -158,7 +158,7 @@ class BaseConfig(object):  # class to store configuration variables
         "hostname": os.getenv("MESSAGE_QUEUE_HOSTNAME", "localhost:9092")
     }
 
-    USE_KAFKA = bool(os.getenv("USE_KAFKA", False))
+    USE_KAFKA = bool(int(os.getenv("USE_KAFKA", False)))
 
 
 class TestConfig(BaseConfig):
