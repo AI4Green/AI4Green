@@ -2,11 +2,12 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 
 from flask import current_app, json
+from sources.services.message_queue import MessageSerialiserMixin
 from sources import services
 
 
 @dataclass
-class ReactionEditMessage:
+class ReactionEditMessage(MessageSerialiserMixin):
     """Class for creating a kafka message for the reaction_editing_history topic"""
 
     person: int
@@ -16,6 +17,28 @@ class ReactionEditMessage:
     change_details: dict
     date: str
 
+    def serialise(self):
+        schema = {
+            "type": "struct",
+            "optional": False,
+            "fields": [
+                {"field": "person", "type": "int32"},
+                {"field": "workbook", "type": "int32"},
+                {"field": "reaction", "type": "int32"},
+                {"field": "field_name", "type": "string"},
+                {
+                    "field": "change_details",
+                    "type": "map",
+                    "keys": "string",
+                    "values": "string",
+                },
+                {"field": "date", "type": "string"},
+            ],
+        }
+        payload = asdict(self)
+        serialised = json.dumps({"schema": schema, "payload": payload})
+        return serialised
+
 
 def send_message(message: ReactionEditMessage):
     """Send a message to the kafka producer in the reaction_editing_history topic.
@@ -23,7 +46,7 @@ def send_message(message: ReactionEditMessage):
         message (ReactionEditMessage): The message to send to the queue in the ReactionEditMessage format
     """
     producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    producer.send("reaction_editing_history", json.dumps(asdict(message)))
+    producer.send("reaction_editing_history", message.serialise())
 
 
 def add_new_reaction(person, workbook, reaction_id, reaction_name):
