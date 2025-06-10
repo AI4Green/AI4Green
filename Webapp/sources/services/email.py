@@ -4,7 +4,6 @@ from typing import Dict, Optional, Tuple, Union
 import jwt
 from flask import current_app, render_template
 from flask_login import current_user
-from qrcode import QRCode
 from sources import models, services
 from sources.extensions import mail
 
