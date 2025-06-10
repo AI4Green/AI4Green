@@ -152,6 +152,7 @@ def process_batch(messages, producer):
         # put results in original message format
         message = services.reaction_editing_history.ReactionEditMessage(
             person,
+            messages[0]["workgroup"],
             messages[0]["workbook"],
             reaction,
             field_name,
