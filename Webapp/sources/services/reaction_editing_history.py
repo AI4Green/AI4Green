@@ -32,6 +32,7 @@ class ReactionEditMessage(MessageSerialiserMixin):
             "optional": False,
             "fields": [
                 {"field": "person", "type": "int32"},
+                {"field": "workgroup", "type": "int32"},
                 {"field": "workbook", "type": "int32"},
                 {"field": "reaction", "type": "int32"},
                 {"field": "field_name", "type": "string"},
