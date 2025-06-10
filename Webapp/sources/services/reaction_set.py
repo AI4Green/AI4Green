@@ -1,4 +1,5 @@
-from typing import List
+import json
+from typing import Dict, List, Union
 
 from sources import models, services
 from sources.extensions import db
@@ -10,6 +11,7 @@ def add(
     creator: models.Person,
     workbook: models.WorkBook,
     reactions: List[models.Reaction],
+    reactor_dimensions: Dict[str, Union[int, str]],
 ):
     reaction_set = models.ReactionSet(
         name=name,
@@ -19,6 +21,7 @@ def add(
         status="active",
         complete="not complete",
         reactions=reactions,
+        reactor_dimensions=json.dumps(reactor_dimensions),
     )
     db.session.add(reaction_set)
     db.session.commit()

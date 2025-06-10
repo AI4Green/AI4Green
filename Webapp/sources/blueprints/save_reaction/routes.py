@@ -57,7 +57,7 @@ def new_reaction() -> Response:
     if b"This reaction name is unique" in name_check.data:
         # make the reaction table dict with units set to default values
         reaction_table = services.reaction.empty_reaction_table()
-        summary_table = services.summary.empty_summary_table
+        summary_table = services.summary.empty_summary_table()
         # add reaction to database
         services.reaction.add(
             reaction_name,
