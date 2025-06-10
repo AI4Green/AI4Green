@@ -44,7 +44,7 @@ class ReactionSet(Model):
     time_of_update = db.Column(db.DateTime)
     date = db.Column(db.DateTime)
 
-    reactor_type = db.Column(db.Text, nullable=False)
+    reactor_dimensions = db.Column(db.JSON, nullable=False)
 
     workbook_id = db.Column(
         db.ForeignKey("WorkBook.id", ondelete="CASCADE"), nullable=False

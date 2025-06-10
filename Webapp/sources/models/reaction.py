@@ -103,7 +103,9 @@ class Reaction(Model):
     )
 
     reaction_set_id = db.Column(
-        db.Integer, db.ForeignKey("ReactionSet.id"), nullable=True
+        db.Integer,
+        db.ForeignKey("ReactionSet.id", name="fk_reaction_reaction_set_id"),
+        nullable=True,
     )
 
     reaction_set = db.relationship("ReactionSet", back_populates="reactions")
