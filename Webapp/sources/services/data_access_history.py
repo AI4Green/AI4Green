@@ -18,6 +18,14 @@ class DataAccessMessage(MessageSerialiserMixin):
     workbook: Optional[int] = None
 
     def serialise(self):
+        """Convert a message into a JSON object with a schema and payload.
+
+        The schema is an object that lists the fields and their types.
+        The payload is an object representing the message class in JSON format.
+
+        Returns:
+            str: The message class formated with shcema and payload.
+        """
         schema = {
             "type": "struct",
             "optional": False,
