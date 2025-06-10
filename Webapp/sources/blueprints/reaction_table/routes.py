@@ -124,13 +124,16 @@ def process():
             reactant_mol_wt = services.all_compounds.mol_weight_from_smiles(
                 reactant_smiles
             )
+            if polymer:
+                reactant_mol_wt = json.dumps(reactant_mol_wt)
+                reactant_smiles = json.dumps(reactant_smiles)
             novel_reactant_html = render_template(
                 "reactions/_novel_compound.html",
                 component="Reactant",
                 name=reactant_name,
                 number=idx,
-                mw=json.dumps(reactant_mol_wt),
-                smiles=json.dumps(reactant_smiles),
+                mw=reactant_mol_wt,
+                smiles=reactant_smiles,
                 polymer=polymer,
             )
             return jsonify(
@@ -176,13 +179,16 @@ def process():
             product_mol_wt = services.all_compounds.mol_weight_from_smiles(
                 product_smiles
             )
+            if polymer:
+                product_mol_wt = json.dumps(product_mol_wt)
+                product_smiles = json.dumps(product_smiles)
             novel_product_html = render_template(
                 "reactions/_novel_compound.html",
                 component="Product",
                 name=product_name,
                 number=idx,
-                mw=json.dumps(product_mol_wt),
-                smiles=json.dumps(product_smiles),
+                mw=product_mol_wt,
+                smiles=product_smiles,
                 polymer=polymer,
             )
             return jsonify({"reactionTable": novel_product_html, "novelCompound": True})
