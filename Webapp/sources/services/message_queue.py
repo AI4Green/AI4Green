@@ -1,11 +1,12 @@
 import json
-from typing import Any, Optional
 import time
 from collections import defaultdict
+from dataclasses import asdict
+from typing import Any, Optional
 
-from sources import services
 from flask import current_app
-from kafka import KafkaProducer, KafkaConsumer
+from kafka import KafkaConsumer, KafkaProducer
+from sources import services
 
 
 class BaseQueueProducer:
@@ -86,6 +87,9 @@ class QueueConsumer:  # TODO: implement base class for ci/cd
             enable_auto_commit=True,
         )
         self.topic = topic
+        self.producer = QueueProducer(
+            hostname=hostname,
+        )
 
     def poll_and_process(self, poll_duration_sec=10):  # TODO: adjust poll duration
         """Poll messages from topics and process them.
@@ -94,7 +98,7 @@ class QueueConsumer:  # TODO: implement base class for ci/cd
         Args:
             poll_duration_sec (int): Length of time to poll kafka for, in seconds
         """
-        print(f"Polling messages from topics: {self.topic}")
+        print(f"Polling messages from topic: {self.topic}")
         messages = []
 
         end_time = time.time() + poll_duration_sec
@@ -107,14 +111,15 @@ class QueueConsumer:  # TODO: implement base class for ci/cd
         print(f"Collected {len(messages)} messages.")
 
         # compress messages and send back to kafka
-        process_batch(messages)
+        process_batch(messages, self.producer)
 
 
-def process_batch(messages):
+def process_batch(messages, producer):
     """Process a batch of kafka message to find net change in change_details dict.
     Returns compressed messages to kafka reaction_editing_history_compressed topic.
     Args:
         messages (list): list of json messages from kafka consumer
+        producer (QueueProducer): the kafka producer
     """
     print(f"Processing {len(messages)} messages...")
 
@@ -151,11 +156,13 @@ def process_batch(messages):
             reaction,
             field_name,
             change_details_merged,
-            messages[0]["date"]
+            messages[0]["date"],
         )
 
         # send back to kafka
-        services.reaction_editing_history.send(message, topic="reaction_editing_history_compressed")
+        producer.send(
+            "reaction_editing_history_compressed", json.dumps(asdict(message))
+        )
 
 
 def merge_diffs(diff1, diff2):

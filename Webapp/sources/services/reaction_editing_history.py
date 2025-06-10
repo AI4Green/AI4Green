@@ -17,14 +17,13 @@ class ReactionEditMessage:
     date: str
 
 
-def send_message(message: ReactionEditMessage, topic: str = "reaction_editing_history"):
+def send_message(message: ReactionEditMessage):
     """Send a message to the kafka producer in the reaction_editing_history topic.
     Args:
         message (ReactionEditMessage): The message to send to the queue in the ReactionEditMessage format
-        topic (str): The name of the kafka topic to send to. Defaults to "reaction_editing_history".
     """
     producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    producer.send(topic, json.dumps(asdict(message)))
+    producer.send("reaction_editing_history", json.dumps(asdict(message)))
 
 
 def add_new_reaction(person, workbook, reaction_id, reaction_name):
