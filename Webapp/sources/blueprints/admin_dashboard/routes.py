@@ -147,7 +147,7 @@ def handle_new_workgroup_request(
                 wg_request="",
             )
             db.session.add(notification)
-            services.email.send_notification(new_workgroup_request.pi)
+            services.email_services.send_notification(new_workgroup_request.pi)
             message = "This request has been denied and workgroup removed"
             db.session.delete(approval_workgroup)
         if decision == "approve":
@@ -180,7 +180,7 @@ def handle_new_workgroup_request(
                     wg_request="",
                 )
                 db.session.add(notification)
-                services.email.send_notification(new_workgroup_request.pi)
+                services.email_services.send_notification(new_workgroup_request.pi)
                 # update the workgroup approval status and flash message
                 approval_workgroup.approved = True
                 message = "This request has been approved"

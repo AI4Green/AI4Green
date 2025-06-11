@@ -478,7 +478,7 @@ class ReactionApprovalRequestSubmission:
                 time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
                 status="active",
             )
-            services.email.send_reaction_approval_request(
+            services.email_services.send_reaction_approval_request(
                 principal_investigator.user,
                 self.reaction_approval_request,
                 self.workgroup,
@@ -632,7 +632,7 @@ class ReactionApprovalRequestResponse:
             time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
             status="active",
         )
-        services.email.send_reaction_approval_response(
+        services.email_services.send_reaction_approval_response(
             user=self.reaction_approval_request.requestor_person.user,
             reaction_approval_request=self.reaction_approval_request,
         )

@@ -157,7 +157,9 @@ def detect_usage_in_embargoed_country(
         None
     """
     if location["country"] in current_app.config["EMBARGOED_COUNTRIES"]:
-        services.email.send_controlled_substance_alert(inchi, location, reaction)
+        services.email_services.send_controlled_substance_alert(
+            inchi, location, reaction
+        )
 
 
 def list_all() -> List[models.ControlledSubstanceUsage]:

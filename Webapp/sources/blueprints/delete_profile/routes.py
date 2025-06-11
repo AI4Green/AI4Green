@@ -106,7 +106,7 @@ def confirm_delete_profile() -> Response:
                         status="active",
                     )
                     db.session.add(notification)
-                    services.email.send_notification(admin)
+                    services.email_services.send_notification(admin)
                 # archive workgroup by removing all members
                 for p in wg.senior_researcher:
                     p.workgroup_senior_researcher.remove(wg)
