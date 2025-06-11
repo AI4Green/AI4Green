@@ -79,7 +79,7 @@ def join_workgroup(workgroup=None) -> Response:
             wb="",
             wg_request="",
         )
-        services.email.send_notification(pi)
+        services.email_services.send_notification(pi)
         db.session.add(notification)
         db.session.commit()  # Have to commit to get the id for notification
         wg_request = models.WGStatusRequest(

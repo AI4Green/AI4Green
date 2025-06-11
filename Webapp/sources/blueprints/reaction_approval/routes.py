@@ -73,7 +73,7 @@ def request_response(token: str) -> Response:
         flask.Response: A rendered template for the reaction review, or a redirect with a flash message
         depending on authorization and approval request status.
     """
-    result = services.email.verify_reaction_approval_request_token(token)
+    result = services.email_services.verify_reaction_approval_request_token(token)
 
     if result is None:
         flash("This link has expired or is invalid.")
