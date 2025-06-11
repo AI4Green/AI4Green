@@ -1,18 +1,15 @@
 // Initialize the page with the correct reactor type settings
 window.onload = function () {
-  initialiseReactors(); // Ensure the page is loaded with the correct display settings
+  let reactorDimensions = JSON.parse($("#js-reactor-dimensions").val());
+  initialiseReactors(reactorDimensions); // Ensure the page is loaded with the correct display settings
 };
 
 observer();
 
-function initialiseReactors() {
-  // include additional logic for handling reactor shape
-  let numberOfReactions = $("#js-number-of-reactions").val();
+function initialiseReactors(reactorDimensions) {
   let reactionSet = JSON.parse($("#js-reaction-set").val());
-  console.log(reactionSet);
-  let reactorType = $("#js-reactor-type").val();
-  $("#carousel-reactions").val(numberOfReactions);
-  updateReactorType();
+
+  updateReactorType(reactorDimensions);
   createCarousel();
   assignReactions(reactionSet.reactions);
   // focus first well
@@ -53,17 +50,17 @@ function assignReactions(reactions) {
   });
 }
 
-function createGrid() {
-  const cols = document.getElementById("column-size").value;
-  const rows = document.getElementById("row-size").value;
+function createGrid(numCols, numRows) {
+  // const cols = document.getElementById("column-size").value;
+  // const rows = document.getElementById("row-size").value;
   const grid = document.getElementById("grid");
   const sidePanel = document.getElementById("side-panel");
   grid.innerHTML = ""; // Clear existing grid
-  grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  grid.style.gridTemplateRows = `repeat(${numRows}, 1fr)`;
+  grid.style.gridTemplateColumns = `repeat(${numCols}, 1fr)`;
 
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
+  for (let row = 0; row < numRows; row++) {
+    for (let col = 0; col < numCols; col++) {
       const circle = document.createElement("div");
       circle.className = "btn icon";
       circle.style.width = "30px";
@@ -154,23 +151,22 @@ function getCarouselDimensions() {
   return { centerX: centerX, centerY: centerY, radius: radius };
 }
 
-function updateReactorType() {
-  let reactorType = $("#js-reactor-type").val(); // Get selected reactor type
-  console.log(reactorType);
-
+function updateReactorType(reactorDimensions) {
   // Get references to selectors and reactor containers
   const wellplateContainer = document.getElementById("wellplate-selector");
   const carouselContainer = document.getElementById("carousel-selector");
   const multiwellReactor = document.getElementById("wellplate-container");
   const carouselReactor = document.getElementById("carousel-container");
-
-  if (reactorType === "well_plate") {
+  let reactorType = reactorDimensions["reactorType"];
+  if (reactorType === "well-plate") {
     // Show multiwell setup and reactor, hide carousel
     wellplateContainer.style.display = "block";
     multiwellReactor.style.display = "block";
 
     carouselContainer.style.display = "none";
     carouselReactor.style.display = "none";
+    console.log(reactorDimensions);
+    createGrid(reactorDimensions["columns"], reactorDimensions["rows"]);
   } else if (reactorType === "carousel") {
     // Show carousel setup and reactor, hide multiwell
     carouselContainer.style.display = "block";

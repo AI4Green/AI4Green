@@ -29,7 +29,7 @@ def reaction_set(set_name, workgroup_name, workbook_name):
         number_of_reactions=len(r_set.reactions),
         workgroup_name=workgroup_name,
         workbook_name=workbook_name,
-        reactor_type=r_set.reactor_dimensions,
+        reactor_dimensions=r_set.reactor_dimensions,
     )
 
 
