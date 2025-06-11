@@ -36,16 +36,12 @@ class ReactionEditMessage(MessageSerialiserMixin):
                 {"field": "workbook", "type": "int32"},
                 {"field": "reaction", "type": "int32"},
                 {"field": "field_name", "type": "string"},
-                {
-                    "field": "change_details",
-                    "type": "map",
-                    "keys": "string",
-                    "values": "string",
-                },
+                {"field": "change_details", "type": "string"},
                 {"field": "date", "type": "string"},
             ],
         }
         payload = asdict(self)
+        payload["change_details"] = json.dumps(payload["change_details"])
         serialised = {"schema": schema, "payload": payload}
         return serialised
 
