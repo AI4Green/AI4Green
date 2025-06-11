@@ -24,7 +24,7 @@ class DataAccessMessage(MessageSerialiserMixin):
         The payload is an object representing the message class in JSON format.
 
         Returns:
-            str: The message class formated with shcema and payload.
+            dict: The message class formated with shcema and payload.
         """
         schema = {
             "type": "struct",

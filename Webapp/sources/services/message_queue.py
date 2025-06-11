@@ -65,7 +65,7 @@ class LoggingQueueProducer(BaseQueueProducer):
 
 
 class MessageSerialiserMixin:
-    def serialise(self) -> str:
+    def serialise(self) -> dict:
         """Convert a message into a JSON object with a schema and payload.
 
         The schema is an object that lists the fields and their types.
@@ -75,6 +75,6 @@ class MessageSerialiserMixin:
             NotImplementedError: You must implement this method in classes that implement this mixin.
 
         Returns:
-            str: The message class formated with shcema and payload.
+            dict: The message class formated with shcema and payload.
         """
         raise NotImplementedError

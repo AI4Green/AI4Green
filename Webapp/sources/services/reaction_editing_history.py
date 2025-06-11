@@ -46,7 +46,7 @@ class ReactionEditMessage(MessageSerialiserMixin):
             ],
         }
         payload = asdict(self)
-        serialised = json.dumps({"schema": schema, "payload": payload})
+        serialised = {"schema": schema, "payload": payload}
         return serialised
 
 
