@@ -42,6 +42,20 @@ class DataAccessMessage(MessageSerdeMixin):
         serialised = json.dumps({"schema": schema, "payload": payload})
         return serialised
 
+    @staticmethod
+    def deserialise(data):
+        """Convert a message from a JSON object to a message object.
+
+        The message object is a class decorated with `@dataclass`.
+
+        Args:
+            data (dict): The JSON to decode.
+
+        Returns:
+            DataAccessMessage: The `DataAccessMessage` from the JSON.
+        """
+        return DataAccessMessage(**data)
+
 
 def send_message(message: DataAccessMessage):
     """Send a message to the kafka producer in the data_access_history topic.
