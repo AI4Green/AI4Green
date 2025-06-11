@@ -64,7 +64,7 @@ class LoggingQueueProducer(BaseQueueProducer):
         current_app.logger.info(msg=msg)
 
 
-class MessageSerialiserMixin:
+class MessageSerdeMixin:
     def serialise(self) -> dict:
         """Convert a message into a JSON object with a schema and payload.
 

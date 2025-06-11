@@ -3,11 +3,11 @@ from typing import Optional
 
 from flask import current_app, json
 
-from sources.services.message_queue import MessageSerialiserMixin
+from sources.services.message_queue import MessageSerdeMixin
 
 
 @dataclass
-class DataAccessMessage(MessageSerialiserMixin):
+class DataAccessMessage(MessageSerdeMixin):
     """Class for creating a kafka message for the data_access_history topic"""
 
     person: int

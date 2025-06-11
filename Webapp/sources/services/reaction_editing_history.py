@@ -2,12 +2,12 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 
 from flask import current_app, json
-from sources.services.message_queue import MessageSerialiserMixin
+from sources.services.message_queue import MessageSerdeMixin
 from sources import services
 
 
 @dataclass
-class ReactionEditMessage(MessageSerialiserMixin):
+class ReactionEditMessage(MessageSerdeMixin):
     """Class for creating a kafka message for the reaction_editing_history topic"""
 
     person: int
