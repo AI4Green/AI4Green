@@ -45,6 +45,29 @@ class ReactionEditMessage(MessageSerdeMixin):
         serialised = {"schema": schema, "payload": payload}
         return serialised
 
+    @staticmethod
+    def deserialise(data):
+        """Convert a message from a JSON object to a message object.
+
+        The message object is a class decorated with `@dataclass`.
+
+        Args:
+            data (dict): The json to decode.
+
+        Returns:
+            ReactionEditMessage: The `ReactionEditMessage` from the JSON.
+        """
+        change_details = json.loads(data["change_details"])
+        return ReactionEditMessage(
+            person=data["person"],
+            workgroup=data["workgroup"],
+            workbook=data["workbook"],
+            reaction=data["reaction"],
+            field_name=data["field_name"],
+            date=data["date"],
+            change_details=change_details,
+        )
+
 
 def send_message(message: ReactionEditMessage):
     """Send a message to the kafka producer in the reaction_editing_history topic.
