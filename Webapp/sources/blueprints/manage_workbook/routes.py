@@ -281,7 +281,7 @@ def manage_workbook_request(
         )
         db.session.add(notification)
         db.session.commit()
-        services.email.send_notification(person)
+        services.email_services.send_notification(person)
         # feedback return
         return jsonify({"feedback": "This user has not been added to this workbook!"})
     else:
@@ -299,7 +299,7 @@ def manage_workbook_request(
         )
         db.session.add(notification)
         db.session.commit()
-        services.email.send_notification(person)
+        services.email_services.send_notification(person)
         # feedback return
         return jsonify({"feedback": "This user has been added to this workbook!"})
 
@@ -400,7 +400,7 @@ def join_workbook(workgroup: str) -> Response:
                 wb=workbook,
                 wg=workgroup,
             )
-            services.email.send_notification(p)
+            services.email_services.send_notification(p)
             db.session.add(notification)
             db.session.commit()
             wb_request = models.WBStatusRequest(

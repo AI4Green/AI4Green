@@ -20,7 +20,9 @@ def verify_email(token: str) -> Response:
         flask.Response: A redirect to the login page with a success or failure message
 
     """
-    user = services.email.verify_encoded_token(token=token, identifier="verify_email")
+    user = services.email_services.verify_encoded_token(
+        token=token, identifier="verify_email"
+    )
 
     if not user:
         flash(
@@ -57,7 +59,7 @@ def email_verification_request(user_id=None) -> Response:
     else:
         user = services.user.from_id(int(user_id))
 
-    services.email.send_email_verification(user)
+    services.email_services.send_email_verification(user)
     flash("Thank you! An email has been sent to your inbox.")
 
     return redirect(url_for("auth.login"))

@@ -190,7 +190,7 @@ def create_workgroup() -> Response:
             )
             db.session.add(notification)
 
-            services.email.send_notification(admin.Person)
+            services.email_services.send_notification(admin.Person)
         db.session.commit()
 
         # record role change

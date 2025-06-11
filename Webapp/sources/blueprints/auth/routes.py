@@ -85,7 +85,7 @@ def register() -> Response:
         services.user.add(
             form.username.data, form.email.data, fullname, form.password.data, p
         )
-        services.email.send_email_verification(p.user)
+        services.email_services.send_email_verification(p.user)
 
         flash(
             "An email has been sent to your address. Please follow the instructions to verify your account."
@@ -157,7 +157,7 @@ def oidc_callback() -> Response:
             person=person,
         )
         # send verification email
-        services.email.send_email_verification(person.user)
+        services.email_services.send_email_verification(person.user)
         # get the new user
         user = services.user.from_email(user_email=user_info["email"])
 

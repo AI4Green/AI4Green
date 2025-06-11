@@ -6,7 +6,7 @@ from . import (
     controlled_substances,
     data_access_history,
     data_export,
-    email,
+    email_services,
     file_attachments,
     hazard_code,
     interactive,

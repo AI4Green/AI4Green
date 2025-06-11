@@ -28,7 +28,7 @@ def update_email_password() -> Response:
         if request.form.get("ChangeEmail") == "Value1":
             return redirect(url_for("update_email.update_email"))
         elif request.form.get("UpdatePassword") == "Value2":
-            services.email.send_password_reset(user)
+            services.email_services.send_password_reset(user)
             flash(
                 "Please check your email for instructions on how to change your password"
             )
@@ -73,7 +73,7 @@ def update_email() -> Response:
         user.email = form.email.data
         user.is_verified = False
         user.update()
-        services.email.send_email_verification(user)
+        services.email_services.send_email_verification(user)
         # alert user of success and redirect to home
         flash(
             "Your email address has been successfully updated! Please check your inbox for instructions on how to verify this new address!"
