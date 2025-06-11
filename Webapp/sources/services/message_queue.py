@@ -86,7 +86,7 @@ class MessageSerdeMixin:
         The message object is a class decorated with `@dataclass`.
 
         Args:
-            data (dict): The json to decode.
+            data (dict): The JSON to decode.
 
         Raises:
             NotImplementedError: You must implement this method in classes that implement this mixin.

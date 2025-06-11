@@ -52,7 +52,7 @@ class ReactionEditMessage(MessageSerdeMixin):
         The message object is a class decorated with `@dataclass`.
 
         Args:
-            data (dict): The json to decode.
+            data (dict): The JSON to decode.
 
         Returns:
             ReactionEditMessage: The `ReactionEditMessage` from the JSON.
