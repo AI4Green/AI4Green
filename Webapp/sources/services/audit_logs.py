@@ -1,5 +1,25 @@
+import json
+from typing import Any, Callable, List
 from minio import Minio
 from minio.error import S3Error
+
+
+def _extract_logs(logs: list, deserialiser: Callable) -> List[Any]:
+    """Decode the logs from a S3 storage object.
+
+    Args:
+        logs (list): The raw list of logs from the S3 API containing the log records.
+        deserialiser (Callable):
+            The function to deserialise the log records. This should be the `deserialise`
+            static method on a message class with the `MessageSerdeMixin`.
+
+    Returns:
+        List[Any]: The log records.
+    """
+    extracted = []
+    for line in logs:
+        extracted.append(deserialiser(json.loads(line)))
+    return extracted
 
 
 def main():
@@ -24,7 +44,14 @@ def main():
         print("Bucket", bucket_name, "already exists")
 
     # Upload the file, renaming it in the process
-    print(client.list_buckets())
+    objects = list(client.list_objects(bucket_name, recursive=True))
+    response = client.get_object(bucket_name, objects[0].object_name)
+    if response:
+        # print(
+        #     *_extract_logs(response.readlines(), ReactionEditMessage.deserialise),
+        #     sep="\n"
+        # )
+        response.close()
 
 
 if __name__ == "__main__":
