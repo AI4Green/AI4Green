@@ -1,7 +1,9 @@
 from datetime import datetime
+import io
 import json
 import re
 from typing import Any, Callable, List, Optional
+import zipfile
 from flask import current_app
 from minio import Minio
 
@@ -150,3 +152,28 @@ def get_audit_logs(
         response.release_conn()
 
     return logs
+
+
+def make_log_stream(logs: List[Any], file_name: str):
+    """
+    Creates an in-memory ZIP file containing the given JSON data.
+
+    Args:
+        logs: The JSON-serializable data to include in the ZIP.
+        filename: The name of the JSON file inside the ZIP archive.
+
+    Returns:
+        A BytesIO object containing the ZIP file data.
+    """
+    # Prepare in-memory bytes buffer
+    zip_buffer = io.BytesIO()
+
+    # Create a ZIP file in memory
+    with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        # Convert JSON to bytes and write into the ZIP archive
+        json_bytes = json.dumps(logs, indent=2).encode("utf-8")
+        zf.writestr(file_name, json_bytes)
+
+    # Reset the stream's position to the beginning
+    zip_buffer.seek(0)
+    return zip_buffer
