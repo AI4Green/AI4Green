@@ -160,6 +160,12 @@ class BaseConfig(object):  # class to store configuration variables
 
     USE_KAFKA = bool(int(os.getenv("USE_KAFKA", False)))
 
+    MINIO_HOST = os.getenv("MINIO_HOST", "localhost:9000")
+    MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "")
+    MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "")
+    MINIO_SECURE = bool(int(os.getenv("MINIO_SECURE", True)))
+    MINIO_AUDIT_LOG_BUCKET = os.getenv("MINIO_AUDIT_LOG_BUCKET", "kafka-logs")
+
 
 class TestConfig(BaseConfig):
     TESTING = True
