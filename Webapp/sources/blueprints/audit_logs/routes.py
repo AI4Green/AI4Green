@@ -13,7 +13,7 @@ from . import audit_log_bp
 @principal_investigator_required
 def download_audit_logs():
     # get arguments form GET parameters
-    topic = request.args.get("tpic")
+    topic = request.args.get("topic")
     if topic is None:
         return jsonify({"error": "topic is a required field"}), 400
     workgroup = request.args.get("workgroup")
