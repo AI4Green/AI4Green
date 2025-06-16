@@ -13,20 +13,20 @@ from . import audit_log_bp
 @principal_investigator_required
 def download_audit_logs():
     # get arguments form GET parameters
-    topic = request.args.get("workbook")
+    topic = request.args.get("tpic")
     if topic is None:
         return jsonify({"error": "topic is a required field"}), 400
-    workbook = request.args.get("workbook")
+    workgroup = request.args.get("workgroup")
     try:
-        workbook = int(workbook) if workbook is not None else None
+        workgroup = int(workgroup) if workgroup is not None else None
     except (TypeError, ValueError):
-        return jsonify({"error": "workbook must an integer, e.g. 1, 2, 3..."}), 400
+        return jsonify({"error": "workgroup must an integer"}), 400
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
     # retrieve and deserialise the audit logs
     logs = get_audit_logs(
-        topic=topic, workbook=workbook, start_date=start_date, end_date=end_date
+        topic=topic, workgroup=workgroup, start_date=start_date, end_date=end_date
     )
 
     # convert the logs into a ZIP file stream
