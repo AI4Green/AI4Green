@@ -158,12 +158,12 @@ class BaseConfig(object):  # class to store configuration variables
         "hostname": os.getenv("MESSAGE_QUEUE_HOSTNAME", "localhost:9092")
     }
 
-    USE_KAFKA = bool(int(os.getenv("USE_KAFKA", False)))
+    USE_KAFKA = bool(int(os.getenv("USE_KAFKA", 0)))
 
     MINIO_HOST = os.getenv("MINIO_HOST", "localhost:9000")
     MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "")
     MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "")
-    MINIO_SECURE = bool(int(os.getenv("MINIO_SECURE", True)))
+    MINIO_SECURE = bool(int(os.getenv("MINIO_SECURE", 1)))
     MINIO_AUDIT_LOG_BUCKET = os.getenv("MINIO_AUDIT_LOG_BUCKET", "kafka-logs")
 
 
