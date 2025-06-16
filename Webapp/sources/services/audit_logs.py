@@ -93,9 +93,9 @@ def get_audit_logs(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
 ) -> List[Any]:
-    """Get the audit logs for a specific topic. The logs can be filtered by workbook and date.
+    """Get the audit logs for a specific topic. The logs can be filtered by workgroup and date.
 
-    If no workbook is given, logs for all workbooks will be selected.
+    If no workgroup is given, logs for all workgroups will be selected.
 
     If `start_date` and `end_date` are given, only logs between and including thos
     dates will be selected.
