@@ -133,7 +133,7 @@ def get_audit_logs(
     bucket_name = current_app.config["MINIO_AUDIT_LOG_BUCKET"]
 
     # Read all the object info in the bucket under the provided topic
-    # If a workgroup is given, filter by workbook too
+    # If a workgroup is given, filter by workgroup too
     prefix = (
         f"topics/{topic}"
         if workgroup is None
