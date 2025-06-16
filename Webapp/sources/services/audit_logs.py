@@ -89,7 +89,7 @@ def _filter_names_by_date(
 def get_audit_logs(
     topic: str,
     deserialiser: Callable,
-    workbook: Optional[int] = None,
+    workgroup: Optional[int] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
 ) -> List[Any]:
@@ -113,8 +113,8 @@ def get_audit_logs(
         deserialiser (Callable):
             The function to deserialise the log records. This should be the `deserialise`
             static method on a message class with the `MessageSerdeMixin`.
-        workbook (Optional[int], optional):
-            The workbook to get the logs for. Defaults to None.
+        workgroup (Optional[int], optional):
+            The workgroup to get the logs for. Defaults to None.
         start_date (Optional[str], optional):
             Get logs after and including this date. Defaults to None.
         end_date (Optional[str], optional):
@@ -133,9 +133,11 @@ def get_audit_logs(
     bucket_name = current_app.config["MINIO_AUDIT_LOG_BUCKET"]
 
     # Read all the object info in the bucket under the provided topic
-    # If a workbook is given, filter by workbook too
+    # If a workgroup is given, filter by workbook too
     prefix = (
-        f"topics/{topic}" if workbook is None else f"topics/{topic}/workbook={workbook}"
+        f"topics/{topic}"
+        if workgroup is None
+        else f"topics/{topic}/workgroup={workgroup}"
     )
     log_files = list(client.list_objects(bucket_name, recursive=True, prefix=prefix))
     log_file_names = [obj.object_name for obj in log_files]
