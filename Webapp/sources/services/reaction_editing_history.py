@@ -2,11 +2,12 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 
 from flask import current_app, json
+from sources.services.message_queue import MessageSerdeMixin
 from sources import services
 
 
 @dataclass
-class ReactionEditMessage:
+class ReactionEditMessage(MessageSerdeMixin):
     """Class for creating a kafka message for the reaction_editing_history topic"""
 
     person: int
@@ -17,6 +18,56 @@ class ReactionEditMessage:
     change_details: dict
     date: str
 
+    def serialise(self):
+        """Convert a message into a JSON object with a schema and payload.
+
+        The schema is an object that lists the fields and their types.
+        The payload is an object representing the message class in JSON format.
+
+        Returns:
+            str: The message class formated with shcema and payload.
+        """
+        schema = {
+            "type": "struct",
+            "optional": False,
+            "fields": [
+                {"field": "person", "type": "int32"},
+                {"field": "workgroup", "type": "int32"},
+                {"field": "workbook", "type": "int32"},
+                {"field": "reaction", "type": "int32"},
+                {"field": "field_name", "type": "string"},
+                {"field": "change_details", "type": "string"},
+                {"field": "date", "type": "string"},
+            ],
+        }
+        payload = asdict(self)
+        payload["change_details"] = json.dumps(payload["change_details"])
+        serialised = {"schema": schema, "payload": payload}
+        return serialised
+
+    @staticmethod
+    def deserialise(data):
+        """Convert a message from a JSON object to a message object.
+
+        The message object is a class decorated with `@dataclass`.
+
+        Args:
+            data (dict): The JSON to decode.
+
+        Returns:
+            ReactionEditMessage: The `ReactionEditMessage` from the JSON.
+        """
+        change_details = json.loads(data["change_details"])
+        return ReactionEditMessage(
+            person=data["person"],
+            workgroup=data["workgroup"],
+            workbook=data["workbook"],
+            reaction=data["reaction"],
+            field_name=data["field_name"],
+            date=data["date"],
+            change_details=change_details,
+        )
+
 
 def send_message(message: ReactionEditMessage):
     """Send a message to the kafka producer in the reaction_editing_history topic.
@@ -24,7 +75,7 @@ def send_message(message: ReactionEditMessage):
         message (ReactionEditMessage): The message to send to the queue in the ReactionEditMessage format
     """
     producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    producer.send("reaction_editing_history", json.dumps(asdict(message)))
+    producer.send("reaction_editing_history", message.serialise())
 
 
 def add_new_reaction(person, workbook, reaction_id, reaction_name):

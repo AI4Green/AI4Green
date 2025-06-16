@@ -97,7 +97,7 @@ def register_extensions(app: Flask) -> None:
         return models.User.query.get(user_id)
 
     # configure the message queue, e.g. kafka
-    if app.config.get("USE_KAFKA", False):
+    if app.config["USE_KAFKA"]:
         # In production or situations where Kafka is required,
         # use the kafka queue producer.
         # N.B. reuqires the kafka services to be running!
@@ -268,6 +268,10 @@ def register_blueprints(app: Flask) -> None:
     from sources.blueprints.utils import utils_bp
 
     app.register_blueprint(utils_bp)
+
+    from sources.blueprints.audit_logs import audit_log_bp
+
+    app.register_blueprint(audit_log_bp)
 
 
 def inject_session_context(app: Flask) -> Dict[str, str]:
