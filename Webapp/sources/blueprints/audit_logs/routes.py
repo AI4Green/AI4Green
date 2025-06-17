@@ -2,7 +2,11 @@ from datetime import datetime
 from flask import jsonify, request, send_file
 from flask_login import login_required
 
-from sources.services.audit_logs import get_audit_logs, make_log_stream
+from sources.services.audit_logs import (
+    TOPIC_DESERIALISER_MAP,
+    get_audit_logs,
+    make_log_stream,
+)
 from sources.decorators import principal_investigator_required
 
 from . import audit_log_bp
@@ -25,8 +29,15 @@ def download_audit_logs():
     end_date = request.args.get("end_date")
 
     # retrieve and deserialise the audit logs
+    deserialiser = TOPIC_DESERIALISER_MAP.get(topic)
+    if deserialiser is None:
+        return jsonify({"error": "topic not found"}), 400
     logs = get_audit_logs(
-        topic=topic, workgroup=workgroup, start_date=start_date, end_date=end_date
+        topic=topic,
+        deserialiser=deserialiser,
+        workgroup=workgroup,
+        start_date=start_date,
+        end_date=end_date,
     )
 
     # convert the logs into a ZIP file stream
