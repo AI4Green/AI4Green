@@ -12,21 +12,18 @@ from . import workbook
 from . import workgroup
 
 
-def _extract_logs(logs: list, deserialiser: Callable) -> List[Any]:
+def _extract_logs(logs: list) -> List[Any]:
     """Decode the logs from a S3 storage object.
 
     Args:
         logs (list): The raw list of logs from the S3 API containing the log records.
-        deserialiser (Callable):
-            The function to deserialise the log records. This should be the `deserialise`
-            static method on a message class with the `MessageSerdeMixin`.
 
     Returns:
         List[Any]: The log records.
     """
     extracted = []
     for line in logs:
-        extracted.append(deserialiser(json.loads(line)))
+        extracted.append(json.loads(line))
     return extracted
 
 
@@ -92,7 +89,6 @@ def _filter_names_by_date(
 
 def get_audit_logs(
     topic: str,
-    deserialiser: Callable,
     workgroup: Optional[int] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
@@ -114,9 +110,6 @@ def get_audit_logs(
 
     Args:
         topic (str): The topic to retrieve logs for.
-        deserialiser (Callable):
-            The function to deserialise the log records. This should be the `deserialise`
-            static method on a message class with the `MessageSerdeMixin`.
         workgroup (Optional[int], optional):
             The workgroup to get the logs for. Defaults to None.
         start_date (Optional[str], optional):
@@ -153,7 +146,7 @@ def get_audit_logs(
     logs = []
     for name in log_file_names:
         response = client.get_object(bucket_name=bucket_name, object_name=name)
-        logs.extend(_extract_logs(response.readlines(), deserialiser=deserialiser))
+        logs.extend(_extract_logs(response.readlines()))
         response.close()
         response.release_conn()
 
