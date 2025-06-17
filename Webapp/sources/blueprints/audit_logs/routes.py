@@ -2,7 +2,11 @@ from datetime import datetime
 from flask import jsonify, request, send_file
 from flask_login import login_required
 
-from sources.services.audit_logs import get_audit_logs, make_log_stream
+from sources.services.audit_logs import (
+    get_audit_logs,
+    get_human_readable_ids,
+    make_log_stream,
+)
 from sources.decorators import principal_investigator_required
 
 from . import audit_log_bp
@@ -28,6 +32,9 @@ def download_audit_logs():
     logs = get_audit_logs(
         topic=topic, workgroup=workgroup, start_date=start_date, end_date=end_date
     )
+
+    # make the names of users, workgroups and workbooks human readable
+    get_human_readable_ids(logs=logs)
 
     # convert the logs into a ZIP file stream
     # file name will be {topic}-{current time}.zip
