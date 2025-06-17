@@ -7,6 +7,9 @@ import zipfile
 from flask import current_app
 from minio import Minio
 
+from sources.services.data_access_history import DataAccessMessage
+from sources.services.reaction_editing_history import ReactionEditMessage
+
 
 def _extract_logs(logs: list, deserialiser: Callable) -> List[Any]:
     """Decode the logs from a S3 storage object.
@@ -179,3 +182,9 @@ def make_log_stream(logs: List[Any], file_name: str):
     # Reset the stream's position to the beginning
     zip_buffer.seek(0)
     return zip_buffer
+
+
+TOPIC_DESERIALISER_MAP = {
+    "reaction_editing_history": ReactionEditMessage.deserialise,
+    "data_access_history": DataAccessMessage.deserialise,
+}
