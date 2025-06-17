@@ -7,6 +7,10 @@ import zipfile
 from flask import current_app
 from minio import Minio
 
+from . import user
+from . import workbook
+from . import workgroup
+
 
 def _extract_logs(logs: list, deserialiser: Callable) -> List[Any]:
     """Decode the logs from a S3 storage object.
@@ -179,3 +183,26 @@ def make_log_stream(logs: List[Any], file_name: str):
     # Reset the stream's position to the beginning
     zip_buffer.seek(0)
     return zip_buffer
+
+
+def get_human_readable_ids(logs: List[Any]):
+    for log in logs:
+        # Look up user, workgroup and workbook
+        # user and workgroup cannot be None
+        user_ = user.from_id(log.person)
+        if user_ is None:
+            raise ValueError(f"User with ID {log.person} does not exist")
+        workgroup_ = workgroup.from_id(log.workgroup)
+        if workgroup_ is None:
+            raise ValueError(f"Workgroup with ID {log.workgroup} does not exist")
+        # workbook can be None
+        workbook_ = workbook.get(log.workbook)
+
+        # get the human readable names
+        username = user_.fullname
+        workgroup_name = workgroup_.name
+        workbook_name = workbook_.name if workbook_ is not None else None
+
+        log.person = username
+        log.workgroup = workgroup_name
+        log.workbook = workbook_name
