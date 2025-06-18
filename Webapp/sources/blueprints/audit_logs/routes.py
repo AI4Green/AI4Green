@@ -12,19 +12,14 @@ from sources.decorators import principal_investigator_required
 from . import audit_log_bp
 
 
-@audit_log_bp.route("/audit_log/download", methods=["GET"])
+@audit_log_bp.route("/audit_log/<workgroup>/download", methods=["GET"])
 @login_required
 @principal_investigator_required
-def download_audit_logs():
+def download_audit_logs(workgroup: str):
     # get arguments form GET parameters
     topic = request.args.get("topic")
     if topic is None:
         return jsonify({"error": "topic is a required field"}), 400
-    workgroup = request.args.get("workgroup")
-    try:
-        workgroup = int(workgroup) if workgroup is not None else None
-    except (TypeError, ValueError):
-        return jsonify({"error": "workgroup must an integer"}), 400
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
