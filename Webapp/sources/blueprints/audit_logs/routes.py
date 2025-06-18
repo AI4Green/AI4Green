@@ -12,7 +12,7 @@ from sources.decorators import principal_investigator_required
 from . import audit_log_bp
 
 
-@audit_log_bp.route("/download", methods=["GET"])
+@audit_log_bp.route("/audit_log/download", methods=["GET"])
 @login_required
 @principal_investigator_required
 def download_audit_logs():
