@@ -10,8 +10,8 @@ function initialiseReactors(reactorDimensions) {
   let reactionSet = JSON.parse($("#js-reaction-set").val());
 
   updateReactorType(reactorDimensions);
-  createCarousel();
   assignReactions(reactionSet.reactions);
+
   // focus first well
   focusWell("0");
 }
@@ -26,11 +26,8 @@ function focusWell(index) {
     let smiles = well.attr("data-smiles");
 
     setTimeout(function () {
-      console.log("This runs after 2 seconds");
       let ketcherFrame = document.getElementById("ketcher-editor");
       let ketcher = ketcherFrame.contentWindow?.ketcher;
-      console.log(ketcher);
-      console.log(smiles);
       ketcher.setMolecule(smiles);
     }, 1000);
   }
@@ -38,6 +35,7 @@ function focusWell(index) {
 
 function assignReactions(reactions) {
   reactions.forEach((reaction, index) => {
+    console.log(index);
     let wellId = `circle-${index}`;
     let well = $(`[data-id='${wellId}']`);
     if (well) {
@@ -58,6 +56,7 @@ function createGrid(numCols, numRows) {
   grid.innerHTML = ""; // Clear existing grid
   grid.style.gridTemplateRows = `repeat(${numRows}, 1fr)`;
   grid.style.gridTemplateColumns = `repeat(${numCols}, 1fr)`;
+  let circleIndex = -1;
 
   for (let row = 0; row < numRows; row++) {
     for (let col = 0; col < numCols; col++) {
@@ -65,7 +64,10 @@ function createGrid(numCols, numRows) {
       circle.className = "btn icon";
       circle.style.width = "30px";
       circle.style.height = "30px";
-      circle.dataset.id = `circle-${row}-${col}`; // Assign a unique ID
+      circle.dataset.id = `circle-${(circleIndex += 1)}`; // Assign a unique ID
+
+      circle.onclick = () => focusWell(`${row}-${col}`);
+      //circle.textContent = i + 1;
 
       // // Tooltip for reaction details
       // const tooltip = document.createElement('div');
@@ -89,20 +91,16 @@ function createGrid(numCols, numRows) {
   }
 }
 
-function createCarousel() {
-  const numPoints = parseInt(
-    document.getElementById("carousel-reactions").value,
-    10,
-  ); // Get the number of points
+function createCarousel(numberOfReactions) {
   const carousel = document.getElementById("carousel");
   const sidePanel = document.getElementById("side-panel");
   carousel.innerHTML = ""; // Clear existing carousel
 
   const { centerX, centerY, radius } = getCarouselDimensions();
 
-  for (let i = 0; i < numPoints; i++) {
+  for (let i = 0; i < numberOfReactions; i++) {
     // Calculate angle for this point
-    const angle = (2 * Math.PI * i) / numPoints;
+    const angle = (2 * Math.PI * i) / numberOfReactions;
 
     // Calculate x and y positions for the point
     const x = centerX + radius * Math.cos(angle);
@@ -165,7 +163,7 @@ function updateReactorType(reactorDimensions) {
 
     carouselContainer.style.display = "none";
     carouselReactor.style.display = "none";
-    console.log(reactorDimensions);
+
     createGrid(reactorDimensions["columns"], reactorDimensions["rows"]);
   } else if (reactorType === "carousel") {
     // Show carousel setup and reactor, hide multiwell
@@ -174,8 +172,7 @@ function updateReactorType(reactorDimensions) {
 
     wellplateContainer.style.display = "none";
     multiwellReactor.style.display = "none";
-
-    createCarousel(); // Ensure carousel is created/updated
+    createCarousel(reactorDimensions["numberOfReactions"]); // Ensure carousel is created/updated
   }
 }
 
