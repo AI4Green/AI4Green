@@ -2,7 +2,7 @@ from datetime import datetime
 import io
 import json
 import re
-from typing import Any, Callable, List, Optional
+from typing import Any, List, Optional
 import zipfile
 from flask import current_app
 from minio import Minio
@@ -10,6 +10,15 @@ from minio import Minio
 from . import user
 from . import workbook
 from . import workgroup
+
+
+# Set up the Minio client
+client = Minio(
+    current_app.config["MINIO_HOST"],
+    access_key=current_app.config["MINIO_ACCESS_KEY"],
+    secret_key=current_app.config["MINIO_SECRET_KEY"],
+    secure=current_app.config["MINIO_SECURE"],
+)
 
 
 def _extract_logs(logs: list) -> List[Any]:
@@ -120,13 +129,6 @@ def get_audit_logs(
     Returns:
         List[Any]: The logs deserialised into their appropriate class.
     """
-    # Set up the Minio client
-    client = Minio(
-        current_app.config["MINIO_HOST"],
-        access_key=current_app.config["MINIO_ACCESS_KEY"],
-        secret_key=current_app.config["MINIO_SECRET_KEY"],
-        secure=current_app.config["MINIO_SECURE"],
-    )
     bucket_name = current_app.config["MINIO_AUDIT_LOG_BUCKET"]
 
     # Read all the object info in the bucket under the provided topic
