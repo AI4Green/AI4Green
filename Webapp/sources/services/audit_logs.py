@@ -12,13 +12,7 @@ from . import workbook
 from . import workgroup
 
 
-# Set up the Minio client
-client = Minio(
-    current_app.config["MINIO_HOST"],
-    access_key=current_app.config["MINIO_ACCESS_KEY"],
-    secret_key=current_app.config["MINIO_SECRET_KEY"],
-    secure=current_app.config["MINIO_SECURE"],
-)
+client: Minio = current_app.config["MINIO_CLIENT"]
 
 
 def _extract_logs(logs: list) -> List[Any]:
