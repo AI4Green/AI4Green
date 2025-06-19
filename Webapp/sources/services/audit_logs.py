@@ -2,27 +2,31 @@ from datetime import datetime
 import io
 import json
 import re
-from typing import Any, Callable, List, Optional
+from typing import Any, List, Optional
 import zipfile
 from flask import current_app
 from minio import Minio
 
+from . import person
+from . import workbook
+from . import workgroup
 
-def _extract_logs(logs: list, deserialiser: Callable) -> List[Any]:
+
+client: Minio = current_app.config["MINIO_CLIENT"]
+
+
+def _extract_logs(logs: list) -> List[Any]:
     """Decode the logs from a S3 storage object.
 
     Args:
         logs (list): The raw list of logs from the S3 API containing the log records.
-        deserialiser (Callable):
-            The function to deserialise the log records. This should be the `deserialise`
-            static method on a message class with the `MessageSerdeMixin`.
 
     Returns:
         List[Any]: The log records.
     """
     extracted = []
     for line in logs:
-        extracted.append(deserialiser(json.loads(line)))
+        extracted.append(json.loads(line))
     return extracted
 
 
@@ -88,7 +92,6 @@ def _filter_names_by_date(
 
 def get_audit_logs(
     topic: str,
-    deserialiser: Callable,
     workgroup: Optional[int] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
@@ -110,9 +113,6 @@ def get_audit_logs(
 
     Args:
         topic (str): The topic to retrieve logs for.
-        deserialiser (Callable):
-            The function to deserialise the log records. This should be the `deserialise`
-            static method on a message class with the `MessageSerdeMixin`.
         workgroup (Optional[int], optional):
             The workgroup to get the logs for. Defaults to None.
         start_date (Optional[str], optional):
@@ -123,13 +123,6 @@ def get_audit_logs(
     Returns:
         List[Any]: The logs deserialised into their appropriate class.
     """
-    # Set up the Minio client
-    client = Minio(
-        current_app.config["MINIO_HOST"],
-        access_key=current_app.config["MINIO_ACCESS_KEY"],
-        secret_key=current_app.config["MINIO_SECRET_KEY"],
-        secure=current_app.config["MINIO_SECURE"],
-    )
     bucket_name = current_app.config["MINIO_AUDIT_LOG_BUCKET"]
 
     # Read all the object info in the bucket under the provided topic
@@ -149,7 +142,7 @@ def get_audit_logs(
     logs = []
     for name in log_file_names:
         response = client.get_object(bucket_name=bucket_name, object_name=name)
-        logs.extend(_extract_logs(response.readlines(), deserialiser=deserialiser))
+        logs.extend(_extract_logs(response.readlines()))
         response.close()
         response.release_conn()
 
@@ -179,3 +172,21 @@ def make_log_stream(logs: List[Any], file_name: str):
     # Reset the stream's position to the beginning
     zip_buffer.seek(0)
     return zip_buffer
+
+
+def get_human_readable_ids(logs: List[dict]):
+    for log in logs:
+        # Look up user, workgroup and workbook
+        person_ = person.from_id(log["person"]).user
+        workgroup_ = workgroup.from_id(log["workgroup"])
+        workbook_ = workbook.get(log["workbook"])
+
+        # get the human readable names
+        fullname = person_.fullname if person_ is not None else "Deleted User"
+        workgroup_name = workgroup_.name if workgroup_ else "Deleted Workgroup"
+        workbook_name = workbook_.name if workbook_ is not None else None
+
+        # Alter the records to show the human readable names
+        log["person"] = fullname
+        log["workgroup"] = workgroup_name
+        log["workbook"] = workbook_name
