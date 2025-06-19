@@ -188,11 +188,11 @@ def get_human_readable_ids(logs: List[dict]):
         workbook_ = workbook.get(log["workbook"])
 
         # get the human readable names
-        username = user_.fullname
+        fullname = user_.fullname
         workgroup_name = workgroup_.name
         workbook_name = workbook_.name if workbook_ is not None else None
 
         # Alter the records to show the human readable names
-        log["person"] = username
+        log["person"] = fullname
         log["workgroup"] = workgroup_name
         log["workbook"] = workbook_name
