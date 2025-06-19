@@ -4,7 +4,45 @@ window.onload = function () {
   initialiseReactors(reactorDimensions); // Ensure the page is loaded with the correct display settings
 };
 
-observer();
+reactionTableObserver();
+
+function reactionTableObserver() {
+  console.log("BBBB");
+  getKetcher().then((ketcher) => {
+    ketcher.editor.subscribe("change", async function () {
+      let smiles = await exportSmilesFromKetcher();
+      let rxn = await exportRXNFromKetcher();
+
+      if (smiles === ">>" || smiles === "" || smiles === undefined) {
+        // catches if autosave occurs during a sketcher crash
+        return;
+      }
+      // change here for reagent support
+      let smilesNew = removeReagentsFromSmiles(smiles);
+      $("#js-reaction-smiles").val(smilesNew);
+      $("#js-reaction-rxn").val(rxn);
+      let workgroup = $("#js-active-workgroup").val();
+      let workbook = $("#js-active-workbook").val();
+      let reactionID = $("#js-reaction-id").val();
+      let polymerIndices = identifyPolymers(rxn);
+      let userEmail = "{{ current_user.email }}";
+      let demo = $("#js-demo").val();
+      let tutorial = $("#js-tutorial").val();
+      // change here for reagent support
+      if (smiles.includes(">>")) {
+        updateReactionTable(
+          smilesNew,
+          workgroup,
+          workbook,
+          reactionID,
+          polymerIndices,
+          demo,
+          tutorial,
+        );
+      }
+    });
+  });
+}
 
 function initialiseReactors(reactorDimensions) {
   let reactionSet = JSON.parse($("#js-reaction-set").val());
