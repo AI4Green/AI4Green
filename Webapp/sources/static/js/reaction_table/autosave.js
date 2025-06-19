@@ -1,8 +1,3 @@
-// run observer if not in tutorial mode
-if ($("#js-tutorial").val() === "no") {
-  observer();
-}
-
 function observer() {
   // this line detects any changes user makes to any input field and saves 0.5 seconds after user stops focus on input
   $(document).on("change", ":input", function (e) {
