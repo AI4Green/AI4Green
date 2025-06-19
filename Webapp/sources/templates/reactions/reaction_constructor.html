@@ -442,6 +442,11 @@ $(function () {
     if ($("#js-complete").val() === "not complete") {
         $("#mark-complete").attr("disabled", false)
     }
+    // run observer if not in tutorial mode
+    if ($("#js-tutorial").val() === "no") {
+      observer();
+      // TEST THIS NOT SURE IF IT WORKS
+}
 })
 
 </script>
