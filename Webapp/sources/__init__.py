@@ -8,6 +8,7 @@ from typing import Dict
 
 from apiflask import APIFlask
 from flask import Flask
+from minio import Minio
 from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db, login, ma, mail, migrate, oidc
@@ -97,7 +98,7 @@ def register_extensions(app: Flask) -> None:
         return models.User.query.get(user_id)
 
     # configure the message queue, e.g. kafka
-    if app.config.get("USE_KAFKA", False):
+    if app.config["USE_KAFKA"]:
         # In production or situations where Kafka is required,
         # use the kafka queue producer.
         # N.B. reuqires the kafka services to be running!
@@ -107,6 +108,15 @@ def register_extensions(app: Flask) -> None:
         # via the built-in logger in Flask.
         producer = LoggingQueueProducer()
     app.config["MESSAGE_QUEUE_PRODUCER"] = producer
+
+    # set up MinIO
+    client = Minio(
+        app.config["MINIO_HOST"],
+        access_key=app.config["MINIO_ACCESS_KEY"],
+        secret_key=app.config["MINIO_SECRET_KEY"],
+        secure=app.config["MINIO_SECURE"],
+    )
+    app.config["MINIO_CLIENT"] = client
 
     mail.init_app(app)
 
@@ -215,6 +225,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(save_reaction_bp)
 
+    from sources.blueprints.reaction_approval import reaction_approval_bp
+
+    app.register_blueprint(reaction_approval_bp, url_prefix="/reaction_approval")
+
     from sources.blueprints.reset_password import reset_password_bp
 
     app.register_blueprint(reset_password_bp)
@@ -264,6 +278,10 @@ def register_blueprints(app: Flask) -> None:
     from sources.blueprints.utils import utils_bp
 
     app.register_blueprint(utils_bp)
+
+    from sources.blueprints.audit_logs import audit_log_bp
+
+    app.register_blueprint(audit_log_bp)
 
 
 def inject_session_context(app: Flask) -> Dict[str, str]:

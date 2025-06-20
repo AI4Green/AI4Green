@@ -58,7 +58,7 @@ psmiles = {git = "https://github.com/Ramprasad-Group/psmiles.git"}
 ipinfo = "^5.1.1"
 flask-oidc = "^2.3.1"
 kafka-python = "^2.2.10"
-apscheduler = "^3.11.0"
+minio = "^7.2.15"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
