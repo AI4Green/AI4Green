@@ -2,7 +2,6 @@ from dataclasses import asdict, dataclass
 from typing import Optional
 
 from flask import current_app, json
-
 from sources.services.message_queue import MessageSerdeMixin
 
 
@@ -63,7 +62,7 @@ def send_message(message: DataAccessMessage):
         message (DataAccessMessage): The message to send to the queue in the DataAccessMessage format
     """
     producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    producer.send("data_access_history", json.dumps(asdict(message)))
+    producer.send("data_access_history", message.serialise())
 
 
 # TODO: record account deletion
