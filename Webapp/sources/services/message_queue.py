@@ -68,7 +68,7 @@ class LoggingQueueProducer(BaseQueueProducer):
         current_app.logger.info(msg=msg)
 
 
-class QueueConsumer:  # TODO: implement base class for ci/cd
+class QueueConsumer:
     """This class is a service which is used to receive messages from a kafka cluster."""
 
     def __init__(self, hostname, topic):
@@ -87,11 +87,8 @@ class QueueConsumer:  # TODO: implement base class for ci/cd
             enable_auto_commit=True,
         )
         self.topic = topic
-        self.producer = QueueProducer(
-            hostname=hostname,
-        )
 
-    def poll_and_process(self, poll_duration_sec=10):  # TODO: adjust poll duration
+    def poll(self, poll_duration_sec=10):  # TODO: adjust poll duration
         """Poll messages from topics and process them.
         Returns compressed messages to kafka reaction_editing_history_compressed topic.
 
@@ -110,60 +107,63 @@ class QueueConsumer:  # TODO: implement base class for ci/cd
 
         print(f"Collected {len(messages)} messages.")
 
-        # compress messages and send back to kafka
-        process_batch(messages, self.producer)
+        return messages
 
 
-def process_batch(messages, producer):
-    """Process a batch of kafka message to find net change in change_details dict.
-    Returns compressed messages to kafka reaction_editing_history_compressed topic.
-    Args:
-        messages (list): list of json messages from kafka consumer
-        producer (QueueProducer): the kafka producer
-    """
-    print(f"Processing {len(messages)} messages...")
+class ReactionEditHistoryProcessor:
+    """Processes reaction editing history messages."""
 
-    message_dicts = [json.loads(msg) for msg in messages]
+    def __init__(self, producer: BaseQueueProducer):
+        self.producer = producer
 
-    # group messages by (reaction, field_name, person)
-    grouped = defaultdict(list)
-    for item in message_dicts:
-        key = (item["reaction"], item["field_name"], item["person"])
-        grouped[key].append(item)
+    def process_and_publish(self, messages):
+        if not messages:
+            print("No messages to process.")
+            return
 
-    # Merge diffs within each group
-    for key, messages in grouped.items():
-        reaction, field_name, person = key
+        print(f"Processing {len(messages)} messages...")
 
-        # Extract all change_details from messages
-        change_details_list = [msg["change_details"] for msg in messages]
+        message_dicts = [json.loads(msg) for msg in messages]
 
-        # initially set result to the first change
-        change_details_merged = change_details_list[0]
+        # group messages by (reaction, field_name, person)
+        grouped = defaultdict(list)
+        for item in message_dicts:
+            key = (item["reaction"], item["field_name"], item["person"])
+            grouped[key].append(item)
 
-        # loop through subsequent changes (if any) to identify net change
-        if len(change_details_list) > 1:
-            for diff in change_details_list[1:]:
-                change_details_merged = merge_diffs(change_details_merged, diff)
+        # Merge diffs within each group
+        for key, messages in grouped.items():
+            reaction, field_name, person = key
 
-        if not change_details_merged:  # no net change
-            continue
+            # Extract all change_details from messages
+            change_details_list = [msg["change_details"] for msg in messages]
 
-        # put results in original message format
-        message = services.reaction_editing_history.ReactionEditMessage(
-            person,
-            messages[0]["workgroup"],
-            messages[0]["workbook"],
-            reaction,
-            field_name,
-            change_details_merged,
-            messages[0]["date"],
-        )
+            # initially set result to the first change
+            change_details_merged = change_details_list[0]
 
-        # send back to kafka
-        producer.send(
-            "reaction_editing_history_compressed", json.dumps(asdict(message))
-        )
+            # loop through subsequent changes (if any) to identify net change
+            if len(change_details_list) > 1:
+                for diff in change_details_list[1:]:
+                    change_details_merged = merge_diffs(change_details_merged, diff)
+
+            if not change_details_merged:  # no net change
+                continue
+
+            # put results in original message format
+            message = services.reaction_editing_history.ReactionEditMessage(
+                person,
+                messages[0]["workgroup"],
+                messages[0]["workbook"],
+                reaction,
+                field_name,
+                change_details_merged,
+                messages[0]["date"],
+            )
+
+            # send back to kafka
+            self.producer.send(
+                "reaction_editing_history_compressed", json.dumps(asdict(message))
+            )
 
 
 def merge_diffs(diff1, diff2):
