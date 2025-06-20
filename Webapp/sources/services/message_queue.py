@@ -121,9 +121,8 @@ class QueueConsumer:
         )
         self.topic = topic
 
-    def poll(self, poll_duration_sec=10):  # TODO: adjust poll duration
-        """Poll messages from topics and process them.
-        Returns compressed messages to kafka reaction_editing_history_compressed topic.
+    def poll(self, poll_duration_sec=60):
+        """Poll messages from topics and returns them.
 
         Args:
             poll_duration_sec (int): Length of time to poll kafka for, in seconds
@@ -144,10 +143,13 @@ class QueueConsumer:
 
 
 class ReactionEditHistoryProcessor:
-    """Processes reaction editing history messages."""
+    """Processes reaction editing history messages.
+    Returns compressed messages to kafka reaction_editing_history_compressed topic.
+    """
 
-    def __init__(self, producer: BaseQueueProducer):
+    def __init__(self, producer: BaseQueueProducer, produce_topic: str):
         self.producer = producer
+        self.produce_topic = produce_topic
 
     def process_and_publish(self, messages):
         if not messages:
@@ -194,9 +196,7 @@ class ReactionEditHistoryProcessor:
             )
 
             # send back to kafka
-            self.producer.send(
-                "reaction_editing_history_compressed", message.serialise()
-            )
+            self.producer.send(self.produce_topic, message.serialise())
 
 
 def merge_diffs(diff1, diff2):
