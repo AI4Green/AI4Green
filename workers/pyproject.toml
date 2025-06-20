@@ -3,6 +3,7 @@ name = "kafka_worker"
 version = "0.1.0"
 description = ""
 authors = ["maddy <madeleine.parker@nottingham.ac.uk>"]
+license = "AGPL-3.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]

@@ -195,7 +195,7 @@ class ReactionEditHistoryProcessor:
 
             # send back to kafka
             self.producer.send(
-                "reaction_editing_history_compressed", json.dumps(asdict(message))
+                "reaction_editing_history_compressed", message.serialise()
             )
 
 
