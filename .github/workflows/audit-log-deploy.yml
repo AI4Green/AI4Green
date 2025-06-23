@@ -32,3 +32,19 @@ jobs:
           file: ./workers/Dockerfile
           push: true
           tags: ai4greeneln/audit_log_compressor:latest
+          build-context: |
+            webapp=../Webapp
+
+      - name: Azure CLI login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Restart container app with new image
+        run: |
+          az containerapp update \
+            --name auditlogcompressor \
+            --resource-group rg-prj-rum-we-RB05G8-1 \
+            --image ai4greeneln/audit_log_compressor:latest

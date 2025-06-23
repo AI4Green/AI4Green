@@ -4,7 +4,6 @@ from collections import defaultdict
 from dataclasses import asdict
 from typing import Any, Optional
 
-from flask import current_app
 from kafka import KafkaConsumer, KafkaProducer
 from sources import services
 
@@ -65,6 +64,8 @@ class LoggingQueueProducer(BaseQueueProducer):
             topic (str, optional): This is ignored in this class. Defaults to None.
             msg (Any, optional): The message to send to the queue. Defaults to None.
         """
+        from flask import current_app
+
         current_app.logger.info(msg=msg)
 
 
