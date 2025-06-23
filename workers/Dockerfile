@@ -14,4 +14,4 @@ COPY . .
 RUN poetry install --no-dev
 
 # Command to run the worker script
-CMD ["poetry", "run", "python", "kafka_worker.py"]
+CMD ["poetry", "run", "python", "audit_log_compressor/kafka_worker.py"]
