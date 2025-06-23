@@ -25,7 +25,7 @@
         {% endfor %}
         {{ form.remember_me() }} {{ form.remember_me.label }}<br>
         {{ form.submit() }}<br>
-        <a class="btn btn-link" id="sso" href="{{ url_for('auth.oidc_login') }}">Use Single Sign-on</a>
+{#        <a class="btn btn-link" id="sso" href="{{ url_for('auth.oidc_login') }}">Use Single Sign-on</a>#}
     </form>
 </div>
     New User? <a id="register" class="btn btn-link" href="{{ url_for('auth.register') }}">Click to Register!</a><br>
