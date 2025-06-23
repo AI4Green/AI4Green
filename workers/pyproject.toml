@@ -10,6 +10,7 @@ readme = "README.md"
 python = "^3.10"
 apscheduler = "^3.11.0"
 kafka-python = "^2.2.12"
+python-dotenv = "^1.1.0"
 
 
 [build-system]

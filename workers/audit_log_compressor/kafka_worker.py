@@ -1,5 +1,3 @@
-import os
-
 from apscheduler.schedulers.blocking import BlockingScheduler
 from config import (
     CONSUME_TOPIC,
@@ -8,12 +6,7 @@ from config import (
     POLL_INTERVAL_MINS,
     PRODUCE_TOPIC,
 )
-
-from Webapp.sources.services.message_queue import (
-    QueueConsumer,
-    QueueProducer,
-    ReactionEditHistoryProcessor,
-)
+from sources.services import message_queue
 
 
 def collect_and_process_messages(
@@ -27,16 +20,16 @@ def collect_and_process_messages(
 
 
 # set up kafka consumer
-consumer = QueueConsumer(
+consumer = message_queue.QueueConsumer(
     hostname=KAFKA_HOSTNAME,
     topic=CONSUME_TOPIC,
 )
 
 # set up kafka producer and processor
-producer = QueueProducer(
+producer = message_queue.QueueProducer(
     hostname=KAFKA_HOSTNAME,
 )
-processor = ReactionEditHistoryProcessor(producer, PRODUCE_TOPIC)
+processor = message_queue.ReactionEditHistoryProcessor(producer, PRODUCE_TOPIC)
 
 # Set up the scheduler
 scheduler = BlockingScheduler()

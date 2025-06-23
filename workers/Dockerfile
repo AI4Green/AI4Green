@@ -7,11 +7,17 @@ WORKDIR /app
 # Install Poetry
 RUN pip install poetry==1.8.3
 
-# Copy project files into the container
-COPY . .
+# Copy message_queue.py into the container.
+COPY --from=webapp /sources/services/message_queue.py /app/Webapp/sources/services/message_queue.py
+
+# Copy the 'workers' directory into the container.
+COPY . /app/workers
+
+ENV PYTHONPATH="/app/Webapp"
+WORKDIR /app/workers/audit_log_compressor
 
 # Install dependencies via Poetry
 RUN poetry install --no-dev
 
 # Command to run the worker script
-CMD ["poetry", "run", "python", "audit_log_compressor/kafka_worker.py"]
+CMD ["poetry", "run", "python", "kafka_worker.py"]
