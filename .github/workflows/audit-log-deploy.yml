@@ -28,8 +28,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./workers
-          file: ./workers/Dockerfile
+          context: ./workers/audit_log_compressor
+          file: ./workers/audit_log_compressor/Dockerfile
           push: true
           tags: ai4greeneln/audit_log_compressor:latest
           build-context: |
@@ -46,5 +46,5 @@ jobs:
         run: |
           az containerapp update \
             --name auditlogcompressor \
-            --resource-group rg-prj-rum-we-RB05G8-1 \
+            --resource-group ${{ secrets.AZURE_RESOURCE_ID }} \
             --image ai4greeneln/audit_log_compressor:latest
