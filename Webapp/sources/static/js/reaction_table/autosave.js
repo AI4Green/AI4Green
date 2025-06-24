@@ -430,7 +430,7 @@ function postReactionData(complete = "not complete") {
         }
       } else {
         // if not locking reaction save as normal
-        flashUserSaveMessage("AUTOSAVE");
+        flashUserSaveMessage();
       }
     },
     error: function () {
@@ -944,9 +944,9 @@ function fade_save_message() {
   $("#reaction-saved-indicator").fadeOut("slow");
 }
 
-function flashUserSaveMessage(message) {
+function flashUserSaveMessage() {
   let $reactionSaveIndicator = $("#reaction-saved-indicator");
-  $reactionSaveIndicator.text(message);
+  $reactionSaveIndicator.text("Reaction Changes Saved");
   $reactionSaveIndicator
     .removeClass()
     .addClass("reaction-save-success")
