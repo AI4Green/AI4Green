@@ -45,9 +45,10 @@ def logout() -> Response:
     # Log out of the flask user system
     logout_user()
 
+    # This line has been commented out until SSO feature is fixed
     # Log out of the OIDC system if the user signed in that way.
-    if oidc.user_loggedin:
-        return oidc.logout(return_to=url_for("main.index"))
+    # if oidc.user_loggedin:
+    #     return oidc.logout(return_to=url_for("main.index"))
 
     return redirect(url_for("main.index"))
 
