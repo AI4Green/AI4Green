@@ -187,6 +187,7 @@ def list_active_in_workbook(
     query = (
         db.session.query(models.Reaction)
         .filter(models.Reaction.status == "active")
+        .filter(models.Reaction.reaction_set_id.is_(None))
         .join(models.WorkBook)
         .filter(models.WorkBook.name == workbook)
         .join(models.WorkGroup)
@@ -226,7 +227,6 @@ def to_dict(reaction_list: List[models.Reaction]) -> List[Dict]:
 
     Args:
         reaction_list - list of reactions as objects
-        sort_crit - criteria to sort reactions.
 
     Returns:
         A List of dictionaries with the reaction data required to render the _saved_reactions.html template
@@ -391,7 +391,7 @@ def add(
         summary_table_data=summary_table,
     )
     db.session.add(reaction)
-    # db.session.commit()
+    db.session.commit()
     return reaction
 
 

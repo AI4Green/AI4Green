@@ -15,13 +15,13 @@ def reaction_set(set_name, workgroup_name, workbook_name):
     # fix atuosave sketcher to only update reaction table in set mode (do we want to try autosaving?)
     # then fix apply to well and apply to all
     # colours for unsaved/edited wells
-    #
+    # colours for highlighted reaction table are also broken, needs fix before deplyment
 
     r_set = services.reaction_set.get_from_names(
         set_name, workgroup_name, workbook_name
     )
 
-    serialised_set = serialise_reaction_set(r_set)
+    serialised_set = services.reaction_set.to_dict([r_set])[0]
 
     return render_template(
         "reaction_set.html",
@@ -31,23 +31,6 @@ def reaction_set(set_name, workgroup_name, workbook_name):
         workbook_name=workbook_name,
         reactor_dimensions=r_set.reactor_dimensions,
     )
-
-
-def serialise_reaction_set(reaction_set: models.ReactionSet):
-    return {
-        "id": reaction_set.id,
-        "name": reaction_set.name,
-        "reactions": [serialise_reaction(r) for r in reaction_set.reactions],
-    }
-
-
-def serialise_reaction(reaction: models.Reaction) -> Dict[str, str]:
-    return {
-        "reaction_id": reaction.reaction_id,
-        "name": reaction.name,
-        "smiles": reaction.reaction_smiles,
-        # maybe more
-    }
 
 
 @reaction_set_bp.route("/click_and_drag")
@@ -67,6 +50,7 @@ def new_reaction_set():
     new_set_id = data.get("setID", None)
     new_set_name = data.get("setName")
 
+    workgroup = services.workgroup.from_name(workgroup_name)
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
@@ -98,6 +82,7 @@ def new_reaction_set():
         set_id=new_set_id,
         creator=creator,
         workbook=workbook,
+        workgroup=workgroup,
         reactions=reactions,
         reactor_dimensions=reactor_dimensions,
     )

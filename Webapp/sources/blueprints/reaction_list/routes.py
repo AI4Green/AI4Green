@@ -92,8 +92,15 @@ def get_reactions() -> Response:
     reactions = services.reaction.list_active_in_workbook(
         workbook_name, workgroup_name, sort_crit
     )
+    reaction_sets = services.reaction_set.list_active_in_workbook(
+        workbook_name, workgroup_name, sort_crit
+    )
+
     new_reaction_id = services.reaction.get_next_reaction_id_for_workbook(workbook.id)
     reactions = services.reaction.to_dict(reactions)
+    reaction_sets = services.reaction_set.to_dict(reaction_sets)
+
+    reactions.extend(reaction_sets)
     reaction_details = render_template(
         "reactions/_saved_reactions.html",
         reactions=reactions,
