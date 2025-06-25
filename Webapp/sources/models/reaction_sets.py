@@ -51,6 +51,11 @@ class ReactionSet(Model):
     )
     workbook = db.relationship("WorkBook", foreign_keys=[workbook_id])
 
+    workgroup_id = db.Column(
+        db.ForeignKey("WorkGroup.id", ondelete="CASCADE"), nullable=False
+    )
+    workgroup = db.relationship("WorkGroup", foreign_keys=[workgroup_id])
+
     complete = db.Column(db.Text, nullable=False)
     status = db.Column(db.Text, nullable=False)
 
