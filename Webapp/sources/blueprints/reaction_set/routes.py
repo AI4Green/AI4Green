@@ -7,9 +7,9 @@ from sources import models, services
 from . import reaction_set_bp
 
 
-@reaction_set_bp.route("/reaction_set/<workgroup_name>/<workbook_name>/<set_name>")
+@reaction_set_bp.route("/reaction_set/<workgroup_name>/<workbook_name>/<set_id>")
 @login_required
-def reaction_set(set_name, workgroup_name, workbook_name):
+def reaction_set(workgroup_name, workbook_name, set_id):
     # to do
     # add workbook, workgroup to reaction set page
     # fix atuosave sketcher to only update reaction table in set mode (do we want to try autosaving?)
@@ -17,9 +17,7 @@ def reaction_set(set_name, workgroup_name, workbook_name):
     # colours for unsaved/edited wells
     # colours for highlighted reaction table are also broken, needs fix before deplyment
 
-    r_set = services.reaction_set.get_from_names(
-        set_name, workgroup_name, workbook_name
-    )
+    r_set = services.reaction_set.get_from_id(set_id, workgroup_name, workbook_name)
 
     serialised_set = services.reaction_set.to_dict([r_set])[0]
 

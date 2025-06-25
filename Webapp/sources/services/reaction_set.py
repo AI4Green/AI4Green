@@ -107,8 +107,8 @@ def next_id_in_workbook(workbook_id):
     return new_set_id
 
 
-def get_from_names(
-    set_name: str, workgroup_name: str, workbook_name: str
+def get_from_id(
+    set_id: str, workgroup_name: str, workbook_name: str
 ) -> models.ReactionSet:
     """
     Gets a reaction set with the given name that belongs to the given workgroup and workbook.
@@ -123,7 +123,7 @@ def get_from_names(
     """
     return (
         db.session.query(models.ReactionSet)
-        .filter(models.ReactionSet.name == set_name)
+        .filter(models.ReactionSet.set_id == set_id)
         .join(models.WorkBook)
         .filter(models.WorkBook.name == workbook_name)
         .join(models.WorkGroup)
@@ -165,7 +165,7 @@ def to_dict(reaction_set_list: List[models.ReactionSet]) -> List[Dict]:
             "workgroup": reaction_set.workgroup.name,
             "workbook": reaction_set.workbook.name,
             "completion_status": reaction_set.complete,
-            "set_id": reaction_set.set_id,
+            "reaction_id": reaction_set.set_id,
             "creator_email": creator_email,
             "creator_username": creator_username,
             "reactions": services.reaction.to_dict(reaction_set.reactions),

@@ -261,6 +261,7 @@ function deleteReaction(reaction) {
  * @param reaction {HTMLElement}
  */
 function redirectToReloadReaction(reaction) {
+  console.log(reaction);
   let workbook = getData(reaction, "workbook");
   let workgroup = getData(reaction, "workgroup");
   // search results open in new tab, otherwise reloaded reactions open in current tab
@@ -270,7 +271,11 @@ function redirectToReloadReaction(reaction) {
       "_blank",
     );
   } else {
-    window.location.href = `/sketcher/${workgroup}/${workbook}/${reaction.id}/no`;
+    if (reaction.id.includes("SET")) {
+      window.location.href = `/reaction_set/${workgroup}/${workbook}/${reaction.id}`;
+    } else {
+      window.location.href = `/sketcher/${workgroup}/${workbook}/${reaction.id}/no`;
+    }
   }
 }
 
