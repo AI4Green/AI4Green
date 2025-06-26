@@ -20,6 +20,10 @@ var sharedPrefix = serviceName
 
 param appServicePlanSku string = 'P2'
 
+
+// MinIO params
+param minioImage string
+
 // log analytics workspace
 module la 'br/DrsComponents:log-analytics-workspace:v1' = {
   name: 'la-ws-${uniqueString(sharedPrefix)}'
@@ -97,10 +101,10 @@ var ai4greenEnvVars = {
   OIDC_USERINFO_AUTH_URI: referenceSecret(keyVaultName, 'OIDC_CLIENT_USERINFO_URI')
   OIDC_CLIENT_ISSUER: referenceSecret(keyVaultName, 'OIDC_CLIENT_ISSUER')
   OIDC_CLIENT_REDIRECT_URIS: referenceSecret(keyVaultName, 'OIDC_CLIENT_REDIRECT_URIS')
-  MESSAGE_QUEUE_HOSTNAME: referenceSecret(keyVaultName, 'MESSAGE_QUEUE_HOSTNAME')
+  MESSAGE_QUEUE_HOSTNAME: minio.outputs.appUrl
   USE_KAFKA: 1
-  MINIO_ACCESS_KEY: referenceSecret(keyVaultName, 'MINIO_ACCESS_KEY')
-  MINIO_SECRET_KEY: referenceSecret(keyVaultName, 'MINIO_SECRET_KEY')
+  MINIO_ACCESS_KEY: minio.outputs.accessKey
+  MINIO_SECRET_KEY: minio.outputs.secretKey
   MINIO_SECURE: 1
 }
 
@@ -110,5 +114,22 @@ module ai4greendKvAccess 'br/DrsConfig:keyvault-access:v2' = {
   params: {
     keyVaultName: kv.name
     principalId: ai4greenSite.outputs.identity.principalId
+  }
+}
+
+
+// Provision Minio
+module minio 'minio.bicep' = {
+  params: {
+    storageAccountName: '${serviceName}-${env}-storage-account'
+    fileShareName: '${serviceName}-${env}-file-share'
+    containerImage: minioImage
+    containerAppName: '${serviceName}-${env}-minio'
+    containerAppEnvName: '${serviceName}-${env}-minio-env'
+    minioAccessKey: referenceSecret(keyVaultName, 'MINIO_CLIENT_ACCESS_KEY')
+    minioBucketName: referenceSecret(keyVaultName, 'MINIO_BUCKET_NAME')
+    minioRootPassword: referenceSecret(keyVaultName, 'MINIO_ROOT_PASSWORD')
+    minioRootUserName: referenceSecret(keyVaultName, 'MINIO_ROOT_USER')
+    minioSecretKey: referenceSecret(keyVaultName, 'MINIO_CLIENT_SECRET_KEY')
   }
 }
