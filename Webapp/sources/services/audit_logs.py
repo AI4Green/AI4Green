@@ -1,16 +1,13 @@
-from datetime import datetime
 import io
 import json
 import re
-from typing import Any, List, Optional
 import zipfile
+from datetime import datetime
+from typing import Any, List, Optional
+
 from flask import current_app
 from minio import Minio
-
-from . import person
-from . import workbook
-from . import workgroup
-
+from sources import services
 
 client: Minio = current_app.config["MINIO_CLIENT"]
 
@@ -60,6 +57,10 @@ def _filter_names_by_date(
     Returns:
         List[str]: The names of the log files that passed the filter.
     """
+    if not start_date and not end_date:
+        # No date filtering needed, return all items
+        return item_names
+
     date_format = "%Y-%m-%d"
     date_pattern = re.compile(r"date=(\d{4}-\d{2}-\d{2})")
     filtered_items = []
@@ -70,7 +71,7 @@ def _filter_names_by_date(
             continue  # No date=YYYY-MM-DD pattern found
 
         try:
-            date_str = date_str = date_match.group(1)
+            date_str = date_match.group(1)
             date_obj = datetime.strptime(date_str, date_format)
         except (ValueError, IndexError):
             continue  # skip malformed dates
@@ -92,7 +93,7 @@ def _filter_names_by_date(
 
 def get_audit_logs(
     topic: str,
-    workgroup: Optional[int] = None,
+    workgroup_name: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
 ) -> List[Any]:
@@ -113,8 +114,8 @@ def get_audit_logs(
 
     Args:
         topic (str): The topic to retrieve logs for.
-        workgroup (Optional[int], optional):
-            The workgroup to get the logs for. Defaults to None.
+        workgroup_name (Optional[str], optional):
+            The workgroup name to get the logs for. Defaults to None.
         start_date (Optional[str], optional):
             Get logs after and including this date. Defaults to None.
         end_date (Optional[str], optional):
@@ -125,12 +126,14 @@ def get_audit_logs(
     """
     bucket_name = current_app.config["MINIO_AUDIT_LOG_BUCKET"]
 
+    workgroup_id = services.workgroup.from_name(workgroup_name).id
+
     # Read all the object info in the bucket under the provided topic
     # If a workgroup is given, filter by workgroup too
     prefix = (
         f"topics/{topic}"
-        if workgroup is None
-        else f"topics/{topic}/workgroup={workgroup}"
+        if workgroup_id is None
+        else f"topics/{topic}/workgroup={workgroup_id}"
     )
     log_files = list(client.list_objects(bucket_name, recursive=True, prefix=prefix))
     log_file_names = [obj.object_name for obj in log_files]
@@ -155,7 +158,7 @@ def make_log_stream(logs: List[Any], file_name: str):
 
     Args:
         logs: The JSON-serializable data to include in the ZIP.
-        filename: The name of the JSON file inside the ZIP archive.
+        file_name: The name of the JSON file inside the ZIP archive.
 
     Returns:
         A BytesIO object containing the ZIP file data.
@@ -177,14 +180,14 @@ def make_log_stream(logs: List[Any], file_name: str):
 def get_human_readable_ids(logs: List[dict]):
     for log in logs:
         # Look up user, workgroup and workbook
-        person_ = person.from_id(log["person"]).user
-        workgroup_ = workgroup.from_id(log["workgroup"])
-        workbook_ = workbook.get(log["workbook"])
+        person = services.person.from_id(log["person"]).user
+        workgroup = services.workgroup.from_id(log["workgroup"])
+        workbook = services.workbook.get(log["workbook"])
 
         # get the human readable names
-        fullname = person_.fullname if person_ is not None else "Deleted User"
-        workgroup_name = workgroup_.name if workgroup_ else "Deleted Workgroup"
-        workbook_name = workbook_.name if workbook_ is not None else None
+        fullname = person.fullname if person is not None else "Deleted User"
+        workgroup_name = workgroup.name if workgroup else "Deleted Workgroup"
+        workbook_name = workbook.name if workbook is not None else None
 
         # Alter the records to show the human readable names
         log["person"] = fullname

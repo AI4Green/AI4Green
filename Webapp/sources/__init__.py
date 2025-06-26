@@ -98,7 +98,7 @@ def register_extensions(app: Flask) -> None:
         return models.User.query.get(user_id)
 
     # configure the message queue, e.g. kafka
-    if app.config["USE_KAFKA"]:
+    if app.config["USE_KAFKA"] and not app.config["TESTING"]:
         # In production or situations where Kafka is required,
         # use the kafka queue producer.
         # N.B. reuqires the kafka services to be running!

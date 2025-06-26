@@ -33,7 +33,7 @@ jobs:
           push: true
           tags: ai4greeneln/audit_log_compressor:latest
           build-contexts: |
-            webapp=../../Webapp
+            webapp=./Webapp
 
       - name: Azure CLI login
         uses: azure/login@v2
