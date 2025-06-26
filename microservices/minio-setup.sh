@@ -7,6 +7,7 @@ set -e
 : "${MINIO_BUCKET_NAME:?Environment variable MINIO_BUCKET_NAME must be set}"
 : "${MINIO_CLIENT_ACCESS_KEY:?Environment variable MINIO_CLIENT_ACCESS_KEY must be set}"
 : "${MINIO_CLIENT_SECRET_KEY:?Environment variable MINIO_CLIENT_SECRET_KEY must be set}"
+: "${MINIO_STORAGE_MOUNT:?Environment variable MINIO_STORAGE_MOUNT must be set}"
 
 # Export MinIO credentials for the server
 export MINIO_ROOT_USER
@@ -48,4 +49,4 @@ kill %1
 wait %1 2>/dev/null || true
 
 # Start MinIO server in foreground
-exec /minio server /data
+exec /minio server $MINIO_STORAGE_MOUNT
