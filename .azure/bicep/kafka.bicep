@@ -1,7 +1,7 @@
 @description('Location for all resources.')
 param location string = resourceGroup().location
 
-@description('Location for all resources.')
+@description('Base name for the apps')
 param appBaseNae string
 
 @description('The image to use for zookeeper')
