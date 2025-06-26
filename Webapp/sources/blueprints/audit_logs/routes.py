@@ -43,9 +43,9 @@ def download_audit_logs(workgroup: str):
     get_human_readable_ids(logs=logs)
 
     # convert the logs into a ZIP file stream
-    # file name will be {topic}-{current time}.zip
-    # e.g. reaction_editing_history-202506161054.zip
-    file_name = f"{topic}-{datetime.now().strftime('%Y%m%d%M%S')}.zip"
+    # file name will be {topic}-{current time}
+    # e.g. reaction_editing_history-202506161054
+    file_name = f"{topic}-{datetime.now().strftime('%Y%m%d%M%S')}"
     log_stream = make_log_stream(logs=logs, file_name=file_name)
 
     return send_file(
