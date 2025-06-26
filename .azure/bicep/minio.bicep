@@ -87,6 +87,9 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           value: storageAccount.name
         }
       ]
+      ingress: {
+        exposedPort: minioPort
+      }
     }
     template: {
       containers: [
