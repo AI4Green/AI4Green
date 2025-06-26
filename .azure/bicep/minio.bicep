@@ -35,6 +35,7 @@ param minioSecretKey string
 
 var storageMountPath = '/data' // Mount point inside the container
 var minioPort = 9000
+var volumeName = 'miniodata'
 
 // Storage account for persistent data
 module storageAccount 'br/DrsComponents:storage-account:v1' = {
@@ -120,7 +121,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           ]
           volumeMounts: [
             {
-              volumeName: 'miniodata'
+              volumeName: volumeName
               mountPath: storageMountPath
             }
           ]
@@ -128,7 +129,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
       ]
       volumes: [
         {
-          name: 'miniodata'
+          name: volumeName
           storageType: 'EmptyDir'
         }
       ]
