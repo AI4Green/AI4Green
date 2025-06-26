@@ -3,7 +3,7 @@ name: Build and Push Audit Log Kafka Worker to Docker Hub
 on:
   push:
     branches:
-      - main
+      - audit_log_frontend
 
 permissions:
   contents: read
@@ -32,8 +32,8 @@ jobs:
           file: ./workers/audit_log_compressor/Dockerfile
           push: true
           tags: ai4greeneln/audit_log_compressor:latest
-          build-context: |
-            webapp=../Webapp
+          build-contexts: |
+            webapp=./Webapp
 
       - name: Azure CLI login
         uses: azure/login@v2
