@@ -181,3 +181,37 @@ function submitNameChange() {
       alert("Network error, please try again later.");
     });
 }
+
+/**
+ * Ensure end date is not before start date on Audit Log tab.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("audit-logs-form");
+  const startDateInput = document.getElementById("start_date");
+  const endDateInput = document.getElementById("end_date");
+  const dateError = document.getElementById("date_error");
+
+  function validateDates() {
+    const startDate = new Date(startDateInput.value);
+    const endDate = new Date(endDateInput.value);
+
+    if (endDate < startDate) {
+      dateError.style.display = "block";
+      return false; // failure
+    } else {
+      dateError.style.display = "none";
+      return true; // success
+    }
+  }
+
+  // Add event listeners for validation
+  form.addEventListener("submit", function (event) {
+    if (!validateDates()) {
+      event.preventDefault(); // Prevent form submission if validation fails
+    }
+  });
+
+  // keep listening to remove message when dates are corrected
+  startDateInput.addEventListener("change", validateDates);
+  endDateInput.addEventListener("change", validateDates);
+});
