@@ -13,8 +13,12 @@ set -e
 export MINIO_ROOT_USER
 export MINIO_ROOT_PASSWORD
 
+# Suppress mc output
+export MC_QUIET=1
+
+
 # Start MinIO server in background to configure it
-/minio server /data &
+minio server /data &
 
 # Wait for MinIO to become healthy
 echo "Waiting for MinIO to be ready..."
@@ -38,7 +42,7 @@ if ! mc admin user svcacct info local "$MINIO_CLIENT_ACCESS_KEY" >/dev/null 2>&1
   mc admin user svcacct add local \
     --access-key "$MINIO_CLIENT_ACCESS_KEY" \
     --secret-key "$MINIO_CLIENT_SECRET_KEY" \
-    "$MINIO_ROOT_USER"
+    "$MINIO_ROOT_USER" >/dev/null 2>&1
   echo "Service account $MINIO_CLIENT_ACCESS_KEY created."
 else
   echo "Service account $MINIO_CLIENT_ACCESS_KEY already exists."
@@ -49,4 +53,4 @@ kill %1
 wait %1 2>/dev/null || true
 
 # Start MinIO server in foreground
-exec /minio server $MINIO_STORAGE_MOUNT
+exec minio server $MINIO_STORAGE_MOUNT --console-address ":9001"
