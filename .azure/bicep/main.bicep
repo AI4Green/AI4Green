@@ -24,6 +24,9 @@ param appServicePlanSku string = 'P2'
 // MinIO params
 param minioImage string
 
+// Kafka stack params
+param kafkaConnectImage string
+
 // log analytics workspace
 module la 'br/DrsComponents:log-analytics-workspace:v1' = {
   name: 'la-ws-${uniqueString(sharedPrefix)}'
@@ -140,5 +143,15 @@ module minio 'minio.bicep' = {
     minioRootPassword: referenceSecret(keyVaultName, 'MINIO_ROOT_PASSWORD')
     minioRootUserName: referenceSecret(keyVaultName, 'MINIO_ROOT_USER')
     minioSecretKey: referenceSecret(keyVaultName, 'MINIO_CLIENT_SECRET_KEY')
+  }
+}
+
+
+// Provision kafka stack
+module kafkaStack 'kafka.bicep' = {
+  params: {
+    appBaseNae: '${serviceName}-${env}'
+    location: location
+    kafkaConnectImage: kafkaConnectImage
   }
 }
