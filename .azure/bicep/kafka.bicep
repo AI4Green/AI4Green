@@ -18,6 +18,8 @@ var zookeeperClientPort string = '2181'
 var zookeeperTickTime string = '2000'
 
 // Kafka settings
+var kafkaMainPort string = '9092'
+var kafkaAltPort string = '29092'
 
 
 // Kafka Connect settings
@@ -56,7 +58,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
             }
             {
               name: 'KAFKA_ZOOKEEPER_CONNECT'
-              value: 'TODO' // get url for the zooper image
+              value: 'localhost:${zookeeperClientPort}'
             }
             {
               name: 'KAFKA_LISTENER_SECURITY_PROTOCOL_MAP'
@@ -64,12 +66,11 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
             }
             {
               name: 'KAFKA_ADVERTISED_LISTENERS'
-              // TODO: substitue the kafka url with the url to this container in azure
-              value: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+              value: 'PLAINTEXT://localhost:${kafkaAltPort},PLAINTEXT_HOST://localhost:${kafkaMainPort}'
             }
             {
               name: 'KAFKA_LISTENERS'
-              value: 'PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092'
+              value: 'PLAINTEXT://0.0.0.0:${kafkaAltPort},PLAINTEXT_HOST://0.0.0.0:${kafkaMainPort}'
             }
             {
               name: 'KAFKA_INTER_BROKER_LISTENER_NAME'
@@ -85,6 +86,68 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         {
           name: '${appBaseNae}-kafka-connect'
           image: kafkaConnectImage
+          env: [
+            {
+              name: 'CONNECT_BOOTSTRAP_SERVERS'
+              value: 'localhost:${kafkaAltPort}'
+            }
+            {
+              name: 'CONNECT_REST_PORT'
+              value: '8083'
+            }
+            {
+              name: 'CONNECT_GROUP_ID'
+              value: 'kafka-connect-group'
+            }
+            {
+              name: 'CONNECT_CONFIG_STORAGE_TOPIC'
+              value: 'connect-configs'
+            }
+            {
+              name: 'CONNECT_OFFSET_STORAGE_TOPIC'
+              value: 'connect-offsets'
+            }
+            {
+              name: 'CONNECT_STATUS_STORAGE_TOPIC'
+              value: 'connect-status'
+            }
+            {
+              name: 'CONNECT_KEY_CONVERTER'
+              value: 'org.apache.kafka.connect.storage.StringConverter'
+            }
+            {
+              name: 'CONNECT_VALUE_CONVERTER'
+              value: 'org.apache.kafka.connect.json.JsonConverter'
+            }
+            {
+              name: 'CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE'
+              value: 'false'
+            }
+            {
+              name: 'CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE'
+              value: 'false'
+            }
+            {
+              name: 'CONNECT_INTERNAL_KEY_CONVERTER'
+              value: 'org.apache.kafka.connect.json.JsonConverter'
+            }
+            {
+              name: 'CONNECT_INTERNAL_VALUE_CONVERTER'
+              value: 'org.apache.kafka.connect.json.JsonConverter'
+            }
+            {
+              name: 'CONNECT_LOG4J_LOGGERS'
+              value: 'org.reflections=ERROR'
+            }
+            {
+              name: 'CONNECT_PLUGIN_PATH'
+              value: '/usr/share/java,/etc/kafka-connect/jars'
+            }
+            {
+              name: 'CONNECT_REST_ADVERTISED_HOST_NAME'
+              value: 'kafka-connect'
+            }
+          ]
         }
       ]
     }
