@@ -49,6 +49,37 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         {
           name: '${appBaseNae}-kafka'
           image: kafkaImage
+          env: [
+            {
+              name: 'KAFKA_BROKER_ID'
+              value: '1'
+            }
+            {
+              name: 'KAFKA_ZOOKEEPER_CONNECT'
+              value: 'TODO' // get url for the zooper image
+            }
+            {
+              name: 'KAFKA_LISTENER_SECURITY_PROTOCOL_MAP'
+              value: 'PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+            }
+            {
+              name: 'KAFKA_ADVERTISED_LISTENERS'
+              // TODO: substitue the kafka url with the url to this container in azure
+              value: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+            }
+            {
+              name: 'KAFKA_LISTENERS'
+              value: 'PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092'
+            }
+            {
+              name: 'KAFKA_INTER_BROKER_LISTENER_NAME'
+              value: 'PLAINTEXT'
+            }
+            {
+              name: 'KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR'
+              value: '1'
+            }
+          ]
         }
         // Kafka-connect
         {
