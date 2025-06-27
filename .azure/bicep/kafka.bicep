@@ -13,6 +13,9 @@ param kafkaImage string = 'confluentinc/cp-kafka:7.6.0'
 @description('The image to use for kafka-connect')
 param kafkaConnectImage string = 'confluentinc/cp-kafka-connect:7.6.0'
 
+@description('Resource ID of the managed environment for Azure Container Apps.')
+param containerAppEnvId string
+
 // Zookeeper settings
 var zookeeperClientPort string = '2181'
 var zookeeperTickTime string = '2000'
@@ -30,6 +33,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: '${appBaseNae}-kafka-stack'
   location: location
   properties: {
+    managedEnvironmentId: containerAppEnvId
     template: {
       containers: [
         // Zookeeper

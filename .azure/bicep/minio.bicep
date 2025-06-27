@@ -14,7 +14,7 @@ param storageAccountName string
 param fileShareName string = 'minioshare'
 
 @description('Resource ID of the managed environment for Azure Container Apps.')
-param containerAppEnvId string = 'minio-env'
+param containerAppEnvId string
 
 @description('The username of the MinIO root user')
 param minioRootUserName string

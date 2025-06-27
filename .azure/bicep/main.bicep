@@ -40,6 +40,18 @@ module la 'br/DrsComponents:log-analytics-workspace:v1' = {
   }
 }
 
+// Provision virtual network
+module vnet 'br/DrsComponents:vnet:v1' = {
+  params: {
+    vnetName: '${serviceName}-${env}-vnet'
+    location: location
+    tags: {
+      ServiceScope: serviceName
+      Environment: sharedEnv
+    }
+  }
+}
+
 // keyvault
 resource kv 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
   name: keyVaultName
@@ -125,6 +137,7 @@ module containerAppEnv 'container-env.bicep' = {
   params: {
     containerAppEnvName: '${serviceName}-${env}-env'
     location: location
+    infrastructureSubnetId: vnet.outputs.integrationSubnetId
   }
 }
 
@@ -153,5 +166,6 @@ module kafkaStack 'kafka.bicep' = {
     appBaseNae: '${serviceName}-${env}'
     location: location
     kafkaConnectImage: kafkaConnectImage
+    containerAppEnvId: containerAppEnv.outputs.id
   }
 }
