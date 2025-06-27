@@ -17,12 +17,12 @@ param kafkaConnectImage string = 'confluentinc/cp-kafka-connect:7.6.0'
 param containerAppEnvId string
 
 // Zookeeper settings
-var zookeeperClientPort string = '2181'
-var zookeeperTickTime string = '2000'
+var zookeeperClientPort int = 2181
+var zookeeperTickTime int = 2000
 
 // Kafka settings
-var kafkaMainPort string = '9092'
-var kafkaAltPort string = '29092'
+var kafkaMainPort int = 9092
+var kafkaAltPort int = 29092
 
 
 // Kafka Connect settings
@@ -34,6 +34,13 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
   location: location
   properties: {
     managedEnvironmentId: containerAppEnvId
+    configuration: {
+      ingress: {
+        exposedPort: kafkaMainPort
+        targetPort: kafkaMainPort
+        external: true
+      }
+    }
     template: {
       containers: [
         // Zookeeper
@@ -43,11 +50,11 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           env: [
             {
               name: 'ZOOKEEPER_CLIENT_PORT'
-              value: zookeeperClientPort
+              value: string(zookeeperClientPort)
             }
             {
               name: 'ZOOKEEPER_TICK_TIME'
-              value: zookeeperTickTime
+              value: string(zookeeperTickTime)
             }
           ]
         }
@@ -157,3 +164,5 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
     }
   }
 }
+
+output kafkaUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}:${kafkaMainPort}'

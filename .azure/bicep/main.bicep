@@ -116,7 +116,7 @@ var ai4greenEnvVars = {
   OIDC_USERINFO_AUTH_URI: referenceSecret(keyVaultName, 'OIDC_CLIENT_USERINFO_URI')
   OIDC_CLIENT_ISSUER: referenceSecret(keyVaultName, 'OIDC_CLIENT_ISSUER')
   OIDC_CLIENT_REDIRECT_URIS: referenceSecret(keyVaultName, 'OIDC_CLIENT_REDIRECT_URIS')
-  MESSAGE_QUEUE_HOSTNAME: minio.outputs.appUrl
+  MESSAGE_QUEUE_HOSTNAME: kafkaStack.outputs.kafkaUrl
   USE_KAFKA: 1
   MINIO_ACCESS_KEY: minio.outputs.accessKey
   MINIO_SECRET_KEY: minio.outputs.secretKey
