@@ -13,8 +13,8 @@ param storageAccountName string
 @description('Name of the Azure File Share to attach to the container.')
 param fileShareName string = 'minioshare'
 
-@description('Name of the managed environment for Azure Container Apps.')
-param containerAppEnvName string = 'minio-env'
+@description('Resource ID of the managed environment for Azure Container Apps.')
+param containerAppEnvId string = 'minio-env'
 
 @description('The username of the MinIO root user')
 param minioRootUserName string
@@ -58,15 +58,6 @@ resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@
   location: location
 }
 
-// Azure Container App Environment (required for container apps)
-resource containerEnv 'Microsoft.App/managedEnvironments@2023-05-01' = {
-  name: containerAppEnvName
-  location: location
-  properties: {
-    daprAIInstrumentationKey: '' // Optional, set if using Dapr with App Insights
-  }
-}
-
 // The main MinIO container app with Azure File volume mount
 resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: containerAppName
@@ -78,7 +69,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
     }
   }
   properties: {
-    managedEnvironmentId: containerEnv.id
+    managedEnvironmentId: containerAppEnvId
     configuration: {
       activeRevisionsMode: 'Single'
       secrets: [

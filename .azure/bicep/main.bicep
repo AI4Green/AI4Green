@@ -117,15 +117,24 @@ module ai4greendKvAccess 'br/DrsConfig:keyvault-access:v2' = {
   }
 }
 
+// Provision container app managed environment
+module containerAppEnv 'container-env.bicep' = {
+  params: {
+    containerAppEnvName: '${serviceName}-${env}-env'
+    location: location
+  }
+}
+
 
 // Provision Minio
 module minio 'minio.bicep' = {
   params: {
+    location: location
     storageAccountName: '${serviceName}-${env}-storage-account'
     fileShareName: '${serviceName}-${env}-file-share'
     containerImage: minioImage
     containerAppName: '${serviceName}-${env}-minio'
-    containerAppEnvName: '${serviceName}-${env}-minio-env'
+    containerAppEnvId: containerAppEnv.outputs.id
     minioAccessKey: referenceSecret(keyVaultName, 'MINIO_CLIENT_ACCESS_KEY')
     minioBucketName: referenceSecret(keyVaultName, 'MINIO_BUCKET_NAME')
     minioRootPassword: referenceSecret(keyVaultName, 'MINIO_ROOT_PASSWORD')
