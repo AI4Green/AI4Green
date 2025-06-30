@@ -24,7 +24,7 @@ def download_audit_logs(workgroup: str):
                     "error": "Kafka is disabled. Refer to the README to enable it.",
                 }
             ),
-            400,
+            503,
         )
 
     # get arguments form GET parameters
