@@ -26,6 +26,15 @@ var kafkaAltPort int = 29092
 
 
 // Kafka Connect settings
+@description('Minio URL')
+param minioUrl string
+
+@description('Minio access key')
+param minioAccessKey string
+
+@secure()
+@description('Minio secret key')
+param minioSecretKey string
 
 
 // Kafka stack container app
@@ -103,60 +112,16 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
               value: 'localhost:${kafkaAltPort}'
             }
             {
-              name: 'CONNECT_REST_PORT'
-              value: '8083'
+              name: 'MINIO_URL'
+              value: minioUrl
             }
             {
-              name: 'CONNECT_GROUP_ID'
-              value: 'kafka-connect-group'
+              name: 'AWS_ACCESS_KEY_ID'
+              value: minioAccessKey
             }
             {
-              name: 'CONNECT_CONFIG_STORAGE_TOPIC'
-              value: 'connect-configs'
-            }
-            {
-              name: 'CONNECT_OFFSET_STORAGE_TOPIC'
-              value: 'connect-offsets'
-            }
-            {
-              name: 'CONNECT_STATUS_STORAGE_TOPIC'
-              value: 'connect-status'
-            }
-            {
-              name: 'CONNECT_KEY_CONVERTER'
-              value: 'org.apache.kafka.connect.storage.StringConverter'
-            }
-            {
-              name: 'CONNECT_VALUE_CONVERTER'
-              value: 'org.apache.kafka.connect.json.JsonConverter'
-            }
-            {
-              name: 'CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE'
-              value: 'false'
-            }
-            {
-              name: 'CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE'
-              value: 'false'
-            }
-            {
-              name: 'CONNECT_INTERNAL_KEY_CONVERTER'
-              value: 'org.apache.kafka.connect.json.JsonConverter'
-            }
-            {
-              name: 'CONNECT_INTERNAL_VALUE_CONVERTER'
-              value: 'org.apache.kafka.connect.json.JsonConverter'
-            }
-            {
-              name: 'CONNECT_LOG4J_LOGGERS'
-              value: 'org.reflections=ERROR'
-            }
-            {
-              name: 'CONNECT_PLUGIN_PATH'
-              value: '/usr/share/java,/etc/kafka-connect/jars'
-            }
-            {
-              name: 'CONNECT_REST_ADVERTISED_HOST_NAME'
-              value: 'kafka-connect'
+              name: 'AWS_SECRET_ACCESS_KEY'
+              value: minioSecretKey
             }
           ]
         }
