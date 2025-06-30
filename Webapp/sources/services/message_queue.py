@@ -33,7 +33,7 @@ class QueueProducer(BaseQueueProducer):
             # We'll be sending messages as JSON objects,
             # but kafka accepts messages as binary strings.
             # This lambda converts dicts to strings and then to binary.
-            value_serializer=lambda x: json.dumps(x).encode(),
+            value_serializer=lambda x: x.encode(),
             # client_id="daniel", TODO: find a good value for the client id
         )
 
