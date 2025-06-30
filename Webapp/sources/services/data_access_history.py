@@ -38,7 +38,7 @@ class DataAccessMessage(MessageSerdeMixin):
             ],
         }
         payload = asdict(self)
-        serialised = {"schema": schema, "payload": payload}
+        serialised = json.dumps({"schema": schema, "payload": payload})
         return serialised
 
     @staticmethod
