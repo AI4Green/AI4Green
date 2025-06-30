@@ -20,7 +20,7 @@ ENV CONNECT_REST_ADVERTISED_HOST_NAME=localhost
 USER root
 
 # Install necessary utilities
-RUN apt-get update && apt-get install -y curl jq unzip && rm -rf /var/lib/apt/lists/*
+RUN yum install -y curl jq unzip
 
 # Create plugin directory if it doesn't exist
 RUN mkdir -p /etc/kafka-connect/jars
