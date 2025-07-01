@@ -1,0 +1,43 @@
+name: Release AI4Green Kafka Connect
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - microservices/kafka-connect.dockerfile # trigger on changes to the Dockerfile
+      - .github/workflows/publish-ai4green-kafka-connect.yml # trigger on changes to this file
+
+env:
+  namespace: ai4greeneln # the organisation name or username to publish to
+  repo-name: ai4green-kafka-connect # the name of the docker image (must be lowercase)
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Docker Login
+        uses: docker/login-action@v3.1.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Docker Metadata action
+        id: meta
+        uses: docker/metadata-action@v5.5.1
+        with:
+          images: ${{ env.namespace }}/${{ env.repo-name }}
+          tags: |
+            ${{ github.sha }}
+            latest
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v5.3.0
+        with:
+          context: microservices # the microservices directory
+          file: kafka-connect.dockerfile # the path to the Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
