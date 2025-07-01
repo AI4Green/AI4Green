@@ -1,5 +1,4 @@
 import { referenceSecret } from 'br/DrsUtils:functions:v1'
-import { ConnectionStringDictionary } from 'br/DrsUtils:types:v1'
 
 type ServiceNames = 'aigreen'
 param serviceName ServiceNames
@@ -109,6 +108,7 @@ var appInsightsSettings = {
 // AI4Green web app environment settings 
 var ai4greenEnvVars = {
   APPLICATIONINSIGHTS_CONNECTION_STRING: ai4greenSite.outputs.appInsights.connectionString
+  DATABASE_URL: referenceSecret(keyVaultName, 'db-connection-string')
   OIDC_CLIENT_ID: referenceSecret(keyVaultName, 'OIDC_CLIENT_ID')
   OIDC_CLIENT_SECRET: referenceSecret(keyVaultName, 'OIDC_CLIENT_SECRET')
   OIDC_CLIENT_AUTH_URI: referenceSecret(keyVaultName, 'OIDC_CLIENT_AUTH_URI')
