@@ -12,9 +12,9 @@ Your reaction {{reaction_approval_request.Reaction.reaction_id}} in workbook {{r
 
   </tr>
   <tr>
-    <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction_approval_request.reviewed_by_person.user.fullname}</td>
-    <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction_approval_request.status.value.capitalize()}</td>
-    <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction_approval_request.comments}</td>
+    <td style='padding: 8px; border: 1px solid #ddd;'>{{ reaction_approval_request.reviewed_by_person.user.fullname }}</td>
+    <td style='padding: 8px; border: 1px solid #ddd;'>{{ reaction_approval_request.status.value.capitalize() }}</td>
+    <td style='padding: 8px; border: 1px solid #ddd;'>{{ reaction_approval_request.comments }}</td>
 
   </tr>
 </table>
