@@ -79,13 +79,13 @@ def new_reaction() -> Response:
 @save_reaction_bp.doc(security="sessionAuth")
 def autosave() -> Response:
     """autosave when a field changes in the reaction page"""
+    print(request.form)
     reaction_description = str(request.form["reactionDescription"])
     reaction = services.reaction.get_current_from_request()
     reaction_name = reaction.name
     reaction_image = str(request.form["reactionImage"])
     reaction_class = str(request.form.get("reactionClass"))
     polymer_indices = json.loads(request.form.get("polymerIndices"))
-    print("autosave", polymer_indices)
     polymerisation_type = str(request.form["polymerisationType"])
 
     services.auth.edit_reaction(reaction)
@@ -246,6 +246,7 @@ def autosave() -> Response:
             "product_mns": product_mns,
         }
     )
+    print(reaction_table)
 
     # summary table entries
     # product masses and unreacted reactant masses

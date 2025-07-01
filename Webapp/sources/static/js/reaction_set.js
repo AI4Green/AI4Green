@@ -7,7 +7,6 @@ window.onload = function () {
 reactionTableObserver();
 
 function reactionTableObserver() {
-  console.log("BBBB");
   getKetcher().then((ketcher) => {
     ketcher.editor.subscribe("change", async function () {
       let smiles = await exportSmilesFromKetcher();
@@ -87,8 +86,6 @@ function assignReactions(reactions) {
 }
 
 function createGrid(numCols, numRows) {
-  // const cols = document.getElementById("column-size").value;
-  // const rows = document.getElementById("row-size").value;
   const grid = document.getElementById("grid");
   const sidePanel = document.getElementById("side-panel");
   grid.innerHTML = ""; // Clear existing grid
@@ -367,4 +364,14 @@ function applyToWellModal() {
 
   // Show the modal
   $("#apply-to-well-modal").modal("show");
+}
+
+function applyToAll() {
+  let reactionSet = JSON.parse($("#js-reaction-set").val());
+  console.log(reactionSet);
+  reactionSet.reactions.forEach((reaction) => {
+    // set each reaction_id as active then post data for each reaction
+    $("#js-reaction-id").val(reaction.reaction_id);
+    postReactionData();
+  });
 }

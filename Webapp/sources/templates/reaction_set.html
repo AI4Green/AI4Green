@@ -21,7 +21,7 @@
        </div>
 
        <div class="row">
-           <div class="col-5">
+           <div class="col-4">
             <div class="row">
                 <div class="col-12">
                     <div class="container-fluid">
@@ -30,45 +30,27 @@
                             <!-- Combined Selectors on One Line -->
                             <div class="row align-items-center">
                                 <!-- Reactor Type Selector -->
-                                <div class="col-4">
-                                    <label for="reactor-type" class="me-2">Reactor type: </label>
-                                    <select id="reactor-type" class="form-select form-select-sm me-3" onchange="updateReactorType()">
-                                        <option value="well-plate">Well plate</option>
-                                        <option value="carousel">Carousel</option>
-                                    </select>
-                                </div>
+{#                                    <label for="reactor-type" class="me-2">Reactor type: </label>#}
+{#                                    <select id="reactor-type" class="form-select form-select-sm me-3" onchange="updateReactorType()">#}
+{#                                        <option value="well-plate">Well plate</option>#}
+{#                                        <option value="carousel">Carousel</option>#}
+{#                                    </select>#}
 
                                 <!-- Multiwell Selectors -->
                                 <div id="wellplate-selector" class="col-8">
                                     <!-- Row and Column Selectors next to each other -->
-                                        <div class="row">
-                                            <div class="col-auto">
-                                                <label for="column-size" class="me-2">Number of columns: </label>
-                                                <select id="column-size" class="form-select form-select-sm me-2" onchange="createGrid()">
-                                                    {% for i in range(1, 11) %}
-                                                        <option value="{{ i }}">{{ i }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-
-                                            <div class="col-auto">
-                                                <label for="row-size" class="me-2">Number of rows: </label>
-                                                <select id="row-size" class="form-select form-select-sm me-3" onchange="createGrid()">
-                                                    {% for i in range(1, 11) %}
-                                                        <option value="{{ i }}">{{ i }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
+                                         <div class="col-4">
+                                            <button>+ Add Row</button>
+                                        </div>
+                                        <div class="col-4">
+                                            <button>+ Add Column</button>
                                         </div>
                                 </div>
                                  <!-- Carousel Selector -->
                                     <div class="col-auto" id="carousel-selector" style="display: none;">
-                                        <label for="carousel-reactions" class="me-2">Number of wells: </label>
-                                        <select id="carousel-reactions" class="form-select form-select-sm" onchange="createCarousel()">
-                                            {% for i in range(1, 20) %}
-                                                <option value="{{ i }}">{{ i }}</option>
-                                            {% endfor %}
-                                        </select>
+                                        <button>
+                                            + Add Reaction
+                                        </button>
                                     </div>
                             </div>
                         </div>
@@ -96,7 +78,7 @@
                 </div>
             </div>
        </div>
-       <div class="col-7">
+       <div class="col-8">
             <div class="row">
                 <div class="col-12">
                     <ul id="myTab" class="nav nav-tabs" role="tablist">
@@ -133,10 +115,9 @@
                                         <p><button id="apply-to-well" type="button" class="btn btn-success" style="width: 100%;" onclick="applyToWellModal()">Apply to Well</button></p>
                                         </div>
                                         <div class="col-2">
-                                            <p><button id="apply-to-all" type="button" class="btn btn-success" style="width: 100%;">Apply to All</button></p>
+                                            <p><button id="apply-to-all" type="button" class="btn btn-success" onclick="applyToAll()" style="width: 100%;">Apply to All</button></p>
                                         </div>
                                     </div>
-                                    <div id="reaction-table-div"></div>
                                 </div>
                             </div>
                         </div>
@@ -158,7 +139,12 @@
                 </div>
             </div>
        </div>
-   </div>
+       </div>
+       <div class="row" style="padding-left: 10px">
+           <div class="col-12">
+               <div id="reaction-table-div"></div>
+           </div>
+       </div>
    </div>
 
 
@@ -190,6 +176,10 @@
 <input type="hidden" value='{{ workgroup_name }}' id="js-active-workgroup">
 <input type="hidden" value='{{ reactor_dimensions }}' id="js-reactor-dimensions">
 <input type="hidden" value='{{ workbook_name }}' id="js-active-workbook">
+<input type="hidden" value="" id="js-reaction-id">
+<input type="hidden" value="" id="js-reaction-rxn">
+<input type="hidden" value="{}" id="js-summary-table-data">
+
 
 {% if reactor_type == "well_plate" %}
     <input type="hidden" value='{{ number_of_columns }}' id="js-columns">
