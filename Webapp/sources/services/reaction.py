@@ -411,7 +411,7 @@ class ReactionApprovalRequestSubmission:
             reaction (models.Reaction): The reaction to be reviewed, extracted from the request.
             reaction_approval_request (models.ReactionApprovalRequest | None): Initialized as None, to be set later.
         """
-        self.requestor = services.user.person_from_current_user()
+        self.requestor = services.person.from_current_user_email()
         self.workgroup = services.workgroup.from_name(request.json.get("workgroup"))
         self.workbook = services.workbook.get_workbook_from_group_book_name_combination(
             self.workgroup.name, request.json.get("workbook")

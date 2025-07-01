@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.9', '3.10']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
     env:
       TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
 
@@ -50,4 +50,4 @@ jobs:
 
       - name: Test with pytest Poetry
         run: |
-           poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=sources Webapp/tests 
+           poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=sources Webapp/tests

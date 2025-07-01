@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "kafka_worker"
+version = "0.1.0"
+description = ""
+authors = ["maddy <madeleine.parker@nottingham.ac.uk>"]
+license = "AGPL-3.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+apscheduler = "^3.11.0"
+kafka-python = "^2.2.12"
+python-dotenv = "^1.1.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

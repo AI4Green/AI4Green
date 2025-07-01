@@ -12,9 +12,9 @@ Your reaction {{reaction_approval_request.Reaction.reaction_id}} in workbook {{r
 
   </tr>
   <tr>
-    <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction_approval_request.reviewed_by_person.user.fullname}</td>
-    <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction_approval_request.status.value.capitalize()}</td>
-    <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction_approval_request.comments}</td>
+    <td style='padding: 8px; border: 1px solid #ddd;'>{{ reaction_approval_request.reviewed_by_person.user.fullname }}</td>
+    <td style='padding: 8px; border: 1px solid #ddd;'>{{ reaction_approval_request.status.value.capitalize() }}</td>
+    <td style='padding: 8px; border: 1px solid #ddd;'>{{ reaction_approval_request.comments }}</td>
 
   </tr>
 </table>
@@ -24,11 +24,13 @@ Your reaction {{reaction_approval_request.Reaction.reaction_id}} in workbook {{r
             workgroup=reaction_approval_request.WorkBook.name,
             workbook=reaction_approval_request.WorkBook.name,
             reaction_id=reaction_approval_request.Reaction.reaction_id,
-            tutorial='no')
+            tutorial='no',
+            _external=True,
+            _scheme="protocol")
             }}">
         Click here</a> to view this reaction
 </p>
-<p>Alternatively, you can paste the following link in your browser"s address bar:</p>
+<p>Alternatively, you can paste the following link in your browser&#39;s address bar:</p>
 <p>{{ url_for("main.sketcher",
             workgroup=reaction_approval_request.WorkGroup.name,
             workbook=reaction_approval_request.WorkBook.name,

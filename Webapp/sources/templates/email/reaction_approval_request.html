@@ -11,11 +11,11 @@
         <th style="text-align: center; padding: 8px; border: 1px solid #ddd;">Reaction ID</th>
       </tr>
       <tr>
-        <td style="padding: 8px; border: 1px solid #ddd;">{self.requestor.user.email}</td>
-        <td style="padding: 8px; border: 1px solid #ddd;">{self.workgroup.name}</td>
-        <td style="padding: 8px; border: 1px solid #ddd;">{self.workbook.name}</td>
-        <td style="padding: 8px; border: 1px solid #ddd;">{self.reaction.name}</td>
-        <td style="padding: 8px; border: 1px solid #ddd;">{self.reaction.reaction_id}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">{{ user.email }}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">{{ workgroup.name }}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">{{ workbook.name }}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">{{ reaction_approval_request.Reaction.name }}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">{{ reaction_approval_request.Reaction.reaction_id }}</td>
       </tr>
     </table>
 
@@ -24,7 +24,7 @@
     <a href="{{ url_for("reaction_approval.request_response", token=token, _external=True, _scheme="protocol") }}">
         click here.</a>
 </p>
-<p>Alternatively, you can paste the following link in your browser"s address bar:</p>
+<p>Alternatively, you can paste the following link in your browser&#39;s address bar:</p>
 <p>{{ url_for("reaction_approval.request_response", token=token, _external=True, _scheme="protocol") }}</p>
 <p>If you do not respond, this request will expire in 70 days.</p>
 
