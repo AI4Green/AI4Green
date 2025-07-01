@@ -167,8 +167,5 @@ module kafkaStack 'kafka.bicep' = {
     location: location
     kafkaConnectImage: kafkaConnectImage
     containerAppEnvId: containerAppEnv.outputs.id
-    minioAccessKey: minio.outputs.accessKey
-    minioSecretKey: minio.outputs.secretKey
-    minioUrl: minio.outputs.appUrl
   }
 }

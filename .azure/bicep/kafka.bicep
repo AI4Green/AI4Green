@@ -26,16 +26,6 @@ var kafkaAltPort int = 29092
 
 
 // Kafka Connect settings
-@description('Minio URL')
-param minioUrl string
-
-@description('Minio access key')
-param minioAccessKey string
-
-@secure()
-@description('Minio secret key')
-param minioSecretKey string
-
 
 // Kafka stack container app
 resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
@@ -112,16 +102,8 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
               value: 'localhost:${kafkaAltPort}'
             }
             {
-              name: 'MINIO_URL'
-              value: minioUrl
-            }
-            {
-              name: 'AWS_ACCESS_KEY_ID'
-              value: minioAccessKey
-            }
-            {
-              name: 'AWS_SECRET_ACCESS_KEY'
-              value: minioSecretKey
+              name: 'BOOTSTRAP_SERVERS'
+              value: 'localhost:${kafkaAltPort}'
             }
           ]
         }

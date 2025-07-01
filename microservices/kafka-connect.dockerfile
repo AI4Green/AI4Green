@@ -1,7 +1,6 @@
 FROM confluentinc/cp-kafka-connect:7.6.0
 
 # Default envrionment variables
-ENV PARTION_FIELDS=workgroup,date
 ENV CONNECT_PLUGIN_PATH=/usr/share/java,/etc/kafka-connect/jars
 ENV CONNECT_REST_PORT=8083
 ENV CONNECT_GROUP_ID=kafka-connect-group
@@ -33,5 +32,4 @@ RUN unzip /tmp/s3-sink-connector.zip -d /etc/kafka-connect/jars && rm /tmp/s3-si
 COPY kafka-connect-setup.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Use the custom entrypoint script
-ENTRYPOINT ["/entrypoint.sh"]
+# Kafka Connect will start as normal with the S3 sink plugin loaded
