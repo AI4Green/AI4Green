@@ -179,11 +179,22 @@ async function reactionTableReload() {
   }
   // auxiliary reload functions that use the reaction table json
   function fillInputField(fieldID, jsonID, i) {
+    let dataRow = js_reaction_table_data[jsonID];
+    // obtain value if dataRow[i] is not undefined else undefined
+    let value = dataRow?.[i];
+
+    if (typeof value === "undefined") {
+      // should fire if any key is missing in js_reaction_table_data (eg/ reactant Mns for older reactions)
+      console.warn(
+        `Skipping fillInputField: value is undefined for jsonID: ${jsonID}`,
+      );
+      return;
+    }
     // either use dropdown or value depending if field is physical form or not
     if (fieldID.includes("physical-form")) {
-      $(fieldID).prop("selectedIndex", js_reaction_table_data[jsonID][i]);
+      $(fieldID).prop("selectedIndex", value);
     } else {
-      $(fieldID).val(js_reaction_table_data[jsonID][i]);
+      $(fieldID).val(value);
     }
     // checks if the field should be styled (highlights red if blank)
     if (styleElements.some((styleElement) => fieldID.includes(styleElement))) {
