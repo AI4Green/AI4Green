@@ -180,6 +180,7 @@ class TestConfig(BaseConfig):
         "db": SQLALCHEMY_DATABASE_URI,
         "update": "sqlite:///temp_update.sqlite",
     }
+    USE_KAFKA = True
 
 
 class DevConfig(BaseConfig):
