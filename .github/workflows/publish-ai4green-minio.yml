@@ -8,6 +8,9 @@ on:
       - microservices/minio.dockerfile # trigger on changes to the Dockerfile
       - .github/workflows/publish-ai4green-minio.yml # trigger on changes to this file
 
+permissions:
+  contents: read
+
 env:
   namespace: ai4greeneln # the organisation name or username to publish to
   repo-name: ai4green-minio # the name of the docker image (must be lowercase)
