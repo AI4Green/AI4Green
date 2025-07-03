@@ -1,12 +1,12 @@
 import { referenceSecret } from 'br/DrsUtils:functions:v1'
 
-type ServiceNames = 'aigreen'
+type ServiceNames = 'ai4green'
 param serviceName ServiceNames
 
 type Environments = 'dev' | 'qa' | 'uat' | 'prod'
 param env Environments
 
-param keyVaultName string = env == 'uat' ? '${serviceName}-test-kv' : '${serviceName}-${env}-kv'
+param keyVaultName string = env == 'uat' ? 'aigreen-test-kv' : 'aigreen-${env}-kv'
 
 param appName string = '${serviceName}-${env}'
 param appSettings object = {}
