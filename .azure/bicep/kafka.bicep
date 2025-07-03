@@ -2,7 +2,7 @@
 param location string = resourceGroup().location
 
 @description('Base name for the apps')
-param appBaseNae string
+param appBaseName string
 
 @description('The image to use for zookeeper')
 param zookeeperImage string = 'confluentinc/cp-zookeeper:7.6.0'
@@ -29,7 +29,7 @@ var kafkaAltPort int = 29092
 
 // Kafka stack container app
 resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
-  name: '${appBaseNae}-kafka-stack'
+  name: '${appBaseName}-kafka-stack'
   location: location
   properties: {
     managedEnvironmentId: containerAppEnvId
@@ -44,7 +44,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
       containers: [
         // Zookeeper
         {
-          name: '${appBaseNae}-zookeeper'
+          name: '${appBaseName}-zookeeper'
           image: zookeeperImage
           env: [
             {
@@ -59,7 +59,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         }
         // Kafka
         {
-          name: '${appBaseNae}-kafka'
+          name: '${appBaseName}-kafka'
           image: kafkaImage
           env: [
             {
@@ -94,7 +94,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         }
         // Kafka-connect
         {
-          name: '${appBaseNae}-kafka-connect'
+          name: '${appBaseName}-kafka-connect'
           image: kafkaConnectImage
           env: [
             {

@@ -197,7 +197,7 @@ module minio 'minio.bicep' = {
 // Provision kafka stack
 module kafkaStack 'kafka.bicep' = {
   params: {
-    appBaseNae: '${serviceName}-${env}'
+    appBaseName: '${serviceName}-${env}'
     location: location
     kafkaConnectImage: kafkaConnectImage
     containerAppEnvId: containerAppEnv.outputs.id
