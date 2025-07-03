@@ -3,9 +3,10 @@ name: Build and Push Audit Log Kafka Worker to Docker Hub
 on:
   push:
     branches:
-      - main
+      - fix-audit-log-deploy-actions
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
