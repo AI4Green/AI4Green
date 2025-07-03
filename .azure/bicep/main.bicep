@@ -121,6 +121,24 @@ var ai4greenEnvVars = {
   MINIO_ACCESS_KEY: minio.outputs.accessKey
   MINIO_SECRET_KEY: minio.outputs.secretKey
   MINIO_SECURE: 1
+  IPINFO_API_KEY: referenceSecret(keyVaultName, 'IPInfo-api-key')
+  MARVIN_JS_API_KEY: referenceSecret(keyVaultName, 'marvin-js-api-key')
+  RECAPTCHA_PRIVATE_KEY: referenceSecret(keyVaultName, 'recaptcha-secret-key')
+  RECAPTCHA_PUBLIC_KEY: referenceSecret(keyVaultName, 'recaptcha-site-key')
+  RETROSYNTHESIS_API_KEY: referenceSecret(keyVaultName, 'retrosynthesis-api-key')
+  SECRET_KEY: referenceSecret(keyVaultName, 'secret-key')
+  MAIL_PASSWORD: referenceSecret(keyVaultName, 'mail-password')
+  AZURE_STORAGE_CONNECTION_STRING: referenceSecret(keyVaultName, 'azure-storage-connection-string')
+  CONDITIONS_API_URL: 'https://ai4greenconditions.yellowriver-71d72982.uksouth.azurecontainerapps.io'
+  EXPORT_CONTROL_EMAIL_ADDRESS: 'admin@ai4green.app'
+  MAIL_PORT: 465
+  MAIL_SERVER: 'smtp.gmail.com'
+  MAIL_USE_LOCAL: 'false'
+  MAIL_USERNAME: 'admin@ai4green.app'
+  RETROSYNTHESIS_API_URL: 'https://ai4greenretrosynthesis.yellowriver-71d72982.uksouth.azurecontainerapps.io'
+  SCM_DO_BUILD_DURING_DEPLOYMENT: 1
+  SERVER_NAME: 'ai4green-uat.azurewebsites.net'
+  WEBSITE_HTTPLOGGING_RETENTION_DAYS: 7
 }
 
 // Grant frontend Key Vault access
