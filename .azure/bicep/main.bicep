@@ -126,6 +126,7 @@ var minioSettings = {
   MINIO_ACCESS_KEY: minio.outputs.accessKey
   MINIO_SECRET_KEY: minio.outputs.secretKey
   MINIO_SECURE: 1
+  MINIO_AUDIT_LOG_BUCKET: referenceSecret(keyVaultName, 'minio-bucket-name')
 }
 var kafkaSettings = {
   MESSAGE_QUEUE_HOSTNAME: kafkaStack.outputs.kafkaUrl
