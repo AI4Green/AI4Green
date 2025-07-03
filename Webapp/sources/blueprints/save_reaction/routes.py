@@ -79,7 +79,6 @@ def new_reaction() -> Response:
 @save_reaction_bp.doc(security="sessionAuth")
 def autosave() -> Response:
     """autosave when a field changes in the reaction page"""
-    print(request.form)
     reaction_description = str(request.form["reactionDescription"])
     reaction = services.reaction.get_current_from_request()
     reaction_name = reaction.name
@@ -246,7 +245,6 @@ def autosave() -> Response:
             "product_mns": product_mns,
         }
     )
-    print(reaction_table)
 
     # summary table entries
     # product masses and unreacted reactant masses

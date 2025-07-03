@@ -72,7 +72,6 @@ function focusWell(index) {
 
 function assignReactions(reactions) {
   reactions.forEach((reaction, index) => {
-    console.log(index);
     let wellId = `circle-${index}`;
     let well = $(`[data-id='${wellId}']`);
     if (well) {
@@ -368,10 +367,12 @@ function applyToWellModal() {
 
 function applyToAll() {
   let reactionSet = JSON.parse($("#js-reaction-set").val());
-  console.log(reactionSet);
   reactionSet.reactions.forEach((reaction) => {
     // set each reaction_id as active then post data for each reaction
     $("#js-reaction-id").val(reaction.reaction_id);
+    $("#js-reaction-name").val(reaction.name);
+    $("#js-summary-table-data").val(reaction.summary_table_data);
+
     postReactionData();
   });
 }

@@ -484,7 +484,6 @@ function getFieldData() {
     reactionImage = "";
   }
   let reactionClass = $("#reaction-class").val();
-  console.log(reactionClass);
   let limitingReactantTableNumber = $(
     "#js-limiting-reactant-table-number",
   ).val();
