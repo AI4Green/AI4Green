@@ -2,9 +2,8 @@
 window.onload = function () {
   let reactorDimensions = JSON.parse($("#js-reactor-dimensions").val());
   initialiseReactors(reactorDimensions); // Ensure the page is loaded with the correct display settings
+  // reactionTableObserver();
 };
-
-reactionTableObserver();
 
 function reactionTableObserver() {
   getKetcher().then((ketcher) => {
@@ -60,14 +59,26 @@ function focusWell(index) {
 
   if (well) {
     well.addClass("focused");
-    let smiles = well.attr("data-smiles");
-
-    setTimeout(function () {
-      let ketcherFrame = document.getElementById("ketcher-editor");
-      let ketcher = ketcherFrame.contentWindow?.ketcher;
-      ketcher.setMolecule(smiles);
-    }, 1000);
+    loadReaction(well.attr("reaction-id"));
   }
+}
+
+function loadReaction(reactionID) {
+  let reactionSet = JSON.parse($("#js-reaction-set").val());
+  $("#js-reaction-id").val(reactionID);
+
+  let reaction = reactionSet.reactions.find(
+    (r) => r.reaction_id === reactionID,
+  );
+  console.log(reaction);
+
+  setTimeout(function () {
+    let ketcherFrame = document.getElementById("ketcher-editor");
+    let ketcher = ketcherFrame.contentWindow?.ketcher;
+    ketcher.setMolecule(reaction.reaction_smiles);
+  }, 1000);
+  reloadReactionTable(JSON.parse(reaction.reaction_table_data));
+  $("#reaction-table-div").show();
 }
 
 function assignReactions(reactions) {
@@ -75,11 +86,9 @@ function assignReactions(reactions) {
     let wellId = `circle-${index}`;
     let well = $(`[data-id='${wellId}']`);
     if (well) {
-      well.attr("data-reaction-id", reaction.reaction_id);
-      well.attr("data-name", reaction.name);
-      well.attr("data-smiles", reaction.smiles);
-      well.attr("title", reaction.reaction_id);
+      well.attr("reaction-id", reaction.reaction_id);
       well.attr("tabindex", "0"); // Make div focusable
+      well.attr("title", reaction.reaction_id);
     }
   });
 }
