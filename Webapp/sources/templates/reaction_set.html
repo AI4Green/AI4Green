@@ -9,8 +9,9 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/polymer.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_marvin.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/integrated_ketcher.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_set.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/sketcher/sketcher.js') }}"></script>
+
 </head>
 <body>
    <div class="container-fluid">
@@ -95,6 +96,9 @@
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="setup" role="tabpanel" style="overflow-y:auto;">
                             <div id="sketchers-div" style="max-width: 100%; width: 100%;">
+                                <div>
+                                    <h3 id="js-reaction-id"></h3>
+                                </div>
                                  <div>
                                     Selected Reaction Sketcher:
                                     <label> MarvinJS
@@ -111,6 +115,9 @@
                                 <br>
                                 <div class="container-fluid">
                                     <div class="row">
+                                        <div class="col-2">
+                                        <p><button id="apply-to-reaction" type="button" class="btn btn-success" style="width: 100%;" onclick="applyToReactionModal()">Apply to Reaction</button></p>
+                                        </div>
                                         <div class="col-2">
                                         <p><button id="apply-to-well" type="button" class="btn btn-success" style="width: 100%;" onclick="applyToWellModal()">Apply to Well</button></p>
                                         </div>
@@ -173,12 +180,12 @@
 <input type="hidden" value="{{ number_of_reactions }}" id="js-number-of-reactions">
 <input type="hidden" value='{{ reaction_set | tojson | safe }}' id="js-reaction-set">
 <input type="hidden" value="{}" id="js-reaction-table-data">
+<input type="hidden" id="js-load-status">
 <input type="hidden" id="js-reaction-name">
 <input type="hidden" id="js-summary-table-data">
 <input type="hidden" value='{{ workgroup_name }}' id="js-active-workgroup">
 <input type="hidden" value='{{ reactor_dimensions }}' id="js-reactor-dimensions">
 <input type="hidden" value='{{ workbook_name }}' id="js-active-workbook">
-<input type="hidden" value="" id="js-reaction-id">
 <input type="hidden" value="" id="js-reaction-rxn">
 <input type="hidden" id="js-reaction-smiles">
 <input type="hidden" value="{}" id="js-summary-table-data">

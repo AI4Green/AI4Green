@@ -64,13 +64,17 @@ function focusWell(index) {
 }
 
 function loadReaction(reactionID) {
+  let loadStatus = $("#js-load-status");
+
+  loadStatus.val("loading");
   let reactionSet = JSON.parse($("#js-reaction-set").val());
-  $("#js-reaction-id").val(reactionID);
+  let reactionIndicator = $("#js-reaction-id");
+  reactionIndicator.val(reactionID);
+  reactionIndicator.text(reactionID);
 
   let reaction = reactionSet.reactions.find(
     (r) => r.reaction_id === reactionID,
   );
-  console.log(reaction);
 
   setTimeout(function () {
     let ketcherFrame = document.getElementById("ketcher-editor");
@@ -78,7 +82,7 @@ function loadReaction(reactionID) {
     ketcher.setMolecule(reaction.reaction_smiles);
   }, 1000);
   reloadReactionTable(JSON.parse(reaction.reaction_table_data));
-  $("#reaction-table-div").show();
+  loadStatus.val("loading");
 }
 
 function assignReactions(reactions) {
