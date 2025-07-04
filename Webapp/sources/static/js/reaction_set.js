@@ -64,25 +64,22 @@ function focusWell(index) {
 }
 
 function loadReaction(reactionID) {
-  let loadStatus = $("#js-load-status");
-
-  loadStatus.val("loading");
   let reactionSet = JSON.parse($("#js-reaction-set").val());
   let reactionIndicator = $("#js-reaction-id");
+
   reactionIndicator.val(reactionID);
   reactionIndicator.text(reactionID);
 
   let reaction = reactionSet.reactions.find(
     (r) => r.reaction_id === reactionID,
   );
+  $("#js-reaction-smiles").val(reaction.reaction_smiles);
+  $("#js-reaction-name").val(reaction.name);
+  $("#js-summary-table-data").val(reaction.summary_table_data);
+  $("#js-reaction-rxn").val(reaction.reaction_rxn);
 
-  setTimeout(function () {
-    let ketcherFrame = document.getElementById("ketcher-editor");
-    let ketcher = ketcherFrame.contentWindow?.ketcher;
-    ketcher.setMolecule(reaction.reaction_smiles);
-  }, 1000);
+  reloadSketcher();
   reloadReactionTable(JSON.parse(reaction.reaction_table_data));
-  loadStatus.val("loading");
 }
 
 function assignReactions(reactions) {
@@ -379,6 +376,7 @@ function applyToWellModal() {
 }
 
 function applyToAll() {
+  let currentID = $("#js-reaction-id").val();
   let reactionSet = JSON.parse($("#js-reaction-set").val());
   reactionSet.reactions.forEach((reaction) => {
     // set each reaction_id as active then post data for each reaction
@@ -388,4 +386,10 @@ function applyToAll() {
 
     postReactionData();
   });
+  // reset reaction ID to what it was before save
+  $("#js-reaction-id").val(currentID);
+}
+
+function applyToReaction() {
+  postReactionData();
 }
