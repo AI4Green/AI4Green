@@ -252,6 +252,7 @@ def to_dict(reaction_list: List[models.Reaction]) -> List[Dict]:
             "time_of_creation": str(reaction.time_of_creation),
             "time_of_update": str(reaction.time_of_update),
             "reaction_smiles": reaction.reaction_smiles,
+            "reaction_rxn": reaction.reaction_rxn,
             "reaction_table_data": reaction.reaction_table_data,
             "summary_table_data": reaction.summary_table_data,
             "workgroup": reaction.WorkBook.WorkGroup.name,
