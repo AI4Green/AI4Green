@@ -62,11 +62,13 @@ def new_reaction_set():
 
     reactions = []
     for i in range(number_of_reactions):
+        name_and_id = new_set_id + "-" + str(i + 1)
         # reaction_id = services.reaction.get_next_reaction_id_for_workbook(workbook.id)
         reactions.append(
             services.reaction.add(
-                name=new_set_name + "-" + str(i + 1),
-                reaction_id=new_set_id + "-" + str(i + 1),
+                # use same value for reaction_id and name
+                name=name_and_id,
+                reaction_id=name_and_id,
                 creator=current_user,
                 workbook_id=workbook.id,
                 reaction_table=reaction_table,
