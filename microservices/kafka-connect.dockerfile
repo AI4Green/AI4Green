@@ -28,8 +28,4 @@ RUN mkdir -p /etc/kafka-connect/jars
 COPY confluentinc-kafka-connect-s3-10.6.7.zip /tmp/s3-sink-connector.zip
 RUN unzip /tmp/s3-sink-connector.zip -d /etc/kafka-connect/jars && rm /tmp/s3-sink-connector.zip
 
-# Copy the custom entrypoint script
-COPY kafka-connect-setup.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 # Kafka Connect will start as normal with the S3 sink plugin loaded
