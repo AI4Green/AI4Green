@@ -3,45 +3,12 @@ window.onload = async function () {
   let reactorDimensions = JSON.parse($("#js-reactor-dimensions").val());
   await initialiseReactors(reactorDimensions); // Ensure the page is loaded with the correct display settings
 
-  // reactionTableObserver();
+  observer();
 };
 
-function reactionTableObserver() {
-  getKetcher().then((ketcher) => {
-    ketcher.editor.subscribe("change", async function () {
-      let smiles = await exportSmilesFromKetcher();
-      let rxn = await exportRXNFromKetcher();
-
-      if (smiles === ">>" || smiles === "" || smiles === undefined) {
-        // catches if autosave occurs during a sketcher crash
-        return;
-      }
-      // change here for reagent support
-      let smilesNew = removeReagentsFromSmiles(smiles);
-      $("#js-reaction-smiles").val(smilesNew);
-      $("#js-reaction-rxn").val(rxn);
-      let workgroup = $("#js-active-workgroup").val();
-      let workbook = $("#js-active-workbook").val();
-      let reactionID = $("#js-reaction-id").val();
-      let polymerIndices = identifyPolymers(rxn);
-      let userEmail = "{{ current_user.email }}";
-      let demo = $("#js-demo").val();
-      let tutorial = $("#js-tutorial").val();
-      // change here for reagent support
-      if (smiles.includes(">>")) {
-        updateReactionTable(
-          smilesNew,
-          workgroup,
-          workbook,
-          reactionID,
-          polymerIndices,
-          demo,
-          tutorial,
-        );
-      }
-    });
-  });
-}
+// lock settings to prevent multiple loads in fast well clicks
+let loadingLock = false;
+let pendingWellIndex = null;
 
 async function initialiseReactors(reactorDimensions) {
   let reactionSet = JSON.parse($("#js-reaction-set").val());
@@ -53,37 +20,55 @@ async function initialiseReactors(reactorDimensions) {
   await focusWell("0");
 }
 
+let currentLoadToken = 0;
+
 async function focusWell(index) {
   $(".focused").removeClass("focused");
   let wellId = `circle-${index}`;
   let well = $(`[data-id='${wellId}']`);
+  if (!well.length) return;
 
-  if (well) {
-    well.addClass("focused");
-    await loadReaction(well.attr("reaction-id"));
+  well.addClass("focused");
+
+  const thisLoad = ++currentLoadToken;
+
+  // Set load-status early so autosave will stop
+  $("#js-load-status").val("loading");
+
+  const reactionId = well.attr("reaction-id");
+
+  const success = await loadReaction(reactionId, thisLoad);
+
+  if (success && thisLoad === currentLoadToken) {
+    $("#js-load-status").val("loaded");
   }
 }
 
-async function loadReaction(reactionID) {
-  let reactionSet = JSON.parse($("#js-reaction-set").val());
-  let reactionIndicator = $("#js-reaction-id");
+async function loadReaction(reactionID, loadToken) {
+  const reactionSet = JSON.parse($("#js-reaction-set").val());
+  const reactionIndicator = $("#js-reaction-id");
 
-  $("#js-load-status").val("loading");
+  // Guard against stale loads
+  if (loadToken !== currentLoadToken) return false;
 
-  reactionIndicator.val(reactionID);
-  reactionIndicator.text(reactionID);
-
-  let reaction = reactionSet.reactions.find(
+  const reaction = reactionSet.reactions.find(
     (r) => r.reaction_id === reactionID,
   );
+
+  if (!reaction) return false;
+
+  // Fill out all fields
+  reactionIndicator.val(reactionID).text(reactionID);
   $("#js-reaction-smiles").val(reaction.reaction_smiles);
   $("#js-reaction-name").val(reaction.name);
   $("#js-summary-table-data").val(reaction.summary_table_data);
   $("#js-reaction-rxn").val(reaction.reaction_rxn);
 
-  reloadReactionTable(JSON.parse(reaction.reaction_table_data));
+  await reloadReactionTable(JSON.parse(reaction.reaction_table_data));
   await reloadSketcher();
-  $("#js-load-status").val("loaded");
+
+  // Confirm still valid load
+  return loadToken === currentLoadToken;
 }
 
 function assignReactions(reactions) {
