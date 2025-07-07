@@ -1,7 +1,8 @@
 // Initialize the page with the correct reactor type settings
-window.onload = function () {
+window.onload = async function () {
   let reactorDimensions = JSON.parse($("#js-reactor-dimensions").val());
-  initialiseReactors(reactorDimensions); // Ensure the page is loaded with the correct display settings
+  await initialiseReactors(reactorDimensions); // Ensure the page is loaded with the correct display settings
+
   // reactionTableObserver();
 };
 
@@ -42,30 +43,32 @@ function reactionTableObserver() {
   });
 }
 
-function initialiseReactors(reactorDimensions) {
+async function initialiseReactors(reactorDimensions) {
   let reactionSet = JSON.parse($("#js-reaction-set").val());
 
   updateReactorType(reactorDimensions);
   assignReactions(reactionSet.reactions);
 
   // focus first well
-  focusWell("0");
+  await focusWell("0");
 }
 
-function focusWell(index) {
+async function focusWell(index) {
   $(".focused").removeClass("focused");
   let wellId = `circle-${index}`;
   let well = $(`[data-id='${wellId}']`);
 
   if (well) {
     well.addClass("focused");
-    loadReaction(well.attr("reaction-id"));
+    await loadReaction(well.attr("reaction-id"));
   }
 }
 
-function loadReaction(reactionID) {
+async function loadReaction(reactionID) {
   let reactionSet = JSON.parse($("#js-reaction-set").val());
   let reactionIndicator = $("#js-reaction-id");
+
+  $("#js-load-status").val("loading");
 
   reactionIndicator.val(reactionID);
   reactionIndicator.text(reactionID);
@@ -78,8 +81,9 @@ function loadReaction(reactionID) {
   $("#js-summary-table-data").val(reaction.summary_table_data);
   $("#js-reaction-rxn").val(reaction.reaction_rxn);
 
-  reloadSketcher();
   reloadReactionTable(JSON.parse(reaction.reaction_table_data));
+  await reloadSketcher();
+  $("#js-load-status").val("loaded");
 }
 
 function assignReactions(reactions) {
