@@ -6,10 +6,6 @@ window.onload = async function () {
   observer();
 };
 
-// lock settings to prevent multiple loads in fast well clicks
-let loadingLock = false;
-let pendingWellIndex = null;
-
 async function initialiseReactors(reactorDimensions) {
   let reactionSet = JSON.parse($("#js-reaction-set").val());
 
