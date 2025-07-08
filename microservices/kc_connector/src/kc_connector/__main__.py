@@ -13,7 +13,6 @@ MINIO_BUCKET_NAME = os.getenv("MINIO_BUCKET_NAME") or exit(
 )
 MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY") or exit("MINIO_ACCESS_KEY is not set")
 MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY") or exit("MINIO_SECRET_KEY is not set")
-PARTITION_FIELDS = os.getenv("PARTITION_FIELDS") or exit("PARTITION_FIELDS is not set")
 FLUSH_SIZE = os.getenv("FLUSH_SIZE") or exit("FLUSH_SIZE is not set")
 
 
@@ -25,6 +24,7 @@ if __name__ == "__main__":
     # get the connector name from the command line
     topic_name = sys.argv[1]
     connector_name = f"{topic_name}-connector"
+    partition_fields = sys.argv[2]
 
     # load the template JSON
     with open("template.json", "r") as template_file:
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     template["name"] = connector_name
     template["config"]["topics"] = topic_name
     template["config"]["s3.bucket.name"] = MINIO_BUCKET_NAME
-    template["config"]["partition.field.name"] = PARTITION_FIELDS
+    template["config"]["partition.field.name"] = partition_fields
     template["config"]["store.url"] = MINIO_URL
     template["config"]["s3.endpoint"] = MINIO_URL
     template["config"]["aws.access.key.id"] = MINIO_ACCESS_KEY
