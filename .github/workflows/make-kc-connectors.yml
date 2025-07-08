@@ -14,7 +14,7 @@ jobs:
       MINIO_BUCKET_NAME: ${{ secrets.MINIO_BUCKET_NAME }}
       MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
       MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
-      FLUSH_SIZE: 1
+      FLUSH_SIZE: 100
 
     runs-on: ubuntu-latest
 
