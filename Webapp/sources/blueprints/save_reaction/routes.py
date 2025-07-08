@@ -92,6 +92,7 @@ def autosave() -> Response:
     summary_to_print = str(request.form["summary_to_print"])
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
     reaction_smiles = str(request.form["reactionSmiles"])
+    reaction_rxn = str(request.form["reactionRXN"])
 
     # reaction table entries
     # find the table number of the limiting reactant e.g js-reactant1
@@ -357,6 +358,7 @@ def autosave() -> Response:
         "time_of_update": current_time,
         "complete": complete,
         "reaction_smiles": reaction_smiles,
+        "reaction_rxn": reaction_rxn,
         "description": reaction_description,
         "reaction_image": reaction_image,
         "reactants": reactant_smiles_ls,
