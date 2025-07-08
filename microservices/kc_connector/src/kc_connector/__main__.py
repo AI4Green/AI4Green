@@ -19,6 +19,10 @@ FLUSH_SIZE = os.getenv("FLUSH_SIZE") or exit("FLUSH_SIZE is not set")
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+
     # get the connector name from the command line
     connector_name = sys.argv[1]
 
@@ -38,9 +42,16 @@ if __name__ == "__main__":
     template["config"]["flush.size"] = FLUSH_SIZE
 
     # Send the data to kafka-connect
-    res = requests.post(KAFKA_CONNECT_URL, data=template)
+    res = requests.post(f"{KAFKA_CONNECT_URL}/connectors", json=template)
     try:
         res.raise_for_status()
         logging.info(f"Successfully created connector {connector_name}")
     except:
-        logging.error(f"Failed to create connector {connector_name}")
+        logging.error(
+            f"Failed to create connector {connector_name}: {res.status_code} {res.reason}"
+        )
+    finally:
+        res.close()
+
+    # Clean up the logger
+    logging.shutdown()
