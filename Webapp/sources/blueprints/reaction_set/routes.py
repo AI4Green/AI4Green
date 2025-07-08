@@ -1,6 +1,6 @@
 from typing import Dict, List, Union
 
-from flask import current_app, jsonify, redirect, render_template, request, url_for
+from flask import Response, current_app, jsonify, redirect, render_template, request
 from flask_login import current_user, login_required
 from sources import models, services
 
@@ -10,15 +10,7 @@ from . import reaction_set_bp
 @reaction_set_bp.route("/reaction_set/<workgroup_name>/<workbook_name>/<set_id>")
 @login_required
 def reaction_set(workgroup_name, workbook_name, set_id):
-    # to do
-    # add workbook, workgroup to reaction set page
-    # fix atuosave sketcher to only update reaction table in set mode (do we want to try autosaving?)
-    # then fix apply to well and apply to all
-    # colours for unsaved/edited wells
-    # colours for highlighted reaction table are also broken, needs fix before deplyment
-
     r_set = services.reaction_set.get_from_id(set_id, workgroup_name, workbook_name)
-
     serialised_set = services.reaction_set.to_dict([r_set])[0]
 
     return render_template(
@@ -34,6 +26,23 @@ def reaction_set(workgroup_name, workbook_name, set_id):
 @reaction_set_bp.route("/click_and_drag")
 def click_and_drag():
     return render_template("click-and-drag.html")
+
+
+@reaction_set_bp.route("/update_reaction_set", methods=["POST"])
+def update_reaction_set() -> Response:
+    """
+    Returns serialised reaction set for storage on front end. Used after saving multiple wells to apply changes in
+    front end
+    """
+    set_id = request.json.get("set_id")
+    workgroup_name = request.json.get("workgroup")
+    workbook_name = request.json.get("workbook")
+    print(set_id, workgroup_name, workbook_name)
+
+    r_set = services.reaction_set.get_from_id(set_id, workgroup_name, workbook_name)
+    serialised_set = services.reaction_set.to_dict([r_set])[0]
+
+    return serialised_set
 
 
 @reaction_set_bp.route("/new_reaction_set", methods=["GET", "POST"])

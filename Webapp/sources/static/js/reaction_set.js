@@ -50,7 +50,6 @@ async function loadReaction(reactionID, loadToken) {
   const reaction = reactionSet.reactions.find(
     (r) => r.reaction_id === reactionID,
   );
-
   if (!reaction) return false;
 
   // Fill out all fields
@@ -317,7 +316,8 @@ function makeReactorDraggable(containerId, reactorId) {
 }
 
 function applyToWellModal() {
-  let reactorType = $("#reactor-type").val(); // Get selected reactor type
+  let reactorDimensions = JSON.parse($("#js-reactor-dimensions").val());
+  let reactorType = reactorDimensions["reactorType"];
 
   let modalReactorContainer = document.getElementById(
     "add-to-well-reactor-container",
@@ -360,21 +360,62 @@ function applyToWellModal() {
   $("#apply-to-well-modal").modal("show");
 }
 
-function applyToAll() {
-  let currentID = $("#js-reaction-id").val();
-  let reactionSet = JSON.parse($("#js-reaction-set").val());
-  reactionSet.reactions.forEach((reaction) => {
+function updateReactionSet() {
+  // sync front and back end after saving multiple rows
+  let setId = JSON.parse($("#js-reaction-set").val())["reaction_id"];
+  let workgroup = $("#js-active-workgroup").val();
+  let workbook = $("#js-active-workbook").val();
+  fetch("/update_reaction_set", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      set_id: setId,
+      workgroup: workgroup,
+      workbook: workbook,
+    }),
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (item) {
+      console.log("UPDATE SET");
+      $("#js-reaction-set").val(JSON.stringify(item));
+    });
+}
+
+function saveToReactions(reactions) {
+  reactions.forEach((reaction) => {
     // set each reaction_id as active then post data for each reaction
     $("#js-reaction-id").val(reaction.reaction_id);
     $("#js-reaction-name").val(reaction.name);
     $("#js-summary-table-data").val(reaction.summary_table_data);
 
     postReactionData();
+    // reload reaction set data from backend ----> IS THIS THE BEST IDEA?
   });
+}
+
+function applyToAll() {
+  let currentID = $("#js-reaction-id").val();
+  let reactionSet = JSON.parse($("#js-reaction-set").val());
+  saveToReactions(reactionSet.reactions);
+  updateReactionSet();
   // reset reaction ID to what it was before save
   $("#js-reaction-id").val(currentID);
 }
 
-function applyToReaction() {
-  postReactionData();
+function applyToSelectedWells() {
+  let reactionSet = JSON.parse($("#js-reaction-set").val());
+  let selectedReactions = reactionSet.reactions.filter((reaction) =>
+    $("div.btn.icon.selected")
+      .map(function () {
+        return $(this).attr("reaction-id");
+      })
+      .get()
+      .includes(reaction.reaction_id),
+  );
+
+  saveToReactions(selectedReactions);
 }
