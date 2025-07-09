@@ -7,6 +7,8 @@ param location string = resourceGroup().location
 @description('The ID of the virtual network')
 param infrastructureSubnetId string
 
+param tags object = {}
+
 // Azure Container App Environment (required for container apps)
 resource containerEnv 'Microsoft.App/managedEnvironments@2023-05-01' = {
   name: containerAppEnvName
@@ -16,6 +18,9 @@ resource containerEnv 'Microsoft.App/managedEnvironments@2023-05-01' = {
       infrastructureSubnetId: infrastructureSubnetId
     }
   }
+  tags: union({
+    Source: 'Bicep'
+  }, tags)
 }
 
 output id string = containerEnv.id

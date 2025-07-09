@@ -33,6 +33,8 @@ param minioAccessKey string
 #disable-next-line secure-secrets-in-params
 param minioSecretKey string
 
+param tags object = {}
+
 var storageMountPath = '/data' // Mount point inside the container
 var minioPort = 9000
 var volumeName = 'miniodata'
@@ -131,6 +133,9 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
       ]
     }
   }
+  tags: union({
+    Source: 'Bicep'
+  }, tags)
 }
 
 // Export the public FQDN of the MinIO Container App

@@ -16,6 +16,8 @@ param kafkaConnectImage string = 'confluentinc/cp-kafka-connect:7.6.0'
 @description('Resource ID of the managed environment for Azure Container Apps.')
 param containerAppEnvId string
 
+param tags object = {}
+
 // Zookeeper settings
 var zookeeperClientPort int = 2181
 var zookeeperTickTime int = 2000
@@ -110,6 +112,9 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
       ]
     }
   }
+  tags: union({
+    Source: 'Bicep'
+  }, tags)
 }
 
 output kafkaUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}:${kafkaMainPort}'

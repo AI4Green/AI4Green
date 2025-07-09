@@ -14,7 +14,6 @@ param hostnames array = []
 
 param location string = resourceGroup().location
 
-param sharedEnv string = 'shared'
 var sharedPrefix = serviceName
 
 param appServicePlanSku string = 'Y1'
@@ -34,7 +33,7 @@ module la 'br/DrsComponents:log-analytics-workspace:v1' = {
     logAnalyticsWorkspaceName: '${sharedPrefix}-la-ws'
     tags: {
       ServiceScope: serviceName
-      Environment: sharedEnv
+      Environment: env
     }
   }
 }
@@ -46,7 +45,7 @@ module vnet 'vnet.bicep' = {
     location: location
     tags: {
       ServiceScope: serviceName
-      Environment: sharedEnv
+      Environment: env
     }
   }
 }
@@ -65,7 +64,7 @@ module asp 'br/DrsComponents:app-service-plan:v1' = {
     sku: appServicePlanSku
     tags: {
       ServiceScope: serviceName
-      Environment: sharedEnv
+      Environment: env
     }
   }
 }
@@ -172,6 +171,10 @@ module containerAppEnv 'container-env.bicep' = {
     containerAppEnvName: '${serviceName}-${env}-env'
     location: location
     infrastructureSubnetId: vnet.outputs.integrationSubnetId
+    tags: {
+      ServiceScope: serviceName
+      Environment: env
+    }
   }
 }
 
@@ -190,6 +193,10 @@ module minio 'minio.bicep' = {
     minioRootPassword: referenceSecret(keyVaultName, 'minio-root-password')
     minioRootUserName: referenceSecret(keyVaultName, 'minio-root-user')
     minioSecretKey: referenceSecret(keyVaultName, 'minio-client-secret-key')
+    tags: {
+      ServiceScope: serviceName
+      Environment: env
+    }
   }
 }
 
@@ -201,5 +208,9 @@ module kafkaStack 'kafka.bicep' = {
     location: location
     kafkaConnectImage: kafkaConnectImage
     containerAppEnvId: containerAppEnv.outputs.id
+    tags: {
+      ServiceScope: serviceName
+      Environment: env
+    }
   }
 }
