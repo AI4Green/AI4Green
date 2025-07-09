@@ -17,7 +17,7 @@ param location string = resourceGroup().location
 param sharedEnv string = 'shared'
 var sharedPrefix = serviceName
 
-param appServicePlanSku string = 'P2'
+param appServicePlanSku string = 'Y1'
 
 
 // MinIO params
