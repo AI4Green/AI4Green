@@ -40,7 +40,7 @@ module la 'br/DrsComponents:log-analytics-workspace:v1' = {
 }
 
 // Provision virtual network
-module vnet 'br/DrsComponents:vnet:v1' = {
+module vnet 'vnet.bicep' = {
   params: {
     vnetName: '${serviceName}-${env}-vnet'
     location: location
