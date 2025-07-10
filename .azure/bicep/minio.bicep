@@ -8,10 +8,10 @@ param containerAppName string = 'minio-app'
 param containerImage string = 'quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z'
 
 @description('Globally unique name of the Azure Storage Account.')
-param storageAccountName string
+param storageAccountBaseName string
 
-@description('Name of the Azure File Share to attach to the container.')
-param fileShareName string = 'minioshare'
+// @description('Name of the Azure File Share to attach to the container.')
+// param fileShareName string = 'minioshare'
 
 @description('Resource ID of the managed environment for Azure Container Apps.')
 param containerAppEnvId string
@@ -42,17 +42,21 @@ var volumeName = 'miniodata'
 // Storage account for persistent data
 module storageAccount 'br/DrsComponents:storage-account:v1' = {
   params: {
-    baseAccountName: storageAccountName
+    baseAccountName: storageAccountBaseName
+    location: location
+    tags: union({
+      Source: 'Bicep'
+    }, tags)
   }
 }
 
 // Azure File Share inside the storage account
-resource fileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-09-01' = {
-  name: '${storageAccount.name}/default/${fileShareName}'
-  properties: {
-    shareQuota: 100 // Max quota in GB
-  }
-}
+// resource fileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-09-01' = {
+//   name: '${storageAccount.name}/default/${fileShareName}'
+//   properties: {
+//     shareQuota: 100 // Max quota in GB
+//   }
+// }
 
 // User-assigned managed identity to allow the container app to access resources securely
 resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
@@ -81,9 +85,8 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         }
       ]
       ingress: {
-        exposedPort: minioPort
+        // exposedPort: minioPort
         targetPort: minioPort
-        external: true
       }
     }
     template: {

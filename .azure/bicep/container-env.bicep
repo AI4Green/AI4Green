@@ -4,8 +4,8 @@ param containerAppEnvName string
 @description('The location of the container app environment')
 param location string = resourceGroup().location
 
-@description('The ID of the virtual network')
-param infrastructureSubnetId string
+// @description('The ID of the virtual network')
+// param infrastructureSubnetId string
 
 param tags object = {}
 
@@ -14,9 +14,9 @@ resource containerEnv 'Microsoft.App/managedEnvironments@2023-05-01' = {
   name: containerAppEnvName
   location: location
   properties: {
-    vnetConfiguration: {
-      infrastructureSubnetId: infrastructureSubnetId
-    }
+    // vnetConfiguration: {
+    //   infrastructureSubnetId: infrastructureSubnetId
+    // }
   }
   tags: union({
     Source: 'Bicep'

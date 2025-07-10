@@ -39,16 +39,16 @@ module la 'br/DrsComponents:log-analytics-workspace:v1' = {
 }
 
 // Provision virtual network
-module vnet 'vnet.bicep' = {
-  params: {
-    vnetName: '${serviceName}-${env}-vnet'
-    location: location
-    tags: {
-      ServiceScope: serviceName
-      Environment: env
-    }
-  }
-}
+// module vnet 'vnet.bicep' = {
+//   params: {
+//     vnetName: '${serviceName}-${env}-vnet'
+//     location: location
+//     tags: {
+//       ServiceScope: serviceName
+//       Environment: env
+//     }
+//   }
+// }
 
 // keyvault
 resource kv 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
@@ -170,7 +170,7 @@ module containerAppEnv 'container-env.bicep' = {
   params: {
     containerAppEnvName: '${serviceName}-${env}-env'
     location: location
-    infrastructureSubnetId: vnet.outputs.defaultSubnetId
+    // infrastructureSubnetId: vnet.outputs.defaultSubnetId
     tags: {
       ServiceScope: serviceName
       Environment: env
@@ -183,8 +183,8 @@ module containerAppEnv 'container-env.bicep' = {
 module minio 'minio.bicep' = {
   params: {
     location: location
-    storageAccountName: '${serviceName}-${env}-storage-account'
-    fileShareName: '${serviceName}-${env}-file-share'
+    storageAccountBaseName: 'sa${env}'
+    // fileShareName: '${serviceName}-${env}-file-share'
     containerImage: minioImage
     containerAppName: '${serviceName}-${env}-minio'
     containerAppEnvId: containerAppEnv.outputs.id
