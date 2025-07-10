@@ -13,7 +13,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2020-08-01' = {
   properties: {
     addressSpace: {
       addressPrefixes: [
-        '10.0.0.0/22'
+        '10.0.0.0/23'
       ]
     }
     // Microsoft.Network/virtualNetworks/subnets
@@ -21,27 +21,27 @@ resource vnet 'Microsoft.Network/virtualNetworks@2020-08-01' = {
       {
         name: 'Default' // for VM, most clients
         properties: {
-          addressPrefix: '10.0.2.0/24'
-          privateEndpointNetworkPolicies: 'Enabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-        }
-      }
-      {
-        name: 'Integration' // for App Service VNET Integrations
-        properties: {
           addressPrefix: '10.0.0.0/23'
           privateEndpointNetworkPolicies: 'Enabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
-          delegations: [
-            {
-              name: 'delegation'
-              properties:{
-                serviceName: 'Microsoft.Web/serverFarms'
-              }
-            }
-          ]
         }
       }
+      // {
+      //   name: 'Integration' // for App Service VNET Integrations
+      //   properties: {
+      //     addressPrefix: '10.0.0.0/23'
+      //     privateEndpointNetworkPolicies: 'Enabled'
+      //     privateLinkServiceNetworkPolicies: 'Enabled'
+      //     delegations: [
+      //       {
+      //         name: 'delegation'
+      //         properties:{
+      //           serviceName: 'Microsoft.Web/serverFarms'
+      //         }
+      //       }
+      //     ]
+      //   }
+      // }
     ]
   }
   tags: union({
@@ -50,4 +50,5 @@ resource vnet 'Microsoft.Network/virtualNetworks@2020-08-01' = {
 }
 
 output name string = vnet.name
-output integrationSubnetId string = vnet.properties.subnets[1].id
+output defaultSubnetId string = vnet.properties.subnets[0].id
+// output integrationSubnetId string = vnet.properties.subnets[1].id
