@@ -39,16 +39,16 @@ module la 'br/DrsComponents:log-analytics-workspace:v1' = {
 }
 
 // Provision virtual network
-module vnet 'vnet.bicep' = {
-  params: {
-    vnetName: '${serviceName}-${env}-vnet'
-    location: location
-    tags: {
-      ServiceScope: serviceName
-      Environment: env
-    }
-  }
-}
+// module vnet 'vnet.bicep' = {
+//   params: {
+//     vnetName: '${serviceName}-${env}-vnet'
+//     location: location
+//     tags: {
+//       ServiceScope: serviceName
+//       Environment: env
+//     }
+//   }
+// }
 
 // keyvault
 resource kv 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
@@ -170,7 +170,7 @@ module containerAppEnv 'container-env.bicep' = {
   params: {
     containerAppEnvName: '${serviceName}-${env}-env'
     location: location
-    infrastructureSubnetId: vnet.outputs.integrationSubnetId
+    // infrastructureSubnetId: vnet.outputs.integrationSubnetId
     tags: {
       ServiceScope: serviceName
       Environment: env
