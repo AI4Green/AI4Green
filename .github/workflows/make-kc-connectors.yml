@@ -23,7 +23,7 @@ jobs:
 
     strategy:
       matrix:
-        topic: ['reaction_edit_history', 'data_access_history']
+        topic: ['reaction_edit_history', 'data_access_history', 'data_export_history']
         partition-fields: ['workgroup,date']
 
     steps:
@@ -32,7 +32,7 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5.6.0
-        with: 
+        with:
           python-version: 3.12
 
       - name: Istall project dependencies
