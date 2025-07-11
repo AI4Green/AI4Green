@@ -16,6 +16,9 @@ param kafkaConnectImage string = 'confluentinc/cp-kafka-connect:7.6.0'
 @description('Resource ID of the managed environment for Azure Container Apps.')
 param containerAppEnvId string
 
+@description('Name of the managed environment for Azure Container Apps.')
+param containerAppEnvName string
+
 param tags object = {}
 
 // Zookeeper settings
@@ -24,22 +27,21 @@ var zookeeperTickTime int = 2000
 
 // Kafka settings
 var kafkaMainPort int = 9092
-var kafkaAltPort int = 29092
-
+var kafkaAppName string = '${appBaseName}-kafka'
 
 // Kafka Connect settings
+var kafkaConnectPort int = 8083
+var kafkaConnectAppName string = '${appBaseName}-kafka-connect'
 
-// Kafka stack container app
-resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
-  name: '${appBaseName}-kafka-stack'
+// Kafka container app
+resource kafkaApp 'Microsoft.App/containerApps@2023-05-01' = {
+  name: kafkaAppName
   location: location
   properties: {
     managedEnvironmentId: containerAppEnvId
     configuration: {
       ingress: {
-        exposedPort: kafkaMainPort
         targetPort: kafkaMainPort
-        external: true
       }
     }
     template: {
@@ -78,11 +80,11 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
             }
             {
               name: 'KAFKA_ADVERTISED_LISTENERS'
-              value: 'PLAINTEXT://localhost:${kafkaAltPort},PLAINTEXT_HOST://localhost:${kafkaMainPort}'
+              value: 'PLAINTEXT_HOST://${kafkaAppName}.${containerAppEnvName}.internal:${kafkaMainPort}'
             }
             {
               name: 'KAFKA_LISTENERS'
-              value: 'PLAINTEXT://0.0.0.0:${kafkaAltPort},PLAINTEXT_HOST://0.0.0.0:${kafkaMainPort}'
+              value: 'PLAINTEXT_HOST://0.0.0.0:${kafkaMainPort}'
             }
             {
               name: 'KAFKA_INTER_BROKER_LISTENER_NAME'
@@ -94,6 +96,42 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
             }
           ]
         }
+      ]
+    }
+  }
+  tags: union({
+    Source: 'Bicep'
+  }, tags)
+}
+
+// Kafka Connect container app
+resource kafkaConnectApp 'Microsoft.App/containerApps@2023-05-01' = {
+  name: kafkaConnectAppName
+  location: location
+  properties: {
+    managedEnvironmentId: containerAppEnvId
+    configuration: {
+      ingress: {
+        targetPort: kafkaConnectPort
+      }
+    }
+    template: {
+      containers: [
+        // Zookeeper
+        {
+          name: '${appBaseName}-zookeeper'
+          image: zookeeperImage
+          env: [
+            {
+              name: 'ZOOKEEPER_CLIENT_PORT'
+              value: string(zookeeperClientPort)
+            }
+            {
+              name: 'ZOOKEEPER_TICK_TIME'
+              value: string(zookeeperTickTime)
+            }
+          ]
+        }
         // Kafka-connect
         {
           name: '${appBaseName}-kafka-connect'
@@ -101,11 +139,11 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           env: [
             {
               name: 'CONNECT_BOOTSTRAP_SERVERS'
-              value: 'localhost:${kafkaAltPort}'
+              value: '${kafkaApp.name}.${containerAppEnvName}.internal:${kafkaMainPort}'
             }
             {
               name: 'BOOTSTRAP_SERVERS'
-              value: 'localhost:${kafkaAltPort}'
+              value: '${kafkaApp.name}.${containerAppEnvName}.internal:${kafkaMainPort}'
             }
           ]
         }
@@ -117,4 +155,5 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
   }, tags)
 }
 
-output kafkaUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}:${kafkaMainPort}'
+output kafkaUrl string = 'https://${kafkaApp.properties.configuration.ingress.fqdn}:${kafkaMainPort}'
+output kafkaConnectUrl string = 'https://${kafkaConnectApp.properties.configuration.ingress.fqdn}:${kafkaMainPort}'

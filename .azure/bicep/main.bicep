@@ -78,6 +78,11 @@ module ai4greenSite 'br/DrsComponents:app-service:v1' = {
     logAnalyticsWorkspaceName: la.outputs.name
     appHostnames: hostnames
     location: location
+    appServiceKind: 'Linux Web App'
+    tags: {
+      ServiceScope: serviceName
+      Environment: env
+    }
   }
 }
 
@@ -208,6 +213,7 @@ module kafkaStack 'kafka.bicep' = {
     location: location
     kafkaConnectImage: kafkaConnectImage
     containerAppEnvId: containerAppEnv.outputs.id
+    containerAppEnvName: containerAppEnv.name
     tags: {
       ServiceScope: serviceName
       Environment: env
