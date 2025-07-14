@@ -3,11 +3,8 @@ name: Build and Push Audit Log Kafka Worker to Docker Hub
 on:
   push:
     branches:
+      - audit_log_deploy_publish_profile
       - main
-
-permissions:
-  id-token: write
-  contents: read
 
 jobs:
   build-and-push:
@@ -36,17 +33,9 @@ jobs:
           build-contexts: |
             webapp=./Webapp
 
-      - name: Azure CLI login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          enable-federated-identity: true
-
       - name: Restart container app with new image
-        run: |
-          az containerapp update \
-            --name auditlogcompressor \
-            --resource-group ${{ secrets.AZURE_RESOURCE_ID }} \
-            --image ai4greeneln/audit_log_compressor:latest
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'auditlogcompressor'
+          publish-profile: ${{ secrets.azureWebAppPublishProfile }}
+          images: 'ai4greeneln/audit_log_compressor:latest'
