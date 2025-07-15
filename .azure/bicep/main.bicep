@@ -13,10 +13,9 @@ param appSettings object = {}
 param hostnames array = []
 
 param location string = resourceGroup().location
+param aspName string
 
 var sharedPrefix = serviceName
-
-param appServicePlanSku string = 'Y1'
 
 
 // MinIO params
@@ -56,17 +55,8 @@ resource kv 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
 }
 
 // App Service Plan
-module asp 'br/DrsComponents:app-service-plan:v1' = {
-  name: 'asp'
-  params: {
-    location: location
-    aspName: 'ai4green-asp'
-    sku: appServicePlanSku
-    tags: {
-      ServiceScope: serviceName
-      Environment: env
-    }
-  }
+resource asp 'Microsoft.Web/serverfarms@2020-10-01' existing = {
+  name: aspName
 }
 
 
@@ -74,7 +64,7 @@ module asp 'br/DrsComponents:app-service-plan:v1' = {
 module ai4greenSite 'br/DrsComponents:app-service:v1' = {
   params: {
     appName: appName
-    aspName: asp.outputs.name
+    aspName: asp.name
     logAnalyticsWorkspaceName: la.outputs.name
     appHostnames: hostnames
     location: location
