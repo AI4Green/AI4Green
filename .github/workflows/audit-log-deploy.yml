@@ -36,7 +36,7 @@ jobs:
       - name: Deploy to Azure Container Apps
         uses: azure/container-apps-deploy-action@v2
         with:
-          publish-profile: ${{ secrets.azureWebAppPublishProfile }}
-          container-app-name: auditlogcompressor
-          resource-group: ${{ secrets.AZURE_RESOURCE_ID }}
-          image: dockerhub.io/ai4greeneln/audit_log_compressor:latest
+          publishProfile: ${{ secrets.azureWebAppPublishProfile }}
+          containerAppName: auditlogcompressor
+          resourceGroup: ${{ secrets.AZURE_RESOURCE_ID }}
+          imageToDeploy: docker.io/ai4greeneln/audit_log_compressor:latest
