@@ -62,6 +62,9 @@ module storageAccount 'br/DrsComponents:storage-account:v1' = {
 resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: '${containerAppName}-identity'
   location: location
+  tags: union({
+    Source: 'Bicep'
+  }, tags)
 }
 
 // The main MinIO container app with Azure File volume mount
