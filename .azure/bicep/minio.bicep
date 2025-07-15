@@ -8,10 +8,7 @@ param containerAppName string = 'minio-app'
 param containerImage string = 'quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z'
 
 @description('Globally unique name of the Azure Storage Account.')
-param storageAccountName string
-
-@description('Name of the Azure File Share to attach to the container.')
-param fileShareName string = 'minioshare'
+param storageAccountBaseName string
 
 @description('Resource ID of the managed environment for Azure Container Apps.')
 param containerAppEnvId string
@@ -33,6 +30,8 @@ param minioAccessKey string
 #disable-next-line secure-secrets-in-params
 param minioSecretKey string
 
+param tags object = {}
+
 var storageMountPath = '/data' // Mount point inside the container
 var minioPort = 9000
 var volumeName = 'miniodata'
@@ -40,15 +39,11 @@ var volumeName = 'miniodata'
 // Storage account for persistent data
 module storageAccount 'br/DrsComponents:storage-account:v1' = {
   params: {
-    baseAccountName: storageAccountName
-  }
-}
-
-// Azure File Share inside the storage account
-resource fileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-09-01' = {
-  name: '${storageAccount.name}/default/${fileShareName}'
-  properties: {
-    shareQuota: 100 // Max quota in GB
+    baseAccountName: storageAccountBaseName
+    location: location
+    tags: union({
+      Source: 'Bicep'
+    }, tags)
   }
 }
 
@@ -56,6 +51,9 @@ resource fileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-0
 resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: '${containerAppName}-identity'
   location: location
+  tags: union({
+    Source: 'Bicep'
+  }, tags)
 }
 
 // The main MinIO container app with Azure File volume mount
@@ -79,9 +77,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         }
       ]
       ingress: {
-        exposedPort: minioPort
         targetPort: minioPort
-        external: true
       }
     }
     template: {
@@ -131,6 +127,9 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
       ]
     }
   }
+  tags: union({
+    Source: 'Bicep'
+  }, tags)
 }
 
 // Export the public FQDN of the MinIO Container App

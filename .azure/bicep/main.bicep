@@ -13,11 +13,9 @@ param appSettings object = {}
 param hostnames array = []
 
 param location string = resourceGroup().location
+param aspName string
 
-param sharedEnv string = 'shared'
 var sharedPrefix = serviceName
-
-param appServicePlanSku string = 'P2'
 
 
 // MinIO params
@@ -34,19 +32,7 @@ module la 'br/DrsComponents:log-analytics-workspace:v1' = {
     logAnalyticsWorkspaceName: '${sharedPrefix}-la-ws'
     tags: {
       ServiceScope: serviceName
-      Environment: sharedEnv
-    }
-  }
-}
-
-// Provision virtual network
-module vnet 'br/DrsComponents:vnet:v1' = {
-  params: {
-    vnetName: '${serviceName}-${env}-vnet'
-    location: location
-    tags: {
-      ServiceScope: serviceName
-      Environment: sharedEnv
+      Environment: env
     }
   }
 }
@@ -57,17 +43,8 @@ resource kv 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
 }
 
 // App Service Plan
-module asp 'br/DrsComponents:app-service-plan:v1' = {
-  name: 'asp'
-  params: {
-    location: location
-    aspName: 'ai4green-asp'
-    sku: appServicePlanSku
-    tags: {
-      ServiceScope: serviceName
-      Environment: sharedEnv
-    }
-  }
+resource asp 'Microsoft.Web/serverfarms@2020-10-01' existing = {
+  name: aspName
 }
 
 
@@ -75,10 +52,15 @@ module asp 'br/DrsComponents:app-service-plan:v1' = {
 module ai4greenSite 'br/DrsComponents:app-service:v1' = {
   params: {
     appName: appName
-    aspName: asp.outputs.name
+    aspName: asp.name
     logAnalyticsWorkspaceName: la.outputs.name
     appHostnames: hostnames
     location: location
+    appServiceKind: 'Linux Web App'
+    tags: {
+      ServiceScope: serviceName
+      Environment: env
+    }
   }
 }
 
@@ -171,7 +153,10 @@ module containerAppEnv 'container-env.bicep' = {
   params: {
     containerAppEnvName: '${serviceName}-${env}-env'
     location: location
-    infrastructureSubnetId: vnet.outputs.integrationSubnetId
+    tags: {
+      ServiceScope: serviceName
+      Environment: env
+    }
   }
 }
 
@@ -180,8 +165,7 @@ module containerAppEnv 'container-env.bicep' = {
 module minio 'minio.bicep' = {
   params: {
     location: location
-    storageAccountName: '${serviceName}-${env}-storage-account'
-    fileShareName: '${serviceName}-${env}-file-share'
+    storageAccountBaseName: 'sa${env}'
     containerImage: minioImage
     containerAppName: '${serviceName}-${env}-minio'
     containerAppEnvId: containerAppEnv.outputs.id
@@ -190,6 +174,10 @@ module minio 'minio.bicep' = {
     minioRootPassword: referenceSecret(keyVaultName, 'minio-root-password')
     minioRootUserName: referenceSecret(keyVaultName, 'minio-root-user')
     minioSecretKey: referenceSecret(keyVaultName, 'minio-client-secret-key')
+    tags: {
+      ServiceScope: serviceName
+      Environment: env
+    }
   }
 }
 
@@ -201,5 +189,10 @@ module kafkaStack 'kafka.bicep' = {
     location: location
     kafkaConnectImage: kafkaConnectImage
     containerAppEnvId: containerAppEnv.outputs.id
+    containerAppEnvName: containerAppEnv.name
+    tags: {
+      ServiceScope: serviceName
+      Environment: env
+    }
   }
 }
