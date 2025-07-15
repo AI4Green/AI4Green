@@ -5,3 +5,4 @@ param env = 'uat'
 param minioImage = 'ai4greeneln/ai4green-minio'
 param kafkaConnectImage = 'ai4greeneln/ai4green-kafka-connect'
 param hostnames = ['ai4green-uat.azurewebsites.net']
+param aspName = 'ASP-rgprjrumweRB05G81-bcb5'
