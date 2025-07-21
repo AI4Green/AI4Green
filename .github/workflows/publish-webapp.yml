@@ -1,4 +1,4 @@
-name: Release AI4Green MinIO
+name: Release AI4Green Webapp
 
 on:
   push:
