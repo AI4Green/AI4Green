@@ -1,3 +1,6 @@
+$(function () {
+  enableSubmit();
+});
 // enable the submit button once both checkboxes are enabled.
 function enableSubmit() {
   if ($("#hazard").is(":checked") && $("#privacy").is(":checked")) {
