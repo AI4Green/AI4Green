@@ -9,6 +9,13 @@ window.onload = async function () {
 async function initialiseReactors(reactorDimensions) {
   let reactionSet = JSON.parse($("#js-reaction-set").val());
 
+  // Sort reactions by reaction_id
+  reactionSet.reactions.sort((a, b) => {
+    if (a.reaction_id < b.reaction_id) return -1;
+    if (a.reaction_id > b.reaction_id) return 1;
+    return 0;
+  });
+
   updateReactorType(reactorDimensions);
   assignReactions(reactionSet.reactions);
 
@@ -360,7 +367,7 @@ function applyToWellModal() {
   $("#apply-to-well-modal").modal("show");
 }
 
-function updateReactionSet() {
+async function updateReactionSet() {
   // sync front and back end after saving multiple rows
   let setId = JSON.parse($("#js-reaction-set").val())["reaction_id"];
   let workgroup = $("#js-active-workgroup").val();
@@ -381,12 +388,13 @@ function updateReactionSet() {
     })
     .then(function (item) {
       console.log("UPDATE SET");
-      $("#js-reaction-set").val(JSON.stringify(item));
+      console.log(item);
     });
 }
 
-function saveToReactions(reactions) {
+function saveReactions(reactions) {
   reactions.forEach((reaction) => {
+    console.log(reaction.reaction_id);
     // set each reaction_id as active then post data for each reaction
     $("#js-reaction-id").val(reaction.reaction_id);
     $("#js-reaction-name").val(reaction.name);
@@ -397,16 +405,16 @@ function saveToReactions(reactions) {
   });
 }
 
-function applyToAll() {
+async function applyToAll() {
   let currentID = $("#js-reaction-id").val();
   let reactionSet = JSON.parse($("#js-reaction-set").val());
-  saveToReactions(reactionSet.reactions);
-  updateReactionSet();
+  saveReactions(reactionSet.reactions);
+  await updateReactionSet();
   // reset reaction ID to what it was before save
   $("#js-reaction-id").val(currentID);
 }
 
-function applyToSelectedWells() {
+async function applyToSelectedWells() {
   let reactionSet = JSON.parse($("#js-reaction-set").val());
   let selectedReactions = reactionSet.reactions.filter((reaction) =>
     $("div.btn.icon.selected")
@@ -416,6 +424,9 @@ function applyToSelectedWells() {
       .get()
       .includes(reaction.reaction_id),
   );
+  console.log(selectedReactions);
 
-  saveToReactions(selectedReactions);
+  saveReactions(selectedReactions);
+  await updateReactionSet();
+  $("#apply-to-well-modal").modal("hide");
 }

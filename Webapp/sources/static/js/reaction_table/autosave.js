@@ -261,6 +261,7 @@ function postReactionData(complete = "not complete") {
     selectivity,
     toExport,
   } = getFieldData();
+  console.log("POST", reactionName);
   let summary_to_print_el = document.getElementById("section-to-print");
   let summary_to_print = "no summary data";
   if (summary_to_print_el !== null) {
