@@ -97,27 +97,6 @@ def register_extensions(app: Flask) -> None:
     def load_user(user_id: int):
         return models.User.query.get(user_id)
 
-    # configure the message queue, e.g. kafka
-    if app.config["USE_KAFKA"] and not app.config["TESTING"]:
-        # In production or situations where Kafka is required,
-        # use the kafka queue producer.
-        # N.B. reuqires the kafka services to be running!
-        producer = QueueProducer(**app.config["MESSAGE_QUEUE_CONFIG"])
-    else:
-        # Use a queue producer which sends messages to the standard output
-        # via the built-in logger in Flask.
-        producer = LoggingQueueProducer()
-    app.config["MESSAGE_QUEUE_PRODUCER"] = producer
-
-    # set up MinIO
-    client = Minio(
-        app.config["MINIO_HOST"],
-        access_key=app.config["MINIO_ACCESS_KEY"],
-        secret_key=app.config["MINIO_SECRET_KEY"],
-        secure=app.config["MINIO_SECURE"],
-    )
-    app.config["MINIO_CLIENT"] = client
-
     mail.init_app(app)
 
     return None
@@ -279,9 +258,9 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(utils_bp)
 
-    from sources.blueprints.audit_logs import audit_log_bp
+    # from sources.blueprints.audit_logs import audit_log_bp
 
-    app.register_blueprint(audit_log_bp)
+    # app.register_blueprint(audit_log_bp)
 
 
 def inject_session_context(app: Flask) -> Dict[str, str]:
