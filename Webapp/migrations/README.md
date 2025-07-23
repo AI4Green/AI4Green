@@ -62,3 +62,28 @@ After-editing:
     op.execute("DROP TYPE IF EXISTS approvalstatus;")
     op.execute("DROP TYPE IF EXISTS exportformat;")
 ```
+
+### Targeting a specific database
+There are multiple database "binds" in the app. The available binds are:
+- db
+- update
+- audit_log
+
+To handle this in migrations, there is a utility function called `perform_migration`.
+This takes one required and one optional argument. The required argument `db_name` is
+provided automatically when you run `flask db upgrade` or `flask db downgrade`. The
+optional argument `target` defaults to "db", the main database. you can change the target
+like so:
+```python
+# Target the main db
+def upgrade(engine_name: str):
+    # test if the engine name is "default"
+    if not perform_migration(engine_name):
+        return
+
+# Target the audit log db
+def upgrade(engine_name: str):
+    # test if the engine name is "default"
+    if not perform_migration(engine_name, target="audit_log"):
+        return
+```
