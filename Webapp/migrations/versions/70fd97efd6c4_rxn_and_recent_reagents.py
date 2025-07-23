@@ -5,9 +5,12 @@ Revises: a1c950d31d0e
 Create Date: 2024-07-26 12:54:34.222040
 
 """
+
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
+
+from migrations.utils import perform_migration
 
 # revision identifiers, used by Alembic.
 revision = "70fd97efd6c4"
@@ -24,7 +27,11 @@ new_enum = sa.Enum(
 )
 
 
-def upgrade():
+def upgrade(engine_name: str):
+    # test if the engine name is "default"
+    if not perform_migration(engine_name):
+        print(f"Not performing migration {__file__}")
+        return
     # Create a temporary enum type with the new values
 
     temp_enum = sa.Enum(
