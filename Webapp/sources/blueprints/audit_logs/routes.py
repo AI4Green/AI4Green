@@ -1,13 +1,13 @@
 from datetime import datetime
-from flask import jsonify, request, send_file
-from flask_login import login_required
 
+from flask import current_app, jsonify, request, send_file
+from flask_login import login_required
+from sources.decorators import principal_investigator_required
 from sources.services.audit_logs import (
     get_audit_logs,
     get_human_readable_ids,
     make_log_stream,
 )
-from sources.decorators import principal_investigator_required
 
 from . import audit_log_bp
 
@@ -16,6 +16,17 @@ from . import audit_log_bp
 @login_required
 @principal_investigator_required
 def download_audit_logs(workgroup: str):
+    if not current_app.config["USE_KAFKA"]:
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": "Kafka is disabled. Refer to the README to enable it.",
+                }
+            ),
+            503,
+        )
+
     # get arguments form GET parameters
     topic = request.args.get("topic")
     if topic is None:
@@ -25,16 +36,16 @@ def download_audit_logs(workgroup: str):
 
     # retrieve and deserialise the audit logs
     logs = get_audit_logs(
-        topic=topic, workgroup=workgroup, start_date=start_date, end_date=end_date
+        topic=topic, workgroup_name=workgroup, start_date=start_date, end_date=end_date
     )
 
     # make the names of users, workgroups and workbooks human readable
     get_human_readable_ids(logs=logs)
 
     # convert the logs into a ZIP file stream
-    # file name will be {topic}-{current time}.zip
-    # e.g. reaction_editing_history-202506161054.zip
-    file_name = f"{topic}-{datetime.now().strftime('%Y%m%d%M%S')}.zip"
+    # file name will be {topic}-{current time}.json
+    # e.g. reaction_editing_history-202506161054.json
+    file_name = f"{topic}-{datetime.now().strftime('%Y%m%d%M%S')}.json"
     log_stream = make_log_stream(logs=logs, file_name=file_name)
 
     return send_file(
