@@ -5,6 +5,7 @@ Revises: a1c950d31d0e
 Create Date: 2024-07-26 12:54:34.222040
 
 """
+
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
@@ -24,7 +25,7 @@ new_enum = sa.Enum(
 )
 
 
-def upgrade():
+def upgrade(engine_name: str):
     # Create a temporary enum type with the new values
 
     temp_enum = sa.Enum(
