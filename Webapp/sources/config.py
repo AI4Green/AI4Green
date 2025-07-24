@@ -172,7 +172,7 @@ class TestConfig(BaseConfig):
         "db": SQLALCHEMY_DATABASE_URI,
         "update": "sqlite:///temp_update.sqlite",
         "audit_log": os.getenv(
-            "AUDIT_LOG_DATABASE_URL",
+            "TEST_AUDIT_LOG_DATABASE_URL",
             "postgresql://postgres:postgres@localhost:5433/ai4gauditlogtest",
         ),
     }
