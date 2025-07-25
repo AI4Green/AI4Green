@@ -2,8 +2,8 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 
 from flask import current_app, json
-from sources.services.message_queue import MessageSerdeMixin
 from sources import services
+from sources.services.message_queue import MessageSerdeMixin
 
 
 @dataclass
@@ -42,7 +42,7 @@ class ReactionEditMessage(MessageSerdeMixin):
         }
         payload = asdict(self)
         payload["change_details"] = json.dumps(payload["change_details"])
-        serialised = {"schema": schema, "payload": payload}
+        serialised = json.dumps({"schema": schema, "payload": payload})
         return serialised
 
     @staticmethod
