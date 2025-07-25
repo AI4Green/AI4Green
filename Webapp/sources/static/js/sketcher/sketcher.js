@@ -228,6 +228,7 @@ async function reloadReaction() {
   if (Object.keys(js_reaction_table_data).includes("reaction_description")) {
     reloadReactionTable(js_reaction_table_data);
   }
+  $("#js-load-status").val("loaded");
 }
 
 function reloadReactionTable(reactionTableData) {
