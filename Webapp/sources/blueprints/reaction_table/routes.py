@@ -173,11 +173,9 @@ class SketcherCompound:
                 for key in sub_dict.keys():
                     # new_key = key.replace(component_type + "_", "")
                     value = sub_dict.get(key, "")
-                    print(key, value)
                     if "units" in key:
                         compound_data[key.replace(component_type + "_", "")] = value
                     else:
-                        #
                         try:
                             compound_data[
                                 key.replace(component_type + "_", "")
@@ -415,7 +413,6 @@ def reload_reaction_table():
     compounds, units = SketcherCompound.from_reaction_table_dict(
         json.loads(reaction.reaction_table_data), workbook
     )
-    # print(compounds["reagent"][0].compound_data)
 
     if demo == "demo":
         sol_rows = services.solvent.get_default_list()
@@ -561,11 +558,11 @@ def get_compound_data(
 
     # now we have the compound/novel_compound object, we can get all the data
 
-    compound_data["molecular_weight_list"] = []
-    compound_data["name_list"] = []
-    compound_data["hazard_list"] = []
-    compound_data["density_list"] = []
-    compound_data["primary_key_list"] = []
+    compound_data["molecular_weights"] = []
+    compound_data["names"] = []
+    compound_data["hazards"] = []
+    compound_data["densities"] = []
+    compound_data["primary_keys"] = []
 
     if isinstance(compound, models.PolymerNovelCompound):
         molecular_weight = services.polymer_novel_compound.get_repeat_unit_weights(
@@ -576,23 +573,23 @@ def get_compound_data(
             float(compound.molec_weight) if compound.molec_weight != "" else 0
         )
 
-    compound_data["molecular_weight_list"].append(molecular_weight)
+    compound_data["molecular_weights"].append(molecular_weight)
 
     compound_name = compound.name if compound.name != "" else "Not found"
-    compound_data["name_list"].append(compound_name)
+    compound_data["names"].append(compound_name)
 
     compound_hazard = (
         compound.hphrase if compound.hphrase != "No hazard codes found" else "Unknown"
     )
-    compound_data["hazard_list"].append(compound_hazard)
+    compound_data["hazards"].append(compound_hazard)
 
     compound_density = compound.density if compound.density != "" else "-"
-    compound_data["density_list"].append(compound_density)
+    compound_data["densities"].append(compound_density)
 
     if novel_compound:
-        compound_data["primary_key_list"].append((compound.name, compound.workbook))
+        compound_data["primary_keys"].append((compound.name, compound.workbook))
     else:
-        compound_data["primary_key_list"].append(compound.id)
+        compound_data["primary_keys"].append(compound.id)
 
 
 @reaction_table_bp.route("/_save_reaction_note", methods=["POST"])
