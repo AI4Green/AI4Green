@@ -113,6 +113,10 @@ class BaseConfig(object):  # class to store configuration variables
     SQLALCHEMY_BINDS = {
         "db": SQLALCHEMY_DATABASE_URI,
         "update": "sqlite:///temp_update.sqlite",
+        "audit_log": os.getenv(
+            "AUDIT_LOG_DATABASE_URL",
+            "postgresql://postgres:postgres@localhost:5432/ai4gauditlog",
+        ),
     }
 
     APP_DIRECTORY = os.path.abspath(os.path.join(os.path.abspath(__file__), "..", ".."))
@@ -154,18 +158,6 @@ class BaseConfig(object):  # class to store configuration variables
         }
     }
 
-    MESSAGE_QUEUE_CONFIG = {
-        "hostname": os.getenv("MESSAGE_QUEUE_HOSTNAME", "localhost:9092")
-    }
-
-    USE_KAFKA = bool(int(os.getenv("USE_KAFKA", 0)))
-
-    MINIO_HOST = os.getenv("MINIO_HOST", "localhost:9000")
-    MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "")
-    MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "")
-    MINIO_SECURE = bool(int(os.getenv("MINIO_SECURE", 1)))
-    MINIO_AUDIT_LOG_BUCKET = os.getenv("MINIO_AUDIT_LOG_BUCKET", "kafka-logs")
-
 
 class TestConfig(BaseConfig):
     TESTING = True
@@ -179,8 +171,11 @@ class TestConfig(BaseConfig):
     SQLALCHEMY_BINDS = {
         "db": SQLALCHEMY_DATABASE_URI,
         "update": "sqlite:///temp_update.sqlite",
+        "audit_log": os.getenv(
+            "TEST_AUDIT_LOG_DATABASE_URL",
+            "postgresql://postgres:postgres@localhost:5433/ai4gauditlogtest",
+        ),
     }
-    USE_KAFKA = True
 
 
 class DevConfig(BaseConfig):

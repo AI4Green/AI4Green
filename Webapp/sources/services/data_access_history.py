@@ -61,8 +61,8 @@ def send_message(message: DataAccessMessage):
     Args:
         message (DataAccessMessage): The message to send to the queue in the DataAccessMessage format
     """
-    producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    producer.send("data_access_history", message.serialise())
+    # producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
+    # producer.send("data_access_history", message.serialise())
 
 
 # TODO: record account deletion
