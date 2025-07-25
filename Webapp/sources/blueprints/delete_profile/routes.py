@@ -144,7 +144,19 @@ def confirm_delete_profile() -> Response:
 
         db.session.delete(user)
         db.session.commit()
-        # TODO: record new data access history
+
+        # record access change
+        for wg in wgs_pi + wgs_sr + wgs_sm:
+            message = services.data_access_history.DataAccessMessage(
+                person.user.fullname,
+                person.user.email,
+                wg.id,
+                old_role="Access",
+                new_role="No Access",
+                date=datetime.now().strftime("%Y-%m-%d"),
+            )
+            services.data_access_history.send_message(message)
+
         flash("Your profile has been deleted!")
         return redirect(url_for("auth.logout"))
 

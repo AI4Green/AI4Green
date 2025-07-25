@@ -160,7 +160,8 @@ def request_download(token: str) -> Response:
 
     # record export
     message = services.data_export_history.DataExportMessage(
-        verification.data_export_request.requestor_person.user.id,
+        verification.data_export_request.requestor_person.user.fullname,
+        verification.data_export_request.requestor_person.user.email,
         verification.data_export_request.WorkGroup.id,
         # take the first workbook as exports from multiple is not supported
         [wb.id for wb in verification.data_export_request.workbooks][0],

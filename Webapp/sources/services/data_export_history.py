@@ -8,7 +8,8 @@ from sources.services.message_queue import MessageSerdeMixin
 class DataExportMessage(MessageSerdeMixin):
     """Class for creating a kafka message for the data_export_history topic"""
 
-    person: int
+    full_name: str
+    email: str
     workgroup: int
     workbook: int
     reactions: list[int]
@@ -27,7 +28,8 @@ class DataExportMessage(MessageSerdeMixin):
             "type": "struct",
             "optional": False,
             "fields": [
-                {"field": "person", "type": "int32"},
+                {"field": "full_name", "type": "string"},
+                {"field": "email", "type": "string"},
                 {"field": "workgroup", "type": "int32"},
                 {"field": "workbook", "type": "int32"},
                 {"field": "reactions", "type": "list"},

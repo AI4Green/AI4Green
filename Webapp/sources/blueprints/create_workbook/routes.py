@@ -151,7 +151,8 @@ def create_workbook(workgroup: str) -> Response:
 
         # record access change
         message = services.data_access_history.DataAccessMessage(
-            person.id,
+            person.user.fullname,
+            person.user.email,
             workgroup.id,
             "No Access",
             "Access",
