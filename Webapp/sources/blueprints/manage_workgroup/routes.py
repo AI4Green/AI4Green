@@ -136,7 +136,8 @@ def make_change_to_workgroup(
 
         # record role change
         message = services.data_access_history.DataAccessMessage(
-            person.id,
+            person.user.fullname,
+            person.user.email,
             wg.id,
             old_role=current_status,
             new_role="No Access",
@@ -162,7 +163,8 @@ def make_change_to_workgroup(
         db.session.commit()
         # record role change
         message = services.data_access_history.DataAccessMessage(
-            person.id,
+            person.user.fullname,
+            person.user.email,
             wg.id,
             workgroup_dict[old_role]["display_string"],
             workgroup_dict[new_role]["display_string"],

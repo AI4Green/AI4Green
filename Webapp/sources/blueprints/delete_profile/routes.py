@@ -148,7 +148,8 @@ def confirm_delete_profile() -> Response:
         # record access change
         for wg in wgs_pi + wgs_sr + wgs_sm:
             message = services.data_access_history.DataAccessMessage(
-                person.id,
+                person.user.fullname,
+                person.user.email,
                 wg.id,
                 old_role="Access",
                 new_role="No Access",
