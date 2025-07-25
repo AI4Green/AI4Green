@@ -1,8 +1,7 @@
 import re
-from datetime import datetime
-from typing import Optional, Tuple
+from typing import Tuple
 
-from flask import abort, jsonify, request
+from flask import abort, json, request
 from flask_login import current_user
 from psmiles import PolymerSmiles
 from rdkit import Chem
@@ -10,23 +9,19 @@ from rdkit.Chem import rdMolDescriptors
 from sources import models, services
 from sources.auxiliary import sanitise_user_input
 from sources.extensions import db
-from sqlalchemy import func
+from sqlalchemy import exists, func
 
 
-def get_smiles(
-    primary_key: Tuple[str, int],
-    person: models.Person = None,
-) -> str:
+def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> list[str]:
     """
-    Gets the novel compound's SMILES string from the primary key if the entry has the SMILES attribute
+    Gets the repeat units SMILES strings from the PolymerNovelCompound primary key by searching in the PolymerRepeatUnit table
     Args:
         primary_key - the primary key is a tuple in the format [compound_name, workgroup.id]
         person - the person we are checking for access rights to the novel compound
 
     Returns:
-        The SMILES string corresponding to the primary key or None
+        A list of the SMILES strings corresponding to the primary key or None
     """
-    print("ploymer get smiles", primary_key)
     primary_key = (primary_key[0], int(primary_key[1]))
     workbook = services.workbook.get(primary_key[1])
     if (person and person not in workbook.users) or (
@@ -34,13 +29,35 @@ def get_smiles(
     ):
         abort(401)
 
-    return (
-        db.session.query(models.PolymerNovelCompound.smiles)
-        .filter(func.lower(models.PolymerNovelCompound.name) == primary_key[0].lower())
+    query = (
+        db.session.query(models.PolymerRepeatUnit.smiles)
+        .filter(func.lower(models.PolymerRepeatUnit.name) == primary_key[0].lower())
         .join(models.WorkBook)
         .filter(models.WorkBook.id == primary_key[1])
-        .first()
-    )[0]
+        .all()
+    )
+    return [q[0] for q in query]
+
+
+def get_repeat_unit_weights(polymer_id: int, workbook: int) -> list:
+    """
+    Retrieves a list of molec weights of the repeat units, from the polymer id.
+
+    Args:
+        polymer_id: PolymerNovelCompound.id
+        workbook: PolymerNovelCompound.workbook
+
+    Returns:
+        PolymerNovelCompound model.
+    """
+    query = (
+        db.session.query(models.PolymerRepeatUnit.molec_weight)
+        .filter(models.PolymerRepeatUnit.polymer_id == polymer_id)
+        .join(models.WorkBook)
+        .filter(models.WorkBook.id == workbook)
+        .all()
+    )
+    return [q[0] for q in query]
 
 
 def from_name_and_workbook(
@@ -66,39 +83,54 @@ def from_name_and_workbook(
 
 
 def from_smiles_and_workbook(
-    smiles: str, workbook: models.WorkBook
+    smiles: list, workbook: models.WorkBook
 ) -> models.PolymerNovelCompound:
     """
-    Retrieves a novel compound by name and workbook.
+    Retrieves a novel compound by repeat units and workbook.
 
     Args:
-        smiles: Compound smiles.
+        smiles: Repeat unit smiles as list.
         workbook: Workbook model.
 
     Returns:
         PolymerNovelCompound model.
     """
-    return (
+    query = (
         db.session.query(models.PolymerNovelCompound)
-        .filter(models.PolymerNovelCompound.smiles == smiles)
+        .filter(
+            # Ensure no repeat units not in smiles list
+            ~exists().where(
+                (models.PolymerRepeatUnit.polymer_id == models.PolymerNovelCompound.id)
+                & (~models.PolymerRepeatUnit.smiles.in_(smiles))
+            ),
+            # Ensure all repeat units are from the smiles list and count matches
+            db.session.query(func.count(models.PolymerRepeatUnit.id))
+            .filter(
+                models.PolymerRepeatUnit.polymer_id == models.PolymerNovelCompound.id
+            )
+            .scalar_subquery()
+            == len(smiles),
+        )
         .join(models.WorkBook)
         .filter(models.WorkBook.id == workbook.id)
         .first()
     )
 
+    return query
+
 
 def add(
     name: str,
-    mol_formula: str,
-    mol_weight: float,
+    mol_formula: list,
+    mol_weight: list,
     density: float,
     concentration: float,
     hazards: str,
-    smiles: str,
+    smiles: list,
     workbook_id: int,
 ) -> models.PolymerNovelCompound:
     """
-    Creates a novel compound in the database.
+    Creates a novel compound in the database, and adds repeat units to database
 
     Args:
         name: Compound name.
@@ -107,25 +139,37 @@ def add(
         density: Density.
         concentration: Concentration.
         hazards: Hazard codes.
-        smiles: SMILES notation.
+        smiles: list of strings in SMILES notation.
         workbook_id: Workbook ID.
-        current_time: Current timestamp.
 
     Returns:
         PolymerNovelCompound model.
     """
     nc = models.PolymerNovelCompound(
         name=name,
-        molec_formula=mol_formula,
-        molec_weight=mol_weight,
         density=density,
         concentration=concentration,
         hphrase=hazards,
-        smiles=smiles,
         workbook=workbook_id,
     )
     db.session.add(nc)
     db.session.commit()
+
+    polymer = from_name_and_workbook(name, services.workbook.get(workbook_id))
+
+    for idx in range(len(smiles)):
+        nr = models.PolymerRepeatUnit(
+            name=name,
+            polymer_id=polymer.id,
+            polymer=polymer,
+            smiles=smiles[idx],
+            molec_weight=mol_weight[idx],
+            molec_formula=mol_formula[idx],
+            workbook=workbook_id,
+        )
+        db.session.add(nr)
+        db.session.commit()
+
     return nc
 
 
@@ -142,12 +186,14 @@ class NewNovelCompound:
             else None
         )
         self.mol_weight = (
-            float(request.form["molWeight"])
+            [float(mw) for mw in json.loads(request.form["molWeight"])]
             if request.form["molWeight"] != ""
             else None
         )
         self.hazard_codes = sanitise_user_input(request.form["hPhrase"])
-        self.smiles = sanitise_user_input(request.form["smiles"])  # canonicalised
+        self.smiles = [
+            sanitise_user_input(smiles) for smiles in json.loads(request.form["smiles"])
+        ]  # canonicalised
 
         self.feedback = ""
         self.validation = ""
@@ -225,7 +271,8 @@ class NewNovelCompound:
         Density, concentration, and molecular weight are optional properties that if provided must be a positive number.
         This function validates this data or fails the validation and provides feedback.
         """
-        numerical_values = [self.density, self.concentration, self.mol_weight]
+        numerical_values = [self.density, self.concentration]
+        numerical_values.extend(self.mol_weight)
         if all(
             entry is None or check_positive_number(entry) for entry in numerical_values
         ):
@@ -250,10 +297,14 @@ class NewNovelCompound:
         """
         Calculate additional molecule identifiers if SMILES is present.
         """
-        mol = Chem.MolFromSmiles(self.smiles)
-        if mol is None or mol.GetNumAtoms() == 0:
-            return
-        self.mol_formula = rdMolDescriptors.CalcMolFormula(mol)
+        mol_formula = []
+        for smiles in self.smiles:
+            mol = Chem.MolFromSmiles(smiles)
+            if mol is None or mol.GetNumAtoms() == 0:
+                mol_formula.append("")  # TODO: is this gonna cause issues?
+                continue
+            mol_formula.append(rdMolDescriptors.CalcMolFormula(mol))
+        self.mol_formula = mol_formula
 
     def validate_hazards(self):
         """
@@ -309,128 +360,107 @@ def extract_inside_brackets(
     return inner_content, -1  # Return -1 if no matching parenthesis found
 
 
-def is_within_brackets(expression, target="{+n}"):
+def check_bracket_balance(smiles):
     """
-    Checks if a target substring (like "{+n}") is within brackets.
-
-    Args:
-    - expression (str): String to search.
-    - target (str): The substring to check if it's within brackets.
-
-    Returns:
-    - bool: True if the target substring is within brackets, False otherwise.
+    Returns the number of opening brackets compared to closing brackets in a SMILES string.
     """
-    # Find the position of the target in the expression
-    target_index = expression.find(target)
-
-    # Track the context of parentheses up to the target's position
     balance = 0
-    for i in range(target_index):
-        if expression[i] == "(":
+    for i in range(len(smiles)):
+        if smiles[i] == "(":
             balance += 1
-        elif expression[i] == ")":
+        elif smiles[i] == ")":
             balance -= 1
 
-    # If we have open parentheses when reaching the target, it is within brackets
-    return balance > 0
+    return balance
 
 
-def get_last_bracketed_expression(expression: str) -> str:
-    """
-    Returns the last set of brackets, including its content, in a given expression.
-
-    Args:
-    - expression (str): The input string containing brackets.
-
-    Returns:
-    - str: The last complete set of brackets and its content, or an empty string if none found.
-    """
-    # Initialize variables to store positions of the last matching brackets
-    open_index = -1
-    close_index = -1
-    balance = 0
-
-    # Traverse the expression in reverse to find the last matching pair of brackets
-    for i in range(len(expression) - 1, -1, -1):
-        if expression[i] == ")":
-            if balance == 0:
-                close_index = i
-            balance += 1
-        elif expression[i] == "(":
-            balance -= 1
-            if balance == 0:
-                open_index = i
-                break
-
-    # If we have found a matching set, return the substring
-    if open_index != -1 and close_index != -1:
-        return expression[open_index + 1 : close_index]
-    return ""
-
-
-def reformat_smiles(smiles: str) -> str:
-    branch = smiles.split(")")[-1]
-    smiles = smiles[: smiles.rfind(branch)]
-    inner = get_last_bracketed_expression(smiles)
-    smiles = smiles.split(inner)[0] + branch + ")" + inner
-
-    return smiles
-
-
-def find_polymer_repeat_unit(
+def find_polymer_repeat_units(
     compound: str,
-) -> str:
+) -> list[str]:
     """
     Identify the repeat group within a polymer SMILES string.
     Must be done before smiles is cleaned.
     Uses {-} and {+n} to find repeat unit.
     """
-    start_marker = compound.find("{-}")
-    end_marker = compound.find("{+n}")
+    start_marker = [marker.start() for marker in re.finditer("{-}", compound)]
+    end_marker = [marker.start() for marker in re.finditer(re.escape("{+n}"), compound)]
 
     # if either {-} or {+} is not found
     if start_marker == -1 or end_marker == -1:
-        return ""
+        return [""]
 
-    # Reformat if end of SRU is treated as a branch. e.g. *C{-}(CC{+n}*)C where {+n} is within brackets
-    while is_within_brackets(compound, "{+n}") != is_within_brackets(compound, "{-}"):
-        compound = reformat_smiles(compound)
-        if compound == reformat_smiles(compound):
-            return ""  # avoid infinite loop
-        start_marker = compound.find("{-}")
-        end_marker = compound.find("{+n}")
+    results = []
+    for i in range(len(start_marker)):
+        # START is the letter before {-}
+        if compound[start_marker[i] - 1].isupper():
+            result = (
+                "*" + compound[start_marker[i] - 1] + compound[start_marker[i] + 3 :]
+            )
+        elif (
+            compound[start_marker[i] - 1] == "]"
+        ):  # for polymers with [] groups e.g C[SiH2]{-}CC{+n}C
+            x = 2
+            while compound[start_marker[i] - x] != "[" and start_marker[i] - x > 0:
+                x += 1  # search backwards
+            result = "*" + compound[start_marker[i] - x :].replace("{-}", "")
+        else:  # for polymers with rings e.g *C1{-}CC{+n}(CCC1)*
+            x = 2
+            while (
+                not compound[start_marker[i] - x].isupper() and start_marker[i] - x > 0
+            ):
+                x += 1  # search backwards
+            result = "*" + compound[start_marker[i] - x :].replace("{-}", "")
 
-    # Start is the letter before {-}, and end is the character just before {+}
-    if compound[start_marker - 1].isupper():
-        result = compound[start_marker - 1] + compound[start_marker + 3 : end_marker]
-    elif (
-        compound[start_marker - 1] == "]"
-    ):  # for polymers with [] groups e.g C[SiH2]{-}CC{+n}C
-        i = 2
-        while compound[start_marker - i] != "[" and start_marker - i > 0:
-            i += 1  # search backwards
-        result = compound[start_marker - i : end_marker].replace("{-}", "")
-    else:  # for polymers with rings e.g *C1{-}CC{+n}(CCC1)*
-        i = 2
-        while not compound[start_marker - i].isupper() and start_marker - i > 0:
-            i += 1  # search backwards
-        result = compound[start_marker - i : end_marker].replace("{-}", "")
+        diff = len(compound) - len(result)
 
-    # Check for branching: if the character after {+} is '('
-    if end_marker + 4 < len(compound) and compound[end_marker + 4] == "(":
-        branch, close_paren = extract_inside_brackets(compound, end_marker + 4)
-        if close_paren != -1:
-            result += branch
+        # END is the character before {+n}
+        if i + 1 < len(end_marker):
+            if (
+                ")" not in result[end_marker[i] - diff : end_marker[i + 1] - diff]
+            ):  # no branching at end of SRU
+                results.append(result[: end_marker[i] - diff] + "*")
+                continue
+        else:  # last repeat unit
+            if ")" not in result[end_marker[i] - diff :]:  # no branching at end of SRU
+                results.append(result[: end_marker[i] - diff] + "*")
+                continue
 
-        # check for more branching
-        while close_paren + 1 < len(compound) and compound[close_paren + 1] == "(":
-            branch, close_paren = extract_inside_brackets(compound, close_paren + 1)
+        if result[end_marker[i] - diff + 4] == "(":  # last atom of SRU has a branch
+            result = result[: end_marker[i] - diff]
+            branch, close_paren = extract_inside_brackets(compound, end_marker[i] + 4)
             if close_paren != -1:
                 result += branch
 
-    result = result.replace("/", "").replace("\\", "")  # ignore stereochemistry
+            # check for more branching on last atom of SRU
+            while close_paren + 1 < len(compound) and compound[close_paren + 1] == "(":
+                branch, close_paren = extract_inside_brackets(compound, close_paren + 1)
+                if close_paren != -1:
+                    result += branch
+        else:
+            result = result[: result.find("{+n}")]
 
-    return result
+        # if end is inside brackets, ----------------------
+        if check_bracket_balance(compound[start_marker[i] : end_marker[i]]) == 0:
+            results.append(result + "*")
+            continue
+
+        section = []
+        parts = compound[end_marker[i] + 4 :].split(")")
+        for p, part in enumerate(parts):
+            if "(" in part and i < len(parts) - 1:
+                parts[p] = ")" + part + ")" + parts[p + 1]
+                parts.pop(p + 1)
+                section.append(parts[p])
+            else:
+                section.append(")" + part)
+
+        idx = check_bracket_balance(compound[: end_marker[i]])
+
+        result = result + "*" + "".join(section[-idx:])
+
+        results.append(result)
+
+    return results
 
 
 def clean_polymer_smiles(
@@ -446,24 +476,31 @@ def canonicalise(smiles: str) -> str:
     """
     Canonicalise a polymer SMILES string. Not for use when endgroups are known (must have two '*'s)
     """
-    ps = PolymerSmiles(smiles)
-    smiles = ps.canonicalize
-    return str(smiles).replace("[*]", "*")  # change dangling bonds label
+    try:
+        ps = PolymerSmiles(smiles)
+        smiles = ps.canonicalize
+        return str(smiles).replace("[*]", "*")  # change dangling bonds label
+    except UserWarning as e:
+        return f"Error: {str(e)}"
 
 
-def find_canonical_repeat(smiles: str) -> str:
+def find_canonical_repeats(smiles: str) -> list[str] or str:
     """
     Find repeat unit, and canonicalise a polymer smiles string.
     REMOVES END GROUPS
     Args:
         smiles - the unedited smiles from ketcher output. e.g. CC{-}C{+n}C
     Returns:
-        canon_smiles - the canonicalised repeat unit. e.g *C*
+        smiles_list - list of the canonicalised repeat units. e.g ['*C*']
     """
-    repeat_unit = find_polymer_repeat_unit(smiles)
-    if "*" in repeat_unit:  # block dummy atoms like R groups
-        return ""
-    smiles = "*" + repeat_unit + "*"
-    smiles = canonicalise(smiles)
+    if "[*]" in smiles:  # block dummy atoms like R groups
+        return "dummy"
 
-    return smiles
+    repeat_units = find_polymer_repeat_units(smiles)
+
+    smiles_list = []
+    for unit in repeat_units:
+        unit = unit.replace("/", "").replace("\\", "")  # ignore stereochemistry
+        smiles_list.append(canonicalise(unit))
+
+    return smiles_list

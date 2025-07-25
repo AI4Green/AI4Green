@@ -133,6 +133,17 @@ def make_change_to_workgroup(
         # uses the current_status variable as a dict key to determine the attribute being removed.
         getattr(person, workgroup_dict[current_status]["person_to_wg_attr"]).remove(wg)
         db.session.commit()
+
+        # record role change
+        message = services.data_access_history.DataAccessMessage(
+            person.id,
+            wg.id,
+            old_role=current_status,
+            new_role="No Access",
+            date=datetime.now().strftime("%Y-%m-%d"),
+        )
+        services.data_access_history.send_message(message)
+
         return jsonify(
             {
                 "feedback": f"{person.user.fullname} "
@@ -149,6 +160,15 @@ def make_change_to_workgroup(
         getattr(person, workgroup_dict[old_role]["person_to_wg_attr"]).remove(wg)
         getattr(person, workgroup_dict[new_role]["person_to_wg_attr"]).add(wg)
         db.session.commit()
+        # record role change
+        message = services.data_access_history.DataAccessMessage(
+            person.id,
+            wg.id,
+            workgroup_dict[old_role]["display_string"],
+            workgroup_dict[new_role]["display_string"],
+            date=datetime.now().strftime("%Y-%m-%d"),
+        )
+        services.data_access_history.send_message(message)
         return jsonify(
             {
                 "feedback": f"{person.user.fullname} has changed role from "
@@ -217,7 +237,7 @@ def status_request(user_type: str, new_role: str, workgroup: str) -> Response:
         )
         db.session.add(notification)
         db.session.commit()  # needed to get the notification id.
-        services.email.send_notification(pi)
+        services.email_services.send_notification(pi)
         wg_request = models.WGStatusRequest(
             principal_investigator=pi.id,
             person=person.id,
@@ -442,7 +462,9 @@ def generate_qr_code(workgroup=None):
     Returns:
         flask.Response with a JSON message of the QR code image
     """
-    token = services.email.get_encoded_token(31536000, {"workgroup": workgroup})
+    token = services.email_services.get_encoded_token(
+        31536000, {"workgroup": workgroup}
+    )
     url = f"https://{current_app.config['SERVER_NAME']}/qr_add_user/{token}"
     logo = Image.open("sources/static/img/favicon.ico")
     qr = qrcode.QRCode(
@@ -466,7 +488,7 @@ def generate_qr_code(workgroup=None):
 
 @manage_workgroup_bp.route("/qr_add_user/<token>", methods=["GET", "POST"])
 def add_user_by_qr(token=None):
-    workgroup = services.email.verify_qr_code_for_add_user_token(token)
+    workgroup = services.email_services.verify_qr_code_for_add_user_token(token)
     if workgroup:
         return redirect(url_for("join_workgroup.join_workgroup", workgroup=workgroup))
 

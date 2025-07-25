@@ -1,4 +1,4 @@
-{% from "macros/modals.html" import toxicity_modal %}
+{% from "macros/modals.html" import toxicity_modal, suggest_comment_modal, reject_reaction_modal %}
 
 <div id="section-to-print">
 <table class="table table-sm">
@@ -6,9 +6,9 @@
         <td style="background-color: rgb(184, 184, 184);"><b>&#8470;</b></td>
         <td style="width:30%; background-color: rgb(184, 184, 184);"><b>Reactants/catalysts/reagents</b></td>
         <td style="width:10%; background-color: rgb(184, 184, 184);"><b>Mol.Wt</b></td>
+        <td style="width:10%; background-color: rgb(184, 184, 184);"><b>Equiv.</b></td>
         <td style="width:10%; background-color: rgb(184, 184, 184);"><b>Density (g/mL)</b></td>
         <td style="width:10%; background-color: rgb(184, 184, 184);"><b>Conc. (M)</b></td>
-        <td style="width:10%; background-color: rgb(184, 184, 184);"><b>Equiv.</b></td>
         <td style="width:10%; background-color: rgb(184, 184, 184);"><b>Amount ({{ amount_unit }})</b></td>
         <td style="width:10%; background-color: rgb(184, 184, 184);"><b>Volume ({{ volume_unit }})</b></td>
         <td style="width:10%;background-color: rgb(184, 184, 184);"><b>Mass ({{ mass_unit }})</b></td>
@@ -18,9 +18,9 @@
         <td style="background-color: rgb(184, 184, 184);">{{ loop.index }}</td>
         <td>{{ reactant }}</td>
         <td><input type="number" value="{{ reactant_molecular_weights[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ reactant_equivalents[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td><input type="number" value="{{ reactant_densities[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td><input type="number" value="{{ reactant_concentrations[loop.index0] }}" style="width:80px; border:none" readonly></td>
-        <td><input type="number" value="{{ reactant_equivalents[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td><input type="number" value="{{ rounded_reactant_amounts[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td><input type="number" value="{{ rounded_reactant_volumes[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td><input type="number" value="{{ rounded_reactant_masses[loop.index0] }}" style="width:80px; border:none" readonly></td>
@@ -31,9 +31,9 @@
         <td style="background-color: rgb(184, 184, 184);">{{ reagent_table_numbers[loop.index0] }}</td>
         <td>{{ reagent }}</td>
         <td><input type="number" value="{{ reagent_molecular_weights[loop.index0] }}" style="width:80px; border:none" readonly></td>
+        <td><input type="number" value="{{ reagent_equivalents[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td><input type="number" value="{{ reagent_densities[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td><input type="number" value="{{ reagent_concentrations[loop.index0] }}" style="width:80px; border:none" readonly></td>
-        <td><input type="number" value="{{ reagent_equivalents[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td><input type="number" value="{{ rounded_reagent_amounts[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td><input type="number" value="{{ rounded_reagent_volumes[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td><input type="number" value="{{ rounded_reagent_masses[loop.index0] }}" style="width:80px; border:none" readonly></td>
@@ -67,18 +67,18 @@
         <td style="background-color: rgb(184, 184, 184);"></td>
         <td id="summary-product-cell" style="background-color: rgb(184, 184, 184);"><b>Product</b></td>
         <td style="background-color: rgb(184, 184, 184);"><b>Mol.Wt</b></td>
+        <td style="background-color: rgb(184, 184, 184);"><b>Equiv.</b></td>
         <td colspan="2" style="background-color: rgb(184, 184, 184);"><b>Theoretical Yield ({{ product_mass_unit }})</b></td>
         <td style="background-color: rgb(184, 184, 184);" title="The approximate mass of the limiting reactant which has not reacted. Used to calculate the reaction conversion."><b>Unreacted ({{ product_mass_unit }})</b><i class="bi bi-info-circle"></i></td>
         <td style="background-color: rgb(184, 184, 184);"><b>Product Mass ({{ product_mass_unit }})</b></td>
         <td style="background-color: rgb(184, 184, 184);"><b>&#37; Yield</b></td>
-        <td style="background-color: rgb(184, 184, 184);"></td>
     </tr>
     {% for product in products %}
     <tr>
         <td style="background-color: rgb(184, 184, 184);">{{ product_table_numbers[loop.index0] }}</td>
         <td>{{ product }}</td>
         <td><input type="number" value="{{ product_molecular_weights[loop.index0] }}" style="width:80px; border:none" readonly></td>
-
+        <td><input type="number" value="{{ product_equivalents[loop.index0] }}" style="width:80px; border:none" readonly></td>
         <td colspan="2"><input type="number" id="js-product-rounded-mass{{ loop.index }}"
                                value="{{ rounded_product_masses[loop.index0] }}" style="width:80px; border:none" readonly></td>
         {% if loop.index0 == main_product_index %}
@@ -87,7 +87,6 @@
         <td><input type="number" step="any" placeholder="-" min="0" style="width:80px;"
                    id="js-real-product-mass" class="main-product{{ loop.index }}"></td>
         <td><input type="number" id="js-percentage-yield" style="width:80px; border:none" readonly></td>
-        <td></td>
         {% else %}
         <td></td><td></td><td></td><td></td>
         {% endif %}
@@ -357,8 +356,65 @@
                     <td colspan="4"><br></td>
                 </tr>
                 <tr>
-                    <td colspan="2">Researcher: <input id="js-researcher" type="text" size="25em"></td>
-                    <td colspan="2">Supervisor: <input id="js-supervisor" type="text" size="25em"></td>
+                    <td colspan="2">Researcher: <input id="js-researcher" type="text" size="30em"></td>
+                    <td colspan="2" >
+                        {% if review == "True" %}
+                            <button id="approve-reaction" class="btn btn-success" value="{{ approval_request.id }}" onclick="approveReaction(this.value)">✅ Approve Reaction</button>
+                            <button id="suggest-changes" class="btn btn-warning" value="{{ approval_request.id }}" onclick="suggestChangesModal(this.value)">✏️ Suggest Changes </button>
+                            <button id="reject-reaction" class="btn btn-danger" value="{{ approval_request.id }}" onclick="rejectReactionModal(this.value)">❌ Reject Reaction </button>
+                        {% else %}
+
+                            {% if approval_request["status"] == "None" %}
+                                 <button id="review-button" class="btn btn-success" onclick="generateReactionApprovalRequest()" >Submit Reaction For Review</button>
+                            {% endif %}
+                            <div id="reaction-pending-review" {% if approval_request.status.value != "PENDING" %}style="display: none"{% endif %}>
+                              ⏳ Reaction Pending Approval
+                            </div>
+
+                            <div id="reaction-approved" class="reaction-approval-status reaction-approved" {% if approval_request.status.value != "APPROVED" %} style="display: none" {% endif %}>
+                                <div class="header">
+                                    ✅ <strong>Reaction Approved by:</strong>
+                                    <input aria-label="reaction-approved-by" id="js-supervisor-approved" disabled value="{% if approval_request.reviewed_by_person %}{{ approval_request.reviewed_by_person.user.fullname }}{% endif %}">
+                                    <span class="timestamp">
+                                        {% set time = approval_request.time_of_review|string %}{{ time[:-7] }}
+                                    </span>
+                                </div>
+                            </div>
+
+
+                            <div id="reaction-rejected" class="reaction-approval-status reaction-rejected" {% if approval_request.status.value != "REJECTED" %} style="display: none" {% endif %}>
+                                <div class="header">
+                                    ❌ <strong>Reaction Rejected by:</strong>
+                                    <input aria-label="reaction-rejected-by" id="js-supervisor-rejected" disabled value="{% if approval_request.reviewed_by_person %}{{ approval_request.reviewed_by_person.user.fullname }}{% endif %}">
+                                    <br>
+                                    <span class="timestamp">
+                                        {% set time = approval_request.time_of_review|string %} {{ time[:-7] }}
+                                    </span>
+                                </div>
+                                <div class="comments-section">
+                                    <label for="rejection-comments">Reason:</label>
+                                    <textarea id="rejection-comments" disabled>{{ approval_request.comments }}</textarea>
+                                </div>
+                            </div>
+
+
+                            <div id="reaction-changes-suggested" class="reaction-approval-status reaction-changes-suggested" {% if approval_request.status.value != "CHANGES_REQUESTED" %} style="display: none" {% endif %}>
+                                <div class="header">
+                                    ✏️ <strong>Changes Requested by:</strong>
+                                    <input aria-label="reaction-approved-by" id="js-supervisor-changes-requested" disabled value="{% if approval_request.reviewed_by_person %}{{ approval_request.reviewed_by_person.user.fullname }}{% endif %}">
+                                    <span class="timestamp">
+                                        {% set time = approval_request.time_of_review|string %}{{ time[:-7] }}
+                                    </span>
+                                </div>
+                                <div class="comments-section">
+                                    <label for="change-comments">Reviewer Comments:</label>
+                                    <textarea id="change-comments" disabled>{{ approval_request.comments }}</textarea>
+                                </div>
+                                <br>
+                                <button type="button" id="submit-suggest-comments" value="{{ approval_request.id }}" class="btn btn-warning" onclick="resubmitChanges(this.value)">Resubmit For Review</button>
+                            </div>
+                        {% endif %}
+                    </td>
                 </tr>
             </table>
         </td>
@@ -368,9 +424,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/autofill_summary_table.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/custom_colours.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/summary_table/summary_table.js') }}"></script>
-
-<p></p>
-
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_approval.css') }}">
 
 <input type="hidden" value="{{ reactant_primary_keys }}" id="js-reactant-primary-keys">
 <input type="hidden" value="{{ product_primary_keys }}" id="js-product-primary-keys">
@@ -378,5 +432,9 @@
 <input type="hidden" value="{{ solvent_primary_keys }}" id="js-solvent-primary-keys">
 <input type="hidden" value='{{ toxicity_alerts | tojson }}' id="toxicity-alerts">
 
-
+{# MODALS #}
 {{ toxicity_modal(toxicity_alerts) }}
+
+{{ reject_reaction_modal() }}
+
+{{ suggest_comment_modal() }}

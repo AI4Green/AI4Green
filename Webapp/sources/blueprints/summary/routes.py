@@ -3,7 +3,7 @@ This module receives data from the reaction table
 via POST request and renders the summary template
 """
 
-from flask import Response, abort, jsonify, render_template, request
+from flask import Response, abort, json, jsonify, render_template, request
 from flask_login import login_required
 from sources import auxiliary, services
 
@@ -20,19 +20,24 @@ def summary() -> Response:
         flask.Response: returns the summary table as a json object
     """
     reaction = None
+    approval_request = {"status": "None"}  # mimic approval request for front end logic
+    review = False
     if not (
         str(request.form["demo"]) == "demo" or str(request.form["tutorial"]) == "yes"
     ):
         # check user permission
         workgroup_name = str(request.form["workgroup"])
         workbook_name = str(request.form["workbook"])
+        review = request.form.get("review")
         if not auxiliary.security_member_workgroup_workbook(
             workgroup_name, workbook_name
         ):
             abort(401)
 
         reaction = services.reaction.get_current_from_request()
-        # also handle if reactants/reagents/solvents/products have changed since reload
+        approval_request = next(
+            iter(reaction.reaction_approval_request), {"status": "None"}
+        )
 
         polymer_mode = request.form["polymerMode"]
         # change summary table in polymer mode
@@ -49,6 +54,10 @@ def summary() -> Response:
     solvent_data = services.summary.get_solvent_data(request.form)
     product_data = services.summary.get_product_data(request.form)
 
+    # get position of polymers in reaction
+    polymer_indices = request.form["polymerIndices"]
+    polymer_indices = json.loads(polymer_indices)
+
     # check all the requirement information has been typed into the reaction table
     check_results = services.summary.check_required_data_is_present(
         reactant_data, reagent_data, solvent_data, product_data
@@ -58,7 +67,7 @@ def summary() -> Response:
         return jsonify({"summary": check_results})
 
     sustainability_data = services.sustainability.SustainabilityMetrics(
-        reactant_data, reagent_data, solvent_data, product_data
+        reactant_data, reagent_data, solvent_data, product_data, polymer_indices
     ).get_sustainability_metrics()
 
     risk_data = services.summary.get_risk_data(
@@ -117,6 +126,7 @@ def summary() -> Response:
             reactant_molecular_weights=reactant_data["reactant_molecular_weights"],
             reactant_densities=reactant_data["reactant_densities"],
             reactant_concentrations=reactant_data["reactant_concentrations"],
+            reactant_mns=reactant_data["reactant_mns"],
             reactant_equivalents=reactant_data["reactant_equivalents"],
             reactant_amounts=reactant_data["reactant_amounts"],
             rounded_reactant_amounts=reactant_data["rounded_reactant_amounts"],
@@ -128,6 +138,8 @@ def summary() -> Response:
             main_product_table_number=product_data["main_product_table_number"],
             main_product_index=product_data["main_product_index"],
             product_molecular_weights=product_data["product_molecular_weights"],
+            product_mns=product_data["product_mns"],
+            product_equivalents=product_data["product_equivalents"],
             product_masses=product_data["product_masses"],
             rounded_product_masses=product_data["rounded_product_masses"],
             ae=sustainability_data["ae"],
@@ -164,6 +176,9 @@ def summary() -> Response:
             risk_rating=risk_data["risk_rating"],
             risk_color=risk_data["risk_colour"],
             number_of_solvents=solvent_data["number_of_solvents"],
+            polymer_indices=polymer_indices,
+            approval_request=approval_request,
+            review=review,
         )
         return jsonify({"summary": summary_table})
     else:

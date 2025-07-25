@@ -18,9 +18,9 @@ class PolymerNovelCompound(Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
-    smiles = db.Column(db.Text, nullable=False)
-    molec_weight = db.Column(db.Float(53))
-    molec_formula = db.Column(db.Text, nullable=False)
+    repeat_units = db.relationship(
+        "PolymerRepeatUnit", backref="PolymerNovelCompound", cascade="all, delete"
+    )
     density = db.Column(db.Float(53))
     concentration = db.Column(db.Float(53))
     state = db.Column(db.Text)

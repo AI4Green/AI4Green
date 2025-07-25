@@ -225,6 +225,17 @@ function autofillLimitingReactantAmount(changedParameter) {
     let reactantMolecularWeight = getVal(
       $("#js-reactant-molecular-weight" + limitingReactantTableNumber),
     );
+    if (!reactantMolecularWeight) {
+      let polymerMnSelector = $(
+        "#js-reactant-mn" + limitingReactantTableNumber,
+      );
+      let polymerMn =
+        getVal(polymerMnSelector) || polymerMnSelector.attr("placeholder");
+      if (polymerMn) {
+        // if polymer
+        reactantMolecularWeight = polymerMn;
+      }
+    }
     const reactantMassUnit = getVal($("#js-mass-unit"));
     const reactantAmountUnit = getVal($("#js-amount-unit"));
     let reactantAmount =
@@ -304,16 +315,16 @@ function autofillAmount(component, changedParameter, loopValue) {
     const firstReactantAmount = getVal(
       $("#js-reactant-amount" + limitingReactantTableNumber),
     );
-    const equivalent = getVal(
-      $("#js-" + component + "-equivalent" + loopValue),
-    );
+    let equivalentSelector = $("#js-" + component + "-equivalent" + loopValue);
+    const equivalent =
+      getVal(equivalentSelector) || equivalentSelector.attr("placeholder");
     let amount;
     // product can have different units to reactant, hence different equation
     if (component === "product") {
       let reactantAmountUnit = getVal($("#js-amount-unit"));
       let productAmountUnit = getVal($("#js-product-amount-unit"));
       amount =
-        (firstReactantAmount * amountFactor[reactantAmountUnit]) /
+        (firstReactantAmount * equivalent * amountFactor[reactantAmountUnit]) /
         amountFactor[productAmountUnit];
     } else {
       amount = firstReactantAmount * equivalent;
@@ -417,6 +428,13 @@ function autofillMass(component, changedParameter, loopValue) {
       let productAmountUnit = getVal($("#js-product-amount-unit"));
       let productMassUnit = getVal($("#js-product-mass-unit"));
       let productAmount = getVal($("#js-product-amount" + loopValue));
+      let polymerMnSelector = $("#js-product-mn" + loopValue);
+      let polymerMn =
+        getVal(polymerMnSelector) || polymerMnSelector.attr("placeholder");
+      if (polymerMn) {
+        // if polymer
+        molecularWeight = polymerMn;
+      }
       mass =
         (molecularWeight * productAmount * amountFactor[productAmountUnit]) /
         massFactor[productMassUnit];
@@ -431,6 +449,13 @@ function autofillMass(component, changedParameter, loopValue) {
       let equivalent = getVal(
         $("#js-" + component + "-equivalent" + loopValue),
       );
+      let polymerMnSelector = $("#js-reactant-mn" + loopValue);
+      let polymerMn =
+        getVal(polymerMnSelector) || polymerMnSelector.attr("placeholder");
+      if (polymerMn) {
+        // if polymer
+        molecularWeight = polymerMn;
+      }
       mass =
         (molecularWeight * equivalent * firstReactantMass) /
         firstReactantMolecularWeight;
@@ -533,6 +558,7 @@ function autofillReactantFields2() {
         limitingReactantMassID,
         "#js-amount-unit",
         "#js-mass-unit",
+        "#js-reactant-mn" + i,
       ];
       for (const param of amountMassChangeParameters) {
         autofillAmount(component, param, i);
@@ -1326,18 +1352,18 @@ function autofillProductFields2() {
     let productAmountParameters = [
       limitingReactantEquivalentID,
       limitingReactantMassID,
+      "#js-product-equivalent" + i,
       "#js-mass-unit",
       "#js-product-amount-unit",
       "#js-product-mass-unit",
       ".js-reactant-limiting",
-      "#js-product-intended-dp",
+      "#js-product-mn" + i,
     ];
     for (const param of productAmountParameters) {
       autofillAmount(component, param, i);
       autofillRoundedAmount(component, param, i);
       autofillMass(component, param, i);
       autofillRoundedMass(component, param, i);
-      autofillTotalMW(component, param, i);
     }
     autofillProductTableNumber(".js-add-reagent", i);
     autofillProductTableNumber(".js-remove-reagent", i);
@@ -1532,14 +1558,4 @@ function fillData(response, component, fieldList, y) {
       $(fieldID).val(response[field]);
     }
   }
-}
-
-function autofillTotalMW(component, changedParameter, loopValue) {
-  //for polymers
-  $(changedParameter).on("input change", function () {
-    let molecularWeight = $("#js-product-molecular-weight" + loopValue).val();
-    let intendedDP = $("#js-product-intended-dp").val(); //get intended DP from html input
-    let totalMW = parseFloat(molecularWeight) * parseFloat(intendedDP);
-    $("#js-polymer-total-weight").val(totalMW);
-  });
 }

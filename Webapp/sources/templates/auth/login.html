@@ -24,7 +24,10 @@
         <br>
         {% endfor %}
         {{ form.remember_me() }} {{ form.remember_me.label }}<br>
-        {{ form.submit() }}
+        {{ form.submit() }}<br>
+{#    This line has been commented out until SSO feature is fixed #}
+{#        <a class="btn btn-link" id="sso" href="{{ url_for('auth.oidc_login') }}">Use Single Sign-on</a>#}
+
     </form>
 </div>
     New User? <a id="register" class="btn btn-link" href="{{ url_for('auth.register') }}">Click to Register!</a><br>

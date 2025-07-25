@@ -18,9 +18,13 @@ from flask_login import (  # protects a view function against anonymous users
     login_required,
 )
 from sources import models, services
-from sources.auxiliary import get_notification_number, get_workgroups
+from sources.auxiliary import (
+    get_notification_number,
+    get_workgroups,
+    security_pi_workgroup,
+)
 from sources.blueprints.auth.forms import LoginForm
-from sources.decorators import workbook_member_required
+from sources.decorators import principal_investigator_required, workbook_member_required
 from sources.extensions import db
 
 from . import main_bp
@@ -113,7 +117,7 @@ def load_icons() -> Response:
         bootstrap_icon = "bi bi-eyedropper"
 
     # load macro template with assigned variables
-    icon_macro = get_template_attribute("macros.html", "icon_panel")
+    icon_macro = get_template_attribute("macros/icons.html", "icon_panel")
     return jsonify(icon_macro(icon_names, load_type, header, bootstrap_icon))
 
 
@@ -152,8 +156,6 @@ def sketcher(
     Returns:
         flask.Response The rendered sketcher page.
     """
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
     workbook_object = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup, workbook
     )
@@ -171,12 +173,11 @@ def sketcher(
         reaction=reaction,
         load_status=load_status,
         demo="not demo",
-        workgroups=workgroups,
-        notification_number=notification_number,
         active_workgroup=workgroup,
         active_workbook=workbook,
         tutorial=tutorial,
         addenda=addenda,
+        review=False,
     )
 
 

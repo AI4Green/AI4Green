@@ -1,0 +1,43 @@
+<p>Dear {{ user.username }},</p>
+
+
+Your reaction {{reaction_approval_request.Reaction.reaction_id}} in workbook {{reaction_approval_request.WorkBook.name}} has been reviewed.
+<br>
+<br>
+<table>
+    <tr style='background-color: #f2f2f2;'>
+    <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Reviewer</th>
+    <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Decision</th>
+    <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Comments</th>
+
+  </tr>
+  <tr>
+    <td style='padding: 8px; border: 1px solid #ddd;'>{{ reaction_approval_request.reviewed_by_person.user.fullname }}</td>
+    <td style='padding: 8px; border: 1px solid #ddd;'>{{ reaction_approval_request.status.value.capitalize() }}</td>
+    <td style='padding: 8px; border: 1px solid #ddd;'>{{ reaction_approval_request.comments }}</td>
+
+  </tr>
+</table>
+
+<p>
+    <a href="{{ url_for("main.sketcher",
+            workgroup=reaction_approval_request.WorkBook.name,
+            workbook=reaction_approval_request.WorkBook.name,
+            reaction_id=reaction_approval_request.Reaction.reaction_id,
+            tutorial='no',
+            _external=True,
+            _scheme="protocol")
+            }}">
+        Click here</a> to view this reaction
+</p>
+<p>Alternatively, you can paste the following link in your browser&#39;s address bar:</p>
+<p>{{ url_for("main.sketcher",
+            workgroup=reaction_approval_request.WorkGroup.name,
+            workbook=reaction_approval_request.WorkBook.name,
+            reaction_id=reaction_approval_request.Reaction.reaction_id,
+            tutorial='no', _external=True, _scheme="protocol")
+            }}</p>
+
+
+<p>Sincerely,</p>
+<p>The AI4Green Team</p>

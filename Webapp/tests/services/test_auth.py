@@ -30,7 +30,10 @@ def test_register(client: FlaskClient, app: Flask):
 
     # users should be notified of email validation
     with client.session_transaction() as session:
-        assert  "An email has been sent to your address. Please follow the instructions to verify your account." in session["_flashes"][0], "email validation was not requested"
+        assert (
+            "An email has been sent to your address. Please follow the instructions to verify your account."
+            in session["_flashes"][0]
+        ), "email validation was not requested"
 
     # mock email verification to test login with new credentials
     with app.app_context():
@@ -45,10 +48,14 @@ def test_register(client: FlaskClient, app: Flask):
 def test_failed_login_invalid_credentials(client: FlaskClient):
     """Tests login is unsuccessful with incorrect credentials"""
 
-    response = login_response(client, username="not_a_registered_user", password="pastword")
+    response = login_response(
+        client, username="not_a_registered_user", password="pastword"
+    )
 
     # upon success user is redirected to login page
-    assert response.status_code == 302 and response.location == "/home", "user should be redirected"
+    assert (
+        response.status_code == 302 and response.location == "/home"
+    ), "user should be redirected"
 
     # Ensure that the user is logged in by checking if the session contains user information
     with client.session_transaction() as session:
@@ -59,25 +66,29 @@ def test_failed_login_not_validated(client: FlaskClient):
     """Tests login is unsuccessful if user has not validated email"""
     response = login_response(client, username="not_verified", password="not_verified")
 
-    assert response.status_code == 302 and response.location == "/home", "user should be redirected"
+    assert (
+        response.status_code == 302 and response.location == "/home"
+    ), "user should be redirected"
 
-    with (client.session_transaction() as session):
+    with client.session_transaction() as session:
         assert "_user_id" not in session, "user should not be logged in"
-        assert "Please verify your email address before logging in. Didn't receive an email? <a href='/email_verification_request/2' class='alert-link'>Click here</a> to resend." in session["_flashes"][0], "user was not notified "
+        assert (
+            "Please verify your email address before logging in. Didn't receive an email? <a href='/email_verification_request/2' class='alert-link'>Click here</a> to resend."
+            in session["_flashes"][0]
+        ), "user was not notified "
 
 
 def test_password_reset_request(client: FlaskClient):
-    """ Tests user can request password reset """
+    """Tests user can request password reset"""
     request = client.post(
-        "/reset_password_request",
-        data = {
-            "email": "test_user@test.com",
-            "submit": True
-        }
+        "/reset_password_request", data={"email": "test_user@test.com", "submit": True}
     )
     assert request.status_code == 302 and request.location == "/auth/login"
     with client.session_transaction() as session:
-        assert "Please check your email for instructions on how to change your password" in session["_flashes"][0]
+        assert (
+            "Please check your email for instructions on how to change your password"
+            in session["_flashes"][0]
+        )
 
 
 def test_password_reset(client: FlaskClient, app: Flask):
@@ -85,15 +96,17 @@ def test_password_reset(client: FlaskClient, app: Flask):
     # mimic password reset
     with app.app_context():
         user = services.user.from_email("password_reset@test.com")
-        token = services.email.get_encoded_token(600, {"reset_password": user.id})
+        token = services.email_services.get_encoded_token(
+            600, {"reset_password": user.id}
+        )
 
     client.post(
         "/reset_password/" + token,
-        data = {
+        data={
             "password": "updated_password",
             "password2": "updated_password",
-            "submit": True
-        }
+            "submit": True,
+        },
     )
     # test login with new credentials
     login(client, username="password_reset", password="updated_password")
@@ -108,8 +121,8 @@ def test_update_email(client: FlaskClient, app: Flask):
             "old_password": "test_pw",
             "email": "updated_mail@mail.com",
             "email2": "updated_mail@mail.com",
-            "submit": True
-        }
+            "submit": True,
+        },
     )
     assert response.status_code == 302 and response.location == "/home"
 
@@ -120,4 +133,3 @@ def test_update_email(client: FlaskClient, app: Flask):
         db.session.commit()
         assert user is not None
         assert user.email == "updated_mail@mail.com"
-

@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import pytz
 from flask import request
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
-from sqlalchemy import func
+from sqlalchemy import func, update
 
 
 def get_from_name_and_workbook_id(name: str, workbook_id: int) -> models.Reaction:
@@ -393,3 +393,292 @@ def add(
     db.session.add(reaction)
     db.session.commit()
     return reaction
+
+
+class ReactionApprovalRequestSubmission:
+    """
+    Class to handle creation of new reaction approval requests
+    """
+
+    def __init__(self):
+        """
+        Creates an instance of NewReactionApprovalRequest from request.json
+
+        Attributes:
+            requestor (models.Person): The user initiating the approval request.
+            workgroup (models.WorkGroup): The workgroup specified in the request JSON.
+            workbook (models.WorkBook): The workbook associated with the workgroup.
+            reaction (models.Reaction): The reaction to be reviewed, extracted from the request.
+            reaction_approval_request (models.ReactionApprovalRequest | None): Initialized as None, to be set later.
+        """
+        self.requestor = services.person.from_current_user_email()
+        self.workgroup = services.workgroup.from_name(request.json.get("workgroup"))
+        self.workbook = services.workbook.get_workbook_from_group_book_name_combination(
+            self.workgroup.name, request.json.get("workbook")
+        )
+        self.reaction = get_current_from_request_json()
+        self.reaction_approval_request = None
+
+    def submit_request(self) -> None:
+        """
+        Save request to database and notify and email approvers.
+
+        Returns:
+            None
+        """
+        self._save_to_database()
+        self._notify_approvers()
+
+    def resubmit_request(self, current_request) -> None:
+        """
+        Resubmit request after suggested changes. Changes request status back to PENDING from CHANGES_REQUESTED
+
+        Args:
+            current_request (models.ReactionApprovalRequest): The current request to update
+
+        Returns:
+            None
+        """
+        self.reaction_approval_request = current_request
+        current_request.status = "PENDING"
+        db.session.commit()
+        self._notify_approvers()
+
+    def _save_to_database(self) -> None:
+        """
+        Save the data export request to the database
+
+        Returns:
+            None
+        """
+        institution = services.workgroup.get_institution()
+
+        self.reaction_approval_request = models.ReactionApprovalRequest.create(
+            requestor=self.requestor.id,
+            required_approvers=self.workgroup.principal_investigator,
+            status="PENDING",
+            reaction=self.reaction.id,
+            workgroup=self.workgroup.id,
+            workbook=self.workbook.id,
+            institution=institution.id,
+        )
+
+    def _notify_approvers(self) -> None:
+        """
+        Send a notification and an email to each principal investigator of the reaction workgroup
+
+        Returns:
+            None
+        """
+        for principal_investigator in self.workgroup.principal_investigator:
+            models.Notification.create(
+                person=principal_investigator.id,
+                type="Reaction Approval Request",
+                info=self._message_content(),
+                time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
+                status="active",
+            )
+            services.email_services.send_reaction_approval_request(
+                principal_investigator.user,
+                self.reaction_approval_request,
+                self.workgroup,
+                self.workbook,
+                self.reaction,
+            )
+
+    def _message_content(self) -> str:
+        """
+        Message content used for emailing approvers.
+
+        returns:
+            message_content (str): The message content.
+        """
+        return f"""
+                <p>A user has requested your review for their reaction!</p>
+                <br>
+                <p>Please follow the link sent to your email to submit your review.</p>
+                <table style='border-collapse: collapse; width: 100%; max-width: 600px; font-family: Arial, sans-serif;'>
+                  <tr style='background-color: #f2f2f2;'>
+                    <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>User</th>
+                    <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Workgroup</th>
+                    <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Workbook</th>
+                    <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Reaction Title</th>
+                    <th style='text-align: center; padding: 8px; border: 1px solid #ddd;'>Reaction ID</th>
+                  </tr>
+                  <tr>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>{self.requestor.user.email}</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>{self.workgroup.name}</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>{self.workbook.name}</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction.name}</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>{self.reaction.reaction_id}</td>
+                  </tr>
+                </table>
+                """
+
+
+class ReactionApprovalRequestResponse:
+    """
+    Class to update the request status when an approver approves or rejects a reaction
+    """
+
+    def __init__(self, reaction_approval_request: models.ReactionApprovalRequest):
+        """
+        Creates an instance of the RequestStatus class.
+
+        Attributes:
+            reaction_approval_request (models.ReactionApprovalRequest): The reaction approval request to update
+            approver (models.User): the current user who will respond to the request
+        """
+        self.reaction_approval_request = reaction_approval_request
+        self.approver = services.person.from_current_user_email()
+
+    def _update_query(self, approved: bool) -> None:
+        """
+        Update the approval status in the required approvers association table
+
+        Args:
+            approved (bool): set to True if reaction_approval_request.status.value set to APPROVED else False
+
+        Returns:
+            None
+        """
+        # use update query because it is an association table. Normal query returns immutable Row.
+        update_query = (
+            update(models.reaction_approval_request_approvers)
+            .where(
+                models.reaction_approval_request_approvers.c.reaction_approval_request_id
+                == self.reaction_approval_request.id
+            )
+            .where(
+                models.reaction_approval_request_approvers.c.person_id
+                == self.approver.id
+            )
+            .values(approved=approved, responded=True)
+        )
+        db.session.execute(update_query)
+
+    def _update_request_status(
+        self,
+        status: str,
+        comments: Union[str, None] = None,
+    ):
+        """
+        Update the status of the reaction approval request and save to database
+
+        Args:
+            status (str): the status of the reaction to update in the db. See ENUM in models.ReactionApprovalRequest.ReactionApprovalStatus for accepted values
+            comments (str | None): comments provided by reviewer to save in db, defaults to None
+        """
+
+        self.reaction_approval_request.status = status
+        self.reaction_approval_request.reviewed_by = self.approver.id
+        self.reaction_approval_request.time_of_review = datetime.now()
+        if comments is not None:
+            self.reaction_approval_request.comments = comments
+
+        db.session.commit()
+
+    def approve(self) -> None:
+        """
+        Approves a reaction approval request
+
+        Returns:
+            None
+        """
+        self._update_query(True)
+        self._update_request_status("APPROVED")
+        self._notify_requestor()
+
+    def reject(self, comments: str) -> None:
+        """
+        Rejects a reaction approval request
+
+        Args:
+            comments (str): comments provided by reviewer to save in db, defaults to None
+
+        Returns:
+            None
+        """
+        self._update_query(False)
+        self._update_request_status("REJECTED", comments)
+        self._notify_requestor()
+
+    def suggest_changes(self, comments: str) -> None:
+        """
+        Suggests changes for a reaction approval request
+
+        Args:
+            comments (str): comments provided by reviewer to save in db, defaults to None
+
+        Returns:
+            None
+        """
+        self._update_query(False)
+        self._update_request_status("CHANGES_REQUESTED", comments=comments)
+        self._notify_requestor()
+
+    def _notify_requestor(self) -> None:
+        """
+        Creates notification and sends email after reaction approval response submitted
+
+        Returns:
+            None
+        """
+        # notify requestor of response
+        models.Notification.create(
+            person=self.reaction_approval_request.requestor,
+            type="Your Reaction Approval Request",
+            info=self._requestor_response(),
+            time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
+            status="active",
+        )
+        services.email_services.send_reaction_approval_response(
+            user=self.reaction_approval_request.requestor_person.user,
+            reaction_approval_request=self.reaction_approval_request,
+        )
+
+    def _requestor_response(self):
+        """
+        Message used in email for mailing reaction creators
+
+        Returns:
+            requestor_response (str): Message for email content
+        """
+        return f"""
+                Your reaction {self.reaction_approval_request.Reaction.reaction_id} in workbook
+                {self.reaction_approval_request.WorkBook.name} has been reviewed.
+                <br><br>
+
+                <div style="text-align: center;">
+                    <table style="margin: 0 auto; border-collapse: collapse;">
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="text-align: center; padding: 8px; border: 1px solid #ddd;">Reviewer</th>
+                            <th style="text-align: center; padding: 8px; border: 1px solid #ddd;">Decision</th>
+                            <th style="text-align: center; padding: 8px; border: 1px solid #ddd;">Comments</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{self.reaction_approval_request.reviewed_by_person.user.fullname}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{self.reaction_approval_request.status.value.capitalize()}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{self.reaction_approval_request.comments}</td>
+                        </tr>
+                    </table>
+                </div>
+                """
+
+
+def get_reaction_details(reaction):
+    """Gets reaction details from its db object - used for logging editing history"""
+    reaction_details = {
+        "complete": reaction.complete,
+        "reaction_smiles": reaction.reaction_smiles,
+        "description": reaction.description,
+        "reactants": reaction.reactants,
+        "products": reaction.products,
+        "reagents": reaction.reagents,
+        "solvent": reaction.solvent,
+        "reaction_table_data": reaction.reaction_table_data,
+        "summary_table_data": reaction.summary_table_data,
+        "polymerisation_type": reaction.polymerisation_type,
+    }
+
+    return reaction_details

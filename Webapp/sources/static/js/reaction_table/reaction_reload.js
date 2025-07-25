@@ -36,29 +36,36 @@ async function reactionTableReload() {
     "product-physical-form",
   ];
   // Field dicts to relate HTML IDs to js_reactant_table_data keys
-  const productFields = {
+  const commonFields = {
     amounts: "-rounded-amount",
     amounts_raw: "-amount",
+    equivalents: "-equivalent",
     masses: "-rounded-mass",
     masses_raw: "-mass",
     physical_forms: "-physical-form",
   };
-  // object.assign concatenates the two arguments - all productFields are also found in reactant and reagent
+  // object.assign concatenates the two arguments - all commonFields are also found in reactant and reagent
   const reactantFields = Object.assign(
     {
-      equivalents: "-equivalent",
       concentrations: "-concentration",
-      densities: "-density",
+      //densities: "-density", //TODO: not sure why this was here previously?
       volumes_raw: "-volume",
       volumes: "-rounded-volume",
+      mns: "-mn",
     },
-    productFields,
+    commonFields,
+  );
+
+  const productFields = Object.assign(
+    {
+      mns: "-mn",
+    },
+    commonFields,
   );
 
   const reagentFields = Object.assign(
     {
       names: "",
-      equivalents: "-equivalent",
       concentrations: "-concentration",
       densities: "-density",
       volumes_raw: "volume-",
@@ -66,7 +73,7 @@ async function reactionTableReload() {
       molecular_weights: "-molecular-weight",
       hazards: "-hazards",
     },
-    productFields,
+    commonFields,
   );
 
   const solventFields = {
@@ -96,7 +103,6 @@ async function reactionTableReload() {
       let jsonID = "product_" + jsonField;
       fillInputField(productFieldID, jsonID, i);
     }
-    //fillInputField("#js-product-intended-dp" + j, "product_intended_dps", i); not yet implemented
   }
   // iterate through and reload reagents data
   let numberOfReagents = js_reaction_table_data["reagent_names"].length;
@@ -173,11 +179,22 @@ async function reactionTableReload() {
   }
   // auxiliary reload functions that use the reaction table json
   function fillInputField(fieldID, jsonID, i) {
+    let dataRow = js_reaction_table_data[jsonID];
+    // obtain value if dataRow[i] is not undefined else undefined
+    let value = dataRow?.[i];
+
+    if (typeof value === "undefined") {
+      // should fire if any key is missing in js_reaction_table_data (eg/ reactant Mns for older reactions)
+      console.warn(
+        `Skipping fillInputField: value is undefined for jsonID: ${jsonID}`,
+      );
+      return;
+    }
     // either use dropdown or value depending if field is physical form or not
     if (fieldID.includes("physical-form")) {
-      $(fieldID).prop("selectedIndex", js_reaction_table_data[jsonID][i]);
+      $(fieldID).prop("selectedIndex", value);
     } else {
-      $(fieldID).val(js_reaction_table_data[jsonID][i]);
+      $(fieldID).val(value);
     }
     // checks if the field should be styled (highlights red if blank)
     if (styleElements.some((styleElement) => fieldID.includes(styleElement))) {
@@ -218,5 +235,11 @@ function controlNonCreatorFunctionality() {
   $("#print-pdf").prop("disabled", false);
   $("#file-list").find("*").prop("disabled", false);
   $(".delete-file-button").prop("disabled", true);
+  // keep the review buttons active for review
+  $("#approve-reaction").prop("disabled", false);
+  $("#suggest-changes").prop("disabled", false);
+  $("#reject-reaction").prop("disabled", false);
+  $("#suggest-comment-modal").find(":disabled").prop("disabled", false);
+  $("#reject-reaction-modal").find(":disabled").prop("disabled", false);
   $("#reaction-note-button").hide();
 }

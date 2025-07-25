@@ -8,9 +8,12 @@ from typing import Dict
 
 from apiflask import APIFlask
 from flask import Flask
+from minio import Minio
 from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
-from sources.extensions import db, login, ma, mail, migrate
+from sources.extensions import db, login, ma, mail, migrate, oidc
+from sources.services.message_queue import LoggingQueueProducer, QueueProducer
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 def create_app(c: str = "dev") -> Flask:
@@ -27,6 +30,7 @@ def create_app(c: str = "dev") -> Flask:
 
     """
     app = APIFlask(__name__, title="AI4Green OpenAPI", version="1.6.0")
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
     app.security_schemes = {
         "sessionAuth": {
@@ -86,6 +90,8 @@ def register_extensions(app: Flask) -> None:
 
     login.init_app(app)
     login.login_view = "auth.login"
+
+    oidc.init_app(app)
 
     @login.user_loader
     def load_user(user_id: int):
@@ -198,6 +204,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(save_reaction_bp)
 
+    from sources.blueprints.reaction_approval import reaction_approval_bp
+
+    app.register_blueprint(reaction_approval_bp, url_prefix="/reaction_approval")
+
     from sources.blueprints.reset_password import reset_password_bp
 
     app.register_blueprint(reset_password_bp)
@@ -251,6 +261,10 @@ def register_blueprints(app: Flask) -> None:
     from sources.blueprints.utils import utils_bp
 
     app.register_blueprint(utils_bp)
+
+    # from sources.blueprints.audit_logs import audit_log_bp
+
+    # app.register_blueprint(audit_log_bp)
 
 
 def inject_session_context(app: Flask) -> Dict[str, str]:
