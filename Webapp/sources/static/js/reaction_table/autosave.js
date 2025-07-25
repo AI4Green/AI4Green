@@ -439,7 +439,7 @@ function postReactionData(complete = "not complete") {
         }
       } else {
         // if not locking reaction save as normal
-        flashUserSaveMessage("AUTOSAVE");
+        flashUserSaveMessage("Reaction Changes Saved");
       }
     },
     error: function () {
