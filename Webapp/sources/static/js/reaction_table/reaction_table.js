@@ -1414,6 +1414,7 @@ function autoChangeRequiredStyling2(styleParameterID, excludedNullValues = []) {
  */
 function autoChangeRequiredStyling(changedParameter, excludedNullValues = []) {
   // update styling of current reaction table (for reaction table reload)
+  autoChangeRequiredStyling2(changedParameter, excludedNullValues);
   // then set up the listener for future changes
   $(changedParameter).on("input change", function () {
     autoChangeRequiredStyling2(changedParameter, excludedNullValues);
@@ -1447,6 +1448,7 @@ function updateStyling() {
   }
   let numberOfReagents = getNum($("#js-number-of-reagents"));
   for (let i = 1; i < numberOfReagents + 1; i++) {
+    console.log(i);
     autoChangeRequiredStyling("#js-reagent-physical-form" + i);
     autoChangeRequiredStyling("#js-reagent-equivalent" + i);
     autoChangeRequiredStyling("js-reagent-hazards" + i);
