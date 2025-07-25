@@ -58,5 +58,5 @@ def send_message(message: DataExportMessage):
     Args:
         message (DataExportMessage): The message to send to the queue in the DataExportMessage format
     """
-    producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    producer.send("data_export_history", message.serialise())
+    # producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
+    # producer.send("data_export_history", message.serialise())
