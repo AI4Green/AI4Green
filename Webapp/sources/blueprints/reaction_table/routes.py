@@ -97,8 +97,10 @@ class SketcherCompound:
         smiles_list = (
             reactant_smiles if self.reaction_component == "Reactant" else product_smiles
         )
-        if "{+n}" in smiles_list[self.reaction_component_idx]:
-            self.is_polymer = True
+        # only check reactant and products for polymers
+        if self.reaction_component in ["Reactant", "Product"]:
+            if "{+n}" in smiles_list[self.reaction_component_idx]:
+                self.is_polymer = True
 
     def handle_new_novel_compound(self):
         if self.demo == "demo":
