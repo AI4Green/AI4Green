@@ -560,6 +560,13 @@ def get_compound_data(
     """
 
     # now we have the compound/novel_compound object, we can get all the data
+
+    compound_data["molecular_weight_list"] = []
+    compound_data["name_list"] = []
+    compound_data["hazard_list"] = []
+    compound_data["density_list"] = []
+    compound_data["primary_key_list"] = []
+
     if isinstance(compound, models.PolymerNovelCompound):
         molecular_weight = services.polymer_novel_compound.get_repeat_unit_weights(
             compound.id, compound.workbook
