@@ -1421,23 +1421,38 @@ function autoChangeRequiredStyling(changedParameter, excludedNullValues = []) {
   });
 }
 
+/**
+ * Function called to change styling on reagent and solvet changing
+ * @param changedParameter
+ * @param changedStyling
+ */
+function styleValidReagent(changedParameter, changedStyling) {
+  if (getVal($(changedParameter)) === "") {
+    $(changedStyling)
+      .removeClass("remove-highlight-filled-cell")
+      .addClass("add-highlight-unfilled-cell");
+  } else {
+    $(changedStyling)
+      .removeClass("add-highlight-unfilled-cell")
+      .addClass("readonly-cell remove-highlight-filled-cell");
+  }
+}
+
 function autoChangeRequiredStylingValidCompound(component, loop_value) {
   // Catches partially filled in reagent/solvent name box - will highlight red unless a valid compound is entered
   let changedParameter = "#js-" + component + "-hazards";
   changedParameter = changedParameter.concat(String(loop_value));
   let changedStyling = "#js-" + component;
+  console.log(component);
   changedStyling = changedStyling.concat(String(loop_value));
+  styleValidReagent(changedParameter, changedStyling);
   $(changedStyling).on("input change", function () {
-    if (getVal($(changedParameter)) === "") {
-      $(changedStyling)
-        .removeClass("remove-highlight-filled-cell")
-        .addClass("add-highlight-unfilled-cell");
-    } else {
-      $(changedStyling)
-        .removeClass("add-highlight-unfilled-cell")
-        .addClass("remove-highlight-filled-cell");
-    }
+    styleValidReagent(changedParameter, changedStyling);
   });
+
+  if (component === "solvent") {
+    $(changedStyling).removeClass("readonly-cell");
+  }
 }
 
 function updateStyling() {
@@ -1448,7 +1463,6 @@ function updateStyling() {
   }
   let numberOfReagents = getNum($("#js-number-of-reagents"));
   for (let i = 1; i < numberOfReagents + 1; i++) {
-    console.log(i);
     autoChangeRequiredStyling("#js-reagent-physical-form" + i);
     autoChangeRequiredStyling("#js-reagent-equivalent" + i);
     autoChangeRequiredStyling("js-reagent-hazards" + i);
