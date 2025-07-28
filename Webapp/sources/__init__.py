@@ -12,7 +12,7 @@ from minio import Minio
 from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db, login, ma, mail, migrate, oidc
-from sources.services.message_queue import LoggingQueueProducer, QueueProducer
+from sources.services.message_queue.producers import LoggingQueueProducer, QueueProducer
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
