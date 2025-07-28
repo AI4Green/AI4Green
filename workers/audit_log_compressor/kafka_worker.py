@@ -6,7 +6,10 @@ from config import (
     POLL_INTERVAL_MINS,
     PRODUCE_TOPIC,
 )
-from sources.services import message_queue
+from sources.services.message_queue.consumers import QueueConsumer
+from sources.services.message_queue.producers import QueueProducer
+
+from .reaction_edit_history_processor import ReactionEditHistoryProcessor
 
 
 def collect_and_process_messages(
@@ -45,16 +48,16 @@ def merge_diffs(diff1, diff2):
 
 
 # set up kafka consumer
-consumer = message_queue.QueueConsumer(
+consumer = QueueConsumer(
     hostname=KAFKA_HOSTNAME,
     topic=CONSUME_TOPIC,
 )
 
 # set up kafka producer and processor
-producer = message_queue.QueueProducer(
+producer = QueueProducer(
     hostname=KAFKA_HOSTNAME,
 )
-processor = message_queue.ReactionEditHistoryProcessor(producer, PRODUCE_TOPIC)
+processor = ReactionEditHistoryProcessor(producer, PRODUCE_TOPIC)
 
 # Set up the scheduler
 scheduler = BlockingScheduler()
