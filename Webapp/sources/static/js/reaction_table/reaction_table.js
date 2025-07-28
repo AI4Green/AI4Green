@@ -1443,7 +1443,6 @@ function autoChangeRequiredStylingValidCompound(component, loop_value) {
   let changedParameter = "#js-" + component + "-hazards";
   changedParameter = changedParameter.concat(String(loop_value));
   let changedStyling = "#js-" + component;
-  console.log(component);
   changedStyling = changedStyling.concat(String(loop_value));
   styleValidReagent(changedParameter, changedStyling);
   $(changedStyling).on("input change", function () {
