@@ -1,22 +1,11 @@
 import json
 import time
 from collections import defaultdict
-from dataclasses import asdict
 from typing import Any, Optional
 
 from kafka import KafkaConsumer, KafkaProducer
+from sources.services.message_queue.base import BaseQueueProducer
 from sources import services
-
-
-class BaseQueueProducer:
-    def send(self, topic: Optional[str] = None, msg: Optional[Any] = None):
-        """Send a message to the message queue with the given topic.
-
-        Args:
-            topic (Optional[str]): The topic to send the message to.
-            msg (Optional[Any]): The message to send to the queue.
-        """
-        raise NotImplementedError
 
 
 class QueueProducer(BaseQueueProducer):
