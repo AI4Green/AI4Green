@@ -16,7 +16,7 @@ class MessageSerdeMixin:
             NotImplementedError: You must implement this method in classes that implement this mixin.
 
         Returns:
-            dict: The message class formated with shcema and payload.
+            dict: The message class formatted with schema and payload.
         """
         raise NotImplementedError
 
