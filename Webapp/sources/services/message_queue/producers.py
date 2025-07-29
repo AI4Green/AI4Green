@@ -1,4 +1,6 @@
 from typing import Any, Optional
+
+from azure.storage.queue import QueueServiceClient
 from kafka import KafkaProducer
 
 
@@ -67,3 +69,51 @@ class LoggingQueueProducer(BaseQueueProducer):
         from flask import current_app
 
         current_app.logger.info(msg=msg)
+
+
+class AzureQueueProducer(BaseQueueProducer):
+    """
+    A queue producer for sending messages to Azure Queue Storage.
+    """
+
+    def __init__(self, connection_str: str):
+        """Create a producer for Azure Queue Storage
+
+        Args:
+            connection_str (str): The connection string for the queue storage resource.
+        """
+        self.producer = QueueServiceClient.from_connection_string(connection_str)
+
+    def send(self, topic: Optional[str] = None, msg: Optional[Any] = None):
+        """Send a message to Azure Queue Storage.
+
+        **NB**: the arguments topic and msg are *required*. The `Optional` type
+        annotation is for compatibility with the base class only.
+
+        Args:
+            topic (Optional[str], optional):
+                The name of the quueue to send the message. Defaults to None.
+            msg (Optional[Any], optional): The message to put in the queue. Defaults to None.
+
+        Raises:
+            ValueError: 'topic' is required. This should be the name of the queue.
+            ValueError: 'msg' is required.
+        """
+        if topic is None:
+            raise ValueError(
+                "'topic' is required. This should be the name of the queue."
+            )
+        if msg is None:
+            raise ValueError("'msg' is required.")
+
+        client = self.producer.get_queue_client(topic)
+
+        try:
+            # create the queue if it doesn't already exist
+            client.create_queue()
+            client.send_message(msg)
+        except Exception as e:
+            # import to avoid context based conflicts
+            from flask import current_app
+
+            current_app.logger.error(msg=str(e))
