@@ -279,6 +279,7 @@ class SketcherCompound:
 
         else:
             self.is_novel_compound = novel_compound
+            self.inchi = compound.inchi
             get_compound_data(self.compound_data, compound, novel_compound)
 
     def check_for_polymer(self, polymer_indices, reaction_smiles):
