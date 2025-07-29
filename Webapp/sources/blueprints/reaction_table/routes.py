@@ -35,25 +35,16 @@ def autoupdate_reaction_table():
         reaction = services.reaction.get_from_reaction_id_and_workbook_id(
             reaction_id, workbook.id
         )
-        print(reaction.reaction_table_data)
-
-        polymer_indices = request.json.get("polymer_indices")
-
-    default_units = {
-        "limiting_reactant_table_number": 1,
-        "main_product": -1,
-        "mass_units": "mg",
-        "polymerisation_type": "NAN",
-        "amount_units": "mmol",
-        "volume_units": "mL",
-        "solvent_volume_units": "mL",
-        "product_mass_units": "mg",
-        "product_amount_units": "mmol",
-    }
 
     reaction_smiles = request.json.get("reaction_smiles")
     if not reaction_smiles:
         return jsonify({"error": "Missing data!"})
+
+    polymer_indices = request.json.get("polymer_indices")
+
+    reaction_table = services.reaction_Table.ReactionTable(reaction.reaction_table_data)
+
+    print(reaction.reaction_table_data)
 
     (
         reactants_smiles_list,
@@ -142,7 +133,7 @@ def autoupdate_reaction_table():
         identifiers=identifiers,
         reactant_table_numbers=[],
         products=products,
-        units=default_units,
+        # units=default_units,
         # product_intended_dps=product_data["intended_dps"],
         reagent_table_numbers=[],
         reaction_table_data="",
@@ -157,6 +148,7 @@ def autoupdate_reaction_table():
 
 @reaction_table_bp.route("/reload_reaction_table", methods=["GET", "POST"])
 def reload_reaction_table():
+    # load variables from front end
     workbook = request.json.get("workbook")
     workgroup = request.json.get("workgroup")
     reaction_id = request.json.get("reaction_id")
@@ -167,40 +159,13 @@ def reload_reaction_table():
     reaction = services.reaction.get_from_reaction_id_and_workbook_id(
         reaction_id, workbook.id
     )
-    compounds, units = services.compound.SketcherCompound.from_reaction_table_dict(
-        json.loads(reaction.reaction_table_data), workbook
-    )
 
-    if demo == "demo":
-        sol_rows = services.solvent.get_default_list()
-    else:
-        sol_rows = services.solvent.get_workbook_list(workbook)
-
-    # Now it renders the reaction table template
-    reaction_table = render_template(
-        "reactions/_reaction_table.html",
-        reactants=compounds["reactant"],
-        reagents=compounds["reagent"],
-        solvents=compounds["solvent"],
-        number_of_reactants=len(compounds["reactant"]),
-        number_of_products=len(compounds["product"]),
-        number_of_reagents=len(compounds["reagent"]),
-        number_of_solvents=len(compounds["solvent"]),
-        units=units,
-        identifiers=[],
-        reactant_table_numbers=[],
-        products=compounds["product"],
-        # product_intended_dps=product_data["intended_dps"],
-        reagent_table_numbers=[],
-        reaction_table_data="",
-        summary_table_data="",
-        sol_rows=sol_rows,
-        reaction=reaction,
-        reaction_class=reaction.reaction_class,
-        reaction_classes=[],
-        polymer_indices={},
+    reaction_table = services.reaction_table.ReactionTable(
+        reaction, workgroup, workbook, demo, "no"
     )
-    return jsonify({"reactionTable": reaction_table})
+    print(reaction_table.reactants, reaction_table.products)
+
+    return reaction_table.render()
 
 
 @reaction_table_bp.route("/_save_reaction_note", methods=["POST"])

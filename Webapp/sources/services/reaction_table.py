@@ -1,6 +1,7 @@
 import re
 from typing import List, Tuple
 
+from flask import json, jsonify, render_template
 from sources import services
 
 
@@ -67,12 +68,39 @@ class ReactionTable:
     not sure if this will work, but yolo lmao
     """
 
-    def __init__(self, smiles, reaction_table_data, units):
-        self.smiles = smiles
-        self.previous_data = reaction_table_data
-        self.units = units
+    def __init__(self, reaction, workgroup, workbook, demo, tutorial):
+        # set up default values
+        self.reaction = reaction
+        self.reaction_table_data = {}
+        self.units = self.default_units()
+        self.workgroup = workgroup
+        self.workbook = workbook
+        self.demo = demo
+        self.tutorial = tutorial
 
-    def update(self):
+        # reaction table species
+        self.reactants = []
+        self.products = []
+        self.reagents = []
+        self.solvents = []
+
+        # interactive elements
+        self.solvent_dropdown = self.get_solvent_dropdown()
+
+        # load reaction_table from provided reaction
+        self.load()
+
+    def load(self):
+        compounds, units = services.compound.SketcherCompound.from_reaction_table_dict(
+            json.loads(self.reaction.reaction_table_data), self.workbook
+        )
+        self.units = units
+        self.reactants = compounds["reactant"]
+        self.products = compounds["product"]
+        self.reagents = compounds["reagent"]
+        self.solvents = compounds["solvent"]
+
+    def update(self, smiles):
         pass
 
     def reload(self):
@@ -82,4 +110,51 @@ class ReactionTable:
         pass
 
     def render(self):
-        pass
+        reaction_table = render_template(
+            "reactions/_reaction_table.html",
+            reactants=self.reactants,
+            reagents=self.reagents,
+            solvents=self.solvents,
+            products=self.products,
+            number_of_reactants=len(self.reactants),
+            number_of_reagents=len(self.reagents),
+            number_of_solvents=len(self.solvents),
+            number_of_products=len(self.products),
+            units=self.units,
+            # do we still need these?
+            identifiers=[],
+            reactant_table_numbers=[],
+            # product_intended_dps=product_data["intended_dps"],
+            reagent_table_numbers=[],
+            reaction_table_data="",
+            summary_table_data="",
+            sol_rows=self.solvent_dropdown,
+            reaction=self.reaction,
+            # need to update reaction class as class attr?
+            reaction_class=self.reaction.reaction_class,
+            # polymer indices?
+            polymer_indices={},
+        )
+        return jsonify({"reactionTable": reaction_table})
+
+    @staticmethod
+    def default_units():
+        return {
+            "limiting_reactant_table_number": 1,
+            "main_product": -1,
+            "mass_units": "mg",
+            "polymerisation_type": "NAN",
+            "amount_units": "mmol",
+            "volume_units": "mL",
+            "solvent_volume_units": "mL",
+            "product_mass_units": "mg",
+            "product_amount_units": "mmol",
+        }
+
+    def get_solvent_dropdown(self):
+        if self.demo == "demo":
+            sol_rows = services.solvent.get_default_list()
+        else:
+            sol_rows = services.solvent.get_workbook_list(self.workbook)
+
+        return sol_rows
