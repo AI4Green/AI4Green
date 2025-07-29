@@ -2,7 +2,7 @@ from dataclasses import asdict, dataclass
 from typing import Optional
 
 from flask import current_app, json
-from sources.services.message_queue import MessageSerdeMixin
+from sources.services.message_queue.serde import MessageSerdeMixin
 
 
 @dataclass

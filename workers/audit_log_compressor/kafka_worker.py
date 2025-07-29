@@ -6,7 +6,10 @@ from config import (
     POLL_INTERVAL_MINS,
     PRODUCE_TOPIC,
 )
-from sources.services import message_queue
+from sources.services.message_queue.consumers import QueueConsumer
+from sources.services.message_queue.producers import QueueProducer
+
+from .reaction_edit_history_processor import ReactionEditHistoryProcessor
 
 
 def collect_and_process_messages(
@@ -19,17 +22,42 @@ def collect_and_process_messages(
     print("Finished processing messages.")
 
 
+def merge_diffs(diff1, diff2):
+    """Returns net change between two change_details dicts
+    Args:
+        diff1 (dict): must have nested "old_value" and "new_value" keys
+        diff2 (dict): must have nested "old_value" and "new_value" keys
+    """
+    merged = {}
+
+    all_keys = set(diff1.keys()) | set(diff2.keys())
+
+    for key in all_keys:
+        if key in diff1 and key in diff2:
+            if diff1[key]["old_value"] != diff2[key]["new_value"]:
+                merged[key] = {
+                    "old_value": diff1[key]["old_value"],
+                    "new_value": diff2[key]["new_value"],
+                }
+        elif key in diff1:
+            merged[key] = diff1[key]
+        elif key in diff2:
+            merged[key] = diff2[key]
+
+    return merged
+
+
 # set up kafka consumer
-consumer = message_queue.QueueConsumer(
+consumer = QueueConsumer(
     hostname=KAFKA_HOSTNAME,
     topic=CONSUME_TOPIC,
 )
 
 # set up kafka producer and processor
-producer = message_queue.QueueProducer(
+producer = QueueProducer(
     hostname=KAFKA_HOSTNAME,
 )
-processor = message_queue.ReactionEditHistoryProcessor(producer, PRODUCE_TOPIC)
+processor = ReactionEditHistoryProcessor(producer, PRODUCE_TOPIC)
 
 # Set up the scheduler
 scheduler = BlockingScheduler()

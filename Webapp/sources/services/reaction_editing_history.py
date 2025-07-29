@@ -3,7 +3,7 @@ from datetime import datetime
 
 from flask import current_app, json
 from sources import services
-from sources.services.message_queue import MessageSerdeMixin
+from sources.services.message_queue.serde import MessageSerdeMixin
 
 
 @dataclass
