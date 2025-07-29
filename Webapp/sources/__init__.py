@@ -8,11 +8,13 @@ from typing import Dict
 
 from apiflask import APIFlask
 from flask import Flask
-from minio import Minio
 from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db, login, ma, mail, migrate, oidc
-from sources.services.message_queue.producers import LoggingQueueProducer, QueueProducer
+from sources.services.message_queue.producers import (
+    LoggingQueueProducer,
+    AzureQueueProducer,
+)
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
@@ -98,6 +100,16 @@ def register_extensions(app: Flask) -> None:
         return models.User.query.get(user_id)
 
     mail.init_app(app)
+
+    # Set up the message queue producer
+    if app.config["TESTING"]:
+        # use logging in the testing environment
+        app.config["message_queue"] = LoggingQueueProducer()
+    else:
+        # use azure queue storage elsewhere
+        app.config["message_queue"] = AzureQueueProducer(
+            connection_str=app.config["MESSAGE_QUEUE_CONNECTION_STRING"]
+        )
 
     return None
 

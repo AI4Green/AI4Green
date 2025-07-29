@@ -158,6 +158,17 @@ class BaseConfig(object):  # class to store configuration variables
         }
     }
 
+    # connection string for local azurite
+    default_conn_str = (
+        "DefaultEndpointsProtocol=http;"
+        "AccountName=devstoreaccount1;"
+        "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;"
+        "QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;"
+    )
+    MESSAGE_QUEUE_CONNECTION_STRING = os.getenv(
+        "MESSAGE_QUEUE_CONNECTION_STRING", default_conn_str
+    )
+
 
 class TestConfig(BaseConfig):
     TESTING = True
