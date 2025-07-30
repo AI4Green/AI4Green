@@ -25,6 +25,22 @@ def get_messages(
     return messages
 
 
+def clear_messages(
+    sc: QueueServiceClient, queue_name: str, messages: List[QueueMessage]
+):
+    """Delete messages from the Azure Queue Storage.
+
+    Args:
+        sc (QueueServiceClient): The service client for Azure Queue Storage.
+        queue_name (str): The name of the queue to delete from.
+        messages (List[QueueMessage]): The list of messages to delete.
+    """
+    client = sc.get_queue_client(queue_name)
+    for message in messages:
+        client.delete_message(message)
+    client.close()
+
+
 def write_messages_to_db(messages: List[QueueMessage], db_connection_string: str):
     """Write the messages from Azure Queue Storage to the database.
 
@@ -60,6 +76,7 @@ def main():
             for queue in queues:
                 messages = get_messages(service_client, queue, max_messages)
                 write_messages_to_db(messages, db_connection_str)
+                clear_messages(service_client, queue, messages)
         except KeyboardInterrupt:
             running = False
             logging.info("Exitiing...")
