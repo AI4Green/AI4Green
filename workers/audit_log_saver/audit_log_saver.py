@@ -7,7 +7,7 @@ from flask import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from sources.models.audit_log import AuditLogEvent
+from models import AuditLogEvent
 
 
 def get_messages(
@@ -78,12 +78,22 @@ def write_messages_to_db(
         except:
             # rollback if anything goes wrong
             session.rollback()
+            raise
         else:
             # if all goes well, commit the changes
             session.commit()
 
 
 def main():
+    logger = logging.Logger("audit_log_saver", level=logging.INFO)
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
     # default string for testing purposes
     default_str = (
         "DefaultEndpointsProtocol=http;"
@@ -92,29 +102,35 @@ def main():
         "QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;"
     )
     connection_str = os.getenv("QUEUE_CONNECTION_STRING", default_str)
-    queue_names = os.getenv("QUEUE_NANES", "test")
+    queue_names = os.getenv("QUEUE_NANES", "test-queue")
     queues = queue_names.split(",")
     db_connection_str = os.getenv(
         "DB_CONNECTION_STRING",
-        "postgresql://postgres:postgres@localhost:5433/ai4gauditlogtest",
+        "postgresql://postgres:postgres@localhost:5432/ai4gauditlog",
     )
     max_messages = os.getenv("MAX_MESSAGES", 100)
 
+    logger.info("Getting service client")
     service_client = QueueServiceClient.from_connection_string(connection_str)
 
     running = True
     while running:
         try:
             for queue in queues:
+                logger.info(f"Getting messages from queue '{queue}'")
                 messages = get_messages(service_client, queue, max_messages)
+                logger.info(f"Writing {len(messages)} messages to DB...")
                 write_messages_to_db(messages, db_connection_str, queue)
+                logger.info("Clearing old messages...")
                 clear_messages(service_client, queue, messages)
         except KeyboardInterrupt:
             running = False
-            logging.info("Exitiing...")
+            logger.info("Exitiing...")
         except Exception as e:
             running = False
-            logging.error(f"An error occurred...{os.linesep}{e}")
+            logger.error(f"An error occurred...{os.linesep}{e}")
+
+    service_client.close()
 
 
 if __name__ == "__main__":
