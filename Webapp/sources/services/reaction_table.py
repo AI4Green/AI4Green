@@ -106,9 +106,6 @@ class ReactionTable:
         self.reagents = []
         self.solvents = []
 
-        # for calculating product number
-        self.number_of_reactants = 0
-
         # interactive elements
         self.solvent_dropdown = self.get_solvent_dropdown()
         self.reaction_class = None
@@ -162,63 +159,6 @@ class ReactionTable:
             updated_compounds, original_compounds
         )
         return preserved_compounds + added_compounds
-
-    def delete_compounds_from_reaction_table(
-        self, updated_dict, deleted_reactants, deleted_products
-    ):
-        pass
-
-    @staticmethod
-    def get_amount_keys(component_type):
-        return [
-            f"{component_type}_amounts",
-            f"{component_type}_amounts_raw",
-            f"{component_type}_concentrations",  # Only for reactants
-            f"{component_type}_equivalents",
-            f"{component_type}_masses",
-            f"{component_type}_masses_raw",
-            f"{component_type}_mns",
-            f"{component_type}_physical_forms",
-            f"{component_type}_physical_forms_text",
-            f"{component_type}_volumes",
-            f"{component_type}_volumes_raw",
-        ]
-
-    @staticmethod
-    def get_compound_keys(component_type):
-        return {
-            f"{component_type}_names": "names",
-            f"{component_type}_densities": "densities",  # Only in reactants
-            f"{component_type}_hazards": "hazards",
-            f"{component_type}_molecular_weights": "molecular_weights",
-            f"{component_type}_smiles": "smiles",  # SketcherCompound instance attribute
-        }
-
-    def update_component_in_reaction_table(
-        self, updated_dict: dict, new_compounds: list, component_type: str
-    ):
-        # Set of keys that get default blank values
-        default_keys = self.get_amount_keys(component_type)
-
-        # Keys mapped from compound_data fields
-        compound_keys = self.get_compound_keys(component_type)
-
-        for compound in new_compounds:
-            # Add default blank values (only add if key actually exists in dict)
-            for key in default_keys:
-                if key in updated_dict:
-                    updated_dict[key].append("")
-
-            # Add compound data
-            for key, attr in compound_keys.items():
-                if key not in updated_dict:
-                    continue
-                if attr == "smiles":
-                    updated_dict[key].append(compound.smiles)
-                else:
-                    updated_dict[key].append(compound.compound_data.get(attr, ""))
-
-        self.reaction_table_data = updated_dict
 
     def convert_smiles_to_compound(
         self, smiles_list, reaction_component, polymer_indices, number_of_reactants
