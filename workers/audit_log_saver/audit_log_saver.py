@@ -7,8 +7,7 @@ from flask import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-# from sources.models.audit_log import AuditLogEvent
-from .audit_log import AuditLogEvent
+from sources.models.audit_log import AuditLogEvent
 
 
 def get_messages(
