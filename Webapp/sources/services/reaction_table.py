@@ -124,6 +124,29 @@ class ReactionTable:
         self.reagents = compounds["reagent"]
         self.solvents = compounds["solvent"]
 
+        self.load_units()
+
+    def load_units(self):
+        unit_keys = [
+            "limiting_reactant_table_number",
+            "main_product",
+            "mass_units",
+            "polymerisation_type",
+            "amount_units",
+            "volume_units",
+            "solvent_volume_units",
+            "product_mass_units",
+            "product_amount_units",
+        ]
+
+        self.units.update(
+            {
+                key: self.reaction_table_data[key]
+                for key in unit_keys
+                if key in self.reaction_table_data
+            }
+        )
+
     def update(self, reaction_smiles, polymer_indices):
         (
             reactants_smiles_list,
@@ -240,3 +263,54 @@ class ReactionTable:
             sol_rows = services.solvent.get_workbook_list(self.workbook)
 
         return sol_rows
+
+
+def new():
+    return json.dumps(
+        {
+            "amount_units": "mmol",
+            "mass_units": "mg",
+            "volume_units": "mL",
+            "solvent_volume_units": "mL",
+            "product_amount_units": "mmol",
+            "product_mass_units": "mg",
+            "reactant_masses": [],
+            "reactant_names": [],
+            "reactant_masses_raw": [],
+            "reactant_amounts": [],
+            "reactant_amounts_raw": [],
+            "reactant_volumes": [],
+            "reactant_volumes_raw": [],
+            "reactant_equivalents": [],
+            "reactant_physical_forms": [],
+            "reactant_densities": [],
+            "reactant_concentrations": [],
+            "reactant_mns": [],
+            "reagent_names": [],
+            "reagent_molecular_weights": [],
+            "reagent_densities": [],
+            "reagent_concentrations": [],
+            "reagent_amounts": [],
+            "reagent_amounts_raw": [],
+            "reagent_equivalents": [],
+            "reagent_physical_forms": [],
+            "reagent_hazards": [],
+            "reagent_masses": [],
+            "reagent_masses_raw": [],
+            "reagent_volumes": [],
+            "reagent_volumes_raw": [],
+            "solvent_volumes": [],
+            "solvent_names": [],
+            "solvent_concentrations": [],
+            "solvent_hazards": [],
+            "solvent_physical_forms": [],
+            "product_names": [],
+            "product_mns": [],
+            "product_amounts": [],
+            "product_amounts_raw": [],
+            "product_equivalents": [],
+            "product_masses": [],
+            "product_masses_raw": [],
+            "product_physical_forms": [],
+        }
+    )

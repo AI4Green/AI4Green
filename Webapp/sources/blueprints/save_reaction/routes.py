@@ -56,52 +56,7 @@ def new_reaction() -> Response:
     # if the name check is passed then proceed with making the new reaction
     if b"This reaction name is unique" in name_check.data:
         # make the reaction table dict with units set to default values
-        reaction_table = json.dumps(
-            {
-                "amount_units": "mmol",
-                "mass_units": "mg",
-                "volume_units": "mL",
-                "solvent_volume_units": "mL",
-                "product_amount_units": "mmol",
-                "product_mass_units": "mg",
-                "reactant_masses": [],
-                "reactant_masses_raw": [],
-                "reactant_amounts": [],
-                "reactant_amounts_raw": [],
-                "reactant_volumes": [],
-                "reactant_volumes_raw": [],
-                "reactant_equivalents": [],
-                "reactant_physical_forms": [],
-                "reactant_densities": [],
-                "reactant_concentrations": [],
-                "reactant_mns": [],
-                "reagent_names": [],
-                "reagent_molecular_weights": [],
-                "reagent_densities": [],
-                "reagent_concentrations": [],
-                "reagent_amounts": [],
-                "reagent_amounts_raw": [],
-                "reagent_equivalents": [],
-                "reagent_physical_forms": [],
-                "reagent_hazards": [],
-                "reagent_masses": [],
-                "reagent_masses_raw": [],
-                "reagent_volumes": [],
-                "reagent_volumes_raw": [],
-                "solvent_volumes": [],
-                "solvent_names": [],
-                "solvent_concentrations": [],
-                "solvent_hazards": [],
-                "solvent_physical_forms": [],
-                "product_mns": [],
-                "product_amounts": [],
-                "product_amounts_raw": [],
-                "product_equivalents": [],
-                "product_masses": [],
-                "product_masses_raw": [],
-                "product_physical_forms": [],
-            }
-        )
+        reaction_table = services.reaction_table.new()
 
         summary_table = services.summary.empty_summary_table
         # add reaction to database
