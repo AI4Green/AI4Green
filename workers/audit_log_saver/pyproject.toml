@@ -9,19 +9,8 @@ license = "AGPL-3.0"
 [tool.poetry.dependencies]
 python = "^3.10"
 azure-storage-queue = "12.13.0"
-apscheduler = "^3.11.0"
 sqlalchemy = "^2.0.42"
 psycopg2-binary = "^2.9.10"
-flask-login = "^0.6.2"
-flask = "^2.3.3"
-flask-mail = "^0.9.1"
-flask-marshmallow = ">=1.0.0"
-flask-migrate = "^4.0.4"
-flask-sqlalchemy = "^3.0.5"
-flask-wtf = "^1.1.1"
-flask-oidc = "^2.3.1"
-marshmallow-sqlalchemy = "^0.29.0"
-marshmallow = ">=3.10,<4"
 
 
 [build-system]
