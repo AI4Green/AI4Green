@@ -4,17 +4,25 @@ from typing import List
 from azure.storage.queue import QueueServiceClient, QueueMessage
 
 
-def get_messages(sc: QueueServiceClient, queue_name: str) -> List[QueueMessage]:
+def get_messages(
+    sc: QueueServiceClient, queue_name: str, max_messages: int
+) -> List[QueueMessage]:
     """Get messages from Azure Queue Storage with the given queue name.
 
     Args:
         sc (QueueServiceClient): The service client for Azure Queue Storage.
         queue_name (str): The name of the queue to read from.
+        max_messages (int, optional): The maximum number of messages to be read from the queue.
 
     Returns:
         List[QueueMessage]: The list of messages retrieved from the queue.
     """
-    return []
+    client = sc.get_queue_client(queue_name)
+    messages = [
+        message for message in client.receive_messages(max_messages=max_messages)
+    ]
+    client.close()
+    return messages
 
 
 def write_messages_to_db(messages: List[QueueMessage], db_connection_string: str):
@@ -36,20 +44,21 @@ def main():
         "QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;"
     )
     connection_str = os.getenv("QUEUE_CONNECTION_STRING", default_str)
-    service_client = QueueServiceClient.from_connection_string(connection_str)
     queue_names = os.getenv("QUEUE_NANES", "test")
     queues = queue_names.split(",")
-
     db_connection_str = os.getenv(
         "DB_CONNECTION_STRING",
         "postgresql://postgres:postgres@localhost:5433/ai4gauditlogtest",
     )
+    max_messages = os.getenv("MAX_MESSAGES", 100)
+
+    service_client = QueueServiceClient.from_connection_string(connection_str)
 
     running = True
     while running:
         try:
             for queue in queues:
-                messages = get_messages(service_client, queue)
+                messages = get_messages(service_client, queue, max_messages)
                 write_messages_to_db(messages, db_connection_str)
         except KeyboardInterrupt:
             running = False
