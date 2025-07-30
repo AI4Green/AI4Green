@@ -1,7 +1,14 @@
+import datetime as dt
 import logging
 import os
 from typing import List
 from azure.storage.queue import QueueServiceClient, QueueMessage
+from flask import json
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+
+# from sources.models.audit_log import AuditLogEvent
+from .audit_log import AuditLogEvent
 
 
 def get_messages(
@@ -41,14 +48,40 @@ def clear_messages(
     client.close()
 
 
-def write_messages_to_db(messages: List[QueueMessage], db_connection_string: str):
+def write_messages_to_db(
+    messages: List[QueueMessage], db_connection_string: str, event_type: str
+):
     """Write the messages from Azure Queue Storage to the database.
 
     Args:
         messages (List[QueueMessage]): The list of messages to write to the database.
         db_connection_string (str): The connection string for the database.
+        event_type (str): The type of the event.
     """
-    pass
+    # Establish DB connection
+    engine = create_engine(db_connection_string)
+
+    # Create the session
+    with Session(engine) as session:
+        session.begin()
+        try:
+            for message in messages:
+                event_type = event_type
+                # get the content from the queue message
+                content = json.loads(message.content)
+                # generate the table entry
+                log_event = AuditLogEvent(
+                    event_type=event_type,
+                    event_time=dt.datetime.now(),
+                    message=content,
+                )
+                session.add(log_event)
+        except:
+            # rollback if anything goes wrong
+            session.rollback()
+        else:
+            # if all goes well, commit the changes
+            session.commit()
 
 
 def main():
@@ -75,7 +108,7 @@ def main():
         try:
             for queue in queues:
                 messages = get_messages(service_client, queue, max_messages)
-                write_messages_to_db(messages, db_connection_str)
+                write_messages_to_db(messages, db_connection_str, queue)
                 clear_messages(service_client, queue, messages)
         except KeyboardInterrupt:
             running = False
