@@ -8,6 +8,7 @@ license = "AGPL-3.0"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+azure-storage-queue = "12.13.0"
 
 
 [build-system]
