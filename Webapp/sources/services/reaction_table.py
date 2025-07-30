@@ -68,6 +68,21 @@ class ReactionTable:
     not sure if this will work, but yolo lmao
     """
 
+    # reaction_param_keys = [
+    #     "limiting_reactant_table_number",
+    #     "main_product",
+    #     "mass_units",
+    #     "polymerisation_type",
+    #     "amount_units",
+    #     "volume_units",
+    #     "solvent_volume_units",
+    #     "product_mass_units",
+    #     "product_amount_units",
+    # ]
+    #
+    # for param in reaction_param_keys:
+    #     units[param] = reaction_table_dict.pop(param)
+
     def __init__(self, reaction, workgroup, workbook, demo, tutorial):
         # set up default values
         self.reaction = reaction
@@ -78,36 +93,150 @@ class ReactionTable:
         self.demo = demo
         self.tutorial = tutorial
 
+        # to do
+        # units
+        # prevent load for new reactions
+        # delete stale compounds
+        # fix polymer bugs
+        #
+
         # reaction table species
         self.reactants = []
         self.products = []
         self.reagents = []
         self.solvents = []
 
+        # for calculating product number
+        self.number_of_reactants = 0
+
         # interactive elements
         self.solvent_dropdown = self.get_solvent_dropdown()
+        self.reaction_class = None
 
         # load reaction_table from provided reaction
         self.load()
 
     def load(self):
-        compounds, units = services.compound.SketcherCompound.from_reaction_table_dict(
-            json.loads(self.reaction.reaction_table_data), self.workbook
+        self.reaction_table_data = json.loads(self.reaction.reaction_table_data)
+        compounds = services.compound.SketcherCompound.from_reaction_table_dict(
+            self.reaction_table_data, self.workbook
         )
-        self.units = units
+        # self.units = units
         self.reactants = compounds["reactant"]
         self.products = compounds["product"]
         self.reagents = compounds["reagent"]
         self.solvents = compounds["solvent"]
 
-    def update(self, smiles):
+    def update(self, reaction_smiles, polymer_indices):
+        (
+            reactants_smiles_list,
+            product_smiles_list,
+        ) = services.reaction_table.get_reactants_and_products_list(reaction_smiles)
+
+        self.reaction_class = services.reaction_classification.classify_reaction(
+            reactants_smiles_list, product_smiles_list
+        )
+
+        updated_reactants = self.convert_smiles_to_compound(
+            reactants_smiles_list, "Reactant", polymer_indices, 0
+        )
+
+        updated_products = self.convert_smiles_to_compound(
+            product_smiles_list, "Product", polymer_indices, len(updated_reactants)
+        )
+
+        self.update_reactants_and_products(updated_reactants, updated_products)
+
+    def update_reactants_and_products(self, updated_reactants, updated_products):
+        new_reactants = self.identify_compounds(updated_reactants, self.reactants)
+        new_products = self.identify_compounds(updated_products, self.products)
+
+        self.reactants = new_reactants
+        self.products = new_products
+
+    def identify_compounds(self, updated_compounds, original_compounds):
+        added_compounds = self.find_added_compounds(
+            updated_compounds, original_compounds
+        )
+        preserved_compounds = self.find_preserved_compounds(
+            updated_compounds, original_compounds
+        )
+        return preserved_compounds + added_compounds
+
+    def delete_compounds_from_reaction_table(
+        self, updated_dict, deleted_reactants, deleted_products
+    ):
         pass
 
-    def reload(self):
-        pass
+    @staticmethod
+    def get_amount_keys(component_type):
+        return [
+            f"{component_type}_amounts",
+            f"{component_type}_amounts_raw",
+            f"{component_type}_concentrations",  # Only for reactants
+            f"{component_type}_equivalents",
+            f"{component_type}_masses",
+            f"{component_type}_masses_raw",
+            f"{component_type}_mns",
+            f"{component_type}_physical_forms",
+            f"{component_type}_physical_forms_text",
+            f"{component_type}_volumes",
+            f"{component_type}_volumes_raw",
+        ]
 
-    def new(self):
-        pass
+    @staticmethod
+    def get_compound_keys(component_type):
+        return {
+            f"{component_type}_names": "names",
+            f"{component_type}_densities": "densities",  # Only in reactants
+            f"{component_type}_hazards": "hazards",
+            f"{component_type}_molecular_weights": "molecular_weights",
+            f"{component_type}_smiles": "smiles",  # SketcherCompound instance attribute
+        }
+
+    def update_component_in_reaction_table(
+        self, updated_dict: dict, new_compounds: list, component_type: str
+    ):
+        # Set of keys that get default blank values
+        default_keys = self.get_amount_keys(component_type)
+
+        # Keys mapped from compound_data fields
+        compound_keys = self.get_compound_keys(component_type)
+
+        for compound in new_compounds:
+            # Add default blank values (only add if key actually exists in dict)
+            for key in default_keys:
+                if key in updated_dict:
+                    updated_dict[key].append("")
+
+            # Add compound data
+            for key, attr in compound_keys.items():
+                if key not in updated_dict:
+                    continue
+                if attr == "smiles":
+                    updated_dict[key].append(compound.smiles)
+                else:
+                    updated_dict[key].append(compound.compound_data.get(attr, ""))
+
+        self.reaction_table_data = updated_dict
+
+    def convert_smiles_to_compound(
+        self, smiles_list, reaction_component, polymer_indices, number_of_reactants
+    ):
+        base_idx = 1 + number_of_reactants
+
+        return [
+            services.compound.SketcherCompound(
+                smiles=smiles,
+                idx=base_idx + i,
+                polymer_indices=polymer_indices,
+                workbook=self.workbook,
+                demo=self.demo,
+                reaction_component=reaction_component,
+                reaction_component_idx=i + 1,
+            )
+            for i, smiles in enumerate(smiles_list)
+        ]
 
     def render(self):
         reaction_table = render_template(
@@ -150,6 +279,19 @@ class ReactionTable:
             "product_mass_units": "mg",
             "product_amount_units": "mmol",
         }
+
+    @staticmethod
+    def find_added_compounds(updated_compounds, original_compounds):
+        """
+        returns unique compounds from updated compound list by comparing to current reaction table data
+        """
+        original_inchis = {x.inchi for x in original_compounds}
+        return [x for x in updated_compounds if x.inchi not in original_inchis]
+
+    @staticmethod
+    def find_preserved_compounds(updated_compounds, original_compounds):
+        updated_inchis = {x.inchi for x in updated_compounds}
+        return [x for x in original_compounds if x.inchi in updated_inchis]
 
     def get_solvent_dropdown(self):
         if self.demo == "demo":

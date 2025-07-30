@@ -23,15 +23,18 @@ def autoupdate_reaction_table():
     demo = request.json.get("demo")
     tutorial = request.json.get("tutorial")
     workbook = None
+    workgroup = None
     reaction = None
     polymer_indices = []
     if demo != "demo" and tutorial != "yes":
-        workgroup = request.json.get("workgroup")
+        workgroup_name = request.json.get("workgroup")
         workbook_name = request.json.get("workbook")
-        workbook = services.workbook.get_workbook_from_group_book_name_combination(
-            workgroup, workbook_name
-        )
         reaction_id = request.json.get("reaction_id")
+
+        workgroup = services.workgroup.from_name(workgroup_name)
+        workbook = services.workbook.get_workbook_from_group_book_name_combination(
+            workgroup_name, workbook_name
+        )
         reaction = services.reaction.get_from_reaction_id_and_workbook_id(
             reaction_id, workbook.id
         )
@@ -42,108 +45,13 @@ def autoupdate_reaction_table():
 
     polymer_indices = request.json.get("polymer_indices")
 
-    reaction_table = services.reaction_Table.ReactionTable(reaction.reaction_table_data)
-
-    print(reaction.reaction_table_data)
-
-    (
-        reactants_smiles_list,
-        product_smiles_list,
-    ) = services.reaction_table.get_reactants_and_products_list(reaction_smiles)
-    reactants = [
-        services.compound.SketcherCompound(
-            smiles=x,
-            idx=idx + 1,
-            polymer_indices=polymer_indices,
-            workbook=workbook,
-            demo=demo,
-            reaction_component="Reactant",
-            reaction_component_idx=idx + 1,
-        )
-        for idx, x in enumerate(reactants_smiles_list)
-    ]
-    number_of_reactants = len(reactants)
-
-    # add for reagent support
-    # reagents = [
-    #     SketcherCompound(
-    #         smiles=x,
-    #         idx=idx + 1 + number_of_reactants,
-    #         polymer_indices=polymer_indices,
-    #         workbook=workbook,
-    #         demo=demo,
-    #         reaction_component="Reagent"
-    #     )
-    #     for idx, x in enumerate(reactants_smiles_list)
-    # ]
-    # number_of_reagents = len(reactants)
-
-    products = [
-        services.compound.SketcherCompound(
-            smiles=y,
-            idx=idx + 1 + number_of_reactants,
-            polymer_indices=polymer_indices,
-            workbook=workbook,
-            demo=demo,
-            reaction_component="Product",
-            reaction_component_idx=idx + 1,
-        )
-        for idx, y in enumerate(product_smiles_list)
-    ]
-    number_of_products = len(products)
-
-    # check errors first add reagents here for reagent support
-    for compound_group in (reactants, products):
-        # now handles co polymer, dummy atom and invalid molecule errors
-        error = services.compound.check_compound_errors(compound_group)
-        if error:
-            return error
-
-        novel_compound_row = services.compound.check_novel_compounds(compound_group)
-        if novel_compound_row:
-            # this should be changed i think
-            return novel_compound_row
-
-    identifiers = []
-
-    # Solvents - keep solvents that are not novel compounds or are novel compounds within the current workbook
-    if demo == "demo":
-        sol_rows = services.solvent.get_default_list()
-    else:
-        sol_rows = services.solvent.get_workbook_list(workbook)
-
-    r_class = None
-
-    if not polymer_indices:
-        polymer_indices = list()
-        r_class = services.reaction_classification.classify_reaction(
-            reactants_smiles_list, product_smiles_list
-        )
-
-    reaction_table_html = "reactions/_reaction_table.html"
-
-    # Now it renders the reaction table template
-    reaction_table = render_template(
-        reaction_table_html,
-        reactants=reactants,
-        # reagents=reagents,
-        number_of_reactants=number_of_reactants,
-        number_of_products=number_of_products,
-        number_of_reagents=0,
-        identifiers=identifiers,
-        reactant_table_numbers=[],
-        products=products,
-        # units=default_units,
-        # product_intended_dps=product_data["intended_dps"],
-        reagent_table_numbers=[],
-        reaction_table_data="",
-        summary_table_data="",
-        sol_rows=sol_rows,
-        reaction=reaction,
-        reaction_class=r_class,
-        polymer_indices=polymer_indices,
+    reaction_table = services.reaction_table.ReactionTable(
+        reaction, workgroup, workbook, demo, tutorial
     )
-    return jsonify({"reactionTable": reaction_table})
+
+    reaction_table.update(reaction_smiles, polymer_indices)
+
+    return reaction_table.render()
 
 
 @reaction_table_bp.route("/reload_reaction_table", methods=["GET", "POST"])
