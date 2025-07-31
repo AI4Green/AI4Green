@@ -8,7 +8,7 @@ WORKDIR /app
 RUN pip install poetry==1.8.3
 
 # Copy the 'audit_log_saver' directory into the container.
-COPY workers/audit_log_saver /app/workers/audit_log_saver
+COPY . /app/workers/audit_log_saver
 
 WORKDIR /app/workers/audit_log_saver
 
