@@ -10,7 +10,8 @@ from sources.services.message_queue.serde import MessageSerdeMixin
 class ReactionEditMessage(MessageSerdeMixin):
     """Class for creating a kafka message for the reaction_editing_history topic"""
 
-    person: int
+    full_name: str
+    email: str
     workgroup: int
     workbook: int
     reaction: int
@@ -31,7 +32,8 @@ class ReactionEditMessage(MessageSerdeMixin):
             "type": "struct",
             "optional": False,
             "fields": [
-                {"field": "person", "type": "int32"},
+                {"field": "full_name", "type": "string"},
+                {"field": "email", "type": "string"},
                 {"field": "workgroup", "type": "int32"},
                 {"field": "workbook", "type": "int32"},
                 {"field": "reaction", "type": "int32"},
@@ -87,7 +89,8 @@ def add_new_reaction(person, workbook, reaction_id, reaction_name):
     change_details = {"reaction_name": reaction_name}
 
     message = ReactionEditMessage(
-        person=person.id,
+        full_name=person.user.fullname,
+        email=person.user.email,
         workgroup=workbook.group,
         workbook=workbook.id,
         reaction=reaction.id,
@@ -103,7 +106,8 @@ def edit_reaction(person, reaction, old_reaction_details, new_reaction_details):
     diff = get_differences(old_reaction_details, new_reaction_details)
     if diff:
         message = ReactionEditMessage(
-            person=person.id,
+            full_name=person.user.fullname,
+            email=person.user.email,
             workgroup=reaction.workbook.group,
             workbook=reaction.workbook.id,
             reaction=reaction.id,
@@ -126,7 +130,8 @@ def autosave_reaction(person, reaction, old_reaction_details):
     diff = get_differences(old_data_normalised, new_data_normalised, exclude_paths=True)
     if diff:
         message = ReactionEditMessage(
-            person=person.id,
+            full_name=person.user.fullname,
+            email=person.user.email,
             workgroup=reaction.workbook.group,
             workbook=reaction.workbook.id,
             reaction=reaction.id,
@@ -148,7 +153,8 @@ def clone_reaction(person, workbook, new_reaction, old_reaction):
     }
 
     message = ReactionEditMessage(
-        person=person.id,
+        full_name=person.user.fullname,
+        email=person.user.email,
         workgroup=workbook.group,
         workbook=workbook.id,
         reaction=old_reaction.id,
@@ -162,7 +168,8 @@ def clone_reaction(person, workbook, new_reaction, old_reaction):
 def delete_reaction(reaction):
     """Record that a reaction was deleted"""
     message = ReactionEditMessage(
-        person=reaction.creator_person.id,
+        full_name=reaction.creator_person.user.fullname,
+        email=reaction.creator_person.user.email,
         workgroup=reaction.workbook.group,
         workbook=reaction.workbook.id,
         reaction=reaction.id,
@@ -177,7 +184,8 @@ def upload_file(person, reaction, file_names):
     """Record that one or more experimental files were added to a reaction"""
     change_details = {"file_names": file_names}
     message = ReactionEditMessage(
-        person=person.id,
+        full_name=person.user.fullname,
+        email=person.user.email,
         workgroup=reaction.workbook.group,
         workbook=reaction.workbook.id,
         reaction=reaction.id,
@@ -192,7 +200,8 @@ def delete_file(person, reaction, file_name):
     """Record that an experimental file was removed from a reaction"""
     change_details = {"file_names": file_name}
     message = ReactionEditMessage(
-        person=person.id,
+        full_name=person.user.fullname,
+        email=person.user.email,
         workgroup=reaction.workbook.group,
         workbook=reaction.workbook.id,
         reaction=reaction.id,

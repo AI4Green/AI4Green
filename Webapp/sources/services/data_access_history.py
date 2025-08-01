@@ -9,7 +9,8 @@ from sources.services.message_queue.serde import MessageSerdeMixin
 class DataAccessMessage(MessageSerdeMixin):
     """Class for creating a kafka message for the data_access_history topic"""
 
-    person: int
+    full_name: str
+    email: str
     workgroup: int
     old_role: str
     new_role: str
@@ -29,7 +30,8 @@ class DataAccessMessage(MessageSerdeMixin):
             "type": "struct",
             "optional": False,
             "fields": [
-                {"field": "person", "type": "int32"},
+                {"field": "full_name", "type": "string"},
+                {"field": "email", "type": "string"},
                 {"field": "workgroup", "type": "int32"},
                 {"field": "old_role", "type": "string"},
                 {"field": "new_role", "type": "string"},
@@ -63,6 +65,3 @@ def send_message(message: DataAccessMessage):
     """
     # producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
     # producer.send("data_access_history", message.serialise())
-
-
-# TODO: record account deletion

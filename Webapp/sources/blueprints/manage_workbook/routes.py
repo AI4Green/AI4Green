@@ -185,7 +185,7 @@ def add_remove_user_from_workbook(
         flask.Response: A JSON response with feedback on the action taken
     """
 
-    user = (
+    person = (
         db.session.query(models.Person)
         .join(models.User)
         .filter(models.User.email == email)
@@ -195,11 +195,12 @@ def add_remove_user_from_workbook(
     workgroup = db.session.query(models.WorkGroup).filter_by(name=workgroup).first()
     if mode == "remove":
         # remove user
-        user.workbook_user.remove(wb)
+        person.workbook_user.remove(wb)
         db.session.commit()
         # record access change
         message = services.data_access_history.DataAccessMessage(
-            user.id,
+            person.user.fullname,
+            person.user.email,
             workgroup.id,
             "Access",
             "No Access",
@@ -210,11 +211,16 @@ def add_remove_user_from_workbook(
         return jsonify({"feedback": "This user has been removed from the workbook!"})
     else:
         # add user
-        user.workbook_user.append(wb)
+        person.workbook_user.append(wb)
         db.session.commit()
         # record access change
         message = services.data_access_history.DataAccessMessage(
-            user.id, workgroup.id, "No Access", "Access", wb.id
+            person.user.fullname,
+            person.user.email,
+            workgroup.id,
+            "No Access",
+            "Access",
+            wb.id,
         )
         services.data_access_history.send_message(message)
         return jsonify({"feedback": "This user has been added to this workbook!"})
