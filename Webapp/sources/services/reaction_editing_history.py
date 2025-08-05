@@ -58,7 +58,8 @@ def send_message(message: ReactionEditMessage):
         message (ReactionEditMessage): The message to send to the queue in the ReactionEditMessage format
     """
     producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    producer.send("reaction_editing_history", message.serialise())
+    # topic name can only be letters and numbers
+    producer.send("reactioneditinghistory", message.serialise())
 
 
 def add_new_reaction(person, workbook, reaction_id, reaction_name):

@@ -48,4 +48,5 @@ def send_message(message: DataAccessMessage):
         message (DataAccessMessage): The message to send to the queue in the DataAccessMessage format
     """
     producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    producer.send("data_access_history", message.serialise())
+    # topic name can only be letters and numbers
+    producer.send("dataaccesshistory", message.serialise())
