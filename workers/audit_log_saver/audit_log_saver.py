@@ -1,9 +1,9 @@
 import datetime as dt
+import json
 import logging
 import os
 from typing import List
 from azure.storage.queue import QueueServiceClient, QueueMessage
-from flask import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
