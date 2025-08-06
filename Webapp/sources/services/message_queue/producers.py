@@ -108,9 +108,13 @@ class AzureQueueProducer(BaseQueueProducer):
 
         client = self.producer.get_queue_client(topic)
 
-        try:
+        # check if topic exists
+        queues = self.producer.list_queues(name_starts_with=topic)
+        if topic not in queues:
             # create the queue if it doesn't already exist
             client.create_queue()
+
+        try:
             client.send_message(msg)
         except Exception as e:
             # import to avoid context based conflicts

@@ -104,10 +104,10 @@ def register_extensions(app: Flask) -> None:
     # Set up the message queue producer
     if app.config["TESTING"]:
         # use logging in the testing environment
-        app.config["message_queue"] = LoggingQueueProducer()
+        app.config["MESSAGE_QUEUE_PRODUCER"] = LoggingQueueProducer()
     else:
         # use azure queue storage elsewhere
-        app.config["message_queue"] = AzureQueueProducer(
+        app.config["MESSAGE_QUEUE_PRODUCER"] = AzureQueueProducer(
             connection_str=app.config["MESSAGE_QUEUE_CONNECTION_STRING"]
         )
 

@@ -17,30 +17,14 @@ class DataAccessMessage(MessageSerdeMixin):
     date: str
     workbook: Optional[int] = None
 
-    def serialise(self):
-        """Convert a message into a JSON object with a schema and payload.
-
-        The schema is an object that lists the fields and their types.
-        The payload is an object representing the message class in JSON format.
+    def serialise(self) -> str:
+        """Convert a message into a JSON string.
 
         Returns:
-            dict: The message class formated with shcema and payload.
+            str: The message class formated as a JSON string.
         """
-        schema = {
-            "type": "struct",
-            "optional": False,
-            "fields": [
-                {"field": "full_name", "type": "string"},
-                {"field": "email", "type": "string"},
-                {"field": "workgroup", "type": "int32"},
-                {"field": "old_role", "type": "string"},
-                {"field": "new_role", "type": "string"},
-                {"field": "date", "type": "string"},
-                {"field": "workbook", "type": "int32", "optional": True},
-            ],
-        }
         payload = asdict(self)
-        serialised = json.dumps({"schema": schema, "payload": payload})
+        serialised = json.dumps(payload)
         return serialised
 
     @staticmethod
@@ -63,5 +47,6 @@ def send_message(message: DataAccessMessage):
     Args:
         message (DataAccessMessage): The message to send to the queue in the DataAccessMessage format
     """
-    # producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    # producer.send("data_access_history", message.serialise())
+    producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
+    # topic name can only be letters and numbers
+    producer.send("dataaccesshistory", message.serialise())
