@@ -3,7 +3,18 @@ import time
 from kafka import KafkaConsumer
 
 
-class QueueConsumer:
+class BaseConsumer:
+
+    def poll(self, poll_duration_sec: int = 60):
+        """Poll messages from topics and returns them.
+
+        Args:
+            poll_duration_sec (int): Length of time to poll for, in seconds
+        """
+        raise NotImplementedError
+
+
+class QueueConsumer(BaseConsumer):
     """This class is a service which is used to receive messages from a kafka cluster."""
 
     def __init__(self, hostname, topic):
