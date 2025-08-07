@@ -63,13 +63,13 @@ class AzureQueueConsumer(BaseQueueConsumer):
     """
 
     def __init__(self, connection_str: str, queue_name: str, max_messages: int = 100):
-        """Create a producer for Azure Queue Storage
+        """Create a consumer for Azure Queue Storage
 
         Args:
             connection_str (str): The connection string for the queue storage resource.
             queue_name (str): The name of the queue to read from.
         """
-        self.producer = QueueServiceClient.from_connection_string(connection_str)
+        self.consumer = QueueServiceClient.from_connection_string(connection_str)
         self.queue_name = queue_name
         self.max_messages = max_messages
 
@@ -81,7 +81,7 @@ class AzureQueueConsumer(BaseQueueConsumer):
         """
         messages = []
 
-        client = self.producer.get_queue_client(self.queue_name)
+        client = self.consumer.get_queue_client(self.queue_name)
 
         end_time = time.time() + poll_duration_sec
         while time.time() < end_time:
