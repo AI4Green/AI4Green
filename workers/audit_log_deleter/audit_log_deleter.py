@@ -43,7 +43,7 @@ def main():
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    max_lifetime = os.getenv("MAX_LIFETIME", 1)
+    max_lifetime = int(os.getenv("MAX_LIFETIME", 1))
     db_connection_str = os.getenv(
         "DB_CONNECTION_STRING",
         "postgresql://postgres:postgres@localhost:5432/ai4gauditlog",
