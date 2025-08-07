@@ -8,7 +8,7 @@ from sources.services.message_queue.serde import MessageSerdeMixin
 
 @dataclass
 class ReactionEditMessage(MessageSerdeMixin):
-    """Class for creating a kafka message for the reaction_editing_history topic"""
+    """Class for creating a message for the reaction_editing_history topic"""
 
     full_name: str
     email: str
@@ -42,7 +42,8 @@ class ReactionEditMessage(MessageSerdeMixin):
             ReactionEditMessage: The `ReactionEditMessage` from the JSON.
         """
         return ReactionEditMessage(
-            person=data["person"],
+            full_name=data["full_name"],
+            email=data["email"],
             workgroup=data["workgroup"],
             workbook=data["workbook"],
             reaction=data["reaction"],
@@ -53,7 +54,7 @@ class ReactionEditMessage(MessageSerdeMixin):
 
 
 def send_message(message: ReactionEditMessage):
-    """Send a message to the kafka producer in the reaction_editing_history topic.
+    """Send a message to the producer in the reaction_editing_history topic.
     Args:
         message (ReactionEditMessage): The message to send to the queue in the ReactionEditMessage format
     """
