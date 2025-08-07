@@ -102,13 +102,13 @@ def main():
         "QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;"
     )
     connection_str = os.getenv("QUEUE_CONNECTION_STRING", default_str)
-    queue_names = os.getenv("QUEUE_NANES", "test-queue")
+    queue_names = os.getenv("QUEUE_NAMES", "test-queue")
     queues = queue_names.split(",")
     db_connection_str = os.getenv(
         "DB_CONNECTION_STRING",
         "postgresql://postgres:postgres@localhost:5434/ai4gauditlog",
     )
-    max_messages = os.getenv("MAX_MESSAGES", 100)
+    max_messages = int(os.getenv("MAX_MESSAGES", 100))
 
     logger.info("Getting service client")
     service_client = QueueServiceClient.from_connection_string(connection_str)
