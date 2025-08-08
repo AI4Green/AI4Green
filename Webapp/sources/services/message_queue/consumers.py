@@ -62,7 +62,7 @@ class AzureQueueConsumer(BaseQueueConsumer):
     A queue consumer for reading messages from Azure Queue Storage.
     """
 
-    def __init__(self, connection_str: str, queue_name: str, max_messages: int = 100):
+    def __init__(self, connection_str: str, queue_name: str, max_messages: int = 32):
         """Create a consumer for Azure Queue Storage
 
         Args:
