@@ -108,7 +108,7 @@ def main():
         "DB_CONNECTION_STRING",
         "postgresql://postgres:postgres@localhost:5432/ai4gauditlog",
     )
-    max_messages = int(os.getenv("MAX_MESSAGES", 100))
+    max_messages = int(os.getenv("MAX_MESSAGES", 32))
 
     logger.info("Getting service client")
     service_client = QueueServiceClient.from_connection_string(connection_str)
