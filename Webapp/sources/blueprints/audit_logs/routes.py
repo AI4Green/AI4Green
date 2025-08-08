@@ -16,17 +16,6 @@ from . import audit_log_bp
 @login_required
 @principal_investigator_required
 def download_audit_logs(workgroup: str):
-    if not current_app.config["USE_KAFKA"]:
-        return (
-            jsonify(
-                {
-                    "success": False,
-                    "error": "Kafka is disabled. Refer to the README to enable it.",
-                }
-            ),
-            503,
-        )
-
     # get arguments form GET parameters
     topic = request.args.get("topic")
     if topic is None:
