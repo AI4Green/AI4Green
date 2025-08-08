@@ -1,6 +1,7 @@
 import datetime as dt
 import logging
 import os
+
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
@@ -46,7 +47,7 @@ def main():
     max_lifetime = int(os.getenv("MAX_LIFETIME", 1))
     db_connection_str = os.getenv(
         "DB_CONNECTION_STRING",
-        "postgresql://postgres:postgres@localhost:5432/ai4gauditlog",
+        "postgresql://postgres:postgres@localhost:5434/ai4gauditlog",
     )
 
     running = True

@@ -3,11 +3,11 @@ import json
 import logging
 import os
 from typing import List
-from azure.storage.queue import QueueServiceClient, QueueMessage
+
+from azure.storage.queue import QueueMessage, QueueServiceClient
+from models import AuditLogEvent
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-
-from models import AuditLogEvent
 
 
 def get_messages(
@@ -106,7 +106,7 @@ def main():
     queues = queue_names.split(",")
     db_connection_str = os.getenv(
         "DB_CONNECTION_STRING",
-        "postgresql://postgres:postgres@localhost:5432/ai4gauditlog",
+        "postgresql://postgres:postgres@localhost:5434/ai4gauditlog",
     )
     max_messages = int(os.getenv("MAX_MESSAGES", 32))
 
