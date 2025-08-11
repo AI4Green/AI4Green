@@ -94,16 +94,13 @@ def make_log_stream(logs: List[Any], file_name: str):
 def get_human_readable_ids(logs: List[dict]):
     for log in logs:
         # Look up user, workgroup and workbook
-        person = services.person.from_id(log["person"]).user
         workgroup = services.workgroup.from_id(log["workgroup"])
         workbook = services.workbook.get(log["workbook"])
 
         # get the human readable names
-        fullname = person.fullname if person is not None else "Deleted User"
         workgroup_name = workgroup.name if workgroup else "Deleted Workgroup"
         workbook_name = workbook.name if workbook is not None else None
 
         # Alter the records to show the human readable names
-        log["person"] = fullname
         log["workgroup"] = workgroup_name
         log["workbook"] = workbook_name
