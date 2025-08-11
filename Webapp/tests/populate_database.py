@@ -83,6 +83,21 @@ def insert_test_data():
         name="Test-Workbook", group=workgroup.id, users=[p1], abbreviation="TW1"
     )
 
+    # Make a test audit log event
+    models.AuditLogEvent.create(
+        event_time=datetime.now(),
+        event_type="reactionedithistory",
+        message={
+            "person": 3,
+            "workgroup": 2,
+            "workbook": 2,
+            "reaction": 4,
+            "field_name": "Edited Reaction",
+            "change_details": '{"reactant_physical_forms_text": {"new_value": ["Unknown", "-select-"], "old_value": ["Non-volatile liquid", "-select-"]}}',
+            "date": "2025-06-11",
+        },
+    )
+
     # add some compounds to the database
     compound1 = models.Compound(
         name="Testoic Acid",
