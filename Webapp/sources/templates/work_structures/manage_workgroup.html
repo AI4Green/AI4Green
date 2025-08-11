@@ -49,6 +49,11 @@
                 <a class="nav-link" role="tab" data-toggle="tab" href="#add-users"
                    aria-selected="{% if has_request == "no" %}false{% else %}true{% endif %}">Add Users</a>
             </li>
+{#        AUDIT LOGS ARE DISABLED UNTIL AZURE CONFIGS ARE SORTED #}
+{#            <li class="nav-item">#}
+{#                <a class="nav-link" role="tab" data-toggle="tab" href="#audit-logs"#}
+{#                   aria-selected="{% if has_request == "no" %}false{% else %}true{% endif %}">Audit Logs</a>#}
+{#            </li>#}
         </ul>
         <div class="tab-content">
             <!-- Overview table-->
@@ -378,6 +383,56 @@
                             <button type="button" class="btn btn-success" id="qr-print" onclick="printQRCode()">Print
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+{#        AUDIT LOGS ARE DISABLED UNTIL AZURE CONFIGS ARE SORTED #}
+{#            <!--audit log tab-->#}
+{#            <div class="tab-pane fade in" id="audit-logs" role="tabpanel">#}
+{#                <div id="audit-logs-section" class="card my-5 shadow-sm rounded-3">#}
+{#                    <div class="card-header bg-light d-flex justify-content-between align-items-center">#}
+{#                        <h4 class="mb-0">Generate Audit Logs</h4>#}
+{#                    </div>#}
+{##}
+{#                    <div class="card-body">#}
+{#                        <form id="audit-logs-form" action="{{ url_for('audit_log.download_audit_logs', workgroup=current_workgroup) }}">#}
+{##}
+{#                            <div class="mb-4">#}
+{#                                <label class="form-label mb-2" style="font-weight: 600;">Topic:</label><br>#}
+{#                                <div class="form-check form-check-inline">#}
+{#                                    <input class="form-check-input" type="radio" name="topic" id="reaction-history" value="reaction_editing_history_compressed" checked>#}
+{#                                    <label class="form-check-label" for="reaction-history">Reaction Edit History</label>#}
+{#                                </div>#}
+{#                                <div class="form-check form-check-inline">#}
+{#                                    <input class="form-check-input" type="radio" name="topic" id="data-access" value="data_access_history">#}
+{#                                    <label class="form-check-label" for="data-access">Data Access History</label>#}
+{#                                </div>#}
+{# commented out until data export topic is added to audit log:                               <div class="form-check form-check-inline">#}
+{#                                    <input class="form-check-input" type="radio" name="topic" id="data-export" value="export">#}
+{#                                    <label class="form-check-label" for="data-export">Data Export History</label>#}
+{#                                </div>#}
+{#                            </div>#}
+
+                            <div class="mb-4">
+                                <label class="form-label mb-2" style="font-weight: 600;">Date Range:</label>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="start-date">Start Date</label>
+                                        <input type="date" id="start_date" name="start_date" class="form-control">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="end-date">End Date</label>
+                                        <input type="date" id="end_date" name="end_date" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p id="date_error" style="color: red; display: none;">End date cannot be before start date.</p>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">Generate Logs</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -56,8 +56,9 @@ def new_reaction() -> Response:
     # if the name check is passed then proceed with making the new reaction
     if b"This reaction name is unique" in name_check.data:
         # make the reaction table dict with units set to default values
-        reaction_table = services.reaction.empty_reaction_table()
-        summary_table = services.summary.empty_summary_table()
+        reaction_table = services.reaction_table.new()
+
+        summary_table = services.summary.empty_summary_table
         # add reaction to database
         services.reaction.add(
             reaction_name,
@@ -66,6 +67,10 @@ def new_reaction() -> Response:
             workbook_object.id,
             reaction_table,
             summary_table,
+        )
+        # record new reaction history
+        services.reaction_editing_history.add_new_reaction(
+            creator, workbook_object, reaction_id, reaction_name
         )
         # load sketcher
         feedback = "New reaction made"
@@ -85,6 +90,7 @@ def autosave() -> Response:
     reaction_image = str(request.form["reactionImage"])
     reaction_class = str(request.form.get("reactionClass"))
     polymer_indices = json.loads(request.form.get("polymerIndices"))
+    print("autosave", polymer_indices)
     polymerisation_type = str(request.form["polymerisationType"])
 
     services.auth.edit_reaction(reaction)
@@ -92,7 +98,6 @@ def autosave() -> Response:
     summary_to_print = str(request.form["summary_to_print"])
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
     reaction_smiles = str(request.form["reactionSmiles"])
-    reaction_rxn = str(request.form["reactionRXN"])
 
     # reaction table entries
     # find the table number of the limiting reactant e.g js-reactant1
@@ -358,7 +363,6 @@ def autosave() -> Response:
         "time_of_update": current_time,
         "complete": complete,
         "reaction_smiles": reaction_smiles,
-        "reaction_rxn": reaction_rxn,
         "description": reaction_description,
         "reaction_image": reaction_image,
         "reactants": reactant_smiles_ls,
@@ -370,7 +374,13 @@ def autosave() -> Response:
         "polymerisation_type": polymerisation_type,
         "reaction_class": reaction_class,
     }
+    # get current state before updating
+    old_reaction_details = services.reaction.get_reaction_details(reaction)
     reaction.update(**update_dict)
+    # record new reaction history
+    services.reaction_editing_history.autosave_reaction(
+        services.person.from_current_user_email(), reaction, old_reaction_details
+    )
     services.controlled_substances.check_reaction_for_controlled_substances(reaction)
     return jsonify({"feedback": feedback})
 
@@ -455,7 +465,10 @@ def clone_reaction() -> Response:
                 "reaction_rxn": old_reaction.reaction_rxn,
             }
         )
-
+        # record new reaction history
+        services.reaction_editing_history.clone_reaction(
+            creator, workbook_object, new_reaction, old_reaction
+        )
         feedback = "New reaction made"
         return jsonify({"feedback": feedback})
     else:
@@ -474,11 +487,12 @@ def autosave_sketcher() -> Response:
     current_time = datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None)
     reaction_smiles = str(request.form.get("reactionSmiles"))
     reaction_rxn = str(request.form.get("reactionRXN"))
-    polymer_indices = str(request.form.get("polymerIndices"))
+    polymer_mode = request.form.get("polymerMode")
 
-    reaction_type = "STANDARD"
-    if polymer_indices:  # convert string to boolean
+    if polymer_mode.lower() == "true":  # convert string to boolean
         reaction_type = "POLYMER"
+    else:
+        reaction_type = "STANDARD"
 
     update_dict = {
         "time_of_update": current_time,
@@ -486,8 +500,21 @@ def autosave_sketcher() -> Response:
         "reaction_rxn": reaction_rxn,
         "reaction_type": reaction_type,
     }
-
+    # get current state before updating
+    old_reaction_details = {
+        "reaction_smiles": reaction.reaction_smiles,
+        "reaction_type": reaction.reaction_type.value,
+    }
     reaction.update(**update_dict)
+    # record new reaction history
+    update_dict.pop("time_of_update")
+    update_dict.pop("reaction_rxn")
+    services.reaction_editing_history.edit_reaction(
+        services.person.from_current_user_email(),
+        reaction,
+        old_reaction_details,
+        update_dict,
+    )
     feedback = "Reaction Updated!"
     return jsonify({"feedback": feedback})
 
@@ -502,7 +529,16 @@ def save_polymer_mode():
 
     reaction_type = request.form["reactionType"]
     update_dict = {"reaction_type": reaction_type}
+    # get current state before updating
+    old_reaction_details = {"reaction_type": reaction.reaction_type.value}
     reaction.update(**update_dict)
+    # record new reaction history
+    services.reaction_editing_history.edit_reaction(
+        services.person.from_current_user_email(),
+        reaction,
+        old_reaction_details,
+        update_dict,
+    )
     feedback = "Reaction Updated!"
     return jsonify({"feedback": feedback})
 
@@ -569,6 +605,12 @@ def upload_experiment_files():
     new_upload = services.file_attachments.UploadExperimentDataFiles(request)
     new_upload.validate_files()
     new_upload.save_validated_files()
+    # record new reaction history
+    services.reaction_editing_history.upload_file(
+        services.person.from_current_user_email(),
+        services.reaction.get_current_from_request(),
+        [file.filename for file in new_upload.validated_files],
+    )
     return jsonify({"uploaded_files": new_upload.uploaded_files})
 
 
@@ -612,7 +654,7 @@ def download_experiment_files():
     display_name = file_object.display_name
     return jsonify(
         {"stream": file_attachment, "mimetype": mimetype, "name": display_name}
-    )
+    )  # TODO: does this count as data export
 
 
 @save_reaction_bp.route("/_delete_reaction_attachment", methods=["DELETE"])
@@ -620,5 +662,17 @@ def download_experiment_files():
 @save_reaction_bp.doc(security="sessionAuth")
 def delete_reaction_attachment():
     """Delete file attached to reaction"""
+    # get current state before updating
+    file_uuid = request.form["uuid"]
+    file_object = services.file_attachments.database_object_from_uuid(file_uuid)
+    display_name = file_object.display_name
+
     services.file_attachments.delete_file_attachment(request_source="user")
+
+    # record new reaction history
+    services.reaction_editing_history.delete_file(
+        services.person.from_current_user_email(),
+        services.reaction.get_current_from_request(),
+        display_name,
+    )
     return "success"

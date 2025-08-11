@@ -12,10 +12,7 @@ from sources.extensions import db
 from sqlalchemy import exists, func
 
 
-def get_smiles(
-    primary_key: Tuple[str, int],
-    person: models.Person = None,
-) -> str:
+def get_smiles(primary_key: Tuple[str, int], person: models.Person = None) -> list[str]:
     """
     Gets the repeat units SMILES strings from the PolymerNovelCompound primary key by searching in the PolymerRepeatUnit table
     Args:

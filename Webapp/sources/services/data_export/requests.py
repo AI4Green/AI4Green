@@ -13,7 +13,7 @@ class NewRequest:
 
     def __init__(self):
         """Creates an instance of the NewRequest class using from the request json."""
-        self.requestor = services.user.person_from_current_user()
+        self.requestor = services.person.from_current_user_email()
         self.data_format = request.json["exportFormat"]
         self.invalid_workbooks = None
         self.workgroup = services.workgroup.from_name(request.json["workgroup"])
@@ -108,7 +108,7 @@ class NewRequest:
                 time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
                 status="active",
             )
-            services.email.send_data_export_approval_request(
+            services.email_services.send_data_export_approval_request(
                 principal_investigator.user, self.data_export_request
             )
 
@@ -203,7 +203,7 @@ class RequestLinkVerification:
         (
             self.person,
             self.data_export_request,
-        ) = services.email.verify_data_export_token(self.token)
+        ) = services.email_services.verify_data_export_token(self.token)
         # redirect if requestor does not match current user and request has not been approved.
         if not (
             self.person
@@ -222,7 +222,7 @@ class RequestLinkVerification:
         (
             self.person,
             self.data_export_request,
-        ) = services.email.verify_data_export_token(self.token)
+        ) = services.email_services.verify_data_export_token(self.token)
         if not (
             self.person
             and self.data_export_request

@@ -8,9 +8,11 @@ from typing import Dict
 
 from apiflask import APIFlask
 from flask import Flask
+from minio import Minio
 from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db, login, ma, mail, migrate, oidc
+from sources.services.message_queue import LoggingQueueProducer, QueueProducer
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
@@ -263,6 +265,10 @@ def register_blueprints(app: Flask) -> None:
     from sources.blueprints.reaction_set import reaction_set_bp
 
     app.register_blueprint(reaction_set_bp)
+
+    # from sources.blueprints.audit_logs import audit_log_bp
+
+    # app.register_blueprint(audit_log_bp)
 
 
 def inject_session_context(app: Flask) -> Dict[str, str]:

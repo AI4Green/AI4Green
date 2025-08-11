@@ -113,6 +113,10 @@ class BaseConfig(object):  # class to store configuration variables
     SQLALCHEMY_BINDS = {
         "db": SQLALCHEMY_DATABASE_URI,
         "update": "sqlite:///temp_update.sqlite",
+        "audit_log": os.getenv(
+            "AUDIT_LOG_DATABASE_URL",
+            "postgresql://postgres:postgres@localhost:5432/ai4gauditlog",
+        ),
     }
 
     APP_DIRECTORY = os.path.abspath(os.path.join(os.path.abspath(__file__), "..", ".."))
@@ -167,6 +171,10 @@ class TestConfig(BaseConfig):
     SQLALCHEMY_BINDS = {
         "db": SQLALCHEMY_DATABASE_URI,
         "update": "sqlite:///temp_update.sqlite",
+        "audit_log": os.getenv(
+            "TEST_AUDIT_LOG_DATABASE_URL",
+            "postgresql://postgres:postgres@localhost:5433/ai4gauditlogtest",
+        ),
     }
 
 

@@ -18,7 +18,7 @@ def send_and_commit(notification: models.Notification, person: models.Person) ->
     """
     db.session.add(notification)
     db.session.commit()
-    services.email.send_notification(person)
+    services.email_services.send_notification(person)
 
 
 def deny_sm_status_request(person: models.Person, workgroup: models.WorkGroup) -> None:

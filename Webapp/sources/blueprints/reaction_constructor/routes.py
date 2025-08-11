@@ -47,6 +47,7 @@ def sketcher(
         load_status = "loading"
     else:
         load_status = "loaded"
+
     return render_template(
         "reactions/reaction_constructor.html",
         reaction=reaction,

@@ -1,20 +1,9 @@
 $(function () {
-  if ($("#hazard_disclaimer").is(":checked") && $("#privacy").is(":checked")) {
-    $("#submit").removeAttr("disabled");
-  } else {
-    $("#submit").prop("disabled", true);
-  }
-  if ($("#hazard_disclaimer").is(":checked")) {
-    $("#hazard_disclaimer").removeAttr("disabled");
-  }
-  if ($("#privacy").is(":checked")) {
-    $("#privacy").removeAttr("disabled");
-  }
+  enableSubmit();
 });
-
 // enable the submit button once both checkboxes are enabled.
 function enableSubmit() {
-  if ($("#hazard_disclaimer").is(":checked") && $("#privacy").is(":checked") && !$("#agree-terms").is(":checked")) {
+  if ($("#hazard").is(":checked") && $("#privacy").is(":checked")) {
     $("#submit").removeAttr("disabled");
   } else {
     $("#submit").prop("disabled", true);

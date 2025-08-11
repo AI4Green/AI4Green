@@ -461,7 +461,7 @@ class ReactionApprovalRequestSubmission:
             reaction (models.Reaction): The reaction to be reviewed, extracted from the request.
             reaction_approval_request (models.ReactionApprovalRequest | None): Initialized as None, to be set later.
         """
-        self.requestor = services.user.person_from_current_user()
+        self.requestor = services.person.from_current_user_email()
         self.workgroup = services.workgroup.from_name(request.json.get("workgroup"))
         self.workbook = services.workbook.get_workbook_from_group_book_name_combination(
             self.workgroup.name, request.json.get("workbook")
@@ -528,7 +528,7 @@ class ReactionApprovalRequestSubmission:
                 time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
                 status="active",
             )
-            services.email.send_reaction_approval_request(
+            services.email_services.send_reaction_approval_request(
                 principal_investigator.user,
                 self.reaction_approval_request,
                 self.workgroup,
@@ -682,7 +682,7 @@ class ReactionApprovalRequestResponse:
             time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
             status="active",
         )
-        services.email.send_reaction_approval_response(
+        services.email_services.send_reaction_approval_response(
             user=self.reaction_approval_request.requestor_person.user,
             reaction_approval_request=self.reaction_approval_request,
         )
@@ -714,3 +714,21 @@ class ReactionApprovalRequestResponse:
                     </table>
                 </div>
                 """
+
+
+def get_reaction_details(reaction):
+    """Gets reaction details from its db object - used for logging editing history"""
+    reaction_details = {
+        "complete": reaction.complete,
+        "reaction_smiles": reaction.reaction_smiles,
+        "description": reaction.description,
+        "reactants": reaction.reactants,
+        "products": reaction.products,
+        "reagents": reaction.reagents,
+        "solvent": reaction.solvent,
+        "reaction_table_data": reaction.reaction_table_data,
+        "summary_table_data": reaction.summary_table_data,
+        "polymerisation_type": reaction.polymerisation_type,
+    }
+
+    return reaction_details

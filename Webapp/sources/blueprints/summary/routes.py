@@ -67,7 +67,7 @@ def summary() -> Response:
         return jsonify({"summary": check_results})
 
     sustainability_data = services.sustainability.SustainabilityMetrics(
-        reactant_data, reagent_data, solvent_data, product_data
+        reactant_data, reagent_data, solvent_data, product_data, polymer_indices
     ).get_sustainability_metrics()
 
     risk_data = services.summary.get_risk_data(

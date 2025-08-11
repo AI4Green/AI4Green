@@ -197,7 +197,7 @@ class DataExport:
             time=datetime.now(pytz.timezone("Europe/London")).replace(tzinfo=None),
             status="active",
         )
-        services.email.send_data_export_ready_message(
+        services.email_services.send_data_export_ready_message(
             self.data_export_request.requestor_person.user, self.data_export_request
         )
 

@@ -64,6 +64,7 @@ async function sketcherAutoSave() {
   // autosave for when the sketcher has been updated
   let smiles;
   let rxn;
+  let polymerMode = false;
   let selectedSketcher = $('input[name="sketcher-select"]:checked').attr("id");
   if (selectedSketcher === "marvin-select") {
     smiles = await exportSmilesFromMarvin();
@@ -84,6 +85,9 @@ async function sketcherAutoSave() {
   let workbook = $("#js-active-workbook").val();
   let reactionID = $("#js-reaction-id").val();
   let polymerIndices = identifyPolymers(rxn);
+  if (polymerIndices.length === 0) {
+    polymerMode = true;
+  }
   let userEmail = "{{ current_user.email }}";
   let demo = $("#js-demo").val();
   let tutorial = $("#js-tutorial").val();
@@ -109,7 +113,7 @@ async function sketcherAutoSave() {
           userEmail: userEmail,
           reactionSmiles: smilesNew,
           reactionRXN: rxn,
-          polymerIndices: JSON.stringify(polymerIndices),
+          polymerMode: polymerMode,
         },
         dataType: "json",
         success: function () {
@@ -261,7 +265,6 @@ function postReactionData(complete = "not complete") {
     selectivity,
     toExport,
   } = getFieldData();
-  console.log("POST", reactionName);
   let summary_to_print_el = document.getElementById("section-to-print");
   let summary_to_print = "no summary data";
   if (summary_to_print_el !== null) {

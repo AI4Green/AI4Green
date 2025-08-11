@@ -1414,10 +1414,28 @@ function autoChangeRequiredStyling2(styleParameterID, excludedNullValues = []) {
  */
 function autoChangeRequiredStyling(changedParameter, excludedNullValues = []) {
   // update styling of current reaction table (for reaction table reload)
+  autoChangeRequiredStyling2(changedParameter, excludedNullValues);
   // then set up the listener for future changes
   $(changedParameter).on("input change", function () {
     autoChangeRequiredStyling2(changedParameter, excludedNullValues);
   });
+}
+
+/**
+ * Function called to change styling on reagent and solvet changing
+ * @param changedParameter
+ * @param changedStyling
+ */
+function styleValidReagent(changedParameter, changedStyling) {
+  if (getVal($(changedParameter)) === "") {
+    $(changedStyling)
+      .removeClass("remove-highlight-filled-cell")
+      .addClass("add-highlight-unfilled-cell");
+  } else {
+    $(changedStyling)
+      .removeClass("add-highlight-unfilled-cell")
+      .addClass("readonly-cell remove-highlight-filled-cell");
+  }
 }
 
 function autoChangeRequiredStylingValidCompound(component, loop_value) {
@@ -1426,17 +1444,14 @@ function autoChangeRequiredStylingValidCompound(component, loop_value) {
   changedParameter = changedParameter.concat(String(loop_value));
   let changedStyling = "#js-" + component;
   changedStyling = changedStyling.concat(String(loop_value));
+  styleValidReagent(changedParameter, changedStyling);
   $(changedStyling).on("input change", function () {
-    if (getVal($(changedParameter)) === "") {
-      $(changedStyling)
-        .removeClass("remove-highlight-filled-cell")
-        .addClass("add-highlight-unfilled-cell");
-    } else {
-      $(changedStyling)
-        .removeClass("add-highlight-unfilled-cell")
-        .addClass("remove-highlight-filled-cell");
-    }
+    styleValidReagent(changedParameter, changedStyling);
   });
+
+  if (component === "solvent") {
+    $(changedStyling).removeClass("readonly-cell");
+  }
 }
 
 function updateStyling() {

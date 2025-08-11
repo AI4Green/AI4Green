@@ -79,7 +79,7 @@ def join_workgroup(workgroup=None) -> Response:
             wb="",
             wg_request="",
         )
-        services.email.send_notification(pi)
+        services.email_services.send_notification(pi)
         db.session.add(notification)
         db.session.commit()  # Have to commit to get the id for notification
         wg_request = models.WGStatusRequest(
@@ -144,6 +144,17 @@ def join_workgroup_response(notification=None, decision=None):
             getattr(person, workgroup_dict[user_type]["person_to_wg_attr"]).add(
                 workgroup
             )
+
+            # record role change
+            message = services.data_access_history.DataAccessMessage(
+                person.id,
+                workgroup.id,
+                old_role="No Access",
+                new_role=workgroup_dict[user_type]["display_string"],
+                date=datetime.now().strftime("%Y-%m-%d"),
+            )
+            services.data_access_history.send_message(message)
+
             flash(
                 f"You have been successfully added to the Workgroup: {workgroup.name}"
             )

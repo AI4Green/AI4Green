@@ -7,6 +7,7 @@ The models are used to create the database tables, and to query the database.
 """
 
 from . import base
+from .audit_log import AuditLogEvent
 from .compound import Compound
 from .compound_data_error_report import CompoundDataErrorReport
 from .controlled_substances import ControlledSubstanceUsage

@@ -192,15 +192,31 @@ def add_remove_user_from_workbook(
         .first()
     )
     wb = db.session.query(models.WorkBook).get(workbook)
+    workgroup = db.session.query(models.WorkGroup).filter_by(name=workgroup).first()
     if mode == "remove":
         # remove user
         user.workbook_user.remove(wb)
         db.session.commit()
+        # record access change
+        message = services.data_access_history.DataAccessMessage(
+            user.id,
+            workgroup.id,
+            "Access",
+            "No Access",
+            datetime.now().strftime("%Y-%m-%d"),
+            wb.id,
+        )
+        services.data_access_history.send_message(message)
         return jsonify({"feedback": "This user has been removed from the workbook!"})
     else:
         # add user
         user.workbook_user.append(wb)
         db.session.commit()
+        # record access change
+        message = services.data_access_history.DataAccessMessage(
+            user.id, workgroup.id, "No Access", "Access", wb.id
+        )
+        services.data_access_history.send_message(message)
         return jsonify({"feedback": "This user has been added to this workbook!"})
 
 
@@ -265,7 +281,7 @@ def manage_workbook_request(
         )
         db.session.add(notification)
         db.session.commit()
-        services.email.send_notification(person)
+        services.email_services.send_notification(person)
         # feedback return
         return jsonify({"feedback": "This user has not been added to this workbook!"})
     else:
@@ -283,7 +299,7 @@ def manage_workbook_request(
         )
         db.session.add(notification)
         db.session.commit()
-        services.email.send_notification(person)
+        services.email_services.send_notification(person)
         # feedback return
         return jsonify({"feedback": "This user has been added to this workbook!"})
 
@@ -384,7 +400,7 @@ def join_workbook(workgroup: str) -> Response:
                 wb=workbook,
                 wg=workgroup,
             )
-            services.email.send_notification(p)
+            services.email_services.send_notification(p)
             db.session.add(notification)
             db.session.commit()
             wb_request = models.WBStatusRequest(
