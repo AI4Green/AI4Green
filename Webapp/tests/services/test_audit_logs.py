@@ -33,36 +33,30 @@ def test_download_sends_a_zip_file(
     app: Flask, client: FlaskClient, mocker: MockerFixture
 ):
     with app.app_context():
-        # Patch the MinIO client in the service module
-        mock_client = mocker.patch("sources.services.audit_logs.client")
-
-        # Create a mock object returned by list_objects
-        mock_obj = MagicMock()
-        mock_obj.object_name = "example.json"
-        mock_client.list_objects.return_value = [mock_obj]
+        audit_message = {
+            "person": 3,
+            "workgroup": 2,
+            "workbook": 2,
+            "reaction": 4,
+            "field_name": "Edited Reaction",
+            "change_details": '{"reactant_physical_forms_text": {"new_value": ["Unknown", "-select-"], "old_value": ["Non-volatile liquid", "-select-"]}}',
+            "date": "2025-06-11",
+        }
+        # Mock the get_audit_logs service
+        mock_service = mocker.patch("sources.services.audit_logs.get_audit_logs")
+        mock_service.return_value = [audit_message]
 
         # Create a mock file-like object for get_object
         mock_file = MagicMock()
-        mock_content = json.dumps(
-            {
-                "person": 3,
-                "workgroup": 2,
-                "workbook": 2,
-                "reaction": 4,
-                "field_name": "Edited Reaction",
-                "change_details": '{"reactant_physical_forms_text": {"new_value": ["Unknown", "-select-"], "old_value": ["Non-volatile liquid", "-select-"]}}',
-                "date": "2025-06-11",
-            }
-        ).encode()
+        mock_content = json.dumps(audit_message).encode()
         mock_file.read.return_value = mock_content
-        mock_client.get_object.return_value = mock_file
 
         login(client)
         expected_code = 200
         expected_mime_type = "application/zip"
         response = client.get(
             "/audit_log/Test-Workgroup/download",
-            query_string={"topic": "test_topic"},
+            query_string={"topic": "reactionedithistory"},
         )
 
         assert response.status_code == expected_code

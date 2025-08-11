@@ -2,7 +2,7 @@ import io
 import json
 import zipfile
 from datetime import datetime
-from sqlalchemy import cast, String
+from sqlalchemy import cast, String, Integer
 from typing import Any, List, Optional
 
 from sources import services
@@ -49,7 +49,7 @@ def get_audit_logs(
     # Filter by workgroup if provided
     if workgroup_name is not None:
         query = query.filter(
-            cast(AuditLogEvent.message["workgroup"].astext, String) == workgroup_name
+            cast(AuditLogEvent.message["workgroup"], String) == workgroup_name
         )
 
     # Apply date filters
