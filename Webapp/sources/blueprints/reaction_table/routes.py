@@ -48,6 +48,7 @@ def autoupdate_reaction_table():
     reaction_table = services.reaction_table.ReactionTable(
         reaction, workgroup, workbook, demo, tutorial
     )
+    print("reactionsmiles 1", reaction_smiles)
 
     reaction_table.update(reaction_smiles, polymer_indices)
 
@@ -71,7 +72,6 @@ def reload_reaction_table():
     reaction_table = services.reaction_table.ReactionTable(
         reaction, workgroup, workbook, demo, "no"
     )
-    print(reaction_table.reactants, reaction_table.products)
 
     return reaction_table.render()
 

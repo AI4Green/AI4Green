@@ -259,6 +259,7 @@ class SketcherCompound:
         self.reload = reload
         self.errors = []
 
+        print(self.smiles, self.idx, self.reaction_component_idx)
         self.check_for_polymer(polymer_indices, reaction_smiles)
 
         self.check_invalid_molecule()
@@ -294,7 +295,7 @@ class SketcherCompound:
         """
         if self.idx in polymer_indices:
             self.is_polymer = True
-            self.smiles = services.polymer_novel_compound.find_canonical_repeat(
+            self.smiles = services.polymer_novel_compound.find_canonical_repeats(
                 self.smiles
             )
 
@@ -355,22 +356,6 @@ class SketcherCompound:
         """
 
         component_lists = {"reactant": [], "reagent": [], "solvent": [], "product": []}
-        units = {}
-
-        reaction_param_keys = [
-            "limiting_reactant_table_number",
-            "main_product",
-            "mass_units",
-            "polymerisation_type",
-            "amount_units",
-            "volume_units",
-            "solvent_volume_units",
-            "product_mass_units",
-            "product_amount_units",
-        ]
-
-        for param in reaction_param_keys:
-            units[param] = reaction_table_dict.pop(param)
 
         number_of_compounds = 0
         for component_type, component_list in component_lists.items():
@@ -384,15 +369,12 @@ class SketcherCompound:
                 for key in sub_dict.keys():
                     # new_key = key.replace(component_type + "_", "")
                     value = sub_dict.get(key, "")
-                    if "units" in key:
-                        compound_data[key.replace(component_type + "_", "")] = value
-                    else:
-                        try:
-                            compound_data[
-                                key.replace(component_type + "_", "")
-                            ] = value[idx]
-                        except IndexError:
-                            compound_data[key.replace(component_type + "_", "")] = ""
+                    try:
+                        compound_data[key.replace(component_type + "_", "")] = value[
+                            idx
+                        ]
+                    except IndexError:
+                        compound_data[key.replace(component_type + "_", "")] = ""
 
                 compound = cls(
                     smiles=compound_data.get(
@@ -413,7 +395,7 @@ class SketcherCompound:
 
                 component_lists[component_type].append(compound)
 
-        return component_lists, units
+        return component_lists
 
     def check_copolymer(self):
         if self.smiles.count("{+n}") > 1:

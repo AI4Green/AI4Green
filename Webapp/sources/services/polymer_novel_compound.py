@@ -477,6 +477,7 @@ def canonicalise(smiles: str) -> str:
     Canonicalise a polymer SMILES string. Not for use when endgroups are known (must have two '*'s)
     """
     try:
+        print(smiles)
         ps = PolymerSmiles(smiles)
         smiles = ps.canonicalize
         return str(smiles).replace("[*]", "*")  # change dangling bonds label

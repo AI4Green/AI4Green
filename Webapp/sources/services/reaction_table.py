@@ -118,7 +118,6 @@ class ReactionTable:
         compounds = services.compound.SketcherCompound.from_reaction_table_dict(
             self.reaction_table_data, self.workbook
         )
-        # self.units = units
         self.reactants = compounds["reactant"]
         self.products = compounds["product"]
         self.reagents = compounds["reagent"]
@@ -153,9 +152,13 @@ class ReactionTable:
             product_smiles_list,
         ) = services.reaction_table.get_reactants_and_products_list(reaction_smiles)
 
-        self.reaction_class = services.reaction_classification.classify_reaction(
-            reactants_smiles_list, product_smiles_list
-        )
+        print("reactionsmiles2", reactants_smiles_list, product_smiles_list)
+
+        # only classify reaction if not polymer
+        if not polymer_indices:
+            self.reaction_class = services.reaction_classification.classify_reaction(
+                reactants_smiles_list, product_smiles_list
+            )
 
         updated_reactants = self.convert_smiles_to_compound(
             reactants_smiles_list, "Reactant", polymer_indices, 0
