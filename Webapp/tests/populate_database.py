@@ -88,7 +88,8 @@ def insert_test_data():
         event_time=datetime.now(),
         event_type="reactionedithistory",
         message={
-            "person": 3,
+            "full_name": "Gloria Testeban",
+            "email": "test_user@test.com",
             "workgroup": 2,
             "workbook": 2,
             "reaction": 4,

@@ -34,7 +34,8 @@ def test_download_sends_a_zip_file(
 ):
     with app.app_context():
         audit_message = {
-            "person": 3,
+            "full_name": "Gloria Testeban",
+            "email": "test_user@test.com",
             "workgroup": 2,
             "workbook": 2,
             "reaction": 4,
