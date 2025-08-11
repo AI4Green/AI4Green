@@ -67,7 +67,8 @@ def test_download_sends_a_zip_file(
 def test_get_human_readable_ids(app: Flask):
     logs = [
         {
-            "person": 1,
+            "full_name": "Gloria Testeban",
+            "email": "test_user@test.com",
             "workgroup": 1,
             "workbook": 1,
             "reaction": 4,
@@ -83,7 +84,8 @@ def test_get_human_readable_ids(app: Flask):
     ]
     expected_output = [
         {
-            "person": "Gloria Testeban",
+            "full_name": "Gloria Testeban",
+            "email": "test_user@test.com",
             "workgroup": "Test-Workgroup",
             "workbook": "Test-Workbook",
             "reaction": 4,
