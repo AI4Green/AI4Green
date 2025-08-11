@@ -1,19 +1,20 @@
 import io
 import json
-import re
 import zipfile
 from datetime import datetime
+from sqlalchemy import cast, String
 from typing import Any, List, Optional
 
-from flask import current_app
 from sources import services
+from sources.extensions import db
+from sources.models.audit_log import AuditLogEvent
 
 
 def get_audit_logs(
     topic: str,
     workgroup_name: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
 ) -> List[Any]:
     """Get the audit logs for a specific topic. The logs can be filtered by workgroup and date.
 
@@ -34,15 +35,33 @@ def get_audit_logs(
         topic (str): The topic to retrieve logs for.
         workgroup_name (Optional[str], optional):
             The workgroup name to get the logs for. Defaults to None.
-        start_date (Optional[str], optional):
+        start_date (Optional[datetime], optional):
             Get logs after and including this date. Defaults to None.
-        end_date (Optional[str], optional):
+        end_date (Optional[datetime], optional):
             Get logs before and including this date. Defaults to None.
 
     Returns:
         List[Any]: The logs deserialised into their appropriate class.
     """
-    logs = []
+
+    query = db.session.query(AuditLogEvent).filter(AuditLogEvent.event_type == topic)
+
+    # Filter by workgroup if provided
+    if workgroup_name is not None:
+        query = query.filter(
+            cast(AuditLogEvent.message["workgroup"].astext, String) == workgroup_name
+        )
+
+    # Apply date filters
+    if start_date is not None:
+        query = query.filter(AuditLogEvent.event_time >= start_date)
+    if end_date is not None:
+        query = query.filter(AuditLogEvent.event_time <= end_date)
+
+    query = query.order_by(AuditLogEvent.event_time.asc())
+
+    # Collect the audit log me
+    logs = [log.message for log in query.all()]
 
     return logs
 
