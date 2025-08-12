@@ -111,11 +111,11 @@ class BaseConfig(object):  # class to store configuration variables
         "DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/ai4green"
     )
     SQLALCHEMY_BINDS = {
-        "db": SQLALCHEMY_DATABASE_URI,
+        # "db": SQLALCHEMY_DATABASE_URI,
         "update": "sqlite:///temp_update.sqlite",
         "audit_log": os.getenv(
             "AUDIT_LOG_DATABASE_URL",
-            "postgresql://postgres:postgres@localhost:5432/ai4gauditlog",
+            "postgresql://postgres:postgres@localhost:5434/ai4gauditlog",
         ),
     }
 
@@ -158,6 +158,17 @@ class BaseConfig(object):  # class to store configuration variables
         }
     }
 
+    # connection string for local azurite
+    default_conn_str = (
+        "DefaultEndpointsProtocol=http;"
+        "AccountName=devstoreaccount1;"
+        "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;"
+        "QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;"
+    )
+    MESSAGE_QUEUE_CONNECTION_STRING = os.getenv(
+        "MESSAGE_QUEUE_CONNECTION_STRING", default_conn_str
+    )
+
 
 class TestConfig(BaseConfig):
     TESTING = True
@@ -169,11 +180,11 @@ class TestConfig(BaseConfig):
         "postgresql://postgres:postgres@localhost:5433/ai4greentest",
     )
     SQLALCHEMY_BINDS = {
-        "db": SQLALCHEMY_DATABASE_URI,
+        # "db": SQLALCHEMY_DATABASE_URI,
         "update": "sqlite:///temp_update.sqlite",
         "audit_log": os.getenv(
             "TEST_AUDIT_LOG_DATABASE_URL",
-            "postgresql://postgres:postgres@localhost:5433/ai4gauditlogtest",
+            "postgresql://postgres:postgres@localhost:5434/ai4gauditlogtest",
         ),
     }
 

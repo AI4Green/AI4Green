@@ -2,15 +2,16 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 
 from flask import current_app, json
-from sources.services.message_queue import MessageSerdeMixin
 from sources import services
+from sources.services.message_queue.serde import MessageSerdeMixin
 
 
 @dataclass
 class ReactionEditMessage(MessageSerdeMixin):
-    """Class for creating a kafka message for the reaction_editing_history topic"""
+    """Class for creating a message for the reaction_editing_history topic"""
 
-    person: int
+    full_name: str
+    email: str
     workgroup: int
     workbook: int
     reaction: int
@@ -18,31 +19,14 @@ class ReactionEditMessage(MessageSerdeMixin):
     change_details: dict
     date: str
 
-    def serialise(self):
-        """Convert a message into a JSON object with a schema and payload.
-
-        The schema is an object that lists the fields and their types.
-        The payload is an object representing the message class in JSON format.
+    def serialise(self) -> str:
+        """Convert a message into a JSON string.
 
         Returns:
-            str: The message class formated with shcema and payload.
+            str: The message class formated as a JSON string.
         """
-        schema = {
-            "type": "struct",
-            "optional": False,
-            "fields": [
-                {"field": "person", "type": "int32"},
-                {"field": "workgroup", "type": "int32"},
-                {"field": "workbook", "type": "int32"},
-                {"field": "reaction", "type": "int32"},
-                {"field": "field_name", "type": "string"},
-                {"field": "change_details", "type": "string"},
-                {"field": "date", "type": "string"},
-            ],
-        }
         payload = asdict(self)
-        payload["change_details"] = json.dumps(payload["change_details"])
-        serialised = {"schema": schema, "payload": payload}
+        serialised = json.dumps(payload)
         return serialised
 
     @staticmethod
@@ -57,25 +41,26 @@ class ReactionEditMessage(MessageSerdeMixin):
         Returns:
             ReactionEditMessage: The `ReactionEditMessage` from the JSON.
         """
-        change_details = json.loads(data["change_details"])
         return ReactionEditMessage(
-            person=data["person"],
+            full_name=data["full_name"],
+            email=data["email"],
             workgroup=data["workgroup"],
             workbook=data["workbook"],
             reaction=data["reaction"],
             field_name=data["field_name"],
             date=data["date"],
-            change_details=change_details,
+            change_details=data["change_details"],
         )
 
 
 def send_message(message: ReactionEditMessage):
-    """Send a message to the kafka producer in the reaction_editing_history topic.
+    """Send a message to the producer in the reaction_editing_history topic.
     Args:
         message (ReactionEditMessage): The message to send to the queue in the ReactionEditMessage format
     """
-    # producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
-    # producer.send("reaction_editing_history", message.serialise())
+    producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
+    # topic name can only be letters and numbers
+    producer.send("reactioneditinghistory", message.serialise())
 
 
 def add_new_reaction(person, workbook, reaction_id, reaction_name):
@@ -87,7 +72,8 @@ def add_new_reaction(person, workbook, reaction_id, reaction_name):
     change_details = {"reaction_name": reaction_name}
 
     message = ReactionEditMessage(
-        person=person.id,
+        full_name=person.user.fullname,
+        email=person.user.email,
         workgroup=workbook.group,
         workbook=workbook.id,
         reaction=reaction.id,
@@ -103,7 +89,8 @@ def edit_reaction(person, reaction, old_reaction_details, new_reaction_details):
     diff = get_differences(old_reaction_details, new_reaction_details)
     if diff:
         message = ReactionEditMessage(
-            person=person.id,
+            full_name=person.user.fullname,
+            email=person.user.email,
             workgroup=reaction.workbook.group,
             workbook=reaction.workbook.id,
             reaction=reaction.id,
@@ -126,7 +113,8 @@ def autosave_reaction(person, reaction, old_reaction_details):
     diff = get_differences(old_data_normalised, new_data_normalised, exclude_paths=True)
     if diff:
         message = ReactionEditMessage(
-            person=person.id,
+            full_name=person.user.fullname,
+            email=person.user.email,
             workgroup=reaction.workbook.group,
             workbook=reaction.workbook.id,
             reaction=reaction.id,
@@ -148,7 +136,8 @@ def clone_reaction(person, workbook, new_reaction, old_reaction):
     }
 
     message = ReactionEditMessage(
-        person=person.id,
+        full_name=person.user.fullname,
+        email=person.user.email,
         workgroup=workbook.group,
         workbook=workbook.id,
         reaction=old_reaction.id,
@@ -162,7 +151,8 @@ def clone_reaction(person, workbook, new_reaction, old_reaction):
 def delete_reaction(reaction):
     """Record that a reaction was deleted"""
     message = ReactionEditMessage(
-        person=reaction.creator_person.id,
+        full_name=reaction.creator_person.user.fullname,
+        email=reaction.creator_person.user.email,
         workgroup=reaction.workbook.group,
         workbook=reaction.workbook.id,
         reaction=reaction.id,
@@ -177,7 +167,8 @@ def upload_file(person, reaction, file_names):
     """Record that one or more experimental files were added to a reaction"""
     change_details = {"file_names": file_names}
     message = ReactionEditMessage(
-        person=person.id,
+        full_name=person.user.fullname,
+        email=person.user.email,
         workgroup=reaction.workbook.group,
         workbook=reaction.workbook.id,
         reaction=reaction.id,
@@ -192,7 +183,8 @@ def delete_file(person, reaction, file_name):
     """Record that an experimental file was removed from a reaction"""
     change_details = {"file_names": file_name}
     message = ReactionEditMessage(
-        person=person.id,
+        full_name=person.user.fullname,
+        email=person.user.email,
         workgroup=reaction.workbook.group,
         workbook=reaction.workbook.id,
         reaction=reaction.id,
