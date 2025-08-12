@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import current_app, jsonify, request, send_file
+from flask import jsonify, request, send_file
 from flask_login import login_required
 from sources.decorators import principal_investigator_required
 from sources.services.audit_logs import (
@@ -8,6 +8,7 @@ from sources.services.audit_logs import (
     get_human_readable_ids,
     make_log_stream,
 )
+from sources.services import workgroup as wg
 
 from . import audit_log_bp
 
@@ -21,6 +22,13 @@ def download_audit_logs(workgroup: str):
     if topic is None:
         return jsonify({"error": "topic is a required field"}), 400
 
+    # records are saved with the workgroup id but this function receives
+    # the name, so get the ID
+    workgroup_id = None
+    workgroup_obj = wg.from_name(workgroup)
+    if workgroup_obj:
+        workgroup_id = workgroup_obj.id
+
     start_date = request.args.get("start_date")
     # convert to datetime
     start_date = datetime.strptime(start_date, "%Y-%m-%d") if start_date else None
@@ -31,7 +39,10 @@ def download_audit_logs(workgroup: str):
 
     # retrieve and deserialise the audit logs
     logs = get_audit_logs(
-        topic=topic, workgroup_name=workgroup, start_date=start_date, end_date=end_date
+        topic=topic,
+        workgroup_name=str(workgroup_id),  # throws an error if not converted to str
+        start_date=start_date,
+        end_date=end_date,
     )
 
     # make the names of users, workgroups and workbooks human readable
