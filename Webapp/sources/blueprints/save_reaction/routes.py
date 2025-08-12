@@ -632,7 +632,7 @@ def view_reaction_attachment() -> Response:
 
     mimetype = file_object.file_details["mimetype"]
     display_name = file_object.display_name
-    file_attachment = f"data:{mimetype};base64,{file_attachment}"
+    file_attachment = f"data: {mimetype}; base64, {file_attachment}"
     return jsonify(
         {"stream": file_attachment, "mimetype": mimetype, "name": display_name}
     )
@@ -654,7 +654,7 @@ def download_experiment_files():
     display_name = file_object.display_name
     return jsonify(
         {"stream": file_attachment, "mimetype": mimetype, "name": display_name}
-    )  # TODO: does this count as data export
+    )
 
 
 @save_reaction_bp.route("/_delete_reaction_attachment", methods=["DELETE"])

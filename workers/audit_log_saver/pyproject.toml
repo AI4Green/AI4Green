@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "audit-log-saver"
+version = "0.1.0"
+description = ""
+authors = ["Daniel Lea <Daniel.Lea@nottingham.ac.uk>"]
+readme = "README.md"
+license = "AGPL-3.0"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+azure-storage-queue = "12.13.0"
+sqlalchemy = "^2.0.42"
+psycopg2-binary = "^2.9.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

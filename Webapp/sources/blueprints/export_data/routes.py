@@ -1,4 +1,5 @@
 import threading
+from datetime import datetime
 
 import sources.services.data_export.requests
 from flask import (
@@ -156,6 +157,19 @@ def request_download(token: str) -> Response:
     sas_url = services.data_export.export.make_sas_link(
         verification.data_export_request
     )
+
+    # record export
+    message = services.data_export_history.DataExportMessage(
+        verification.data_export_request.requestor_person.user.fullname,
+        verification.data_export_request.requestor_person.user.email,
+        verification.data_export_request.WorkGroup.id,
+        # take the first workbook as exports from multiple is not supported
+        [wb.id for wb in verification.data_export_request.workbooks][0],
+        [reaction.id for reaction in verification.data_export_request.reactions],
+        datetime.now().strftime("%Y-%m-%d"),
+    )
+    services.data_export_history.send_message(message)
+
     return render_template(
         "data_export/data_export_download.html",
         sas_url=sas_url,
