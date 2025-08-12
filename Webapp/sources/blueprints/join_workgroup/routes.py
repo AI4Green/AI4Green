@@ -147,7 +147,8 @@ def join_workgroup_response(notification=None, decision=None):
 
             # record role change
             message = services.data_access_history.DataAccessMessage(
-                person.id,
+                person.user.fullname,
+                person.user.email,
                 workgroup.id,
                 old_role="No Access",
                 new_role=workgroup_dict[user_type]["display_string"],

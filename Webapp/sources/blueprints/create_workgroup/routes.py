@@ -195,7 +195,8 @@ def create_workgroup() -> Response:
 
         # record role change
         message = services.data_access_history.DataAccessMessage(
-            PI.id,
+            PI.user.fullname,
+            PI.user.email,
             new_workgroup.id,
             old_role="No Access",
             new_role="Principal Investigator",

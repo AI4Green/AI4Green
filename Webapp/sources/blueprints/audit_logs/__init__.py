@@ -1,5 +1,5 @@
-# from apiflask import APIBlueprint
+from apiflask import APIBlueprint
 
-# audit_log_bp = APIBlueprint("audit_log", __name__)
+audit_log_bp = APIBlueprint("audit_log", __name__)
 
-# from . import routes
+from . import routes

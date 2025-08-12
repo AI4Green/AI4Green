@@ -7,8 +7,8 @@ WORKDIR /app
 # Install Poetry
 RUN pip install poetry==1.8.3
 
-# Copy message_queue.py into the container.
-COPY --from=webapp /sources/services/message_queue.py /app/Webapp/sources/services/message_queue.py
+# Copy message_queue into the container.
+COPY --from=webapp /sources/services/message_queue /app/Webapp/sources/services/message_queue
 
 # Copy the 'audit_log_compressor' directory into the container.
 COPY . /app/workers/audit_log_compressor

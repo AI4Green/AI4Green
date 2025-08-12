@@ -11,8 +11,8 @@ import pytz
 from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
 from azure.storage.blob import BlobClient, BlobServiceClient, ContainerClient
 from flask import abort, current_app, request
-from sources.extensions import db
 from sources import models, services
+from sources.extensions import db
 from werkzeug.utils import secure_filename
 
 
@@ -337,7 +337,7 @@ class UploadExperimentDataFiles:
                 return "failure"
             # acceptable file extension
             file_ext = os.path.splitext(filename)[1]
-            if file_ext not in current_app.config["UPLOAD_EXTENSIONS"]:
+            if file_ext.lower() not in current_app.config["UPLOAD_EXTENSIONS"]:
                 print("incorrect extension")
                 return "failure"
             # acceptable mimetype

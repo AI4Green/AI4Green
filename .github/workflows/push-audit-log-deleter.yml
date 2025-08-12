@@ -1,0 +1,36 @@
+name: Build and Push Audit Log Deleter to Docker Hub
+
+on:
+  push:
+    branches:
+      - main
+
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./workers/audit_log_deleter
+          file: ./workers/audit_log_deleter/Dockerfile
+          push: true
+          tags: ai4greeneln/audit_log_deleter:latest
