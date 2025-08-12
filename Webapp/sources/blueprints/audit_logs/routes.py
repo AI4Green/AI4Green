@@ -41,5 +41,7 @@ def download_audit_logs(workgroup: str):
         log_stream,
         mimetype="application/zip",
         as_attachment=True,
-        download_name=file_name,
+        # `send_file` creates a file around the stream,
+        # so change the extension to make it download properly
+        download_name=file_name.replace(".json", ".zip"),
     )
