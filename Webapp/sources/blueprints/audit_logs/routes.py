@@ -20,8 +20,14 @@ def download_audit_logs(workgroup: str):
     topic = request.args.get("topic")
     if topic is None:
         return jsonify({"error": "topic is a required field"}), 400
+
     start_date = request.args.get("start_date")
+    # convert to datetime
+    start_date = datetime.strptime(start_date, "%Y-%m-%d") if start_date else None
+
     end_date = request.args.get("end_date")
+    # convert to datetime
+    end_date = datetime.strptime(end_date, "%Y-%m-%d") if start_date else None
 
     # retrieve and deserialise the audit logs
     logs = get_audit_logs(
