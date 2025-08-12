@@ -49,11 +49,10 @@
                 <a class="nav-link" role="tab" data-toggle="tab" href="#add-users"
                    aria-selected="{% if has_request == "no" %}false{% else %}true{% endif %}">Add Users</a>
             </li>
-{#        AUDIT LOGS ARE DISABLED UNTIL AZURE CONFIGS ARE SORTED #}
-{#            <li class="nav-item">#}
-{#                <a class="nav-link" role="tab" data-toggle="tab" href="#audit-logs"#}
-{#                   aria-selected="{% if has_request == "no" %}false{% else %}true{% endif %}">Audit Logs</a>#}
-{#            </li>#}
+            <li class="nav-item">
+                <a class="nav-link" role="tab" data-toggle="tab" href="#audit-logs"
+                   aria-selected="{% if has_request == "no" %}false{% else %}true{% endif %}">Audit Logs</a>
+            </li>
         </ul>
         <div class="tab-content">
             <!-- Overview table-->
