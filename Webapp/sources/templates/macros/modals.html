@@ -234,7 +234,7 @@
                         <div class="row">
                           {% for step in steps %}
                             <div class="col-md-4 mb-3 text-center">
-                              <button type="button" class="btn icon" title="{{ step.name }}" onclick="selectReactwiseStep('{{ step.id }}')">
+                              <button type="button" class="btn icon reactwise" id="{{ step.id }}" onclick="toggleIcon({{ step.id }}, 'reactwise', this.id)">
                                 <!-- Optional: Add an icon here if needed -->
                               </button>
                               <p class="mb-0">{{ step.name }}</p>

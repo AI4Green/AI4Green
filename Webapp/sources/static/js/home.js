@@ -8,12 +8,12 @@
  *
  */
 function focusIcon(type, btnId) {
-    document.querySelectorAll('.btn.icon.' + type).forEach(btn => {
-                btn.classList.remove('focused');
-            });
+  document.querySelectorAll(".btn.icon." + type).forEach((btn) => {
+    btn.classList.remove("focused");
+  });
 
-    button = document.getElementById(btnId)
-    button.classList.add("focused")
+  button = document.getElementById(btnId);
+  button.classList.add("focused");
 }
 
 /**
@@ -23,7 +23,7 @@ function focusIcon(type, btnId) {
  *
  */
 function blurIcon(button) {
-    button.classList.remove('focused');
+  button.classList.remove("focused");
 }
 
 /**
@@ -39,22 +39,28 @@ function blurIcon(button) {
  *
  */
 function toggleIcon(input, type, btnId) {
-    button = document.getElementById(btnId)
-    if (button.classList.contains('focused')) {
-        blurIcon(button)
-        unloadIconPanel(type)
+  let button = document.getElementById(btnId);
+  if (button.classList.contains("focused")) {
+    blurIcon(button);
+    unloadIconPanel(type);
+  } else {
+    if (type != "reaction") {
+      focusIcon(type, btnId);
+      if (type != "reactwise") {
+        loadIcons(input, type);
+      }
+    } else {
+      var activeIcons = findActiveWorkgroupAndWorkbook();
+      window.location.href =
+        "/sketcher/" +
+        activeIcons[0] +
+        "/" +
+        activeIcons[1] +
+        "/" +
+        input +
+        "/no";
     }
-
-    else {
-        if (type != "reaction") {
-            focusIcon(type, btnId)
-            loadIcons(input, type)
-        }
-        else {
-           var activeIcons = findActiveWorkgroupAndWorkbook()
-           window.location.href = "/sketcher/" + activeIcons[0] + "/" + activeIcons[1] + "/" + input +"/no";
-        }
-    }
+  }
 }
 
 /**
@@ -65,16 +71,13 @@ function toggleIcon(input, type, btnId) {
  *                        - "workbook": Fades out only the reaction icons.
  *
  */
-function unloadIconPanel(type){
-    if (type == "workgroup") {
-        $("#workbook-icons").fadeOut("slow");
-        $("#reaction-icons").fadeOut("slow");
-    }
-
-    else if (type == "workbook") {
-        $("#reaction-icons").fadeOut("slow");
-    }
-
+function unloadIconPanel(type) {
+  if (type == "workgroup") {
+    $("#workbook-icons").fadeOut("slow");
+    $("#reaction-icons").fadeOut("slow");
+  } else if (type == "workbook") {
+    $("#reaction-icons").fadeOut("slow");
+  }
 }
 
 /**
@@ -90,20 +93,20 @@ function unloadIconPanel(type){
  *                                                    be `undefined`.
  */
 function findActiveWorkgroupAndWorkbook() {
-    // Select all elements with both 'icon' and 'focused' classes
-            var focusedIcons = document.querySelectorAll('.icon.focused');
-            var workgroup, workbook;
+  // Select all elements with both 'icon' and 'focused' classes
+  var focusedIcons = document.querySelectorAll(".icon.focused");
+  var workgroup, workbook;
 
-            // Iterate through the focused icons and check their classes
-            focusedIcons.forEach(function(icon) {
-                if (icon.classList.contains('workgroup')) {
-                    workgroup = icon.id;
-                }
-                if (icon.classList.contains('workbook')) {
-                    workbook = icon.id;
-                }
-            });
-            return [workgroup, workbook]
+  // Iterate through the focused icons and check their classes
+  focusedIcons.forEach(function (icon) {
+    if (icon.classList.contains("workgroup")) {
+      workgroup = icon.id;
+    }
+    if (icon.classList.contains("workbook")) {
+      workbook = icon.id;
+    }
+  });
+  return [workgroup, workbook];
 }
 
 /**
@@ -116,31 +119,32 @@ function findActiveWorkgroupAndWorkbook() {
  *                        - "workbook": Loads and displays reaction icons.
  *
  */
-function loadIcons(selected, type){
-    // loads workbooks in workgroup selected in homepage
-    // only needs selected workgroup to load active reactions
-    var activeIcons = findActiveWorkgroupAndWorkbook()
-    fetch("/load_icons", {
+function loadIcons(selected, type) {
+  // loads workbooks in workgroup selected in homepage
+  // only needs selected workgroup to load active reactions
+  var activeIcons = findActiveWorkgroupAndWorkbook();
+  fetch("/load_icons", {
     headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify({
-        input: selected,
-        load_type: type,
-        activeWorkgroup: activeIcons[0]
-      })
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      input: selected,
+      load_type: type,
+      activeWorkgroup: activeIcons[0],
+    }),
+  })
+    .then(function (response) {
+      return response.json();
     })
-    .then(function(response) {return response.json()} )
-    .then(function(item) {
-        if (type == "workgroup"){
-            $("#workbook-icons").html(item).hide().fadeIn("slow");
-            $("#reaction-icons").html(item).hide().fadeOut("slow");
-        }
-        else if (type == "workbook"){
-            $("#reaction-icons").html(item).hide().fadeIn("slow");
-        }
-    })
+    .then(function (item) {
+      if (type == "workgroup") {
+        $("#workbook-icons").html(item).hide().fadeIn("slow");
+        $("#reaction-icons").html(item).hide().fadeOut("slow");
+      } else if (type == "workbook") {
+        $("#reaction-icons").html(item).hide().fadeIn("slow");
+      }
+    });
 }
 
 /**
@@ -149,27 +153,29 @@ function loadIcons(selected, type){
  *
  */
 function newReactionSetup() {
-    activeIcons = findActiveWorkgroupAndWorkbook()
-    $("#active-workgroup").val(activeIcons[0])
-    $("#active-workbook").val(activeIcons[1])
+  activeIcons = findActiveWorkgroupAndWorkbook();
+  $("#active-workgroup").val(activeIcons[0]);
+  $("#active-workbook").val(activeIcons[1]);
 
-    fetch("/get_new_reaction_id", {
+  fetch("/get_new_reaction_id", {
     headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify({
-        workgroup: activeIcons[0],
-        workbook: activeIcons[1],
-      })
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      workgroup: activeIcons[0],
+      workbook: activeIcons[1],
+    }),
+  })
+    .then(function (response) {
+      return response.json();
     })
-    .then(function (response) { return response.json() })
     .then(function (item) {
       $("#new-reaction-id-input").val(item);
       $("#new-reaction-name").val("");
       $("#error-warning-new-reaction").html("");
       $("#new-reaction-modal").modal("show");
-    })
+    });
 }
 
 /**
@@ -182,15 +188,14 @@ function newReactionSetup() {
  *
  */
 function newType(type) {
-    if (type == "workgroup") {
-        window.location.href = "/create_workgroup"
-    }
-    else if (type == "workbook") {
-        var workgroup = document.getElementsByClassName("btn icon workgroup focused")[0].id
-        window.location.href = "/create_workbook/" + workgroup
-    }
-
-    else {
-        newReactionSetup()
-    }
+  if (type == "workgroup") {
+    window.location.href = "/create_workgroup";
+  } else if (type == "workbook") {
+    var workgroup = document.getElementsByClassName(
+      "btn icon workgroup focused",
+    )[0].id;
+    window.location.href = "/create_workbook/" + workgroup;
+  } else {
+    newReactionSetup();
+  }
 }
