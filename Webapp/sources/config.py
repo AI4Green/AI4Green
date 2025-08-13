@@ -169,6 +169,8 @@ class BaseConfig(object):  # class to store configuration variables
         "MESSAGE_QUEUE_CONNECTION_STRING", default_conn_str
     )
 
+    REACTWISE_API_KEY = os.getenv("REACTWISE_API_KEY", "")
+
 
 class TestConfig(BaseConfig):
     TESTING = True
