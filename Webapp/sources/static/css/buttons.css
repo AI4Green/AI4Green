@@ -30,6 +30,8 @@
 .icon.reactwise {
     background-color: #FD475A;
     border-color: #FD475A;
+    transition: all 0.3s linear;
+    font-size: 10px;
 }
 
 .icon.reactwise.focused {
