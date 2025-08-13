@@ -116,7 +116,7 @@
 </div>
 {%- endmacro %}
 
-{% macro new_reaction_set_modal() -%}
+{% macro new_reaction_set_modal(reactwise_list) -%}
 <!-- new reaction set modal -->
 <div class="modal fade" id="new-reaction-set-modal" tabindex="-1" role="dialog" aria-labelledby="new-reaction-modal-title">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -127,73 +127,117 @@
       </div>
       <div id="new-reaction-set-body">
         <div id="new-reaction-set-inner-body" class="p-3">
-          <form>
-            <div class="form-group">
-              <label for="new-reaction-set-id-input">Reaction Set ID</label>
-              <input id="new-reaction-set-id-input" class="form-control" disabled value="">
-            </div>
 
-            <div class="form-group">
-              <label for="new-reaction-set-name">Reaction Set Name</label>
-              <input id="new-reaction-set-name" type="text" class="form-control">
-            </div>
+          <!-- Tabs -->
+          <ul class="nav nav-tabs" id="reaction-set-tabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="new-reaction-tab" data-toggle="tab" href="#new-reaction-set-tab" role="tab" aria-controls="new-reaction-set-tab" aria-selected="true">
+                New Reaction Set
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="import-reactwise-tab" data-toggle="tab" href="#import-reactwise" role="tab" aria-controls="import-reactwise" aria-selected="false">
+                Import From Reactwise
+              </a>
+            </li>
+          </ul>
 
-            <div class="form-group">
-              <label for="reactor-type">Reactor Type</label>
-              <select id="reactor-type" class="form-control" onchange="toggleReactorOptions()">
-                <option value="">Select Reactor</option>
-                <option value="well-plate">Well Plate</option>
-                <option value="carousel">Carousel</option>
-              </select>
-            </div>
+          <!-- Tab content -->
+          <div class="tab-content" id="reaction-set-tab-content">
 
-            <!-- Carousel-only reactions dropdown -->
-            <div class="form-group" id="carousel-reaction-count" style="display: none;">
-              <label for="new-reaction-count">Number of Reactions</label>
-              <select id="new-reaction-count" class="form-control">
-                <option value="">Select number</option>
-                {% for i in range(1, 13) %}
-                  <option value="{{ i }}">{{ i }}</option>
-                {% endfor %}
-              </select>
-            </div>
-
-            <!-- Well Plate options -->
-            <div id="well-plate-options" class="form-group" style="display:none;">
-              <label>Well Plate Format</label>
-              <div class="btn-group btn-group-toggle d-flex mb-2" data-toggle="buttons">
-                <label class="btn btn-outline-primary flex-fill">
-                  <input type="radio" name="well-plate-option" value="96" autocomplete="off" onchange="showCustomSize(false)"> 96 Well
-                </label>
-                <label class="btn btn-outline-primary flex-fill">
-                  <input type="radio" name="well-plate-option" value="48" autocomplete="off" onchange="showCustomSize(false)"> 48 Well
-                </label>
-                <label class="btn btn-outline-primary flex-fill">
-                  <input type="radio" name="well-plate-option" value="24" autocomplete="off" onchange="showCustomSize(false)"> 24 Well
-                </label>
-                <label class="btn btn-outline-primary flex-fill">
-                  <input type="radio" name="well-plate-option" value="custom" autocomplete="off" onchange="showCustomSize(true)"> Custom Size
-                </label>
-              </div>
-
-              <div id="custom-size-inputs" style="display: none;">
-                <div class="form-row">
-                  <div class="col">
-                    <label for="custom-rows">Rows</label>
-                    <input type="number" class="form-control" id="custom-rows" min="1">
-                  </div>
-                  <div class="col">
-                    <label for="custom-columns">Columns</label>
-                    <input type="number" class="form-control" id="custom-columns" min="1">
-                  </div>
+            <!-- New Reaction Set Tab -->
+            <div class="tab-pane fade show active p-3" id="new-reaction-set-tab" role="tabpanel" aria-labelledby="new-reaction-tab">
+              <form>
+                <div class="form-group">
+                  <label for="new-reaction-set-id-input">Reaction Set ID</label>
+                  <input id="new-reaction-set-id-input" class="form-control" disabled value="">
                 </div>
-              </div>
 
-              <small class="form-text text-muted">Choose a predefined size or select custom size.</small>
+                <div class="form-group">
+                  <label for="new-reaction-set-name">Reaction Set Name</label>
+                  <input id="new-reaction-set-name" type="text" class="form-control">
+                </div>
+
+                <div class="form-group">
+                  <label for="reactor-type">Reactor Type</label>
+                  <select id="reactor-type" class="form-control" onchange="toggleReactorOptions()">
+                    <option value="">Select Reactor</option>
+                    <option value="well-plate">Well Plate</option>
+                    <option value="carousel">Carousel</option>
+                  </select>
+                </div>
+
+                <!-- Carousel-only reactions dropdown -->
+                <div class="form-group" id="carousel-reaction-count" style="display: none;">
+                  <label for="new-reaction-count">Number of Reactions</label>
+                  <select id="new-reaction-count" class="form-control">
+                    <option value="">Select number</option>
+                    {% for i in range(1, 13) %}
+                      <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <!-- Well Plate options -->
+                <div id="well-plate-options" class="form-group" style="display:none;">
+                  <label>Well Plate Format</label>
+                  <div class="btn-group btn-group-toggle d-flex mb-2" data-toggle="buttons">
+                    <label class="btn btn-outline-primary flex-fill">
+                      <input type="radio" name="well-plate-option" value="96" autocomplete="off" onchange="showCustomSize(false)"> 96 Well
+                    </label>
+                    <label class="btn btn-outline-primary flex-fill">
+                      <input type="radio" name="well-plate-option" value="48" autocomplete="off" onchange="showCustomSize(false)"> 48 Well
+                    </label>
+                    <label class="btn btn-outline-primary flex-fill">
+                      <input type="radio" name="well-plate-option" value="24" autocomplete="off" onchange="showCustomSize(false)"> 24 Well
+                    </label>
+                    <label class="btn btn-outline-primary flex-fill">
+                      <input type="radio" name="well-plate-option" value="custom" autocomplete="off" onchange="showCustomSize(true)"> Custom Size
+                    </label>
+                  </div>
+
+                  <div id="custom-size-inputs" style="display: none;">
+                    <div class="form-row">
+                      <div class="col">
+                        <label for="custom-rows">Rows</label>
+                        <input type="number" class="form-control" id="custom-rows" min="1">
+                      </div>
+                      <div class="col">
+                        <label for="custom-columns">Columns</label>
+                        <input type="number" class="form-control" id="custom-columns" min="1">
+                      </div>
+                    </div>
+                  </div>
+
+                  <small class="form-text text-muted">Choose a predefined size or select custom size.</small>
+                </div>
+              </form>
+
+              <div style="padding-left: 5px; color: red" id="error-warning-new-reaction-set"></div>
             </div>
-          </form>
 
-          <div style="padding-left: 5px; color: red" id="error-warning-new-reaction-set"></div>
+            <!-- Import From Reactwise Tab -->
+            <div class="tab-pane fade p-3" id="import-reactwise" role="tabpanel" aria-labelledby="import-reactwise-tab">
+              <div class="container-fluid">
+                <div class="row">
+                    {% if not reactwise_list %}
+                        <h4>No steps to show!</h4>
+                    {% else %}
+                      {% for item in reactwise_list %}
+                        <div class="col-md-4 mb-3 d-flex">
+                          <button type="button" class="btn btn-outline-primary flex-fill"
+                                  onclick="selectReactwiseItem('{{ item.id }}')">
+                            {{ item.name }}
+                          </button>
+                        </div>
+                      {% endfor %}
+                    {% endif %}
+    </div>
+  </div>
+</div>
+
+
+          </div>
         </div>
       </div>
 
@@ -212,7 +256,6 @@ function toggleReactorOptions() {
   const wellOptions = document.getElementById('well-plate-options');
   const carouselCount = document.getElementById('carousel-reaction-count');
 
-  // Reset both
   wellOptions.style.display = 'none';
   carouselCount.style.display = 'none';
   clearAllWellPlateInputs();
