@@ -1,0 +1,28 @@
+.reactwise-heading {
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.reactwise-heading .heading-title {
+    background: #f8f9fa;       /* light gray background */
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.reactwise-heading .heading-title:hover {
+    background: #e2e6ea;
+}
+
+.reactwise-heading .collapse-icon {
+    transition: transform 0.3s;
+}
+
+.collapse.show + .reactwise-heading .collapse-icon {
+    transform: rotate(90deg);
+}
