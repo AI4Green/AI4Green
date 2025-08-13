@@ -110,7 +110,8 @@ class AzureQueueProducer(BaseQueueProducer):
 
         # check if topic exists
         queues = self.producer.list_queues(name_starts_with=topic)
-        if topic not in queues:
+        queue_names = [queue["name"] for queue in queues]
+        if topic not in queue_names:
             # create the queue if it doesn't already exist
             client.create_queue()
 
