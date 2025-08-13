@@ -83,6 +83,8 @@ def workgroup(
         workbooks = "no_workbooks"
         new_reaction_id = None
 
+    reactwise_steps = services.reactwise.list_steps()
+
     return render_template(
         "work_structures/workgroup.html",
         workgroup_selected=workgroup_selected,
@@ -95,4 +97,5 @@ def workgroup(
         workbook_next_reaction_ids=json.dumps(workbook_new_reaction_ids_dic),
         workbook_next_set_ids=json.dumps(workbook_new_set_ids_dic),
         new_reaction_id=new_reaction_id,
+        reactwise_steps=reactwise_steps,
     )

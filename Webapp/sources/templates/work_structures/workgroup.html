@@ -2,6 +2,7 @@
 {% block title %}Workgroups{% endblock %}
 {% block scripts %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/new_reaction.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reactwise.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_list.js') }}"></script>
     <script>
         $(document).ready(function() {
@@ -90,8 +91,9 @@
     <input type="hidden" value="{{ sort_crit }}" id="js-sort-crit">
     <input id="workbook_corresponding_next_reaction_ids" type="hidden" value="{{ workbook_next_reaction_ids }}">
     <input id="workbook_corresponding_next_set_ids" type="hidden" value="{{ workbook_next_set_ids }}">
+    <input id="reactwise_steps" type="hidden" value="">
     {{ render_new_reaction_modal() }}
-    {{ new_reaction_set_modal() }}
+    {{ new_reaction_set_modal( reactwise_steps ) }}
 
 </body>
 
