@@ -22,6 +22,7 @@ from . import (
     reaction_editing_history,
     reaction_set,
     reaction_table,
+    reactwise,
     requests,
     retrosynthesis,
     solvent,
