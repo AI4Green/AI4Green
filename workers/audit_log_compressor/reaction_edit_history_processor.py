@@ -2,7 +2,6 @@ import json
 from collections import defaultdict
 from logging import Logger
 
-from audit_log_compressor import merge_diffs
 from sources import services
 from sources.services.message_queue.producers import BaseQueueProducer
 
@@ -69,3 +68,28 @@ class ReactionEditHistoryProcessor:
 
             # send back to message queue
             self.producer.send(self.produce_topic, message.serialise())
+
+
+def merge_diffs(diff1, diff2):
+    """Returns net change between two change_details dicts
+    Args:
+        diff1 (dict): must have nested "old_value" and "new_value" keys
+        diff2 (dict): must have nested "old_value" and "new_value" keys
+    """
+    merged = {}
+
+    all_keys = set(diff1.keys()) | set(diff2.keys())
+
+    for key in all_keys:
+        if key in diff1 and key in diff2:
+            if diff1[key]["old_value"] != diff2[key]["new_value"]:
+                merged[key] = {
+                    "old_value": diff1[key]["old_value"],
+                    "new_value": diff2[key]["new_value"],
+                }
+        elif key in diff1:
+            merged[key] = diff1[key]
+        elif key in diff2:
+            merged[key] = diff2[key]
+
+    return merged
