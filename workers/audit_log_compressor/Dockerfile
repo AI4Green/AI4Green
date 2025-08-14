@@ -20,4 +20,4 @@ WORKDIR /app/workers/audit_log_compressor
 RUN poetry install --no-dev
 
 # Command to run the worker script
-CMD ["poetry", "run", "python", "kafka_worker.py"]
+CMD ["poetry", "run", "python", "audit_log_compressor.py"]
