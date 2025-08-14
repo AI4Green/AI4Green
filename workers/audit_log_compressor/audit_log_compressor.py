@@ -23,31 +23,6 @@ def collect_and_process_messages(
     logger.info("Finished processing messages.")
 
 
-def merge_diffs(diff1, diff2):
-    """Returns net change between two change_details dicts
-    Args:
-        diff1 (dict): must have nested "old_value" and "new_value" keys
-        diff2 (dict): must have nested "old_value" and "new_value" keys
-    """
-    merged = {}
-
-    all_keys = set(diff1.keys()) | set(diff2.keys())
-
-    for key in all_keys:
-        if key in diff1 and key in diff2:
-            if diff1[key]["old_value"] != diff2[key]["new_value"]:
-                merged[key] = {
-                    "old_value": diff1[key]["old_value"],
-                    "new_value": diff2[key]["new_value"],
-                }
-        elif key in diff1:
-            merged[key] = diff1[key]
-        elif key in diff2:
-            merged[key] = diff2[key]
-
-    return merged
-
-
 def main():
     logger = logging.Logger("audit_log_compressor", level=logging.INFO)
     handler = logging.StreamHandler()
