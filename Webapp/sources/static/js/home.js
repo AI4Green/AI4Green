@@ -12,8 +12,9 @@ function focusIcon(type, btnId) {
     btn.classList.remove("focused");
   });
 
-  button = document.getElementById(btnId);
+  let button = document.getElementById(btnId);
   button.classList.add("focused");
+  button.classList.add("is-selected");
 }
 
 /**
@@ -24,6 +25,7 @@ function focusIcon(type, btnId) {
  */
 function blurIcon(button) {
   button.classList.remove("focused");
+  button.classList.remove("is-selected");
 }
 
 /**

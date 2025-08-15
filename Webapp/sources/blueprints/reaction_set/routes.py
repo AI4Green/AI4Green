@@ -116,7 +116,8 @@ def get_number_of_reactions(reactor_dimensions):
 
 @reaction_set_bp.route("/import_from_reactwise", methods=["POST", "GET"])
 def import_from_reactwise():
-    step_id = request.json.get("reactwiseID", None)
+    step_id = request.json.get("stepID", None)
+    step_name = request.json.get("stepName", None)
     workbook_name = request.json.get("workbook", None)
     workgroup_name = request.json.get("workgroup", None)
 
@@ -124,11 +125,11 @@ def import_from_reactwise():
         workgroup_name, workbook_name
     )
 
-    data = services.reactwise.ReactWiseStep(int(step_id))
-    data.load_step_experiments()
-    creator = services.user.person_from_current_user()
+    rw_step = services.reactwise.ReactWiseStep(int(step_id))
+    rw_step.load_step_experiments()
+    creator = services.person.from_current_user_email()
 
-    set_name = "ReactWise Set " + str(step_id)
+    set_name = step_name
 
     # check if set already exists
     set_obj = services.reaction_set.get_from_names(
@@ -138,7 +139,7 @@ def import_from_reactwise():
     if not set_obj:
         reactions = []
 
-        for reactwise_id, details in data.experimental_details.items():
+        for reactwise_id, details in rw_step.experimental_details.items():
             reaction_id = services.reaction.get_next_reaction_id_for_workbook(
                 workbook.id
             )

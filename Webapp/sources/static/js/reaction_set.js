@@ -424,7 +424,6 @@ async function applyToSelectedWells() {
       .get()
       .includes(reaction.reaction_id),
   );
-  console.log(selectedReactions);
 
   saveReactions(selectedReactions);
   await updateReactionSet();

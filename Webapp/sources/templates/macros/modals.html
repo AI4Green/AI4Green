@@ -234,10 +234,10 @@
                         <div class="row">
                           {% for step in steps %}
                             <div class="col-md-4 mb-3 text-center">
-                              <button type="button" class="btn icon reactwise" id="{{ step.id }}" onclick="toggleIcon({{ step.id }}, 'reactwise', this.id)">
+                              <button type="button" class="btn icon reactwise" id="{{ step.id }}" onclick="toggleIcon({{ step.id }}, 'reactwise', this.id)" title="{{ step.description }}">
                                 &nbsp<img src="/static/img/reactwise_logo.svg" alt="React Wise Logo" class="img-fluid" style="color: black;">
                               </button>
-                              <p class="mb-0">{{ step.name }}</p>
+                              <p class="mb-0" id="{{ step.id }}-name">{{ step.name }}</p>
                             </div>
                           {% endfor %}
                         </div>

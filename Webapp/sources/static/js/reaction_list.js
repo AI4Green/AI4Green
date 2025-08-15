@@ -149,13 +149,54 @@ function newReactionCreate() {
 }
 
 function newSetCreate() {
+  let activeTabLink = $("#reaction-set-tabs .nav-link.active");
+
+  if (activeTabLink.attr("id") === "new-reaction-tab") {
+    newReactionSet();
+  } else if (activeTabLink.attr("id") === "import-reactwise-tab") {
+    importReactwise();
+  }
+}
+
+function importReactwise() {
+  // creates new reaction if name and ID pass validation in the backend routes.
+  let selectedReactwiseBtn = $(".btn.icon.reactwise.is-selected");
+  let stepID = selectedReactwiseBtn.attr("id");
+  let stepName = $(stepID + "-name");
+
+  let workgroup = $("#active-workgroup").val();
+  let workbook = $("#active-workbook").val();
+
+  fetch("/import_from_reactwise", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      workgroup,
+      workbook,
+      stepID,
+      stepName,
+    }),
+  })
+    .then(function (response) {
+      return response.json();
+    })
+
+    .then(function (data) {
+      if (data.feedback === "Set Created!") {
+        window.location.href = `/reaction_set/${workgroup}/${workbook}/${setName}`;
+      }
+    });
+}
+
+function newReactionSet() {
   // creates new reaction if name and ID pass validation in the backend routes.
   let workgroup = $("#active-workgroup").val();
   let workbook = $("#active-workbook").val();
   let setName = $("#new-reaction-set-name").val();
   let setID = $("#new-reaction-set-id-input").val();
   let reactorDimensions = getReactorDimensions();
-  console.log(reactorDimensions);
 
   fetch("/new_reaction_set", {
     headers: {

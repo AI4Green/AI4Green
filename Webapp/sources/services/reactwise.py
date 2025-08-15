@@ -1,3 +1,4 @@
+import json
 from typing import Dict, List, Union
 
 import requests
@@ -13,28 +14,31 @@ class ReactWiseStep:
         self.categorical_inputs = None
         self.categorical_map = {}
 
-    def load_step_experiments(self):
-        inputs_url = f"https://api.reactwise.com/views/step-experiments/{self.step_id}"  # noqa: E231
-        components_url = (
-            f"https://api.reactwise.com/step-components/{self.step_id}"  # noqa: E231
-        )
-        print(components_url)
-
+    def _get_api_call(self, url):
         headers = {
-            "Authorization": "Bearer " + current_app.config["REACTWISE_API_KEY"]
+            "Authorization": "Bearer " + current_app.config["REACTWISE_API_KEY"],
         }  # possibly add reactwise key per user?
 
-        input_response = requests.request(
-            "GET", inputs_url, headers=headers
-        ).json()  # not working yet
+        payload = json.dumps(
+            {
+                "step_id": str(self.step_id),
+            }
+        )
+        # currently only get requests
+        return requests.request("GET", url, headers=headers, data=payload).json()
 
-        # component_response = requests.request(
-        #     "GET", components_url, headers=headers
-        # ).json()
+    def load_step_experiments(self):
+        input_response = self._get_api_call(
+            f"https://api.reactwise.com/views/step-experiments/{self.step_id}"  # noqa: E231
+        )
+        component_response = self._get_api_call(
+            "https://api.reactwise.com/step-components"  # noqa: E231
+        )
 
         self._extract_categorical(input_response)
         self._extract_continuous(input_response)
         self._extract_experiment_inputs(input_response)
+        self._extract_step_components(component_response)
 
     def _extract_categorical(self, response: Dict[str, Union[int, str]]):
         """
@@ -101,6 +105,22 @@ class ReactWiseStep:
             experiment_details[exp_id] = exp_dict
         self.experimental_details = experiment_details
 
+    def _extract_step_components(self, api_response):
+        step_components = [
+            x for x in api_response["data"] if x.get("step_id", None) == self.step_id
+        ]
+
+        print(step_components)
+
+        # reaction_SMILES = ""
+
+        for component in step_components:
+            step_component = self._get_api_call(
+                f"https://api.reactwise.com/components/{component.get('component_id')}"  # noqa: E231
+            )
+
+            print(step_component)
+
 
 def list_steps():
     """
@@ -132,8 +152,6 @@ def list_steps():
         psteps = [x for x in steps if x.get("project_id") == pid]
 
         sorted_steps[project.get("name")] = psteps
-
-    print(sorted_steps)
     return sorted_steps
 
     # for step in step_response.get("data", []):

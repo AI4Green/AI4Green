@@ -34,18 +34,20 @@
     font-size: 10px;
 }
 
+.icon.reactwise:hover {
+    background-color: black;
+    border-color: black;
+    border-width: 3;
+    transform: scale(1.1);
+}
+
 .icon.reactwise.focused {
     background-color: black;
     border-color: #FD475A;
     border-width: 3;
-}
-
-.icon.reactwise:hover {
-    background-color: black;
-    border-color: black;
-    border-width: 2;
     transform: scale(1.1);
 }
+
 
 .btn.btn-primary {
   background-color: var(--primary-grey);
