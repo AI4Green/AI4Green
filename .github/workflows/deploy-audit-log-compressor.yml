@@ -36,6 +36,7 @@ jobs:
             --name auditlogcompressoruat \
             --resource-group ${{ secrets.AZURE_RESOURCE_ID }} \
             --image ai4greeneln/audit_log_compressor:latest
+            --revision-suffix $GITHUB_RUN_NUMBER
 
   deploy-to-prod:
     if: ${{ github.event.inputs.env == 'prod' }}
@@ -56,3 +57,4 @@ jobs:
             --name auditlogcompressorprod \
             --resource-group ${{ secrets.AZURE_RESOURCE_ID }} \
             --image ai4greeneln/audit_log_compressor:latest
+            --revision-suffix $GITHUB_RUN_NUMBER
