@@ -1,7 +1,7 @@
 import json
 import time
 from typing import List
-from azure.storage.queue import QueueServiceClient, QueueMessage
+from azure.storage.queue import QueueClient, QueueServiceClient, QueueMessage
 from kafka import KafkaConsumer
 
 
@@ -99,13 +99,12 @@ class AzureQueueConsumer(BaseQueueConsumer):
 
         return messages
 
-    def _clear_messages(self, sc: QueueServiceClient, messages: List[QueueMessage]):
+    def _clear_messages(self, client: QueueClient, messages: List[QueueMessage]):
         """Delete messages from the Azure Queue Storage.
 
         Args:
-            sc (QueueServiceClient): The service client for Azure Queue Storage.
+            client (QueueClient): The client for Azure Queue Storage.
             messages (List[QueueMessage]): The list of messages to delete.
         """
-        client = sc.get_queue_client(self.queue_name)
         for message in messages:
             client.delete_message(message)
