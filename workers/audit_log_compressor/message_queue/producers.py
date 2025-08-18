@@ -69,4 +69,4 @@ class AzureQueueProducer(BaseQueueProducer):
         try:
             client.send_message(msg)
         except Exception as e:
-            self.logger.error(msg=str(e))
+            self.logger.error(str(e))
