@@ -41,9 +41,7 @@ def main():
     )
 
     # set up producer and processor
-    producer = AzureQueueProducer(
-        connection_str=QUEUE_CONNECTION_STRING,
-    )
+    producer = AzureQueueProducer(connection_str=QUEUE_CONNECTION_STRING, logger=logger)
     processor = ReactionEditHistoryProcessor(producer, PRODUCE_TOPIC, logger)
 
     # Set up the scheduler

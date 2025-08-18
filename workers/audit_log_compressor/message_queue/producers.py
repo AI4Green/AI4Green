@@ -1,3 +1,4 @@
+from logging import Logger
 from typing import Any, Optional
 
 from azure.storage.queue import QueueServiceClient
@@ -20,39 +21,19 @@ class BaseQueueProducer:
         raise NotImplementedError
 
 
-class LoggingQueueProducer(BaseQueueProducer):
-    """
-    A queue producer designed to be used in testing situations where
-    actually sending messages to a message queue is not required.
-
-    This producer simply logs the messages with the Flask logger instance.
-    """
-
-    def send(self, topic: Optional[str] = None, msg: Optional[Any] = None):
-        """Send a message to the standard output using the built-in logger
-        in Flask.
-
-        Args:
-            topic (str, optional): This is ignored in this class. Defaults to None.
-            msg (Any, optional): The message to send to the queue. Defaults to None.
-        """
-        from flask import current_app
-
-        current_app.logger.info(msg=msg)
-
-
 class AzureQueueProducer(BaseQueueProducer):
     """
     A queue producer for sending messages to Azure Queue Storage.
     """
 
-    def __init__(self, connection_str: str):
+    def __init__(self, connection_str: str, logger: Logger):
         """Create a producer for Azure Queue Storage
 
         Args:
             connection_str (str): The connection string for the queue storage resource.
         """
         self.producer = QueueServiceClient.from_connection_string(connection_str)
+        self.logger = logger
 
     def send(self, topic: Optional[str] = None, msg: Optional[Any] = None):
         """Send a message to Azure Queue Storage.
@@ -88,7 +69,4 @@ class AzureQueueProducer(BaseQueueProducer):
         try:
             client.send_message(msg)
         except Exception as e:
-            # import to avoid context based conflicts
-            from flask import current_app
-
-            current_app.logger.error(msg=str(e))
+            self.logger.error(msg=str(e))
