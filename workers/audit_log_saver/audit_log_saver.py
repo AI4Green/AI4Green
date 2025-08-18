@@ -6,7 +6,7 @@ from typing import List
 
 from azure.storage.queue import QueueMessage, QueueServiceClient
 from models import AuditLogEvent
-from sqlalchemy import create_engine
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 
 
@@ -47,19 +47,14 @@ def clear_messages(
     client.close()
 
 
-def write_messages_to_db(
-    messages: List[QueueMessage], db_connection_string: str, event_type: str
-):
+def write_messages_to_db(engine: Engine, messages: List[QueueMessage], event_type: str):
     """Write the messages from Azure Queue Storage to the database.
 
     Args:
+        engine (Engine): The engine that connects to the database.
         messages (List[QueueMessage]): The list of messages to write to the database.
-        db_connection_string (str): The connection string for the database.
         event_type (str): The type of the event.
     """
-    # Establish DB connection
-    engine = create_engine(db_connection_string)
-
     # Create the session
     with Session(engine) as session:
         session.begin()
@@ -108,6 +103,9 @@ def main():
         "DB_CONNECTION_STRING",
         "postgresql://postgres:postgres@localhost:5434/ai4gauditlog",
     )
+    # Establish DB connection
+    engine = create_engine(db_connection_str)
+
     max_messages = int(os.getenv("MAX_MESSAGES", 32))
 
     logger.info("Getting service client")
@@ -120,7 +118,7 @@ def main():
                 logger.info(f"Getting messages from queue '{queue}'")
                 messages = get_messages(service_client, queue, max_messages)
                 logger.info(f"Writing {len(messages)} messages to DB...")
-                write_messages_to_db(messages, db_connection_str, queue)
+                write_messages_to_db(engine, messages, queue)
                 logger.info("Clearing old messages...")
                 clear_messages(service_client, queue, messages)
         except KeyboardInterrupt:
