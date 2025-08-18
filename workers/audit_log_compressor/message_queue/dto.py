@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass
 import json
-from serde import MessageSerdeMixin
+from .serde import MessageSerdeMixin
 
 
 @dataclass
