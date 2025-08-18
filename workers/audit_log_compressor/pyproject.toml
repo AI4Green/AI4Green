@@ -9,7 +9,6 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 apscheduler = "^3.11.0"
-kafka-python = "^2.2.12"
 python-dotenv = "^1.1.0"
 azure-storage-queue = "12.13.0"
 

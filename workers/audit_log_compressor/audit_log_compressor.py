@@ -9,8 +9,8 @@ from config import (
     QUEUE_CONNECTION_STRING,
 )
 from reaction_edit_history_processor import ReactionEditHistoryProcessor
-from sources.services.message_queue.consumers import AzureQueueConsumer
-from sources.services.message_queue.producers import AzureQueueProducer
+from message_queue.consumers import AzureQueueConsumer
+from message_queue.producers import AzureQueueProducer
 
 
 def collect_and_process_messages(
@@ -41,9 +41,7 @@ def main():
     )
 
     # set up producer and processor
-    producer = AzureQueueProducer(
-        connection_str=QUEUE_CONNECTION_STRING,
-    )
+    producer = AzureQueueProducer(connection_str=QUEUE_CONNECTION_STRING, logger=logger)
     processor = ReactionEditHistoryProcessor(producer, PRODUCE_TOPIC, logger)
 
     # Set up the scheduler

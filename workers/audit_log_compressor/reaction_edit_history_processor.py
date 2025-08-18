@@ -2,8 +2,8 @@ import json
 from collections import defaultdict
 from logging import Logger
 
-from sources import services
-from sources.services.message_queue.producers import BaseQueueProducer
+from message_queue.producers import AzureQueueProducer
+from message_queue.dto import ReactionEditMessage
 
 
 class ReactionEditHistoryProcessor:
@@ -11,7 +11,9 @@ class ReactionEditHistoryProcessor:
     Returns compressed messages to message queue reaction_editing_history_compressed topic.
     """
 
-    def __init__(self, producer: BaseQueueProducer, produce_topic: str, logger: Logger):
+    def __init__(
+        self, producer: AzureQueueProducer, produce_topic: str, logger: Logger
+    ):
         self.producer = producer
         self.produce_topic = produce_topic
         self.logger = logger
@@ -55,7 +57,7 @@ class ReactionEditHistoryProcessor:
                 continue
 
             # put results in original message format
-            message = services.reaction_editing_history.ReactionEditMessage(
+            message = ReactionEditMessage(
                 full_name,
                 email,
                 messages[0]["workgroup"],
