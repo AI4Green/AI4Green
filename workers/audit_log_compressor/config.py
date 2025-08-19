@@ -7,8 +7,8 @@ load_dotenv()
 
 # message queue config
 QUEUE_CONNECTION_STRING = os.getenv("QUEUE_CONNECTION_STRING", "localhost:9092")
-CONSUME_TOPIC = os.getenv("CONSUME_TOPIC", "reaction-editing-history")
-PRODUCE_TOPIC = os.getenv("PRODUCE_TOPIC", "reaction-editing-history-compressed")
+CONSUME_TOPIC = os.getenv("CONSUME_TOPIC", "reaction-editing-history-raw")
+PRODUCE_TOPIC = os.getenv("PRODUCE_TOPIC", "reaction-editing-history")
 
 # Polling config
 POLL_INTERVAL_MINS = int(os.getenv("POLL_INTERVAL_MINS", 60))
