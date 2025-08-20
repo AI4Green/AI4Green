@@ -12,7 +12,12 @@ class ReactWiseStep:
     def __init__(self, step_id: int):
         self.step_id = step_id
         self.categorical_inputs = None
-        self.categorical_map = {}
+        self.continuous_map = None
+        self.categorical_map = None
+        self.experimental_details = None
+        self.reaction_smiles = None
+
+        self.load_step_experiments()
 
     def _get_api_call(self, url):
         headers = {
@@ -38,7 +43,7 @@ class ReactWiseStep:
         self._extract_categorical(input_response)
         self._extract_continuous(input_response)
         self._extract_experiment_inputs(input_response)
-        self._extract_step_components(component_response)
+        self._extract_reaction_smiles(component_response)
 
     def _extract_categorical(self, response: Dict[str, Union[int, str]]):
         """
@@ -105,21 +110,30 @@ class ReactWiseStep:
             experiment_details[exp_id] = exp_dict
         self.experimental_details = experiment_details
 
-    def _extract_step_components(self, api_response):
+    def _extract_reaction_smiles(self, api_response):
+        """
+        Possibly need to handle multiple reaction smiles for different reactions in a step?
+        """
         step_components = [
             x for x in api_response["data"] if x.get("step_id", None) == self.step_id
         ]
 
-        print(step_components)
-
-        # reaction_SMILES = ""
+        reactant_smiles = []
+        product_smiles = []
 
         for component in step_components:
             step_component = self._get_api_call(
                 f"https://api.reactwise.com/components/{component.get('component_id')}"  # noqa: E231
             )
+            component_smiles = step_component.get("data").get("smiles")
+            if component.get("reactant"):
+                reactant_smiles.append(component_smiles)
+            else:
+                product_smiles.append(component_smiles)
 
-            print(step_component)
+        self.reaction_smiles = (
+            f"{'.'.join(reactant_smiles)}>>{'.'.join(product_smiles)}"
+        )
 
 
 def list_steps():

@@ -45,7 +45,6 @@ def update_reaction_set() -> Response:
     set_id = request.json.get("set_id")
     workgroup_name = request.json.get("workgroup")
     workbook_name = request.json.get("workbook")
-    print(set_id, workgroup_name, workbook_name)
 
     r_set = services.reaction_set.get_from_id(set_id, workgroup_name, workbook_name)
     serialised_set = services.reaction_set.to_dict([r_set])[0]
@@ -126,7 +125,9 @@ def import_from_reactwise():
     )
 
     rw_step = services.reactwise.ReactWiseStep(int(step_id))
-    rw_step.load_step_experiments()
+
+    print(rw_step.experimental_details)
+    print(rw_step.reaction_smiles)
     creator = services.person.from_current_user_email()
 
     set_name = step_name
@@ -136,10 +137,20 @@ def import_from_reactwise():
         set_name, workgroup_name, workbook_name
     )
 
+    # labelled_fields = ["solvent", "temperature", "time"]
     if not set_obj:
         reactions = []
 
+        # need to test which inputs/outputs we recognise and which we dont
+
         for reactwise_id, details in rw_step.experimental_details.items():
+            # unknown_fields = [
+            #     x.lower() for x in details.keys() if x.lower() not in labelled_fields
+            # ]
+            # known_fields = [
+            #     x.lower() for x in details.keys() if x.lower() not in labelled_fields
+            # ]
+
             reaction_id = services.reaction.get_next_reaction_id_for_workbook(
                 workbook.id
             )
