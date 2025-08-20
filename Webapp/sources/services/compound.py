@@ -259,7 +259,6 @@ class SketcherCompound:
         self.reload = reload
         self.errors = []
 
-        print(self.smiles, self.idx, self.reaction_component_idx)
         self.check_for_polymer(polymer_indices, reaction_smiles)
 
         self.check_invalid_molecule()
@@ -321,7 +320,7 @@ class SketcherCompound:
         # generate molweight
         mol_wt = services.all_compounds.mol_weight_from_smiles(self.smiles)
         novel_reactant_html = render_template(
-            "_novel_compound.html",
+            "reactions/_novel_compound.html",
             component=self.reaction_component,
             name=compound_name,
             # chenage for novel compound table
