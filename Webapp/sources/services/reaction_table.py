@@ -68,21 +68,6 @@ class ReactionTable:
     not sure if this will work, but yolo lmao
     """
 
-    # reaction_param_keys = [
-    #     "limiting_reactant_table_number",
-    #     "main_product",
-    #     "mass_units",
-    #     "polymerisation_type",
-    #     "amount_units",
-    #     "volume_units",
-    #     "solvent_volume_units",
-    #     "product_mass_units",
-    #     "product_amount_units",
-    # ]
-    #
-    # for param in reaction_param_keys:
-    #     units[param] = reaction_table_dict.pop(param)
-
     def __init__(self, reaction, workgroup, workbook, demo, tutorial):
         # set up default values
         self.reaction = reaction
@@ -94,11 +79,8 @@ class ReactionTable:
         self.tutorial = tutorial
 
         # to do
-        # units
-        # prevent load for new reactions
-        # delete stale compounds
         # fix polymer bugs
-        #
+        # fix input novel compound
 
         # reaction table species
         self.reactants = []
@@ -110,7 +92,7 @@ class ReactionTable:
         self.solvent_dropdown = self.get_solvent_dropdown()
         self.reaction_class = None
 
-        # load reaction_table from provided reaction
+        # load reaction_table from provided reaction_table data
         self.load()
 
     def load(self):
@@ -124,6 +106,22 @@ class ReactionTable:
         self.solvents = compounds["solvent"]
 
         self.load_units()
+
+    def check_errors(self):
+        for compound_group in [self.reactants, self.products]:
+            errors = self._check_compound_errors(compound_group)
+            if errors:
+                return errors
+        return False
+
+    @staticmethod
+    def _check_compound_errors(compound_type):
+        for compound in compound_type:
+            if compound.novel_compound_table:
+                return compound.novel_compound_table
+            elif compound.errors:
+                return compound.errors[0]
+        return False
 
     def load_units(self):
         unit_keys = [
@@ -152,8 +150,6 @@ class ReactionTable:
             product_smiles_list,
         ) = services.reaction_table.get_reactants_and_products_list(reaction_smiles)
 
-        print("reactionsmiles2", reactants_smiles_list, product_smiles_list)
-
         # only classify reaction if not polymer
         if not polymer_indices:
             self.reaction_class = services.reaction_classification.classify_reaction(
@@ -169,6 +165,7 @@ class ReactionTable:
         )
 
         self.update_reactants_and_products(updated_reactants, updated_products)
+        self.check_errors()
 
     def update_reactants_and_products(self, updated_reactants, updated_products):
         new_reactants = self.identify_compounds(updated_reactants, self.reactants)

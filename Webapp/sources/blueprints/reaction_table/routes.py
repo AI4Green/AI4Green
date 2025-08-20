@@ -48,9 +48,12 @@ def autoupdate_reaction_table():
     reaction_table = services.reaction_table.ReactionTable(
         reaction, workgroup, workbook, demo, tutorial
     )
-    print("reactionsmiles 1", reaction_smiles)
 
     reaction_table.update(reaction_smiles, polymer_indices)
+    # do error check
+    errors = reaction_table.check_errors()
+    if errors:
+        return errors
 
     return reaction_table.render()
 
