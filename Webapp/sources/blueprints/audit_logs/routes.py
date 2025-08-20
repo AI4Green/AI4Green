@@ -36,6 +36,7 @@ def download_audit_logs(workgroup: str):
     end_date = request.args.get("end_date")
     # convert to datetime
     end_date = datetime.strptime(end_date, "%Y-%m-%d") if start_date else None
+    end_date = end_date.replace(hour=23, minute=59, second=59)
 
     # retrieve and deserialise the audit logs
     logs = get_audit_logs(
