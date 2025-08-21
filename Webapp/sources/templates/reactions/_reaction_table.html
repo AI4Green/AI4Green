@@ -54,18 +54,203 @@
         {{  reaction_table_components.product_row(product, loop.index) }}
     {% endfor %}
 
-    </table>
+    <tbody>
+        <tr class="not-novel-compound-input">
+        <th scope="col"></th>
+        <th scope="col">Reaction Parameters</th>
+        <th scope="col"></th>
+        <th scope="col">
+            Time
+            <select size="1" id="js-reaction-time-unit">
+              <option value="h" selected>h</option>
+              <option value="min">min</option>
+              <option value="s">s</option>
+            </select>
+        </th>
+        <th scope="col"></th>
+        <th scope="col">
+            Temperature
+            <select size="1" id="js-reaction-temperature-unit">
+              <option value="°C" selected>°C</option>
+              <option value="K">K</option>
+              <option value="°F">°F</option>
+            </select>
+        </th>
+        <th scope="col"></th>
+        <th scope="col">Atmosphere</th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+    </tr>
 
-<table hidden id="js-reagent-table-new-row">
-    {{ reaction_table_components.reagent_row(None, "-x-") }}
+
+    <tr class="not-novel-compound-input">
+        <td></td>
+        <td style='width: 200px;'></td>
+        <td></td>
+        <td>
+            <input style="width: 60px;" type="number" step="any" min="0" id="js-reaction-time" placeholder="-" class="add-highlight-unfilled-cell">
+        </td>
+        <td></td>
+        <td>
+            <input style="width: 60px;" type="number" step="any" min="0" id="js-reaction-temperature" placeholder="-" class="add-highlight-unfilled-cell">
+        </td>
+        <td></td>
+        <td>
+            <select size="1" id="js-reaction-atmosphere" class="add-highlight-unfilled-cell">
+              <option value="-select-" selected>-select-</option>
+              <option value="air">Air</option>
+              <option value="nitrogen">N&#8322;</option>
+              <option value="argon">Ar</option>
+              <option value="hydrogen">H&#8322;</option>
+              <option value="oxygen">O&#8322;</option>
+            </select>
+        </td>
+        <td></td>
+        <td style="width:4.3em"></td>
+        <td> </td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+   </tbody>
+  </table>
+
+<div class="container-fluid my-3">
+  <h5 class="mb-2"><b>Workup / Purification</b></h5>
+  <p class="text-muted" style="font-size: 0.9rem;">
+    Define workup and purification procedures.
+  </p>
+</div>
+<table class="table table-sm">
+    <!-- Workup section -->
+    <tr class="not-novel-compound-input">
+            <td></td>
+            <td><b>Workup Details</b></td>
+            <td><b></b></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                <button type="button" id="js-add-workup-drying-agent" title="Add Workup Drying Agent" onclick="addWorkupAgent()" class="btn btn-warning" style="width: fit-content;">Add Drying Agent</button>
+            </td>
+            <td>
+                <button type="button" id="js-add-workup-solvent" title="Add Workup Solvent" onclick="addWorkupSolvent()" class="btn btn-success" style="width: fit-content;">Add Workup Solvent</button>
+            </td>
+        </tr>
+
+    <!-- Purification section -->
+        <tr class="not-novel-compound-input">
+            <td></td>
+            <td><b>Purification Method</b></td>
+            <td></td>
+            <td></td>
+            <td>Purification Type:</td>
+            <td id="js-isolation-cell">
+                <select size="1" id="js-isolation">
+                  <option class="hazard-reset-hazard" selected>-select-</option>
+                  <option class="hazard-hazardous">Column</option>
+                  <option class="hazard-hazardous">HPLC</option>
+                  <option class="hazard-hazardous">Ion exchange</option>
+                  <option class="hazard-acceptable">Crystallization</option>
+                  <option class="hazard-acceptable">Filtration</option>
+                  <option class="hazard-hazardous">Multiple recryst.</option>
+                  <option class="hazard-acceptable">Distillation &lt; 140&#8451;</option>
+                  <option class="hazard-hazardous">Distillation &gt; 140&#8451;</option>
+                </select>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                <button type="button" id="js-add-workup-solvent" title="Add Workup Solvent" onclick="addPurificationSolvent()" class="btn btn-success" style="width: fit-content;">Add Workup Solvent</button>
+            </td>
+        </tr>
+</table>
+<br>
+<div class="container-fluid my-3">
+  <h5 class="mb-2"><b>Responses</b></h5>
+  <p class="text-muted" style="font-size: 0.9rem;">
+    Define additional responses for this reaction. Please provide a name, units, and value.
+  </p>
+</div>
+<table class="table table-sm">
+  <thead>
+    <tr class="not-novel-compound-input">
+      <th scope="col">#</th>
+      <th scope="col">Response Name</th>
+      <th scope="col">Units</th>
+      <th scope="col">Value</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody id="js-response-table">
+    <tr>
+      <td colspan="5" class="text-center">
+        <button type="button" class="btn btn-success btn-sm" onclick="addNewResponse()">+ Add Response</button>
+      </td>
+    </tr>
+  </tbody>
 </table>
 
+<script>
+let responseIndex = 1;
 
-<table hidden id="js-solvent-table-new-row">
-    {{ reaction_table_components.solvent_row(None, "-x-") }}
-</table>
+function addNewResponse() {
+  const table = document.getElementById("js-response-table");
+  const newRow = document.createElement("tr");
+  newRow.className = "not-novel-compound-input";
+  newRow.id = "js-response-table-row" + responseIndex;
+
+  newRow.innerHTML = `
+    <td>
+      <input type="number" style="width:40px; border:none"
+             readonly value="${responseIndex}">
+    </td>
+    <td>
+      <input type="text" style="width:200px;"
+             class="add-highlight-unfilled-cell"
+             placeholder="Name" name="responses[${responseIndex}][name]">
+    </td>
+    <td>
+      <input type="text" style="width:80px;"
+             class="add-highlight-unfilled-cell"
+             placeholder="Units" name="responses[${responseIndex}][units]">
+    </td>
+    <td>
+      <input type="number" step="any" style="width:80px;"
+             class="add-highlight-unfilled-cell"
+             placeholder="Value" name="responses[${responseIndex}][value]">
+    </td>
+    <td>
+      <button type="button" class="js-remove-response close"
+              aria-label="Close" onclick="removeResponse(${responseIndex})">
+        <span aria-hidden="true" title="Remove Response">&times;</span>
+      </button>
+    </td>
+  `;
+
+  // Insert before the last row (the "Add" button row)
+  table.insertBefore(newRow, table.lastElementChild);
+
+  responseIndex++;
+}
+
+function removeResponse(index) {
+  const row = document.getElementById("js-response-table-row" + index);
+  if (row) row.remove();
+}
+</script>
 
 </div>
+
 
 {# Numbers #}
 <input type="hidden" value="{{ number_of_solvents }}" id="js-number-of-solvents">
@@ -90,6 +275,14 @@
     {% endfor %}
 </datalist>
 
+<table hidden id="js-reagent-table-new-row">
+    {{ reaction_table_components.reagent_row(None, "-x-") }}
+</table>
+
+
+<table hidden id="js-solvent-table-new-row">
+    {{ reaction_table_components.solvent_row(None, "-x-") }}
+</table>
 
 {{ reaction_table_components.report_compound_modal() }}
 
