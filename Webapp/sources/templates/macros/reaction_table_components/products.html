@@ -1,0 +1,71 @@
+{%  macro product_headings(units) -%}
+    {% set product_units = {
+    "amount": ["mol", "mmol", "μmol"],
+    "volume": [],
+    "mass": ["g", "mg", "μg"],
+    } %}
+
+    <tr class="not-novel-compound-input">
+            <td></td>
+            <td><b>Product</b></td>
+            <td><b>Desired Product?</b></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            {% for unit_type, options in product_units.items() %}
+                {% if unit_type == "volume" %}
+                    <td></td>
+                {% else %}
+                    <td>
+                        <select size="1" name="product{{ unit_type|capitalize }}Unit" id="js-product-{{ unit_type }}-unit">
+                            {% for option in options %}
+                                <option value="{{ option }}" {{ "selected" if units["product_" + unit_type + "_units"] == option else "" }}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                {% endif %}
+            {% endfor %}
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+{%- endmacro %}
+
+{%  macro product_row(product, index) -%}
+<tr class="not-novel-compound-input">
+            <td><input type="number" id="js-product-table-number{{ index }}" value="{{ product.idx }}" style="width:40px; border:none" readonly></td>
+            <td style='width: 200px;'><input  id="js-product{{ index }}" style="width: 200px; border-width:0px;" value="{{ product.compound_data.names if product.compound_data.names is string else product.compound_data.names | join(', ') }}"></td>
+            <td><input type="radio" id="js-main-product{{ index }}" name="js-main-product" value="{{ product.idx }}" class="js-main-product"></td>
+                <script>
+                $('input[name="js-main-product"]').first().prop('checked', true)
+                </script>
+            <td><input type="number" step="any" value="{{ product.compound_data.molecular_weights if product.compound_data.molecular_weights is string else product.compound_data.molecular_weights | join(', ') }}"
+                       id="js-product-molecular-weight{{ index }}" style="width: 70px; border:none" readonly>
+            <br>
+            {% if product.is_polymer %}
+                     <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
+                {% endif %}
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><input type="number" step="any" placeholder="-" min="0"
+                {% if product.compound_data.amounts %}value="{{ product.compound_data.amounts }}"{% endif %}
+                id="js-product-rounded-amount{{ index }}" style="width: 60px; border:none" readonly></td>
+            <td></td>
+            <td style="width:4.3em"><input type="number" step="any" placeholder="-" min="0"
+                {% if product.compound_data.masses %}value="{{ product.compound_data.masses }}"{% endif %}
+                id="js-product-rounded-mass{{ index }}" style="width: 60px; border:none" readonly></td>
+            <td> {{ physical_form_dropdown(index, product.compound_data.physical_forms_text, "product") }} </td>
+            <td><textarea class="text-in-table" id="js-product-hazard{{ index }}" readonly>{{ product.compound_data.hazards if product.compound_data.hazards is string else product.compound_data.hazards | join(', ') }}</textarea></td>
+            <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal" title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-product{{ index }}" type="button"><i class="bi bi-exclamation-circle"></i></button></td>
+            <td></td>
+        </tr>
+        <input type="hidden" {% if product.compound_data.amounts_raw %}value="{{ product.compound_data.amounts_raw }}"{% endif %}
+               id="js-product-amount{{ index }}">
+        <input type="hidden" {% if product.compound_data.masses_raw %}value="{{ product.compound_data.masses_raw }}"{% endif %}
+               id="js-product-mass{{ index }}">
+        <input type="hidden" value="{{ product.compound_data.primary_keys if product.compound_data.primary_keys is string else product.compound_data.primary_keys | join(', ') }}" id="js-product-primary-key{{ index }}">
+{%- endmacro %}

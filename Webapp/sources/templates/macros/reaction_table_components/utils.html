@@ -1,0 +1,40 @@
+{% macro reaction_description(reaction, tutorial) -%}
+<div class="container-fluid" style="padding-left: 0px">
+    <div id="reaction-name-description">
+        <p>
+            <textarea disabled id="js-reaction-name2" style="resize: horizontal;" rows="1" cols="50" placeholder="Please enter your reaction name">{% if tutorial == "yes" %}Tutorial Reaction{% else %}{{ reaction.name }}{% endif %}</textarea>
+        </p>
+        <p>
+            <textarea id="js-reaction-description" rows="4" cols="100" placeholder="Please describe your reaction"></textarea>
+        </p>
+    </div>
+    <p><b>Please fill in the highlighted boxes to proceed</b></p>
+</div>
+{%- endmacro  %}
+
+{% macro add_to_database_row(type) -%}
+    <tr style="display: none" id="js-input-{{ type }}1">
+                <td style="text-align:center;">New<br>Compound</td>
+                <td>Name</td>
+                <td>SMILES</td>
+                <td>Hazard Codes</td>
+                <td>CAS</td>
+                <td>MW</td>
+                <td>Density</td>
+                <td>Conc.</td>
+    </tr>
+    <tr style="display: none" id="js-input-{{ type }}2">
+        <td></td>
+        <td><input style="width: 200px;" class="add-highlight-unfilled-cell no_autosave"  type="text" id="js-input-{{ type }}-name" placeholder="Required"></td>
+        <td><input style="width: 200px" type="text" id="js-input-{{ type }}-smiles" placeholder="Optional" class="no_autosave"></td>
+        <td><input style="width: 200px" type="text" id="js-input-{{ type }}-hazards" placeholder="Optional (HXXX-etc.)" class="no_autosave"></td>
+        <td><input style="width: 200px" type="text" id="js-input-{{ type }}-cas" placeholder="Optional" class="no_autosave"></td>
+        <td><input style="width: 60px" type="number" id="js-input-{{ type }}-mw" placeholder="Opt." class="no_autosave"></td>
+        <td><input style="width: 60px" type="number" id="js-input-{{ type }}-density" placeholder="Opt." class="no_autosave"></td>
+        <td><input style="width: 60px" type="number" id="js-input-{{ type }}-concentration" placeholder="Opt." class="no_autosave"></td>
+        <td><button type="button" id="js-input-{{ type }}" class="btn btn-outline-dark"
+                    onclick="submitNovelCompoundViaTable('{{ type }}')" title="Add compound to database" style="width: fit-content;">Input</button></td>
+        <td><button type="button" id="js-input-cancel" class="js-input-cancel btn btn-outline-dark"
+                    style="width: fit-content;" onclick="cancelNovelCompoundInput('{{ type }}')">Cancel</button></td>
+    </tr>
+{%- endmacro  %}

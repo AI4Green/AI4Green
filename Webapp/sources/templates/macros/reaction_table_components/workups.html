@@ -1,0 +1,43 @@
+{% macro workup_row(workup=None, index="{{ index }}") -%}
+    <tr id="js-workup-table-row{{ index }}" class="not-novel-compound-input">
+        <td><input type="number"
+         style="width:40px; border:none" id="js-workup-table-number{{ index }}" readonly value="{{ workup.idx if workup else ""}}"></td>
+        <td id="js-workup-datalist-cell{{ index }}">
+            <input aria-role="combobox" type="search" style="width: 200px;"
+                   {% if workup %}
+                    class="{{ workup.compound_data.sustainability_flag}} remove-highlight-filled-cell"
+                   {% else %}
+                    class="add-highlight-unfilled-cell"
+                   {% endif %}
+                   id="js-workup{{ index }}" autocomplete="off" placeholder="Name or CAS Number"
+                   value="{{ workup.compound_data.names if workup else "" }}">
+        </td>
+        <td><button value="{{ index }}" id="go-to-workup-guide{{ index }}" title="Open workup guide in new tab" class="btn btn-primary btn-primary btn-sm" onclick="goToworkupGuide(this.value)">workup Guide</button></td>
+        <td><button  value="{{ index }}" id="go-to-workup-surfer" title="Open workup surfer in new tab" class="btn btn-primary btn-primary btn-sm" onclick="goToworkupSurfer(this.value)">workup Surfer</button></td>
+        <td></td>
+        <td><input type="number" step="any" min="0" placeholder="-"
+         id="js-workup-rounded-concentration{{ index }}" value="{{ workup.compound_data.concentrations if workup else "" }}"
+         style="width:60px; border:none" readonly></td>
+        <td></td>
+        <td></td>
+        <td><input type="number" step="any" min="0" placeholder="-"
+         id="js-workup-volume{{ index }}" style="width:60px;" class="add-highlight-unfilled-cell" value="{{ workup.compound_data.volumes if workup else "" }}"></td>
+        <td></td>
+        <td>
+        {{ physical_form_dropdown(index, workup.compound_data.physical_forms_text if workup else "-select-", "workup") }}
+        </td>
+        <td><textarea class="text-in-table"
+         id="js-workup-hazards{{ index }}" readonly>{{ workup.compound_data.hazards if workup else "" }}</textarea></td>
+        <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal"
+                    title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-workup{{ index }}"
+                    type="button"><i class="bi bi-exclamation-circle"></i></button></td>
+        <td>
+            <button value="{{ index }}" id="remove-workup{{ index }}" onclick="removeworkup(this.value)" type="button" class="js-remove-workup close" aria-label="Close">
+                <span aria-hidden="true" title="Remove workup">&times;</span>
+            </button>
+        </td>
+        <input type="hidden"
+        id="js-workup-concentration{{ index }}" value="{{ workup.compound_data.volumes if workup else "" }}">
+        <input type="hidden" id="js-workup-primary-key{{ index }}" value="{{ workup.compound_data.ids if workup else "" }}">
+    </tr>
+{%- endmacro %}

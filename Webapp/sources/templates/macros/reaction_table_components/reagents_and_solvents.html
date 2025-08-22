@@ -1,0 +1,147 @@
+{% macro reagent_or_solvent_heading(type, units) -%}
+    <tbody id="js-{{ type }}-table">
+            {{ add_to_database_row( type ) }}
+            <tr class="not-novel-compound-input" id="{{ type }}-row">
+                <td></td>
+                <td>{{ reagent_or_solvent_title(type) }}</td>
+                <td><button id="js-add-new-{{ type }}-by-table" title="Add new {{ type }} to database" onclick="make{{ type|capitalize }}Input()" class="btn btn-outline-dark" style="width: fit-content;">Add new {{ type|capitalize }} to database</button></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td> {{ solvent_units_dropdown(type, units["solvent_volume_units"]) }} </td>
+                <td></td>
+                <td></td>
+                <td><button type="button" title="Add {{ type }} to reaction" onclick="addNew{{ type|capitalize }}()" class="js-add-{{ type }} btn btn-success" style="width: fit-content;">Add {{ type|capitalize }}</button></td>
+            </tr>
+        </tbody>
+{%- endmacro %}
+
+
+{%  macro reagent_or_solvent_title(type) -%}
+    {% if type == "reagent" %}
+        <b>Catalysts/reagents</b>
+    {% else %}
+        <b>Solvents</b>
+    {% endif %}
+{%- endmacro %}
+
+
+{% macro solvent_units_dropdown(type, selected_unit) -%}
+    {% if type == "solvent" %}
+        <select size="1" name="solventVolumeUnit" id="js-solvent-volume-unit">
+            <option value="mL" {{ "selected" if selected_unit == "mL" else "" }}>mL</option>
+            <option value="μL" {{ "selected" if selected_unit == "μL" else "" }}>μL</option>
+        </select>
+    {% endif %}
+{%- endmacro %}
+
+{% macro solvent_row(solvent=None, index="{{ index }}") -%}
+    <tr id="js-solvent-table-row{{ index }}" class="not-novel-compound-input">
+        <td><input type="number"
+         style="width:40px; border:none" id="js-solvent-table-number{{ index }}" readonly value="{{ solvent.idx if solvent else ""}}"></td>
+        <td id="js-solvent-datalist-cell{{ index }}"  >
+            <input aria-role="combobox" type="search" style="width: 200px;"
+                   {% if solvent %}
+                    class="{{ solvent.compound_data.sustainability_flag}} remove-highlight-filled-cell"
+                   {% else %}
+                    class="add-highlight-unfilled-cell"
+                   {% endif %}
+                   id="js-solvent{{ index }}" autocomplete="off" placeholder="Name or CAS Number"
+                   value="{{ solvent.compound_data.names if solvent else "" }}">
+        </td>
+        <td><button value="{{ index }}" id="go-to-solvent-guide{{ index }}" title="Open solvent guide in new tab" class="btn btn-primary btn-primary btn-sm" onclick="goToSolventGuide(this.value)">Solvent Guide</button></td>
+        <td><button  value="{{ index }}" id="go-to-solvent-surfer" title="Open solvent surfer in new tab" class="btn btn-primary btn-primary btn-sm" onclick="goToSolventSurfer(this.value)">Solvent Surfer</button></td>
+        <td></td>
+        <td><input type="number" step="any" min="0" placeholder="-"
+         id="js-solvent-rounded-concentration{{ index }}" value="{{ solvent.compound_data.concentrations if solvent else "" }}"
+         style="width:60px; border:none" readonly></td>
+        <td></td>
+        <td></td>
+        <td><input type="number" step="any" min="0" placeholder="-"
+         id="js-solvent-volume{{ index }}" style="width:60px;" class="add-highlight-unfilled-cell" value="{{ solvent.compound_data.volumes if solvent else "" }}"></td>
+        <td></td>
+        <td>
+        {{ physical_form_dropdown(index, solvent.compound_data.physical_forms_text if solvent else "-select-", "solvent") }}
+        </td>
+        <td><textarea class="text-in-table"
+         id="js-solvent-hazards{{ index }}" readonly>{{ solvent.compound_data.hazards if solvent else "" }}</textarea></td>
+        <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal"
+                    title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-solvent{{ index }}"
+                    type="button"><i class="bi bi-exclamation-circle"></i></button></td>
+        <td>
+            <button value="{{ index }}" id="remove-solvent{{ index }}" onclick="removeSolvent(this.value)" type="button" class="js-remove-solvent close" aria-label="Close">
+                <span aria-hidden="true" title="Remove Solvent">&times;</span>
+            </button>
+        </td>
+        <input type="hidden"
+        id="js-solvent-concentration{{ index }}" value="{{ solvent.compound_data.volumes if solvent else "" }}">
+        <input type="hidden" id="js-solvent-primary-key{{ index }}" value="{{ solvent.compound_data.ids if solvent else "" }}">
+    </tr>
+{%- endmacro %}
+
+{% macro reagent_row(reagent=None, index="-x-") -%}
+    <tr id="js-reagent-table-row{{ index }}" class="not-novel-compound-input">
+        <td>
+            <input
+                    type="number"
+                    id="js-reagent-table-number{{ index }}"
+                    style="width: 40px;
+                    border-width:0px;"
+                    value="{{ reagent.idx if reagent else "" }}"
+                    readonly
+            >
+        </td>
+        <td style="width: 200px;">
+            <datalist size="1" id="js2-reagent{{ index }}" style="width: 200px;">
+                <option selected>-select-</option>
+            </datalist>
+            <input style="width: 200px;" class="add-highlight-unfilled-cell" type="search" id="js-reagent{{ index }}" autocomplete="off" list="js2-reagent{{ index }}" placeholder="Name or CAS Number" value="{{ reagent.compound_data.names if reagent else "" }}">
+        </td>
+        <td></td>
+        <td>
+            <input type="number" step="any" placeholder="-" min="0" id="js-reagent-molecular-weight{{ index }}" style="width: 70px; border:none" readonly value="{{ reagent.compound_data.molecular_weights if reagent else "" }}">
+        </td>
+        <td>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-density{{ index }}" style="width: 60px; border:none" value="{{ reagent.compound_data.densities if reagent else "" }}">
+        </td>
+        <td>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-concentration{{ index }}" style="width: 60px; border:none" value="{{ reagent.compound_data.concentrations if reagent else "" }}">
+        </td>
+        <td>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-equivalent{{ index }}" style="width: 60px;" class="add-highlight-unfilled-cell" value="{{ reagent.compound_data.equivalents if reagent else "" }}">
+        </td>
+        <td>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-amount{{ index }}" style="width: 60px; border:none" readonly value="{{ reagent.compound_data.amounts if reagent else "" }}">
+        </td>
+        <td>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-volume{{ index }}" style="width: 60px; border:none" readonly value="{{ reagent.compound_data.volumes if reagent else "" }}">
+        </td>
+        <td>
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-mass{{ index }}" style="width: 60px; border:none" readonly value="{{ reagent.compound_data.masses if reagent else "" }}">
+        </td>
+        <td>
+        {{ physical_form_dropdown(index, reagent.compound_data.physical_forms_text if reagent else "-select-", "reagent") }}
+        </td>
+        <td>
+            <textarea class="text-in-table" id="js-reagent-hazards{{ index }}" readonly>{{ reagent.compound_data.hazards if reagent else "" }}</textarea>
+        </td>
+        <td>
+            <button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal"
+                    title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-reagent{{ index }}"
+                    type="button"><i class="bi bi-exclamation-circle"></i>
+            </button>
+        <input type="hidden" id="js-reagent-amount{{ index }}" value="{{ reagent.compound_data.amounts_raw if reagent else "" }}">
+        <input type="hidden" id="js-reagent-mass{{ index }}" value="{{ reagent.compound_data.masses_raw if reagent else "" }}">
+        <input type="hidden" id="js-reagent-volume{{ index }}" value="{{ reagent.compound_data.volumes_raw if reagent else "" }}">
+        <input type="hidden" id="js-reagent-primary-key{{ index }}" value="{{ reagent.compound_data.primary_key if reagent else "" }}">
+        <input type="hidden" id="js-reagent-smiles{{ index }}" value="{{ reagent.compound_data.smiles if reagent else "" }}">
+        </td>
+        <td>
+            <button value="{{ index }}" id="remove-reagent{{ index }}" onclick="removeReagent(this.value)" type="button" class="js-remove-reagent close" aria-label="Close">
+                <span aria-hidden="true" title="Remove Reagent">&times;</span>
+            </button>
+        </td>
+    </tr>
+{%- endmacro %}
