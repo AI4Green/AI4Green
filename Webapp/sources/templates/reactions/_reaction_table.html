@@ -115,139 +115,180 @@
         <td></td>
     </tr>
    </tbody>
-  </table>
-
-<div class="container-fluid my-3">
-  <h5 class="mb-2"><b>Workup / Purification</b></h5>
-  <p class="text-muted" style="font-size: 0.9rem;">
-    Define workup and purification procedures.
-  </p>
-</div>
-<table class="table table-sm">
-    <!-- Workup section -->
-    <tr class="not-novel-compound-input">
-            <td></td>
-            <td><b>Workup Details</b></td>
-            <td><b></b></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>
-                <button type="button" id="js-add-workup-drying-agent" title="Add Workup Drying Agent" onclick="addWorkupAgent()" class="btn btn-warning" style="width: fit-content;">Add Drying Agent</button>
-            </td>
-            <td>
-                <button type="button" id="js-add-workup-solvent" title="Add Workup Solvent" onclick="addWorkupSolvent()" class="btn btn-success" style="width: fit-content;">Add Workup Solvent</button>
-            </td>
-        </tr>
-
-    <!-- Purification section -->
-        <tr class="not-novel-compound-input">
-            <td></td>
-            <td><b>Purification Method</b></td>
-            <td></td>
-            <td></td>
-            <td>Purification Type:</td>
-            <td id="js-isolation-cell">
-                <select size="1" id="js-isolation">
-                  <option class="hazard-reset-hazard" selected>-select-</option>
-                  <option class="hazard-hazardous">Column</option>
-                  <option class="hazard-hazardous">HPLC</option>
-                  <option class="hazard-hazardous">Ion exchange</option>
-                  <option class="hazard-acceptable">Crystallization</option>
-                  <option class="hazard-acceptable">Filtration</option>
-                  <option class="hazard-hazardous">Multiple recryst.</option>
-                  <option class="hazard-acceptable">Distillation &lt; 140&#8451;</option>
-                  <option class="hazard-hazardous">Distillation &gt; 140&#8451;</option>
-                </select>
-            </td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>
-                <button type="button" id="js-add-workup-solvent" title="Add Workup Solvent" onclick="addPurificationSolvent()" class="btn btn-success" style="width: fit-content;">Add Workup Solvent</button>
-            </td>
-        </tr>
-</table>
-<br>
-<div class="container-fluid my-3">
-  <h5 class="mb-2"><b>Responses</b></h5>
-  <p class="text-muted" style="font-size: 0.9rem;">
-    Define additional responses for this reaction. Please provide a name, units, and value.
-  </p>
-</div>
-<table class="table table-sm">
-  <thead>
-    <tr class="not-novel-compound-input">
-      <th scope="col">#</th>
-      <th scope="col">Response Name</th>
-      <th scope="col">Units</th>
-      <th scope="col">Value</th>
-      <th scope="col"></th>
-    </tr>
-  </thead>
-  <tbody id="js-response-table">
+   <tbody>
     <tr>
-      <td colspan="5" class="text-center">
-        <button type="button" class="btn btn-success btn-sm" onclick="addNewResponse()">+ Add Response</button>
+      <td colspan="12">
+        <div class="container-fluid my-3">
+          <h5 class="mb-2"><b>Workup / Purification</b></h5>
+          <p class="text-muted" style="font-size: 0.9rem;">
+            Define workup and purification procedures.
+          </p>
+        </div>
       </td>
     </tr>
   </tbody>
-</table>
+    {{ reaction_table_components.workup_headings(units) }}
 
-<script>
-let responseIndex = 1;
+  </table>
 
-function addNewResponse() {
-  const table = document.getElementById("js-response-table");
-  const newRow = document.createElement("tr");
-  newRow.className = "not-novel-compound-input";
-  newRow.id = "js-response-table-row" + responseIndex;
 
-  newRow.innerHTML = `
-    <td>
-      <input type="number" style="width:40px; border:none"
-             readonly value="${responseIndex}">
-    </td>
-    <td>
-      <input type="text" style="width:200px;"
-             class="add-highlight-unfilled-cell"
-             placeholder="Name" name="responses[${responseIndex}][name]">
-    </td>
-    <td>
-      <input type="text" style="width:80px;"
-             class="add-highlight-unfilled-cell"
-             placeholder="Units" name="responses[${responseIndex}][units]">
-    </td>
-    <td>
-      <input type="number" step="any" style="width:80px;"
-             class="add-highlight-unfilled-cell"
-             placeholder="Value" name="responses[${responseIndex}][value]">
-    </td>
-    <td>
-      <button type="button" class="js-remove-response close"
-              aria-label="Close" onclick="removeResponse(${responseIndex})">
-        <span aria-hidden="true" title="Remove Response">&times;</span>
-      </button>
-    </td>
-  `;
 
-  // Insert before the last row (the "Add" button row)
-  table.insertBefore(newRow, table.lastElementChild);
 
-  responseIndex++;
-}
 
-function removeResponse(index) {
-  const row = document.getElementById("js-response-table-row" + index);
-  if (row) row.remove();
-}
-</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{#<table class="table table-sm w-auto">#}
+{#  <tbody id="js-workup-table">#}
+{#    <tr class="not-novel-compound-input">#}
+{#        <td></td>#}
+{#        <td><b>Workup Details</b></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td>#}
+{#            <button type="button" id="js-add-workup-solvent" title="Add Workup Row" onclick="addWorkupRow()" class="btn btn-success" style="width: fit-content;">Add Workup Row</button>#}
+{#        </td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#    </tr>#}
+{#  </tbody>#}
+{#  <tbody>#}
+{#    <!-- Purification section -->#}
+{#    <tr class="not-novel-compound-input">#}
+{#        <td></td>#}
+{#        <td><b>Purification Details</b></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td>Purification Type:</td>#}
+{#        <td id="js-isolation-cell">#}
+{#            <select size="1" id="js-isolation">#}
+{#              <option class="hazard-reset-hazard" selected>-select-</option>#}
+{#              <option class="hazard-hazardous">Column</option>#}
+{#              <option class="hazard-hazardous">HPLC</option>#}
+{#              <option class="hazard-hazardous">Ion exchange</option>#}
+{#              <option class="hazard-acceptable">Crystallization</option>#}
+{#              <option class="hazard-acceptable">Filtration</option>#}
+{#              <option class="hazard-hazardous">Multiple recryst.</option>#}
+{#              <option class="hazard-acceptable">Distillation &lt; 140&#8451;</option>#}
+{#              <option class="hazard-hazardous">Distillation &gt; 140&#8451;</option>#}
+{#            </select>#}
+{#        </td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#        <td>#}
+{#            <button type="button" id="js-add-workup-solvent" title="Add Workup Solvent" onclick="addPurificationRow()" class="btn btn-success" style="width: fit-content;">Add Workup Solvent</button>#}
+{#        </td>#}
+{#    </tr>#}
+{#  </tbody>#}
+{#</table>#}
+{#<br>#}
+{#<div class="container-fluid my-3">#}
+{#  <h5 class="mb-2"><b>Responses</b></h5>#}
+{#  <p class="text-muted" style="font-size: 0.9rem;">#}
+{#    Define additional responses for this reaction. Please provide a name, units, and value.#}
+{#  </p>#}
+{#</div>#}
+{#<table class="table table-sm">#}
+{#  <thead>#}
+{#    <tr class="not-novel-compound-input">#}
+{#      <th scope="col">#</th>#}
+{#      <th scope="col">Response Name</th>#}
+{#      <th scope="col">Units</th>#}
+{#      <th scope="col">Value</th>#}
+{#      <th scope="col"></th>#}
+{#    </tr>#}
+{#  </thead>#}
+{#  <tbody id="js-response-table">#}
+{#    <tr>#}
+{#      <td colspan="5" class="text-center">#}
+{#        <button type="button" class="btn btn-success btn-sm" onclick="addNewResponse()">+ Add Response</button>#}
+{#      </td>#}
+{#    </tr>#}
+{#  </tbody>#}
+{#</table>#}
+{##}
+{#<script>#}
+{#let responseIndex = 1;#}
+{##}
+{#function addNewResponse() {#}
+{#  const table = document.getElementById("js-response-table");#}
+{#  const newRow = document.createElement("tr");#}
+{#  newRow.className = "not-novel-compound-input";#}
+{#  newRow.id = "js-response-table-row" + responseIndex;#}
+{##}
+{#  newRow.innerHTML = `#}
+{#    <td>#}
+{#      <input type="number" style="width:40px; border:none"#}
+{#             readonly value="${responseIndex}">#}
+{#    </td>#}
+{#    <td>#}
+{#      <input type="text" style="width:200px;"#}
+{#             class="add-highlight-unfilled-cell"#}
+{#             placeholder="Name" name="responses[${responseIndex}][name]">#}
+{#    </td>#}
+{#    <td>#}
+{#      <input type="text" style="width:80px;"#}
+{#             class="add-highlight-unfilled-cell"#}
+{#             placeholder="Units" name="responses[${responseIndex}][units]">#}
+{#    </td>#}
+{#    <td>#}
+{#      <input type="number" step="any" style="width:80px;"#}
+{#             class="add-highlight-unfilled-cell"#}
+{#             placeholder="Value" name="responses[${responseIndex}][value]">#}
+{#    </td>#}
+{#    <td>#}
+{#      <button type="button" class="js-remove-response close"#}
+{#              aria-label="Close" onclick="removeResponse(${responseIndex})">#}
+{#        <span aria-hidden="true" title="Remove Response">&times;</span>#}
+{#      </button>#}
+{#    </td>#}
+{#  `;#}
+{##}
+{#  // Insert before the last row (the "Add" button row)#}
+{#  table.insertBefore(newRow, table.lastElementChild);#}
+{##}
+{#  responseIndex++;#}
+{#}#}
+{##}
+{#function removeResponse(index) {#}
+{#  const row = document.getElementById("js-response-table-row" + index);#}
+{#  if (row) row.remove();#}
+{#}#}
+{#</script>#}
 
 </div>
 
@@ -260,6 +301,8 @@ function removeResponse(index) {
 <input type="hidden" value="{{ number_of_reactants }}" id="js-number-of-reactants">
 
 <input type="hidden" value="{{ number_of_products }}" id="js-number-of-products">
+
+<input type="hidden" value="{{ number_of_workups }}" id="js-number-of-workups">
 
 <input type="hidden" value="1" id="js-limiting-reactant-table-number">
 
@@ -283,6 +326,12 @@ function removeResponse(index) {
 <table hidden id="js-solvent-table-new-row">
     {{ reaction_table_components.solvent_row(None, "-x-") }}
 </table>
+
+{# new rows here#}
+<table hidden id="js-workup-table-new-row">
+    {{ reaction_table_components.workup_row(None, "-x-") }}
+</table>
+
 
 {{ reaction_table_components.report_compound_modal() }}
 

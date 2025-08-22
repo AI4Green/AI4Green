@@ -512,3 +512,89 @@
   </div>
 </div>
 {%- endmacro %}
+
+{% macro workup_row(workup=None, index="{{ index }}") -%}
+    <tr id="js-workup-table-row{{ index }}" class="not-novel-compound-input">
+        <td>
+            <input type="number"
+            style="width:40px; border:none" id="js-workup-table-number{{ index }}" readonly value="{{ workup.idx if workup else ""}}">
+        </td>
+        <td id="js-workup-solvent-datalist-cell{{ index }}">
+            <input aria-role="combobox" type="search" style="width: 200px;"
+                   {% if workup %}
+                    class="{{ workup.compound_data.sustainability_flag}} remove-highlight-filled-cell"
+                   {% else %}
+                    class="add-highlight-unfilled-cell"
+                   {% endif %}
+                   id="js-workup-solvent{{ index }}" autocomplete="off" placeholder="Name or CAS Number"
+                   value="{{ workup.compound_data.names if workup else "" }}">
+        </td>
+        <td style="text-align: center;">
+            <input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-workup-solvent-volume" class="js-workup-solvent-volume add-highlight-unfilled-cell">
+        </td>
+        <td id="js-workup-aqueous-phase-datalist-cell{{ index }}" colspan="2">
+            <input aria-role="combobox" type="search" style="width: 200px;"
+                   {% if workup %}
+                    class="{{ workup.compound_data.sustainability_flag}} remove-highlight-filled-cell"
+                   {% else %}
+                    class="add-highlight-unfilled-cell"
+                   {% endif %}
+                   id="js-workup-aqueous-phase{{ index }}" autocomplete="off" placeholder="Name or CAS Number"
+                   value="{{ workup.compound_data.names if workup else "" }}">
+        </td>
+        <td colspan="2">
+            <input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-workup-aqueous-volume" class="js-workup-aqueous-volume add-highlight-unfilled-cell">
+        </td>
+        <td>
+            <input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-workup-repeat" class="js-workup-repeat add-highlight-unfilled-cell">
+        </td>
+        <td colspan="2">
+            <input aria-role="combobox" type="search" style="width: 200px;"
+                   {% if workup %}
+                    class="{{ workup.compound_data.sustainability_flag}} remove-highlight-filled-cell"
+                   {% else %}
+                    class="add-highlight-unfilled-cell"
+                   {% endif %}
+                   id="js-workup-drying-agent{{ index }}" autocomplete="off" placeholder="Name or CAS Number"
+                   value="{{ workup.compound_data.names if workup else "" }}">
+        </td>
+        <td style="text-align: center;">
+            <input type="number" step="any" min="0" placeholder="-"
+                id="js-workup-drying-agent-mass{{ index }}" style="width:60px;" class="add-highlight-unfilled-cell" value="{{ workup.compound_data.volumes if workup else "" }}">
+        </td>
+        <td colspan="2">
+            <textarea class="text-in-table" id="js-workup-notes"{{ index }} placeholder="Enter notes about your workup here"></textarea>
+        </td>
+        <td>
+            <button value="{{ index }}" id="remove-workup{{ index }}" onclick="removeworkup(this.value)" type="button" class="js-remove-workup close" aria-label="Close">
+                <span aria-hidden="true" title="Remove workup">&times;</span>
+            </button>
+        </td>
+    </tr>
+{%- endmacro %}
+
+{% macro workup_headings(units) -%}
+
+    <tbody id="js-workup-table">
+        <tr class="not-novel-compound-input" id="{{ type }}-row">
+            <td></td>
+            <td><b>Organic Phase</b></td>
+            <td><b>Organic Volume</b> {{ solvent_units_dropdown("solvent", units["solvent_volume_units"]) }}</td>
+            <td colspan="2"><b>Aqueous Phase</b></td>
+            <td colspan="2"><b>Aqueous Volume</b>{{ solvent_units_dropdown("solvent", units["solvent_volume_units"]) }}</td>
+            <td><b>x repeat</b></td>
+            <td colspan="2"><b>Drying Agent</b></td>
+            <td style="text-align: center;">
+                <b>Mass</b>
+                <select size="1" name="Drying Agent Unit" id="js-workup-drying-agent-unit">
+                    {% for option in ["g", "mg", "μg"] %}
+                        <option value="{{ option }}" {{ "selected" if units["workup_drying_agent_units"] == option else "" }}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><button type="button" title="Add workup to reaction" onclick="addWorkupRow()" class="js-add-workup btn btn-success" style="widtd: fit-content;">Add Workup</button></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </tbody>
+{%- endmacro %}
