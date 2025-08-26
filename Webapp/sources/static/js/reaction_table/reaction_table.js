@@ -1030,6 +1030,71 @@ function addNewSolvent() {
   updateProductTableNumber();
 }
 
+function addWorkupRow() {
+  // Get current number of workups and plus one
+  $("#js-workup-table").prop("hidden", false);
+  let workupNumberID = $("#js-number-of-workups");
+  let workupNumber = getVal(workupNumberID);
+  workupNumber++;
+  workupNumberID.val(workupNumber);
+  // new row stored as the variable markup and replaced/sliced, and then appended to the workup table
+  let markup = $("#js-workup-table-new-row")
+    .html()
+    .replace(/-x-/g, String(workupNumber))
+    .slice(8, -8);
+  $("tbody#js-workup-table").append(markup);
+  // clones the workup datalist to the new row
+  let workupInputID = "js-workup" + workupNumber;
+  let workupDatalistID = "js-workup-datalist" + workupNumber;
+  $("#js-workup-datalist")
+    .clone()
+    .prop("id", workupDatalistID)
+    .appendTo("#js-workup-datalist-cell" + workupNumber);
+  setColours();
+  let workupPhysicalFormID = "js-workup-physical-form" + workupNumber;
+  // clones the physical form dropdown and appends
+  $("#js-physical-form-dropdown")
+    .clone()
+    .prop("id", workupPhysicalFormID)
+    .appendTo("#js-workup-physical-form-dropdown-cell" + workupNumber);
+  // initiate datalist for added workup
+  datalist_initiate(workupInputID, workupDatalistID, workupNumber);
+  // update table number
+  let workupTableNumber =
+    getNum($("#js-number-of-reactants")) +
+    getNum($("#js-number-of-reagents")) +
+    Number(workupNumber);
+  $("#js-workup-table-number" + workupNumber).val(workupTableNumber);
+  updateProductTableNumber();
+}
+
+function addNewResponse() {
+  $("#js-response-table").prop("hidden", false);
+  // Get current number of responses and plus one
+  let responseNumberID = $("#js-number-of-responses");
+  let responseNumber = getVal(responseNumberID);
+  responseNumber++;
+  responseNumberID.val(responseNumber);
+  // new row stored as the variable markup and replaced/sliced, and then appended to the response table
+  let markup = $("#js-response-table-new-row")
+    .html()
+    .replace(/-x-/g, String(responseNumber))
+    .slice(8, -8);
+  $("tbody#js-response-table").append(markup);
+  // clones the response datalist to the new row
+  let responseInputID = "js-response" + responseNumber;
+  let responseDatalistID = "js-response-datalist" + responseNumber;
+  setColours();
+
+  // update table number
+  let responseTableNumber =
+    getNum($("#js-number-of-reactants")) +
+    getNum($("#js-number-of-reagents")) +
+    Number(responseNumber);
+  $("#js-response-table-number" + responseNumber).val(responseTableNumber);
+  // updateProductTableNumber();
+}
+
 async function removeSolvent(removedSolventNumber) {
   let solventNumber = getVal($("#js-number-of-solvents"));
   let reactantNumber = getNum($("#js-number-of-reactants"));
@@ -1116,6 +1181,10 @@ function initialiseSolventListeners() {
       .clone()
       .prop("id", solventDatalistID)
       .appendTo("#js-solvent-datalist-cell" + i);
+    $("#js-workup-solvent-datalist")
+      .clone()
+      .prop("id", solventDatalistID)
+      .appendTo("#js-workup-solvent-datalist-cell" + i);
     setColours();
     datalist_initiate(solventInputID, solventDatalistID, i);
   }

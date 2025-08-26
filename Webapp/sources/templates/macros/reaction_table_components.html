@@ -574,11 +574,35 @@
 {%- endmacro %}
 
 {% macro workup_headings(units) -%}
-
-    <tbody id="js-workup-table">
+    <tbody id="js-workup-table" hidden>
         <tr class="not-novel-compound-input" id="{{ type }}-row">
             <td></td>
             <td><b>Organic Phase</b></td>
+            <td><b>Organic Volume</b> {{ solvent_units_dropdown("solvent", units["solvent_volume_units"]) }}</td>
+            <td colspan="2"><b>Aqueous Phase</b></td>
+            <td colspan="2"><b>Aqueous Volume</b>{{ solvent_units_dropdown("solvent", units["solvent_volume_units"]) }}</td>
+            <td><b>x repeat</b></td>
+            <td colspan="2"><b>Drying Agent</b></td>
+            <td style="text-align: center;">
+                <b>Mass</b>
+                <select size="1" name="Drying Agent Unit" id="js-workup-drying-agent-unit">
+                    {% for option in ["g", "mg", "μg"] %}
+                        <option value="{{ option }}" {{ "selected" if units["workup_drying_agent_units"] == option else "" }}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </tbody>
+{%- endmacro %}
+
+{% macro purification_headings(units) -%}
+    <tbody id="js-purification-table" hidden>
+        <tr class="not-novel-compound-input" id="purification-table">
+            <td></td>
+            <td><b>Purification Type</b></td>
             <td><b>Organic Volume</b> {{ solvent_units_dropdown("solvent", units["solvent_volume_units"]) }}</td>
             <td colspan="2"><b>Aqueous Phase</b></td>
             <td colspan="2"><b>Aqueous Volume</b>{{ solvent_units_dropdown("solvent", units["solvent_volume_units"]) }}</td>
@@ -597,4 +621,71 @@
             <td></td>
         </tr>
     </tbody>
+{%- endmacro %}
+
+{% macro purification_options(units) -%}
+    <tbody id="js-purification-table">
+        <tr class="not-novel-compound-input" id="{{ type }}-row">
+            <td></td>
+            <td style="text-align: center;">
+                <button type="button" title="Add column to reaction" onclick="addColumn()" class="js-add-column btn btn-success" style="widtd: fit-content;">Add Column Chromatography</button>
+            </td>
+            <td>
+                <button type="button" title="Add recrystallisation to reaction" onclick="addRecryst()" class="js-add-recryst btn btn-success" style="widtd: fit-content;">Add Recrystallisation</button>
+            </td>
+            <td>
+                <button type="button" title="Add distillation to reaction" onclick="addDistillation()" class="js-add-distillation btn btn-success" style="widtd: fit-content;">Add Distillation</button>
+            </td>
+            <td>
+                <button type="button" title="Add filtration to reaction" onclick="addFiltration()" class="js-add-filtration btn btn-success" style="widtd: fit-content;">Add Filtration</button>
+            </td>
+            <td></td>
+            <td colspan="2"></td>
+            <td colspan="2"></td>
+            <td></td>
+            <td colspan="2"></td>
+            <td></td>
+        </tr>
+    </tbody>
+{%- endmacro %}
+
+{% macro response_headings() -%}
+<tbody id="js-response-table" hidden>
+    <tr class="not-novel-compound-input" id="js-response-table">
+        <td></td>
+        <td><b>Reaction Responses</b></td>
+        <td></td>
+        <td colspan="2"><b>Response Name</b></td>
+        <td colspan="2"><b>Response Units</b></td>
+        <td colspan="2"><b>Response Value</b> </td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>
+        </td>
+        <td></td>
+    </tr>
+</tbody>
+{%- endmacro %}
+
+{% macro response_row(response=None, index="{{ index }}") -%}
+    <tr class="not-novel-compound-input" id="js-response-row{{ index }}">
+        <td></td>
+        <td></td>
+        <td></td>
+        <td colspan="2">
+            <textarea class="text-in-table" id="js-response-name"{{ index }} placeholder="Response Name"></textarea>
+        </td>
+        <td colspan="2">
+            <textarea class="text-in-table" id="js-response-units"{{ index }} placeholder="Response Units"></textarea>
+        </td>
+        <td colspan="2">
+             <input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-response-value{{ index }}" class="js-response add-highlight-unfilled-cell">
+        </td>
+        <td></td>
+        <td></td>
+        <td><b>Notes</b></td>
+        <td></td>
+        <td></td>
+    </tr>
 {%- endmacro %}
