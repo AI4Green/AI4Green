@@ -227,6 +227,14 @@ function postReactionData(complete = "not complete") {
     solventVolumeUnits,
     productAmountUnits,
     productMassUnits,
+    reactionTemperature,
+    reactionTime,
+    reactionAtmosphere,
+    temperatureUnits,
+    timeUnits,
+    responseNames,
+    responseUnits,
+    responseValues,
     // summary table elements
     realProductMass,
     unreactedReactantMass,
@@ -240,7 +248,6 @@ function postReactionData(complete = "not complete") {
     polymerTc,
     polymerThermalMethod,
     polymerThermalCalibration,
-    reactionTemperature,
     elementSustainability,
     batchFlow,
     isolationMethod,
@@ -270,6 +277,7 @@ function postReactionData(complete = "not complete") {
     selectivity,
     toExport,
   } = getFieldData();
+  console.log("atm - post data", reactionAtmosphere);
   let summary_to_print_el = document.getElementById("section-to-print");
   let summary_to_print = "no summary data";
   if (summary_to_print_el !== null) {
@@ -342,6 +350,14 @@ function postReactionData(complete = "not complete") {
       productAmountUnits: productAmountUnits,
       productMassUnits: productMassUnits,
       realProductMass: realProductMass,
+      reactionTemperature: reactionTemperature,
+      reactionTime: reactionTime,
+      reactionAtmosphere: reactionAtmosphere,
+      temperatureUnits: temperatureUnits,
+      timeUnits: timeUnits,
+      responseNames: responseNames,
+      responseUnits: responseUnits,
+      responseValues: responseValues,
       unreactedReactantMass: unreactedReactantMass,
       polymerMn: polymerMn,
       polymerMw: polymerMw,
@@ -353,7 +369,6 @@ function postReactionData(complete = "not complete") {
       polymerTc: polymerTc,
       polymerThermalMethod: polymerThermalMethod,
       polymerThermalCalibration: polymerThermalCalibration,
-      reactionTemperature: reactionTemperature,
       elementSustainability: elementSustainability,
       batchFlow: batchFlow,
       isolationMethod: isolationMethod,
@@ -493,7 +508,6 @@ function getFieldData() {
     reactionImage = "";
   }
   let reactionClass = $("#reaction-class").val();
-  console.log(reactionClass);
   let limitingReactantTableNumber = $(
     "#js-limiting-reactant-table-number",
   ).val();
@@ -678,6 +692,11 @@ function getFieldData() {
     let productAmountRawID = "#js-product-amount" + i;
     productAmountsRaw += $(productAmountRawID).val() + ";";
   }
+  // reaction parameters
+  let reactionTemperature = $("#js-reaction-temperature").val() + ";";
+  let reactionTime = $("#js-reaction-time").val() + ";";
+  let reactionAtmosphere = $("#js-reaction-atmosphere").val() + ";";
+  console.log("atm - field data", reactionAtmosphere);
   // unit data
   let amountUnits = unitData("#js-amount-unit", "mmol");
   let volumeUnits = unitData("#js-volume-unit", "mL");
@@ -685,6 +704,22 @@ function getFieldData() {
   let solventVolumeUnits = unitData("#js-solvent-volume-unit", "mL");
   let productAmountUnits = unitData("#js-product-amount-unit", "mmol");
   let productMassUnits = unitData("#js-product-mass-unit", "mg");
+  let temperatureUnits = unitData("#js-reaction-temperature-unit", "mL");
+  let timeUnits = unitData("#js-reaction-time-unit", "h");
+
+  // reaction responses
+  let responseNames = "";
+  let responseUnits = "";
+  let responseValues = "";
+  let numberOfResponses = Number($("#js-number-of-responses").val());
+  for (let i = 1; i <= numberOfResponses; i++) {
+    let responseNameID = "#js-response-name" + i;
+    responseNames += $(responseNameID).val() + ";";
+    let responseValueID = "#js-response-value" + i;
+    responseValues += $(responseValueID).val() + ";";
+    let responseUnitsID = "#js-response-units" + i;
+    responseUnits += $(responseUnitsID).val() + ";";
+  }
   // summary table fields
   // yield data
   let summaryTableData = JSON.parse($("#js-summary-table-data").val());
@@ -706,7 +741,7 @@ function getFieldData() {
     "#js-polymer-thermal-calibration",
     "",
   );
-  let reactionTemperature = summaryInput("#js-temperature", "");
+  // let reactionTemperature = summaryInput("#js-temperature", ""); redefine reaction temp in summary table!
   let elementSustainability = summaryDropDown(
     "#js-elements",
     summaryTableData,
@@ -871,6 +906,13 @@ function getFieldData() {
     productAmountUnits: productAmountUnits,
     productMassUnits: productMassUnits,
     realProductMass: realProductMass,
+    reactionTime: reactionTime,
+    reactionAtmosphere: reactionAtmosphere,
+    temperatureUnits: temperatureUnits,
+    timeUnits: timeUnits,
+    responseNames: responseNames,
+    responseUnits: responseUnits,
+    responseValues: responseValues,
     unreactedReactantMass: unreactedReactantMass,
     polymerMn: polymerMn,
     polymerMw: polymerMw,

@@ -54,88 +54,8 @@
         {{  reaction_table_components.product_row(product, loop.index) }}
     {% endfor %}
 
-       <tbody>
-    <tr>
-      <td colspan="3">
-        <div class="container-fluid my-3">
-          <h5 class="mb-2"><b>Reaction Parameters</b></h5>
-          <p class="text-muted" style="font-size: 0.9rem;">
-            Reaction time, temperature, atmosphere.
-          </p>
-        </div>
-      </td>
-        <th scope="col">
-            Time
-            <select size="1" id="js-reaction-time-unit">
-              <option value="h" selected>h</option>
-              <option value="min">min</option>
-              <option value="s">s</option>
-            </select>
-        </th>
-        <th scope="col"></th>
-        <th scope="col">
-            Temperature
-            <select size="1" id="js-reaction-temperature-unit">
-              <option value="°C" selected>°C</option>
-              <option value="K">K</option>
-              <option value="°F">°F</option>
-            </select>
-        </th>
-        <th scope="col"></th>
-        <th scope="col">Atmosphere</th>
-        <th scope="col"></th>
-        <th scope="col"></th>
-        <th scope="col"></th>
-        <th scope="col"></th>
-    </tr>
-       </tbody>
+    {{ reaction_table_components.reaction_params() }}
 
-    <tr class="not-novel-compound-input">
-        <td></td>
-        <td style='width: 200px;'></td>
-        <td></td>
-        <td>
-            <input style="width: 60px;" type="number" step="any" min="0" id="js-reaction-time" placeholder="-" class="add-highlight-unfilled-cell">
-        </td>
-        <td></td>
-        <td>
-            <input style="width: 60px;" type="number" step="any" min="0" id="js-reaction-temperature" placeholder="-" class="add-highlight-unfilled-cell">
-        </td>
-        <td></td>
-        <td>
-            <select size="1" id="js-reaction-atmosphere" class="add-highlight-unfilled-cell">
-              <option value="-select-" selected>-select-</option>
-              <option value="air">Air</option>
-              <option value="nitrogen">N&#8322;</option>
-              <option value="argon">Ar</option>
-              <option value="hydrogen">H&#8322;</option>
-              <option value="oxygen">O&#8322;</option>
-            </select>
-        </td>
-        <td></td>
-        <td style="width:4.3em"></td>
-        <td> </td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-   </tbody>
-   <tbody>
-    <tr>
-      <td colspan="11">
-        <div class="container-fluid my-3">
-          <h5 class="mb-2"><b>Workup Details</b></h5>
-          <p class="text-muted" style="font-size: 0.9rem;">
-            Define workup procedures.
-          </p>
-        </div>
-      </td>
-      <td>
-        <button type="button" title="Add workup to reaction" onclick="addWorkupRow()" class="js-add-workup btn btn-success" style="widtd: fit-content;">Add Workup</button>
-      </td>
-
-    </tr>
-  </tbody>
     {{ reaction_table_components.workup_headings(units) }}
 
   <tbody>
@@ -187,6 +107,10 @@
 <input type="hidden" value="{{ number_of_products }}" id="js-number-of-products">
 
 <input type="hidden" value="{{ number_of_workups }}" id="js-number-of-workups">
+
+<input type="hidden" value="{{ number_of_purifications }}" id="js-number-of-purifications">
+
+<input type="hidden" value="{{ number_of_responses }}" id="js-number-of-responses">
 
 <input type="hidden" value="1" id="js-limiting-reactant-table-number">
 
