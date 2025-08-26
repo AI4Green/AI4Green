@@ -92,6 +92,9 @@ class ReactionTable:
         self.solvent_dropdown = self.get_solvent_dropdown()
         self.reaction_class = None
 
+        # params/workups/purifications/responses
+        self.reaction_params = {}
+
         # load reaction_table from provided reaction_table data
         self.load()
 
@@ -106,6 +109,7 @@ class ReactionTable:
         self.solvents = compounds["solvent"]
 
         self.load_units()
+        self._extract_reaction_params()
 
     def check_errors(self):
         for compound_group in [self.reactants, self.products]:
@@ -124,6 +128,7 @@ class ReactionTable:
         return False
 
     def load_units(self):
+        # response units not included here, as these are inputted by users
         unit_keys = [
             "limiting_reactant_table_number",
             "main_product",
@@ -134,6 +139,8 @@ class ReactionTable:
             "solvent_volume_units",
             "product_mass_units",
             "product_amount_units",
+            "reaction_temperature_units",
+            "reaction_time_units",
         ]
 
         self.units.update(
@@ -201,13 +208,29 @@ class ReactionTable:
             for i, smiles in enumerate(smiles_list)
         ]
 
+    def _extract_reaction_params(self):
+        param_keys = [
+            "reaction_time",
+            "reaction_atmosphere",
+            "reaction_temperature",
+        ]
+        for param in param_keys:
+            # important to add try loop for older reactions
+            try:
+                self.reaction_params[param] = self.reaction_table_data[param]
+            except KeyError:
+                print(param)
+                self.reaction_params[param] = ""
+
     def render(self):
+        print(self.reaction_params)
         reaction_table = render_template(
             "reactions/_reaction_table.html",
             reactants=self.reactants,
             reagents=self.reagents,
             solvents=self.solvents,
             products=self.products,
+            reaction_params=self.reaction_params,
             number_of_reactants=len(self.reactants),
             number_of_reagents=len(self.reagents),
             number_of_solvents=len(self.solvents),
@@ -241,6 +264,8 @@ class ReactionTable:
             "solvent_volume_units": "mL",
             "product_mass_units": "mg",
             "product_amount_units": "mmol",
+            "reaction_temperature_units": "°C",
+            "reaction_time_units": "h",
         }
 
     @staticmethod
@@ -312,5 +337,13 @@ def new():
             "product_masses": [],
             "product_masses_raw": [],
             "product_physical_forms": [],
+            "reaction_time": "",
+            "reaction_atmosphere": "-select-",
+            "reaction_temperature": "",
+            "reaction_temperature_units": "",
+            "reaction_time_units": "",
+            "response_names": "",
+            "response_units": "",
+            "response_values": "",
         }
     )

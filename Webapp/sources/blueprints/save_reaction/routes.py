@@ -185,10 +185,10 @@ def autosave() -> Response:
     # reaction details and responses
     reaction_time = str(request.form.get("reactionTime", None))
     reaction_atmosphere = str(request.form.get("reactionAtmosphere", None))
-    print("atm - autosave", reaction_atmosphere)
     temperature_units = str(request.form.get("temperatureUnits", None))
     reaction_temperature = request.form.get("reactionTemperature", None)
     time_units = str(request.form.get("timeUnits", None))
+    print(reaction_temperature, reaction_time, reaction_atmosphere)
 
     response_names = get_data("responseNames")
     response_units = get_data("responseUnits")
@@ -263,8 +263,9 @@ def autosave() -> Response:
             "product_mns": product_mns,
             "reaction_time": reaction_time,
             "reaction_atmosphere": reaction_atmosphere,
-            "temperature_units": temperature_units,
-            "time_units": time_units,
+            "reaction_temperature": reaction_temperature,
+            "reaction_temperature_units": temperature_units,
+            "reaction_time_units": time_units,
             "response_names": response_names,
             "response_units": response_units,
             "response_values": response_values,

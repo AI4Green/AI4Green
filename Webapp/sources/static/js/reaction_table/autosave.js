@@ -691,10 +691,9 @@ function getFieldData() {
     productAmountsRaw += $(productAmountRawID).val() + ";";
   }
   // reaction parameters
-  let reactionTemperature = $("#js-reaction-temperature").val() + ";";
-  let reactionTime = $("#js-reaction-time").val() + ";";
-  let reactionAtmosphere = $("#js-reaction-atmosphere").val() + ";";
-  console.log("atm - field data", reactionAtmosphere);
+  let reactionTemperature = $("#js-reaction-temperature").val();
+  let reactionTime = $("#js-reaction-time").val();
+  let reactionAtmosphere = $("#js-reaction-atmosphere").val();
   // unit data
   let amountUnits = unitData("#js-amount-unit", "mmol");
   let volumeUnits = unitData("#js-volume-unit", "mL");
