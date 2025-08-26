@@ -277,13 +277,11 @@ function postReactionData(complete = "not complete") {
     selectivity,
     toExport,
   } = getFieldData();
-  console.log("atm - post data", reactionAtmosphere);
   let summary_to_print_el = document.getElementById("section-to-print");
   let summary_to_print = "no summary data";
   if (summary_to_print_el !== null) {
     summary_to_print = summary_to_print_el.outerHTML;
   }
-
   let $reactionSaveIndicator = $("#reaction-saved-indicator");
   $.ajax({
     url: "/_autosave",

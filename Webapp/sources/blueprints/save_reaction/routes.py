@@ -83,6 +83,7 @@ def new_reaction() -> Response:
 @login_required
 @save_reaction_bp.doc(security="sessionAuth")
 def autosave() -> Response:
+    # TODO: autosave workups and purifications, add purifications by front end, load workups and purification
     """autosave when a field changes in the reaction page"""
     reaction_description = str(request.form["reactionDescription"])
     reaction = services.reaction.get_current_from_request()
