@@ -235,6 +235,7 @@ function postReactionData(complete = "not complete") {
     responseNames,
     responseUnits,
     responseValues,
+    responseNotes,
     // summary table elements
     realProductMass,
     unreactedReactantMass,
@@ -277,6 +278,7 @@ function postReactionData(complete = "not complete") {
     selectivity,
     toExport,
   } = getFieldData();
+  console.log("postreactiondata", responseNames);
   let summary_to_print_el = document.getElementById("section-to-print");
   let summary_to_print = "no summary data";
   if (summary_to_print_el !== null) {
@@ -356,6 +358,7 @@ function postReactionData(complete = "not complete") {
       responseNames: responseNames,
       responseUnits: responseUnits,
       responseValues: responseValues,
+      responseNotes: responseNotes,
       unreactedReactantMass: unreactedReactantMass,
       polymerMn: polymerMn,
       polymerMw: polymerMw,
@@ -708,14 +711,18 @@ function getFieldData() {
   let responseNames = "";
   let responseUnits = "";
   let responseValues = "";
+  let responseNotes = "";
   let numberOfResponses = Number($("#js-number-of-responses").val());
   for (let i = 1; i <= numberOfResponses; i++) {
     let responseNameID = "#js-response-name" + i;
     responseNames += $(responseNameID).val() + ";";
+    console.log(numberOfResponses, i, responseNameID, $(responseNameID).val());
     let responseValueID = "#js-response-value" + i;
     responseValues += $(responseValueID).val() + ";";
     let responseUnitsID = "#js-response-units" + i;
     responseUnits += $(responseUnitsID).val() + ";";
+    let responseNotesID = "#js-response-notes" + i;
+    responseNotes += $(responseNotesID).val() + ";";
   }
   // summary table fields
   // yield data
@@ -910,6 +917,7 @@ function getFieldData() {
     responseNames: responseNames,
     responseUnits: responseUnits,
     responseValues: responseValues,
+    responseNotes: responseNotes,
     unreactedReactantMass: unreactedReactantMass,
     polymerMn: polymerMn,
     polymerMw: polymerMw,

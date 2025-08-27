@@ -75,23 +75,7 @@
   </tbody>
 {#  {{ reaction_table_components.purification_options() }}#}
 
-    <tbody>
-    <tr>
-      <td colspan="11">
-        <div class="container-fluid my-3">
-          <h5 class="mb-2"><b>Reaction Outputs</b></h5>
-          <p class="text-muted" style="font-size: 0.9rem;">
-            Define measured outputs for this reaction.
-          </p>
-        </div>
-      </td>
-      <td>
-        <button type="button" class="btn btn-success" onclick="addNewResponse()">+ Add Response</button>
-      </td>
-    </tr>
-  </tbody>
-
-    {{ reaction_table_components.response_headings() }}
+{{ reaction_table_components.response_section(responses) }}
 
   </table>
 </div>

@@ -108,8 +108,12 @@ class ReactionTable:
         self.reagents = compounds["reagent"]
         self.solvents = compounds["solvent"]
 
+        # TODO: we should think about adding new relational db tables for workups/purifications/responses
+        # TODO: not sure if this would be worth it, but would add more structure
+
         self.load_units()
-        self._extract_reaction_params()
+        self._load_reaction_params()
+        self._load_responses()
 
     def check_errors(self):
         for compound_group in [self.reactants, self.products]:
@@ -208,7 +212,7 @@ class ReactionTable:
             for i, smiles in enumerate(smiles_list)
         ]
 
-    def _extract_reaction_params(self):
+    def _load_reaction_params(self):
         param_keys = [
             "reaction_time",
             "reaction_atmosphere",
@@ -219,11 +223,23 @@ class ReactionTable:
             try:
                 self.reaction_params[param] = self.reaction_table_data[param]
             except KeyError:
-                print(param)
                 self.reaction_params[param] = ""
 
+    def _load_responses(self):
+        # TODO: If responses are added to the db they should be loaded in this fn
+        response_names = self.reaction_table_data.get("response_names", [])
+        response_units = self.reaction_table_data.get("response_units", [])
+        response_values = self.reaction_table_data.get("response_values", [])
+        response_notes = self.reaction_table_data.get("response_notes", [])
+
+        self.responses = [
+            {"name": n, "unit": u, "value": v, "note": nt}
+            for n, u, v, nt in zip(
+                response_names, response_units, response_values, response_notes
+            )
+        ]
+
     def render(self):
-        print(self.reaction_params)
         reaction_table = render_template(
             "reactions/_reaction_table.html",
             reactants=self.reactants,
@@ -231,10 +247,12 @@ class ReactionTable:
             solvents=self.solvents,
             products=self.products,
             reaction_params=self.reaction_params,
+            responses=self.responses,
             number_of_reactants=len(self.reactants),
             number_of_reagents=len(self.reagents),
             number_of_solvents=len(self.solvents),
             number_of_products=len(self.products),
+            number_of_responses=len(self.responses),
             units=self.units,
             # do we still need these?
             identifiers=[],
@@ -342,8 +360,9 @@ def new():
             "reaction_temperature": "",
             "reaction_temperature_units": "",
             "reaction_time_units": "",
-            "response_names": "",
-            "response_units": "",
-            "response_values": "",
+            "response_names": [],
+            "response_units": [],
+            "response_values": [],
+            "response_notes": [],
         }
     )

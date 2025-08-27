@@ -285,8 +285,8 @@ class SketcherCompound:
     def check_for_polymer(self, polymer_indices, reaction_smiles):
         if polymer_indices is not None:
             self.check_polymer_indices_for_polymer(polymer_indices)
-        else:
-            self.check_reaction_smiles_for_polymer(reaction_smiles)
+        # else:
+        #     self.check_reaction_smiles_for_polymer(reaction_smiles)
 
     def check_polymer_indices_for_polymer(self, polymer_indices):
         """
@@ -308,6 +308,7 @@ class SketcherCompound:
         )
         # only check reactant and products for polymers
         if self.reaction_component in ["Reactant", "Product"]:
+            print(smiles_list, self.reaction_component_idx)
             if "{+n}" in smiles_list[self.reaction_component_idx]:
                 self.is_polymer = True
 
@@ -334,6 +335,7 @@ class SketcherCompound:
         )
 
     def add_solvent_sustainability_flags(self):
+        print(self.compound_data)
         flag = services.solvent.sustainability_from_primary_key(
             self.compound_data["ids"]
         )

@@ -155,6 +155,7 @@ def autosave() -> Response:
     # products data from the ajax post
     main_product = str(request.form["mainProductTableNumber"])
     product_primary_keys = get_data("productPrimaryKeys")
+    print(product_primary_keys, request.form.get("productPrimaryKeys"))
     product_primary_keys_ls = list(filter(None, product_primary_keys))
     product_smiles_ls = services.all_compounds.get_smiles_list(
         product_primary_keys_ls,
@@ -188,11 +189,12 @@ def autosave() -> Response:
     temperature_units = str(request.form.get("temperatureUnits", None))
     reaction_temperature = request.form.get("reactionTemperature", None)
     time_units = str(request.form.get("timeUnits", None))
-    print(reaction_temperature, reaction_time, reaction_atmosphere)
-
     response_names = get_data("responseNames")
     response_units = get_data("responseUnits")
     response_values = get_data("responseValues")
+    response_notes = get_data("responseNotes")
+
+    print("from front end", request.form.get("responseNames"), response_names)
 
     reaction_table = json.dumps(
         {
@@ -269,6 +271,7 @@ def autosave() -> Response:
             "response_names": response_names,
             "response_units": response_units,
             "response_values": response_values,
+            "response_notes": response_notes,
         }
     )
 

@@ -750,8 +750,33 @@
     </tbody>
 {%- endmacro %}
 
-{% macro response_headings() -%}
-<tbody id="js-response-table" hidden>
+{% macro response_section(responses) -%}
+    <tbody>
+        <tr>
+          <td colspan="11">
+            <div class="container-fluid my-3">
+              <h5 class="mb-2"><b>Reaction Outputs</b></h5>
+              <p class="text-muted" style="font-size: 0.9rem;">
+                Define measured outputs for this reaction.
+              </p>
+            </div>
+          </td>
+          <td>
+            <button type="button" class="btn btn-success" onclick="addNewResponse()">+ Add Response</button>
+          </td>
+        </tr>
+    </tbody>
+
+    {{ response_headings(responses) }}
+
+    {% for response in responses %}
+        {{ response_row(response, loop.index) }}
+    {% endfor %}
+
+{%- endmacro %}
+
+{% macro response_headings(responses) -%}
+<tbody id="js-response-table" {% if responses|length == 0 %}hidden{% endif %}>
     <tr class="not-novel-compound-input" id="js-response-table">
         <td></td>
         <td><b>Reaction Responses</b></td>
@@ -761,7 +786,7 @@
         <td colspan="2"><b>Response Value</b> </td>
         <td></td>
         <td></td>
-        <td></td>
+        <td><b>Notes</b></td>
         <td>
         </td>
         <td></td>
@@ -772,22 +797,29 @@
 
 {% macro response_row(response=None, index="{{ index }}") -%}
     <tr class="not-novel-compound-input" id="js-response-row{{ index }}">
-        <td></td>
+        <td>{{ index }}</td>
         <td></td>
         <td></td>
         <td colspan="2">
-            <textarea class="text-in-table" id="js-response-name{{ index }}" placeholder="Response Name"></textarea>
+            <textarea class="text-in-table" id="js-response-name{{ index }}" placeholder="Response Name">{{ response.name if response else "" }}</textarea>
         </td>
         <td colspan="2">
-            <textarea class="text-in-table" id="js-response-units{{ index }}" placeholder="Response Units"></textarea>
+            <textarea class="text-in-table" id="js-response-units{{ index }}" placeholder="Response Units">{{ response.unit if response else "" }}</textarea>
         </td>
         <td colspan="2">
-             <input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-response-value{{ index }}" class="js-response add-highlight-unfilled-cell">
+             <input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-response-value{{ index }}" class="js-response add-highlight-unfilled-cell" value="{{ response.value if response else "" }}">
         </td>
         <td></td>
         <td></td>
-        <td><b>Notes</b></td>
+        <td>
+            <textarea class="text-in-table" id="js-response-notes{{ index }}" placeholder="Describe this response">{{ response.note if response else "" }}</textarea>
+        </td>
         <td></td>
-        <td></td>
+
+        <td>
+             <button value="{{ index }}" id="remove-response{{ index }}" onclick="removeResponse(this.value)" type="button" class="js-remove-response close" aria-label="Close">
+                <span aria-hidden="true" title="Remove Response">&times;</span>
+            </button>
+        </td>
     </tr>
 {%- endmacro %}
