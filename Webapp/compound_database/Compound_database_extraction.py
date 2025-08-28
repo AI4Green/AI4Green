@@ -16,8 +16,6 @@ from chemspipy import ChemSpider
 from compound_database.auxiliary import compound_database_dir
 from lxml import etree as et
 from rdkit import Chem
-from rdkit.Chem.Descriptors import MolWt
-from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from sources import models
 from sources.extensions import db
 from utilities import basedir, read_yaml
@@ -152,7 +150,7 @@ def get_smiles(inchi_str):
         return "smiles error"
 
 
-def get_mol_weight(root, smiles):
+def get_mol_weight(root):
     """This function returns the molecular weight when given the root for a single record
     :param root:
     :param smiles: smiles of the pubchem entry, to calculate mol weight if missing
@@ -234,7 +232,7 @@ def get_hazards(root, echa_ref):
     return "No hazard codes found"
 
 
-def get_mol_formula(root, smiles):
+def get_mol_formula(root):
     """
     Extracts the molecular formula for a single record
     :param root:
