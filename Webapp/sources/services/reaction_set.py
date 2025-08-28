@@ -3,6 +3,7 @@ from typing import Dict, List, Union
 
 from sources import models, services
 from sources.extensions import db
+from sqlalchemy import func
 
 
 def add(
@@ -172,3 +173,15 @@ def to_dict(reaction_set_list: List[models.ReactionSet]) -> List[Dict]:
         }
         reaction_sets.append(reaction_set_details)
     return reaction_sets
+
+
+def from_names(set_name, workgroup_name, workbook_name):
+    return (
+        db.session.query(models.ReactionSet)
+        .filter(func.lower(models.ReactionSet.name) == set_name.lower())
+        .join(models.WorkGroup)
+        .filter(func.lower(models.WorkGroup.name) == workgroup_name.lower())
+        .join(models.WorkBook)
+        .filter(func.lower(models.WorkBook.name) == workbook_name.lower())
+        .first()
+    )

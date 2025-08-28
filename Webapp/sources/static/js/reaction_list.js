@@ -162,8 +162,7 @@ function importReactwise() {
   // creates new reaction if name and ID pass validation in the backend routes.
   let selectedReactwiseBtn = $(".btn.icon.reactwise.is-selected");
   let stepID = selectedReactwiseBtn.attr("id");
-  let stepName = $(stepID + "-name");
-
+  let stepName = $("#" + stepID + "-name").text();
   let workgroup = $("#active-workgroup").val();
   let workbook = $("#active-workbook").val();
 

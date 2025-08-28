@@ -1,3 +1,4 @@
+import json
 from typing import Dict, List, Union
 
 from flask import (
@@ -15,10 +16,10 @@ from sources import models, services
 from . import reaction_set_bp
 
 
-@reaction_set_bp.route("/reaction_set/<workgroup_name>/<workbook_name>/<set_id>")
+@reaction_set_bp.route("/reaction_set/<workgroup_name>/<workbook_name>/<set_name>")
 @login_required
-def reaction_set(workgroup_name, workbook_name, set_id):
-    r_set = services.reaction_set.get_from_id(set_id, workgroup_name, workbook_name)
+def reaction_set(workgroup_name, workbook_name, set_name):
+    r_set = services.reaction_set.from_names(set_name, workgroup_name, workbook_name)
     serialised_set = services.reaction_set.to_dict([r_set])[0]
 
     return render_template(
@@ -119,43 +120,48 @@ def import_from_reactwise():
     step_name = request.json.get("stepName", None)
     workbook_name = request.json.get("workbook", None)
     workgroup_name = request.json.get("workgroup", None)
-
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
 
     rw_step = services.reactwise.ReactWiseStep(int(step_id))
-
-    print(rw_step.experimental_details)
-    print(rw_step.reaction_smiles)
     creator = services.person.from_current_user_email()
 
-    set_name = step_name
-
     # check if set already exists
-    set_obj = services.reaction_set.get_from_names(
-        set_name, workgroup_name, workbook_name
-    )
+    set_obj = services.reaction_set.from_names(step_name, workgroup_name, workbook_name)
+    # handle error here lmao
 
-    # labelled_fields = ["solvent", "temperature", "time"]
     if not set_obj:
         reactions = []
 
-        # need to test which inputs/outputs we recognise and which we dont
+        # need to test which inputs we recognise and which we dont
+        # outputs have been added to reaction table in new update
 
-        for reactwise_id, details in rw_step.experimental_details.items():
+        # we need to hadle:
+        # novel compounds
+        # solvents
+        # unknown field
+
+        # meaning:
+        # design a new page that allows users to match compounds to unknown inputs
+        # novel compound dialogue on that page
+
+        for reactwise_experiment_id, details in rw_step.experimental_details.items():
             # unknown_fields = [
-            #     x.lower() for x in details.keys() if x.lower() not in labelled_fields
+            #     x.lower() for x in details.keys() if x.lower() not in labelled_inputs
             # ]
             # known_fields = [
-            #     x.lower() for x in details.keys() if x.lower() not in labelled_fields
+            #     x.lower() for x in details.keys() if x.lower() not in labelled_inputs
             # ]
+            reaction_table = json.loads(services.reaction_table.new())
+
+            services.reactwise.extract_recognised_fields(details, reaction_table)
 
             reaction_id = services.reaction.get_next_reaction_id_for_workbook(
                 workbook.id
             )
             reaction = services.reaction.add(
-                name="reactwise-" + reactwise_id,
+                name="reactwise-" + reactwise_experiment_id,
                 creator=creator,
                 reaction_id=reaction_id,
                 workbook_id=workbook.id,
@@ -167,7 +173,7 @@ def import_from_reactwise():
 
         set_id = services.reaction_set.next_id_in_workbook(workbook.id)
         services.reaction_set.add(
-            name=set_name,
+            name=step_name,
             set_id=set_id,
             creator=creator,
             workbook=workbook,
@@ -178,7 +184,7 @@ def import_from_reactwise():
         {
             "redirect_url": url_for(
                 "reaction_set.reaction_set",
-                set_name=set_name,
+                set_name=step_name,
                 workgroup_name=workgroup_name,
                 workbook_name=workbook_name,
             )
