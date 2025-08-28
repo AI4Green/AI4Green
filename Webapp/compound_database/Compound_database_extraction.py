@@ -49,8 +49,7 @@ def get_cas_num(root):
                 # Finds the mode of the cas numbers.
                 cas_number = mode(cas_number_ls)
                 return cas_number
-            else:
-                return None  # returning both as none means the record will be skipped if no cas is found
+    return None  # returning both as none means the record will be skipped if no cas is found
 
 
 def cas_verification(
@@ -157,21 +156,15 @@ def get_mol_weight(root):
     :return molecular_weight:
     """
 
-    for sections in root.findall("xmlns:Section", ns):
-        # Finds where the molecular weight is stored in the xml
-        for headings in sections.findall("xmlns:TOCHeading", ns):
-            if headings.text == "Molecular Weight":
-                # Saves the molecular weight and converts it to a string.
-                molecular_weight_ls = [
-                    mol_weight.text
-                    for mol_weight in sections.findall(
-                        "xmlns:Information/xmlns:Value/xmlns:StringWithMarkup/"
-                        "xmlns:String",
-                        ns,
-                    )
-                ]
-                molecular_weight = molecular_weight_ls[0]
-                return float(molecular_weight)
+    for section in root.findall(".//xmlns:Section", ns):
+        heading = section.find("xmlns:TOCHeading", ns)
+        if heading is not None and heading.text == "Molecular Weight":
+            val = section.find(
+                ".//xmlns:Information/xmlns:Value/xmlns:StringWithMarkup/xmlns:String",
+                ns,
+            )
+            if val is not None and val.text:
+                return float(val.text)
 
 
 def find_echa(root):
@@ -180,23 +173,21 @@ def find_echa(root):
     :param root:
     :return ref_num:
     """
-
-    for sections in root.findall("xmlns:Section/xmlns:Information", ns):
-        for references in sections.findall("xmlns:Name", ns):
-            if references.text == "ECHA C&L Notifications Summary":
-                ref_num_ls = [
-                    ref_nums.text
-                    for ref_nums in sections.findall("xmlns:ReferenceNumber", ns)
-                ]
-                return ref_num_ls[0]
-        # alternative name
-        for references in sections.findall("xmlns:Name", ns):
-            if references.text == "Signal":
-                ref_num_ls = [
-                    ref_nums.text
-                    for ref_nums in sections.findall("xmlns:ReferenceNumber", ns)
-                ]
-                return ref_num_ls[0]
+    for section in root.findall("xmlns:Section", ns):
+        heading = section.find("xmlns:TOCHeading", ns)
+        if heading is not None and heading.text == "Hazard Classification":
+            for subsection in section.findall("xmlns:Section", ns):
+                subheading = subsection.find("xmlns:TOCHeading", ns)
+                if subheading is not None and subheading.text == "GHS Classification":
+                    for info in subsection.findall("xmlns:Information", ns):
+                        name_elem = info.find("xmlns:Name", ns)
+                        if (
+                            name_elem is not None
+                            and name_elem.text.strip()
+                            == "ECHA C&L Notifications Summary"
+                        ):
+                            ref_num = info.find("xmlns:ReferenceNumber", ns)
+                            return ref_num.text if ref_num is not None else None
 
 
 def get_hazards(root, echa_ref):
@@ -205,48 +196,56 @@ def get_hazards(root, echa_ref):
     :param echa_ref:
     :return hazard_codes:
     """
+    if echa_ref is None:
+        return "No hazard codes found"
 
-    for sections in root.findall("xmlns:Section/xmlns:Information", ns):
-        # Finds where the hazard codes are stored
-        for headings in sections.findall("xmlns:Name", ns):
-            if headings.text == "GHS Hazard Statements":
-                # Finds the ECHA supplied data using the reference number and saves them as a list
-                for hazard_suppliers in sections.findall("xmlns:ReferenceNumber", ns):
-                    if hazard_suppliers.text == echa_ref:
-                        hazard_codes_ls = [
-                            haz_codes.text
-                            for haz_codes in sections.findall(
-                                "xmlns:Value/xmlns:StringWithMarkup/xmlns:String", ns
-                            )
-                        ]
+    for section in root.findall("xmlns:Section", ns):
+        heading = section.find("xmlns:TOCHeading", ns)
+        if heading is None or heading.text != "Hazard Classification":
+            continue
 
-                        # Formats the hazard codes by separating the different codes then only saving the H codes.
-                        hazard_codes = ""
+        for subsection in section.findall("xmlns:Section", ns):
+            subheading = subsection.find("xmlns:TOCHeading", ns)
+            if subheading is None or subheading.text != "GHS Classification":
+                continue
 
-                        for hazards in hazard_codes_ls:
-                            hazards_text = hazards.split(" ")
-                            ind_hazard_codes = hazards_text[0]
-                            ind_hazard_codes = ind_hazard_codes.split(":")[0]
-                            ind_hazard_codes += "-"
-                            hazard_codes += ind_hazard_codes
-                        return hazard_codes[:-1]
+            for info in subsection.findall("xmlns:Information", ns):
+                ref_elem = info.find("xmlns:ReferenceNumber", ns)
+                name_elem = info.find("xmlns:Name", ns)
+                if (
+                    ref_elem is not None
+                    and ref_elem.text == echa_ref
+                    and name_elem is not None
+                    and name_elem.text.strip() == "GHS Hazard Statements"
+                ):
+                    hazard_codes_ls = []
+                    for value in info.findall(
+                        "xmlns:Value/xmlns:StringWithMarkup/xmlns:String", ns
+                    ):
+                        if value.text:
+                            code = value.text.split()[0].split(":")[0]
+                            code = code.replace("+", "-")
+                            hazard_codes_ls.append(code)
+                    if hazard_codes_ls:
+                        return "-".join(hazard_codes_ls)
+    return "No hazard codes found"
 
 
 def get_mol_formula(root):
     """
     Extracts the molecular formula for a single record
     :param root:
-    :return mol_formula:
+    :return mol_formula: The molecular formula of the pubchem entry
     """
-
-    for sections in root.findall("xmlns:Section", ns):
-        for headings in sections.findall("xmlns:TOCHeading", ns):
-            if headings.text == "Molecular Formula":
-                for values in sections.findall(
-                    "xmlns:Information/xmlns:Value/xmlns:StringWithMarkup/xmlns:String",
-                    ns,
-                ):
-                    return values.text
+    for section in root.findall(".//xmlns:Section", ns):
+        heading = section.find("xmlns:TOCHeading", ns)
+        if heading is not None and heading.text == "Molecular Formula":
+            val = section.find(
+                ".//xmlns:Information/xmlns:Value/xmlns:StringWithMarkup/xmlns:String",
+                ns,
+            )
+            if val is not None and val.text:
+                return val.text.strip()
 
 
 def get_phys_prop(root, property_input):
@@ -582,8 +581,10 @@ def extract_from_pubchem(
         encoding="ISO-8859-1",
     )
     for idx, (event, records) in enumerate(context):  # event is end of record
+        if idx > limit:
+            break
         cas = get_cas_num(records)
-        inchi_key = get_identifier(records, "InChI Key")
+        inchi_key = get_identifier(records, "InChIKey")
         cas_eval = cas_verification(cas, model)
         if cas_eval is False:
             continue
@@ -591,8 +592,8 @@ def extract_from_pubchem(
         common_name = get_compound_name(records)
         inchi = get_identifier(records, "InChI")
         smiles_str = get_smiles(inchi)
-        molec_formula = get_mol_formula(records)
-        mw = get_mol_weight(records)
+        molec_formula = get_mol_formula(records, smiles_str)
+        mw = get_mol_weight(records, smiles_str)
         density = get_phys_prop(records, "Density")
         bp = get_phys_prop(records, "Boiling Point")
         mp = get_phys_prop(records, "Melting Point")
@@ -641,8 +642,6 @@ def extract_from_pubchem(
             autoignition_temp,
             model,
         )
-        if idx > limit:
-            break
 
 
 def seed_solvent_data():
@@ -670,7 +669,7 @@ def seed_solvent_data():
             if compound_db_match is None:
                 print(f"no match for: {name}")
             else:
-                print(f"Match found between:{name} and {compound_db_match.name}")
+                print(f"Match found between: {name} and {compound_db_match.name}")
 
             if not (
                 name.isupper() or name in ["t-Butanol", "n-Butanol", "n-Butylacetate"]
