@@ -412,7 +412,7 @@ def compute_compound_hash(
     Returns:
         A string representing the hash value.
     """
-    excluded_fields = ["id", "solvent", "error_report"]
+    excluded_fields = ["id", "solvent", "error_report", "workbooks_recently_used_in_id"]
 
     # Combine the field values into a single string and compute the hash
     compound_data = "".join(

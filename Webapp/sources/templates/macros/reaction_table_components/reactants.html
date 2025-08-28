@@ -1,0 +1,89 @@
+{% macro table_headings(units) -%}
+
+    {% set unit_options = {
+    "amount": ["mol", "mmol", "μmol"],
+    "volume": ["mL", "μL"],
+    "mass": ["g", "mg", "μg"]
+    } %}
+
+    <tr class="not-novel-compound-input">
+        <th scope="col">&#8470;</th>
+        <th scope="col">Reactants</th>
+        <th scope="col">Limiting Reagent?</th>
+        <th scope="col">Mol.Wt</th>
+        <th scope="col">Density (g/mL)</th>
+        <th scope="col">Conc. (M)</th>
+        <th scope="col">Equiv.</th>
+        {#  set up headings with variable units  #}
+        {% for unit_type, options in unit_options.items() %}
+            <th scope="col">{{ unit_type|capitalize }}<br>
+                <select size="1" name="{{ unit_type }}Unit" id="js-{{ unit_type }}-unit">
+                    {% for option in options %}
+                        <option value="{{ option }}" {{ "selected" if units[unit_type + "_units"] == option else "" }}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </th>
+        {% endfor %}
+        <th scope="col">Physical Form</th>
+        <th scope="col">Hazards</th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+    </tr>
+{%- endmacro %}
+
+{% macro reactant_row(reactant, index) -%}
+<tr class="not-novel-compound-input">
+            <td><input id="js-reactant-table-number{{ index }}" style="width: 40px; border-width:0px;" type="number" value="{{ index }}" readonly></td>
+            <td style='width: 200px;'><input  id="js-reactant{{ index }}" style="width: 200px; border-width:0px;"
+                value="{{ reactant.compound_data.names if reactant.compound_data.names is string else reactant.compound_data.names | join(', ') }}">
+            </td>
+            <td><input  type="radio" step="any"
+                    name="reactant-limiting" id="js-reactant-limiting{{ index }}" value="{{ index }}"  class="js-reactant-limiting">
+            </td>
+            <td><input style="width: 70px; border-width:0px;" type="number" step="any"
+                       value="{{ reactant.compound_data.molecular_weights if reactant.compound_data.molecular_weights is string else reactant.compound_data.molecular_weights | join(', ') }}"
+                    id="js-reactant-molecular-weight{{ index }}" readonly>
+                <br>
+                {% if reactant.is_polymer %}
+                     <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
+                {% endif %}
+            </td>
+            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
+                    {% if reactant.compound_data.densities %}value="{{ reactant.compound_data.densities if reactant.compound_data.densities is string else reactant.compound_data.densities | join(', ') }}"{% endif %}
+                    id="js-reactant-density{{ index }}"></td>
+            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
+                    {% if reactant.compound_data.сoncentrations %}value="{{ reactant.compound_data.сoncentrations }}"{% endif %}
+                    id="js-reactant-concentration{{ index }}"></td>
+            <td><input style="width: 60px;" type="number" step="any" min="0" id="js-reactant-equivalent{{ index }}" placeholder="-"
+                    {% if index == 1 %} value="1" readonly {% else %}
+                    {% if reactant.compound_data.equivalents %}value="{{ reactant.compound_data.equivalents }}"{% endif %}
+                    {% endif %}></td>
+            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
+                    {% if reactant.compound_data.amounts %}value="{{ reactant.compound_data.amounts }}"{% endif %}
+                    id="js-reactant-rounded-amount{{ index }}" class="js-reactant-rounded-amounts"
+                    readonly></td>
+            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
+                    {% if reactant.compound_data.volumes %}value="{{ reactant.compound_data.volumes }}"{% endif %}
+                    id="js-reactant-rounded-volume{{ index }}"
+                    readonly></td>
+            <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-reactant-rounded-mass{{ index }}" class="js-reactant-rounded-masses"
+                    {% if reactant.compound_data.masses %}value="{{ reactant.compound_data.masses }}"{% endif %}
+                    {% if index == 1 %} {% else %}
+                    readonly
+                    {% endif %}></td>
+            <td> {{ physical_form_dropdown(index, reactant.compound_data.physical_forms_text, "reactant") }} </td>
+            <td><textarea class="text-in-table" id="js-reactant-hazards{{ index }}" readonly>{{ reactant.compound_data.hazards if reactant.compound_data.hazards is string else reactant.compound_data.hazards | join(', ') }}</textarea></td>
+            <td><button onclick="reportWindow(this.id)" data-toggle="modal" data-target="#report-compound-data-modal" title="Report incorrect compound data" class="btn btn-outline-dark btn-light btn-sm" id="js-report-reactant{{ index }}" type="button"><i class="bi bi-exclamation-circle"></i></button></td>
+            <td></td>
+        </tr>
+        <input type="hidden"
+        {% if reactant.compound_data.amounts_raw %}value="{{ reactant.compound_data.amounts_raw }}"{% endif %}
+        id="js-reactant-amount{{ index }}">
+        <input type="hidden"
+        {% if reactant.compound_data.volumes_raw %}value="{{ reactant.compound_data.volumes_raw }}"{% endif %}
+        id="js-reactant-volume{{ index }}">
+        <input type="hidden"
+        {% if reactant.compound_data.masses_raw %}value="{{ reactant.compound_data.masses_raw }}"{% endif %}
+        id="js-reactant-mass{{ index }}">
+        <input type="hidden" value="{{ reactant.compound_data.primary_keys if reactant.compound_data.primary_keys is string else reactant.compound_data.primary_keys | join(', ') }}" id="js-reactant-primary-key{{ index }}">
+{%- endmacro %}

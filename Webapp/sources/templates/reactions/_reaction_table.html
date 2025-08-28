@@ -54,18 +54,32 @@
         {{  reaction_table_components.product_row(product, loop.index) }}
     {% endfor %}
 
-    </table>
+    {{ reaction_table_components.reaction_params(reaction_params, units) }}
 
-<table hidden id="js-reagent-table-new-row">
-    {{ reaction_table_components.reagent_row(None, "-x-") }}
-</table>
+    {{ reaction_table_components.workup_section(units) }}
 
+  <tbody>
+    <tr>
+      <td colspan="11">
+        <div class="container-fluid my-3">
+          <h5 class="mb-2"><b>Purification Details</b></h5>
+          <p class="text-muted" style="font-size: 0.9rem;">
+            Define purification procedures.
+          </p>
+        </div>
+      </td>
+      <td>
+        <button type="button" title="Add purification to reaction" onclick="addPurificationRow()" class="js-add-workup btn btn-success" style="widtd: fit-content;">Add Purification</button>
+      </td>
+    </tr>
+  </tbody>
+{#  {{ reaction_table_components.purification_options() }}#}
 
-<table hidden id="js-solvent-table-new-row">
-    {{ reaction_table_components.solvent_row(None, "-x-") }}
-</table>
+{{ reaction_table_components.response_section(responses) }}
 
+  </table>
 </div>
+
 
 {# Numbers #}
 <input type="hidden" value="{{ number_of_solvents }}" id="js-number-of-solvents">
@@ -76,6 +90,12 @@
 
 <input type="hidden" value="{{ number_of_products }}" id="js-number-of-products">
 
+<input type="hidden" value="{{ number_of_workups }}" id="js-number-of-workups">
+
+<input type="hidden" value="{{ number_of_purifications }}" id="js-number-of-purifications">
+
+<input type="hidden" value="{{ number_of_responses }}" id="js-number-of-responses">
+
 <input type="hidden" value="1" id="js-limiting-reactant-table-number">
 
 <input type="hidden" value="1" id="js-main-product-table-number">
@@ -84,11 +104,31 @@
 
 <input type="hidden" value="0" id="js-reaction-image-source">
 
+<input type="hidden" value="0" id="js-number-of-responses">
+
 <datalist role="listbox" size=1 list="" id="js-solvent-datalist" class="solvent-datalist">
     {% for sol in sol_rows %}
       <option value="{{ sol.name }}" class='datalistOption {% if sol.flag == 1 %}hazard-highly-hazardous{% elif sol.flag == 2 %}hazard-hazardous{% elif sol.flag == 3 %}hazard-warning{% elif sol.flag == 4 %}hazard-acceptable{% else %}hazard-reset-hazard{% endif %}'>{{ sol.name }}</option>
     {% endfor %}
 </datalist>
+
+<table hidden id="js-reagent-table-new-row">
+    {{ reaction_table_components.reagent_row(None, "-x-") }}
+</table>
+
+
+<table hidden id="js-solvent-table-new-row">
+    {{ reaction_table_components.solvent_row(None, "-x-") }}
+</table>
+
+{# new rows here#}
+<table hidden id="js-workup-table-new-row">
+    {{ reaction_table_components.workup_row(None, "-x-") }}
+</table>
+
+<table hidden id="js-response-table-new-row">
+    {{ reaction_table_components.response_row(None, "-x-") }}
+</table>
 
 
 {{ reaction_table_components.report_compound_modal() }}

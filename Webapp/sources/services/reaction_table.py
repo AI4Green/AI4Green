@@ -68,21 +68,6 @@ class ReactionTable:
     not sure if this will work, but yolo lmao
     """
 
-    # reaction_param_keys = [
-    #     "limiting_reactant_table_number",
-    #     "main_product",
-    #     "mass_units",
-    #     "polymerisation_type",
-    #     "amount_units",
-    #     "volume_units",
-    #     "solvent_volume_units",
-    #     "product_mass_units",
-    #     "product_amount_units",
-    # ]
-    #
-    # for param in reaction_param_keys:
-    #     units[param] = reaction_table_dict.pop(param)
-
     def __init__(self, reaction, workgroup, workbook, demo, tutorial):
         # set up default values
         self.reaction = reaction
@@ -94,11 +79,8 @@ class ReactionTable:
         self.tutorial = tutorial
 
         # to do
-        # units
-        # prevent load for new reactions
-        # delete stale compounds
         # fix polymer bugs
-        #
+        # fix input novel compound
 
         # reaction table species
         self.reactants = []
@@ -110,7 +92,10 @@ class ReactionTable:
         self.solvent_dropdown = self.get_solvent_dropdown()
         self.reaction_class = None
 
-        # load reaction_table from provided reaction
+        # params/workups/purifications/responses
+        self.reaction_params = {}
+
+        # load reaction_table from provided reaction_table data
         self.load()
 
     def load(self):
@@ -123,9 +108,31 @@ class ReactionTable:
         self.reagents = compounds["reagent"]
         self.solvents = compounds["solvent"]
 
+        # TODO: we should think about adding new relational db tables for workups/purifications/responses
+        # TODO: not sure if this would be worth it, but would add more structure
+
         self.load_units()
+        self._load_reaction_params()
+        self._load_responses()
+
+    def check_errors(self):
+        for compound_group in [self.reactants, self.products]:
+            errors = self._check_compound_errors(compound_group)
+            if errors:
+                return errors
+        return False
+
+    @staticmethod
+    def _check_compound_errors(compound_type):
+        for compound in compound_type:
+            if compound.novel_compound_table:
+                return compound.novel_compound_table
+            elif compound.errors:
+                return compound.errors[0]
+        return False
 
     def load_units(self):
+        # response units not included here, as these are inputted by users
         unit_keys = [
             "limiting_reactant_table_number",
             "main_product",
@@ -136,6 +143,8 @@ class ReactionTable:
             "solvent_volume_units",
             "product_mass_units",
             "product_amount_units",
+            "reaction_temperature_units",
+            "reaction_time_units",
         ]
 
         self.units.update(
@@ -152,8 +161,6 @@ class ReactionTable:
             product_smiles_list,
         ) = services.reaction_table.get_reactants_and_products_list(reaction_smiles)
 
-        print("reactionsmiles2", reactants_smiles_list, product_smiles_list)
-
         # only classify reaction if not polymer
         if not polymer_indices:
             self.reaction_class = services.reaction_classification.classify_reaction(
@@ -169,6 +176,7 @@ class ReactionTable:
         )
 
         self.update_reactants_and_products(updated_reactants, updated_products)
+        self.check_errors()
 
     def update_reactants_and_products(self, updated_reactants, updated_products):
         new_reactants = self.identify_compounds(updated_reactants, self.reactants)
@@ -204,6 +212,33 @@ class ReactionTable:
             for i, smiles in enumerate(smiles_list)
         ]
 
+    def _load_reaction_params(self):
+        param_keys = [
+            "reaction_time",
+            "reaction_atmosphere",
+            "reaction_temperature",
+        ]
+        for param in param_keys:
+            # important to add try loop for older reactions
+            try:
+                self.reaction_params[param] = self.reaction_table_data[param]
+            except KeyError:
+                self.reaction_params[param] = ""
+
+    def _load_responses(self):
+        # TODO: If responses are added to the db they should be loaded in this fn
+        response_names = self.reaction_table_data.get("response_names", [])
+        response_units = self.reaction_table_data.get("response_units", [])
+        response_values = self.reaction_table_data.get("response_values", [])
+        response_notes = self.reaction_table_data.get("response_notes", [])
+
+        self.responses = [
+            {"name": n, "unit": u, "value": v, "note": nt}
+            for n, u, v, nt in zip(
+                response_names, response_units, response_values, response_notes
+            )
+        ]
+
     def render(self):
         reaction_table = render_template(
             "reactions/_reaction_table.html",
@@ -211,10 +246,13 @@ class ReactionTable:
             reagents=self.reagents,
             solvents=self.solvents,
             products=self.products,
+            reaction_params=self.reaction_params,
+            responses=self.responses,
             number_of_reactants=len(self.reactants),
             number_of_reagents=len(self.reagents),
             number_of_solvents=len(self.solvents),
             number_of_products=len(self.products),
+            number_of_responses=len(self.responses),
             units=self.units,
             # do we still need these?
             identifiers=[],
@@ -244,6 +282,8 @@ class ReactionTable:
             "solvent_volume_units": "mL",
             "product_mass_units": "mg",
             "product_amount_units": "mmol",
+            "reaction_temperature_units": "°C",
+            "reaction_time_units": "h",
         }
 
     @staticmethod
@@ -315,5 +355,14 @@ def new():
             "product_masses": [],
             "product_masses_raw": [],
             "product_physical_forms": [],
+            "reaction_time": "",
+            "reaction_atmosphere": "-select-",
+            "reaction_temperature": "",
+            "reaction_temperature_units": "",
+            "reaction_time_units": "",
+            "response_names": [],
+            "response_units": [],
+            "response_values": [],
+            "response_notes": [],
         }
     )

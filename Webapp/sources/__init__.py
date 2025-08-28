@@ -129,7 +129,7 @@ def register_cli(app: Flask) -> None:
     app.cli.add_command(commands.seed_db)
     app.cli.add_command(commands.seed_users)
     app.cli.add_command(commands.download_pubchem)
-    app.cli.add_command(commands.update_db)
+    app.cli.add_command(commands.update_pubchem)
     app.cli.add_command(commands.add_user)
 
 

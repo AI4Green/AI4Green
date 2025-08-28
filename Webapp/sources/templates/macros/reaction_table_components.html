@@ -1,3 +1,15 @@
+{% macro render_select(id, selected, options) -%}
+{#    Macro unit dropdowns #}
+<select size="1" id="{{ id }}" name="{{ id }}">
+  {% for opt in options %}
+    <option value="{{ opt }}" {{ "selected" if opt == selected else "" }}>
+      {{ opt }}
+    </option>
+  {% endfor %}
+</select>
+{%- endmacro %}
+
+
 {% macro reaction_description(reaction, tutorial) -%}
 <div class="container-fluid" style="padding-left: 0px">
     <div id="reaction-name-description">
@@ -511,4 +523,303 @@
     </div>
   </div>
 </div>
+{%- endmacro %}
+
+{%  macro reaction_params(reaction_params, units) -%}
+ <tbody>
+    <tr>
+      <td colspan="3">
+        <div class="container-fluid my-3">
+          <h5 class="mb-2"><b>Reaction Parameters</b></h5>
+          <p class="text-muted" style="font-size: 0.9rem;">
+            Reaction time, temperature, atmosphere.
+          </p>
+        </div>
+      </td>
+        <th scope="col">
+            Time
+              {{ render_select(
+                  "js-reaction-time-unit",
+                  units["reaction_time_units"],
+                  ["h", "min", "s"]
+              ) }}
+        </th>
+        <th scope="col"></th>
+        <th scope="col">
+            Temperature
+              {{ render_select(
+                  "js-reaction-temperature-unit",
+                  units["reaction_temperature_units"],
+                  ["°C", "K", "°F"]
+              ) }}
+        </th>
+        <th scope="col"></th>
+        <th scope="col">Atmosphere</th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+    </tr>
+       </tbody>
+<tbody>
+    <tr class="not-novel-compound-input">
+        <td></td>
+        <td style='width: 200px;'></td>
+        <td></td>
+        <td>
+            <input style="width: 60px;" type="number" step="any" min="0" id="js-reaction-time" placeholder="-" class="add-highlight-unfilled-cell" value="{{ reaction_params['reaction_time'] }}">
+        </td>
+        <td></td>
+        <td>
+            <input style="width: 60px;" type="number" step="any" min="0" id="js-reaction-temperature" placeholder="-" class="add-highlight-unfilled-cell" value="{{ reaction_params['reaction_temperature'] }}">
+        </td>
+        <td></td>
+        <td>
+            {{
+                render_select(
+                    "js-reaction-atmosphere",
+                    reaction_params["reaction_atmosphere"],
+                    ["-select-", "Air", "Nitrogen", "Argon", "Hydrogen", "Oxygen"]
+                )
+                    }}
+        </td>
+        <td></td>
+        <td style="width:4.3em"></td>
+        <td> </td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+</tbody>
+{%- endmacro  %}
+
+{% macro workup_section(units) -%}
+   <tbody>
+    <tr>
+      <td colspan="11">
+        <div class="container-fluid my-3">
+          <h5 class="mb-2"><b>Workup Details</b></h5>
+          <p class="text-muted" style="font-size: 0.9rem;">
+            Define workup procedures.
+          </p>
+        </div>
+      </td>
+      <td>
+        <button type="button" title="Add workup to reaction" onclick="addWorkupRow()" class="js-add-workup btn btn-success" style="widtd: fit-content;">Add Workup</button>
+      </td>
+    </tr>
+  </tbody>
+
+    {{ workup_headings(units) }}
+{%- endmacro %}
+
+
+{% macro workup_row(workup=None, index="{{ index }}") -%}
+    <tr id="js-workup-table-row{{ index }}" class="not-novel-compound-input">
+        <td>
+            <input type="number"
+            style="width:40px; border:none" id="js-workup-table-number{{ index }}" readonly value="{{ workup.idx if workup else ""}}">
+        </td>
+        <td id="js-workup-solvent-datalist-cell{{ index }}">
+            <input aria-role="combobox" type="search" style="width: 200px;"
+                   {% if workup %}
+                    class="{{ workup.compound_data.sustainability_flag}} remove-highlight-filled-cell"
+                   {% else %}
+                    class="add-highlight-unfilled-cell"
+                   {% endif %}
+                   id="js-workup-solvent{{ index }}" autocomplete="off" placeholder="Name or CAS Number"
+                   value="{{ workup.compound_data.names if workup else "" }}">
+        </td>
+        <td style="text-align: center;">
+            <input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-workup-solvent-volume" class="js-workup-solvent-volume add-highlight-unfilled-cell">
+        </td>
+        <td id="js-workup-aqueous-phase-datalist-cell{{ index }}" colspan="2">
+            <input aria-role="combobox" type="search" style="width: 200px;"
+                   {% if workup %}
+                    class="{{ workup.compound_data.sustainability_flag}} remove-highlight-filled-cell"
+                   {% else %}
+                    class="add-highlight-unfilled-cell"
+                   {% endif %}
+                   id="js-workup-aqueous-phase{{ index }}" autocomplete="off" placeholder="Name or CAS Number"
+                   value="{{ workup.compound_data.names if workup else "" }}">
+        </td>
+        <td colspan="2">
+            <input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-workup-aqueous-volume" class="js-workup-aqueous-volume add-highlight-unfilled-cell">
+        </td>
+        <td>
+            <input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-workup-repeat" class="js-workup-repeat add-highlight-unfilled-cell">
+        </td>
+        <td colspan="2">
+            <input aria-role="combobox" type="search" style="width: 200px;"
+                   {% if workup %}
+                    class="{{ workup.compound_data.sustainability_flag}} remove-highlight-filled-cell"
+                   {% else %}
+                    class="add-highlight-unfilled-cell"
+                   {% endif %}
+                   id="js-workup-drying-agent{{ index }}" autocomplete="off" placeholder="Name or CAS Number"
+                   value="{{ workup.compound_data.names if workup else "" }}">
+        </td>
+        <td style="text-align: center;">
+            <input type="number" step="any" min="0" placeholder="-"
+                id="js-workup-drying-agent-mass{{ index }}" style="width:60px;" class="add-highlight-unfilled-cell" value="{{ workup.compound_data.volumes if workup else "" }}">
+        </td>
+        <td colspan="2">
+            <textarea class="text-in-table" id="js-workup-notes"{{ index }} placeholder="Enter notes about your workup here"></textarea>
+        </td>
+        <td>
+            <button value="{{ index }}" id="remove-workup{{ index }}" onclick="removeworkup(this.value)" type="button" class="js-remove-workup close" aria-label="Close">
+                <span aria-hidden="true" title="Remove workup">&times;</span>
+            </button>
+        </td>
+    </tr>
+{%- endmacro %}
+
+{% macro workup_headings(units) -%}
+    <tbody id="js-workup-table" hidden>
+        <tr class="not-novel-compound-input" id="{{ type }}-row">
+            <td></td>
+            <td><b>Organic Phase</b></td>
+            <td><b>Organic Volume</b> {{ solvent_units_dropdown("solvent", units["solvent_volume_units"]) }}</td>
+            <td colspan="2"><b>Aqueous Phase</b></td>
+            <td colspan="2"><b>Aqueous Volume</b>{{ solvent_units_dropdown("solvent", units["solvent_volume_units"]) }}</td>
+            <td><b>x repeat</b></td>
+            <td colspan="2"><b>Drying Agent</b></td>
+            <td style="text-align: center;">
+                <b>Mass</b>
+                <select size="1" name="Drying Agent Unit" id="js-workup-drying-agent-unit">
+                    {% for option in ["g", "mg", "μg"] %}
+                        <option value="{{ option }}" {{ "selected" if units["workup_drying_agent_units"] == option else "" }}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </tbody>
+{%- endmacro %}
+
+{% macro purification_headings(units) -%}
+    <tbody id="js-purification-table" hidden>
+        <tr class="not-novel-compound-input" id="purification-table">
+            <td></td>
+            <td><b>Purification Type</b></td>
+            <td><b>Organic Volume</b> {{ solvent_units_dropdown("solvent", units["solvent_volume_units"]) }}</td>
+            <td colspan="2"><b>Aqueous Phase</b></td>
+            <td colspan="2"><b>Aqueous Volume</b>{{ solvent_units_dropdown("solvent", units["solvent_volume_units"]) }}</td>
+            <td><b>x repeat</b></td>
+            <td colspan="2"><b>Drying Agent</b></td>
+            <td style="text-align: center;">
+                <b>Mass</b>
+                <select size="1" name="Drying Agent Unit" id="js-workup-drying-agent-unit">
+                    {% for option in ["g", "mg", "μg"] %}
+                        <option value="{{ option }}" {{ "selected" if units["workup_drying_agent_units"] == option else "" }}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><button type="button" title="Add workup to reaction" onclick="addWorkupRow()" class="js-add-workup btn btn-success" style="widtd: fit-content;">Add Workup</button></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </tbody>
+{%- endmacro %}
+
+{% macro purification_options(units) -%}
+    <tbody id="js-purification-table">
+        <tr class="not-novel-compound-input" id="{{ type }}-row">
+            <td></td>
+            <td style="text-align: center;">
+                <button type="button" title="Add column to reaction" onclick="addColumn()" class="js-add-column btn btn-success" style="widtd: fit-content;">Add Column Chromatography</button>
+            </td>
+            <td>
+                <button type="button" title="Add recrystallisation to reaction" onclick="addRecryst()" class="js-add-recryst btn btn-success" style="widtd: fit-content;">Add Recrystallisation</button>
+            </td>
+            <td>
+                <button type="button" title="Add distillation to reaction" onclick="addDistillation()" class="js-add-distillation btn btn-success" style="widtd: fit-content;">Add Distillation</button>
+            </td>
+            <td>
+                <button type="button" title="Add filtration to reaction" onclick="addFiltration()" class="js-add-filtration btn btn-success" style="widtd: fit-content;">Add Filtration</button>
+            </td>
+            <td></td>
+            <td colspan="2"></td>
+            <td colspan="2"></td>
+            <td></td>
+            <td colspan="2"></td>
+            <td></td>
+        </tr>
+    </tbody>
+{%- endmacro %}
+
+{% macro response_section(responses) -%}
+    <tbody>
+        <tr>
+          <td colspan="11">
+            <div class="container-fluid my-3">
+              <h5 class="mb-2"><b>Reaction Outputs</b></h5>
+              <p class="text-muted" style="font-size: 0.9rem;">
+                Define measured outputs for this reaction.
+              </p>
+            </div>
+          </td>
+          <td>
+            <button type="button" class="btn btn-success" onclick="addNewResponse()">+ Add Response</button>
+          </td>
+        </tr>
+    </tbody>
+
+    {{ response_headings(responses) }}
+
+    {% for response in responses %}
+        {{ response_row(response, loop.index) }}
+    {% endfor %}
+
+{%- endmacro %}
+
+{% macro response_headings(responses) -%}
+<tbody id="js-response-table" {% if responses|length == 0 %}hidden{% endif %}>
+    <tr class="not-novel-compound-input" id="js-response-table">
+        <td></td>
+        <td><b>Reaction Responses</b></td>
+        <td></td>
+        <td colspan="2"><b>Response Name</b></td>
+        <td colspan="2"><b>Response Units</b></td>
+        <td colspan="2"><b>Response Value</b> </td>
+        <td></td>
+        <td></td>
+        <td><b>Notes</b></td>
+        <td>
+        </td>
+        <td></td>
+    </tr>
+</tbody>
+{%- endmacro %}
+
+
+{% macro response_row(response=None, index="{{ index }}") -%}
+    <tr class="not-novel-compound-input" id="js-response-row{{ index }}">
+        <td>{{ index }}</td>
+        <td></td>
+        <td></td>
+        <td colspan="2">
+            <textarea class="text-in-table" id="js-response-name{{ index }}" placeholder="Response Name">{{ response.name if response else "" }}</textarea>
+        </td>
+        <td colspan="2">
+            <textarea class="text-in-table" id="js-response-units{{ index }}" placeholder="Response Units">{{ response.unit if response else "" }}</textarea>
+        </td>
+        <td colspan="2">
+             <input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-response-value{{ index }}" class="js-response add-highlight-unfilled-cell" value="{{ response.value if response else "" }}">
+        </td>
+        <td></td>
+        <td></td>
+        <td>
+            <textarea class="text-in-table" id="js-response-notes{{ index }}" placeholder="Describe this response">{{ response.note if response else "" }}</textarea>
+        </td>
+        <td></td>
+
+        <td>
+             <button value="{{ index }}" id="remove-response{{ index }}" onclick="removeResponse(this.value)" type="button" class="js-remove-response close" aria-label="Close">
+                <span aria-hidden="true" title="Remove Response">&times;</span>
+            </button>
+        </td>
+    </tr>
 {%- endmacro %}

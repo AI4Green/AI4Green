@@ -83,6 +83,7 @@ def new_reaction() -> Response:
 @login_required
 @save_reaction_bp.doc(security="sessionAuth")
 def autosave() -> Response:
+    # TODO: autosave workups and purifications, add purifications by front end, load workups and purification
     """autosave when a field changes in the reaction page"""
     reaction_description = str(request.form["reactionDescription"])
     reaction = services.reaction.get_current_from_request()
@@ -90,7 +91,6 @@ def autosave() -> Response:
     reaction_image = str(request.form["reactionImage"])
     reaction_class = str(request.form.get("reactionClass"))
     polymer_indices = json.loads(request.form.get("polymerIndices"))
-    print("autosave", polymer_indices)
     polymerisation_type = str(request.form["polymerisationType"])
 
     services.auth.edit_reaction(reaction)
@@ -182,6 +182,19 @@ def autosave() -> Response:
     solvent_volume_units = str(request.form["solventVolumeUnits"])
     product_amount_units = str(request.form["productAmountUnits"])
     product_mass_units = str(request.form["productMassUnits"])
+    # reaction details and responses
+    reaction_time = str(request.form.get("reactionTime", None))
+    reaction_atmosphere = str(request.form.get("reactionAtmosphere", None))
+    temperature_units = str(request.form.get("temperatureUnits", None))
+    reaction_temperature = request.form.get("reactionTemperature", None)
+    time_units = str(request.form.get("timeUnits", None))
+    response_names = get_data("responseNames")
+    response_units = get_data("responseUnits")
+    response_values = get_data("responseValues")
+    response_notes = get_data("responseNotes")
+
+    print("from front end", request.form.get("responseNames"), response_names)
+
     reaction_table = json.dumps(
         {
             # reaction data
@@ -249,6 +262,15 @@ def autosave() -> Response:
             "product_hazards": product_hazards,
             "product_physical_forms_text": product_physical_forms_text,
             "product_mns": product_mns,
+            "reaction_time": reaction_time,
+            "reaction_atmosphere": reaction_atmosphere,
+            "reaction_temperature": reaction_temperature,
+            "reaction_temperature_units": temperature_units,
+            "reaction_time_units": time_units,
+            "response_names": response_names,
+            "response_units": response_units,
+            "response_values": response_values,
+            "response_notes": response_notes,
         }
     )
 
@@ -268,7 +290,6 @@ def autosave() -> Response:
     polymer_thermal_method = request.form.get("polymerThermalMethod")
     polymer_thermal_calibration = request.form.get("polymerThermalCalibration")
     # sustainability data
-    reaction_temperature = request.form["reactionTemperature"]
     element_sustainability = request.form["elementSustainability"]
     batch_flow = request.form["batchFlow"]
     isolation_method = request.form["isolationMethod"]
@@ -632,7 +653,7 @@ def view_reaction_attachment() -> Response:
 
     mimetype = file_object.file_details["mimetype"]
     display_name = file_object.display_name
-    file_attachment = f"data: {mimetype}; base64, {file_attachment}"
+    file_attachment = f"data:{mimetype};base64,{file_attachment}"  # noqa: E231 E702
     return jsonify(
         {"stream": file_attachment, "mimetype": mimetype, "name": display_name}
     )

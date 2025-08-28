@@ -1,0 +1,71 @@
+{% macro report_compound_modal() -%}
+    <!-- Report compound modal -->
+<div class="modal fade" id="report-compound-data-modal" tabindex="-1" role="dialog" aria-labelledby="report-compound-data-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="compound-data-report-modal-title"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="compound-data-report-body">
+          <span id="compound-data-report-text"></span>
+          <div id="modal-report-inner-body">
+              <br>
+              <span style="float: left">
+                  Select error from dropdown
+                  <br>
+                  <select size="1" id="compound-data-report-dropdown">
+                      <option value="-select-" selected>-select-</option>
+                      <option value="incorrect-cas">Incorrect CAS</option>
+                      <option value="incorrect-name">Incorrect name</option>
+                      <option value="incorrect-molecular-weight">Incorrect molecular weight</option>
+                      <option value="incorrect-density">Incorrect density</option>
+                      <option value="incorrect-concentration">Incorrect concentration</option>
+                      <option value="incorrect-hazards">Incorrect hazards</option>
+                      <option value="other">Other</option>
+                  </select>
+                  </span>
+                  <span style="float: right">
+                      Additional information
+                      <br>
+                      <textarea id="compound-data-report-additional-info" cols="28"></textarea>
+            </span>
+          </div>
+          <input hidden id="compound-data-report-id">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" id="report-compound-data-close">Close</button>
+        <button type="button" class="btn btn-danger" id="report-compound-data-submit" onclick="reportCompoundSubmit()" disabled>Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+{%- endmacro %}
+
+{% macro reaction_note_modal() -%}
+    <!-- reaction-note modal window -->
+<div class="modal fade" id="new-reaction-note-modal" tabindex="-1" role="dialog" aria-labelledby="new-reaction-note-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="new-reaction-note-modal-title">Add Note</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="new-reaction-note-body">
+          <div id="modal-new-reaction-note-inner-body">
+              <label for="new-reaction-note-text">Add a note to amend any missing or incorrect details in the reaction.</label>
+              <textarea id="new-reaction-note-text" style="width: 100%; height:10rem"></textarea>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal" id="new-reaction-note-close">Close</button>
+        <button type="button" class="btn btn-success" id="new-reaction-note-submit" data-dismiss="modal" onclick="saveNewReactionNoteToDatabase()" disabled>Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+{%- endmacro %}

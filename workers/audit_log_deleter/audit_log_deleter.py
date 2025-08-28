@@ -2,20 +2,18 @@ import datetime as dt
 import logging
 import os
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.orm import Session
 
 
-def delete_old_events_from_db(n_days: int, connection_str: str):
+def delete_old_events_from_db(engine: Engine, n_days: int):
     """Delete old audit log events from the database. Events older than
     today - n_days will be deleted.
 
     Args:
+        engine (Engine): The engine that connects to the database.
         n_days (int): Messages older than this will be deleted.
-        connection_str (str): The connection string to the database.
     """
-    # Establish DB connection
-    engine = create_engine(connection_str)
     time_limit = dt.datetime.now() - dt.timedelta(days=n_days)
 
     # Create the session
@@ -49,12 +47,14 @@ def main():
         "DB_CONNECTION_STRING",
         "postgresql://postgres:postgres@localhost:5434/ai4gauditlog",
     )
+    # Establish DB connection
+    engine = create_engine(db_connection_str)
 
     running = True
     while running:
         try:
             logger.info(f"Deleting messages to DB...")
-            delete_old_events_from_db(max_lifetime, db_connection_str)
+            delete_old_events_from_db(engine, max_lifetime)
         except KeyboardInterrupt:
             running = False
             logger.info("Exitiing...")

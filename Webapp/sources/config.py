@@ -111,7 +111,6 @@ class BaseConfig(object):  # class to store configuration variables
         "DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/ai4green"
     )
     SQLALCHEMY_BINDS = {
-        # "db": SQLALCHEMY_DATABASE_URI,
         "update": "sqlite:///temp_update.sqlite",
         "audit_log": os.getenv(
             "AUDIT_LOG_DATABASE_URL",
@@ -182,7 +181,6 @@ class TestConfig(BaseConfig):
         "postgresql://postgres:postgres@localhost:5433/ai4greentest",
     )
     SQLALCHEMY_BINDS = {
-        # "db": SQLALCHEMY_DATABASE_URI,
         "update": "sqlite:///temp_update.sqlite",
         "audit_log": os.getenv(
             "TEST_AUDIT_LOG_DATABASE_URL",

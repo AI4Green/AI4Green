@@ -49,4 +49,4 @@ def send_message(message: DataAccessMessage):
     """
     producer = current_app.config["MESSAGE_QUEUE_PRODUCER"]
     # topic name can only be letters and numbers
-    producer.send("dataaccesshistory", message.serialise())
+    producer.send("data-access-history", message.serialise())

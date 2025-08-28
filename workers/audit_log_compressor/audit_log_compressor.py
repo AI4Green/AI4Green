@@ -9,8 +9,8 @@ from config import (
     QUEUE_CONNECTION_STRING,
 )
 from reaction_edit_history_processor import ReactionEditHistoryProcessor
-from sources.services.message_queue.consumers import AzureQueueConsumer
-from sources.services.message_queue.producers import AzureQueueProducer
+from message_queue.consumers import AzureQueueConsumer
+from message_queue.producers import AzureQueueProducer
 
 
 def collect_and_process_messages(
@@ -21,31 +21,6 @@ def collect_and_process_messages(
     messages = consumer_service.poll(poll_duration_sec)
     processor_service.process_and_publish(messages)
     logger.info("Finished processing messages.")
-
-
-def merge_diffs(diff1, diff2):
-    """Returns net change between two change_details dicts
-    Args:
-        diff1 (dict): must have nested "old_value" and "new_value" keys
-        diff2 (dict): must have nested "old_value" and "new_value" keys
-    """
-    merged = {}
-
-    all_keys = set(diff1.keys()) | set(diff2.keys())
-
-    for key in all_keys:
-        if key in diff1 and key in diff2:
-            if diff1[key]["old_value"] != diff2[key]["new_value"]:
-                merged[key] = {
-                    "old_value": diff1[key]["old_value"],
-                    "new_value": diff2[key]["new_value"],
-                }
-        elif key in diff1:
-            merged[key] = diff1[key]
-        elif key in diff2:
-            merged[key] = diff2[key]
-
-    return merged
 
 
 def main():
@@ -66,9 +41,7 @@ def main():
     )
 
     # set up producer and processor
-    producer = AzureQueueProducer(
-        connection_str=QUEUE_CONNECTION_STRING,
-    )
+    producer = AzureQueueProducer(connection_str=QUEUE_CONNECTION_STRING, logger=logger)
     processor = ReactionEditHistoryProcessor(producer, PRODUCE_TOPIC, logger)
 
     # Set up the scheduler

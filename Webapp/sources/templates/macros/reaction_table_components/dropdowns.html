@@ -1,0 +1,77 @@
+{%  macro reaction_class_dropdown(reaction_class) -%}
+    {% set reaction_classes =
+        [
+            "Amide bond formation",
+            "Alcohol oxidation",
+            "Alkene metathesis",
+            "Baylis-Hillman",
+            "Buchwald-Hartwig coupling",
+            "Ester hydrolysis",
+            "Grignard",
+            "Heck cross-coupling",
+            "SNAr/SN2",
+            "Suzuki-Miyaura coupling",
+            "Other"
+        ]
+    %}
+<label for="reaction-class"><b>Reaction Class:</b> </label>
+<select size="1" name="reactionClass" id="reaction-class">
+
+     {% for option in reaction_classes %}
+         {% if option == reaction_class %}
+            <option value="{{option}}" SELECTED>{{option}}</option>
+         {% else %}
+            <option value="{{option}}">{{option}}</option>
+        {% endif %}
+    {% endfor %}
+</select>
+{%- endmacro %}
+
+{% macro polymerisation_dropdown(polymerisation_type) -%}
+    {% set polymerisation_types =
+        [
+            "-select-",
+            "Addition",
+            "Anionic",
+            "Cationic",
+            "Coordination",
+            "Condensation",
+            "Radical",
+            "Ring-Opening",
+        ]
+    %}
+    <label for="js-polymerisation-type" style="padding-bottom: 20px"><b>Type of polymerisation:</b></label>
+        <select size="1" id="js-polymerisation-type">
+            {% for option in reaction_classes %}
+                {% if option == polymerisation_type %}
+                    <option value="{{option}}" SELECTED>{{option}}</option>
+                {% else %}
+                    <option value="{{option}}">{{option}}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+{%- endmacro %}
+
+{%  macro physical_form_dropdown(index, value, type) -%}
+<select size="1" class="physical-form add-highlight-unfilled-cell" id="js-{{ type }}-physical-form{{ index }}">
+    {% set options = [
+        "-select-",
+        "Dense solid",
+        "Non-volatile liquid",
+        "Unknown",
+        "Dusty Solid",
+        "Lyophilised solid",
+        "Volatile liquid",
+        "Gas",
+        "Highly volatile liquid",
+        "Aerosol",
+        "Solution that promotes skin absorption"
+    ] %}
+
+    {% for option in options %}
+        <option value="{{ option }}" {% if option == value %}selected{% endif %}>
+            {{ option if option != "Non-volatile liquid" and option != "Volatile liquid" and option != "Highly volatile liquid" else option + ' (b.p. ' + ('> 130℃' if option == 'Non-volatile liquid' else '< 70℃' if option == 'Highly volatile liquid' else '70℃ ≤ b.p. ≤ 130℃') + ')' }}
+        </option>
+    {% endfor %}
+</select>
+{%- endmacro %}
