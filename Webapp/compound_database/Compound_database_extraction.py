@@ -153,7 +153,6 @@ def get_smiles(inchi_str):
 def get_mol_weight(root):
     """This function returns the molecular weight when given the root for a single record
     :param root:
-    :param smiles: smiles of the pubchem entry, to calculate mol weight if missing
     :return molecular_weight:
     """
 
@@ -236,7 +235,6 @@ def get_mol_formula(root):
     """
     Extracts the molecular formula for a single record
     :param root:
-    :param smiles: The smiles string for the compound in case formula is missing from pubchem
     :return mol_formula: The molecular formula of the pubchem entry
     """
     for section in root.findall(".//xmlns:Section", ns):
