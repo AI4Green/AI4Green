@@ -227,11 +227,10 @@ def get_hazards(root, echa_ref):
                     ):
                         if value.text:
                             code = value.text.split()[0].split(":")[0]
-                            code.replace("+", "-")
+                            code = code.replace("+", "-")
                             hazard_codes_ls.append(code)
                     if hazard_codes_ls:
                         return "-".join(hazard_codes_ls)
-                    print(hazard_codes_ls)
     return "No hazard codes found"
 
 
@@ -484,7 +483,6 @@ def compound_assertions(
             print(f"{entry=}")
         # assert entry is not None, f"The required entry {entry} is set to None"
 
-    print(common_name, cid, mw)
     assert mw >= 0, "Molecular weight is negative "
 
     temperatures = (bp, mp, flash_point, autoignition_temp)
