@@ -214,7 +214,7 @@ def import_from_reactwise():
                 ),  # must be list to be JSON serializable
                 "set_id": set_id,
                 "workgroup_name": workgroup_name,
-                "workbook": workbook_name,
+                "workbook_name": workbook_name,
             }
             return jsonify(
                 {
@@ -238,7 +238,9 @@ def assign_reactwise_fields():
     sol_rows = services.solvent.get_workbook_list(workbook)
     return render_template(
         "reactions/assign_reactwise_fields.html",
-        unknown_fields=rw_import["unknown_fields"],
+        unknown_variables=rw_import["unknown_fields"],
         unknown_solvents=rw_import["unknown_solvents"],
         sol_rows=sol_rows,
+        workgroup=rw_import["workgroup_name"],
+        workbook_name=rw_import["workbook_name"],
     )

@@ -2,30 +2,47 @@
 
 {% block title %}Assign Unknown Fields{% endblock %}
 
+{% block scripts %}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/custom_colours.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/reaction_table.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_constructor.css') }}">
+
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <h2 class="mb-4 text-center">Assign Unknown Reaction Fields</h2>
 
-    <!-- Unknown Solvents Card -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-primary text-white">
-            Unknown Solvents
+    <!-- Unknown Solvents Section -->
+    <div class="card mb-5 border rounded shadow-sm">
+        <div class="card-header bg-light border-bottom p-3">
+            <h4 class="mb-1 text-dark">Unknown Solvents</h4>
+            <small class="text-muted">Match each solvent to the correct reaction component before completing the import.</small>
         </div>
         <div class="card-body">
             {% if unknown_solvents %}
                 <form method="post" action="/assign_solvents">
-                    {% for solvent in unknown_solvents %}
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">{{ solvent }}</label>
-                            <select name="solvent_assignment_{{ loop.index }}" class="form-select" required>
-                                <option value="" disabled selected>Select a reaction component</option>
-                                {% for component in reaction_components %}
-                                    <option value="{{ component }}">{{ component }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    {% endfor %}
-                    <button type="submit" class="btn btn-primary">Save Solvent Assignments</button>
+                    <div class="row g-3">
+                        {% for solvent in unknown_solvents %}
+                            <div class="col-md-6">
+                                <div class="card p-3 border rounded shadow-sm h-100"
+                                     style="min-height: 120px; transition: transform 0.2s;"
+                                     tabindex="0" role="group" aria-labelledby="label-{{ loop.index }}">
+                                    <label id="label-{{ loop.index }}" class="form-label fw-bold"
+                                           for="solvent_assignment_{{ loop.index }}">
+                                        {{ solvent }}
+                                    </label>
+                                    <input aria-role="combobox" type="search" style="width: 200px;"
+                                        class="remove-highlight-filled-cell"
+                                       id="js-solvent{{ loop.index }}" autocomplete="off" placeholder="Name or CAS Number"
+                                       value="" list="js-solvent-datalist{{ loop.index }}">
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">Save Solvent Assignments</button>
+                    </div>
                 </form>
             {% else %}
                 <p class="text-muted">No unknown solvents to assign.</p>
@@ -33,26 +50,91 @@
         </div>
     </div>
 
-    <!-- Unknown Continuous Variables Card -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-success text-white">
-            Unknown Continuous Variables
+    <!-- Unknown Continuous Variables Section -->
+    <div class="card mb-5 border rounded shadow-sm">
+        <div class="card-header bg-light border-bottom p-3">
+            <h4 class="mb-1 text-dark">Unknown Continuous Variables</h4>
+            <small class="text-muted">
+                Match each field to the correct reaction component and define its type.
+            </small>
         </div>
         <div class="card-body">
             {% if unknown_variables %}
                 <form method="post" action="/assign_variables">
-                    {% for variable in unknown_variables %}
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">{{ variable }}</label>
-                            <select name="variable_assignment_{{ loop.index }}" class="form-select" required>
-                                <option value="" disabled selected>Select a reaction component</option>
-                                {% for component in reaction_components %}
-                                    <option value="{{ component }}">{{ component }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    {% endfor %}
-                    <button type="submit" class="btn btn-success">Save Variable Assignments</button>
+                    <div class="row g-3">
+                        {% for variable in unknown_variables %}
+                            <div class="col-md-6">
+                                <div class="card p-3 border rounded shadow-sm h-100"
+                                     style="min-height: 180px; transition: transform 0.2s;"
+                                     tabindex="0" role="group" aria-labelledby="label-var-{{ loop.index }}">
+
+                                    <!-- Variable Label -->
+                                    <label id="label-var-{{ loop.index }}" class="form-label fw-bold"
+                                           for="variable_assignment_{{ loop.index }}">
+                                        {{ variable }}
+                                    </label>
+
+                                    <!-- Type Selection -->
+                                    <div class="mb-3">
+                                        <select class="form-select form-select-sm variable-type-select"
+                                                data-target="{{ loop.index }}" required>
+                                            <option value="" disabled selected>Select type</option>
+                                            <option value="chemical">Chemical</option>
+                                            <option value="amount">Amount</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Chemical structure input -->
+                                    <div class="chemical-input mt-2" id="chemical-{{ loop.index }}" style="display:none;">
+                                        <button type="button" class="btn btn-outline-secondary w-100">
+                                            Draw/Upload Chemical Structure
+                                        </button>
+                                    </div>
+
+                                    <!-- Amount input -->
+                                    <div class="amount-input mt-2" id="amount-{{ loop.index }}" style="display:none;">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-borderless mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col" class="fw-normal text-muted">Select Reaction Component</th>
+                                                        <th scope="col" class="fw-normal text-muted">Select Unit</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <select name="variable_assignment_{{ loop.index }}"
+                                                                    class="form-select form-select-sm" required>
+                                                                <option value="" disabled selected>Choose component</option>
+                                                                {% for component in reaction_components %}
+                                                                    <option value="{{ component }}">{{ component }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select name="variable_unit_{{ loop.index }}"
+                                                                    class="form-select form-select-sm" required>
+                                                                <option value="" disabled selected>Choose unit</option>
+                                                                <option value="equivalent">Equivalent</option>
+                                                                <option value="mass">Mass</option>
+                                                                <option value="volume">Volume</option>
+                                                                <option value="concentration">Concentration</option>
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-success">Save Variable Assignments</button>
+                    </div>
                 </form>
             {% else %}
                 <p class="text-muted">No unknown continuous variables to assign.</p>
@@ -60,4 +142,98 @@
         </div>
     </div>
 </div>
+
+<input hidden is="js-active-workbook" value="{{ workbook_name }}">
+<input hidden is="js-active-workgroup" value="{{ workbook_name }}">
+
+<datalist role="listbox" size=1 list="" id="js-solvent-datalist" class="solvent-datalist">
+{% for sol in sol_rows %}
+  <option value="{{ sol.name }}" class='datalistOption {% if sol.flag == 1 %}hazard-highly-hazardous{% elif sol.flag == 2 %}hazard-hazardous{% elif sol.flag == 3 %}hazard-warning{% elif sol.flag == 4 %}hazard-acceptable{% else %}hazard-reset-hazard{% endif %}'>{{ sol.name }}</option>
+{% endfor %}
+</datalist>
+
+<!-- Hover/focus effect -->
+<style>
+.card[tabindex="0"]:hover,
+.card[tabindex="0"]:focus {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    outline: none;
+}
+</style>
+
+<!-- Show/Hide inputs based on type selection -->
+<script>
+document.querySelectorAll('.variable-type-select').forEach(select => {
+    select.addEventListener('change', function() {
+        const id = this.dataset.target;
+        const chemicalDiv = document.getElementById('chemical-' + id);
+        const amountDiv = document.getElementById('amount-' + id);
+
+        if (this.value === 'chemical') {
+            chemicalDiv.style.display = 'block';
+            amountDiv.style.display = 'none';
+        } else if (this.value === 'amount') {
+            chemicalDiv.style.display = 'none';
+            amountDiv.style.display = 'block';
+        } else {
+            chemicalDiv.style.display = 'none';
+            amountDiv.style.display = 'none';
+        }
+    });
+});
+
+console.log("DDDD")
+
+let solventDatalistID = "js-solvent-datalist"
+let solventInputID = "js-solvent"
+let solventNumber = 1
+
+$("#js-solvent-datalist")
+.clone()
+.prop("id", "js-solvent-datalist1")
+.appendTo("#js-solvent1");
+
+console.log($("#js-solvent1"))
+setColours();
+// datalist_initiate fns without the reaction table stuff
+autofillSolventData(1);
+autofillSolventFields2();
+  for (let option of document.getElementById(solventDatalistID).options) {
+    option.onclick = function () {
+      document.getElementById(solventInputID).value = option.value;
+      document.getElementById(solventDatalistID).style.display = "none";
+      document.getElementById(solventInputID).style.borderRadius = "5px";
+      postSolventData(option.value, solventNumber, true);
+    };
+  }
+  // hide the solvent dropdown if clicking on non-dropdown/input element
+  let $solventInputID = "#" + solventInputID;
+  $(document).on("click", function (event) {
+    let $target = $(event.target);
+    let $solventDatalistID = "#" + solventDatalistID;
+    if (
+      !$target.closest($solventDatalistID).length &&
+      !$target.closest($solventInputID).length &&
+      $($solventDatalistID).is(":visible")
+    ) {
+      $($solventDatalistID).hide();
+    } else {
+    }
+  });
+
+// datalist_initiate("js-solvent", "js-solvent-datalist1", 1)
+</script>
+
+
+
+<!-- Optional: add hover/focus effect -->
+<style>
+.card[tabindex="0"]:hover,
+.card[tabindex="0"]:focus {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    outline: none;
+}
+</style>
 {% endblock %}
