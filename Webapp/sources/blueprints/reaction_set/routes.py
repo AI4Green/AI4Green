@@ -8,6 +8,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    session,
     url_for,
 )
 from flask_login import current_user, login_required
@@ -114,12 +115,32 @@ def get_number_of_reactions(reactor_dimensions):
         return reactor_dimensions.get("rows") * reactor_dimensions.get("columns")
 
 
+def rw_reactor_dimensions(number_of_reactions):
+    if number_of_reactions <= 12:  # less than 12 reactions
+        return {"reactorType": "carousel", "numberOfReactions": number_of_reactions}
+    else:
+        wellplates = {
+            24: {"rows": 4, "cols": 6},
+            48: {"rows": 6, "cols": 8},
+            96: {"rows": 8, "cols": 12},
+        }
+        # Pick the smallest standard plate that fits
+        for size, dims in wellplates.items():
+            if number_of_reactions <= size:
+                return {
+                    "reactorType": "well plate",
+                    "rows": dims["rows"],
+                    "columns": dims["cols"],
+                }
+
+
 @reaction_set_bp.route("/import_from_reactwise", methods=["POST", "GET"])
 def import_from_reactwise():
     step_id = request.json.get("stepID", None)
     step_name = request.json.get("stepName", None)
     workbook_name = request.json.get("workbook", None)
     workgroup_name = request.json.get("workgroup", None)
+    workgroup = services.workgroup.from_name(workgroup_name)
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
@@ -132,34 +153,34 @@ def import_from_reactwise():
     # handle error here lmao
 
     if not set_obj:
+        set_id = services.reaction_set.next_id_in_workbook(workbook.id)
         reactions = []
+        unknown_solvents = []
+        unknown_fields = []
 
-        # need to test which inputs we recognise and which we dont
-        # outputs have been added to reaction table in new update
-
-        # we need to hadle:
-        # novel compounds
-        # solvents
-        # unknown field
-
-        # meaning:
-        # design a new page that allows users to match compounds to unknown inputs
-        # novel compound dialogue on that page
+        # these fields are added to the reaction table dict
+        known_fields = ["solvent", "time", "temperature"]  # any more to add?
 
         for reactwise_experiment_id, details in rw_step.experimental_details.items():
-            # unknown_fields = [
-            #     x.lower() for x in details.keys() if x.lower() not in labelled_inputs
-            # ]
-            # known_fields = [
-            #     x.lower() for x in details.keys() if x.lower() not in labelled_inputs
-            # ]
+            print(details)
+            unknown_keys = [x for x in details.keys() if x.lower() not in known_fields]
+            unknown_fields.extend(unknown_keys)
+            # for key in unknown_keys:
+            #     print(key)
+            #     print(details[key])
+            #     unknown_fields.append(
+            #         (key, details[key])
+            #     )
             reaction_table = json.loads(services.reaction_table.new())
-
-            services.reactwise.extract_recognised_fields(details, reaction_table)
-
             reaction_id = services.reaction.get_next_reaction_id_for_workbook(
                 workbook.id
             )
+
+            # any solvents that are not matched are returned here
+            unknown_solvents.extend(
+                services.reactwise.extract_recognised_fields(details, reaction_table)
+            )
+
             reaction = services.reaction.add(
                 name="reactwise-" + reactwise_experiment_id,
                 creator=creator,
@@ -171,22 +192,53 @@ def import_from_reactwise():
             )
             reactions.append(reaction)
 
-        set_id = services.reaction_set.next_id_in_workbook(workbook.id)
+        reactor_dimensions = rw_reactor_dimensions(len(reactions))
+
         services.reaction_set.add(
             name=step_name,
             set_id=set_id,
             creator=creator,
+            workgroup=workgroup,
             workbook=workbook,
             reactions=reactions,
+            reactor_dimensions=reactor_dimensions,
         )
-
-    return jsonify(
-        {
-            "redirect_url": url_for(
-                "reaction_set.reaction_set",
-                set_name=step_name,
-                workgroup_name=workgroup_name,
-                workbook_name=workbook_name,
+        if unknown_solvents or unknown_fields:
+            # store as session variables for now, there must be a better way
+            session["reactwise_import"] = {
+                "unknown_fields": list(
+                    set(unknown_fields)
+                ),  # must be list to be JSON serializable
+                "unknown_solvents": list(
+                    set(unknown_solvents)
+                ),  # must be list to be JSON serializable
+                "set_id": set_id,
+                "workgroup_name": workgroup_name,
+                "workbook": workbook_name,
+            }
+            return jsonify(
+                {
+                    "feedback": "unknown fields",
+                }
             )
-        }
+        return jsonify({"feedback": "Set Created!"})
+    else:
+        return jsonify({"feedback": "Set Created!"})
+
+
+@reaction_set_bp.route("/assign_reactwise_fields", methods=["GET", "POST"])
+def assign_reactwise_fields():
+    # requires session variable, keeps in session in case of reload
+    rw_import = session.get("reactwise_import", {})
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        rw_import["workgroup_name"], rw_import["workbook_name"]
+    )
+    print(rw_import)
+
+    sol_rows = services.solvent.get_workbook_list(workbook)
+    return render_template(
+        "reactions/assign_reactwise_fields.html",
+        unknown_fields=rw_import["unknown_fields"],
+        unknown_solvents=rw_import["unknown_solvents"],
+        sol_rows=sol_rows,
     )

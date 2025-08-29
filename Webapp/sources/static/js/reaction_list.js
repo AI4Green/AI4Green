@@ -183,8 +183,11 @@ function importReactwise() {
     })
 
     .then(function (data) {
+      console.log(data);
       if (data.feedback === "Set Created!") {
-        window.location.href = `/reaction_set/${workgroup}/${workbook}/${setName}`;
+        window.location.href = `/reaction_set/${workgroup}/${workbook}/${stepName}`;
+      } else if (data.feedback === "unknown fields") {
+        window.location.href = "/assign_reactwise_fields";
       }
     });
 }

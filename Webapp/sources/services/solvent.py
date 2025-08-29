@@ -220,3 +220,15 @@ def get_flag_rate() -> Dict[int, str]:
 def convert_sustainability_flag_to_text(flag: int) -> str:
     conversion_dict = get_flag_rate()
     return conversion_dict[flag]
+
+
+def from_name(solvent_name):
+    """
+    This probs wont work properly but not sure if there is any other way
+    """
+    return (
+        db.session.query(models.Solvent)
+        .join(models.Compound)
+        .filter(models.Compound.name == solvent_name)
+        .first()
+    )

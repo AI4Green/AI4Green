@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Assign Unknown Fields{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Assign Unknown Reaction Fields</h2>
+
+    <!-- Unknown Solvents Card -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            Unknown Solvents
+        </div>
+        <div class="card-body">
+            {% if unknown_solvents %}
+                <form method="post" action="/assign_solvents">
+                    {% for solvent in unknown_solvents %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">{{ solvent }}</label>
+                            <select name="solvent_assignment_{{ loop.index }}" class="form-select" required>
+                                <option value="" disabled selected>Select a reaction component</option>
+                                {% for component in reaction_components %}
+                                    <option value="{{ component }}">{{ component }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary">Save Solvent Assignments</button>
+                </form>
+            {% else %}
+                <p class="text-muted">No unknown solvents to assign.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Unknown Continuous Variables Card -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-success text-white">
+            Unknown Continuous Variables
+        </div>
+        <div class="card-body">
+            {% if unknown_variables %}
+                <form method="post" action="/assign_variables">
+                    {% for variable in unknown_variables %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">{{ variable }}</label>
+                            <select name="variable_assignment_{{ loop.index }}" class="form-select" required>
+                                <option value="" disabled selected>Select a reaction component</option>
+                                {% for component in reaction_components %}
+                                    <option value="{{ component }}">{{ component }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-success">Save Variable Assignments</button>
+                </form>
+            {% else %}
+                <p class="text-muted">No unknown continuous variables to assign.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
