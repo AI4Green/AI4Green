@@ -220,9 +220,9 @@ class ReactionTable:
         for c in reaction_component:
             # figure out component prefix (e.g. "reactants", "products", ...)
             prefix = c.reaction_component.lower()
-            # append novel compound table to novel compounds
+            # append smiles to novel compounds if novel compound
             if c.is_novel_compound:
-                self.novel_compounds.append(c.novel_compound_table)
+                self.novel_compounds.append(c.smiles)
             for key, acc in fields.items():
                 # should maintain smiles even if novel_compound
                 if key == "smiles":

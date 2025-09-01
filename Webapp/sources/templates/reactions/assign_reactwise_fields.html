@@ -32,10 +32,10 @@
                                            for="solvent_assignment_{{ loop.index }}">
                                         {{ solvent }}
                                     </label>
-                                    <input aria-role="combobox" type="search" style="width: 200px;"
-                                        class="remove-highlight-filled-cell"
-                                       id="js-solvent{{ loop.index }}" autocomplete="off" placeholder="Name or CAS Number"
-                                       value="" list="js-solvent-datalist{{ loop.index }}">
+                                    <input type="search" class="remove-highlight-filled-cell solvent-input"
+                                           id="js-solvent{{ loop.index }}" autocomplete="off"
+                                           placeholder="Name or CAS Number"
+                                           list="js-solvent-datalist">
                                 </div>
                             </div>
                         {% endfor %}
@@ -141,16 +141,76 @@
             {% endif %}
         </div>
     </div>
+
+    <!-- Novel Compounds Section -->
+    <div class="card mb-5 border rounded shadow-sm" >
+        <div class="card-header bg-light border-bottom p-3">
+            <h4 class="mb-1 text-dark">Novel Compounds</h4>
+            <small class="text-muted">
+                These compounds were not recognized in the system. Please provide their details.
+            </small>
+        </div>
+        <div class="card-body">
+            {% if novel_compounds %}
+                <form method="post" action="/assign_novel_compounds">
+                    <div class="row g-3">
+                        {% for compound in novel_compounds %}
+                            <div class="col-6">
+                                <div class="card p-3 border rounded shadow-sm h-100" tabindex="0">
+                                    <h5 class="mb-2">{{ compound.component }} {{ compound.number }}</h5>
+
+                                    {# Chemical structure image #}
+                                    {% if compound.image_base64 %}
+                                        <div class="text-center mb-3">
+                                            <img src="data:image/png;base64,{{ compound.image_base64 }}"
+                                                 alt="Chemical structure of {{ compound.name or 'compound' }}"
+                                                 class="img-fluid border rounded" id="novel-compound-image-{{ compound.number }}"
+                                                 style="max-height: 200px; object-fit: contain;">
+                                        </div>
+                                    {% else %}
+                                        <p class="text-muted text-center">No structure available</p>
+                                    {% endif %}
+
+                                    {# Existing novel compound input partial #}
+                                    {% set component = compound.component %}
+                                    {% set number = compound.number %}
+                                    {% set name = compound.name %}
+                                    {% set mw = compound.mw %}
+                                    {% set smiles = compound.smiles %}
+                                    {% set polymer = compound.polymer %}
+                                    {% include "reactions/_novel_compound.html" %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-warning">Save Novel Compounds</button>
+                    </div>
+                </form>
+            {% else %}
+                <p class="text-muted">No novel compounds to define.</p>
+            {% endif %}
+        </div>
+    </div>
+
 </div>
 
-<input hidden is="js-active-workbook" value="{{ workbook_name }}">
-<input hidden is="js-active-workgroup" value="{{ workbook_name }}">
+<input type="hidden" id="js-active-workbook" value="{{ workbook_name }}">
+<input type="hidden" id="js-active-workgroup" value="{{ workgroup }}">
 
-<datalist role="listbox" size=1 list="" id="js-solvent-datalist" class="solvent-datalist">
+<datalist id="js-solvent-datalist" class="solvent-datalist">
 {% for sol in sol_rows %}
-  <option value="{{ sol.name }}" class='datalistOption {% if sol.flag == 1 %}hazard-highly-hazardous{% elif sol.flag == 2 %}hazard-hazardous{% elif sol.flag == 3 %}hazard-warning{% elif sol.flag == 4 %}hazard-acceptable{% else %}hazard-reset-hazard{% endif %}'>{{ sol.name }}</option>
+  <option value="{{ sol.name }}" class='datalistOption
+    {% if sol.flag == 1 %}hazard-highly-hazardous
+    {% elif sol.flag == 2 %}hazard-hazardous
+    {% elif sol.flag == 3 %}hazard-warning
+    {% elif sol.flag == 4 %}hazard-acceptable
+    {% else %}hazard-reset-hazard{% endif %}'>
+    {{ sol.name }}
+  </option>
 {% endfor %}
 </datalist>
+
 
 <!-- Hover/focus effect -->
 <style>

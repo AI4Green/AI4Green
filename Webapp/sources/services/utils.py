@@ -1,10 +1,14 @@
+import base64
 import contextlib
 import datetime
+import io
 from typing import Dict, Tuple, Union
 
 import ipinfo
 import toml
 from flask import current_app, request
+from rdkit import Chem
+from rdkit.Chem import Draw
 
 
 def camelCase_to_snake_case(string: str) -> str:
@@ -125,3 +129,29 @@ def remove_spaces_and_dashes(name: str) -> str:
         name: str, the name without spaces.
     """
     return name.replace(" ", "").replace("-", "")
+
+
+def smiles_to_base64(smiles: str, size=(300, 300)) -> str:
+    """
+    Convert a SMILES string to a base64-encoded PNG image.
+
+    Args:
+        smiles (str): SMILES string of the molecule.
+        size (tuple): (width, height) of the generated image in pixels.
+
+    Returns:
+        str: Base64-encoded PNG image, or empty string if invalid SMILES.
+    """
+    if not smiles:
+        return ""
+
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        return ""  # Invalid SMILES
+
+    img = Draw.MolToImage(mol, size=size)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    img_base64 = base64.b64encode(buf.read()).decode("ascii")
+    return img_base64
