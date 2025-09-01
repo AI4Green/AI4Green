@@ -8,7 +8,7 @@ import ipinfo
 import toml
 from flask import current_app, request
 from rdkit import Chem
-from rdkit.Chem import Draw
+from rdkit.Chem import Draw, rdChemReactions
 
 
 def camelCase_to_snake_case(string: str) -> str:
@@ -155,3 +155,28 @@ def smiles_to_base64(smiles: str, size=(300, 300)) -> str:
     buf.seek(0)
     img_base64 = base64.b64encode(buf.read()).decode("ascii")
     return img_base64
+
+
+def reaction_to_base64(rxn_smiles: str, size=(600, 300)) -> str:
+    """
+    Convert a reaction SMILES to a base64-encoded PNG image.
+
+    Args:
+        rxn_smiles (str): Reaction SMILES string (e.g. 'CCO.O=O>>CC=O.O').
+        size (tuple): (width, height) of the generated image in pixels.
+
+    Returns:
+        str: Base64-encoded PNG image, or empty string if invalid.
+    """
+    if not rxn_smiles:
+        return ""
+
+    rxn = rdChemReactions.ReactionFromSmarts(rxn_smiles, useSmiles=True)
+    if rxn is None:
+        return ""
+
+    img = Draw.ReactionToImage(rxn, subImgSize=size)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode("ascii")

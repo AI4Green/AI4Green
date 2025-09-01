@@ -14,8 +14,6 @@ from flask import (
 from flask_login import current_user, login_required
 from sources import models, services
 
-from ...services.compound import iupac_convert
-from ...services.utils import smiles_to_base64
 from . import reaction_set_bp
 
 
@@ -239,6 +237,7 @@ def import_from_reactwise():
                 "workgroup_name": workgroup_name,
                 "workbook_name": workbook_name,
                 "novel_compounds": list(set(novel_compounds)),
+                "reaction_smiles": rw_step.reaction_smiles,
             }
             return jsonify(
                 {
@@ -262,12 +261,14 @@ def assign_reactwise_fields():
     for smiles in rw_import["novel_compounds"]:
         novel_compounds.append(
             {
-                "name": iupac_convert(smiles),
+                "name": services.compound.iupac_convert(smiles),
                 "mw": services.all_compounds.mol_weight_from_smiles(smiles),
                 "smiles": smiles,
-                "image_base64": smiles_to_base64(smiles),
+                "image_base64": services.utils.smiles_to_base64(smiles),
             }
         )
+
+    reaction_image = services.utils.reaction_to_base64(rw_import["reaction_smiles"])
 
     sol_rows = services.solvent.get_workbook_list(workbook)
 
@@ -279,4 +280,5 @@ def assign_reactwise_fields():
         workgroup=rw_import["workgroup_name"],  # fix hidden input bug
         workbook_name=rw_import["workbook_name"],
         novel_compounds=novel_compounds,
+        reaction_scheme_image=reaction_image,
     )

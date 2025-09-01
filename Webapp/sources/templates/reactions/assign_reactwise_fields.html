@@ -10,7 +10,60 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container py-4">
+
+    <!-- Reaction Overview Card -->
+    <div class="card mb-5 border rounded shadow-sm">
+        <div class="card-header bg-light border-bottom p-3">
+            <h4 class="mb-1 text-dark">Reaction Overview</h4>
+            <small class="text-muted">Reaction scheme, solvents, and reagents.</small>
+        </div>
+        <div class="card-body">
+
+            <!-- Reaction Scheme -->
+            <div class="mb-4">
+                <div class="text-center">
+                    {% if reaction_scheme_image %}
+                        <img src="data:image/png;base64,{{ reaction_scheme_image }}"
+                             alt="Reaction Scheme"
+                             class="img-fluid border rounded"
+                             style="max-height: 300px; object-fit: contain;">
+                    {% else %}
+                        <p class="text-muted">No reaction scheme available</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Solvents -->
+            <div class="mb-4">
+                {% if solvents %}
+                    <ul class="list-group list-group-flush">
+                        {% for solvent in solvents %}
+                            <li class="list-group-item">{{ solvent }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No solvents provided</p>
+                {% endif %}
+            </div>
+
+            <!-- Reagents -->
+            <div class="mb-2">
+                {% if reagents %}
+                    <ul class="list-group list-group-flush">
+                        {% for reagent in reagents %}
+                            <li class="list-group-item">{{ reagent }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No reagents provided</p>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+
     <h2 class="mb-4 text-center">Assign Unknown Reaction Fields</h2>
 
     <!-- Unknown Solvents Section -->
