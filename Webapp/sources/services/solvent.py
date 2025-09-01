@@ -227,8 +227,8 @@ def from_name(solvent_name):
     This probs wont work properly but not sure if there is any other way
     """
     return (
-        db.session.query(models.Solvent)
-        .join(models.Compound)
-        .filter(models.Compound.name == solvent_name)
+        db.session.query(models.Compound)
+        .join(models.Solvent)
+        .filter(models.Solvent.name == solvent_name)
         .first()
     )

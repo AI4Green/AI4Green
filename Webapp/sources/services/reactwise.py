@@ -17,6 +17,8 @@ class ReactWiseStep:
         self.categorical_map = None
         self.experimental_details = None
         self.reaction_smiles = None
+        self.reactants = None
+        self.products = None
 
         self.load_step_experiments()
 
@@ -132,6 +134,8 @@ class ReactWiseStep:
             else:
                 product_smiles.append(component_smiles)
 
+        self.reactants = reactant_smiles
+        self.products = product_smiles
         self.reaction_smiles = (
             f"{'.'.join(reactant_smiles)}>>{'.'.join(product_smiles)}"
         )
@@ -187,25 +191,20 @@ def assign_reaction_temperature(reactwise_experiment_details, reaction_table_dat
     ) = temp_info.get("value"), temp_info.get("unit")
 
 
-def assign_reaction_solvents(reactwise_experiment_details, reaction_table_data):
+def extract_reaction_solvents(reactwise_experiment_details, unknown_solvents):
+    """
+    Gets reaction solvent by name and returns the solvent db object. If name is not in db, only the name is returned
+    """
     solvent_name = reactwise_experiment_details.get("Solvent", "")
     solvent = services.solvent.from_name(solvent_name)
+
     if solvent:
-        reaction_table_data["solvent_names"] = [solvent.name]
-        reaction_table_data["solvent_hazards"] = [solvent.hazard]
+        return solvent
     else:
-        return solvent_name
+        unknown_solvents.append(solvent_name)
+        return None
 
 
-def extract_recognised_fields(reactwise_experiment_details, reaction_table_data):
-    unknown_solvents = []
-
+def extract_temp_time_fields(reactwise_experiment_details, reaction_table_data):
     assign_reaction_time(reactwise_experiment_details, reaction_table_data)
     assign_reaction_temperature(reactwise_experiment_details, reaction_table_data)
-    unknown_solvent = assign_reaction_solvents(
-        reactwise_experiment_details, reaction_table_data
-    )
-
-    if unknown_solvent:
-        unknown_solvents.append(unknown_solvent)
-    return unknown_solvents

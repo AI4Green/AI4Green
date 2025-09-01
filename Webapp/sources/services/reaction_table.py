@@ -92,6 +92,9 @@ class ReactionTable:
         self.solvent_dropdown = self.get_solvent_dropdown()
         self.reaction_class = None
 
+        # novel_compound responses are stored here
+        self.novel_compounds = []
+
         # params/workups/purifications/responses
         self.reaction_params = {}
 
@@ -176,7 +179,59 @@ class ReactionTable:
         )
 
         self.update_reactants_and_products(updated_reactants, updated_products)
+        self.update_reaction_table_data()
         self.check_errors()
+
+    def update_reaction_table_data(self):
+        """
+        updates reaction_table_data dict with info from reactionTable class
+        """
+        self.update_dict_reaction_component(self.reactants)
+        self.update_dict_reaction_component(self.products)
+        self.update_dict_reaction_component(self.reagents)
+        self.update_dict_reaction_component(self.solvents)
+
+    def save(self):
+        """
+        Updates the reaction_table_data dict and saves to the reaction.
+        used only for reactwise imports, as reaction autosave manually saves reaction_table_dict from user input
+        """
+        pass
+
+    def update_dict_reaction_component(self, reaction_component):
+        """
+        Updates self.reaction_table_data with names from provided reaction component.
+        """
+        # define which fields you want to collect
+        fields = {
+            "names": [],
+            "smiles": [],
+            "molecular_weights": [],
+            "hazards": [],
+            "density": [],
+            "equivalents": [],
+        }
+
+        prefix = ""
+
+        # collect values into lists
+        for c in reaction_component:
+            # figure out component prefix (e.g. "reactants", "products", ...)
+            prefix = c.reaction_component.lower()
+            # append novel compound table to novel compounds
+            if c.is_novel_compound:
+                self.novel_compounds.append(c.novel_compound_table)
+            for key, acc in fields.items():
+                # should maintain smiles even if novel_compound
+                if key == "smiles":
+                    acc.append(c.smiles)
+                else:
+                    acc.extend(c.compound_data.get(key, [""]))
+
+        # update reaction_table_data in one go
+        for field, values in fields.items():
+            if values:
+                self.reaction_table_data[f"{prefix}_{field}"] = values
 
     def update_reactants_and_products(self, updated_reactants, updated_products):
         new_reactants = self.identify_compounds(updated_reactants, self.reactants)
@@ -317,8 +372,10 @@ def new():
             "solvent_volume_units": "mL",
             "product_amount_units": "mmol",
             "product_mass_units": "mg",
+            # reactants
             "reactant_masses": [],
             "reactant_names": [],
+            "reactant_molecular_weights": [],
             "reactant_masses_raw": [],
             "reactant_amounts": [],
             "reactant_amounts_raw": [],
@@ -329,6 +386,7 @@ def new():
             "reactant_densities": [],
             "reactant_concentrations": [],
             "reactant_mns": [],
+            # reagents
             "reagent_names": [],
             "reagent_molecular_weights": [],
             "reagent_densities": [],
@@ -342,11 +400,14 @@ def new():
             "reagent_masses_raw": [],
             "reagent_volumes": [],
             "reagent_volumes_raw": [],
+            # solvents
+            "solvent_ids": [],
             "solvent_volumes": [],
             "solvent_names": [],
             "solvent_concentrations": [],
             "solvent_hazards": [],
             "solvent_physical_forms": [],
+            # products
             "product_names": [],
             "product_mns": [],
             "product_amounts": [],
@@ -355,6 +416,7 @@ def new():
             "product_masses": [],
             "product_masses_raw": [],
             "product_physical_forms": [],
+            # params
             "reaction_time": "",
             "reaction_atmosphere": "-select-",
             "reaction_temperature": "",

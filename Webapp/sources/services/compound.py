@@ -276,6 +276,7 @@ class SketcherCompound:
         # only check for novel compound if reaction is not being reloaded
         if compound is None:
             self.handle_new_novel_compound()
+            self.is_novel_compound = True
 
         else:
             self.is_novel_compound = novel_compound

@@ -157,6 +157,7 @@ def import_from_reactwise():
         reactions = []
         unknown_solvents = []
         unknown_fields = []
+        novel_compounds = []
 
         # these fields are added to the reaction table dict
         known_fields = ["solvent", "time", "temperature"]  # any more to add?
@@ -165,31 +166,50 @@ def import_from_reactwise():
             print(details)
             unknown_keys = [x for x in details.keys() if x.lower() not in known_fields]
             unknown_fields.extend(unknown_keys)
-            # for key in unknown_keys:
-            #     print(key)
-            #     print(details[key])
-            #     unknown_fields.append(
-            #         (key, details[key])
-            #     )
-            reaction_table = json.loads(services.reaction_table.new())
+
+            # load new reaction table to load into reaction
+            new_reaction_table_data = services.reaction_table.new()
             reaction_id = services.reaction.get_next_reaction_id_for_workbook(
                 workbook.id
             )
 
-            # any solvents that are not matched are returned here
-            unknown_solvents.extend(
-                services.reactwise.extract_recognised_fields(details, reaction_table)
+            # gets solvents
+            solvent = services.reactwise.extract_reaction_solvents(
+                details, unknown_solvents
             )
+            print(unknown_solvents)
 
             reaction = services.reaction.add(
                 name="reactwise-" + reactwise_experiment_id,
                 creator=creator,
                 reaction_id=reaction_id,
                 workbook_id=workbook.id,
-                reaction_table={},
+                reaction_table=new_reaction_table_data,
                 summary_table={},
-                reaction_smiles="OB(O)C1=CC=CC=C1.FC2=CC=C(Br)C=C2>>FC3=CC=C(C=C3)C4=CC=CC=C4",
+                reaction_smiles=rw_step.reaction_smiles,
             )
+
+            # add reactants/products/solvents
+            reaction.reactants = (rw_step.reactants,)
+            reaction.products = (rw_step.products,)
+            reaction.solvent = [solvent.id if solvent else ""]
+
+            # now process the reaction data using the reaction table class
+            reaction_table = services.reaction_table.ReactionTable(
+                reaction, workgroup, workbook, "no", "no"
+            )
+            # this step updates the products/reagents from reaction smiles in the reaction table dict
+            # if there is a novel compound, they are added as blank strings and the novel_compound responses are stored
+            reaction_table.update(rw_step.reaction_smiles, {})
+            reaction_table.update_reaction_table_data()
+            novel_compounds.extend(reaction_table.novel_compounds)
+            # reaction_table.save()
+
+            reaction_table_data = reaction_table.reaction_table_data
+
+            # this step loads reaction temp/time to the reaction table dict
+            services.reactwise.extract_temp_time_fields(details, reaction_table_data)
+
             reactions.append(reaction)
 
         reactor_dimensions = rw_reactor_dimensions(len(reactions))
