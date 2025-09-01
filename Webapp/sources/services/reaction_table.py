@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 from flask import json, jsonify, render_template
 from sources import services
+from sources.extensions import db
 
 
 def get_reactants_and_products_list(
@@ -196,7 +197,8 @@ class ReactionTable:
         Updates the reaction_table_data dict and saves to the reaction.
         used only for reactwise imports, as reaction autosave manually saves reaction_table_dict from user input
         """
-        pass
+        self.reaction.update(**{"reaction_table_data": self.reaction_table_data})
+        db.session.commit()
 
     def update_dict_reaction_component(self, reaction_component):
         """

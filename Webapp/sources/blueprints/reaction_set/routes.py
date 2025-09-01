@@ -163,7 +163,6 @@ def import_from_reactwise():
         known_fields = ["solvent", "time", "temperature"]  # any more to add?
 
         for reactwise_experiment_id, details in rw_step.experimental_details.items():
-            print(details)
             unknown_keys = [x for x in details.keys() if x.lower() not in known_fields]
             unknown_fields.extend(unknown_keys)
 
@@ -177,7 +176,6 @@ def import_from_reactwise():
             solvent = services.reactwise.extract_reaction_solvents(
                 details, unknown_solvents
             )
-            print(unknown_solvents)
 
             reaction = services.reaction.add(
                 name="reactwise-" + reactwise_experiment_id,
@@ -203,12 +201,15 @@ def import_from_reactwise():
             reaction_table.update(rw_step.reaction_smiles, {})
             reaction_table.update_reaction_table_data()
             novel_compounds.extend(reaction_table.novel_compounds)
-            # reaction_table.save()
 
-            reaction_table_data = reaction_table.reaction_table_data
+            # reaction_table_data = reaction_table.reaction_table_data
 
             # this step loads reaction temp/time to the reaction table dict
-            services.reactwise.extract_temp_time_fields(details, reaction_table_data)
+            services.reactwise.extract_temp_time_fields(
+                details, reaction_table.reaction_table_data
+            )
+
+            reaction_table.save()
 
             reactions.append(reaction)
 
