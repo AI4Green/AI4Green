@@ -173,8 +173,9 @@ def solvents() -> Response:
     )
 
 
-@solvents_bp.route("/reactwise_assign_solvents", methods=["POST"])
-def reactwise_assign_solvents():
+# should be patch method????
+@solvents_bp.route("/assign_reactwise_solvents", methods=["POST"])
+def assign_reactwise_solvents():
     assignments = request.json.get("assignments")
     workbook_name = request.json.get("workbook_name")
     workgroup_name = request.json.get("workgroup_name")

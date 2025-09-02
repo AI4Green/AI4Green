@@ -3,7 +3,6 @@ function assignSolvents(unknownSolvents) {
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
   let assignments = {};
-  console.log(workgroup, workbook);
   // get assignments from user input
   for (let i = 1; i <= numberOfSolvents; i++) {
     let unknownSolvent = $("#unknown-solvent-name-" + i)
@@ -19,7 +18,7 @@ function assignSolvents(unknownSolvents) {
       };
     }
   }
-  fetch("/reactwise_assign_solvents", {
+  fetch("/assign_reactwise_solvents", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -84,7 +83,7 @@ function updateSolventCards(data) {
 
       // Remove the button
       const saveButton = unknownSolventsCard.querySelector(
-        ".btn-primary[onclick^='assignSolvents']",
+        ".btn-success[onclick^='assignSolvents']",
       );
       if (saveButton) saveButton.remove();
 
@@ -120,4 +119,108 @@ function showCardToast(card, message) {
   setTimeout(() => {
     toast.remove();
   }, 3000);
+}
+
+function assignVariables() {
+  let numberOfVariables = Number($("#js-number-of-unknown-variables").val());
+  let workgroup = $("#js-active-workgroup").val();
+  let workbook = $("#js-active-workbook").val();
+  let reactionSetId = $("#js-active-reaction-set").val();
+  let expDetails = JSON.parse($("#js-experimental-details").text()); // converts JSON string to JS object
+  let assignments = {};
+  // get assignments from user input, currently only does amounts
+  for (let i = 1; i <= numberOfVariables; i++) {
+    let label = $("#unknown-var-" + i);
+    let unknownVariable = label.data("variable");
+    let variableUnit = label.data("unit");
+    // get better name for variable nature
+    let variableNature = $("#variable-nature-" + i).val();
+    let reactionComponent = $("#variable-assignment-" + i).val();
+    let variableType = $("#variable-type-" + i).val();
+
+    assignments[unknownVariable] = {
+      nature: variableNature,
+      component: reactionComponent,
+      type: variableType,
+      unit: variableUnit,
+    };
+  }
+
+  fetch("/assign_reactwise_variables", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      assignments: assignments,
+      workbook_name: workbook,
+      workgroup_name: workgroup,
+      reaction_set_id: reactionSetId,
+      exp_details: expDetails,
+    }),
+  })
+    .then((response) => response.json()) // or .text() depending on what the backend sends
+    .then((data) => {
+      updateVariableCards(data);
+    })
+    .catch((err) => console.error("Error:", err));
+}
+
+function updateVariableCards(data) {
+  // Remove successful variables
+  data.success.forEach((variableName) => {
+    const label = Array.from(
+      document.querySelectorAll("[id^='unknown-var-']"),
+    ).find((el) => el.dataset.variable === variableName);
+
+    if (label) {
+      const card = label.closest(".col-md-6");
+      if (card) card.remove();
+    }
+  });
+
+  // Mark failed variables
+  data.failed.forEach((variableName) => {
+    const label = Array.from(
+      document.querySelectorAll("[id^='unknown-var-']"),
+    ).find((el) => el.dataset.variable === variableName);
+
+    if (label) {
+      const card = label.closest(".card");
+      if (card) {
+        card.classList.add("border-danger");
+        card.style.backgroundColor = "#ffe5e5";
+        showCardToast(card, "Variable not recognised");
+      }
+    }
+  });
+
+  // Section-level success check
+  const unknownVariablesCard = document.getElementById(
+    "unknown-variables-card",
+  );
+  if (unknownVariablesCard) {
+    const remainingCards = unknownVariablesCard.querySelectorAll(
+      "[id^='unknown-var-']",
+    );
+    if (remainingCards.length === 0) {
+      unknownVariablesCard.classList.add("border-success");
+      unknownVariablesCard.style.backgroundColor = "#e6f4ea";
+
+      // remove save button
+      const saveButton = unknownVariablesCard.querySelector(
+        ".btn-success[onclick^='assignVariables']",
+      );
+      if (saveButton) saveButton.remove();
+
+      // success message
+      const cardBody = unknownVariablesCard.querySelector(".card-body");
+      if (cardBody) {
+        const msg = document.createElement("p");
+        msg.innerHTML = "&#10003; All variables are assigned.";
+        msg.className = "text-success fw-bold mt-3";
+        cardBody.appendChild(msg);
+      }
+    }
+  }
 }

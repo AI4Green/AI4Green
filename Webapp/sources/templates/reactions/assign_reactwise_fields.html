@@ -128,7 +128,7 @@
                     {% endfor %}
                 </div>
                 <div class="mt-3">
-                    <button type="submit" class="btn btn-primary" onclick="assignSolvents({{ unknown_solvents }})">Save Solvent Assignments</button>
+                    <button type="submit" class="btn btn-success" onclick="assignSolvents({{ unknown_solvents }})">Save Solvent Assignments</button>
                 </div>
             {% else %}
                 <p class="text-muted">No unknown solvents to assign.</p>
@@ -137,7 +137,7 @@
     </div>
 
     <!-- Unknown Continuous Variables Section -->
-    <div class="card mb-5 border rounded shadow-sm">
+    <div class="card mb-5 border rounded shadow-sm" id="unknown-variables-card">
         <div class="card-header bg-light border-bottom p-3">
             <h4 class="mb-1 text-dark">Unknown Continuous Variables</h4>
             <small class="text-muted">
@@ -146,82 +146,83 @@
         </div>
         <div class="card-body">
             {% if unknown_variables %}
-                <form method="post" action="/assign_variables">
-                    <div class="row g-3">
-                        {% for variable in unknown_variables %}
-                            <div class="col-md-6">
-                                <div class="card p-3 border rounded shadow-sm h-100"
-                                     style="min-height: 180px; transition: transform 0.2s;"
-                                     tabindex="0" role="group" aria-labelledby="label-var-{{ loop.index }}">
+                <div class="row g-3">
+                    {% for variable, unit in unknown_variables %}
+                        <div class="col-md-6">
+                            <div class="card p-3 border rounded shadow-sm h-100"
+                                 style="min-height: 180px; transition: transform 0.2s;"
+                                 tabindex="0" role="group" aria-labelledby="label-var-{{ loop.index }}">
 
-                                    <!-- Variable Label -->
-                                    <label id="label-var-{{ loop.index }}" class="form-label fw-bold"
-                                           for="variable_assignment_{{ loop.index }}">
-                                        {{ variable }}
-                                    </label>
+                                <!-- Variable Label -->
+                                <label id="unknown-var-{{ loop.index }}" class="form-label fw-bold"
+                                       for="variable-assignment-{{ loop.index }}"
+                                       data-variable="{{ variable }}"
+                                       data-unit="{{ unit }}">
+                                    {{ variable }} ({{ unit }})
+                                </label>
 
-                                    <!-- Type Selection -->
-                                    <div class="mb-3">
-                                        <select class="form-select form-select-sm variable-type-select"
-                                                data-target="{{ loop.index }}" required>
-                                            <option value="" disabled selected>Select type</option>
-                                            <option value="chemical">Chemical</option>
-                                            <option value="amount">Amount</option>
-                                        </select>
-                                    </div>
-
-                                    <!-- Chemical structure input -->
-                                    <div class="chemical-input mt-2" id="chemical-{{ loop.index }}" style="display:none;">
-                                        <button type="button" class="btn btn-outline-secondary w-100">
-                                            Draw/Upload Chemical Structure
-                                        </button>
-                                    </div>
-
-                                    <!-- Amount input -->
-                                    <div class="amount-input mt-2" id="amount-{{ loop.index }}" style="display:none;">
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-borderless mb-0">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col" class="fw-normal text-muted">Select Reaction Component</th>
-                                                        <th scope="col" class="fw-normal text-muted">Select Unit</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>
-                                                            <select name="variable_assignment_{{ loop.index }}"
-                                                                    class="form-select form-select-sm" required>
-                                                                <option value="" disabled selected>Choose component</option>
-                                                                {% for component in reaction_components %}
-                                                                    <option value="{{ component }}">{{ component }}</option>
-                                                                {% endfor %}
-                                                            </select>
-                                                        </td>
-                                                        <td>
-                                                            <select name="variable_unit_{{ loop.index }}"
-                                                                    class="form-select form-select-sm" required>
-                                                                <option value="" disabled selected>Choose unit</option>
-                                                                <option value="equivalent">Equivalent</option>
-                                                                <option value="mass">Mass</option>
-                                                                <option value="volume">Volume</option>
-                                                                <option value="concentration">Concentration</option>
-                                                            </select>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-
+                                <!-- Type Selection -->
+                                <div class="mb-3">
+                                    <select class="form-select form-select-sm variable-type-select"
+                                            data-target="{{ loop.index }}" id="variable-nature-{{ loop.index }}" required>
+                                        <option value="" disabled selected>Select type</option>
+                                        <option value="chemical">Chemical</option>
+                                        <option value="amount">Amount</option>
+                                    </select>
                                 </div>
+
+                                <!-- Chemical structure input -->
+                                <div class="chemical-input mt-2" id="chemical-{{ loop.index }}" style="display:none;">
+                                    <button type="button" class="btn btn-outline-secondary w-100">
+                                        Draw/Upload Chemical Structure
+                                    </button>
+                                </div>
+
+                                <!-- Amount input -->
+                                <div class="amount-input mt-2" id="amount-{{ loop.index }}" style="display:none;">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-borderless mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" class="fw-normal text-muted">Select Reaction Component</th>
+                                                    <th scope="col" class="fw-normal text-muted">Select Variable Type</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <select id="variable-assignment-{{ loop.index }}"
+                                                                class="form-select form-select-sm" required>
+                                                            <option value="" disabled selected>Choose component</option>
+                                                            {% for component in reaction_components %}
+                                                                <option value="{{ component }}">{{ component }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select id="variable-type-{{ loop.index }}"
+                                                                class="form-select form-select-sm" required>
+                                                            <option value="" disabled selected>Choose unit</option>
+                                                            <option value="equivalent">Equivalent</option>
+                                                            <option value="mole-fraction">Mole Fraction</option>
+                                                            <option value="mass">Mass</option>
+                                                            <option value="volume">Volume</option>
+                                                            <option value="concentration">Concentration</option>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
                             </div>
-                        {% endfor %}
-                    </div>
-                    <div class="mt-3">
-                        <button type="submit" class="btn btn-success">Save Variable Assignments</button>
-                    </div>
-                </form>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-success" onclick="assignVariables()">Save Variable Assignments</button>
+                </div>
             {% else %}
                 <p class="text-muted">No unknown continuous variables to assign.</p>
             {% endif %}
@@ -270,7 +271,7 @@
                         {% endfor %}
                     </div>
                     <div class="mt-3">
-                        <button type="submit" class="btn btn-warning">Save Novel Compounds</button>
+                        <button type="submit" class="btn btn-success">Save Novel Compounds</button>
                     </div>
                 </form>
             {% else %}
@@ -283,7 +284,12 @@
 
 <input type="hidden" id="js-active-workbook" value="{{ workbook_name }}">
 <input type="hidden" id="js-active-workgroup" value="{{ workgroup_name }}">
+<input type="hidden" id="js-active-reaction-set" value="{{ reaction_set_id }}">
 <input type="hidden" id="js-number-of-unknown-solvents" value="{{ number_of_solvents }}">
+<input type="hidden" id="js-number-of-unknown-variables" value="{{ number_of_variables }}">
+<script id="js-experimental-details" type="application/json">
+  {{ experimental_details | tojson | safe }}
+</script>
 
 <datalist id="js-solvent-datalist" class="solvent-datalist">
 {% for sol in sol_rows %}

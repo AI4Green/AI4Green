@@ -13,6 +13,7 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from sources import models, services
+from sources.extensions import db
 
 from . import reaction_set_bp
 
@@ -158,13 +159,21 @@ def import_from_reactwise():
         unknown_solvents = {}
         unknown_fields = []
         novel_compounds = []
+        reaction_components = []
 
         # these fields are added to the reaction table dict
         known_fields = ["solvent", "time", "temperature"]  # any more to add?
 
         for reactwise_experiment_id, details in rw_step.experimental_details.items():
-            unknown_keys = [x for x in details.keys() if x.lower() not in known_fields]
+            # fix me
+            unknown_keys = [
+                (param, y.get("unit", "") if isinstance(y, dict) else "")
+                for param, y in details.items()
+                if param.lower() not in known_fields
+            ]
             unknown_fields.extend(unknown_keys)
+
+            # TODO: move exp details logic all to assign variables route?
 
             # load new reaction table to load into reaction
             new_reaction_table_data = services.reaction_table.new()
@@ -188,9 +197,12 @@ def import_from_reactwise():
             )
 
             # add reactants/products/solvents
-            reaction.reactants = (rw_step.reactants,)
-            reaction.products = (rw_step.products,)
+            reaction.reactants = rw_step.reactants
+            reaction.products = rw_step.products
             reaction.solvent = [solvent.id if solvent else ""]
+
+            reaction_components.extend(rw_step.reactants)
+            reaction_components.extend(rw_step.products)
 
             # now process the reaction data using the reaction table class
             reaction_table = services.reaction_table.ReactionTable(
@@ -234,7 +246,11 @@ def import_from_reactwise():
                 "workbook_name": workbook_name,
                 "novel_compounds": list(set(novel_compounds)),
                 "reaction_smiles": rw_step.reaction_smiles,
+                "reaction_components": list(set(reaction_components)),
+                "experimental_details": rw_step.experimental_details,
             }
+            print("SETUP", rw_step.experimental_details)
+
             return jsonify(
                 {
                     "feedback": "unknown fields",
@@ -268,14 +284,64 @@ def assign_reactwise_fields():
 
     sol_rows = services.solvent.get_workbook_list(workbook)
 
+    print("view", rw_import["experimental_details"])
+
     return render_template(
         "reactions/assign_reactwise_fields.html",
         unknown_variables=rw_import["unknown_fields"],
         unknown_solvents=rw_import["unknown_solvents"],
         number_of_solvents=len(rw_import["unknown_solvents"]),
+        number_of_variables=len(rw_import["unknown_fields"]),
         sol_rows=sol_rows,
         workgroup_name=rw_import["workgroup_name"],  # fix hidden input bug
         workbook_name=rw_import["workbook_name"],
         novel_compounds=novel_compounds,
         reaction_scheme_image=reaction_image,
+        reaction_components=rw_import["reaction_components"],
+        reaction_set_id=rw_import["set_id"],
+        experimental_details=rw_import["experimental_details"],
     )
+
+
+# possibly patch
+@reaction_set_bp.route("/assign_reactwise_variables", methods=["POST"])
+def assign_reactwise_variables():
+    assignments = request.json.get("assignments")
+    workbook_name = request.json.get("workbook_name")
+    workgroup_name = request.json.get("workgroup_name")
+    reaction_set_id = request.json.get("reaction_set_id")
+    exp_details = request.json.get("exp_details")
+
+    rset = services.reaction_set.get_from_id(
+        reaction_set_id, workgroup_name, workbook_name
+    )
+
+    success = []
+    fail = []
+
+    for reaction_number, details in exp_details.items():
+        for variable in details:
+            if variable in assignments:
+                ls = assignments.get(variable)
+                print("ls", ls)
+                reaction = [
+                    r
+                    for r in rset.reactions
+                    if r.name == "reactwise-" + reaction_number
+                ][0]
+
+                component_idx = reaction.reactants.index(ls["component"])
+                value = float(details[variable].get("value"))
+
+                if ls.get("type") == "mole-fraction":
+                    scaled_value = value / 100
+                    reaction.reaction_table_data["reactant_equivalents"][
+                        component_idx
+                    ] = scaled_value
+                    success.append(variable)
+
+                # include extra logic for other types
+
+    db.session.commit()
+
+    return jsonify({"success": success, "failed": fail})
