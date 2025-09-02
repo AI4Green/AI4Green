@@ -17,6 +17,7 @@ def solvents() -> Response:
     Returns:
         flask.Response: returns the solvent data as a json object
     """
+    # TODO: handle errors for solvent data list in reactwise assign solvents page
     solvent = sanitise_user_input(
         request.form["solvent"]
     )  # gets the solvent from browser
@@ -168,5 +169,43 @@ def solvents() -> Response:
             "primary_key": [primary_key],
             "alert_message": alert_message,
             "new_solvent": new_solvent,
+        }
+    )
+
+
+@solvents_bp.route("/reactwise_assign_solvents", methods=["POST"])
+def reactwise_assign_solvents():
+    assignments = request.json.get("assignments")
+    workbook_name = request.json.get("workbook_name")
+    workgroup_name = request.json.get("workgroup_name")
+
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
+
+    failed = []
+    success = []
+    # loop through unknown solvents
+    for unknown_solvent_name in assignments.keys():
+        # should be matched from datalist
+        assigned_solvent = services.solvent.from_name(
+            assignments[unknown_solvent_name]["assigned"]
+        )
+        if assigned_solvent is None:
+            failed.append(unknown_solvent_name)
+            continue
+        for reaction_id in assignments[unknown_solvent_name]["reactions"]:
+            reaction = services.reaction.get_from_reaction_id_and_workbook_id(
+                reaction_id, workbook.id
+            )
+            reaction.solvent = [assigned_solvent.id]
+
+        success.append(unknown_solvent_name)
+
+    db.session.commit()
+    return jsonify(
+        {
+            "success": success,
+            "failed": failed,
         }
     )

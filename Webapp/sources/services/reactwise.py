@@ -191,7 +191,7 @@ def assign_reaction_temperature(reactwise_experiment_details, reaction_table_dat
     ) = temp_info.get("value"), temp_info.get("unit")
 
 
-def extract_reaction_solvents(reactwise_experiment_details, unknown_solvents):
+def extract_reaction_solvents(exp_id, reactwise_experiment_details, unknown_solvents):
     """
     Gets reaction solvent by name and returns the solvent db object. If name is not in db, only the name is returned
     """
@@ -201,7 +201,7 @@ def extract_reaction_solvents(reactwise_experiment_details, unknown_solvents):
     if solvent:
         return solvent
     else:
-        unknown_solvents.append(solvent_name)
+        unknown_solvents.setdefault(solvent_name, []).append(exp_id)
         return None
 
 

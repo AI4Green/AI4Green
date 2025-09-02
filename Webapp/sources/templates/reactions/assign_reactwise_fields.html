@@ -5,11 +5,73 @@
 {% block scripts %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/custom_colours.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/reaction_table.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/reactwise.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_constructor.css') }}">
 
 {% endblock %}
 
 {% block content %}
+    <!-- Floating Progress Tracker -->
+<div id="progress-tracker" style="
+    position: fixed;
+    top: 100px;
+    left: 20px;
+    z-index: 1050;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: sans-serif;
+    font-size: 0.9rem;
+">
+    <span id="tracker-icon" style="font-size: 1.5rem; color: red;">&#10060;</span>
+    <span id="tracker-text" style="color: #333;">Assign the unrecognised fields to complete set up!</span>
+    <a id="tracker-button" href="/next_step" class="btn btn-success btn-sm" style="display: none; margin-left: 10px;">
+        Click to progress
+    </a>
+
+{#    <script>#}
+{#    function updateTracker() {#}
+{#        const solventCards = document.querySelectorAll('#assign-solvents .card[tabindex="0"]');#}
+{#        const variableCards = document.querySelectorAll('#assign-variables .card[tabindex="0"]');#}
+{#        const compoundCards = document.querySelectorAll('#assign-compounds .card[tabindex="0"]');#}
+{##}
+{#        const unresolved = solventCards.length + variableCards.length + compoundCards.length;#}
+{##}
+{#        const icon = document.getElementById('tracker-icon');#}
+{#        const text = document.getElementById('tracker-text');#}
+{#        const button = document.getElementById('tracker-button');#}
+{##}
+{#        if (unresolved > 0) {#}
+{#            icon.innerHTML = '&#10060;'; // Red cross#}
+{#            icon.style.color = 'red';#}
+{#            text.textContent = 'There are still unrecognised fields';#}
+{#            button.style.display = 'none';#}
+{#        } else {#}
+{#            icon.innerHTML = '&#9989;'; // Green tick#}
+{#            icon.style.color = 'green';#}
+{#            text.textContent = 'All fields recognised!';#}
+{#            button.style.display = 'inline-block';#}
+{#        }#}
+{#    }#}
+{##}
+{#    // Attach IDs to sections for tracking#}
+{#    document.querySelector('[action="/assign_solvents"]')?.setAttribute('id','assign-solvents');#}
+{#    document.querySelector('[action="/assign_variables"]')?.setAttribute('id','assign-variables');#}
+{#    document.querySelector('[action="/assign_novel_compounds"]')?.setAttribute('id','assign-compounds');#}
+{##}
+{#    // Initial check#}
+{#    updateTracker();#}
+{##}
+{#    // Observe DOM changes to auto-update#}
+{#    const observer = new MutationObserver(updateTracker);#}
+{#    observer.observe(document.body, { childList: true, subtree: true });#}
+{#    </script>#}
+</div>
+
 <div class="container py-4">
 
     <!-- Reaction Overview Card -->
@@ -33,33 +95,6 @@
                     {% endif %}
                 </div>
             </div>
-
-            <!-- Solvents -->
-            <div class="mb-4">
-                {% if solvents %}
-                    <ul class="list-group list-group-flush">
-                        {% for solvent in solvents %}
-                            <li class="list-group-item">{{ solvent }}</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="text-muted">No solvents provided</p>
-                {% endif %}
-            </div>
-
-            <!-- Reagents -->
-            <div class="mb-2">
-                {% if reagents %}
-                    <ul class="list-group list-group-flush">
-                        {% for reagent in reagents %}
-                            <li class="list-group-item">{{ reagent }}</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="text-muted">No reagents provided</p>
-                {% endif %}
-            </div>
-
         </div>
     </div>
 
@@ -67,36 +102,34 @@
     <h2 class="mb-4 text-center">Assign Unknown Reaction Fields</h2>
 
     <!-- Unknown Solvents Section -->
-    <div class="card mb-5 border rounded shadow-sm">
+    <div class="card mb-5 border rounded shadow-sm" id="unknown-solvents-card">
         <div class="card-header bg-light border-bottom p-3">
             <h4 class="mb-1 text-dark">Unknown Solvents</h4>
             <small class="text-muted">Match each solvent to the correct reaction component before completing the import.</small>
         </div>
         <div class="card-body">
             {% if unknown_solvents %}
-                <form method="post" action="/assign_solvents">
-                    <div class="row g-3">
-                        {% for solvent in unknown_solvents %}
-                            <div class="col-md-6">
-                                <div class="card p-3 border rounded shadow-sm h-100"
-                                     style="min-height: 120px; transition: transform 0.2s;"
-                                     tabindex="0" role="group" aria-labelledby="label-{{ loop.index }}">
-                                    <label id="label-{{ loop.index }}" class="form-label fw-bold"
-                                           for="solvent_assignment_{{ loop.index }}">
-                                        {{ solvent }}
-                                    </label>
-                                    <input type="search" class="remove-highlight-filled-cell solvent-input"
-                                           id="js-solvent{{ loop.index }}" autocomplete="off"
-                                           placeholder="Name or CAS Number"
-                                           list="js-solvent-datalist">
-                                </div>
+                <div class="row g-3">
+                    {% for solvent, exps in unknown_solvents.items() %}
+                        <div class="col-md-6" id="unknown-solvent-card-{{ loop.index }}">
+                            <div class="card p-3 border rounded shadow-sm h-100"
+                                 style="min-height: 120px; transition: transform 0.2s;"
+                                 tabindex="0" role="group" aria-labelledby="label-{{ loop.index }}">
+                                <label id="unknown-solvent-name-{{ loop.index }}" class="form-label fw-bold"
+                                       for="solvent_assignment_{{ loop.index }}">
+                                    {{ solvent }}
+                                </label>
+                                <input type="search" class="remove-highlight-filled-cell solvent-input"
+                                       id="js-solvent{{ loop.index }}" autocomplete="off"
+                                       placeholder="Name or CAS Number"
+                                       list="js-solvent-datalist">
                             </div>
-                        {% endfor %}
-                    </div>
-                    <div class="mt-3">
-                        <button type="submit" class="btn btn-primary">Save Solvent Assignments</button>
-                    </div>
-                </form>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary" onclick="assignSolvents({{ unknown_solvents }})">Save Solvent Assignments</button>
+                </div>
             {% else %}
                 <p class="text-muted">No unknown solvents to assign.</p>
             {% endif %}
@@ -249,7 +282,8 @@
 </div>
 
 <input type="hidden" id="js-active-workbook" value="{{ workbook_name }}">
-<input type="hidden" id="js-active-workgroup" value="{{ workgroup }}">
+<input type="hidden" id="js-active-workgroup" value="{{ workgroup_name }}">
+<input type="hidden" id="js-number-of-unknown-solvents" value="{{ number_of_solvents }}">
 
 <datalist id="js-solvent-datalist" class="solvent-datalist">
 {% for sol in sol_rows %}
@@ -348,5 +382,29 @@ autofillSolventFields2();
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     outline: none;
 }
+.card-toast {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: #f8d7da; /* light red */
+  color: #721c24; /* dark red text */
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  opacity: 1;
+  transition: opacity 1s ease-out, transform 1s ease-out;
+  pointer-events: none; /* so it doesn't block clicks */
+  z-index: 10;
+}
+
+.card-toast.fade-out {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.card.position-relative {
+  position: relative; /* make card a positioning context */
+}
 </style>
+
 {% endblock %}

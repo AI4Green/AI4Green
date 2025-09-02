@@ -155,7 +155,7 @@ def import_from_reactwise():
     if not set_obj:
         set_id = services.reaction_set.next_id_in_workbook(workbook.id)
         reactions = []
-        unknown_solvents = []
+        unknown_solvents = {}
         unknown_fields = []
         novel_compounds = []
 
@@ -172,11 +172,6 @@ def import_from_reactwise():
                 workbook.id
             )
 
-            # gets solvents
-            solvent = services.reactwise.extract_reaction_solvents(
-                details, unknown_solvents
-            )
-
             reaction = services.reaction.add(
                 name="reactwise-" + reactwise_experiment_id,
                 creator=creator,
@@ -185,6 +180,11 @@ def import_from_reactwise():
                 reaction_table=new_reaction_table_data,
                 summary_table={},
                 reaction_smiles=rw_step.reaction_smiles,
+            )
+
+            # gets solvents
+            solvent = services.reactwise.extract_reaction_solvents(
+                reaction.reaction_id, details, unknown_solvents
             )
 
             # add reactants/products/solvents
@@ -227,12 +227,8 @@ def import_from_reactwise():
         if unknown_solvents or unknown_fields:
             # store as session variables for now, there must be a better way
             session["reactwise_import"] = {
-                "unknown_fields": list(
-                    set(unknown_fields)
-                ),  # must be list to be JSON serializable
-                "unknown_solvents": list(
-                    set(unknown_solvents)
-                ),  # must be list to be JSON serializable
+                "unknown_fields": list(set(unknown_fields)),
+                "unknown_solvents": unknown_solvents,
                 "set_id": set_id,
                 "workgroup_name": workgroup_name,
                 "workbook_name": workbook_name,
@@ -276,8 +272,9 @@ def assign_reactwise_fields():
         "reactions/assign_reactwise_fields.html",
         unknown_variables=rw_import["unknown_fields"],
         unknown_solvents=rw_import["unknown_solvents"],
+        number_of_solvents=len(rw_import["unknown_solvents"]),
         sol_rows=sol_rows,
-        workgroup=rw_import["workgroup_name"],  # fix hidden input bug
+        workgroup_name=rw_import["workgroup_name"],  # fix hidden input bug
         workbook_name=rw_import["workbook_name"],
         novel_compounds=novel_compounds,
         reaction_scheme_image=reaction_image,
