@@ -197,7 +197,10 @@ class ReactionTable:
         Updates the reaction_table_data dict and saves to the reaction.
         used only for reactwise imports, as reaction autosave manually saves reaction_table_dict from user input
         """
-        self.reaction.update(**{"reaction_table_data": self.reaction_table_data})
+        json_data = json.dumps(self.reaction_table_data)
+
+        # Save the JSON string to the database
+        self.reaction.reaction_table_data = json_data
         db.session.commit()
 
     def update_dict_reaction_component(self, reaction_component):
@@ -227,6 +230,8 @@ class ReactionTable:
                 # should maintain smiles even if novel_compound
                 if key == "smiles":
                     acc.append(c.smiles)
+                elif key == "molecular_weights":
+                    acc.extend(str(c.compound_data.get(key, [""])))
                 else:
                     acc.extend(c.compound_data.get(key, [""]))
 

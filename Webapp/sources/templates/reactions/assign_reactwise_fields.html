@@ -29,47 +29,9 @@
 ">
     <span id="tracker-icon" style="font-size: 1.5rem; color: red;">&#10060;</span>
     <span id="tracker-text" style="color: #333;">Assign the unrecognised fields to complete set up!</span>
-    <a id="tracker-button" href="/next_step" class="btn btn-success btn-sm" style="display: none; margin-left: 10px;">
+    <a id="tracker-button" href="/reaction_set/{{ workgroup_name }}/{{ workbook_name }}/{{ set_name }}" class="btn btn-success btn-sm" style="display: none; margin-left: 10px;">
         Click to progress
     </a>
-
-{#    <script>#}
-{#    function updateTracker() {#}
-{#        const solventCards = document.querySelectorAll('#assign-solvents .card[tabindex="0"]');#}
-{#        const variableCards = document.querySelectorAll('#assign-variables .card[tabindex="0"]');#}
-{#        const compoundCards = document.querySelectorAll('#assign-compounds .card[tabindex="0"]');#}
-{##}
-{#        const unresolved = solventCards.length + variableCards.length + compoundCards.length;#}
-{##}
-{#        const icon = document.getElementById('tracker-icon');#}
-{#        const text = document.getElementById('tracker-text');#}
-{#        const button = document.getElementById('tracker-button');#}
-{##}
-{#        if (unresolved > 0) {#}
-{#            icon.innerHTML = '&#10060;'; // Red cross#}
-{#            icon.style.color = 'red';#}
-{#            text.textContent = 'There are still unrecognised fields';#}
-{#            button.style.display = 'none';#}
-{#        } else {#}
-{#            icon.innerHTML = '&#9989;'; // Green tick#}
-{#            icon.style.color = 'green';#}
-{#            text.textContent = 'All fields recognised!';#}
-{#            button.style.display = 'inline-block';#}
-{#        }#}
-{#    }#}
-{##}
-{#    // Attach IDs to sections for tracking#}
-{#    document.querySelector('[action="/assign_solvents"]')?.setAttribute('id','assign-solvents');#}
-{#    document.querySelector('[action="/assign_variables"]')?.setAttribute('id','assign-variables');#}
-{#    document.querySelector('[action="/assign_novel_compounds"]')?.setAttribute('id','assign-compounds');#}
-{##}
-{#    // Initial check#}
-{#    updateTracker();#}
-{##}
-{#    // Observe DOM changes to auto-update#}
-{#    const observer = new MutationObserver(updateTracker);#}
-{#    observer.observe(document.body, { childList: true, subtree: true });#}
-{#    </script>#}
 </div>
 
 <div class="container py-4">
@@ -230,7 +192,7 @@
     </div>
 
     <!-- Novel Compounds Section -->
-    <div class="card mb-5 border rounded shadow-sm" >
+    <div class="card mb-5 border rounded shadow-sm" id="novel-compounds-section">
         <div class="card-header bg-light border-bottom p-3">
             <h4 class="mb-1 text-dark">Novel Compounds</h4>
             <small class="text-muted">
@@ -239,41 +201,40 @@
         </div>
         <div class="card-body">
             {% if novel_compounds %}
-                <form method="post" action="/assign_novel_compounds">
-                    <div class="row g-3">
-                        {% for compound in novel_compounds %}
-                            <div class="col-6">
-                                <div class="card p-3 border rounded shadow-sm h-100" tabindex="0">
-                                    <h5 class="mb-2">{{ compound.component }} {{ compound.number }}</h5>
+                <div class="row g-3">
+                    {% for compound in novel_compounds %}
+                        <div class="col-6">
+                            <div class="card p-3 border rounded shadow-sm h-100" tabindex="0">
+                                <h5 class="mb-2">{{ compound.component }} {{ compound.number }}</h5>
 
-                                    {# Chemical structure image #}
-                                    {% if compound.image_base64 %}
-                                        <div class="text-center mb-3">
-                                            <img src="data:image/png;base64,{{ compound.image_base64 }}"
-                                                 alt="Chemical structure of {{ compound.name or 'compound' }}"
-                                                 class="img-fluid border rounded" id="novel-compound-image-{{ compound.number }}"
-                                                 style="max-height: 200px; object-fit: contain;">
-                                        </div>
-                                    {% else %}
-                                        <p class="text-muted text-center">No structure available</p>
-                                    {% endif %}
+                                {# Chemical structure image #}
+                                {% if compound.image_base64 %}
+                                    <div class="text-center mb-3">
+                                        <img src="data:image/png;base64,{{ compound.image_base64 }}"
+                                             alt="Chemical structure of {{ compound.name or 'compound' }}"
+                                             class="img-fluid border rounded"
+                                             id="novel-compound-image-{{ compound.number }}"
+                                             style="max-height: 200px; object-fit: contain;">
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted text-center">No structure available</p>
+                                {% endif %}
 
-                                    {# Existing novel compound input partial #}
-                                    {% set component = compound.component %}
-                                    {% set number = compound.number %}
-                                    {% set name = compound.name %}
-                                    {% set mw = compound.mw %}
-                                    {% set smiles = compound.smiles %}
-                                    {% set polymer = compound.polymer %}
-                                    {% include "reactions/_novel_compound.html" %}
-                                </div>
+                                {# Call the macro here #}
+                                {% from "macros/novel_compound.html" import novel_compound_input_form %}
+                                {{ novel_compound_input_form(
+                                    compound.component,
+                                    compound.number,
+                                    name=compound.name,
+                                    mw=compound.mw,
+                                    smiles=compound.smiles,
+                                    polymer=compound.polymer,
+                                    index=loop.index0
+                                ) }}
                             </div>
-                        {% endfor %}
-                    </div>
-                    <div class="mt-3">
-                        <button type="submit" class="btn btn-success">Save Novel Compounds</button>
-                    </div>
-                </form>
+                        </div>
+                    {% endfor %}
+                </div>
             {% else %}
                 <p class="text-muted">No novel compounds to define.</p>
             {% endif %}
@@ -287,6 +248,8 @@
 <input type="hidden" id="js-active-reaction-set" value="{{ reaction_set_id }}">
 <input type="hidden" id="js-number-of-unknown-solvents" value="{{ number_of_solvents }}">
 <input type="hidden" id="js-number-of-unknown-variables" value="{{ number_of_variables }}">
+<input type="hidden" id="js-reaction-smiles" value="{{ reaction_smiles }}">
+
 <script id="js-experimental-details" type="application/json">
   {{ experimental_details | tojson | safe }}
 </script>
@@ -335,8 +298,6 @@ document.querySelectorAll('.variable-type-select').forEach(select => {
         }
     });
 });
-
-console.log("DDDD")
 
 let solventDatalistID = "js-solvent-datalist"
 let solventInputID = "js-solvent"

@@ -220,8 +220,10 @@ def import_from_reactwise():
             services.reactwise.extract_temp_time_fields(
                 details, reaction_table.reaction_table_data
             )
+            print(type(reaction.reaction_table_data), "1")
 
             reaction_table.save()
+            print(type(reaction.reaction_table_data), "2")
 
             reactions.append(reaction)
 
@@ -248,6 +250,7 @@ def import_from_reactwise():
                 "reaction_smiles": rw_step.reaction_smiles,
                 "reaction_components": list(set(reaction_components)),
                 "experimental_details": rw_step.experimental_details,
+                "set_name": step_name,
             }
             print("SETUP", rw_step.experimental_details)
 
@@ -284,8 +287,6 @@ def assign_reactwise_fields():
 
     sol_rows = services.solvent.get_workbook_list(workbook)
 
-    print("view", rw_import["experimental_details"])
-
     return render_template(
         "reactions/assign_reactwise_fields.html",
         unknown_variables=rw_import["unknown_fields"],
@@ -299,7 +300,9 @@ def assign_reactwise_fields():
         reaction_scheme_image=reaction_image,
         reaction_components=rw_import["reaction_components"],
         reaction_set_id=rw_import["set_id"],
+        set_name=rw_import["set_name"],
         experimental_details=rw_import["experimental_details"],
+        reaciton_smiles=rw_import["reaction_smiles"],
     )
 
 
@@ -329,16 +332,20 @@ def assign_reactwise_variables():
                     for r in rset.reactions
                     if r.name == "reactwise-" + reaction_number
                 ][0]
+                reaction_table_data = json.loads(reaction.reaction_table_data)
 
                 component_idx = reaction.reactants.index(ls["component"])
                 value = float(details[variable].get("value"))
 
                 if ls.get("type") == "mole-fraction":
                     scaled_value = value / 100
-                    reaction.reaction_table_data["reactant_equivalents"][
+                    reaction_table_data["reactant_equivalents"][
                         component_idx
                     ] = scaled_value
                     success.append(variable)
+                    reaction.reaction_table_data = json.dumps(reaction_table_data)
+
+                print(type(reaction.reaction_table_data), "4")
 
                 # include extra logic for other types
 

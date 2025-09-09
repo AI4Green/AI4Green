@@ -32,6 +32,7 @@ function assignSolvents(unknownSolvents) {
     .then((response) => response.json()) // or .text() depending on what the backend sends
     .then((data) => {
       updateSolventCards(data);
+      updateTracker();
     })
     .catch((err) => console.error("Error:", err));
 }
@@ -162,6 +163,7 @@ function assignVariables() {
     .then((response) => response.json()) // or .text() depending on what the backend sends
     .then((data) => {
       updateVariableCards(data);
+      updateTracker();
     })
     .catch((err) => console.error("Error:", err));
 }
@@ -222,5 +224,128 @@ function updateVariableCards(data) {
         cardBody.appendChild(msg);
       }
     }
+  }
+}
+
+function postNovelCompound(index) {
+  // Select fields by index
+  let name = $(`#js-new-compound-name-${index}`).val();
+  let molWeight = $(`#js-new-compound-mw-${index}`).val();
+  let hPhrase = $(`#js-new-compound-hazards-${index}`).val();
+  let cas = $(`#js-new-compound-cas-${index}`).val();
+  let density = $(`#js-new-compound-density-${index}`).val();
+  let concentration = $(`#js-new-compound-concentration-${index}`).val();
+  let smiles = $(`#js-new-compound-smiles-${index}`).val();
+  let polymer = $(`#js-polymer-${index}`).val();
+  let workgroup = $("#js-active-workgroup").val();
+  let workbook = $("#js-active-workbook").val();
+
+  let requestData = {
+    name: name,
+    molWeight: molWeight,
+    hPhrase: hPhrase,
+    density: density,
+    concentration: concentration,
+    smiles: smiles,
+    polymer: polymer,
+    workbook: workbook,
+    workgroup: workgroup,
+    component: "reactant",
+    source: "card",
+  };
+
+  if (!polymer) {
+    requestData.cas = cas;
+  }
+
+  // Send AJAX request
+  $.ajax({
+    url: "/_novel_compound",
+    type: "POST",
+    dataType: "json",
+    data: requestData,
+  }).done(function (data) {
+    console.log(data);
+    alert(data.feedback);
+    if (data.feedback === "Compound added to the database") {
+      removeNovelCompoundCard(index);
+      updateTracker();
+    }
+  });
+}
+
+function removeNovelCompoundCard(index) {
+  // Find the specific form container by index
+  const formContainer = document.getElementById(
+    `js-novel-compound-input-form-${index}`,
+  );
+  if (!formContainer) return;
+
+  // Remove the outer card of this form
+  const card = formContainer.closest(".card.p-3");
+  if (card) card.remove();
+
+  // Get the section/container holding all novel compound cards
+  const novelCompoundsSection = document.getElementById(
+    "novel-compounds-section",
+  );
+  if (!novelCompoundsSection) return;
+
+  // Check if any cards are left
+  const remainingCards = novelCompoundsSection.querySelectorAll(".card.p-3");
+  if (remainingCards.length === 0) {
+    // Update section styling to indicate all compounds processed
+    novelCompoundsSection.classList.add("border-success");
+    novelCompoundsSection.style.backgroundColor = "#e6f4ea";
+
+    // Remove save button if present
+    const saveButton = novelCompoundsSection.querySelector(
+      ".btn-success[onclick^='saveNovelCompounds']",
+    );
+    if (saveButton) saveButton.remove();
+
+    // Add success message
+    const cardBody = novelCompoundsSection.querySelector(".card-body");
+    if (cardBody) {
+      const msg = document.createElement("p");
+      msg.innerHTML = "&#10003; All novel compounds have been processed.";
+      msg.className = "text-success fw-bold mt-3";
+      cardBody.appendChild(msg);
+    }
+  }
+}
+
+function updateTracker() {
+  // Count unresolved cards in each section
+  const solventCards = document.querySelectorAll(
+    '#unknown-solvents-card .card[tabindex="0"]',
+  );
+  const variableCards = document.querySelectorAll(
+    '#unknown-variables-card .card[tabindex="0"]',
+  );
+  const compoundCards = document.querySelectorAll(
+    '#novel-compounds-section .card[tabindex="0"]',
+  );
+
+  const unresolved =
+    solventCards.length + variableCards.length + compoundCards.length;
+
+  // Get tracker elements
+  const icon = document.getElementById("tracker-icon");
+  const text = document.getElementById("tracker-text");
+  const button = document.getElementById("tracker-button");
+
+  if (!icon || !text || !button) return; // safety check
+
+  if (unresolved > 0) {
+    icon.innerHTML = "&#10060;"; // Red cross
+    icon.style.color = "red";
+    text.textContent = "There are still unrecognised fields";
+    button.style.display = "none";
+  } else {
+    icon.innerHTML = "&#9989;"; // Green tick
+    icon.style.color = "green";
+    text.textContent = "All fields recognised!";
+    button.style.display = "inline-block";
   }
 }
