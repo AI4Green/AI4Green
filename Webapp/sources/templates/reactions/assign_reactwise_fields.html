@@ -64,10 +64,16 @@
     <h2 class="mb-4 text-center">Assign Unknown Reaction Fields</h2>
 
     <!-- Unknown Solvents Section -->
-    <div class="card mb-5 border rounded shadow-sm" id="unknown-solvents-card">
+    <div class="card mb-5 border rounded shadow-sm {% if not unknown_solvents %}border-success{% endif %}"
+         id="unknown-solvents-card"
+         {% if not unknown_solvents %}style="background-color: #e6f4ea;"{% endif %}>
         <div class="card-header bg-light border-bottom p-3">
             <h4 class="mb-1 text-dark">Unknown Solvents</h4>
-            <small class="text-muted">Match each solvent to the correct reaction component before completing the import.</small>
+            {% if unknown_solvents %}
+                <small class="text-muted">
+                    Match each solvent to the correct reaction component before completing the import.
+                </small>
+            {% endif %}
         </div>
         <div class="card-body">
             {% if unknown_solvents %}
@@ -90,21 +96,27 @@
                     {% endfor %}
                 </div>
                 <div class="mt-3">
-                    <button type="submit" class="btn btn-success" onclick="assignSolvents({{ unknown_solvents }})">Save Solvent Assignments</button>
+                    <button type="submit" class="btn btn-success" onclick="assignSolvents({{ unknown_solvents }})">
+                        Save Solvent Assignments
+                    </button>
                 </div>
             {% else %}
-                <p class="text-muted">No unknown solvents to assign.</p>
+                <p class="text-success fw-bold mt-3">&#10003; All unknown solvents have been assigned.</p>
             {% endif %}
         </div>
     </div>
 
     <!-- Unknown Continuous Variables Section -->
-    <div class="card mb-5 border rounded shadow-sm" id="unknown-variables-card">
+    <div class="card mb-5 border rounded shadow-sm {% if not unknown_variables %}border-success{% endif %}"
+         id="unknown-variables-card"
+         {% if not unknown_variables %}style="background-color: #e6f4ea;"{% endif %}>
         <div class="card-header bg-light border-bottom p-3">
             <h4 class="mb-1 text-dark">Unknown Continuous Variables</h4>
-            <small class="text-muted">
-                Match each field to the correct reaction component and define its type.
-            </small>
+            {% if unknown_variables %}
+                <small class="text-muted">
+                    Match each field to the correct reaction component and define its type.
+                </small>
+            {% endif %}
         </div>
         <div class="card-body">
             {% if unknown_variables %}
@@ -186,13 +198,15 @@
                     <button type="submit" class="btn btn-success" onclick="assignVariables()">Save Variable Assignments</button>
                 </div>
             {% else %}
-                <p class="text-muted">No unknown continuous variables to assign.</p>
+                <p class="text-success fw-bold mt-3">&#10003; All unknown continuous variables have been assigned.</p>
             {% endif %}
         </div>
     </div>
 
     <!-- Novel Compounds Section -->
-    <div class="card mb-5 border rounded shadow-sm" id="novel-compounds-section">
+    <div class="card mb-5 border rounded shadow-sm {% if not novel_compounds %}border-success{% endif %}"
+         id="novel-compounds-section"
+         {% if not novel_compounds %}style="background-color: #e6f4ea;"{% endif %}>
         <div class="card-header bg-light border-bottom p-3">
             <h4 class="mb-1 text-dark">Novel Compounds</h4>
             <small class="text-muted">
@@ -236,11 +250,10 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="text-muted">No novel compounds to define.</p>
+                <p class="text-success fw-bold mt-3">&#10003; All novel compounds have been processed.</p>
             {% endif %}
         </div>
     </div>
-
 </div>
 
 <input type="hidden" id="js-active-workbook" value="{{ workbook_name }}">
