@@ -58,7 +58,7 @@ def new_reaction() -> Response:
         # make the reaction table dict with units set to default values
         reaction_table = services.reaction_table.new()
 
-        summary_table = services.summary.empty_summary_table
+        summary_table = services.summary.empty_summary_table()
         # add reaction to database
         services.reaction.add(
             reaction_name,
