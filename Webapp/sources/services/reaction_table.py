@@ -94,7 +94,7 @@ class ReactionTable:
         self.reaction_class = None
 
         # novel_compound responses are stored here
-        self.novel_compounds = []
+        self.new_novel_compounds = []
 
         # params/workups/purifications/responses
         self.reaction_params = {}
@@ -130,6 +130,7 @@ class ReactionTable:
     def _check_compound_errors(compound_type):
         for compound in compound_type:
             if compound.novel_compound_table:
+                print(compound.smiles, compound.novel_compound_table)
                 return compound.novel_compound_table
             elif compound.errors:
                 return compound.errors[0]
@@ -201,7 +202,7 @@ class ReactionTable:
 
         # Save the JSON string to the database
         self.reaction.reaction_table_data = json_data
-        db.session.commit()
+        # db.session.commit()
 
     def update_dict_reaction_component(self, reaction_component):
         """
@@ -223,9 +224,11 @@ class ReactionTable:
         for c in reaction_component:
             # figure out component prefix (e.g. "reactants", "products", ...)
             prefix = c.reaction_component.lower()
-            # append smiles to novel compounds if novel compound
+            # append smiles to novel compounds if novel compound table has been rendered
             if c.is_novel_compound:
-                self.novel_compounds.append(c.smiles)
+                self.new_novel_compounds.append(
+                    c.smiles
+                ) if c.novel_compound_table else None
             for key, acc in fields.items():
                 # should maintain smiles even if novel_compound
                 if key == "smiles":

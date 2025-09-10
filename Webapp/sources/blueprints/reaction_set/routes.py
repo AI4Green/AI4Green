@@ -212,7 +212,7 @@ def import_from_reactwise():
             # if there is a novel compound, they are added as blank strings and the novel_compound responses are stored
             reaction_table.update(rw_step.reaction_smiles, {})
             reaction_table.update_reaction_table_data()
-            novel_compounds.extend(reaction_table.novel_compounds)
+            novel_compounds.extend(reaction_table.new_novel_compounds)
 
             # reaction_table_data = reaction_table.reaction_table_data
 
@@ -220,10 +220,8 @@ def import_from_reactwise():
             services.reactwise.extract_temp_time_fields(
                 details, reaction_table.reaction_table_data
             )
-            print(type(reaction.reaction_table_data), "1")
 
             reaction_table.save()
-            print(type(reaction.reaction_table_data), "2")
 
             reactions.append(reaction)
 
@@ -252,7 +250,6 @@ def import_from_reactwise():
                 "experimental_details": rw_step.experimental_details,
                 "set_name": step_name,
             }
-            print("SETUP", rw_step.experimental_details)
 
             return jsonify(
                 {
@@ -344,9 +341,6 @@ def assign_reactwise_variables():
                     ] = scaled_value
                     success.append(variable)
                     reaction.reaction_table_data = json.dumps(reaction_table_data)
-
-                print(type(reaction.reaction_table_data), "4")
-
                 # include extra logic for other types
 
     db.session.commit()

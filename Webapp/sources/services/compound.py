@@ -336,7 +336,6 @@ class SketcherCompound:
         )
 
     def add_solvent_sustainability_flags(self):
-        print(self.compound_data)
         flag = services.solvent.sustainability_from_primary_key(
             self.compound_data["ids"]
         )
