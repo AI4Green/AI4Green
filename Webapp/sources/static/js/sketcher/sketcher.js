@@ -268,7 +268,6 @@ async function reloadSketcherFromSmiles(smiles, sketcher) {
     for (let i = 0; i < 5; i++) {
       let ketcher = await getKetcher();
       if (ketcher !== undefined) {
-        console.log(smiles);
         ketcher.setMolecule(smiles);
         break;
       } else {
@@ -300,7 +299,6 @@ async function reloadSketcherFromRXN(rxn, sketcher) {
  */
 async function reloadSketcher() {
   let reactionSmiles = $("#js-reaction-smiles").val();
-  console.log(reactionSmiles);
   let reactionRXN = $("#js-reaction-rxn").val();
   let selectedSketcher = $('input[name="sketcher-select"]:checked').attr("id");
   // reactionRXN will be None for reactions made before polymer mode deployment

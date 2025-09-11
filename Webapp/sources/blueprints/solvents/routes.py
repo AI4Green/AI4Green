@@ -200,7 +200,6 @@ def assign_reactwise_solvents():
                 reaction_id, workbook.id
             )
             reaction.solvent = [assigned_solvent.id]
-            print(type(reaction.reaction_table_data), "3")
 
         success.append(unknown_solvent_name)
 

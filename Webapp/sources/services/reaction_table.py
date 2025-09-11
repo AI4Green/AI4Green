@@ -78,6 +78,7 @@ class ReactionTable:
         self.workbook = workbook
         self.demo = demo
         self.tutorial = tutorial
+        self.responses = []
 
         # to do
         # fix polymer bugs
@@ -100,7 +101,7 @@ class ReactionTable:
         self.reaction_params = {}
 
         # load reaction_table from provided reaction_table data
-        self.load()
+        # self.load()
 
     def load(self):
         self.reaction_table_data = json.loads(self.reaction.reaction_table_data)
@@ -130,7 +131,6 @@ class ReactionTable:
     def _check_compound_errors(compound_type):
         for compound in compound_type:
             if compound.novel_compound_table:
-                print(compound.smiles, compound.novel_compound_table)
                 return compound.novel_compound_table
             elif compound.errors:
                 return compound.errors[0]
@@ -202,7 +202,7 @@ class ReactionTable:
 
         # Save the JSON string to the database
         self.reaction.reaction_table_data = json_data
-        # db.session.commit()
+        db.session.commit()
 
     def update_dict_reaction_component(self, reaction_component):
         """
@@ -234,7 +234,7 @@ class ReactionTable:
                 if key == "smiles":
                     acc.append(c.smiles)
                 elif key == "molecular_weights":
-                    acc.extend(str(c.compound_data.get(key, [""])))
+                    acc.extend([str(x) for x in c.compound_data.get(key, [""])])
                 else:
                     acc.extend(c.compound_data.get(key, [""]))
 
