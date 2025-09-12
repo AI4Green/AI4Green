@@ -101,7 +101,7 @@ class ReactionTable:
         self.reaction_params = {}
 
         # load reaction_table from provided reaction_table data
-        # self.load()
+        self.load()
 
     def load(self):
         self.reaction_table_data = json.loads(self.reaction.reaction_table_data)
