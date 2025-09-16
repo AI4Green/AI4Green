@@ -210,8 +210,9 @@ def import_from_reactwise():
             )
             # this step updates the products/reagents from reaction smiles in the reaction table dict
             # if there is a novel compound, they are added as blank strings and the novel_compound responses are stored
+            reaction_table.update_solvents([solvent.smiles if solvent else ""])
             reaction_table.update(rw_step.reaction_smiles, {})
-            reaction_table.update_reaction_table_data()
+            # reaction_table.update_reaction_table_data()
             novel_compounds.extend(reaction_table.new_novel_compounds)
 
             # reaction_table_data = reaction_table.reaction_table_data

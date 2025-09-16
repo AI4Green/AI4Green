@@ -265,7 +265,7 @@ class SketcherCompound:
         self.check_polymer_dummy_atom()
         self.check_copolymer()
 
-        if not self.errors and self.reaction_component != "Solvent":
+        if not self.errors:
             self.process_compound()
 
     def process_compound(self):
@@ -392,6 +392,7 @@ class SketcherCompound:
 
                 compound.compound_data.update(compound_data)
                 if component_type == "solvent":
+                    print(compound.compound_data)
                     compound.add_solvent_sustainability_flags()
 
                 component_lists[component_type].append(compound)

@@ -181,6 +181,7 @@ class ReactionTable:
         )
 
         self.update_reactants_and_products(updated_reactants, updated_products)
+        # this overwrites the reaction table and prevents the data loss handler from working?
         self.update_reaction_table_data()
         self.check_errors()
 
@@ -236,6 +237,7 @@ class ReactionTable:
                 elif key == "molecular_weights":
                     acc.extend([str(x) for x in c.compound_data.get(key, [""])])
                 else:
+                    print(key, acc)
                     acc.extend(c.compound_data.get(key, [""]))
 
         # update reaction_table_data in one go
@@ -258,6 +260,11 @@ class ReactionTable:
             updated_compounds, original_compounds
         )
         return preserved_compounds + added_compounds
+
+    def update_solvents(self, solvent_smiles_list):
+        self.solvents = self.convert_smiles_to_compound(
+            solvent_smiles_list, "Solvent", {}, len(self.reactants)
+        )
 
     def convert_smiles_to_compound(
         self, smiles_list, reaction_component, polymer_indices, number_of_reactants
