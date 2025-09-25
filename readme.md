@@ -95,8 +95,6 @@ Otherwise, you can create a new user through the CLI, by running
 
 `flask add-user`
 
-test sequence
-
 and following the prompts.
 
 ### Step 5 - Run AI4Green
