@@ -43,11 +43,11 @@ Error with lib magic? [See here](#python-magic)
 
 Configuration of AI4Green is controlled by `AI4Green/Webapp/sources/config.py`, the default values are included, but can be overridden by setting environment variables.
 
-`SQLALCHEMY_DATABASE_URI`: Postgres database connection string. 
+`SQLALCHEMY_DATABASE_URI`: Postgres database connection string.
 
 `COMPOUND_LIMIT`: Sets the limit for the number of compounds extracted from PubChem. Note that a large database can cause smaller servers to crash.
 
-`MAIL`: Ai4Green is configured to send email alerts triggered by actions such as managing and creating Workgroups. Functionality such as password reset requires email support. 
+`MAIL`: Ai4Green is configured to send email alerts triggered by actions such as managing and creating Workgroups. Functionality such as password reset requires email support.
 See `AI4Green/Webapp/sources/config.py` lines `55 to 64` to edit this configuration.
 
 We use `Flask-Mail`, which can be set up by providing the email address and password. Note that you may need to configure your email account to allow messages to be sent from the application.
@@ -64,7 +64,7 @@ Next, with your conda environment activated, navigate to the Webapp directory
 
 `cd Webapp`
 
-Make the database migrations 
+Make the database migrations
 
 `flask db upgrade`
 
@@ -79,7 +79,7 @@ Finally, the user decides whether to add PubChem Compound data to the existing d
 
 To seed the data from the pubchem download, run
 
-`flask seed-db` 
+`flask seed-db`
 
 To update your version of pubchem at any time, run
 
@@ -89,11 +89,13 @@ To update your version of pubchem at any time, run
 
 Seed the data in `seed_data.yaml` to include default users
 
-`flask seed-users` 
+`flask seed-users`
 
-Otherwise, you can create a new user through the CLI, by running 
+Otherwise, you can create a new user through the CLI, by running
 
-`flask add-user` 
+`flask add-user`
+
+test sequence
 
 and following the prompts.
 
@@ -111,7 +113,7 @@ AI4Green can now be accessed via your browser at [127.0.0.1:80/home/](http://127
 
 ### Step 6 - Deploy to Server (Optional)
 
-It is possible to deploy an instance of AI4Green to a remote server for increased data security and privacy. 
+It is possible to deploy an instance of AI4Green to a remote server for increased data security and privacy.
 
 A system administrator should be able to set up a version which is available on an organisation's internal server.
 
@@ -173,4 +175,3 @@ A previous version of the PubChem compound data can be obtained by emailing [ai4
 - This can often be fixed by
 
 `pip install python-magic-bin`
-
