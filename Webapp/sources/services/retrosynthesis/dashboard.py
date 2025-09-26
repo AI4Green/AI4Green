@@ -1,3 +1,4 @@
+import base64
 import os
 import re
 import threading
@@ -9,6 +10,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_cytoscape as cyto
 from dash import ALL, Input, Output, State, ctx, dcc, html
+from dash.exceptions import PreventUpdate
 from flask import Flask, current_app
 from rdkit import Chem
 from sources import services
@@ -27,6 +29,7 @@ from .predictive_chemistry import (
 )
 
 cyto.load_extra_layouts()
+batch_runs: Dict[str, Dict] = {}
 
 
 def init_dashboard(server: Flask) -> classes.Dash:
@@ -38,6 +41,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         external_stylesheets=[
             "/static/css/pagestyle.css",
         ],
+        suppress_callback_exceptions=True,
     )
     # read api keys and urls from the yaml file
     retrosynthesis_api_key = server.config["RETROSYNTHESIS_API_KEY"]
@@ -293,6 +297,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             f"&time_limit={time_limit}"
             f"&max_depth={max_depth}"
         )
+        print(request_url)
         unique_identifier = str(uuid.uuid4())
         # Start the retrosynthesis process in a background thread
         thread = threading.Thread(
@@ -571,7 +576,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         State("active-retrosynthesis-routes", "data"),
         State("active-conditions-data", "data"),
         Input("weighted-sustainability-data", "data"),
-        prevent_intial_call=True,
+        prevent_initial_call=True,
     )
     def populate_routes_dropdown(
         active_retrosynthesis: dict,
@@ -773,25 +778,6 @@ def init_dashboard(server: Flask) -> classes.Dash:
         if n1 or n2:
             return not is_open
         return is_open
-
-    @dash_app.callback(
-        Output("search-config-collapse", "is_open"),
-        Input("search-config-toggle", "n_clicks"),
-        State("search-config-collapse", "is_open"),
-        prevent_initial_call=True,
-    )
-    def toggle_search_configuration(n_clicks, is_open):
-        """
-        Toggles the search configuration panel when the settings button (gear icon) is clicked.
-
-        Args:
-            n_clicks (int): The number of times the toggle button is clicked.
-            is_open (bool): The current state of the search configuration panel.
-
-        Returns:
-            bool: The opposite of the current state (i.e., toggles open/close).
-        """
-        return not is_open
 
     @dash_app.callback(
         Output("modal-save-message", "children"),
@@ -1376,4 +1362,214 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Output("window-width", "data"),
         Input("url", "href"),
     )
+
+    # --- ADD: clientside toggle for search-config collapse ---
+    dash_app.clientside_callback(
+        """
+        function(n, is_open) {
+            if (typeof n === "number" && n > 0) {
+                return !Boolean(is_open);
+            }
+            return is_open;
+        }
+        """,
+        Output("search-config-collapse", "is_open"),
+        Input("search-config-toggle", "n_clicks"),
+        State("search-config-collapse", "is_open"),
+    )
+    # --- END ADD ---
+
+    # === Batch mode callbacks ===
+    @dash_app.callback(
+        Output("batch-mode", "data"),
+        Input("batch-mode-toggle", "value"),
+    )
+    def set_batch_mode(toggle_vals):
+        return bool(toggle_vals)
+
+    @dash_app.callback(
+        Output("batch-skip-render", "data"),
+        Input("skip-render-toggle", "value"),
+    )
+    def set_skip_render(vals):
+        return "skip" in (vals or [])
+
+    @dash_app.callback(
+        Output("batch-smiles-list", "data"),
+        Output("batch-upload-message", "children"),
+        Output("btn-run-batch", "disabled"),
+        Input("batch-smiles-upload", "contents"),
+        State("batch-mode", "data"),
+        State("batch-smiles-upload", "filename"),
+        prevent_initial_call=True,
+    )
+    def parse_batch_txt(contents, batch_mode, filename):
+        if not batch_mode:
+            return dash.no_update, "Batch mode is off.", True
+        if not contents:
+            return dash.no_update, dash.no_update, True
+        try:
+            header, b64data = contents.split(",", 1)
+            raw = base64.b64decode(b64data)
+            text = raw.decode("utf-8", errors="replace")
+            items = []
+            for i, ln in enumerate(text.splitlines(), 1):
+                ln = ln.strip()
+                if not ln or ln.startswith("#"):
+                    continue
+                if "," in ln:
+                    parts = [p.strip() for p in ln.split(",", 1)]
+                    mol_id, smi = (
+                        (parts[0], parts[1])
+                        if len(parts) == 2
+                        else (parts[0], parts[-1])
+                    )
+                else:
+                    mol_id, smi = "", ln
+                smi = smi.strip()
+                if not smi:
+                    continue
+                items.append(
+                    {"id": mol_id or f"mol{i:04d}", "smiles": smi, "valid": True}
+                )
+
+            valid = items[:500]
+            if not valid:
+                return [], f"Parsed 0 valid SMILES from {filename}.", True
+            note = " (trimmed to 500)" if len(items) > 500 else ""
+            msg = f"Parsed {len(valid)} valid from {filename}{note}."
+            return valid, msg, False
+        except Exception as e:
+            return [], f"Error reading {filename}: {e}", True
+
+    def batch_worker(
+        batch_uuid: str,
+        molecules: List[Dict[str, str]],
+        enhancement: str,
+        iterations: Optional[int],
+        time_limit: Optional[int],
+        max_depth: Optional[int],
+        skip_render: bool,
+    ):
+        """
+        Sequentially run retrosynthesis_api for each molecule and record results.
+        Writes progress into batch_runs[batch_uuid].
+        """
+        manifest: List[Dict] = []
+        stats = {"total": len(molecules), "done": 0, "errors": 0}
+        batch_runs[batch_uuid] = {"manifest": manifest, **stats}
+
+        for item in molecules:
+            smi = item["smiles"]
+            mol_id = item["id"]
+
+            iters = iterations if iterations is not None else 100
+            tlim = time_limit if time_limit is not None else 60
+            mdep = max_depth if max_depth is not None else 7
+            enhancement_s = enhancement or "Default"
+
+            # Build request URL identical to single-molecule path, with skip_render passthrough
+            request_url = (
+                f"{retrosynthesis_base_url}/retrosynthesis_api/"
+                f"?key={retrosynthesis_api_key}"
+                f"&smiles={quote(smi)}"
+                f"&enhancement={enhancement_s}"
+                f"&iterations={iters}"
+                f"&time_limit={tlim}"
+                f"&max_depth={mdep}"
+                f"&skip_render={'true' if skip_render else 'false'}"
+            )
+
+            try:
+                (
+                    retro_api_status,
+                    api_message,
+                    solved_routes,
+                ) = retrosynthesis_api.retrosynthesis_api_call(
+                    request_url, retrosynthesis_base_url
+                )
+            except Exception as e:
+                retro_api_status, api_message, solved_routes = "failed", str(e), {}
+
+            entry = {
+                "target_id": mol_id,
+                "smiles": smi,
+                "status": retro_api_status,
+                "message": api_message,
+                "routes": solved_routes if retro_api_status != "failed" else {},
+            }
+            manifest.append(entry)
+            if retro_api_status == "failed":
+                stats["errors"] += 1
+            stats["done"] += 1
+            batch_runs[batch_uuid] = {"manifest": manifest, **stats}
+
+    @dash_app.callback(
+        Output("batch-uuid", "data"),
+        Output("batch-status", "data"),
+        Output("batch-progress", "children"),
+        Output("interval-container", "children", allow_duplicate=True),
+        State("batch-smiles-list", "data"),
+        State("batch-skip-render", "data"),
+        State("enhancement-dropdown", "value"),
+        State("iterations-input", "value"),
+        State("time-limit-input", "value"),
+        State("max-depth-input", "value"),
+        Input("btn-run-batch", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def start_batch(
+        mols, skip_render, enhancement, iterations, time_limit, max_depth, n_clicks
+    ):
+        if not mols or not n_clicks:
+            return dash.no_update
+        batch_uuid = str(uuid.uuid4())
+
+        # spawn worker thread
+        t = threading.Thread(
+            target=batch_worker,
+            args=(
+                batch_uuid,
+                mols,
+                enhancement,
+                iterations,
+                time_limit,
+                max_depth,
+                bool(skip_render),
+            ),
+            daemon=True,
+        )
+        t.start()
+
+        st = {"total": len(mols), "done": 0, "errors": 0}
+        interval = dcc.Interval(id="batch-interval", interval=2000, n_intervals=0)
+        return (
+            batch_uuid,
+            st,
+            f"Batch {batch_uuid[:8]} started: 0/{len(mols)} completed.",
+            interval,
+        )
+
+    @dash_app.callback(
+        Output("batch-status", "data"),
+        Output("batch-progress", "children"),
+        Output("interval-container", "children", allow_duplicate=True),
+        State("batch-uuid", "data"),
+        Input("batch-interval", "n_intervals"),
+        prevent_initial_call=True,
+    )
+    def update_batch_progress(batch_uuid, _):
+        run = batch_runs.get(batch_uuid)
+        if not run:
+            return dash.no_update, dash.no_update, dash.no_update
+
+        done, total, errors = run["done"], run["total"], run["errors"]
+        msg = f"Batch {batch_uuid[:8]} progress: {done}/{total} completed; {errors} errors."
+
+        if done < total:
+            return {"total": total, "done": done, "errors": errors}, msg, dash.no_update
+
+        # Finished — clear the interval
+        return {"total": total, "done": done, "errors": errors}, f"{msg} — Done.", None
+
     return dash_app.server

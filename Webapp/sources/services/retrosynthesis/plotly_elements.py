@@ -123,23 +123,48 @@ enhancement_dropdown = html.Div(
 MCTS Search configurations
 """
 
+
 search_configurations = dbc.Collapse(
-    [
-        html.Label("Number of Iterations:"),
-        dcc.Input(
-            id="iterations-input", type="number", value=100, min=20, max=5000, step=1
-        ),
-        html.Label(" Time Limit (seconds):"),
-        dcc.Input(
-            id="time-limit-input", type="number", value=60, min=30, max=1000, step=1
-        ),
-        html.Label(" Max Depth:"),
-        dcc.Input(id="max-depth-input", type="number", value=7, min=1, max=25, step=1),
-    ],
+    html.Div(
+        [
+            html.Label("Number of Iterations:"),
+            dcc.Input(
+                id="iterations-input",
+                type="number",
+                value=100,
+                min=20,
+                max=5000,
+                step=1,
+            ),
+            html.Label(" Time Limit (seconds):"),
+            dcc.Input(
+                id="time-limit-input",
+                type="number",
+                value=60,
+                min=30,
+                max=1000,
+                step=1,
+            ),
+            html.Label(" Max Depth:"),
+            dcc.Input(
+                id="max-depth-input",
+                type="number",
+                value=7,
+                min=1,
+                max=25,
+                step=1,
+            ),
+        ],
+        style={
+            "margin-bottom": "15px",
+            "border": "1px solid #9FA6B2",
+            "padding": "10px",
+        },
+    ),
     id="search-config-collapse",
     is_open=False,
-    style={"margin-bottom": "15px", "border": "1px solid #9FA6B2", "padding": "10px"},
 )
+
 
 search_toggle_button = html.Div(
     [
@@ -167,6 +192,70 @@ search_toggle_button = html.Div(
         ),
     ]
 )
+
+"""
+Batch controls
+"""
+
+batch_controls = dbc.Row(
+    className="gx-2",
+    children=[
+        dbc.Col(
+            width=3,
+            children=[
+                dbc.Checklist(
+                    options=[{"label": " Batch mode", "value": "on"}],
+                    value=[],  # empty = off
+                    id="batch-mode-toggle",
+                    switch=True,
+                )
+            ],
+        ),
+        dbc.Col(
+            width=5,
+            children=[
+                dcc.Upload(
+                    id="batch-smiles-upload",
+                    children=html.Div([html.A("Select .txt with SMILES")]),
+                    accept=".txt",
+                    multiple=False,
+                    className="btn btn-outline-secondary",
+                ),
+                html.Div(id="batch-upload-message", style={"marginTop": "6px"}),
+            ],
+        ),
+        dbc.Col(
+            width=2,
+            children=[
+                dbc.Checklist(
+                    options=[{"label": " Skip images", "value": "skip"}],
+                    value=["skip"],
+                    id="skip-render-toggle",
+                    switch=True,
+                )
+            ],
+        ),
+        dbc.Col(
+            width=2,
+            children=[
+                html.Button(
+                    "Run Batch",
+                    id="btn-run-batch",
+                    n_clicks=0,
+                    className="btn btn-primary",
+                    disabled=True,  # enabled after valid file parse
+                )
+            ],
+        ),
+        dbc.Col(
+            width=12,
+            children=[
+                html.Div(id="batch-progress", style={"marginTop": "8px"}),
+            ],
+        ),
+    ],
+)
+
 
 """
 Smiles field + Retrosynthesis button
@@ -229,14 +318,17 @@ smiles_field_and_retrosynthesis_button = dbc.Row(
             ],
         ),
         dbc.Col(
-            width=12,  # Takes full width below the above fields
+            width=12,
             children=[
+                # Button row
                 html.Div(
                     style={"display": "flex", "align-items": "center"},
-                    children=[
-                        search_toggle_button,
-                        search_configurations,
-                    ],
+                    children=[search_toggle_button],
+                ),
+                html.Div(
+                    id="search-config-wrapper",
+                    children=[search_configurations],
+                    style={"marginTop": "8px"},
                 ),
             ],
         ),
@@ -271,6 +363,19 @@ retrosynthesis_data = [
     dcc.Store(id="user-uploaded-route", data="", storage_type="memory"),
 ]
 
+batch_data_stores = [
+    dcc.Store(id="batch-mode", data=False, storage_type="memory"),
+    dcc.Store(id="batch-smiles-list", data=[], storage_type="memory"),
+    dcc.Store(id="batch-uuid", data="", storage_type="memory"),
+    dcc.Store(
+        id="batch-status",
+        data={"total": 0, "done": 0, "errors": 0},
+        storage_type="memory",
+    ),
+    dcc.Store(id="batch-results-index", data=0, storage_type="memory"),
+    dcc.Store(id="batch-skip-render", data=True, storage_type="memory"),
+]
+
 conditions_data = [
     dcc.Store(id="computed-conditions-data", storage_type="memory"),
     dcc.Store(id="reloaded-conditions-data", storage_type="memory"),
@@ -295,8 +400,13 @@ other_data_stores = [
     dcc.Store(id="save-functionality-status", data=""),
 ]
 
+
 all_data_stores = (
-    retrosynthesis_data + conditions_data + sustainability_data + other_data_stores
+    retrosynthesis_data
+    + batch_data_stores
+    + conditions_data
+    + sustainability_data
+    + other_data_stores
 )
 
 data_storage_elements = html.Div(children=all_data_stores)
