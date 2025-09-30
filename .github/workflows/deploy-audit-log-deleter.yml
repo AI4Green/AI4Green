@@ -35,7 +35,8 @@ jobs:
           az containerapp update \
             --name auditlogdeleteruat \
             --resource-group ${{ secrets.AZURE_RESOURCE_ID }} \
-            --image ai4greeneln/audit_log_deleter:latest
+            --image ai4greeneln/audit_log_deleter:latest \
+            --revision-suffix $GITHUB_RUN_NUMBER
 
   deploy-to-prod:
     if: ${{ github.event.inputs.env == 'prod' }}
