@@ -53,7 +53,6 @@ def main():
     running = True
     while running:
         try:
-            logger.info(f"Deleting messages to DB...")
             delete_old_events_from_db(engine, max_lifetime)
         except KeyboardInterrupt:
             running = False
