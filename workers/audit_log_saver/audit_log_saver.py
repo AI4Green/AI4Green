@@ -2,6 +2,7 @@ import datetime as dt
 import json
 import logging
 import os
+import time
 from typing import List
 
 from azure.storage.queue import QueueMessage, QueueServiceClient
@@ -113,9 +114,11 @@ def main():
     running = True
     logger.info(f"Saving messages from queues: '{queues}'.")
     while running:
+        retrieved_messages = 0
         try:
             for queue in queues:
                 messages = get_messages(service_client, queue, max_messages)
+                retrieved_messages += len(messages)
                 write_messages_to_db(engine, messages, queue)
                 clear_messages(service_client, queue, messages)
         except KeyboardInterrupt:
@@ -124,6 +127,11 @@ def main():
         except Exception as e:
             running = False
             logger.error(f"An error occurred...{os.linesep}{e}")
+        # If no messages were retrived from the queues, wait 5 seconds
+        # to reduce the number of calls to read the queue per minute
+        # to save money
+        if retrieved_messages == 0:
+            time.sleep(5)
 
     service_client.close()
 
