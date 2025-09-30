@@ -108,18 +108,15 @@ def main():
 
     max_messages = int(os.getenv("MAX_MESSAGES", 32))
 
-    logger.info("Getting service client")
     service_client = QueueServiceClient.from_connection_string(connection_str)
 
     running = True
+    logger.info(f"Saving messages from queues: '{queues}'.")
     while running:
         try:
             for queue in queues:
-                logger.info(f"Getting messages from queue '{queue}'")
                 messages = get_messages(service_client, queue, max_messages)
-                logger.info(f"Writing {len(messages)} messages to DB...")
                 write_messages_to_db(engine, messages, queue)
-                logger.info("Clearing old messages...")
                 clear_messages(service_client, queue, messages)
         except KeyboardInterrupt:
             running = False
