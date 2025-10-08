@@ -36,6 +36,7 @@ from .reaction_approval_request import (
 from .reaction_data_file import ReactionDataFile
 from .reaction_note import ReactionNote
 from .retrosynthesis import Retrosynthesis
+from .retrosynthesis_access_keys import RetrosynthesisKey
 from .role import Role
 from .solvent import Solvent
 from .update_compound import UpdateCompound
