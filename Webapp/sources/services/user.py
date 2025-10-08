@@ -61,22 +61,3 @@ def from_email(user_email: str) -> models.User:
         .filter(func.lower(models.User.email) == user_email.lower())
         .first()
     )
-
-
-def get_retrosynthesis_key(user_email: str) -> Optional[str]:
-    """Get the retrosynthesis key associated with a user's email, if they have one.
-
-    Args:
-        user_email (str): The user's email.
-
-    Returns:
-        Optional[str]: The user's access key to the retrosynthesis service.
-    """
-    user = (
-        db.session.query(models.User)
-        .filter(func.lower(models.User.email) == user_email.lower())
-        .first()
-    )
-    if not user:
-        return None
-    return user.retrosynthesis_access_key.key
