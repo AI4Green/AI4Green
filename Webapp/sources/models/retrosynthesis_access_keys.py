@@ -14,4 +14,4 @@ class RetrosynthesisKey(Model):
 
     # one-to-one relationship to user
     user_id = db.Column(db.ForeignKey("User.id"), nullable=True, unique=True)
-    user = db.relationship("User", back_populates="RetrosynthesisKey")
+    user = db.relationship("User", back_populates="retrosynthesis_access_key")

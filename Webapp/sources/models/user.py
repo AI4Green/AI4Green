@@ -64,7 +64,7 @@ class User(Model, UserMixin):
     retrosynthesis_access_key = db.relationship(
         "RetrosynthesisKey",
         cascade="all, delete-orphan",
-        back_populates="RetrosynthesisKey",
+        back_populates="user",
         uselist=False,
     )
 
