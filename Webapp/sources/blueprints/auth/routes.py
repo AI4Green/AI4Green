@@ -5,8 +5,9 @@ login, logout, and register
 
 import uuid
 
-from flask import Response, flash, redirect, render_template, request, url_for
+from flask import Response, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
+from Webapp.sources.services.user import from_email
 from sources import auxiliary, models, services
 from sources.extensions import db, oidc
 
@@ -161,3 +162,29 @@ def hazard_disclaimer() -> Response:
 #     login_user(user=user)
 #
 #     return redirect(url_for("main.index"))
+
+
+@auth_bp.route("/retrosynthesis_key", methods=["POST"])
+def get_retrosynthesis_key() -> Response:
+    """Endpoint for getting a user's retrosynthesis key
+    based on their email and password.
+
+    Returns:
+        Response: The user's retrosynthesis key if they have one.
+    """
+    data = request.get_json()
+
+    if not "email" in data or "password" not in data:
+        return jsonify({"error": "Username and password are required."}), 400
+
+    user = from_email(data["email"])
+    if not user:
+        return jsonify({"error": "Invalid username or password."}), 401
+
+    if not user.check_password(data["password"]):
+        return jsonify({"error": "Invalid username or password."}), 401
+
+    if user.retrosynthesis_access_key:
+        return jsonify({"access_key": user.retrosynthesis_access_key.key}), 200
+    else:
+        return jsonify({"message": "User has no access key."}), 200
