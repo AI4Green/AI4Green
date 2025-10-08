@@ -164,27 +164,21 @@ def hazard_disclaimer() -> Response:
 #     return redirect(url_for("main.index"))
 
 
-@auth_bp.route("/retrosynthesis_key", methods=["POST"])
-def get_retrosynthesis_key() -> Response:
-    """Endpoint for getting a user's retrosynthesis key
-    based on their email and password.
+@auth_bp.route("/retrosynthesis_key_check", methods=["POST"])
+def check_retrosynthesis_key() -> Response:
+    """Endpoint for checking the validity of an access key.
 
     Returns:
-        Response: The user's retrosynthesis key if they have one.
+        Response: Whether or not the key is valid. 200 if valid, else 403.
     """
     data = request.get_json()
 
-    if not "email" in data or "password" not in data:
-        return jsonify({"error": "Username and password are required."}), 400
+    if not "key" in data:
+        return jsonify({"error": "key is required."}), 400
 
-    user = from_email(data["email"])
-    if not user:
-        return jsonify({"error": "Invalid username or password."}), 401
+    key_exists = services.auth.check_retrosynthesis_key(data["key"])
 
-    if not user.check_password(data["password"]):
-        return jsonify({"error": "Invalid username or password."}), 401
-
-    if user.retrosynthesis_access_key:
-        return jsonify({"access_key": user.retrosynthesis_access_key.key}), 200
+    if key_exists:
+        return jsonify({"message": "Key is valid."}), 200
     else:
-        return jsonify({"message": "User has no access key."}), 200
+        return jsonify({"message": "Key is not valid."}), 403
