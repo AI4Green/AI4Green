@@ -7,7 +7,7 @@ import uuid
 
 from flask import Response, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
-from Webapp.sources.services.user import from_email
+from sources.services.user import from_email
 from sources import auxiliary, models, services
 from sources.extensions import db, oidc
 
