@@ -60,6 +60,14 @@ class User(Model, UserMixin):
 
     privacy_policy_accepted_on = db.Column(db.DateTime, nullable=True)
 
+    # one-to-one relationship to retrosynthesis key
+    retrosynthesis_access_key = db.relationship(
+        "RetrosynthesisKey",
+        cascade="all, delete-orphan",
+        back_populates="RetrosynthesisKey",
+        uselist=False,
+    )
+
     """Password hashing is implemented by the two following methods"""
 
     def check_password(self, password):
