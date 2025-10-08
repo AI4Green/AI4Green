@@ -171,3 +171,19 @@ def edit_reaction(
     # validate the reaction is not locked, unless it is a file attachment being edited.
     if reaction.complete == "complete":
         abort(401)
+
+
+def check_retrosynthesis_key(key: str) -> bool:
+    """Check that a given retrosynthesis key exists.
+
+    Args:
+        key (str): The key to check.
+
+    Returns:
+        bool: Whether the key exists or not.
+    """
+    return (
+        db.session.query(models.RetrosynthesisKey)
+        .filter(models.RetrosynthesisKey.key == key)
+        .exists()
+    )
