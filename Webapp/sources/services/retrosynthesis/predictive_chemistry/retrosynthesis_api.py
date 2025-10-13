@@ -1,13 +1,37 @@
 import json
-from typing import Dict, List, Tuple, Union
+from typing import Dict, Tuple
 
 import requests
 from requests import Response
 
 
-def retrosynthesis_api_call(
-    request_url: str, retrosynthesis_base_url: str
-) -> Tuple[str, str, Union[str, List[Dict]]]:
+def retrosynthesis_api_call(request_url: str, retrosynthesis_base_url: str) -> str:
+    """Make a call to the retrosynthesis API to trigger a retrosynthesis job.
+
+    Args:
+        request_url (str): the url containing the retrosynthesis server and target SMILES
+        retrosynthesis_base_url (str): the base url for the retrosynthesis server
+
+    Returns:
+        Tuple[str, str, Union[str, List[Dict]]]: The job ID which can be polled for results
+    """
+    try:
+        response = requests.get(request_url)
+    except requests.exceptions.ConnectionError:
+        return "Retrosynthesis server is down. If this problem persists please report this error to admin@ai4green.app"
+    if response.status_code == 500:
+        return "Error with molecule"
+
+    try:
+        response_data = response.json()
+        job_id = response_data["job_id"]
+        return job_id
+    except Exception:
+        failure_message = determine_retrosynthesis_error(retrosynthesis_base_url)
+        return "failed", failure_message, ""
+
+
+def retrosynthesis_results_poll(request_url: str, retrosynthesis_base_url: str):
     """
     Makes a call to the retrosynthesis api server with the target molecule as a SMILES strings and recieves a JSON
     containing the retrosynthetic route
@@ -19,7 +43,6 @@ def retrosynthesis_api_call(
          the user feedback message either with the error type or a success message
          The list of routes as dictionaries
     """
-
     try:
         response = requests.get(request_url)
     except requests.exceptions.ConnectionError:
