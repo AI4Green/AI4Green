@@ -31,48 +31,31 @@ def retrosynthesis_api_call(request_url: str, retrosynthesis_base_url: str) -> s
         return "failed", failure_message, ""
 
 
-def retrosynthesis_results_poll(request_url: str, retrosynthesis_base_url: str):
-    """
-    Makes a call to the retrosynthesis api server with the target molecule as a SMILES strings and recieves a JSON
-    containing the retrosynthetic route
+def retrosynthesis_results_poll(request_url: str) -> Tuple[str, dict, dict]:
+    """Poll the retrosynthesis API for the results of a job.
+
     Args:
-        request_url - the url containing the retrosynthesis server and target SMILES
-        retrosynthesis_base_url - the base url for the retrosynthesis server
+        request_url (str): The URL to the results endpoint, containing the job ID.
+
     Returns:
-         a string to indicate if the api call failed or succeeded
-         the user feedback message either with the error type or a success message
-         The list of routes as dictionaries
+        Tuple[str, dict, dict]: Status, solved routes, raw routes
     """
     try:
         response = requests.get(request_url)
-    except requests.exceptions.ConnectionError:
-        return (
-            "failed",
-            "Retrosynthesis server is down. If this problem persists please report this error to admin@ai4green.app",
-            "",
-        )
-    if response.status_code == 500:
-        return "failed", "Error with molecule", ""
+        if not response.ok:
+            return "error", {}, {}
 
-    try:
-        solved_routes = json.loads(response.content)["Message"]
-        if solved_routes == "invalid key":
-            return "failed", "invalid key", ""
-        if solved_routes == {}:
-            return (
-                "failed",
-                "Could not find a successful route to the molecule.",
-                "",
-            )
-        assert solved_routes
-        # if query fails try and print error code but
+        data = response.json()
+        status = data.get("status", "error")
+        if status == "error":
+            return status, {}, {}
+
+        results = data.get("results", {})
+        solved_routes = results.get("solved_route_dict", {})
+        raw_routes = results.get("raw_routes", {})
+        return status, solved_routes, raw_routes
     except Exception:
-        failure_message = determine_retrosynthesis_error(retrosynthesis_base_url)
-        return "failed", failure_message, ""
-    validation, validation_message = validate_retrosynthesis_api_response(
-        response, solved_routes
-    )
-    return validation, validation_message, solved_routes
+        return "error", {}, {}
 
 
 def validate_retrosynthesis_api_response(
