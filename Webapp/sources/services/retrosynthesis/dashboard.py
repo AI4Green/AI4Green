@@ -323,13 +323,20 @@ def init_dashboard(server: Flask) -> classes.Dash:
             children for the dcc.Interval container element
             string to set the display setting for the loading wheel.
         """
-        if not task_id or task_id not in task_results:
+        # Poll retrosynthesis API for job results
+        request_url = (
+            f"{retrosynthesis_base_url}/results/{task_id}"
+            f"?key={retrosynthesis_api_key}"
+        )
+        retro_api_status, solved_routes, raw_routes = (
+            retrosynthesis_api.retrosynthesis_results_poll(request_url)
+        )
+
+        if retro_api_status == "running":
             return dash.no_update, "Processing...", dash.no_update, dash.no_update
 
-        retro_api_status, api_message, solved_routes = task_results.pop(task_id)
-
-        if retro_api_status == "failed":
-            return dash.no_update, f"Retrosynthesis failed: {api_message}", None, "hide"
+        if retro_api_status == "error":
+            return dash.no_update, f"Retrosynthesis failed.", None, "hide"
 
         retrosynthesis_output = {"uuid": task_id, "routes": solved_routes}
         return (
