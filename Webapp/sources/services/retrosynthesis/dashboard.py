@@ -1,7 +1,5 @@
 import os
 import re
-import threading
-import uuid
 from typing import Dict, List, Literal, Optional, Tuple, Union
 from urllib.parse import quote
 
@@ -147,7 +145,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Input("save-functionality-status", "data"),
     )
     def save_features_handler(
-        save_functionality_status: Union[Literal["disabled"], Literal["enabled"]]
+        save_functionality_status: Union[Literal["disabled"], Literal["enabled"]],
     ) -> [bool, bool]:
         """
         Called on page load after function: 'load_user_workbooks'
@@ -215,23 +213,18 @@ def init_dashboard(server: Flask) -> classes.Dash:
     # Global store for task results
     task_results = {}
 
-    def retrosynthesis_process_wrapper(
-        request_url: str,
-        task_id: str,
-    ):
+    def retrosynthesis_process_wrapper(request_url: str) -> str:
         """
         Args:
             request_url - the url with the target smiles and api key
-            task_id - the unique identifier
+
+        Returns:
+            str: The ID of the job that has been started
         """
-        (
-            retro_api_status,
-            api_message,
-            solved_routes,
-        ) = retrosynthesis_api.retrosynthesis_api_call(
+        task_id = retrosynthesis_api.retrosynthesis_api_call(
             request_url, retrosynthesis_base_url
         )
-        task_results[task_id] = (retro_api_status, api_message, solved_routes)
+        return task_id
 
     @dash_app.callback(
         Output("user-message", "children", allow_duplicate=True),
@@ -293,13 +286,9 @@ def init_dashboard(server: Flask) -> classes.Dash:
             f"&time_limit={time_limit}"
             f"&max_depth={max_depth}"
         )
-        unique_identifier = str(uuid.uuid4())
-        # Start the retrosynthesis process in a background thread
-        thread = threading.Thread(
-            target=retrosynthesis_process_wrapper,
-            args=[request_url, unique_identifier],
-        )
-        thread.start()
+
+        # Call the API to start the retrosynthesis job
+        unique_identifier = retrosynthesis_process_wrapper(request_url)
         interval = dcc.Interval(id="interval-component", interval=5000, n_intervals=0)
 
         return (
