@@ -59,6 +59,7 @@ flask-oidc = "^2.3.1"
 kafka-python = "^2.2.10"
 minio = "^7.2.15"
 azure-storage-queue = "^12.13.0"
+psmiles = {git = "https://github.com/FermiQ/psmiles.git"}
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"

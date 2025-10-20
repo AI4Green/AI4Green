@@ -431,6 +431,24 @@ files = [
 ]
 
 [[package]]
+name = "canonicalize-psmiles"
+version = "0.1.2"
+description = "Canonicalize PSMILES strings."
+optional = false
+python-versions = "^3.7"
+files = []
+develop = false
+
+[package.dependencies]
+rdkit = ">=2022.3.5"
+
+[package.source]
+type = "git"
+url = "https://github.com/Ramprasad-Group/canonicalize_psmiles.git"
+reference = "HEAD"
+resolved_reference = "729dfd20b0e909df7cb245ffbfa5ab2187ffbf8b"
+
+[[package]]
 name = "certifi"
 version = "2025.1.31"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -2879,6 +2897,33 @@ files = [
 ]
 
 [[package]]
+name = "psmiles"
+version = "0.6.9"
+description = "A Python package for working with PSMILES (polymer SMILES) strings."
+optional = false
+python-versions = ">=3.8,<4.0"
+files = []
+develop = false
+
+[package.dependencies]
+canonicalize-psmiles = {git = "https://github.com/Ramprasad-Group/canonicalize_psmiles.git"}
+numpy = ">1.19.0"
+pandas = ">1.1.0"
+rdkit = ">=2022.3.3"
+scikit-learn = "^1.1.2"
+
+[package.extras]
+docs = ["mkdocs (>=1.4.2,<2.0.0)", "mkdocs-jupyter (>=0.22.0,<0.23.0)", "mkdocs-material (>=8.5.11,<9.0.0)", "mkdocstrings-python (>=0.8.2,<0.9.0)", "mkdocstrings[python] (>=0.19.0,<0.20.0)"]
+mordred = ["mordred (>=1.2.0,<2.0.0)"]
+polybert = ["sentence-transformers (>=2.2.0,<3.0.0)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/FermiQ/psmiles.git"
+reference = "HEAD"
+resolved_reference = "e8c1e9436642a27085e27d54bbbf22a724190a08"
+
+[[package]]
 name = "psycopg2-binary"
 version = "2.9.10"
 description = "psycopg2 - Python-PostgreSQL Database Adapter"
@@ -4134,4 +4179,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.14"
-content-hash = "bc01430076901b5033bd0522d40d3f63161e3b888a43d679207bd001944779fb"
+content-hash = "bdda8a035d44d9d7178e2d80820dbc2797f222419107748723a7af3bba36debb"
