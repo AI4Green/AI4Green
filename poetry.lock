@@ -2898,7 +2898,7 @@ files = [
 
 [[package]]
 name = "psmiles"
-version = "0.6.10"
+version = "0.6.9"
 description = "A Python package for working with PSMILES (polymer SMILES) strings."
 optional = false
 python-versions = ">=3.8,<4.0"
@@ -2919,9 +2919,9 @@ polybert = ["sentence-transformers (>=2.2.0,<3.0.0)"]
 
 [package.source]
 type = "git"
-url = "https://github.com/Ramprasad-Group/psmiles.git"
+url = "https://github.com/FermiQ/psmiles.git"
 reference = "HEAD"
-resolved_reference = "806b8dacc3c7d801bcfad74ff505b3c4b23db912"
+resolved_reference = "e8c1e9436642a27085e27d54bbbf22a724190a08"
 
 [[package]]
 name = "psycopg2-binary"
@@ -4179,4 +4179,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.14"
-content-hash = "70d2e2c600df2328c726d8fe354326ff78ad95d6792f683bba4ea3a2baeeaf9f"
+content-hash = "bdda8a035d44d9d7178e2d80820dbc2797f222419107748723a7af3bba36debb"
