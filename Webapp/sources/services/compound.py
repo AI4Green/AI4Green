@@ -4,6 +4,7 @@ from urllib.parse import quote
 from urllib.request import urlopen
 
 from flask import jsonify, render_template
+from marshmallow.fields import Boolean
 from rdkit import Chem
 from sources import models, services
 from sources.extensions import db
@@ -125,7 +126,7 @@ def get_compound_all_tables(smiles, workbook, polymer, demo):
 
     Args:
         smiles (str or list): The SMILES string for the compound.
-        workbook (str):
+        workbook (models.WorkBook): workbook object.
         polymer (bool): True if compound is a polymer.
         demo (str): "demo" if in demo mode.
 
@@ -211,8 +212,7 @@ def get_compound_data(
 
 def iupac_convert(smiles: str) -> str:
     """
-    Tries to make the iupac name for a compound not in the database.
-    First we try the CIR service.
+    Tries to make the iupac name using CIR for a compound not in the database.
     """
     try:
         url = (
@@ -236,20 +236,12 @@ def get_reactants_and_products_list(
     If ions are present, it processes the ionic SMILES accordingly.
 
     Args:
-        reaction_smiles (str), the smiles of the reaction from the front end
+        reaction_smiles (str), the smiles of the reaction from the sketcher
 
     Returns:
         Tuple[List[str], List[str]]: A tuple containing lists of reactant, reagent and product SMILES.
 
     """
-    # reactants_smiles = smiles_symbols(reactants)
-    # products_smiles = smiles_symbols(products)
-
-    # # form the reaction_smiles. Just from reactands and products to exclude reagents/other data
-    # reaction_smiles = (reactants_smiles + ">>" + products_smiles).replace(",", ".")
-
-    # we get the smiles straight from the sketcher to see if we have CXSmiles
-    # sketcher_smiles = smiles_symbols(request.json.get("reaction_smiles"))
 
     # [OH-].[Na+]>>[Cl-].[Cl-].[Zn++] |f:0.1,2.3.4|
     if "|f:" in reaction_smiles:
@@ -262,7 +254,7 @@ def get_reactants_and_products_list(
         r"(?<!\{)-", reaction_smiles
     ):
         # find "+" or "-" in reaction_smiles but not {-} or {+n} for polymers
-        # CHANGE THIS FUNCTION TO HANDLE REAGENTS
+        # add logic here for reagent support
         (
             reactants_smiles_list,
             products_smiles_list,
@@ -285,23 +277,42 @@ def get_reactants_and_products_list(
 
 class SketcherCompound:
     """
-    A compound that has been processed from the sketcher.
-    This class should contain all the functions needed to process smiles from front end and include all the info needed to render the reaction table
-    on a compound basis
+    Handles incoming compounds from the chemical sketcher.
+
+    Provides functions for validating structures, retrieving compound data, handling polymers,
+    handling novel compounds, flagging compound errors
     """
 
     def __init__(
         self,
-        smiles,
-        idx,
-        workbook,
-        demo,
-        reaction_component,
-        reaction_component_idx,
-        polymer_indices=None,
-        reaction_smiles="",
-        reload=False,
+        smiles: str,
+        idx: int,
+        workbook: models.WorkBook,
+        demo: str,
+        reaction_component: str,
+        reaction_component_idx: int,
+        polymer_indices: List[int] = None,
+        reaction_smiles: str = "",
+        reload: bool = False,
     ):
+        """
+        Initialise Sketcher Compound.
+
+        Checks for polymers, copolymers, and invalid molecules.
+
+        If no errors are found the compound data is extracted from the database. If novel compound is found
+
+        Args:
+            smiles (str): The SMILES string for the compound.
+            idx (int): reaction table number for compound
+            workbook (models.WorkBook): A workbook object.
+            demo (str): "demo" if in demo mode else None
+            reaction_component (str): The reaction component of the compound, eg/("Reactant", "Reagent", "Solvent", "Product")
+            reaction_component_idx (int): The index of the compound relative to its reaction component
+            polymer_indices (List[int]): A dictionary containing polymer indices.
+            reaction_smiles (str): The reaction SMILES string.
+            reload (bool): A boolean flag indicating if the compound should be reloaded.
+        """
         self.smiles = smiles
         self.inchi = ""
         self.idx = idx
@@ -326,6 +337,7 @@ class SketcherCompound:
             self.process_compound()
 
     def process_compound(self):
+        """ """
         # find out if compound is a novel compound (if polymer then novel compound is always true)# fails for polymers lmao
         compound, novel_compound = get_compound_all_tables(
             self.smiles, self.workbook, self.is_polymer, self.demo

@@ -18,16 +18,24 @@ from . import reaction_table_bp
 # @workbook_member_required
 def autoupdate_reaction_table() -> Response:
     """
-    I guess the idea is to take any smiles from the front end and generate the reaction table
-
-    Needs to get reaction from db too, but ignore for now
+    Updates the reaction table based on smiles string extracted from the sketcher.
+    Triggered when changes are made in the chemical sketcher.
+    SketcherCompound class extracts all compound data needed to generate reaction table.
     """
-    # get user workbook
+
+    # get and check reaction smiles
+    reaction_smiles = request.json.get("reaction_smiles")
+    if not reaction_smiles:
+        return jsonify({"error": "Missing data!"})
+
+    # load front end variables
     demo = request.json.get("demo")
     tutorial = request.json.get("tutorial")
     workbook = None
     reaction = None
     polymer_indices = []
+
+    # get workgroup, workbook and reaction if not in demo/tutorial mode
     if demo != "demo" and tutorial != "yes":
         workgroup = request.json.get("workgroup")
         workbook_name = request.json.get("workbook")
@@ -41,6 +49,7 @@ def autoupdate_reaction_table() -> Response:
 
         polymer_indices = request.json.get("polymer_indices")
 
+    # define default units for reaction table
     default_units = {
         "limiting_reactant_table_number": 1,
         "main_product": -1,
@@ -53,10 +62,7 @@ def autoupdate_reaction_table() -> Response:
         "product_amount_units": "mmol",
     }
 
-    reaction_smiles = request.json.get("reaction_smiles")
-    if not reaction_smiles:
-        return jsonify({"error": "Missing data!"})
-
+    # split reaction smiles to reactants and products
     (
         reactants_smiles_list,
         product_smiles_list,
@@ -103,16 +109,15 @@ def autoupdate_reaction_table() -> Response:
     ]
     number_of_products = len(products)
 
-    # check errors first add reagents here for reagent support
+    # check and return errors or novel compound tables, if any. Add reagents here for reagent support
     for compound_group in (reactants, products):
-        # now handles co polymer, dummy atom and invalid molecule errors
+        # TODO: handle polymer errors
         error = services.compound.check_compound_errors(compound_group)
         if error:
             return error
 
         novel_compound_row = services.compound.check_novel_compounds(compound_group)
         if novel_compound_row:
-            # this should be changed i think
             return novel_compound_row
 
     identifiers = []
@@ -125,17 +130,16 @@ def autoupdate_reaction_table() -> Response:
 
     r_class = None
 
+    # predict reaction class if not in polymer mode
     if not polymer_indices:
         polymer_indices = list()
         r_class = services.reaction_classification.classify_reaction(
             reactants_smiles_list, product_smiles_list
         )
 
-    reaction_table_html = "reactions/_reaction_table.html"
-
     # Now it renders the reaction table template
     reaction_table = render_template(
-        reaction_table_html,
+        "reactions/_reaction_table.html",
         reactants=reactants,
         # reagents=reagents,
         number_of_reactants=number_of_reactants,
@@ -158,7 +162,11 @@ def autoupdate_reaction_table() -> Response:
 
 
 @reaction_table_bp.route("/reload_reaction_table", methods=["GET", "POST"])
-def reload_reaction_table():
+def reload_reaction_table() -> Response:
+    """
+    Reloads reaction table from a saved reaction.
+    """
+    # get workgroup, workbook, reaction
     workbook = request.json.get("workbook")
     workgroup = request.json.get("workgroup")
     reaction_id = request.json.get("reaction_id")
@@ -169,10 +177,13 @@ def reload_reaction_table():
     reaction = services.reaction.get_from_reaction_id_and_workbook_id(
         reaction_id, workbook.id
     )
+
+    # load SketcherCompounds from reaction table dict
     compounds, units = services.compound.SketcherCompound.from_reaction_table_dict(
         json.loads(reaction.reaction_table_data), workbook
     )
 
+    # get solvent datalist
     if demo == "demo":
         sol_rows = services.solvent.get_default_list()
     else:
