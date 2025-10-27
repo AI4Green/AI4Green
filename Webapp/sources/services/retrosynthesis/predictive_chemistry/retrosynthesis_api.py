@@ -26,7 +26,9 @@ def retrosynthesis_api_call(request_url: str, retrosynthesis_base_url: str) -> s
         response_data = response.json()
         job_id = response_data["job_id"]
         return job_id
-    except Exception:
+    except Exception as e:
+        print("api_call error")
+        print(e)
         failure_message = determine_retrosynthesis_error(retrosynthesis_base_url)
         return "failed", failure_message, ""
 
@@ -42,6 +44,8 @@ def retrosynthesis_results_poll(request_url: str) -> Tuple[str, dict, dict]:
     """
     try:
         response = requests.get(request_url)
+        print("results poll url", request_url)
+        print("results poll status", response.status_code)
         if not response.ok:
             return "error", {}, {}
 
@@ -93,11 +97,13 @@ def determine_retrosynthesis_error(retrosynthesis_base_url: str) -> str:
         a message describing the error
     """
     url = f"{retrosynthesis_base_url}/"
+    print("RETRO URL", url)
     response_content = ""
     try:
         response = requests.get(url)
         response_content = json.loads(response.content["Message"])
-    except Exception:
+    except Exception as e:
+        print("determine retrosynthesis error", e)
         return "Retrosynthesis server is down. If this problem persists please report this error to admin@ai4green.app"
     if not response_content == "Retrosynthesis service is running":
         return (

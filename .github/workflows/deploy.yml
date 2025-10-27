@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - Bugfix/retrosynthesis-connection
   workflow_dispatch:
 
 jobs:

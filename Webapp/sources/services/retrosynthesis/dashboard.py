@@ -211,7 +211,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
     """
 
     # Global store for task results
-    task_results = {}
+    # task_results = {}
 
     def retrosynthesis_process_wrapper(request_url: str) -> str:
         """
@@ -324,19 +324,22 @@ def init_dashboard(server: Flask) -> classes.Dash:
             string to set the display setting for the loading wheel.
         """
         # Poll retrosynthesis API for job results
+        print("TASK ID", task_id)
         request_url = (
             f"{retrosynthesis_base_url}/results/{task_id}"
             f"?key={retrosynthesis_api_key}"
         )
-        retro_api_status, solved_routes, raw_routes = (
-            retrosynthesis_api.retrosynthesis_results_poll(request_url)
-        )
+        (
+            retro_api_status,
+            solved_routes,
+            raw_routes,
+        ) = retrosynthesis_api.retrosynthesis_results_poll(request_url)
 
         if retro_api_status == "running":
             return dash.no_update, "Processing...", dash.no_update, dash.no_update
 
         if retro_api_status == "error":
-            return dash.no_update, f"Retrosynthesis failed.", None, "hide"
+            return dash.no_update, "Retrosynthesis failed.", None, "hide"
 
         retrosynthesis_output = {"uuid": task_id, "routes": solved_routes}
         return (
