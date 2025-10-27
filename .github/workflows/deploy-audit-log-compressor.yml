@@ -35,7 +35,7 @@ jobs:
           az containerapp update \
             --name auditlogcompressoruat \
             --resource-group ${{ secrets.AZURE_RESOURCE_ID }} \
-            --image ai4greeneln/audit_log_compressor:latest \
+            --image ai4greeneln/audit_log_compressor:uat-latest \
             --revision-suffix $GITHUB_RUN_NUMBER
 
   deploy-to-prod:
@@ -56,5 +56,5 @@ jobs:
           az containerapp update \
             --name auditlogcompressorprod \
             --resource-group ${{ secrets.AZURE_RESOURCE_ID }} \
-            --image ai4greeneln/audit_log_compressor:latest \
+            --image ai4greeneln/audit_log_compressor:prod-latest \
             --revision-suffix $GITHUB_RUN_NUMBER
