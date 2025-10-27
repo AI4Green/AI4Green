@@ -337,7 +337,10 @@ class SketcherCompound:
             self.process_compound()
 
     def process_compound(self):
-        """ """
+        """
+        Processes data for the provided compound. Gets the db entry (Compound, NovelCompound or PolymerNovelCompound),
+         and sets self.compound_data. Renders novel compound tabe if compound is not found in db.
+        """
         # find out if compound is a novel compound (if polymer then novel compound is always true)# fails for polymers lmao
         compound, novel_compound = get_compound_all_tables(
             self.smiles, self.workbook, self.is_polymer, self.demo
@@ -350,23 +353,41 @@ class SketcherCompound:
             self.is_novel_compound = novel_compound
             get_compound_data(self.compound_data, compound, novel_compound)
 
-    def check_for_polymer(self, polymer_indices, reaction_smiles):
+    def check_for_polymer(
+        self, polymer_indices: List[int] | None, reaction_smiles: str
+    ):
+        """
+        Checks if reaction contains a polymer. Either using polymer indices or reaction SMILES
+
+        Args:
+            polymer_indices (List[int] or None): A List containing polymer indices.
+            reaction_smiles (str): The reaction SMILES string.
+        """
         if polymer_indices is not None:
             self.check_polymer_indices_for_polymer(polymer_indices)
         else:
             self.check_reaction_smiles_for_polymer(reaction_smiles)
 
-    def check_polymer_indices_for_polymer(self, polymer_indices):
+    def check_polymer_indices_for_polymer(self, polymer_indices: List[int]):
         """
-        Set is_polymer to True if idx in polymer indices and process smiles
+        Sets is_polymer to True if idx in polymer indices and processes polymer smiles
+
+        Args:
+            polymer_indices (List[int]): A list of polymer indices.
         """
         if self.idx in polymer_indices:
             self.is_polymer = True
+            # TODO: fix this for new polymer updates
             self.smiles = services.polymer_novel_compound.find_canonical_repeat(
                 self.smiles
             )
 
-    def check_reaction_smiles_for_polymer(self, reaction_smiles):
+    def check_reaction_smiles_for_polymer(self, reaction_smiles: str):
+        """
+        Searches reaction SMILES for polymers and sets self.is_polymer to True if one is found
+        Args:
+            reaction_smiles (str): The reaction SMILES string.
+        """
         reactant_smiles, product_smiles = get_reactants_and_products_list(
             reaction_smiles
         )
@@ -379,6 +400,10 @@ class SketcherCompound:
                 self.is_polymer = True
 
     def handle_new_novel_compound(self):
+        """
+        Renders novel compound table including all info form the provided structure. The JSON returned to
+        self.novel_compound_table can be returned directly to the front end.
+        """
         if self.demo == "demo":
             self.errors.append(jsonify({"reactionTable": "Demo", "novelCompound": ""}))
             return
@@ -401,6 +426,9 @@ class SketcherCompound:
         )
 
     def add_solvent_sustainability_flags(self):
+        """
+        Adds sustainability flags to compound. Requires
+        """
         flag = services.solvent.sustainability_from_primary_key(
             self.compound_data["ids"]
         )
