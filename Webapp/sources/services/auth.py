@@ -188,7 +188,15 @@ def get_request_ip() -> str:
     return ip
 
 
-def get_country_from_ip(ip):
+def get_country_from_ip(ip: str) -> str:
+    """Get the ISO 3166-1 alpha-2 country code from an IP address.
+
+    Args:
+        ip (str): The IP Address.
+
+    Returns:
+        str: The country code.
+    """
     try:
         handler = ipinfo.getHandler(current_app.config["IPINFO_API_KEY"])
         details = handler.getDetails(ip)
@@ -197,7 +205,15 @@ def get_country_from_ip(ip):
         return None
 
 
-def get_email_domain(email):
+def get_email_domain(email: str) -> str:
+    """Get the domain of an email address.
+
+    Args:
+        email (str): The email address.
+
+    Returns:
+        str: The domain of the email address.
+    """
     return email.split("@")[-1].lower().strip()
 
 
@@ -238,7 +254,15 @@ def get_blocked_country_codes():
         return set(f.read().splitlines())
 
 
-def is_blocked_tld(domain):
+def is_blocked_tld(domain: str) -> bool:
+    """Check the domain TLD is not banned.
+
+    Args:
+        domain (str): the domain.
+
+    Returns:
+        bool: is it blocked?
+    """
     tld = domain.split(".")[-1]
     return tld in get_blocked_tlds()
 
