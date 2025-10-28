@@ -171,3 +171,16 @@ def edit_reaction(
     # validate the reaction is not locked, unless it is a file attachment being edited.
     if reaction.complete == "complete":
         abort(401)
+
+
+def get_request_ip() -> str:
+    """Get the IP address for the request.
+
+    Returns:
+        str: The IP address.
+    """
+    if request.headers.getlist("X-Forwarded-For"):
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        ip = request.remote_addr
+    return ip
