@@ -147,18 +147,31 @@ def hazard_disclaimer() -> Response:
 # @oidc.require_login
 # def oidc_callback() -> Response:
 #     """Callback endpoint for when a user logs in or registers via OIDC.
-#
+
 #     When an existing user is logging in, simply redirect them to the main screen.
 #     When a new user registers an account via OIDC, add the new user to the AI4Green
 #     database.
-#
+
 #     Returns:
 #         Response: Redirect the to main screen when the user logs in.
 #     """
+#     # Block registration from blocked countries
+#     ip = get_request_ip()
+#     country_code = get_country_from_ip(ip)
+#     if is_blocked_country(country_code):
+#         flash("Registration is not permitted from your country.")
+#         return redirect(url_for("main.index"))
+
 #     # Attempt to find a user in the AI4Green database with an email from the OIDC provider
 #     user_info = oidc.user_getinfo(["email", "name"])
 #     user = services.user.from_email(user_email=user_info["email"])
-#
+
+#     # Block registration from emails from blocked countries
+#     email_domain = get_email_domain(user_info["email"])
+#     if is_blocked_tld(email_domain):
+#         flash("Registration is not permitted from your country.")
+#         return redirect(url_for("main.index"))
+
 #     # If the user doesn't exist, add them.
 #     if user is None:
 #         person = models.Person()
@@ -175,9 +188,9 @@ def hazard_disclaimer() -> Response:
 #         services.email_services.send_email_verification(person.user)
 #         # get the new user
 #         user = services.user.from_email(user_email=user_info["email"])
-#
+
 #     # OIDC and regular login are different. Use `login_user` to hook into
 #     # the regular login/out system
 #     login_user(user=user)
-#
+
 #     return redirect(url_for("main.index"))
