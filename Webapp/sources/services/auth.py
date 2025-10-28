@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 from urllib.parse import urlparse
 
 from flask import Markup, abort, flash, redirect, request, session, url_for, current_app
@@ -198,3 +199,26 @@ def get_country_from_ip(ip):
 
 def get_email_domain(email):
     return email.split("@")[-1].lower().strip()
+
+
+def get_blocked_tlds():
+    """
+    Returns list of TLDs that are blocked, listed in blocked_tlds.txt
+
+    Returns:
+        List of TLDs found in blocked_tlds.txt
+    """
+    with open(
+        os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "static",
+            "blocked_tlds.txt",
+        ),
+        "r",
+    ) as f:
+        return set(f.read().splitlines())
+
+
+def is_blocked_tld(domain):
+    tld = domain.split(".")[-1]
+    return tld in get_blocked_tlds()
