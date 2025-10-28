@@ -78,7 +78,7 @@ def register() -> Response:
     country_code = get_country_from_ip(ip)
     if is_blocked_country(country_code):
         flash("Registration is not permitted from your country.")
-        return redirect(url_for("main.index"), code=403)
+        return redirect(url_for("main.index"))
 
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -90,7 +90,7 @@ def register() -> Response:
         email_domain = get_email_domain(form.email.data)
         if is_blocked_tld(email_domain):
             flash("Registration is not permitted from your country.")
-            return redirect(url_for("main.index"), code=403)
+            return redirect(url_for("main.index"))
 
         # Creates a person and user and commits to the database
         p = models.Person()
