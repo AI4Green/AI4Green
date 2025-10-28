@@ -194,3 +194,7 @@ def get_country_from_ip(ip):
         return details.country
     except Exception:
         return None
+
+
+def get_email_domain(email):
+    return email.split("@")[-1].lower().strip()
