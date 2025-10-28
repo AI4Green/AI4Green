@@ -45,6 +45,32 @@ def test_register(client: FlaskClient, app: Flask):
     login(client, username="new_test_user", password="new_password")
 
 
+def test_register_blocked_country(client: FlaskClient, app: Flask):
+    """Tests we can't register from a blocked country"""
+    response = client.post(
+        "auth/register",
+        data={
+            "username": "badguy",
+            "email": "badguy@mail.ru",
+            "fullname": "Bad Guy",
+            "password": "new_password",
+            "password2": "new_password",
+            "privacy": True,
+            "hazard_disclaimer": True,
+            "submit": True,
+        },
+    )
+
+    # Check the response returns forbidden
+    assert response.status_code == 302
+
+    # users should be notified that they're blocked
+    with client.session_transaction() as session:
+        assert (
+            "Registration is not permitted from your country." in session["_flashes"][0]
+        ), "Blocked country not being blocked!"
+
+
 def test_failed_login_invalid_credentials(client: FlaskClient):
     """Tests login is unsuccessful with incorrect credentials"""
 
