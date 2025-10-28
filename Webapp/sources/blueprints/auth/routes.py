@@ -7,6 +7,13 @@ import uuid
 
 from flask import Response, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
+from sources.services.auth import (
+    get_country_from_ip,
+    get_email_domain,
+    get_request_ip,
+    is_blocked_country,
+    is_blocked_tld,
+)
 from sources import auxiliary, models, services
 from sources.extensions import db, oidc
 
@@ -66,12 +73,25 @@ def register() -> Response:
         flask.Response Renders the login template if registration is successful or registration template if not
 
     """
+    # Block registration from blocked countries
+    ip = get_request_ip()
+    country_code = get_country_from_ip(ip)
+    if is_blocked_country(country_code):
+        flash("Registration is not permitted from your country.")
+        return render_template("auth/register.html", title="Register", form=form)
+
     form = RegistrationForm()
     if form.validate_on_submit():
         """The form.validate_on_submit returns True when the browser sends the POST
         request as a result of the user pressing the submit button and if all the fields
         passes validation. It returns False when the browser sends the GET request to
         receive the web page with the form or if at least one field fails validation."""
+        # Block registration from emails from blocked countries
+        email_domain = get_email_domain(form.email.data)
+        if is_blocked_tld(email_domain):
+            flash("Registration is not permitted from your country.")
+            return render_template("auth/register.html", title="Register", form=form)
+
         # Creates a person and user and commits to the database
         p = models.Person()
         # Capitalize unique fields for consistency
