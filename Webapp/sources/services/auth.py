@@ -1,8 +1,9 @@
 from datetime import datetime
 from urllib.parse import urlparse
 
-from flask import Markup, abort, flash, redirect, request, session, url_for
+from flask import Markup, abort, flash, redirect, request, session, url_for, current_app
 from flask_login import current_user, login_user
+import ipinfo
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
@@ -184,3 +185,12 @@ def get_request_ip() -> str:
     else:
         ip = request.remote_addr
     return ip
+
+
+def get_country_from_ip(ip):
+    try:
+        handler = ipinfo.getHandler(current_app.config["IPINFO_API_KEY"])
+        details = handler.getDetails(ip)
+        return details.country
+    except Exception:
+        return None
