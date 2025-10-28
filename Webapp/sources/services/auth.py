@@ -219,6 +219,29 @@ def get_blocked_tlds():
         return set(f.read().splitlines())
 
 
+def get_blocked_country_codes():
+    """
+    Returns list of ISO 3166-1 alpha-2 country coes that are blocked,
+    listed in blocked_country_codes.txt
+
+    Returns:
+        List of TLDs found in blocked_country_codes.txt
+    """
+    with open(
+        os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "static",
+            "blocked_country_codes.txt",
+        ),
+        "r",
+    ) as f:
+        return set(f.read().splitlines())
+
+
 def is_blocked_tld(domain):
     tld = domain.split(".")[-1]
     return tld in get_blocked_tlds()
+
+
+def is_blocked_country(country_code: str) -> bool:
+    return country_code in get_blocked_country_codes()
