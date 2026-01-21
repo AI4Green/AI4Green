@@ -1,0 +1,64 @@
+{% set tutorial_steps = [
+      dict(id=1, title="Welcome to the reaction sketcher tutorial", text="This tutorial leads you through the key steps in building a reaction.", back=false, next=2, next_func=""),
+      dict(id=2, title="Autosave", text="Any changes you make to your reaction are automatically saved. Reactions can be reloaded from the relevant workgroup page.", back=1, next=3, next_func="tutorial_3()"),
+      dict(id=3, title="Reaction name and ID", text="The reaction name was specified when making the reaction. The reaction ID is automatically generated based on a workbook code and an incremental number.", back=2, next=4),
+      dict(id=4, title="Reaction sketcher", text="Next sketch your reaction into the Marvin JS editor.", back=3, next=5, next_func="tutorial_5()"),
+      dict(id=5, title="Marvin JS Help", text="Consult our help guide for FAQ and how to import reactions from other editors including ChemDraw.", back=4, next=6, next_func="tutorial_6()"),
+      dict(id=6, title="Over the arrow", text="Note that reagents & solvents over or under the arrow are not currently supported. These may be added directly to the reaction table at the next stage.", back=5, next=7, next_func="tutorial_7()"),
+      dict(id=7, title="Proceed to Reaction Table", text="The reaction table will automatically update as you draw compounds in the sketcher.", back=6, next=8, next_func="tutorial_8()"),
+      dict(id=8, title="Reaction name and description", text="The chosen reaction name is shown. There is space to record reaction description, including experimental procedure and observations.", back=7, next=9, next_func="tutorial_9()"),
+      dict(id=9, title="Reaction table", text="The reactant and product information is automatically filled from PubChem. You will be prompted at this point to add any novel compounds to the database. These compounds are only shared within your workbook.", back=8, next=10, next_func="tutorial_10()"),
+      dict(id=10, title="Reaction table", text="The required masses, equivalents, and physical forms required to proceed are highlighted in red.", back=9, next=11, next_func="tutorial_11()"),
+      dict(id=11, title="Reagents", text="Reagents can be added to the reaction. If the reagent is not in our database, it can be added.", back=10, next=12, next_func="tutorial_12()"),
+      dict(id=12, title="Reagents", text="Reagents can be added by CAS or name. If the reagent is not in the database you will be prompted to add this reagent to the database.", back=11, next=13, next_func="tutorial_13()"),
+      dict(id=13, title="Solvents", text="Solvents can be added to your reaction. These can be selected from our predefined list.", back=12, next=14, next_func="tutorial_14()"),
+      dict(id=14, title="Solvents", text="Solvent sustainability is shown in the four-tier system developed by CHEM21. Alternative solvents can be explored with the solvent guide.", back=13, next=15, next_func="tutorial_15()"),
+      dict(id=15, title="Proceed to Summary", text="Once you are happy with the reaction table, you may proceed to the summary.", back=14, next=16, next_func="tutorial_16()"),
+      dict(id=16, title="Summary Table", text="The summary gives an overview of the sustainability of the reaction, an overview of health and safety considerations, and a risk assessment.", back=15, next=17, next_func="tutorial_17()"),
+      dict(id=17, title="Summary Table", text="Some sustainability criteria are calculated automatically, others, like temperature and operating procedures, can be selected.", back=16, next=18, next_func="tutorial_18()"),
+      dict(id=18, title="Summary Table", text="After the reaction has been completed, unreacted mass and actual product mass can be entered to calculate more metrics.", back=17, next=19, next_func="tutorial_19()"),
+      dict(id=19, title="Locking a reaction", text="Once a reaction is fully completed, it can be locked to further editing. There is also the option to print the reaction.", back=18, next=20, next_func="tutorial_20()"),
+      dict(id=20, title="Congratulations!", text="You have finished this tutorial on building a reaction. You may now close this window.", back=19, next=false, next_func="")
+    ] %}
+
+
+{% macro tutorial_step(id, title, text, back, next) -%}
+<div class="tutorial" id="tutorial-{{ id }}">
+    <div class="card" style="width: 450px;">
+        <div class="card-body">
+            <h5 class="card-title">{{ title }}</h5>
+            <p class="card-text">{{ text }}</p>
+            {{ back_row(id, back) }}
+            {{ next_row(id, next) }}
+        </div>
+    </div>
+</div>
+{%- endmacro %}
+
+
+{% macro tutorial_macro() -%}
+    {% for step in tutorial_steps %}
+          {{ tutorial_step(
+            step.id,
+            step.title,
+            step.text,
+            step.back,
+            step.next
+          ) }}
+    {% endfor %}
+{%- endmacro %}
+
+
+{% macro back_row(id, back) -%}
+    {% if id == 1 %}
+        <button class="btn btn-primary" style="color:white;" disabled>Back</button>
+    {% else %}
+        <a id="tut-{{ id }}-back" onclick="tutorialBack({{ id }});tutorial_{{ back }}()" class="btn btn-primary" style="color:white;">Back</a>
+    {% endif %}
+{%- endmacro %}
+
+{% macro next_row(id, next) -%}
+    {% if id != 20 %}
+        <a id="tut-{{ id }}-back" onclick="tutorialNext({{ id }});tutorial_{{ next }}()" class="btn btn-primary" style="color:white;">Next</a>
+    {% endif %}
+{%- endmacro %}
