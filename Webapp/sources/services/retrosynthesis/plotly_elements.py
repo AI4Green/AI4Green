@@ -306,7 +306,10 @@ compound_sidebar = html.Div(
     [
         html.H3("Compounds"),
         html.Hr(),
-        html.Img(id="tapped-compound-image"),
+        html.Img(
+            id="tapped-compound-image",
+            alt="chemical structure of compound selected by user",
+        ),
         html.Div(id="compound-feedback"),
     ],
     id="compound-sidebar",
@@ -319,7 +322,9 @@ reaction_sidebar = html.Div(
         html.H3("Reactions"),
         html.Hr(),
         html.Div(id="reaction-class"),
-        html.Img(id="tapped-reaction-image"),
+        html.Img(
+            id="tapped-reaction-image", alt="Chemical reaction scheme selected by user"
+        ),
         dcc.Store(id="reaction-smiles", data="", storage_type="memory"),
         html.Div(id="reaction-feedback"),
         dcc.Store(id="reaction-conditions-list", data="", storage_type="memory"),
