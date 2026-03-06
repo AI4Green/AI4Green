@@ -446,3 +446,20 @@ def change_hazard_colours() -> Response:
 def internal_error(error):
     flash("Something went wrong, please try again later.")
     return redirect(url_for("main.index"))
+
+
+# manage account page
+@main_bp.route("/accessibility_statement", methods=["GET", "POST"])
+@login_required
+@main_bp.doc(security="sessionAuth")
+def accessibility_statement() -> Response:
+    """
+    Renders the accessibility statement
+
+    Returns:
+        flask.Response: The rendered accessibility statement page.
+    """
+
+    return render_template(
+        "general/AI4GREEN_accessibility_statement.html",
+    )
