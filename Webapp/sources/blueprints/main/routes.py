@@ -450,7 +450,6 @@ def internal_error(error):
 
 # manage account page
 @main_bp.route("/accessibility_statement", methods=["GET", "POST"])
-@login_required
 @main_bp.doc(security="sessionAuth")
 def accessibility_statement() -> Response:
     """
