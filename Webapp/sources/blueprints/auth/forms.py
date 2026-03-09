@@ -47,7 +47,7 @@ class LoginForm(FlaskForm):  # this class defines the login form fields
         render_kw={"placeholder": "Password", "class": "form-control form-control-lg"},
     )
     remember_me = BooleanField("Remember Me")
-    submit = SubmitField("Sign In", render_kw={"class": "btn btn-primary"})
+    submit = SubmitField("Log In", render_kw={"class": "btn btn-primary"})
 
 
 class RegistrationForm(FlaskForm):  # this class defines the registration form fields
