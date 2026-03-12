@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 
 import pytz
-from app_enums import ReactionApprovalStatus
+from sources.app_enums import ReactionApprovalStatus
 from sources.extensions import db
 
 from .base import Model

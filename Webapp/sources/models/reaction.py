@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import pytz
-from app_enums import ReactionType
+from sources.app_enums import ReactionType
 from sources.extensions import db
 
 from .base import Model
