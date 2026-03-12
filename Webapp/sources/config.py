@@ -168,6 +168,28 @@ class BaseConfig(object):  # class to store configuration variables
         "MESSAGE_QUEUE_CONNECTION_STRING", default_conn_str
     )
 
+    # set for testing. need to decide on the actual limits for each tier
+    SUBSCRIPTION_PLANS = {
+        "free": {
+            "reaction_limit_per_workbook": 1,
+            "max_workbooks": 1,
+            "surfer_limit_per_workbook": 1,
+            "retrosynthesis_limit_per_workbook": 1,
+        },
+        "pro": {
+            "reaction_limit_per_workbook": 2,
+            "max_workbooks": 2,
+            "surfer_limit_per_workbook": 2,
+            "retrosynthesis_limit_per_workbook": 2,
+        },
+        "enterprise": {
+            "reaction_limit_per_workbook": None,
+            "max_workbooks": None,
+            "surfer_limit_per_workbook": None,
+            "retrosynthesis_limit_per_workbook": None,
+        },
+    }
+
 
 class TestConfig(BaseConfig):
     TESTING = True
