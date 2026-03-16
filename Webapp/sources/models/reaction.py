@@ -1,17 +1,12 @@
 from datetime import datetime
-from enum import Enum
 
 import pytz
+from sources.app_enums import ReactionType
 from sources.extensions import db
 
 from .base import Model
 
 metadata = db.Model.metadata
-
-
-class ReactionType(Enum):
-    STANDARD = "STANDARD"
-    POLYMER = "POLYMER"
 
 
 class Reaction(Model):

@@ -1,19 +1,11 @@
 import uuid
 from datetime import datetime, timedelta
-from enum import Enum
 
 import pytz
+from sources.app_enums import ReactionApprovalStatus
 from sources.extensions import db
 
 from .base import Model
-
-
-class ReactionApprovalStatus(Enum):
-    PENDING = "PENDING"
-    APPROVED = "APPROVED"
-    REJECTED = "REJECTED"
-    CHANGES_REQUESTED = "CHANGES_REQUESTED"
-
 
 # Association table for the many-to-many relationship between Person and DataExportRequests
 reaction_approval_request_approvers = db.Table(

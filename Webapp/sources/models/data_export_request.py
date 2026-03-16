@@ -1,30 +1,11 @@
 import uuid
 from datetime import datetime, timedelta
-from enum import Enum
 
 import pytz
+from sources.app_enums import ApprovalStatus, ExportFormat
 from sources.extensions import db
 
 from .base import Model
-
-
-class ApprovalStatus(Enum):
-    PENDING = "PENDING"
-    APPROVED = "APPROVED"
-    REJECTED = "REJECTED"
-    EXPIRED = "EXPIRED"
-
-
-class ExportFormat(Enum):
-    RDF = "RDF"
-    RXN = "RXN"
-    PDF = "PDF"
-    ELN = "ELN"
-    SURF = "SURF"
-    CSV = "CSV"
-    JSON = "JSON"
-    SI = "SI"
-
 
 # Association table for the many-to-many relationship between Person and DataExportRequests
 data_export_request_approvers = db.Table(
