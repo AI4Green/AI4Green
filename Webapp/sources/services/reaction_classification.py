@@ -1,5 +1,6 @@
+from typing import Dict, List
+
 from rdkit import Chem
-from typing import List, Dict
 
 
 def define_substructs() -> Dict:
@@ -29,6 +30,7 @@ def define_substructs() -> Dict:
     }
 
     return substructs
+
 
 def define_reaction_criteria() -> Dict:
     """
@@ -86,20 +88,21 @@ def define_reaction_criteria() -> Dict:
 
     return reaction_criteria
 
+
 def classify_reaction(reactants: List, products: List) -> (str, List):
     """
-        Classifies reactions by identifying important functional groups in reactants and products.
-        Only checks for reaction classes included in the solvent surfer
+    Classifies reactions by identifying important functional groups in reactants and products.
+    Only checks for reaction classes included in the solvent surfer
 
-        Args:
-            reactants: List, List of reactants as SMILES strings
-            products: List, List of products as SMILES strings
+    Args:
+        reactants: List, List of reactants as SMILES strings
+        products: List, List of products as SMILES strings
 
-        Returns:
-            reaction_class: Str, class of reaction identified to functional groups. Returns 'Other' if class not recognised.
-            reaction_groups.keys(): List of reaction classes checked
+    Returns:
+        reaction_class: Str, class of reaction identified to functional groups. Returns 'Other' if class not recognised.
+        reaction_groups.keys(): List of reaction classes checked
 
-        """
+    """
 
     # define functional groups
     substructs = define_substructs()
@@ -138,11 +141,11 @@ def classify_reaction(reactants: List, products: List) -> (str, List):
     for r_class, r_dict in reaction_groups.items():
         r = r_dict["Reactants"]
         p = r_dict["Products"]
-        #a = r_dict['Agents']
+        # a = r_dict['Agents']
 
         if len([x for x in r if x in reactant_groups]) == len(r):
             if len([y for y in p if y in product_groups]) == len(p):
                 reaction_class = r_class
 
     reaction_groups["Other"] = {}
-    return reaction_class, reaction_groups.keys()
+    return reaction_class
