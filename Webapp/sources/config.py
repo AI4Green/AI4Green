@@ -170,21 +170,21 @@ class BaseConfig(object):  # class to store configuration variables
 
     # set for testing. need to decide on the actual limits for each tier
     SUBSCRIPTION_PLANS = {
-        "free": {
+        "FREE": {
             "reaction_limit_per_workbook": 1,
-            "max_workbooks": 1,
+            "max_workbooks_per_workgroup": 1,
             "surfer_limit_per_workbook": 1,
             "retrosynthesis_limit_per_workbook": 1,
         },
-        "pro": {
+        "PRO": {
             "reaction_limit_per_workbook": 2,
-            "max_workbooks": 2,
+            "max_workbooks_per_workgroup": 2,
             "surfer_limit_per_workbook": 2,
             "retrosynthesis_limit_per_workbook": 2,
         },
-        "enterprise": {
+        "ENTERPRISE": {
             "reaction_limit_per_workbook": None,
-            "max_workbooks": None,
+            "max_workbooks_per_workgroup": None,
             "surfer_limit_per_workbook": None,
             "retrosynthesis_limit_per_workbook": None,
         },

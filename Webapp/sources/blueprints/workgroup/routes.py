@@ -51,6 +51,11 @@ def workgroup(
         workgroup_selected
     )
 
+    remaining_workbooks = services.workgroup.check_workbooks_remaining(
+        workgroup_selected_obj
+    )
+    print(remaining_workbooks)
+
     workbook_new_reaction_ids_dic = {}
     for workbook in workbooks:
         next_reaction_id = services.reaction.get_next_reaction_id_for_workbook(

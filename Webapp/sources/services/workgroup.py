@@ -1,6 +1,7 @@
 import re
 from typing import List
 
+from flask import current_app
 from sources import models, services
 from sources.extensions import db
 from sqlalchemy import func
@@ -189,3 +190,32 @@ def list_all_members(workgroup: models.WorkGroup) -> List[models.Person]:
     all_persons = [services.person.from_id(x.person) for x in all_users]
 
     return all_persons
+
+
+def list_all_workbooks(workgroup: models.WorkGroup) -> List:
+    workbooks = db.session.query(models.WorkBook).join(models.WorkGroup).all()
+    return [x for x in workbooks]
+
+
+def get_workgroup_tier(workgroup: models.WorkGroup) -> str:
+    return workgroup.subscription_tier.value
+
+
+def get_workbook_limits(workgroup: models.WorkGroup) -> int | None:
+    tier = get_workgroup_tier(workgroup)
+    subscription_tiers = current_app.config["SUBSCRIPTION_PLANS"]
+    limit = subscription_tiers[tier]["max_workbooks_per_workgroup"]
+
+    if limit is None:
+        return None
+
+    return limit
+
+
+def check_workbooks_remaining(workgroup: models.WorkGroup) -> int | None:
+    workbook_limits = get_workbook_limits(workgroup)
+    current_workbooks = list_all_workbooks(workgroup)
+    if workbook_limits is None:
+        return None
+
+    return workbook_limits - len(current_workbooks)
