@@ -47,3 +47,13 @@ class ReactionApprovalStatus(Enum):
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
     CHANGES_REQUESTED = "CHANGES_REQUESTED"
+
+
+class SubscriptionTier(Enum):
+    """
+    Enum for tracking subscription tiers for workgroups
+    """
+
+    FREE = "FREE"
+    PRO = "PRO"
+    ENTERPRISE = "ENTERPRISE"
