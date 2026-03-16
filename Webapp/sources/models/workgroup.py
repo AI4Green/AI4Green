@@ -44,7 +44,7 @@ class WorkGroup(Model):
     )
     Institution = db.relationship("Institution", backref="WorkGroup")
 
-    Subscription = db.Column(
+    subscription_tier = db.Column(
         db.Enum(SubscriptionTier),
         server_default=SubscriptionTier.ENTERPRISE.value,
         default=SubscriptionTier.FREE.value,
