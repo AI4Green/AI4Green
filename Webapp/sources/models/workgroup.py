@@ -1,3 +1,4 @@
+from sources.app_enums import SubscriptionTier
 from sources.extensions import db
 
 from .base import Model
@@ -42,3 +43,10 @@ class WorkGroup(Model):
         backref=db.backref("standard_workgroups", lazy="dynamic"),
     )
     Institution = db.relationship("Institution", backref="WorkGroup")
+
+    Subscription = db.Column(
+        db.Enum(SubscriptionTier),
+        server_default=SubscriptionTier.ENTERPRISE.value,
+        default=SubscriptionTier.FREE.value,
+        nullable=False,
+    )
