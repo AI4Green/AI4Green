@@ -1,5 +1,5 @@
 import re
-from typing import List
+from typing import Dict, List
 
 from flask import current_app
 from sources import models, services
@@ -193,18 +193,23 @@ def list_all_members(workgroup: models.WorkGroup) -> List[models.Person]:
 
 
 def list_all_workbooks(workgroup: models.WorkGroup) -> List:
-    workbooks = db.session.query(models.WorkBook).join(models.WorkGroup).all()
+    workbooks = (
+        db.session.query(models.WorkBook)
+        .join(models.WorkGroup)
+        .filter(models.WorkGroup.name == workgroup.name)
+        .all()
+    )
     return [x for x in workbooks]
 
 
-def get_workgroup_tier(workgroup: models.WorkGroup) -> str:
-    return workgroup.subscription_tier.value
+def get_subscription(workgroup: models.WorkGroup) -> Dict[str, int | None]:
+    subscription_tiers = current_app.config["SUBSCRIPTION_PLANS"]
+    return subscription_tiers[workgroup.subscription_tier.value]
 
 
 def get_workbook_limits(workgroup: models.WorkGroup) -> int | None:
-    tier = get_workgroup_tier(workgroup)
-    subscription_tiers = current_app.config["SUBSCRIPTION_PLANS"]
-    limit = subscription_tiers[tier]["max_workbooks_per_workgroup"]
+    subscription = get_subscription(workgroup)
+    limit = subscription["max_workbooks_per_workgroup"]
 
     if limit is None:
         return None
@@ -212,10 +217,10 @@ def get_workbook_limits(workgroup: models.WorkGroup) -> int | None:
     return limit
 
 
-def check_workbooks_remaining(workgroup: models.WorkGroup) -> int | None:
+def check_workbooks_remaining(workgroup: models.WorkGroup) -> int | str:
     workbook_limits = get_workbook_limits(workgroup)
     current_workbooks = list_all_workbooks(workgroup)
     if workbook_limits is None:
-        return None
+        return "No Limit"
 
     return workbook_limits - len(current_workbooks)
