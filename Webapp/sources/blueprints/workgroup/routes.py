@@ -94,6 +94,6 @@ def workgroup(
         approval_status=approval_status,
         workbook_next_reaction_ids=json.dumps(workbook_new_reaction_ids_dic),
         new_reaction_id=new_reaction_id,
-        remaining_workbooks=remaining_workbooks,
-        subscription=workgroup.subscription_tier.value,
+        workbooks_remaining=remaining_workbooks,
+        subscription=workgroup_selected_obj.subscription_tier.value,
     )
