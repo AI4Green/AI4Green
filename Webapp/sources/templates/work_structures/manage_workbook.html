@@ -126,7 +126,12 @@
     </div>
     <br>
     {% endif %}
-    <a href="{{url_for('create_workbook.create_workbook', workgroup=current_workgroup)}}" id="create-workbook-button" class="btn btn-success">Create Workbook</a>
+
+    {%  if remaining_workbooks == 0 %}
+        <button id="create-workbook-button" class="btn btn-success" disabled title="Upgrade your plan to create more workbooks!">Create Workbook</button>
+    {% else %}
+        <a href="{{url_for('create_workbook.create_workbook', workgroup=current_workgroup)}}" id="create-workbook-button" class="btn btn-success">Create Workbook</a>
+    {% endif %}
     <a class="btn btn-primary" href="{{url_for('export_data.export_data_home')}}">Export Workbook</a>
 <input type="hidden" id="current_workgroup" value="{{ current_workgroup }}">
 </div>

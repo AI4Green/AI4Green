@@ -96,10 +96,16 @@ def load_icons() -> Response:
     icon_names = []
     header = None
     bootstrap_icon = ""
+    disable_new = False
     if load_type == "workgroup":
         workbooks = services.workbook.get_workbooks_from_user_group_combination(
             selected
         )
+        workgroup = services.workgroup.from_name(selected)
+        remaining_workbooks = services.workgroup.check_workbooks_remaining(workgroup)
+        if remaining_workbooks == 0:
+            disable_new = True
+
         icon_names = [i.name for i in workbooks]
         header = "Workbooks in " + selected
         load_type = "workbook"
@@ -118,7 +124,9 @@ def load_icons() -> Response:
 
     # load macro template with assigned variables
     icon_macro = get_template_attribute("macros/icons.html", "icon_panel")
-    return jsonify(icon_macro(icon_names, load_type, header, bootstrap_icon))
+    return jsonify(
+        icon_macro(icon_names, load_type, header, bootstrap_icon, disable_new)
+    )
 
 
 @main_bp.route("/get_marvinjs_key", methods=["POST"])

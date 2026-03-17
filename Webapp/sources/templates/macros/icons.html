@@ -1,5 +1,5 @@
 
-{% macro icon_panel(inputs, type, header_text, bootstrap_icon) -%}
+{% macro icon_panel(inputs, type, header_text, bootstrap_icon, disable_new) -%}
 <div class="container" style="background-color: #F5F5F5;">
     <div class="row">
         <div class="col-12">
@@ -10,9 +10,15 @@
             </div>
             <div class="row text-center">
                 <div class="col-6 col-md-3 my-2">
-                    <button id="new-{{ type }}" class="btn icon" onclick="newType('{{ type }}')">
-                        <i class="bi bi-plus icon-img"></i>
-                    </button><br>
+                    {% if disable_new %}
+                        <button id="new-{{ type }}" class="btn icon" disabled title="Upgrade your plan to create more {{ type }}s!")>
+                            <i class="bi bi-plus icon-img"></i>
+                        </button><br>
+                    {% else %}
+                        <button id="new-{{ type }}" class="btn icon" onclick="newType('{{ type }}')">
+                            <i class="bi bi-plus icon-img"></i>
+                        </button><br>
+                    {% endif %}
                     <p> New {{ type.capitalize() }} </p>
                 </div>
                 {% for input in inputs -%}

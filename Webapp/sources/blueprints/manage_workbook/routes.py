@@ -63,9 +63,11 @@ def manage_workbook(
     Returns:
         flask.Response: The rendered template for managing the selected workbook.
     """
-    current_workgroup = workgroup
-    workgroups = get_workgroups()
     notification_number = get_notification_number()
+
+    workgroup_obj = services.workgroup.from_name(workgroup)
+    remaining_workbooks = services.workgroup.check_workbooks_remaining(workgroup_obj)
+    print(remaining_workbooks)
 
     # This function provides the initial dropdown choices for a user and then handles submission of the form
     # Initiate form
@@ -75,7 +77,7 @@ def manage_workbook(
     wb1 = (
         db.session.query(models.WorkBook)
         .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == current_workgroup)
+        .filter(models.WorkGroup.name == workgroup)
         .join(models.t_Person_WorkGroup)
         .join(models.Person)
         .join(models.User)
@@ -88,7 +90,7 @@ def manage_workbook(
     wb2 = (
         db.session.query(models.WorkBook)
         .join(models.WorkGroup)
-        .filter(models.WorkGroup.name == current_workgroup)
+        .filter(models.WorkGroup.name == workgroup)
         .join(models.t_Person_WorkGroup_2)
         .join(models.Person)
         .join(models.User)
@@ -104,11 +106,11 @@ def manage_workbook(
             return render_template(
                 "work_structures/manage_workbook.html",
                 form=form,
-                workgroups=workgroups,
                 workbook=workbook,
-                current_workgroup=current_workgroup,
+                current_workgroup=workgroup,
                 has_request="no",
                 notification_number=notification_number,
+                remaining_workbooks=remaining_workbooks,
             )
     form.workbooks.default = workbook
     form.process()
@@ -123,7 +125,7 @@ def manage_workbook(
     )
     wg = (
         db.session.query(models.WorkGroup)
-        .filter(models.WorkGroup.name == current_workgroup)
+        .filter(models.WorkGroup.name == workgroup)
         .first()
     )
     pi, sr, sm = get_all_workgroup_members(wg)
@@ -149,14 +151,14 @@ def manage_workbook(
     return render_template(
         "work_structures/manage_workbook.html",
         form=form,
-        workgroups=workgroups,
         workbook=workbook,
-        current_workgroup=current_workgroup,
+        current_workgroup=workgroup,
         has_request=has_request,
         members=members,
         other_members=other_members,
         notification_number=notification_number,
         requests=requests,
+        remaining_workbooks=remaining_workbooks,
     )
 
 
