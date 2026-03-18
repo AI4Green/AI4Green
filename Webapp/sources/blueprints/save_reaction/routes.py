@@ -5,7 +5,7 @@ table and saves it in the reaction database
 from datetime import datetime
 
 import pytz
-from flask import Response, json, jsonify, request
+from flask import Response, flash, json, jsonify, redirect, request, url_for
 from flask_api import status
 from flask_login import login_required
 from sources import models, services
@@ -34,9 +34,16 @@ def new_reaction() -> Response:
     workgroup_name = request.form["workgroup"]
 
     # finds workbook object (needs institution later)
+    workgroup_object = services.workgroup.from_name(workgroup_name)
     workbook_object = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
+    remaining_reactions = services.workbook.check_reactions_remaining(
+        workgroup_object, workbook_object
+    )
+    if remaining_reactions == 0:
+        flash("Please upgrade your subscription to create more reactions!")
+        return redirect(url_for("main.index"))
 
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook_object)
     reaction_name = sanitise_user_input(request.form["reactionName"])
@@ -674,7 +681,7 @@ def view_reaction_attachment() -> Response:
 
     mimetype = file_object.file_details["mimetype"]
     display_name = file_object.display_name
-    file_attachment = f"data:{mimetype};base64,{file_attachment}"
+    file_attachment = f"data:{mimetype};base64,{file_attachment}"  # noqa: E231, E702
     return jsonify(
         {"stream": file_attachment, "mimetype": mimetype, "name": display_name}
     )

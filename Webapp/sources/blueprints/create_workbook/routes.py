@@ -53,6 +53,11 @@ def create_workbook(workgroup: str) -> Response:
         .filter(models.WorkGroup.name == workgroup_name)
         .first()
     )
+    remaining_workbooks = services.workgroup.check_workbooks_remaining(workgroup)
+    if remaining_workbooks == 0:
+        flash("Please upgrade your subscription to create more workbooks!")
+        return redirect(url_for("main.index"))
+
     # on valid submit
     if request.method == "POST" and form.validate_on_submit():
         # validates against special characters in workbook name
