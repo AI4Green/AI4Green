@@ -93,15 +93,17 @@ def load_icons() -> Response:
     """
     selected = request.json.get("input")
     load_type = request.json.get("load_type")
+    print(selected, load_type)
     icon_names = []
     header = None
     bootstrap_icon = ""
     disable_new = False
+
     if load_type == "workgroup":
+        workgroup = services.workgroup.from_name(selected)
         workbooks = services.workbook.get_workbooks_from_user_group_combination(
             selected
         )
-        workgroup = services.workgroup.from_name(selected)
         remaining_workbooks = services.workgroup.check_workbooks_remaining(workgroup)
         if remaining_workbooks == 0:
             disable_new = True
@@ -112,11 +114,21 @@ def load_icons() -> Response:
         bootstrap_icon = "bi bi-journal-text"
 
     elif load_type == "workbook":
+        workgroup_name = request.json.get("activeWorkgroup")
+        workgroup = services.workgroup.from_name(workgroup_name)
+        workbook = services.workbook.get_workbook_from_group_book_name_combination(
+            workgroup_name, selected
+        )
         reactions = services.reaction.list_active_in_workbook(
             workbook=selected,
             workgroup=request.json.get("activeWorkgroup"),
             sort_crit="time",
         )
+        remaining_reactions = services.workbook.check_reactions_remaining(
+            workgroup, workbook
+        )
+        if remaining_reactions == 0:
+            disable_new = True
         icon_names = [i.reaction_id for i in reactions[:11]]
         header = "Recent Reactions in " + selected
         load_type = "reaction"
