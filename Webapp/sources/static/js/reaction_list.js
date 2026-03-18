@@ -13,6 +13,8 @@ function getReactions(sortCriteria) {
     document.getElementById("no-reactions").style.display = "none";
     let workgroup = getVal("#active-workgroup");
     let workbook = getVal("#active-workbook");
+    // update the number of remaining reactions
+    updateRemainingReactions(workgroup, workbook);
     $.ajax({
       url: "/get_reactions",
       type: "post",
@@ -34,6 +36,39 @@ function getReactions(sortCriteria) {
  */
 function updateSelectedWorkbook() {
   getReactions("AZ");
+}
+
+function updateRemainingReactions(activeWorkgroup, activeWorkbook) {
+  fetch("/check_remaining_reactions", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      workgroup: activeWorkgroup,
+      workbook: activeWorkbook,
+    }),
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (remainingReactionCount) {
+      let newReaction = $("#new-reaction");
+      let remainingReactions = remainingReactionCount.count;
+      $("#remaining-reactions-counter").text(
+        "Remaining Reactions: " + remainingReactions,
+      );
+      if (remainingReactions === 0) {
+        newReaction.attr("disabled", "disabled");
+        newReaction.attr(
+          "title",
+          "Upgrade your plan to create more reactions!",
+        );
+      } else {
+        newReaction.removeAttr("disabled"); // need to include checks on new reaction create incase people try to hack it
+        newReaction.attr("title", "Create new reaction");
+      }
+    });
 }
 
 /**

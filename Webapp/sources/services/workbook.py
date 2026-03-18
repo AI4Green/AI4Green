@@ -1,5 +1,6 @@
-from typing import List
+from typing import List, Tuple
 
+import services.workgroup
 from flask_login import current_user
 from sources import models
 from sources.extensions import db
@@ -131,3 +132,26 @@ def add_compound_to_recent_list(
         oldest_compound = workbook.recent_compounds[0]
         workbook.recent_compounds.remove(oldest_compound)
     db.session.commit()
+
+
+def get_reaction_limits(workgroup: models.WorkGroup) -> int | None:
+    subscription = services.workgroup.get_subscription(workgroup)
+    limit = subscription["reaction_limit_per_workbook"]
+
+    if limit is None:
+        return None
+
+    return limit
+
+
+def check_reactions_remaining(
+    workgroup: models.WorkGroup, workbook: models.WorkBook
+) -> int | str:
+    reaction_limit = get_reaction_limits(workgroup)
+    current_reactions = len(
+        services.reaction.list_active_in_workbook(workbook.name, workgroup.name)
+    )
+    if reaction_limit is None:
+        return "No Limit"
+
+    return reaction_limit - current_reactions

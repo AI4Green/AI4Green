@@ -1,7 +1,7 @@
 import json
 from typing import Optional
 
-from flask import Response, flash, redirect, render_template, url_for
+from flask import Response, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from sources import services
 from sources.auxiliary import (
@@ -54,7 +54,6 @@ def workgroup(
     remaining_workbooks = services.workgroup.check_workbooks_remaining(
         workgroup_selected_obj
     )
-    print(remaining_workbooks)
 
     workbook_new_reaction_ids_dic = {}
     for workbook in workbooks:
@@ -98,3 +97,19 @@ def workgroup(
         remaining_workbooks=remaining_workbooks,
         subscription=workgroup_selected_obj.subscription_tier.value,
     )
+
+
+@workgroup_bp.route("/check_remaining_reactions", methods=["GET", "POST"])
+def check_workbook_remaining_reactions() -> Response:
+    workgroup_name = request.json.get("workgroup")
+    workbook_name = request.json.get("workbook")
+
+    workgroup_obj = services.workgroup.from_name(workgroup_name)
+    workbook_obj = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
+    reactions_remaining = services.workbook.check_reactions_remaining(
+        workgroup_obj, workbook_obj
+    )
+
+    return jsonify({"count": reactions_remaining})
