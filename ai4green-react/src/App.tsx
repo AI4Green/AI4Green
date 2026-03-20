@@ -1,12 +1,24 @@
-import React from "react";
+import { Routes, Route } from "react-router-dom";
+
+import { Box } from "@chakra-ui/react";
+import Navbar from "./components/navbar.tsx";
 import "./App.css";
-import helloClass from "./projects/ProjectsPage";
+import Home from "./pages/home.tsx";
+import COSHH from "./pages/coshh.tsx";
 
 function App() {
   return (
-    <div className="App">
-      <helloClass name="David" enthusiasmLevel={5}></helloClass>
-    </div>
+    <>
+      <Navbar />
+
+      <Box p={5}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/coshh" element={<COSHH />} />
+          {/*<Route path="/about" element={<About />} />*/}
+        </Routes>
+      </Box>
+    </>
   );
 }
 
