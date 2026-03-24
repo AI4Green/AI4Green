@@ -1,8 +1,6 @@
 // src/components/Navbar.tsx
 import { Flex, Text } from "@chakra-ui/react";
-import { Link, useLocation, Routes, Route } from "react-router-dom";
-import Home from "../pages/home.tsx";
-import COSHH from "../pages/coshh.tsx";
+import { Link } from "react-router-dom";
 
 export default function Navbar() {
   // const location = useLocation(); // to highlight the current page
@@ -10,7 +8,7 @@ export default function Navbar() {
   return (
     <Flex
       as="nav"
-      bg="blue.500"
+      bg="gray.500"
       color="white"
       padding={4}
       align="center"
