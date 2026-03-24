@@ -1,10 +1,10 @@
 import { HStack, Text, Tooltip } from "@chakra-ui/react";
-import { useProjectType } from "src/api/project-type.ts";
-import { Badge } from "@/components/core/Badge.jsx";
-import { Breadcrumbs } from "@/components/core/breadcrumbs.jsx";
-import { Area } from "@/components/project-type/canvas/area.jsx";
-import { Section } from "@/components/project-type/canvas/section";
-import { TITLE_ICON_COMPONENTS } from "@/constants";
+import { useProjectType } from "api/project-type";
+import { Badge } from "components/core/Badge";
+import { Breadcrumbs } from "components/core/breadcrumbs";
+import { Area } from "components/project-type/canvas/area";
+import { Section } from "components/project-type/canvas/section";
+import { TITLE_ICON_COMPONENTS } from "constants";
 import { DefaultContentLayout } from "layouts/default";
 import { useParams } from "react-router-dom";
 

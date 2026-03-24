@@ -17,7 +17,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { FormHelpError } from "components/core/forms";
-import { Modal } from "components/core/modal";
+import { Modal } from "components/core/modal.tsx";
 import { useField } from "formik";
 import { useRef, useState } from "react";
 import { FaCloudUploadAlt } from "react-icons/fa";

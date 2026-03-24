@@ -8,7 +8,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import { Modal } from "components/core/modal";
+import { Modal } from "components/core/modal.tsx";
 import { useObjectUrl } from "helpers/hooks";
 import { useEffect, useState } from "react";
 import { FaDownload, FaTimes } from "react-icons/fa";

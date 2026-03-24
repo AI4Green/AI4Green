@@ -14,7 +14,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import { Modal } from "components/core/modal";
+import { Modal } from "components/core/modal.tsx";
 import { Field, Form, Formik, useField } from "formik";
 import { useEffect, useRef, useState } from "react";
 import { FaBook, FaEdit, FaRegTimesCircle } from "react-icons/fa";

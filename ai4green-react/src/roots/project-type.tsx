@@ -1,7 +1,7 @@
-// import { NotFound } from "./pages/error";
-import { ProjectTypeCanvas } from "@/pages/project-type/canvas.jsx";
+import { NotFound } from "pages/error";
+import { ProjectTypeCanvas } from "pages/project-type";
 import { Route, Routes } from "react-router-dom";
-import { ProjectTypeList } from "@/pages/project-type/list.jsx";
+import { ProjectTypeList } from "pages/project-type";
 
 export const ProjectType = () => {
   return (

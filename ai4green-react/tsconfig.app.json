@@ -3,6 +3,15 @@
       "baseUrl": ".",
       "paths": {
         "src/*": ["./src/*"],
+        "components/*": ["./src/components/*"],
+        "assets/*": ["./src/assets/*"],
+        "api/*": ["./src/api/*"],
+        "contexts/*": ["./src/contexts/*"],
+        "pages/*": ["./src/pages/*"],
+        "constants/*": ["./src/constants/*"],
+        "layouts/*": ["./src/layouts/*"],
+        "helpers/*": ["./src/helpers/*"],
+        "config/*": ["./src/config/*"]
       },
       "allowJs": true,
 
