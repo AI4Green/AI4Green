@@ -17,6 +17,7 @@ export default defineConfig({
       layouts: path.resolve(__dirname, "src/layouts"),
       helpers: path.resolve(__dirname, "src/helpers"),
       config: path.resolve(__dirname, "src/config"),
+      routes: path.resolve(__dirname, "src/routes"),
     },
   },
   server: {

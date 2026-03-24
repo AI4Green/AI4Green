@@ -11,7 +11,8 @@
         "constants/*": ["./src/constants/*"],
         "layouts/*": ["./src/layouts/*"],
         "helpers/*": ["./src/helpers/*"],
-        "config/*": ["./src/config/*"]
+        "config/*": ["./src/config/*"],
+        "routes/*": ["./src/routes/*"]
       },
       "allowJs": true,
 

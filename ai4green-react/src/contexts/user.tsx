@@ -1,4 +1,4 @@
-import { useProfile } from "api";
+// import { useProfile } from "api";
 import Cookies from "js-cookie";
 import {
   createContext,
@@ -34,9 +34,9 @@ export const UserProvider = ({ children }) => {
     setUser(profile);
   }, [profile]);
 
-  useEffect(() => {
-    user && i18n.changeLanguage(user.uiCulture);
-  }, [i18n, user]);
+  // useEffect(() => {
+  //   user && i18n.changeLanguage(user.uiCulture);
+  // }, [i18n, user]);
 
   const signOut = useCallback(() => setUser(null), []);
   const updateProfile = useCallback(() => mutate(), [mutate]);
