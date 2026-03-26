@@ -20,6 +20,7 @@ import { createContext, useCallback, useContext, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 const BackendApiContext = createContext({});
+
 export const useBackendApi = () => useContext(BackendApiContext);
 
 /** Default KY instance options for hitting the backend API */
@@ -55,30 +56,46 @@ export const BackendApiProvider = ({ children }) => {
 
   const baseContext = useMemo(() => ({ api, apiFetcher }), [api, apiFetcher]);
 
-  const context = useMemo(
+  // need to reinstate actual api calls
+  const mockContext = useMemo(
     () => ({
       ...baseContext,
-      account: getAccountApi(baseContext),
-      // users: getUserApi(baseContext),
-      // registrationRules: getRegistrationRulesApi(baseContext),
-      // projects: getProjectsApi(baseContext),
-      // projectGroups: getProjectGroupsApi(baseContext),
-      projectTypes: getProjectTypesApi(baseContext),
-      // plans: getPlansApi(baseContext),
-      // notes: getNotesApi(baseContext),
-      // literatureReviews: getLiteratureReviewsApi(baseContext),
-      // reports: getReportsApi(baseContext),
-      // reactionTable: getReactionTableApi(baseContext),
-      // predictions: getPredictionsApi(baseContext),
-      // comments: getCommentsApi(baseContext),
-      sections: getSectionsApi(baseContext),
-      // fields: getFieldsApi(baseContext),
+      account: {
+        logout: async () => {
+          console.log("Mock logout - no server needed");
+          return Promise.resolve();
+        },
+        // ... other mock methods
+      },
+      // ...
     }),
     [baseContext],
   );
 
+  // const context = useMemo(
+  //   () => ({
+  //     ...baseContext,
+  //     account: getAccountApi(baseContext),
+  //     // users: getUserApi(baseContext),
+  //     // registrationRules: getRegistrationRulesApi(baseContext),
+  //     // projects: getProjectsApi(baseContext),
+  //     // projectGroups: getProjectGroupsApi(baseContext),
+  //     projectTypes: getProjectTypesApi(baseContext),
+  //     // plans: getPlansApi(baseContext),
+  //     // notes: getNotesApi(baseContext),
+  //     // literatureReviews: getLiteratureReviewsApi(baseContext),
+  //     // reports: getReportsApi(baseContext),
+  //     // reactionTable: getReactionTableApi(baseContext),
+  //     // predictions: getPredictionsApi(baseContext),
+  //     // comments: getCommentsApi(baseContext),
+  //     sections: getSectionsApi(baseContext),
+  //     // fields: getFieldsApi(baseContext),
+  //   }),
+  //   [baseContext],
+  // );
+
   return (
-    <BackendApiContext.Provider value={context}>
+    <BackendApiContext.Provider value={mockContext}>
       {children}
     </BackendApiContext.Provider>
   );

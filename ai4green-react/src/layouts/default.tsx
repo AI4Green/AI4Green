@@ -12,22 +12,22 @@ import {
 } from "@chakra-ui/react";
 import { Badge } from "components/core/Badge.js";
 import { Footer } from "components/core/footer.js";
-// import { Sidebar } from "components/core/nav";
-// import { useLocationStateToast } from "helpers/hooks";
-// import { FaExclamationTriangle } from "react-icons/fa";
-// import { IoIosAddCircleOutline } from "react-icons/io";
+import { Sidebar } from "components/core/nav";
+import { useLocationStateToast } from "helpers/hooks";
+import { FaExclamationTriangle } from "react-icons/fa";
+import { IoIosAddCircleOutline } from "react-icons/io";
 import { Link, Outlet } from "react-router-dom";
 
 export const DefaultLayout = ({
   toastDefaults = { position: "top" },
   children,
 }) => {
-  // useLocationStateToast(toastDefaults);
+  useLocationStateToast(toastDefaults);
 
   return (
     <Grid templateRows="1fr auto" minHeight="100vh" fontWeight="light">
-      {/*<Sidebar>{children ? children : <Outlet />}</Sidebar>*/}
-      <GridItem>{/*<Footer />*/}</GridItem>
+      <Sidebar>{children ? children : <Outlet />}</Sidebar>
+      <GridItem>{<Footer />}</GridItem>
     </Grid>
   );
 };

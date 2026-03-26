@@ -1,4 +1,4 @@
-// import { useProfile } from "api";
+import { useProfile } from "api";
 import Cookies from "js-cookie";
 import {
   createContext,
@@ -26,7 +26,13 @@ const getCookieProfile = () => {
  */
 export const UserProvider = ({ children }) => {
   const { i18n } = useTranslation();
-  const [user, setUser] = useState(getCookieProfile());
+  // const [user, setUser] = useState(getCookieProfile());
+
+  const [user, setUser] = useState({
+    fullName: "Guest User",
+    email: "guest@example.com",
+    uiCulture: "en",
+  });
 
   const { data: profile, mutate } = useProfile();
 
@@ -34,9 +40,9 @@ export const UserProvider = ({ children }) => {
     setUser(profile);
   }, [profile]);
 
-  // useEffect(() => {
-  //   user && i18n.changeLanguage(user.uiCulture);
-  // }, [i18n, user]);
+  useEffect(() => {
+    user && i18n.changeLanguage(user.uiCulture);
+  }, [i18n, user]);
 
   const signOut = useCallback(() => setUser(null), []);
   const updateProfile = useCallback(() => mutate(), [mutate]);

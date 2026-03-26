@@ -1,0 +1,175 @@
+{
+  "name": "English (Dev)",
+  "brand": {
+    "name": "AI4Green4Students",
+    "heading": "Empowering students to innovate for a greener future.",
+    "subheading": "Harness AI to tackle environmental challenges and build sustainable solutions."
+  },
+  "feedback": {
+    "saved": "Saved",
+    "loading": "Loading",
+    "error": "An unknown error has occurred.",
+    "error_title": "Something went wrong",
+    "invalidForm": "There was an issue with your form submission. Please check for errors and try again.",
+    "sendEmailFailed": "An error occurred trying to send an email.",
+    "error_400": "The request was invalid.",
+    "error_401": "You are not authorised to view this page.",
+    "error_404": "The requested page could not be found.",
+    "error_403": "You don't have access to this page.",
+    "emptyState": "Looks like there's nothing here!",
+    "account": {
+      "resendConfirm_title": "Request a new confirmation link",
+      "resendConfirm_link": "Send me a new confirmation link via email",
+      "invalidResendLink": "Your resend link is invalid. Please try to get a new one, or contact support.",
+      "unconfirmed": "Your account email address has not been confirmed."
+    }
+  },
+  "fields": {
+    "email": "Email Address",
+    "email_placeholder": "name@example.com",
+    "email_checkreminder": "Please check to ensure your email address is correct.",
+    "password": "Password",
+    "proposal": {
+      "title": "Proposal Title"
+    }
+  },
+  "validation": {
+    "fullname_required": "Please enter your name.",
+    "email_required": "Please enter your email address.",
+    "email_valid": "Please enter a valid email address.",
+    "password_required": "Please enter a password.",
+    "password_minLength": "Passwords must be at least {{minLength}} characters.",
+    "password_digit": "Passwords must have at least one digit ('0' - '9').",
+    "password_uppercase": "Passwords must have at least one uppercase character ('A' - 'Z').",
+    "password_lowercase": "Passwords must have at least one lowercase character ('a' - 'z').",
+    "password_special": "Passwords must have at least one non alphanumeric character.",
+    "department_required": "Please select your department",
+    "institution_required": "Please select your institution"
+  },
+  "buttons": {
+    "brand": "AI4Green4Students",
+    "about": "About",
+    "register": "Register",
+    "login": "Login",
+    "logout": "Logout",
+    "home": "Home",
+    "cancel": "Cancel"
+  },
+  "adminMenu": {
+    "title": "Admin",
+    "menuList": {
+      "userManagement": "User Management",
+      "registrationRule": "Registration Rules",
+      "projectManagement": "Project Management",
+      "projectTypeManagement": "Project Type Management"
+    }
+  },
+  "infoMenu": {
+    "title": "Info",
+    "menuList": {
+      "publishedPapers": "Published Papers",
+      "meetTheTeam": "Meet The Team"
+    }
+  },
+  "about": {
+    "meet_the_team": "Meet The Team"
+  },
+  "register": {
+    "heading": "Register an account",
+    "fields": {
+      "fullname": "Full Name",
+      "fullname_placeholder": "John Smith",
+      "institution": "Institution",
+      "department": "Department"
+    },
+    "links": {
+      "login": "Login to an existing account",
+      "passwordRequirements": "Click here to show password requirements"
+    },
+    "feedback": {
+      "success": "Thank you for registering!",
+      "confirm_title": "Just one more step!",
+      "confirm_message": "We've sent you an email to confirm your account. Please follow the link in the email.",
+      "existingUser": "There is already a user registered with that email address.",
+      "emailNotAllowlisted": "The email address provided is not eligible for registration.",
+      "nottinghamEmailRequired": "We are currently only accepting registrations from University of Nottingham accounts"
+    }
+  },
+  "login": {
+    "heading": "Login",
+    "links": {
+      "forgotPassword": "I've forgotten my password",
+      "register": "Register an account"
+    },
+    "feedback": {
+      "loginFailed": "We couldn't log you in with the username and password you provided."
+    }
+  },
+  "logout": {
+    "feedback": {
+      "success": "You have been logged out.",
+      "busy": "Logging out"
+    }
+  },
+  "confirm": {
+    "feedback": {
+      "busy": "Please wait while we confirm your account",
+      "success": "Your account is confirmed and you have been logged in.",
+      "error": "An error occurred trying to confirm your account.",
+      "invalidLink": "Your confirmation link is invalid, or the token has expired."
+    }
+  },
+  "resendConfirm": {
+    "feedback": {
+      "busy": "Sending account confirmation link via email",
+      "success_title": "Account confirmation link sent",
+      "success_message": "We've sent you an email to confirm your account. Please follow the link in the email."
+    }
+  },
+  "requestPasswordReset": {
+    "heading": "Request a password reset",
+    "buttons": {
+      "submit": "Send me a reset link"
+    },
+    "feedback": {
+      "success": "If there is an user account associated with that email address, we'll send an email with instructions on how to reset your password."
+    }
+  },
+  "resendPasswordReset": {
+    "feedback": {
+      "busy": "Sending password reset link via email",
+      "success_title": "Password reset link sent",
+      "success_message": "We've sent you an email with instructions on how to reset your password. Please follow the link in the email."
+    }
+  },
+  "resetPassword": {
+    "heading": "Reset your password",
+    "buttons": {
+      "submit": "Reset password"
+    },
+    "feedback": {
+      "success": "Your password has been changed.",
+      "loggedIn": "You have been logged in.",
+      "invalidLink": "The password reset failed. Please request a new reset link, or contact support."
+    }
+  },
+  "confirmEmailChange": {
+    "feedback": {
+      "busy": "Please wait while we confirm your email change",
+      "success": "Your email has been updated and you have been logged in.",
+      "error": "An error occurred trying to update your email.",
+      "invalidLink": "Your email change link is invalid, or the token has expired."
+    }
+  },
+  "activateAccount": {
+    "heading": "Activate your account",
+    "buttons": {
+      "submit": "Activate account"
+    },
+    "feedback": {
+      "success": "Your account has been activated.",
+      "loggedIn": "You have been logged in.",
+      "invalidLink": "Your account activation failed. Please request a new account activation link, or contact support."
+    }
+  }
+}
