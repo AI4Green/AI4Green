@@ -152,7 +152,7 @@ def test_novel_compound_table_all_data(app: Flask, client: FlaskClient):
 
 def test_polymer_smiles_parsing():
     """Tests if different polymers are parsed correctly"""
-    assert find_canonical_repeats("CC{-}C{+n}C") == ["*C*"]  # end groups
+    assert find_canonical_repeats("CC{-}CCCCC{+n}C") == ["*C*"]  # end groups
 
     # different branching patterns
     assert find_canonical_repeats("*C{-}(CC{+n}*)C") == ["*CCC(*)C"]
@@ -174,5 +174,23 @@ def test_polymer_smiles_parsing():
         "*C*",
         "*CC(*)C",
     ]  # copolymers
+
+    # reduce multiplication
+    assert find_canonical_repeats("*C{-}(C(C(C{+n}(C)*)C)C)C") == ["*C(*)C"]
+    assert find_canonical_repeats("*C{-}(C{+n}(C1=CC=CC=C1)*)C1=CC=CC=C1") == [
+        "*C(*)c1ccccc1"
+    ]
+    assert find_canonical_repeats(
+        "*C{-}(C(C{+n}(C1=CC=CC=C1)*)C1=CC=CC=C1)C1=CC=CC=C1"
+    ) == ["*C(*)c1ccccc1"]
+    assert find_canonical_repeats("*C1{-}=CC(=CC=C1)C1=CC{+n}(=CC=C1)*") == [
+        "*c1cccc(*)c1"
+    ]
+    assert find_canonical_repeats(
+        "*C1{-}=CC(=CC=C1)C1=CC(=CC=C1)C1=CC(=CC=C1)C1=CC{+n}(=CC=C1)*"
+    ) == ["*c1cccc(*)c1"]
+    assert find_canonical_repeats("*C1{-}(CCCCC1)C1(CCCCC1)C1{+n}(CCCCC1)*") == [
+        "*C1(*)CCCCC1"
+    ]
 
     assert find_canonical_repeats("C[*]{-}C{+n}C") == "dummy"  # dummy atoms = blocked
