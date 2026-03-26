@@ -24,7 +24,7 @@ export const Root = () => {
         />
 
         {/* If you want ProjectType to be the fallback INSIDE the layout */}
-        <Route path="project-types" element={<ProjectType />} />
+        <Route path="project-types/*" element={<ProjectType />} />
       </Route>
 
       {/* 3. Global Catch-all for 404s (Outside the layout) */}

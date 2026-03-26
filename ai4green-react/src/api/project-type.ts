@@ -39,12 +39,21 @@ export const useProjectTypesList = () => {
 
 export const useProjectType = (projectTypeId) => {
   const { apiFetcher } = useBackendApi();
+  const mockData = {
+    id: "mock-id-123",
+    name: "Green Chemistry Research",
+    description:
+      "A specialized project type for analyzing sustainable chemical reactions and waste reduction metrics.",
+    // Add any other fields your 'Section' or 'Area' components expect
+    sections: [],
+  };
 
   return useSWR(
     projectTypeId ? fetchKeys.projectType(projectTypeId) : null,
     async (url) => {
-      const data = await apiFetcher(url);
-      return data;
+      // const data = await apiFetcher(url);
+
+      return mockData;
     },
     { suspense: true },
   );
@@ -53,11 +62,26 @@ export const useProjectType = (projectTypeId) => {
 export const useSectionTypesList = () => {
   const { apiFetcher } = useBackendApi();
 
+  const mockSectionTypes = [
+    {
+      id: "section-type-1",
+      name: "Standard Analysis",
+      description: "Basic green chemistry metrics",
+      order: 1,
+    },
+    {
+      id: "section-type-2",
+      name: "Solvent Selection",
+      description: "Safety and environmental impact of solvents",
+      order: 2,
+    },
+  ];
+
   return useSWR(
     fetchKeys.sectionTypesList,
     async (url) => {
-      const data = await apiFetcher(url);
-      return data;
+      // const data = await apiFetcher(url);
+      return mockSectionTypes;
     },
     { suspense: true },
   );

@@ -24,13 +24,28 @@ export const getSectionsApi = ({ api }) => ({
 });
 
 export const useSectionsListByProjectType = (id) => {
-  const { apiFetcher } = useBackendApi();
+  // const { apiFetcher } = useBackendApi();
+
+  const mockListData = [
+    {
+      id: "item-1",
+      name: "Initial Synthesis Observation",
+      status: "In Progress",
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: "item-2",
+      name: "Waste Management Log",
+      status: "Completed",
+      createdAt: new Date().toISOString(),
+    },
+  ];
 
   return useSWR(
-    id ? fetchKeys.listByProjectType(id) : null,
+    id && name ? fetchKeys.listBySectionType(id, name) : null,
     async (url) => {
-      const data = await apiFetcher(url);
-      return data;
+      // const data = await apiFetcher(url);
+      return mockListData;
     },
     { suspense: true },
   );
@@ -50,13 +65,28 @@ export const useSectionsListByProject = (id) => {
 };
 
 export const useSectionsListBySectionType = (id, name) => {
-  const { apiFetcher } = useBackendApi();
+  // const { apiFetcher } = useBackendApi();
+
+  const mockListData = [
+    {
+      id: "item-1",
+      name: "Initial Synthesis Observation",
+      status: "In Progress",
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: "item-2",
+      name: "Waste Management Log",
+      status: "Completed",
+      createdAt: new Date().toISOString(),
+    },
+  ];
 
   return useSWR(
     id && name ? fetchKeys.listBySectionType(id, name) : null,
     async (url) => {
-      const data = await apiFetcher(url);
-      return data;
+      // const data = await apiFetcher(url);
+      return mockListData;
     },
     { suspense: true },
   );
