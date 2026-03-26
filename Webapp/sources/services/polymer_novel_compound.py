@@ -3,7 +3,6 @@ from typing import Tuple
 
 from flask import abort, json, request
 from flask_login import current_user
-from psmiles import PolymerSmiles
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
 from sources import models, services
