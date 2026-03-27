@@ -12,20 +12,39 @@ const fetchKeys = {
  * @returns
  */
 export const useProfile = () => {
-  const { apiFetcher } = useBackendApi();
+  // const { apiFetcher } = useBackendApi();
 
-  return useSWR(
-    fetchKeys.me,
-    async (url) => {
-      try {
-        return await apiFetcher(url);
-      } catch (e) {
-        if (e?.response?.status === 401) return null;
-        throw e;
-      }
+  return {
+    data: {
+      fullName: "Dev Admin",
+      email: "admin@dev.local",
+      uiCulture: "en",
+      // IMPORTANT: Add all permissions you want to test in the UI
+      permissions: [
+        "CreateProjectTypes",
+        "EditProjectTypes",
+        "DeleteProjectTypes",
+        "ViewProjectTypes",
+      ],
     },
-    { suspense: true, refreshInterval: 600000 }, // re-check profile every 10mins in case of cookie expiry
-  );
+    mutate: () => Promise.resolve(),
+    isLoading: false,
+    isValidating: false,
+    error: null,
+  };
+
+  // return useSWR(
+  //   fetchKeys.me,
+  //   async (url) => {
+  //     try {
+  //       return await apiFetcher(url);
+  //     } catch (e) {
+  //       if (e?.response?.status === 401) return null;
+  //       throw e;
+  //     }
+  //   },
+  //   { suspense: true, refreshInterval: 600000 }, // re-check profile every 10mins in case of cookie expiry
+  // );
 };
 
 export const getUserApi = ({ api }) => ({

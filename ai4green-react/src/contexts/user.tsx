@@ -32,13 +32,14 @@ export const UserProvider = ({ children }) => {
     fullName: "Guest User",
     email: "guest@example.com",
     uiCulture: "en",
+    permissions: [""],
   });
 
   const { data: profile, mutate } = useProfile();
 
-  useEffect(() => {
-    setUser(profile);
-  }, [profile]);
+  // useEffect(() => {
+  //   setUser(profile);
+  // }, [profile]);
 
   useEffect(() => {
     user && i18n.changeLanguage(user.uiCulture);

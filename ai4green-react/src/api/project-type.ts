@@ -33,7 +33,13 @@ export const useProjectTypesList = () => {
       const data = await apiFetcher(url);
       return data;
     },
-    { suspense: true },
+    {
+      suspense: true,
+      fallbackData: [
+        { id: "1", name: "Example Type A" },
+        { id: "2", name: "Example Type B" },
+      ],
+    },
   );
 };
 

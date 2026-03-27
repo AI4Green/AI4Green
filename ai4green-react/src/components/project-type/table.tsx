@@ -10,7 +10,18 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 export const ProjectTypeTable = () => {
-  const { user } = useUser();
+  // const { user } = useUser();
+  const user = {
+    id: "user-123",
+    name: "Dev User",
+    email: "dev@example.com",
+    // Ensure this includes the specific permission the UI is looking for
+    permissions: [
+      "CreateProjectTypes",
+      "EditProjectTypes",
+      "DeleteProjectTypes",
+    ],
+  };
   const { data } = useTableData();
   const [searchValue, setSearchValue] = useState("");
   return (
@@ -41,20 +52,44 @@ const New = () => {
 };
 
 const useTableData = () => {
-  const { data: projectTypes } = useProjectTypesList();
+  // const { data: projectTypes } = useProjectTypesList();
 
-  const tableData = useMemo(
-    () =>
-      projectTypes?.map((projectType) => ({
-        id: projectType.id,
-        name: projectType.name,
-        description: projectType.description,
-        stage: projectType.stage,
-        inUseCount: projectType.inUseCount,
-        permissions: projectType.permissions,
-        targetPath: `${projectType.id}`,
-      })),
-    [projectTypes],
+  const mockTableData = useMemo(
+    () => [
+      {
+        id: "1",
+        name: "Standard Web API",
+        description: "A template for RESTful services using Node.js",
+        stage: "Draft", // <--- Must exist in STATUS_ICON_COMPONENTS
+        inUseCount: 0,
+        permissions: ["CanPublish", "CanPutInDraft", "CanDeprecate"],
+        targetPath: "1",
+      },
+      {
+        id: "2",
+        name: "React Component Library",
+        description: "Shared UI components for internal projects",
+        stage: "Ready", // <--- Must exist in STATUS_ICON_COMPONENTS
+        inUseCount: 15,
+        permissions: ["CanPublish", "CanPutInDraft", "CanDeprecate"],
+        targetPath: "2",
+      },
+    ],
+    [], // No dependencies needed for static mock data
   );
-  return { data: tableData ?? [] };
+
+  // const tableData = useMemo(
+  //   () =>
+  //     projectTypes?.map((projectType) => ({
+  //       id: projectType.id,
+  //       name: projectType.name,
+  //       description: projectType.description,
+  //       stage: projectType.stage,
+  //       inUseCount: projectType.inUseCount,
+  //       permissions: projectType.permissions,
+  //       targetPath: `${projectType.id}`,
+  //     })),
+  //   [projectTypes],
+  // );
+  return { data: mockTableData ?? [] };
 };

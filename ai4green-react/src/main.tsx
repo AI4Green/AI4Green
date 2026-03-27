@@ -24,11 +24,11 @@ createRoot(document.getElementById("root")).render(
           }
         >
           <BackendApiProvider>
-            {/*<UserProvider>*/}
-            <BackendConfigProvider>
-              <Root />
-            </BackendConfigProvider>
-            {/*</UserProvider>*/}
+            <UserProvider>
+              <BackendConfigProvider>
+                <Root />
+              </BackendConfigProvider>
+            </UserProvider>
           </BackendApiProvider>
         </Suspense>
       </BrowserRouter>
