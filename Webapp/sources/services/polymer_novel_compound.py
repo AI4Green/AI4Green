@@ -395,6 +395,7 @@ def find_polymer_repeat_units(
             result = (
                 "*" + compound[start_marker[i] - 1] + compound[start_marker[i] + 3 :]
             )
+            x = 1
         elif (
             compound[start_marker[i] - 1] == "]"
         ):  # for polymers with [] groups e.g C[SiH2]{-}CC{+n}C
@@ -410,6 +411,18 @@ def find_polymer_repeat_units(
                 x += 1  # search backwards
             result = "*" + compound[start_marker[i] - x :].replace("{-}", "")
 
+        # check for double/triple bond (to dummy atoms) before start
+        if compound[start_marker[i] - x - 1] == "=":
+            bond_type = Chem.rdchem.BondType.DOUBLE
+        elif compound[start_marker[i] - x - 1] == "#":
+            bond_type = Chem.rdchem.BondType.TRIPLE
+        elif compound[start_marker[i] - x - 1] == "$":
+            bond_type = Chem.rdchem.BondType.QUADRUPLE
+        elif compound[start_marker[i] - x - 1] == ":":
+            bond_type = Chem.rdchem.BondType.AROMATIC
+        else:
+            bond_type = Chem.rdchem.BondType.SINGLE
+
         diff = len(compound) - len(result)
 
         # END is the character before {+n}
@@ -417,11 +430,11 @@ def find_polymer_repeat_units(
             if (
                 ")" not in result[end_marker[i] - diff : end_marker[i + 1] - diff]
             ):  # no branching at end of SRU
-                results.append(result[: end_marker[i] - diff] + "*")
+                results.append((result[: end_marker[i] - diff] + "*", bond_type))
                 continue
         else:  # last repeat unit
             if ")" not in result[end_marker[i] - diff :]:  # no branching at end of SRU
-                results.append(result[: end_marker[i] - diff] + "*")
+                results.append((result[: end_marker[i] - diff] + "*", bond_type))
                 continue
 
         if result[end_marker[i] - diff + 4] == "(":  # last atom of SRU has a branch
@@ -440,7 +453,7 @@ def find_polymer_repeat_units(
 
         # if end is inside brackets, ----------------------
         if check_bracket_balance(compound[start_marker[i] : end_marker[i]]) == 0:
-            results.append(result + "*")
+            results.append((result + "*", bond_type))
             continue
 
         section = []
@@ -458,7 +471,7 @@ def find_polymer_repeat_units(
 
         result = result + "*" + "".join(section[-idx:])
 
-        results.append(result)
+        results.append((result, bond_type))
 
     return results
 
@@ -610,11 +623,12 @@ def get_repeating_substructure(mol):
     return mol, False
 
 
-def break_cyclic_bond(cyclic_mol):
+def break_cyclic_bond(cyclic_mol, bond_type):
     """
     Break cyclic bond and return as linear mol with dummy atoms
 
     :param cyclic_mol: mol object for cyclic mol
+    :param bond_type: rdkit bond type to dummy atoms
     :return: mol object for linear mol
     """
     # reset indexing
@@ -639,24 +653,26 @@ def break_cyclic_bond(cyclic_mol):
 
         # Add first dummy atom (*) and bond it to begin_idx
         new_idx_1 = cyclic_mol.AddAtom(Chem.Atom(0))
-        cyclic_mol.AddBond(begin_idx, new_idx_1, Chem.BondType.SINGLE)
+        cyclic_mol.AddBond(begin_idx, new_idx_1, bond_type)
 
         # Add second dummy atom (*) and bond it to end_idx
         new_idx_2 = cyclic_mol.AddAtom(Chem.Atom(0))
-        cyclic_mol.AddBond(end_idx, new_idx_2, Chem.BondType.SINGLE)
+        cyclic_mol.AddBond(end_idx, new_idx_2, bond_type)
 
     mol = cyclic_mol.GetMol()
     Chem.SanitizeMol(mol)
     return mol
 
 
-def canonicalise(smiles):
+def canonicalise(unit):
     """
     Canonicalise a polymer smiles string and reduce multiples of a repeating unit
 
-    :param smiles: polymer smiles string
+    :param unit: tuple of polymer smiles string and rdkit bond type
     :return: canonical polymer smiles string
     """
+    (smiles, bond_type) = unit
+    smiles = smiles.replace("/", "").replace("\\", "")  # ignore stereochemistry
     mol = Chem.MolFromSmiles(smiles)
 
     # Identify the dummy atoms (*) and their neighbors (anchors)
@@ -684,7 +700,7 @@ def canonicalise(smiles):
 
     # Create the cyclic version
     cyclic_mol = Chem.RWMol(mol)
-    cyclic_mol.AddBond(anchors[0], anchors[1], Chem.rdchem.BondType.SINGLE)
+    cyclic_mol.AddBond(anchors[0], anchors[1], bond_type)
 
     # Remove dummies in reverse order to keep indices stable
     for idx in sorted(dummy_indices, reverse=True):
@@ -696,7 +712,7 @@ def canonicalise(smiles):
         return Chem.MolToSmiles(cyclic_mol)
 
     # return to linear form
-    mol = break_cyclic_bond(cyclic_mol)
+    mol = break_cyclic_bond(cyclic_mol, bond_type)
     return Chem.MolToSmiles(mol)
 
 
@@ -712,11 +728,10 @@ def find_canonical_repeats(smiles: str) -> list[str] or str:
     if "[*]" in smiles:  # block dummy atoms like R groups
         return "dummy"
 
-    repeat_units = find_polymer_repeat_units(smiles)
+    repeat_unit_info = find_polymer_repeat_units(smiles)
 
     smiles_list = []
-    for unit in repeat_units:
-        unit = unit.replace("/", "").replace("\\", "")  # ignore stereochemistry
+    for unit in repeat_unit_info:
         smiles_list.append(canonicalise(unit))
 
     return smiles_list
