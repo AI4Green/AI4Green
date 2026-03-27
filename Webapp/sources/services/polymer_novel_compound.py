@@ -447,8 +447,9 @@ def find_polymer_repeat_units(
         parts = compound[end_marker[i] + 4 :].split(")")
         for p, part in enumerate(parts):
             if "(" in part and i < len(parts) - 1:
-                parts[p] = ")" + part + ")" + parts[p + 1]
-                parts.pop(p + 1)
+                while check_bracket_balance(parts[p]) > 0:
+                    parts[p] = ")" + parts[p] + ")" + parts[p + 1]
+                    parts.pop(p + 1)
                 section.append(parts[p])
             else:
                 section.append(")" + part)
