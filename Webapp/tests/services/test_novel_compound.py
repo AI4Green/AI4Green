@@ -193,4 +193,9 @@ def test_polymer_smiles_parsing():
         "*C1(*)CCCCC1"
     ]
 
+    # double bonds to dummy atoms
+    assert find_canonical_repeats("*=C{-}(NC1:C:C:C(:C:C:1)C1:C:C:C(:C:C:1)N{+n}=*)C") == [
+        '*=Nc1ccc(-c2ccc(NC(=*)C)cc2)cc1'
+    ]
+
     assert find_canonical_repeats("C[*]{-}C{+n}C") == "dummy"  # dummy atoms = blocked
