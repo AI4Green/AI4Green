@@ -576,13 +576,20 @@ def get_repeating_substructure(mol):
             other_ring_atoms = set(ring_indices) - set(unit_ring_indices)
 
             def add_substituents(atom_idx):
+                """
+                recursive function to add substituents on an atom to the final_atom_set list.
+                travels through substituent branches one neighbour atom at a time
+                """
                 atom = mol.GetAtomWithIdx(atom_idx)
-                for neighbor in atom.GetNeighbors():
-                    nb_idx = neighbor.GetIdx()
+                for neighbour in atom.GetNeighbors():
+                    neighbour_idx = neighbour.GetIdx()
                     # Only add if neighbor isn't part of the core unit or the rest of the ring
-                    if nb_idx not in final_atom_set and nb_idx not in other_ring_atoms:
-                        final_atom_set.add(nb_idx)
-                        add_substituents(nb_idx)
+                    if (
+                        neighbour_idx not in final_atom_set
+                        and neighbour_idx not in other_ring_atoms
+                    ):
+                        final_atom_set.add(neighbour_idx)
+                        add_substituents(neighbour_idx)
 
             for idx in unit_ring_indices:
                 add_substituents(idx)
