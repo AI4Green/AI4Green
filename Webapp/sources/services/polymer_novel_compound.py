@@ -373,6 +373,40 @@ def check_bracket_balance(smiles):
     return balance
 
 
+def remove_first_end_group(compound: str, start_marker: int, x=1):
+    """
+    Remove the start marker {-} and first end group in a polymer smiles string.
+    Searches backwards from start marker {-} to find the first (last) valid atom, removing everything before that.
+    Valid atoms are upper case, or lower case if aromatic, or in [] brackets.
+
+    Args:
+        compound - smiles string with {-} and {+n} markers
+        start_marker - idx of the start marker {-}
+        x - the index of the atom being checked, relative to the start marker {-}
+    Returns:
+        result - the compound to be tested
+        x - the index of the first valid atom, relative to the start marker {-}
+    """
+    if compound[start_marker - x].isupper():
+        result = "*" + compound[start_marker - x:].replace("{-}", "", 1)
+    elif (  # aromatic atoms
+            compound[start_marker - x] in ['b', 'c', 'n', 'o', 'p', 's']
+    ):
+        result = "*" + compound[start_marker - x:].replace("{-}", "", 1)
+    elif (
+            compound[start_marker - x] == "]"
+    ):  # for polymers with [] groups e.g C[SiH2]{-}CC{+n}C
+        x += 1
+        while compound[start_marker - x] != "[" and start_marker - x > 0:
+            x += 1  # search backwards
+        result = "*" + compound[start_marker - x:].replace("{-}", "", 1)
+    else:  # for polymers with rings e.g *C1{-}CC{+n}(CCC1)*
+        x += 1  # search backwards
+        result, x = remove_first_end_group(compound, start_marker, x)
+
+    return result, x
+
+
 def find_polymer_repeat_units(
     compound: str,
 ) -> list[str]:
@@ -391,25 +425,7 @@ def find_polymer_repeat_units(
     results = []
     for i in range(len(start_marker)):
         # START is the letter before {-}
-        if compound[start_marker[i] - 1].isupper():
-            result = (
-                "*" + compound[start_marker[i] - 1] + compound[start_marker[i] + 3 :]
-            )
-            x = 1
-        elif (
-            compound[start_marker[i] - 1] == "]"
-        ):  # for polymers with [] groups e.g C[SiH2]{-}CC{+n}C
-            x = 2
-            while compound[start_marker[i] - x] != "[" and start_marker[i] - x > 0:
-                x += 1  # search backwards
-            result = "*" + compound[start_marker[i] - x :].replace("{-}", "")
-        else:  # for polymers with rings e.g *C1{-}CC{+n}(CCC1)*
-            x = 2
-            while (
-                not compound[start_marker[i] - x].isupper() and start_marker[i] - x > 0
-            ):
-                x += 1  # search backwards
-            result = "*" + compound[start_marker[i] - x :].replace("{-}", "")
+        result, x = remove_first_end_group(compound, start_marker[i])
 
         # check for double/triple bond (to dummy atoms) before start
         if compound[start_marker[i] - x - 1] == "=":
@@ -461,9 +477,9 @@ def find_polymer_repeat_units(
         for p, part in enumerate(parts):
             if "(" in part and i < len(parts) - 1:
                 while check_bracket_balance(parts[p]) > 0:
-                    parts[p] = ")" + parts[p] + ")" + parts[p + 1]
+                    parts[p] = parts[p] + ")" + parts[p + 1]
                     parts.pop(p + 1)
-                section.append(parts[p])
+                section.append(")" + parts[p])
             else:
                 section.append(")" + part)
 
@@ -674,6 +690,10 @@ def break_cyclic_bond(cyclic_mol, bond_type):
 def canonicalise(unit):
     """
     Canonicalise a polymer smiles string and reduce multiples of a repeating unit
+
+    We do this by cyclising the polymer (this reduces many possible representations of the polymer to a single option),
+    then resetting the index, and breaking the first bond.
+    Cyclising also allows checks for rotational symmetry to determine if multiple repeats are present.
 
     :param unit: tuple of polymer smiles string and rdkit bond type
     :return: canonical polymer smiles string

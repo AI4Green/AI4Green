@@ -167,6 +167,7 @@ def test_polymer_smiles_parsing():
     ) == ["*C(C(C)Cl)C1C2(C(C)Cl)C3C(*)C(C4CC4)C132"]
 
     assert find_canonical_repeats("*C1{-}CC{+n}(CCC1)*") == ["*C1CCCC(*)C1"]  # rings
+    assert find_canonical_repeats("Clc1{-}ccc{+n}([s]1)Cl") == ['*c1ccc(*)s1']  # aromatic at start marker
     assert find_canonical_repeats("C[SiH2]{-}CC{+n}C") == [
         "*C[SiH2]C*"
     ]  # groups in [] brackets
