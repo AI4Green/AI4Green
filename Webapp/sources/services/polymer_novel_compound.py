@@ -5,6 +5,7 @@ from flask import abort, json, request
 from flask_login import current_user
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
+from rdkit.Chem.rdchem import KekulizeException
 from sources import models, services
 from sources.auxiliary import sanitise_user_input
 from sources.extensions import db
@@ -388,18 +389,16 @@ def remove_first_end_group(compound: str, start_marker: int, x=1):
         x - the index of the first valid atom, relative to the start marker {-}
     """
     if compound[start_marker - x].isupper():
-        result = "*" + compound[start_marker - x:].replace("{-}", "", 1)
-    elif (  # aromatic atoms
-            compound[start_marker - x] in ['b', 'c', 'n', 'o', 'p', 's']
-    ):
-        result = "*" + compound[start_marker - x:].replace("{-}", "", 1)
+        result = "*" + compound[start_marker - x :].replace("{-}", "", 1)
+    elif compound[start_marker - x] in ["b", "c", "n", "o", "p", "s"]:  # aromatic atoms
+        result = "*" + compound[start_marker - x :].replace("{-}", "", 1)
     elif (
-            compound[start_marker - x] == "]"
+        compound[start_marker - x] == "]"
     ):  # for polymers with [] groups e.g C[SiH2]{-}CC{+n}C
         x += 1
         while compound[start_marker - x] != "[" and start_marker - x > 0:
             x += 1  # search backwards
-        result = "*" + compound[start_marker - x:].replace("{-}", "", 1)
+        result = "*" + compound[start_marker - x :].replace("{-}", "", 1)
     else:  # for polymers with rings e.g *C1{-}CC{+n}(CCC1)*
         x += 1  # search backwards
         result, x = remove_first_end_group(compound, start_marker, x)
@@ -645,6 +644,7 @@ def get_repeating_substructure(mol):
 
     return mol, False
 
+
 def break_cyclic_bond(cyclic_mol):
     """
     Break cyclic bond and return as linear mol with dummy atoms
@@ -672,7 +672,9 @@ def break_cyclic_bond(cyclic_mol):
     bond_to_remove = []
     for b in cyclic_mol.GetBonds():
         if b.HasProp("backbone") and not b.HasProp("ring"):
-            bond_to_remove.append((b.GetBeginAtomIdx(), b.GetEndAtomIdx(), b.GetBondType()))
+            bond_to_remove.append(
+                (b.GetBeginAtomIdx(), b.GetEndAtomIdx(), b.GetBondType())
+            )
             break
 
     # Break cyclic bond and add dummy atoms back
