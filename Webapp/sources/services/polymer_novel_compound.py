@@ -427,16 +427,15 @@ def find_polymer_repeat_units(
         result, x = remove_first_end_group(compound, start_marker[i])
 
         # check for double/triple bond (to dummy atoms) before start
-        if compound[start_marker[i] - x - 1] == "=":
-            bond_type = Chem.rdchem.BondType.DOUBLE
-        elif compound[start_marker[i] - x - 1] == "#":
-            bond_type = Chem.rdchem.BondType.TRIPLE
-        elif compound[start_marker[i] - x - 1] == "$":
-            bond_type = Chem.rdchem.BondType.QUADRUPLE
-        elif compound[start_marker[i] - x - 1] == ":":
-            bond_type = Chem.rdchem.BondType.AROMATIC
-        else:
-            bond_type = Chem.rdchem.BondType.SINGLE
+        bond_types_dict = {
+            "=": Chem.rdchem.BondType.DOUBLE,
+            "#": Chem.rdchem.BondType.TRIPLE,
+            "$": Chem.rdchem.BondType.QUADRUPLE,
+            ":": Chem.rdchem.BondType.AROMATIC,
+        }
+        bond_type = bond_types_dict.get(
+            compound[start_marker[i] - x - 1], Chem.rdchem.BondType.SINGLE
+        )
 
         diff = len(compound) - len(result)
 
