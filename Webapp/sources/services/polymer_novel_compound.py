@@ -410,7 +410,7 @@ def find_polymer_repeat_units(
     compound: str,
 ) -> list[str]:
     """
-    Identify the repeat group within a polymer SMILES string.
+    Identify the repeat group within a polymer SMILES string, and the bond type to dummy atoms.
     Must be done before smiles is cleaned.
     Uses {-} and {+n} to find repeat unit.
     """
@@ -705,7 +705,12 @@ def canonicalise(unit):
     :param unit: tuple of polymer smiles string and rdkit bond type
     :return: canonical polymer smiles string
     """
-    (smiles, bond_type) = unit
+    if type(unit) == tuple:
+        (smiles, bond_type) = unit
+    else:  # bond_type isn't present in /structure_search_handler route
+        smiles = unit
+        bond_type = None
+
     smiles = smiles.replace("/", "").replace("\\", "")  # ignore stereochemistry
     mol = Chem.MolFromSmiles(smiles)
 
@@ -714,6 +719,8 @@ def canonicalise(unit):
     anchors = [
         mol.GetAtomWithIdx(idx).GetNeighbors()[0].GetIdx() for idx in dummy_indices
     ]
+    if bond_type is None:
+        bond_type = mol.GetBondBetweenAtoms(dummy_indices[0], anchors[0]).GetBondType()
 
     # check for only one atom in backbone e.g *C*
     if anchors[0] == anchors[1]:
