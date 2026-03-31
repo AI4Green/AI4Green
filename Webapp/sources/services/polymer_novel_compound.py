@@ -645,33 +645,38 @@ def get_repeating_substructure(mol):
 
     return mol, False
 
-
-def break_cyclic_bond(cyclic_mol, bond_type):
+def break_cyclic_bond(cyclic_mol):
     """
     Break cyclic bond and return as linear mol with dummy atoms
 
     :param cyclic_mol: mol object for cyclic mol
-    :param bond_type: rdkit bond type to dummy atoms
     :return: mol object for linear mol
     """
     # reset indexing
-    cyclic_mol = Chem.MolFromSmiles(Chem.MolToSmiles(cyclic_mol))
-    cyclic_mol = Chem.RWMol(cyclic_mol)
+    new_order = list(Chem.CanonicalRankAtoms(cyclic_mol, breakTies=True))
+    cyclic_mol = Chem.RWMol(Chem.RenumberAtoms(cyclic_mol, new_order))
 
     # Identify bonds in backbone
     for b in cyclic_mol.GetBonds():
         if b.IsInRing():
             b.SetProp("backbone", "True")
 
+    # kekulise so we can get bond types as single/double not aromatic
+    try:
+        Chem.Kekulize(cyclic_mol, clearAromaticFlags=True)
+    except KekulizeException:
+        # If it fails, it might already be non-aromatic
+        pass
+
     # Find bonds to break
     bond_to_remove = []
     for b in cyclic_mol.GetBonds():
         if b.HasProp("backbone") and not b.HasProp("ring"):
-            bond_to_remove.append((b.GetBeginAtomIdx(), b.GetEndAtomIdx()))
+            bond_to_remove.append((b.GetBeginAtomIdx(), b.GetEndAtomIdx(), b.GetBondType()))
             break
 
     # Break cyclic bond and add dummy atoms back
-    for begin_idx, end_idx in bond_to_remove:
+    for begin_idx, end_idx, bond_type in bond_to_remove:
         cyclic_mol.RemoveBond(begin_idx, end_idx)
 
         # Add first dummy atom (*) and bond it to begin_idx
@@ -683,7 +688,7 @@ def break_cyclic_bond(cyclic_mol, bond_type):
         cyclic_mol.AddBond(end_idx, new_idx_2, bond_type)
 
     mol = cyclic_mol.GetMol()
-    Chem.SanitizeMol(mol)
+    Chem.SanitizeMol(mol)  # undo kekulisation
     return mol
 
 
@@ -739,7 +744,7 @@ def canonicalise(unit):
         return Chem.MolToSmiles(cyclic_mol)
 
     # return to linear form
-    mol = break_cyclic_bond(cyclic_mol, bond_type)
+    mol = break_cyclic_bond(cyclic_mol)
     return Chem.MolToSmiles(mol)
 
 
