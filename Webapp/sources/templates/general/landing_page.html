@@ -40,6 +40,7 @@
                                 {{ form.remember_me() }} {{ form.remember_me.label }}<br>
                                 {{ form.submit() }}
                             </form>
+                            <a class="btn btn-primary" id="sso" href="/auth/oidc_login">Use Single Sign-on</a>
                         </div>
                         <div class="d-flex flex-column gap-2">
                            <p>
@@ -54,13 +55,6 @@
                                 Click to Register 🌱
                               </a>
                             </p>
-{#                            This line has been commented out until SSO feature is fixed #}
-{#                            <p>#}
-{#                                <a id="register" class="btn btn-light text-dark shadow-lg fw-bold px-4 py-2 rounded-pill text-decoration-none"#}
-{#                                   href="{{ url_for('auth.oidc_login') }}">#}
-{#                                  Use Single Sign-on#}
-{#                                </a>#}
-{#                              </p>#}
                         </div>
                     </div>
                 </div>
