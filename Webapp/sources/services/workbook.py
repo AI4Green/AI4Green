@@ -1,8 +1,7 @@
 from typing import List, Tuple
 
-import services.workgroup
 from flask_login import current_user
-from sources import models
+from sources import models, services
 from sources.extensions import db
 
 
