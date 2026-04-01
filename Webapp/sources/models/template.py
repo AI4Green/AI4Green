@@ -13,15 +13,13 @@ class TemplateType(Enum):
     COSHH = "COSHH"
 
 
-class ApprovalStatus(Enum):
+class TemplateStatus(Enum):
     """
-    Enum for Approval Status, todo can we reuse a previous one?
+    Enum for publish status
     """
 
-    PENDING = "PENDING"
-    APPROVED = "APPROVED"
-    REJECTED = "REJECTED"
-    CHANGES_SUGGESTED = "CHANGES_SUGGESTED"
+    PUBLISHED = "PUBLISHED"
+    DRAFT = "DRAFT"
 
 
 class Template(Model):
@@ -37,14 +35,13 @@ class Template(Model):
     """
 
     __tablename__ = "Template"
-    # __bind_key__ = "main" do we need this to add to the default db?
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False, default="")
     template_type = db.Column(db.Enum(TemplateType), nullable=False)
     time_of_creation = db.Column(db.Datetime, nullable=False)
-    timE_of_update = db.Column(db.Datetime)
+    time_of_update = db.Column(db.Datetime)
 
     institution_id = db.Column(
         db.Integer, db.ForeignKey("Institution.id", ondelete="CASCADE")
@@ -54,7 +51,9 @@ class Template(Model):
     sections = db.relationship("Section", back_populates="template")
     instances = db.relationship("Instance", back_populates="template")
 
-    approved = db.Column(db.Enum(ApprovalStatus), nullable=False)
+    status = db.Column(
+        db.Enum(TemplateStatus), nullable=False, deafult=TemplateStatus.DRAFT
+    )
 
     # # Polymorphic config, uncomment for additional child template
     # __mapper_args__ = {"polymorphic_on": template_type}

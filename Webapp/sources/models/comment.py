@@ -14,6 +14,6 @@ class Comment(Model):
     user = db.relationship("User", backref="comment")
 
     field_response_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    field_response = db.relationship("User", backref="comment")
+    field_response = db.relationship("FieldResponse", backref="comment")
 
     read = db.Column(db.Boolean, nullable=False, default=False)

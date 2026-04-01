@@ -16,3 +16,6 @@ class FieldResponse(Model):
     )
 
     comment = db.relationship("Comment", back_populates="field_response")
+
+    instance_id = db.Column(db.Integer, db.ForeignKey("Instance.id"), nullable=False)
+    instance = db.relationship("Instance", back_populates="field_responses")
