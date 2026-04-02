@@ -138,6 +138,10 @@ def register_blueprints(app: Flask) -> None:
     Registers blueprints for the app.
     """
 
+    from sources.blueprints.api import api_v1
+
+    app.register_blueprint(api_v1)
+
     from sources.blueprints.workgroup import workgroup_bp
 
     app.register_blueprint(workgroup_bp)
