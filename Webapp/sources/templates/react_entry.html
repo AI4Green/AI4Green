@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI4Green</title>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="module">
+        const isDev = window.location.hostname === 'localhost';
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = isDev
+            ? 'http://localhost:5173/src/main.tsx'
+            : "{{ url_for('static', filename='dist/index.js') }}";
+        document.body.appendChild(script);
+    </script>
+</body>
+</html>
