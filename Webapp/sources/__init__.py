@@ -220,6 +220,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(save_reaction_bp)
 
+    from sources.blueprints.react_entry import react_entry_bp
+
+    app.register_blueprint(react_entry_bp)
+
     from sources.blueprints.reaction_approval import reaction_approval_bp
 
     app.register_blueprint(reaction_approval_bp, url_prefix="/reaction_approval")
