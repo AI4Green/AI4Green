@@ -19,4 +19,4 @@ class Section(Model):
     template_id = db.Column(db.Integer, db.ForeignKey("Template.id"))
     template = db.relationship("Template", back_populates="sections")
 
-    fields = db.relationship("Fields", back_populates="section")
+    fields = db.relationship("Field", back_populates="section")

@@ -6,18 +6,17 @@ The models are used to create the database tables, and to query the database.
 
 """
 
-from field_response import FieldResponse
-from field_response_value import FieldResponseValue
-from select_field_options import SelectFieldOptions
-
 from . import base
 from .audit_log import AuditLogEvent
+from .comment import Comment
 from .compound import Compound
 from .compound_data_error_report import CompoundDataErrorReport
 from .controlled_substances import ControlledSubstanceUsage
 from .data_export_request import DataExportRequest, data_export_request_approvers
 from .element import Element
 from .field import Field
+from .field_response import FieldResponse
+from .field_response_value import FieldResponseValue
 from .hazard_code import HazardCode
 from .input_type import InputType
 from .institution import Institution
@@ -45,7 +44,10 @@ from .retrosynthesis import Retrosynthesis
 from .role import Role
 from .section import Section
 from .section_type import SectionType
+from .select_field_options import SelectFieldOptions
 from .solvent import Solvent
+from .template import Template
+from .template_instance import TemplateInstance
 from .update_compound import UpdateCompound
 from .user import User
 from .wb_status_request import WBStatusRequest

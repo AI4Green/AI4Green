@@ -40,8 +40,8 @@ class Template(Model):
     name = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False, default="")
     template_type = db.Column(db.Enum(TemplateType), nullable=False)
-    time_of_creation = db.Column(db.Datetime, nullable=False)
-    time_of_update = db.Column(db.Datetime)
+    time_of_creation = db.Column(db.DateTime, nullable=False)
+    time_of_update = db.Column(db.DateTime)
 
     institution_id = db.Column(
         db.Integer, db.ForeignKey("Institution.id", ondelete="CASCADE")
@@ -49,10 +49,10 @@ class Template(Model):
     institution = db.relationship("Institution", backref="template")
 
     sections = db.relationship("Section", back_populates="template")
-    instances = db.relationship("Instance", back_populates="template")
+    template_instances = db.relationship("TemplateInstance", back_populates="template")
 
     status = db.Column(
-        db.Enum(TemplateStatus), nullable=False, deafult=TemplateStatus.DRAFT
+        db.Enum(TemplateStatus), nullable=False, default=TemplateStatus.DRAFT
     )
 
     # # Polymorphic config, uncomment for additional child template

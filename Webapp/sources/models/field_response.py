@@ -9,7 +9,7 @@ class FieldResponse(Model):
     id = db.Column(db.Integer, primary_key=True)
 
     field_id = db.Column(db.Integer, db.ForeignKey("Field.id"), nullable=False)
-    field = db.relationship("Field", backref="field_response")
+    field = db.relationship("Field", back_populates="field_response")
 
     field_response_values = db.relationship(
         "FieldResponseValue", back_populates="field_response"
@@ -17,5 +17,9 @@ class FieldResponse(Model):
 
     comment = db.relationship("Comment", back_populates="field_response")
 
-    instance_id = db.Column(db.Integer, db.ForeignKey("Instance.id"), nullable=False)
-    instance = db.relationship("Instance", back_populates="field_responses")
+    template_instance_id = db.Column(
+        db.Integer, db.ForeignKey("TemplateInstance.id"), nullable=False
+    )
+    template_instance = db.relationship(
+        "TemplateInstance", back_populates="field_responses"
+    )

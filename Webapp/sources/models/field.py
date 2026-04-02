@@ -9,7 +9,7 @@ class Field(Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     sort_order = db.Column(db.Integer)
-    mandatory = db.Column(db.Boolean, server_default=True)
+    mandatory = db.Column(db.Boolean, default="true")
 
     section_id = db.Column(db.Integer, db.ForeignKey("Section.id"))
     section = db.relationship("Section", back_populates="fields")
