@@ -1,3 +1,3 @@
-export * from "./forbidden.js";
-export * from "./generic-error.js";
-export * from "./not-found.tsx";
+export * from "./forbidden";
+export * from "./generic-error";
+export * from "./not-found";

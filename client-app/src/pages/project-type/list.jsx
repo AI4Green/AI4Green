@@ -1,7 +1,7 @@
 import { HStack } from "@chakra-ui/react";
-import { Breadcrumbs } from "../../components/core/breadcrumbs.js";
-import { ProjectTypeTable } from "../../components/project-type/table";
-import { TITLE_ICON_COMPONENTS } from "../../constants/experiment-ui";
+import { Breadcrumbs } from "components/core/breadcrumbs";
+import { ProjectTypeTable } from "components/project-type/table";
+import { TITLE_ICON_COMPONENTS } from "constants/experiment-ui";
 import {
   DefaultContentHeader,
   DefaultContentLayout,

@@ -1,5 +1,5 @@
 import { Container, Text } from "@chakra-ui/react";
-import { TitledAlert } from "components/core/titled-alert.tsx";
+import { TitledAlert } from "components/core/titled-alert";
 import { useTranslation } from "react-i18next";
 
 export const NotFound = () => {

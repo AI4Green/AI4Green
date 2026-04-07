@@ -1,3 +1,3 @@
-export * from "./nav-bar.tsx";
-export * from "./side-bar.tsx";
-export * from "./side-bar-item.tsx";
+export * from "./nav-bar";
+export * from "./side-bar";
+export * from "./side-bar-item";

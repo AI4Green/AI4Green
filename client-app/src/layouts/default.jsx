@@ -10,8 +10,8 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { Badge } from "components/core/Badge.js";
-import { Footer } from "components/core/footer.js";
+import { Badge } from "components/core/Badge";
+import { Footer } from "components/core/footer";
 import { Sidebar } from "components/core/nav";
 import { useLocationStateToast } from "helpers/hooks";
 import { FaExclamationTriangle } from "react-icons/fa";

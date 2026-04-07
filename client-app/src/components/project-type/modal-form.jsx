@@ -13,7 +13,7 @@ import {
   MultiSelectField,
   TextAreaField,
 } from "components/core/forms";
-import { Modal, useModalState } from "components/core/modal.tsx";
+import { Modal, useModalState } from "components/core/modal";
 import { GLOBAL_PARAMETERS, STAGES } from "constants";
 import { useBackendApi } from "contexts";
 import { Form, Formik } from "formik";

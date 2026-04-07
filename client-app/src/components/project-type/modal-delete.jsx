@@ -9,7 +9,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useProjectTypesList } from "api";
-import { Modal, useModalState } from "components/core/modal.tsx";
+import { Modal, useModalState } from "components/core/modal";
 import { GLOBAL_PARAMETERS } from "constants";
 import { useBackendApi } from "contexts";
 import { useEffect } from "react";

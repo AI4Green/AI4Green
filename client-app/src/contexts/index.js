@@ -1,3 +1,3 @@
-export * from "./backend-api.js";
-export * from "./config.js";
-export * from "./user.tsx";
+export * from "./backend-api";
+export * from "./config";
+export * from "./user";

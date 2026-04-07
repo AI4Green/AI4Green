@@ -6,10 +6,10 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import { useInputTypes } from "api/field.ts";
-import { ActionButton } from "components/core/action-button.tsx";
+import { useInputTypes } from "api/field";
+import { ActionButton } from "components/core/action-button";
 import { FormikInput, MultiSelectField, Switch } from "components/core/forms";
-import { Modal } from "components/core/modal.tsx";
+import { Modal } from "components/core/modal";
 import { INPUT_TYPES_MAP as FIELD_TYPES_MAP } from "components/section-field";
 import { INPUT_TYPES } from "constants";
 import { Form, Formik } from "formik";
