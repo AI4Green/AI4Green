@@ -282,10 +282,6 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(audit_log_bp)
 
-    from sources.blueprints.coshh import coshh_bp
-
-    app.register_blueprint(coshh_bp)
-
 
 def inject_session_context(app: Flask) -> Dict[str, str]:
     """
