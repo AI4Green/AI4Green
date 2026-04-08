@@ -4,8 +4,8 @@ from flask_login import login_required
 from . import react_entry_bp
 
 
+@react_entry_bp.route("/coshh")
 @login_required
-@react_entry_bp.route("/coshh", defaults={"path": ""})
-def serve_react(path):
+def spa_coshh():
     react_url = current_app.config["REACT_APP_URL"]
     return redirect(react_url + "project-types/")

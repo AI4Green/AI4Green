@@ -17,12 +17,11 @@ export default defineConfig({
     port: 8000,
     https: false, // uses mkcert-generated certificate
     proxy: {
-      // Optional Python backend proxy. Uncomment if you want it
-      // "/api": {
-      //   target: "http://localhost:8000",
-      //   changeOrigin: true,
-      //   secure: false
-      // }
+      "/api": {
+        target: "http://localhost:80", // use env variable here for deployment
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 });
