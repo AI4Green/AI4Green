@@ -26,20 +26,13 @@ const getCookieProfile = () => {
  */
 export const UserProvider = ({ children }) => {
   const { i18n } = useTranslation();
-  // const [user, setUser] = useState(getCookieProfile());
-
-  const [user, setUser] = useState({
-    fullName: "Guest User",
-    email: "guest@example.com",
-    uiCulture: "en",
-    permissions: [""],
-  });
+  const [user, setUser] = useState(getCookieProfile());
 
   const { data: profile, mutate } = useProfile();
 
-  // useEffect(() => {
-  //   setUser(profile);
-  // }, [profile]);
+  useEffect(() => {
+    setUser(profile);
+  }, [profile]);
 
   useEffect(() => {
     user && i18n.changeLanguage(user.uiCulture);

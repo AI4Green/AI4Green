@@ -15,7 +15,7 @@ import { theme } from "./themes";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ChakraProvider value={theme}>
-      <BrowserRouter>
+      <BrowserRouter basename="/spa">
         <Suspense
           fallback={
             <Flex justify="center" w="100%" my={16}>
