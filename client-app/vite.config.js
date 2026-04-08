@@ -6,7 +6,7 @@ import path from "path";
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   build: {
-    outDir: path.resolve(__dirname, "../Webapp/static/dist"),
+    outDir: path.resolve(__dirname, "../Webapp/sources/static/dist"),
     emptyOutDir: true,
     sourcemap: false,
     rollupOptions: {
@@ -14,7 +14,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 45577,
+    port: 8000,
     https: false, // uses mkcert-generated certificate
     proxy: {
       // Optional Python backend proxy. Uncomment if you want it

@@ -168,6 +168,8 @@ class BaseConfig(object):  # class to store configuration variables
         "MESSAGE_QUEUE_CONNECTION_STRING", default_conn_str
     )
 
+    REACT_APP_URL = os.getenv("REACT_APP_URL", "http://localhost:8000/")
+
 
 class TestConfig(BaseConfig):
     TESTING = True
