@@ -102,12 +102,9 @@ const LoggedOutButtons = ({ t }) => (
 );
 
 const UserMenu = () => {
-  // ive commented out auth routes for now, will need to tie this in to ai4green before deployment
-  // const { user, signOut } = useUser();
+  const { user, signOut } = useUser();
   const { t } = useTranslation();
-  const mockUser = { fullName: "Guest", email: "guest@example.com" };
   const navigate = useNavigate();
-  console.log(useBackendApi());
   const {
     account: { logout },
   } = useBackendApi();
@@ -135,10 +132,9 @@ const UserMenu = () => {
 
   return (
     <>
-      // change mockUser to reinstate auth
-      {mockUser ? (
+      {user ? (
         <Box>
-          <LoggedInMenu user={mockUser} onLogout={handleLogoutClick} />
+          <LoggedInMenu user={user} onLogout={handleLogoutClick} />
         </Box>
       ) : (
         <LoggedOutButtons t={t} />

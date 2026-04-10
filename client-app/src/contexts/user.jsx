@@ -26,27 +26,57 @@ const getCookieProfile = () => {
  */
 export const UserProvider = ({ children }) => {
   const { i18n } = useTranslation();
-  const [user, setUser] = useState(getCookieProfile());
+
+  const initialUser = getCookieProfile();
+
+  const [user, setUser] = useState(initialUser);
+  const [isLoading, setIsLoading] = useState(!initialUser);
 
   const { data: profile, mutate } = useProfile();
 
   useEffect(() => {
-    setUser(profile);
+    if (profile === undefined) return;
+
+    // API says logged in
+    if (profile) {
+      setUser(profile);
+
+      Cookies.set(".AI4Green4Students.Profile", JSON.stringify(profile), {
+        expires: 1,
+      });
+    }
+    // API says NOT logged in
+    else {
+      setUser(null);
+      Cookies.remove(".AI4Green4Students.Profile");
+    }
+
+    setIsLoading(false);
   }, [profile]);
 
   useEffect(() => {
-    user && i18n.changeLanguage(user.uiCulture);
+    if (user?.uiCulture) {
+      i18n.changeLanguage(user.uiCulture);
+    }
   }, [i18n, user]);
 
-  const signOut = useCallback(() => setUser(null), []);
+  const signOut = useCallback(() => {
+    setUser(null);
+    Cookies.remove(".AI4Green4Students.Profile");
+  }, []);
+
   const updateProfile = useCallback(() => mutate(), [mutate]);
 
-  const context = useMemo(
-    () => ({ user, signIn: setUser, signOut, updateProfile }),
-    [user, setUser, signOut, updateProfile],
+  const value = useMemo(
+    () => ({
+      user,
+      isLoading,
+      signIn: setUser,
+      signOut,
+      updateProfile,
+    }),
+    [user, isLoading, signOut, updateProfile],
   );
 
-  return (
-    <UserContext.Provider value={context}>{children}</UserContext.Provider>
-  );
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
