@@ -2,7 +2,7 @@ import { useBackendApi } from "contexts";
 import useSWR from "swr";
 
 export const fetchKeys = {
-  projectTypesList: "project-types/",
+  projectTypesList: "coshh/project_types",
   projectType: (projectTypeId) => `project-types/${projectTypeId}`,
   sectionTypesList: "project-types/section-types",
 };
@@ -35,10 +35,6 @@ export const useProjectTypesList = () => {
     },
     {
       suspense: true,
-      fallbackData: [
-        { id: "1", name: "Example Type A" },
-        { id: "2", name: "Example Type B" },
-      ],
     },
   );
 };
