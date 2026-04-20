@@ -11,6 +11,7 @@ class TemplateType(Enum):
     """
 
     COSHH = "COSHH"
+    REACTIONS = "REACTIONS"
 
 
 class TemplateStatus(Enum):
@@ -42,6 +43,11 @@ class Template(Model):
     template_type = db.Column(db.Enum(TemplateType), nullable=False)
     time_of_creation = db.Column(db.DateTime, nullable=False)
     time_of_update = db.Column(db.DateTime)
+
+    creator_id = db.Column(
+        db.Integer, db.ForeignKey("User.id", ondelete="SET NULL"), nullable=True
+    )
+    creator = db.relationship("User", backref="templates")
 
     institution_id = db.Column(
         db.Integer, db.ForeignKey("Institution.id", ondelete="CASCADE")
