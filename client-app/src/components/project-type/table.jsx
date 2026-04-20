@@ -1,5 +1,5 @@
 import { HStack } from "@chakra-ui/react";
-import { useProjectTypesList } from "../../api/coshh-templates.js";
+import { useProjectTypesList } from "../../api/project-type.js";
 import { DataTable, DataTableGlobalFilter } from "components/core/data-table";
 import { columns } from "components/project-type/columns";
 import { CreateOrEditProjectTypeModal } from "components/project-type/modal-form";

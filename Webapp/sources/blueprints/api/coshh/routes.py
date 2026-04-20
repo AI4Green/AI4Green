@@ -7,10 +7,12 @@ from . import coshh_api_bp
 
 @coshh_api_bp.route("/project_types", methods=["GET"])
 def get_all_templates():
+    # templates = db.session.query(models.Template).filter()
+
     return jsonify(
         [
-            {"id": "uu", "name": "ggg", "stage": "Draft"},
-            {"id": "tt", "name": "ddd", "stage": "Draft"},
+            {"id": "uu", "name": "ggg", "stage": "Draft", "permissions": "CanPublish"},
+            {"id": "tt", "name": "ddd", "stage": "Draft", "permissions": "CanPublish"},
         ]
     )
     # return (
