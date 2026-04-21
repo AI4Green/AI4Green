@@ -63,3 +63,17 @@ class Template(Model):
 
     # # Polymorphic config, uncomment for additional child template
     # __mapper_args__ = {"polymorphic_on": template_type}
+
+    def to_dict(self):
+        """
+        Simple method to serialise template. Does not include sections, these should be retrieved by api call
+        """
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "time_of_creation": self.time_of_creation,
+            "time_of_update": self.time_of_update,
+            "creator_id": self.creator_id,
+            "institution_id": self.institution_id,
+        }
