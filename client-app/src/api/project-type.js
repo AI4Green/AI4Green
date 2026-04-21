@@ -2,26 +2,26 @@ import { useBackendApi } from "contexts";
 import useSWR from "swr";
 
 export const fetchKeys = {
-  projectTypesList: "coshh/project_types",
+  projectTypesList: "coshh/templates",
   projectType: (projectTypeId) => `project-types/${projectTypeId}`,
   sectionTypesList: "project-types/section-types",
 };
 
 export const getProjectTypesApi = ({ api }) => ({
   create: ({ values }) =>
-    api.post("project-types/", {
+    api.post("coshh/templates", {
       json: values,
     }),
 
   edit: ({ values, id }) =>
-    api.put(`project-types/${id}`, {
+    api.put(`coshh/templates/${id}`, {
       json: values,
     }),
 
-  delete: (id) => api.delete(`project-types/${id}`),
+  delete: (id) => api.delete(`coshh/templates/${id}`),
 
   advanceStage: (id, stageName) =>
-    api.post(`project-types/${id}/advance`, { json: { stageName } }),
+    api.post(`coshh/templates/${id}/advance`, { json: { stageName } }),
 });
 
 export const useProjectTypesList = () => {
