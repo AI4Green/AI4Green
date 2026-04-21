@@ -10,7 +10,6 @@ from . import coshh_api_bp
 
 @coshh_api_bp.route("/templates", methods=["GET"])
 def get_all_templates():
-    # todo: sort out this route!
     templates = (
         db.session.query(models.Template)
         .filter(models.Template.creator_id == current_user.id)
@@ -20,8 +19,7 @@ def get_all_templates():
     if not templates:
         return []
 
-    # need to implement to_dict including permissions and stuff
-    return jsonify(templates)
+    return jsonify([x.to_dict() for x in templates])
 
     # return jsonify(
     #     [
