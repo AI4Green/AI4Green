@@ -21,18 +21,6 @@ def get_all_templates():
 
     return jsonify([x.to_dict() for x in templates])
 
-    # return jsonify(
-    #     [
-    #         {"id": "uu", "name": "ggg", "stage": "Draft", "permissions": "CanPublish"},
-    #         {"id": "tt", "name": "ddd", "stage": "Draft", "permissions": "CanPublish"},
-    #     ]
-    # )
-    # return (
-    #     db.session.query(models.User)
-    #     .filter(func.lower(models.User.email) == user_email.lower())
-    #     .first()
-    # )
-
 
 @coshh_api_bp.route("/templates", methods=["POST"])
 def create_new_template():
@@ -60,3 +48,15 @@ def create_new_template():
         db.session.commit()
 
         return jsonify({"message": "blank template created"}), 200
+
+
+@coshh_api_bp.route("/templates/<int:template_id>", methods=["GET"])
+def get_template(template_id):
+    template = models.Template.query.get(template_id)
+    return jsonify(template.to_dict())
+
+
+@coshh_api_bp.route("/templates/section_types", methods=["GET"])
+def get_template_section_types():
+    section_types = models.SectionType.query.all()
+    return jsonify([x.to_dict for x in section_types])

@@ -10,6 +10,7 @@ export const Area = () => {
   const navigate = useNavigate();
   const { projectTypeId, sectionTypeId } = useParams();
   const { data: sectionTypes } = useSectionTypesList();
+  console.log("SECTION TYPES", sectionTypes);
 
   return (
     <HStack
@@ -47,7 +48,7 @@ export const Area = () => {
               bg: "blue.50",
             }}
           >
-            {sectionTypeLabels[sectionType.name]}
+            {sectionType.name}
           </Button>
         ))}
       </HStack>
