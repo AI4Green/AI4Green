@@ -10,21 +10,19 @@ from . import templates_api_bp
 
 @templates_api_bp.route("/", methods=["GET"])
 def get_templates():
-    template_type = request.args.get("type")
+    template_type = request.args.get("type", None)
     # todo: move db queries to services?
-    query = (
-        db.session.query(models.Template)
-        .filter(models.Template.creator_id == current_user.id)
-        .all()
+    query = db.session.query(models.Template).filter(
+        models.Template.creator_id == current_user.id
     )
 
     if template_type:
-        query = query.filter(models.Template.template_type == template_type).all()
+        query = query.filter(models.Template.template_type == template_type)
 
     if not query:
         return []
 
-    return jsonify([x.to_dict() for x in query])
+    return jsonify([x.to_dict() for x in query.all()])
 
 
 @templates_api_bp.route("/<int:template_id>", methods=["GET"])
