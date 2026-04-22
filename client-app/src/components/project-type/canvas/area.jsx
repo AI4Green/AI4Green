@@ -84,7 +84,7 @@ export const Area = () => {
               bg: "blue.50",
             }}
           >
-            {sections.name}
+            {section.name}
           </Button>
         ))}
         {/* Empty state helper text */}

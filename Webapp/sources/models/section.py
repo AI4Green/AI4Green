@@ -20,3 +20,12 @@ class Section(Model):
     template = db.relationship("Template", back_populates="sections")
 
     fields = db.relationship("Field", back_populates="section")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "sort_order": self.sort_order,
+            "section_type_id": self.section_type_id,
+            "template_id": self.template_id,
+        }
