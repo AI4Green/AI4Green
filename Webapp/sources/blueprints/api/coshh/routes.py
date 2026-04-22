@@ -56,7 +56,15 @@ def get_template(template_id):
     return jsonify(template.to_dict())
 
 
-@coshh_api_bp.route("/templates/section_types", methods=["GET"])
-def get_template_section_types():
-    section_types = models.SectionType.query.all()
-    return jsonify([x.to_dict for x in section_types])
+@coshh_api_bp.route("/templates/<int:template_id>/sections", methods=["GET"])
+def get_template_sections(template_id):
+    template = models.Template.query.get(template_id)
+    return jsonify(template.sections)
+
+
+# @coshh_api_bp.route("/templates/<int:template_id>/sections", methods=["GET"])
+# def get_template_section_types(template_id):
+#     print(template_id)
+#
+#     section_types = models.SectionType.query.all()
+#     return jsonify([x.to_dict() for x in section_types])
