@@ -25,31 +25,33 @@ def downgrade(engine_name):
 
 def upgrade_():
     # Define table structure locally for the migration
-    section_type_table = sa.table(
-        "SectionType", sa.column("id", sa.Integer), sa.column("name", sa.String)
+    input_type_table = sa.table(
+        "InputType",
+        sa.column("id", sa.Integer),
+        sa.column("title", sa.String),
     )
 
-    # Data to seed
     op.bulk_insert(
-        section_type_table,
+        input_type_table,
         [
-            {"id": 1, "name": "Activity Information"},
-            {"id": 2, "name": "Hazard Identifications"},
-            {"id": 3, "name": "SDS Reference"},
-            {"id": 4, "name": "Safe Storage"},
-            {"id": 5, "name": "Workplace Exposure Limits"},
-            {"id": 6, "name": "Control Measures"},
-            {"id": 7, "name": "Exposure Monitoring and Health Surveillance"},
-            {"id": 8, "name": "Personal Protective Equipment (PPE)"},
-            {"id": 9, "name": "Emergency Requirements"},
-            {"id": 10, "name": "Additional Control Measures"},
+            {"id": 1, "title": "text"},  # single line text
+            {"id": 2, "title": "textarea"},  # long text
+            {"id": 3, "title": "number"},  # numeric values
+            {"id": 4, "title": "select"},  # single choice dropdown
+            {"id": 5, "title": "multiselect"},  # multiple choice
+            {"id": 6, "title": "checkbox"},  # boolean true/false
+            {"id": 7, "title": "date"},  # dates (review, assessment)
+            {"id": 8, "title": "file"},  # SDS uploads, documents
+            {"id": 9, "title": "url"},  # references / external links
+            {"id": 10, "title": "richtext"},  # formatted procedures
+            {"id": 11, "title": "repeatable_group"},  # repeated structured entries
         ],
     )
 
 
 def downgrade_():
     # Clean up the seeded data if we roll back
-    op.execute('DELETE FROM "SectionType" WHERE id BETWEEN 1 AND 10')
+    op.execute('DELETE FROM "InputType" WHERE id BETWEEN 1 AND 11')
 
 
 def upgrade_audit_log():
