@@ -51,7 +51,7 @@ def upgrade_():
             {"id": 15, "title": "ProjectGroupHazardTable"},
             {"id": 16, "title": "YieldTable"},
             {"id": 17, "title": "MultiYieldTable"},
-            {"id": 18, "title": "GreenMetrics able"},
+            {"id": 18, "title": "GreenMetricsTable"},
             {"id": 19, "title": "MultiGreenMetricsTable"},
             {"id": 20, "title": "DateAndTime"},
             {"id": 21, "title": "FormattedTextInput"},
