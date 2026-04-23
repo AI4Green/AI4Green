@@ -54,7 +54,7 @@ def upgrade_():
             {"id": 18, "title": "GreenMetrics able"},
             {"id": 19, "title": "MultiGreenMetricsTable"},
             {"id": 20, "title": "DateAndTime"},
-            {"id": 21, "title": "Formatted Text Input"},
+            {"id": 21, "title": "FormattedTextInput"},
         ],
     )
 
