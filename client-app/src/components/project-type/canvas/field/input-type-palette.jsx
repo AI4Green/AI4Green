@@ -159,6 +159,8 @@ export const INPUT_TYPES_MAP = {
 
 export const InputTypePalette = ({ onAdd }) => {
   const { data: inputTypes } = useInputTypes();
+  console.log("inputTYpes:", inputTypes);
+
   return (
     <VStack
       px={2}
@@ -175,7 +177,7 @@ export const InputTypePalette = ({ onAdd }) => {
       <Divider />
       <VStack spacing={4} align="stretch" w="full">
         {inputTypes
-          .filter((inputType) => INPUT_TYPES_MAP[inputType.name])
+          .filter((inputType) => INPUT_TYPES_MAP[inputType.title])
           .map((inputType) => {
             return (
               <InputTypeItem
@@ -234,9 +236,9 @@ const InputTypeItem = ({ inputType, onAdd }) => {
         cursor: isGrabbed ? "grabbing" : "grab",
       }}
     >
-      <Icon as={INPUT_TYPES_MAP[inputType.name].icon} fontSize="sm" />
+      <Icon as={INPUT_TYPES_MAP[inputType.title].icon} fontSize="sm" />
       <Text fontSize="xs" fontWeight="normal" flex={1}>
-        {INPUT_TYPES_MAP[inputType.name].label}
+        {INPUT_TYPES_MAP[inputType.title].label}
       </Text>
     </HStack>
   );
