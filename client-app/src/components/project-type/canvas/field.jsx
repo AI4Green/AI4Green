@@ -105,7 +105,7 @@ export const Field = ({ section, projectType }) => {
 
       const { inputType } = source.data;
 
-      if (!inputType || !inputType.name) {
+      if (!inputType || !inputType.title) {
         toast({
           ...TOAST_DEFAULTS,
           title: "Invalid input type",
@@ -116,19 +116,19 @@ export const Field = ({ section, projectType }) => {
 
       const newField = {
         id: `temp-${Date.now()}`,
-        name: `${inputType.name} ${fields.length + 1}`,
+        name: `${inputType.title} ${fields.length + 1}`,
         mandatory: false,
         hidden: false,
         inputType,
         sortOrder: fields.length + 1,
-        selectFieldOptions: INPUT_TYPES_MAP[inputType.name]?.options || [],
+        selectFieldOptions: INPUT_TYPES_MAP[inputType.title]?.options || [],
       };
 
       setFields([...fields, newField]);
 
       toast({
         ...TOAST_DEFAULTS,
-        title: `Added ${inputType.name}`,
+        title: `Added ${inputType.title}`,
         status: "success",
       });
     },
@@ -153,7 +153,7 @@ export const Field = ({ section, projectType }) => {
     try {
       acc[field.id] = JSON.parse(field.defaultResponse);
     } catch (e) {
-      acc[field.id] = INPUT_TYPES_MAP[field.inputType.name].defaultResponse;
+      acc[field.id] = INPUT_TYPES_MAP[field.inputType.title].defaultResponse;
     }
     return acc;
   }, {});
@@ -285,7 +285,7 @@ const mapFieldToCreateModel = (field) => {
     hidden: field.hidden,
     sortOrder: field.sortOrder,
     defaultValue: JSON.stringify(
-      INPUT_TYPES_MAP[field.inputType.name].defaultResponse,
+      INPUT_TYPES_MAP[field.inputType.title].defaultResponse,
     ),
     selectFieldOptions:
       field.selectFieldOptions?.map((option) => ({
