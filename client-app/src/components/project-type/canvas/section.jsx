@@ -126,7 +126,7 @@ export const Section = ({ isCollapsed = false, projectType }) => {
     }
   };
 
-  if (!sectionTypeId) return null;
+  // if (!sectionTypeId) return null;
 
   return (
     <>

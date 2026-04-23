@@ -5,7 +5,7 @@ export const fetchKeys = {
   fieldByName: (projectId, sectionType, fieldName) =>
     `fields/${projectId}/${sectionType}/${fieldName}`,
 
-  sectionFields: (id) => `fields/section/${id}`,
+  sectionFields: (id) => `sections/${id}/fields`,
 
   inputTypes: "input-types",
 };

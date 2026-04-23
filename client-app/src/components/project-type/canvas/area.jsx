@@ -77,7 +77,7 @@ export const Area = () => {
             size="xs"
             onClick={() => {
               navigate(
-                `${BASE_PATH}/${projectTypeId}/sections/${section.id}?action=edit`,
+                `${BASE_PATH}/${projectTypeId}/sections/${section.id}?action=edit&type=section-fields`,
                 {
                   replace: true,
                 },

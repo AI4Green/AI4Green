@@ -2,7 +2,7 @@ import { useBackendApi } from "contexts";
 import useSWR from "swr";
 
 export const fetchKeys = {
-  listByProjectType: (id) => `sections?template_id=${id}`,
+  listByProjectType: (id) => `templates/${id}/sections`,
 
   listByProject: (id) => `sections/project/${id}`,
 

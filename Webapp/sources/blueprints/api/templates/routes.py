@@ -57,3 +57,9 @@ def create_new_template():
         db.session.commit()
 
         return jsonify(new_template.to_dict()), 200
+
+
+@templates_api_bp.route("/<int:template_id>/sections", methods=["GET"])
+def get_template_sections(template_id):
+    query = models.Template.query.get(template_id)
+    return jsonify([x.to_dict() for x in query.sections])

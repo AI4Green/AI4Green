@@ -7,20 +7,12 @@ from . import sections_api_bp
 
 @sections_api_bp.route("/", methods=["GET"])
 def get_sections():
-    template_id = request.args.get("template_id", None)
-
     # get sections per user
     query = (
         db.session.query(models.Section)
         .join(models.Template)
         .filter(models.Template.creator_id == current_user.id)
-        .filter(models.Template.id == template_id)
     )
-
-    if template_id:
-        query.filter(models.Section.template_id == template_id)
-
-    print([x.to_dict() for x in query.all()])
 
     return jsonify([x.to_dict() for x in query.all()])
 
@@ -43,8 +35,6 @@ def save_new_section():
     db.session.add(new_section)
     db.session.commit()
 
-    print(new_section.to_dict())
-
     return jsonify(new_section.to_dict())
 
 
@@ -52,3 +42,9 @@ def save_new_section():
 def get_section_by_id(section_id):
     section = models.Section.query.get(section_id)
     return jsonify(section.to_dict)
+
+
+@sections_api_bp.route("/<int:section_id>/fields", methods=["GET"])
+def get_section_fields(section_id):
+    section = models.Section.query.get(section_id)
+    return [x.to_dict() for x in section.fields]
