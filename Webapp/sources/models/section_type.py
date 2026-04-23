@@ -19,5 +19,5 @@ class SectionType(Model):
         return {
             "id": self.id,
             "name": self.name,
-            "sections": self.sections,  # todo: is this needed?
+            # "sections": self.sections,  # todo: is this needed?
         }

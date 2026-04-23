@@ -25,7 +25,7 @@ class Section(Model):
         return {
             "id": self.id,
             "name": self.name,
-            "sort_order": self.sort_order,
-            "section_type_id": self.section_type_id,
-            "template_id": self.template_id,
+            "sortOrder": self.sort_order,
+            "sectionType": self.section_type.to_dict(),
+            "templateId": self.template_id,
         }

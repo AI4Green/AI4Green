@@ -20,6 +20,8 @@ def get_sections():
     if template_id:
         query.filter(models.Section.template_id == template_id)
 
+    print([x.to_dict() for x in query.all()])
+
     return jsonify([x.to_dict() for x in query.all()])
 
 
@@ -39,7 +41,9 @@ def save_new_section():
     )
 
     db.session.add(new_section)
-    # db.session.commit()
+    db.session.commit()
+
+    print(new_section.to_dict())
 
     return jsonify(new_section.to_dict())
 

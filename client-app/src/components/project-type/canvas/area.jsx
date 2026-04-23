@@ -14,7 +14,7 @@ import { useBackendApi } from "contexts";
 import { SECTION_TYPES, TITLE_ICON_COMPONENTS } from "constants";
 import { useNavigate, useParams } from "react-router-dom";
 
-export const BASE_PATH = "/project-type-management";
+export const BASE_PATH = "/project-types";
 
 export const Area = () => {
   const navigate = useNavigate();
@@ -76,9 +76,12 @@ export const Area = () => {
             variant={Number(sectionId) === section.id ? "solid" : "ghost"}
             size="xs"
             onClick={() => {
-              navigate(`${BASE_PATH}/${projectTypeId}/sections/${section.id}`, {
-                replace: true,
-              });
+              navigate(
+                `${BASE_PATH}/${projectTypeId}/sections/${section.id}?action=edit`,
+                {
+                  replace: true,
+                },
+              );
             }}
             _hover={{
               bg: "blue.50",
