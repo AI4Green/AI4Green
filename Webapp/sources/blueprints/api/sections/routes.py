@@ -48,3 +48,42 @@ def get_section_by_id(section_id):
 def get_section_fields(section_id):
     section = models.Section.query.get(section_id)
     return [x.to_dict() for x in section.fields]
+
+
+@sections_api_bp.route("/<int:section_id>/fields", methods=["POST"])
+def save_new_field(section_id):
+    data = request.get_json()
+
+    print(
+        data
+    )  # todo: if there is a field id, we need to update the field instead of creating a new one
+
+    for f in data:
+        print("F", f)
+        # if an id exists, try to find it
+        fid = f.get("id", None)
+        if fid:
+            query = models.Field.query.filter(models.Field.id == fid)
+            query.update(
+                {
+                    "section_id": section_id,
+                    "name": f.get("name"),
+                    "sort_order": f.get("sortOrder"),
+                    "input_type_id": f.get("inputType"),
+                    "mandatory": f.get("mandatory"),
+                }
+            )
+
+        else:
+            new_field = models.Field.create(
+                section_id=section_id,
+                name=f.get("name"),
+                sort_order=f.get("sortOrder"),
+                input_type_id=f.get("inputType"),
+                mandatory=f.get("mandatory"),
+            )
+            db.session.add(new_field)
+    db.session.commit()
+
+    return jsonify({"message": "success"}), 201
+    # todo: handle multiple input fields, create new select_field_options?

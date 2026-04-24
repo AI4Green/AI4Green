@@ -28,4 +28,5 @@ class Field(Model):
             "sort_order": self.sort_order,
             "mandatory": self.mandatory,
             "section_id": self.section_id,
+            "inputType": self.input_type.to_dict(),
         }

@@ -14,7 +14,7 @@ export const getFieldsApi = ({ apiFetcher, api }) => ({
   getFieldByName: async (projectId, sectionType, fieldName) =>
     apiFetcher(fetchKeys.fieldByName(projectId, sectionType, fieldName)),
 
-  save: (id, values) => api.post(`fields/${id}/save`, { json: values }),
+  save: (id, values) => api.post(`sections/${id}/fields`, { json: values }),
 });
 
 export const useSectionFields = (id) => {

@@ -23,6 +23,8 @@ export const Field = ({ section, projectType }) => {
   const navigate = useNavigate();
   const { fields: api } = useBackendApi();
 
+  console.log("SECTION ID HRHRHR", section.id);
+
   const canEdit = projectType.stage === STAGES.Draft;
   const isEditing =
     canEdit &&
@@ -67,10 +69,9 @@ export const Field = ({ section, projectType }) => {
         status: "success",
       });
       await mutate();
-      navigate(
-        `${BASE_PATH}/${projectTypeId}/section-types/${sectionTypeId}/sections/${sectionId}`,
-        { replace: true },
-      );
+      navigate(`${BASE_PATH}/${projectTypeId}/sections/${sectionId}`, {
+        replace: true,
+      });
     } catch (error) {
       console.error(error);
       toast({
@@ -230,7 +231,7 @@ const NoFieldsAlert = () => (
 const FieldRenderer = ({ field, isChild = false, depth = 0 }) => {
   const [, Component] =
     Object.entries(FIELD_TYPES_MAP).find(
-      ([key]) => key.toUpperCase() === field.inputType?.name.toUpperCase(),
+      ([key]) => key.toUpperCase() === field.inputType?.title.toUpperCase(),
     ) || [];
 
   if (!Component) return null;

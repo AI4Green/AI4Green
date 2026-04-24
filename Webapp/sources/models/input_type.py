@@ -20,5 +20,4 @@ class InputType(Model):
         return {
             "id": self.id,
             "title": self.title,
-            # "field": self.field.to_dict()
         }
