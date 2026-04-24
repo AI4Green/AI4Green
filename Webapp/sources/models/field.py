@@ -25,7 +25,7 @@ class Field(Model):
         return {
             "id": self.id,
             "name": self.name,
-            "sort_order": self.sort_order,
+            "sortOrder": self.sort_order,
             "mandatory": self.mandatory,
             "section_id": self.section_id,
             "inputType": self.input_type.to_dict(),
