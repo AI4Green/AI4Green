@@ -23,8 +23,6 @@ export const Field = ({ section, projectType }) => {
   const navigate = useNavigate();
   const { fields: api } = useBackendApi();
 
-  console.log("SECTION ID HRHRHR", section.id);
-
   const canEdit = projectType.stage === STAGES.Draft;
   const isEditing =
     canEdit &&

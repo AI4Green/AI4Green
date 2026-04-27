@@ -51,15 +51,25 @@ def get_section_fields(section_id):
 
 
 @sections_api_bp.route("/<int:section_id>/fields", methods=["POST"])
-def save_new_field(section_id):
+def save_new_fields(section_id):
     data = request.get_json()
 
-    print(
-        data
-    )  # todo: if there is a field id, we need to update the field instead of creating a new one
+    # get all fields with session id
+    existing_fields = models.Section.query.get(section_id).fields
+    existing_ids = {f.id for f in existing_fields}
 
+    # find all ids from front end request
+    incoming_ids = {f.get("id", None) for f in data}
+
+    # identify which ids have been deleted and remove them
+    ids_to_delete = existing_ids - incoming_ids
+    if ids_to_delete:
+        db.session.query(models.Field).filter(
+            models.Field.id.in_(ids_to_delete)
+        ).delete()
+
+    # now update/create remaining fields
     for f in data:
-        print("F", f)
         # if an id exists, try to find it
         fid = f.get("id", None)
         if fid:
