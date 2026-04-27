@@ -10,7 +10,7 @@ import { useRef, useState } from "react";
 import { FaSync } from "react-icons/fa";
 import { GiMaterialsScience } from "react-icons/gi";
 
-const KETCHER_IFRAME_SRC = "/js/ketcher/index.html";
+const KETCHER_IFRAME_SRC = "/static/ketcher/index.html";
 const KETCHER_EDITOR_INITALS_VALUES = {
   sketcherSmiles: "", // smiles from the Ketcher
   reactants: [], // reactants extracted using the smiles
