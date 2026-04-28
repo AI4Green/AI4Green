@@ -12,24 +12,24 @@ export const fetchKeys = {
 
 export const getProjectsApi = ({ api }) => ({
   create: (values) =>
-    api.post("projects/", {
+    api.post("template-instances/", {
       json: values,
     }),
 
   edit: (id, values) =>
-    api.put(`projects/${id}`, {
+    api.put(`template-instances/${id}`, {
       json: values,
     }),
 
-  delete: (id) => api.delete(`projects/${id}`),
+  delete: (id) => api.delete(`template-instances/${id}`),
 
   inviteInstructors: (id, { emails }) =>
-    api.post(`projects/${id}/invite-instructors`, {
+    api.post(`template-instances/${id}/invite-instructors`, {
       json: { emails },
     }),
 
   removeInstructor: (id, instructorId) =>
-    api.post(`projects/${id}/remove-instructor`, {
+    api.post(`template-instances/${id}/remove-instructor`, {
       json: { id: instructorId },
     }),
 });

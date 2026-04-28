@@ -23,7 +23,7 @@ class TemplateInstance(Model):
     __tablename__ = "TemplateInstance"
 
     id = db.Column(db.Integer, primary_key=True)
-    uuid = db.Column(db.Text)  # identifier, needed? or just use the id?
+    uuid = db.Column(db.Text)
     template_type = db.Column(db.Enum(InstanceType))
 
     owner_id = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
@@ -43,9 +43,20 @@ class TemplateInstance(Model):
 
     # approval
     approval_status = db.Column(
-        db.Enum(TemplateApprovalStatus), nullable=False, default=ApprovalStatus.DRAFT
+        db.Enum(TemplateApprovalStatus), nullable=False, default="DRAFT"
     )
     approver_id = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
     approver = db.relationship(
         "User", backref="template_approvals", foreign_keys=[approver_id]
     )  # backref used so we dont have to edit user table
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "uuid": self.uuid,
+            # "template_type": self.template_type.value,
+            "owner_id": self.owner_id,
+            "template_id": self.template_id,
+            "reaction_id": self.reaction_id,
+            "approver_id": self.approver_id,
+        }

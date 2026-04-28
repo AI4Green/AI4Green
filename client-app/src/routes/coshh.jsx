@@ -26,7 +26,7 @@ export const CoshhCreateModal = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { projects: action } = useBackendApi();
+  const { projects: api } = useBackendApi();
   const { data: templates = [] } = useProjectTypesList();
 
   const toast = useToast();
@@ -54,25 +54,29 @@ export const CoshhCreateModal = () => {
     try {
       setIsLoading(true);
 
-      const response = await action.create({
-        reaction_id: Number(reactionId),
-        template_id: Number(values.templateId[0]),
+      const response = await api.create({
+        reactionId: Number(reactionId),
+        templateId: Number(values.templateId[0]),
+        templateType: "COSHH", // best to send this here or have a dedicated route?
       });
+      const data = await response.json();
+      console.log(data);
 
-      if (response?.status === 200 || response?.status === 201) {
+      if (data?.id || data?.uuid) {
         toast({
           title: "COSHH form created",
           status: "success",
-          duration: GLOBAL_PARAMETERS.ToastDuration,
+          duration: 10,
           isClosable: true,
           position: "top",
         });
 
-        handleReset();
+        // handleReset();
 
-        navigate(`/coshh/form/${response.data.id}/edit`);
+        navigate(`/coshh/form/${data.id}/edit`);
       }
     } catch (e) {
+      console.log(e);
       setFeedback({
         status: "error",
         message: "Failed to create COSHH form",
@@ -153,7 +157,7 @@ export const COSHH = () => {
       {/* When the URL is /coshh/form/:formId,
          the Modal is gone because this route doesn't render it.
       */}
-      <Route path="form/:formId" element={<CoshhForm />} />
+      <Route path="form/:formId/edit" element={<CoshhForm />} />
     </Routes>
   );
 };
