@@ -4,15 +4,13 @@ import { NotFound } from "pages/error";
 import { Home } from "pages/home";
 import { Route, Routes } from "react-router-dom";
 import { ProjectType } from "./project-type";
-import { Project } from "./project";
+import { COSHH } from "./coshh.jsx";
 
 export const Root = () => {
   return (
     <Routes>
-      {/* 1. Home page usually stands alone */}
       <Route path="/" element={<Home />} />
 
-      {/* 2. Routes that share the DefaultLayout */}
       <Route path="/" element={<DefaultLayout />}>
         <Route
           path="greenchemistry"
@@ -25,7 +23,7 @@ export const Root = () => {
         />
 
         <Route path="project-types/*" element={<ProjectType />} />
-        <Route path="projects/*" element={<Project />} />
+        <Route path="coshh/*" element={<COSHH />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

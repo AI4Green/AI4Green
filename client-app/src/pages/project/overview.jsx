@@ -22,7 +22,7 @@ import {
 } from "layouts/default";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { buildProjectPath } from "routes/project";
+import { buildProjectPath } from "../../routes/coshh.jsx";
 
 export const ProjectOverview = () => {
   const { user } = useUser();
