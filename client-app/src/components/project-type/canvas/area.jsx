@@ -25,8 +25,6 @@ export const Area = () => {
     useSectionsListByProjectType(projectTypeId);
   const { sections: api } = useBackendApi();
 
-  console.log("SSSSS", sections);
-
   const handleAddSection = async () => {
     try {
       const newSection = {

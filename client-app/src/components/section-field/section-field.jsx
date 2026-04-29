@@ -28,8 +28,6 @@ export const SectionField = ({
 }) => {
   const { canEdit } = useFieldPermissions(item, field, isInstructor);
 
-  console.log(canEdit, !canEdit);
-
   return (
     <>
       <Field field={{ ...field, feedback }} isDisabled={!canEdit} item={item} />

@@ -236,8 +236,6 @@ const FieldEditModal = ({
 
 const FieldAddChildModal = ({ isOpen, onClose, handleAddChildSubmit }) => {
   const { data: inputTypes } = useInputTypes();
-  console.log("SSSSS", inputTypes);
-
   const validationSchema = object({
     inputType: array()
       .of(string())

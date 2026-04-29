@@ -133,7 +133,7 @@ const processObject = (acc, obj, isNew) => {
  * @returns true if the field is a file type
  */
 const isFieldFileType = (inputType) => {
-  const type = inputType.name.toUpperCase();
+  const type = inputType.title.toUpperCase();
   return (
     type === INPUT_TYPES.File.toUpperCase() ||
     type === INPUT_TYPES.ImageFile.toUpperCase() ||

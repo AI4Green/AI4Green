@@ -66,7 +66,6 @@ const useTableData = () => {
       })),
     [projectTypes],
   );
-  console.log("PROJECT LIST", tableData);
 
   return { data: tableData ?? [] };
 };
