@@ -59,4 +59,7 @@ class TemplateInstance(Model):
             "template_id": self.template_id,
             "reaction_id": self.reaction_id,
             "approver_id": self.approver_id,
+            "sections": [x.to_dict() for x in self.template.sections],
+            # "fieldResponses": [x.to_dict() for x in self.field_responses],
+            "approvalStatus": self.approval_status.value[0],
         }

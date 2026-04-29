@@ -23,3 +23,12 @@ class FieldResponse(Model):
     template_instance = db.relationship(
         "TemplateInstance", back_populates="field_responses"
     )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "field_id": self.field_id,
+            "field_response_values": self.field_response_values,  # does this get updates with multiple values?
+            "template_instance_id": self.template_instance_id,
+            "comment": self.comment,
+        }

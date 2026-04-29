@@ -29,13 +29,13 @@ export const SectionForm = ({
   const formRef = useRef();
   const { sections: sectionApis } = useBackendApi();
 
-  const sectionFields = form?.fieldResponses.map((x) => ({
-    ...x.field,
+  const sectionFields = form?.fields.map((x) => ({
+    ...x,
     response: {
-      id: x.id,
-      value: x.response,
+      id: x.fieldResponse?.[0]?.id || null,
+      value: x.fieldResponse?.[0]?.response || null,
     },
-    feedback: x.feedback,
+    feedback: x.fieldResponse?.[0]?.feedback || null,
   }));
 
   const handleSubmit = async (values, fields) => {
@@ -88,7 +88,8 @@ export const SectionForm = ({
     <DefaultContentLayout>
       <Breadcrumbs items={breadcrumbItems} />
       <SectionHeader
-        {...headerItems}
+        header={headerItems}
+        project={{ name: "bpoog" }}
         action={
           <SectionFormAction
             item={item}

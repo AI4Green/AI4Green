@@ -2,8 +2,8 @@ import { useBackendApi } from "contexts";
 import useSWR from "swr";
 
 export const fetchKeys = {
-  list: "projects/",
-  get: (id) => `projects/${id}`,
+  list: "template-instances/",
+  get: (id) => `template-instances/${id}`,
   studentSummary: (id, studentId) =>
     `projects/${id}/summary${studentId ? `?studentId=${studentId}` : ""}`,
   instructors: (id) => `projects/${id}/instructors`,

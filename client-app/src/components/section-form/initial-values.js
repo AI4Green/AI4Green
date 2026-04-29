@@ -19,7 +19,7 @@ const getInitialValue = (field, recordId, sectionId, sectionApis) => {
     MultiGreenMetricsTable,
   } = INPUT_TYPES;
 
-  const fieldType = field.inputType.name.toUpperCase();
+  const fieldType = field.inputType.title.toUpperCase();
   const fieldResponse = field.response.value;
 
   switch (fieldType) {

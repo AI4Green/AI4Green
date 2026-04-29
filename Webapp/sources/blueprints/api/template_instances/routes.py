@@ -13,9 +13,7 @@ def save_new_instance():
 
     # check to make sure current user is owner of reaction
 
-    # enforce no duplicates
-
-    print(data)
+    # todo: enforce no duplicates
 
     new_instance = models.TemplateInstance.create(
         uuid=str(uuid.uuid4()),
@@ -30,3 +28,16 @@ def save_new_instance():
     db.session.commit()
 
     return jsonify(new_instance.to_dict())
+
+
+@template_instances_api_bp.route("/<int:template_id>", methods=["GET"])
+def get_template_instance(template_id):
+    query = models.TemplateInstance.query.get(template_id)
+    data = query.to_dict()
+
+    # if not query.field_responses:
+    #     # if no fieldResponses, include null values
+    #     data["section"] = [x.to_dict() for x in query.template.sections]
+    print(data)
+
+    return jsonify(data)

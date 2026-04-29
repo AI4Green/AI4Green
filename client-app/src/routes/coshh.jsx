@@ -15,9 +15,10 @@ import {
   AlertIcon,
   useToast,
 } from "@chakra-ui/react";
+import { SectionForm } from "components/section-form";
 import { Formik, Form } from "formik";
 import { useBackendApi } from "contexts";
-import { useProjectTypesList } from "api";
+import { useProjectTypesList, useProject } from "api";
 import { FormikInput, MultiSelectField } from "components/core/forms";
 
 export const CoshhCreateModal = () => {
@@ -134,18 +135,66 @@ export const CoshhCreateModal = () => {
 
 export const CoshhForm = () => {
   const { formId } = useParams();
-  const { coshh: api } = useBackendApi();
-  const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState(null);
+  const { projectType: api } = useBackendApi();
+  const toast = useToast();
 
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const { data: template } = useProject(formId);
+
+  useEffect(() => {
+    const loadCoshhData = async () => {
+      try {
+        setLoading(true);
+        console.log(template);
+        setData(template);
+      } catch (e) {
+        console.log(e);
+        toast({ title: "Error loading form", status: "error" });
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadCoshhData();
+  }, [formId, api, toast]);
+
+  const itemContext = {
+    id: template.id,
+    isOwner: true, // Usually true if they just created it
+    type: "COSHH",
+    approvalStatus: template.approvalStatus || {
+      permissions: ["OWNER_CAN_EDIT"],
+    },
+    action: {
+      // SectionForm calls this with FormData when 'Save' is clicked
+      save: async (formData) => api.update(template.id, formData),
+      mutate: () => window.location.reload(), // Or a more elegant SWR mutate
+    },
+  };
+  // render a section form for each section
   return (
-    <VStack align="stretch" spacing={4} p={5}>
-      <Text fontSize="xl" fontWeight="bold">
-        Editing COSHH Form: {formId}
-      </Text>
-      {/* Your form fields would go here */}
-      <Button colorScheme="green">Save Changes</Button>
-    </VStack>
+    <>
+      {template.sections
+        ?.sort((a, b) => a.sortOrder - b.sortOrder)
+        .map((section) => (
+          <SectionForm
+            key={section.id}
+            item={itemContext}
+            form={section}
+            isInstructor={false}
+            breadcrumbItems={[
+              { label: "Reactions", href: "/reactions" },
+              { label: "COSHH", active: true },
+            ]}
+            headerItems={{
+              title: section.title || "COSHH Assessment",
+              subtitle: `Editing instance ${template.uuid}`,
+              name: section.title || "SECTION",
+            }}
+          />
+        ))}
+    </>
   );
 };
 
