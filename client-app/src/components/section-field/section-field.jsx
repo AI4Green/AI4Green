@@ -28,6 +28,8 @@ export const SectionField = ({
 }) => {
   const { canEdit } = useFieldPermissions(item, field, isInstructor);
 
+  console.log(canEdit, !canEdit);
+
   return (
     <>
       <Field field={{ ...field, feedback }} isDisabled={!canEdit} item={item} />
@@ -79,12 +81,14 @@ const TriggerField = ({ item, field, fields, fieldValues, isInstructor }) => {
 };
 
 const useFieldPermissions = (item, field, isInstructor) => {
+  console.log(item);
   const hasRequiredPermissions = [
     STAGES_PERMISSIONS.OwnerCanEdit,
     STAGES_PERMISSIONS.OwnerCanEditCommented,
   ].some(
     (permission) =>
-      item.stage?.permissions.includes(permission) && !field.feedback?.approved,
+      item.approvalStatus?.permissions.includes(permission) &&
+      !field.feedback?.approved,
   );
 
   const canEdit =

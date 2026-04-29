@@ -150,7 +150,7 @@ const SectionFormAction = ({ item, isInstructor, isLoading, formRef }) => {
   const hasRequiredPermissions = [
     STAGES_PERMISSIONS.OwnerCanEdit,
     STAGES_PERMISSIONS.OwnerCanEditCommented,
-  ].some((permission) => item.stage?.permissions.includes(permission));
+  ].some((permission) => item.approvalStatus?.permissions.includes(permission));
 
   const canUserSave =
     !isInstructor &&

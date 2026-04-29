@@ -147,7 +147,6 @@ export const CoshhForm = () => {
     const loadCoshhData = async () => {
       try {
         setLoading(true);
-        console.log(template);
         setData(template);
       } catch (e) {
         console.log(e);
@@ -163,16 +162,18 @@ export const CoshhForm = () => {
     id: template.id,
     isOwner: true, // Usually true if they just created it
     type: "COSHH",
-    approvalStatus: template.approvalStatus || {
+    approvalStatus: {
+      stage: template.approvalStatus,
+      permissions: "OwnerCanEdit",
+    } || {
+      // handle permissions better
       permissions: ["OWNER_CAN_EDIT"],
     },
     action: {
-      // SectionForm calls this with FormData when 'Save' is clicked
       save: async (formData) => api.update(template.id, formData),
       mutate: () => window.location.reload(), // Or a more elegant SWR mutate
     },
   };
-  // render a section form for each section
   return (
     <>
       {template.sections
