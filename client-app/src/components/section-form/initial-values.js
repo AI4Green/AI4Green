@@ -22,8 +22,6 @@ const getInitialValue = (field, recordId, sectionId, sectionApis) => {
   const fieldType = field.inputType.title.toUpperCase();
   const fieldResponse = field.response?.value ?? "";
 
-  console.log(fieldResponse);
-
   switch (fieldType) {
     case File.toUpperCase():
     case ImageFile.toUpperCase(): {

@@ -79,7 +79,6 @@ const TriggerField = ({ item, field, fields, fieldValues, isInstructor }) => {
 };
 
 const useFieldPermissions = (item, field, isInstructor) => {
-  console.log(item);
   const hasRequiredPermissions = [
     STAGES_PERMISSIONS.OwnerCanEdit,
     STAGES_PERMISSIONS.OwnerCanEditCommented,
