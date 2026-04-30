@@ -21,6 +21,11 @@ export const getProjectsApi = ({ api }) => ({
       json: values,
     }),
 
+  putForm: (id, formData) =>
+    api.put(`template-instances/${id}`, {
+      body: formData,
+    }),
+
   delete: (id) => api.delete(`template-instances/${id}`),
 
   inviteInstructors: (id, { emails }) =>

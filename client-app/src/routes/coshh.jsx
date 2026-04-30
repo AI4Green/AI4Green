@@ -61,7 +61,6 @@ export const CoshhCreateModal = () => {
         templateType: "COSHH", // best to send this here or have a dedicated route?
       });
       const data = await response.json();
-      console.log(data);
 
       if (data?.id || data?.uuid) {
         toast({
@@ -135,7 +134,8 @@ export const CoshhCreateModal = () => {
 
 export const CoshhForm = () => {
   const { formId } = useParams();
-  const { projectType: api } = useBackendApi();
+  const { projectType: projectTypesApi, projects: projectApi } =
+    useBackendApi();
   const toast = useToast();
 
   const [data, setData] = useState(null);
@@ -156,7 +156,7 @@ export const CoshhForm = () => {
       }
     };
     loadCoshhData();
-  }, [formId, api, toast]);
+  }, [formId, projectTypesApi, toast]);
 
   const itemContext = {
     id: template.id,
@@ -170,7 +170,7 @@ export const CoshhForm = () => {
       permissions: ["OWNER_CAN_EDIT"],
     },
     action: {
-      save: async (formData) => api.update(template.id, formData),
+      save: async (formData) => projectApi.putForm(template.id, formData),
       mutate: () => window.location.reload(), // Or a more elegant SWR mutate
     },
   };

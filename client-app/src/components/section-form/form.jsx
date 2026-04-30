@@ -39,6 +39,7 @@ export const SectionForm = ({
   }));
 
   const handleSubmit = async (values, fields) => {
+    console.log("%c SUBMIT TRIGGERED", "color: orange; font-weight: bold;");
     const data = prepareSubmissionData(fields, values);
 
     const payload = {
@@ -77,7 +78,8 @@ export const SectionForm = ({
         toast(toastOptions("Section values saved successfully", "success"));
         await item.action.mutate();
       }
-    } catch {
+    } catch (e) {
+      console.log(e);
       toast(toastOptions(t("feedback.error_title"), "error"));
     } finally {
       setIsLoading(false);
@@ -147,6 +149,7 @@ const toastOptions = (title, status) => ({
 });
 
 const SectionFormAction = ({ item, isInstructor, isLoading, formRef }) => {
+  console.log("Button Clicked");
   const hasRequiredPermissions = [
     STAGES_PERMISSIONS.OwnerCanEdit,
     STAGES_PERMISSIONS.OwnerCanEditCommented,
