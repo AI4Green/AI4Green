@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 
+import services.file_attachments
 from flask import json, jsonify, request
 from flask_login import current_user
 from sources import db, models
@@ -43,8 +44,10 @@ def get_template_instance(template_id):
 @template_instances_api_bp.route("/<int:template_id>", methods=["PUT"])
 def save_template_instance(template_id):
     data = request.form
+    # files = request.files
+
     print(data)
-    # todo: need to handle files and new update fields, but need to handle template instance reload first
+
     # Parse JSON strings from form data
     # field_responses = json.loads(data.get("fieldResponses", "[]"))
     new_field_responses = json.loads(data.get("newFieldResponses", "[]"))
@@ -54,8 +57,14 @@ def save_template_instance(template_id):
     # section_id = data.get("sectionId")
     template_instance_id = data.get("recordId")
 
+    print(template_instance_id)
+
+    processor = services.file_attachments.UploadExperimentDataFiles(request)
+
+    processor.process_react_submission()
+
+    # save new responses
     for r in new_field_responses:
-        print(r)
         field_id = r.get("id")
         value = r.get("value")
 
@@ -73,9 +82,10 @@ def save_template_instance(template_id):
         )
 
         db.session.add(field_response, field_response_value)
-        db.session.commit()
 
-        return jsonify({"message": "success!"}), 200
+    db.session.commit()
+
+    return jsonify({"message": "success!"}), 200
 
     # query = models.TemplateInstance.query.get(template_id)
     # data = query.to_dict() # todo: does this need anymore?

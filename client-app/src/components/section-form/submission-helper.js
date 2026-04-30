@@ -161,7 +161,7 @@ const processFieldResponseWithFiles = (
   acc[isNew ? SUBMISSION_KEYS.NewFiles : SUBMISSION_KEYS.Files].push(
     ...fieldResponseWithFiles.map((response) => {
       if (
-        inputType.name.toUpperCase() ===
+        inputType.title.toUpperCase() ===
         INPUT_TYPES.ReactionScheme.toUpperCase()
       ) {
         return response.reactionSketch?.reactionImage?.image ?? new Blob();
