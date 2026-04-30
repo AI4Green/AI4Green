@@ -193,6 +193,7 @@ def test_polymer_smiles_parsing():
     assert find_canonical_repeats("*C1{-}(CCCCC1)C1(CCCCC1)C1{+n}(CCCCC1)*") == [
         "*C1(*)CCCCC1"
     ]
+    assert find_canonical_repeats("*C1{-}=CC=C(C=C1)/C=C{+n}/*") == ['*C=Cc1ccc(*)cc1'] # dont reduce
 
     # double bonds to dummy atoms
     assert find_canonical_repeats("*=C{-}(NC1:C:C:C(:C:C:1)C1:C:C:C(:C:C:1)N{+n}=*)C") == [
