@@ -569,12 +569,22 @@ def get_repeating_substructure(mol):
 
     for ring in ssr:
         ring_indices = sorted(list(ring))
+        n = len(ring_indices)
 
-        # ignore original rings
-        if all(mol.GetAtomWithIdx(idx).HasProp('ring') for idx in ring_indices):
+        # only process the ring that contains the macrocycle closure bond
+        has_closure_bond = False
+        for i in range(n):
+            idx1 = ring_indices[i]
+            idx2 = ring_indices[(i + 1) % n]
+            bond = mol.GetBondBetweenAtoms(idx1, idx2)
+            if bond and bond.HasProp('closure'):
+                has_closure_bond = True
+                break
+
+        # If this ring doesn't contain the closure bond, it's a monomer ring (like Benzene). Skip it.
+        if not has_closure_bond:
             continue
 
-        n = len(ring_indices)
         ring_ranks = [ranks[i] for i in ring_indices]
 
         # Find smallest repeating period, i, to divide length n perfectly
@@ -747,14 +757,11 @@ def canonicalise(unit):
     if all_ring_bonds(mol):
         return Chem.MolToSmiles(mol)
 
-    # Identify atoms in rings
-    for atom in mol.GetAtoms():
-        if atom.IsInRing():
-            atom.SetProp("ring", "True")
-
     # Create the cyclic version
     cyclic_mol = Chem.RWMol(mol)
-    cyclic_mol.AddBond(anchors[0], anchors[1], bond_type)
+    num_bonds = cyclic_mol.AddBond(anchors[0], anchors[1], bond_type)
+    closure_bond = cyclic_mol.GetBondWithIdx(num_bonds - 1)
+    closure_bond.SetProp('closure', "True")
 
     # Remove dummies in reverse order to keep indices stable
     for idx in sorted(dummy_indices, reverse=True):
