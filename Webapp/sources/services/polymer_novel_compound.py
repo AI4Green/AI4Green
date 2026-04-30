@@ -569,6 +569,11 @@ def get_repeating_substructure(mol):
 
     for ring in ssr:
         ring_indices = sorted(list(ring))
+
+        # ignore original rings
+        if all(mol.GetAtomWithIdx(idx).HasProp('ring') for idx in ring_indices):
+            continue
+
         n = len(ring_indices)
         ring_ranks = [ranks[i] for i in ring_indices]
 
@@ -620,6 +625,10 @@ def get_repeating_substructure(mol):
                     # If neighbor is in the ring but NOT in our current repeating unit
                     if nb_idx in other_ring_atoms:
                         exit_bonds.append((atom_idx, nb_idx))
+
+            # do not break original ring bonds
+            if any([rw_mol.GetBondBetweenAtoms(stay_idx, leave_idx).HasProp('ring') for stay_idx, leave_idx in exit_bonds]):
+                continue
 
             # Add dummy atoms at the exit points
             for stay_idx, leave_idx in exit_bonds:
@@ -737,6 +746,11 @@ def canonicalise(unit):
     # check if all bonds are in rings - these shouldnt be cyclised
     if all_ring_bonds(mol):
         return Chem.MolToSmiles(mol)
+
+    # Identify atoms in rings
+    for atom in mol.GetAtoms():
+        if atom.IsInRing():
+            atom.SetProp("ring", "True")
 
     # Create the cyclic version
     cyclic_mol = Chem.RWMol(mol)
