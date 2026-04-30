@@ -29,17 +29,20 @@ export const SectionForm = ({
   const formRef = useRef();
   const { sections: sectionApis } = useBackendApi();
 
+  console.log(form.fields);
+
   const sectionFields = form?.fields.map((x) => ({
     ...x,
     response: {
       id: x.fieldResponse?.[0]?.id || null,
-      value: x.fieldResponse?.[0]?.response || null,
+      value: x.fieldResponse?.[0]?.fieldResponseValues?.[0]?.value || null,
     },
     feedback: x.fieldResponse?.[0]?.feedback || null,
   }));
 
+  console.log(sectionFields);
+
   const handleSubmit = async (values, fields) => {
-    console.log("%c SUBMIT TRIGGERED", "color: orange; font-weight: bold;");
     const data = prepareSubmissionData(fields, values);
 
     const payload = {

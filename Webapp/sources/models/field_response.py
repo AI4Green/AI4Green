@@ -28,7 +28,9 @@ class FieldResponse(Model):
         return {
             "id": self.id,
             "field_id": self.field_id,
-            "field_response_values": self.field_response_values,  # does this get updates with multiple values?
+            "fieldResponseValues": [
+                x.to_dict() for x in self.field_response_values
+            ],  # does this get updates with multiple values?
             "template_instance_id": self.template_instance_id,
             "comment": self.comment,
         }

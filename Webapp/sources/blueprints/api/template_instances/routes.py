@@ -35,6 +35,8 @@ def save_new_instance():
 def get_template_instance(template_id):
     query = models.TemplateInstance.query.get(template_id)
     data = query.to_dict()  # todo: does this need anymore?
+
+    print(data)
     return jsonify(data)
 
 
