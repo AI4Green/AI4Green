@@ -76,9 +76,6 @@ function loadExampleSmiles() {
  */
 async function createReactionTable() {
   let tutorial = getVal($("#js-tutorial"));
-  if (tutorial === "no") {
-    await sketcherAutoSave();
-  }
   let smiles;
   try {
     smiles = await exportSmilesFromActiveEditor();
@@ -210,6 +207,7 @@ function sketcherDataLossHandler() {
  * Calls functions to reload the reaction sketcher, and reaction table if data for it is found in the json object
  */
 async function reloadReaction() {
+  $(".loading-bar").css("display", "block");
   // disable select sketcher buttons until SMILES are loaded into sketcher
   let $sketcherSelectRadioButtons = $('input[name="sketcher-select"]');
   $sketcherSelectRadioButtons.prop("disabled", true);
@@ -227,6 +225,7 @@ async function reloadReaction() {
   if (Object.keys(js_reaction_table_data).includes("reaction_description")) {
     await createReactionTable();
   }
+  $(".loading-bar").css("display", "none");
 }
 
 /**
