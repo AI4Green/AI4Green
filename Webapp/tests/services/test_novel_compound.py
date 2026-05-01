@@ -152,7 +152,7 @@ def test_novel_compound_table_all_data(app: Flask, client: FlaskClient):
 
 def test_polymer_smiles_parsing():
     """Tests if different polymers are parsed correctly"""
-    assert find_canonical_repeats("CC{-}C{+n}C") == ["*C*"]  # end groups
+    assert find_canonical_repeats("CC{-}CCCCC{+n}C") == ["*C*"]  # end groups
 
     # different branching patterns
     assert find_canonical_repeats("*C{-}(CC{+n}*)C") == ["*CCC(*)C"]
@@ -164,15 +164,41 @@ def test_polymer_smiles_parsing():
     assert find_canonical_repeats("*C{-}C(C(C{+n}*)=O)C(C)C") == ["*CCC(=O)C(*)C(C)C"]
     assert find_canonical_repeats(
         "*C1{-}C(C23C1C2(C3C{+n}(C(C)Cl)C(C)C)C(Cl)C)C1CC1"
-    ) == ["*C(C(C)Cl)C1C2(C(C)Cl)C3C(*)C(C4CC4)C132"]
+    ) == ['*C(C(C)Cl)C1C(C2CC2)C23C(*)C2(C(C)Cl)C13']
 
     assert find_canonical_repeats("*C1{-}CC{+n}(CCC1)*") == ["*C1CCCC(*)C1"]  # rings
+    assert find_canonical_repeats("Clc1{-}ccc{+n}([s]1)Cl") == ['*c1ccc(*)s1']  # aromatic at start marker
     assert find_canonical_repeats("C[SiH2]{-}CC{+n}C") == [
-        "*C[SiH2]C*"
+        "*CC[SiH2]*"
     ]  # groups in [] brackets
     assert find_canonical_repeats("C(C{-}{+n}*)C{-}(C{+n}*)C") == [
         "*C*",
         "*CC(*)C",
     ]  # copolymers
+
+    # reduce multiplication
+    assert find_canonical_repeats("*C{-}(C(C(C{+n}(C)*)C)C)C") == ["*C(*)C"]
+    assert find_canonical_repeats("*C{-}(C{+n}(C1=CC=CC=C1)*)C1=CC=CC=C1") == [
+        "*C(*)c1ccccc1"
+    ]
+    assert find_canonical_repeats(
+        "*C{-}(C(C{+n}(C1=CC=CC=C1)*)C1=CC=CC=C1)C1=CC=CC=C1"
+    ) == ["*C(*)c1ccccc1"]
+    assert find_canonical_repeats("*C1{-}=CC(=CC=C1)C1=CC{+n}(=CC=C1)*") == [
+        "*c1cccc(*)c1"
+    ]
+    assert find_canonical_repeats(
+        "*C1{-}=CC(=CC=C1)C1=CC(=CC=C1)C1=CC(=CC=C1)C1=CC{+n}(=CC=C1)*"
+    ) == ["*c1cccc(*)c1"]
+    assert find_canonical_repeats("*C1{-}(CCCCC1)C1(CCCCC1)C1{+n}(CCCCC1)*") == [
+        "*C1(*)CCCCC1"
+    ]
+
+    # double bonds to dummy atoms
+    assert find_canonical_repeats("*=C{-}(NC1:C:C:C(:C:C:1)C1:C:C:C(:C:C:1)N{+n}=*)C") == [
+        '*Nc1ccc(-c2ccc(N=C(*)C)cc2)cc1'
+    ]
+    # aromatic bond to dummy atoms
+    assert find_canonical_repeats("*/C{-}=C/C1:N(C):C{+n}(:C(OC):C:1OCCCC)*") == ['*=Cc1c(OC)c(OCCCC)c(C=*)n1C']
 
     assert find_canonical_repeats("C[*]{-}C{+n}C") == "dummy"  # dummy atoms = blocked

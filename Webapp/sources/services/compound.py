@@ -1,5 +1,11 @@
-from typing import List, Optional
+import re
+from typing import Dict, List, Optional, Tuple, Union
+from urllib.parse import quote
+from urllib.request import urlopen
 
+from flask import jsonify, render_template
+from marshmallow.fields import Boolean
+from rdkit import Chem
 from sources import models, services
 from sources.extensions import db
 from sqlalchemy import func
@@ -112,3 +118,445 @@ def from_name(name: str) -> models.Compound:
         .filter(func.lower(models.Compound.name) == name.lower())
         .first()
     )
+
+
+def get_compound_all_tables(smiles, workbook, polymer, demo):
+    """
+    Retrieves a compound from the database, checking the Compound, NovelCompound, and PolymerNovelCompound tables.
+
+    Args:
+        smiles (str or list): The SMILES string for the compound.
+        workbook (models.WorkBook): workbook object.
+        polymer (bool): True if compound is a polymer.
+        demo (str): "demo" if in demo mode.
+
+    Returns:
+        compound: The database object for the compound or None if it cannot be found.
+        novel_compound (bool): True if compound not present in compound databases.
+
+
+    """
+    novel_compound = False  # false but change later if true
+    if polymer:
+        compound = None
+    else:
+        mol = Chem.MolFromSmiles(smiles)
+        inchi = Chem.MolToInchi(mol)
+        compound = services.compound.from_inchi(inchi)
+
+    # if no match by inchi, then check the workbook collection of novel compounds
+    if compound is None:
+        if demo == "demo":  # if in demo mode don't search novel compounds
+            return compound, True
+
+        if polymer:
+            compound = services.polymer_novel_compound.from_smiles_and_workbook(
+                smiles, workbook
+            )
+        else:
+            compound = services.novel_compound.from_inchi_and_workbook(inchi, workbook)
+        novel_compound = True
+
+    return compound, novel_compound
+
+
+def get_compound_data(
+    compound_data: Dict,
+    compound: Union[models.Compound, models.NovelCompound, models.PolymerNovelCompound],
+    novel_compound: bool,
+):
+    """
+    Update compound data dictionary with information from the given compound object.
+
+    Args:
+        compound_data (Dict): A dictionary containing lists to store compound data.
+        compound (Union[models.Compound, models.NovelCompound]): The compound or novel compound object.
+        novel_compound (bool): A boolean flag indicating whether the compound is a novel compound.
+    """
+
+    # now we have the compound/novel_compound object, we can get all the data
+
+    compound_data["molecular_weights"] = []
+    compound_data["names"] = []
+    compound_data["hazards"] = []
+    compound_data["densities"] = []
+    compound_data["primary_keys"] = []
+
+    if isinstance(compound, models.PolymerNovelCompound):
+        molecular_weight = services.polymer_novel_compound.get_repeat_unit_weights(
+            compound.id, compound.workbook
+        )
+    else:
+        molecular_weight = (
+            float(compound.molec_weight) if compound.molec_weight != "" else 0
+        )
+
+    compound_data["molecular_weights"].append(molecular_weight)
+
+    compound_name = compound.name if compound.name != "" else "Not found"
+    compound_data["names"].append(compound_name)
+
+    compound_hazard = (
+        compound.hphrase if compound.hphrase != "No hazard codes found" else "Unknown"
+    )
+    compound_data["hazards"].append(compound_hazard)
+
+    compound_density = compound.density if compound.density != "" else "-"
+    compound_data["densities"].append(compound_density)
+
+    if novel_compound:
+        compound_data["primary_keys"].append((compound.name, compound.workbook))
+    else:
+        compound_data["primary_keys"].append(compound.id)
+
+
+def iupac_convert(smiles: str) -> str:
+    """
+    Tries to make the iupac name using CIR for a compound not in the database.
+    """
+    try:
+        url = (
+            "http://cactus.nci.nih.gov/chemical/structure/"
+            + quote(smiles)
+            + "/iupac_name"
+        )  # https://opsin.ch.cam.ac.uk/opsin/cyclopropane.png
+        iupac_name = urlopen(url, [5]).read().decode("utf8")
+        return iupac_name
+    except Exception:
+        print("failed CIR")
+    return ""
+
+
+def get_reactants_and_products_list(
+    reaction_smiles: str,
+) -> Tuple[List[str], List[str]]:
+    """
+    Process reactants and products strings to obtain lists of reactant and product SMILES.
+    Converts words into SMILES symbols and identifies the format as either CXSMILES or SMILES.
+    If ions are present, it processes the ionic SMILES accordingly.
+
+    Args:
+        reaction_smiles (str), the smiles of the reaction from the sketcher
+
+    Returns:
+        Tuple[List[str], List[str]]: A tuple containing lists of reactant, reagent and product SMILES.
+
+    """
+
+    # [OH-].[Na+]>>[Cl-].[Cl-].[Zn++] |f:0.1,2.3.4|
+    if "|f:" in reaction_smiles:
+        reaction_smiles += re.search(r" \|[^\|]*\|$", reaction_smiles).group()
+        (
+            reactants_smiles_list,
+            products_smiles_list,
+        ) = services.ions.reactants_and_products_from_ionic_cx_smiles(reaction_smiles)
+    elif re.findall(r"(?<!\{)\+", reaction_smiles) or re.findall(
+        r"(?<!\{)-", reaction_smiles
+    ):
+        # find "+" or "-" in reaction_smiles but not {-} or {+n} for polymers
+        # add logic here for reagent support
+        (
+            reactants_smiles_list,
+            products_smiles_list,
+        ) = services.ions.reactants_and_products_from_ionic_smiles(reaction_smiles)
+    # reactions with no ions - make rxn object directly from string
+    else:
+        # Split and pad to ensure two parts
+        # change to 3 for reagent support and change split type >> to >
+        parts = reaction_smiles.split(">>") + [""] * (
+            2 - len(reaction_smiles.split(">>"))
+        )
+
+        # Process each part (add reagent_smiles_list_here)
+        reactants_smiles_list, products_smiles_list = [
+            x.split(".") if x else [] for x in parts
+        ]
+
+    return reactants_smiles_list, products_smiles_list
+
+
+class SketcherCompound:
+    """
+    Handles incoming compounds from the chemical sketcher.
+
+    Provides functions for validating structures, retrieving compound data, handling polymers,
+    handling novel compounds, flagging compound errors
+    """
+
+    def __init__(
+        self,
+        smiles: str,
+        idx: int,
+        workbook: models.WorkBook,
+        demo: str,
+        reaction_component: str,
+        reaction_component_idx: int,
+        polymer_indices: List[int] = None,
+        reaction_smiles: str = "",
+        reload: bool = False,
+    ):
+        """
+        Initialise Sketcher Compound.
+
+        Checks for polymers, copolymers, and invalid molecules.
+
+        If no errors are found the compound data is extracted from the database. If novel compound is found
+
+        Args:
+            smiles (str): The SMILES string for the compound.
+            idx (int): reaction table number for compound
+            workbook (models.WorkBook): A workbook object.
+            demo (str): "demo" if in demo mode else None
+            reaction_component (str): The reaction component of the compound, eg/("Reactant", "Reagent", "Solvent", "Product")
+            reaction_component_idx (int): The index of the compound relative to its reaction component
+            polymer_indices (List[int]): A dictionary containing polymer indices.
+            reaction_smiles (str): The reaction SMILES string.
+            reload (bool): A boolean flag indicating if the compound should be reloaded.
+        """
+        self.smiles = smiles
+        self.inchi = ""
+        self.idx = idx
+        self.reaction_component_idx = reaction_component_idx
+        self.demo = demo
+        self.workbook = workbook
+        self.reaction_component = reaction_component
+        self.is_novel_compound = False
+        self.is_polymer = False
+        self.novel_compound_table = None
+        self.compound_data = {}
+        self.reload = reload
+        self.errors = []
+
+        self.check_for_polymer(polymer_indices, reaction_smiles)
+
+        self.check_invalid_molecule()
+        self.check_polymer_dummy_atom()
+        self.check_copolymer()
+
+        if not self.errors and self.reaction_component != "Solvent":
+            self.process_compound()
+
+    def process_compound(self):
+        """
+        Processes data for the provided compound. Gets the db entry (Compound, NovelCompound or PolymerNovelCompound),
+         and sets self.compound_data. Renders novel compound tabe if compound is not found in db.
+        """
+        # find out if compound is a novel compound (if polymer then novel compound is always true)# fails for polymers lmao
+        compound, novel_compound = get_compound_all_tables(
+            self.smiles, self.workbook, self.is_polymer, self.demo
+        )
+        # only check for novel compound if reaction is not being reloaded
+        if compound is None:
+            self.handle_new_novel_compound()
+
+        else:
+            self.is_novel_compound = novel_compound
+            get_compound_data(self.compound_data, compound, novel_compound)
+
+    def check_for_polymer(
+        self, polymer_indices: List[int] | None, reaction_smiles: str
+    ):
+        """
+        Checks if reaction contains a polymer. Either using polymer indices or reaction SMILES
+
+        Args:
+            polymer_indices (List[int] or None): A List containing polymer indices.
+            reaction_smiles (str): The reaction SMILES string.
+        """
+        if polymer_indices is not None:
+            self.check_polymer_indices_for_polymer(polymer_indices)
+        else:
+            self.check_reaction_smiles_for_polymer(reaction_smiles)
+
+    def check_polymer_indices_for_polymer(self, polymer_indices: List[int]):
+        """
+        Sets is_polymer to True if idx in polymer indices and processes polymer smiles
+
+        Args:
+            polymer_indices (List[int]): A list of polymer indices.
+        """
+        if self.idx in polymer_indices:
+            self.is_polymer = True
+            # TODO: fix this for new polymer updates
+            self.smiles = services.polymer_novel_compound.find_canonical_repeat(
+                self.smiles
+            )
+
+    def check_reaction_smiles_for_polymer(self, reaction_smiles: str):
+        """
+        Searches reaction SMILES for polymers and sets self.is_polymer to True if one is found
+        Args:
+            reaction_smiles (str): The reaction SMILES string.
+        """
+        reactant_smiles, product_smiles = get_reactants_and_products_list(
+            reaction_smiles
+        )
+        smiles_list = (
+            reactant_smiles if self.reaction_component == "Reactant" else product_smiles
+        )
+        # only check reactant and products for polymers
+        if self.reaction_component in ["Reactant", "Product"]:
+            if "{+n}" in smiles_list[self.reaction_component_idx]:
+                self.is_polymer = True
+
+    def handle_new_novel_compound(self):
+        """
+        Renders novel compound table including all info form the provided structure. The JSON returned to
+        self.novel_compound_table can be returned directly to the front end.
+        """
+        if self.demo == "demo":
+            self.errors.append(jsonify({"reactionTable": "Demo", "novelCompound": ""}))
+            return
+
+        compound_name = iupac_convert(self.smiles)
+        # generate molweight
+        mol_wt = services.all_compounds.mol_weight_from_smiles(self.smiles)
+        novel_reactant_html = render_template(
+            "_novel_compound.html",
+            component=self.reaction_component,
+            name=compound_name,
+            # chenage for novel compound table
+            number=self.idx,
+            mw=mol_wt,
+            smiles=self.smiles,
+            polymer=self.is_polymer,
+        )
+        self.novel_compound_table = jsonify(
+            {"reactionTable": novel_reactant_html, "novelCompound": True}
+        )
+
+    def add_solvent_sustainability_flags(self):
+        """
+        Adds sustainability flags to compound. Requires
+        """
+        flag = services.solvent.sustainability_from_primary_key(
+            self.compound_data["ids"]
+        )
+        self.compound_data[
+            "sustainability_flag"
+        ] = services.solvent.convert_sustainability_flag_to_text(flag)
+
+    @classmethod
+    def from_reaction_table_dict(cls, reaction_table_dict, workbook):
+        """
+        Create SketcherCompound instances from a dictionary of reaction data.
+
+        Args:
+            reaction_table_dict (dict): Dictionary containing reaction data with keys for reactants, products, and other details.
+            workbook:
+
+        Returns:
+            dict: A list of SketcherCompound instances representing individual reactants and products.
+        """
+
+        component_lists = {"reactant": [], "reagent": [], "solvent": [], "product": []}
+        units = {}
+
+        reaction_param_keys = [
+            "limiting_reactant_table_number",
+            "main_product",
+            "mass_units",
+            "polymerisation_type",
+            "amount_units",
+            "volume_units",
+            "solvent_volume_units",
+            "product_mass_units",
+            "product_amount_units",
+        ]
+
+        for param in reaction_param_keys:
+            units[param] = reaction_table_dict.pop(param)
+
+        number_of_compounds = 0
+        for component_type, component_list in component_lists.items():
+            # get all relevant items from reaction_table_dict
+            sub_dict = {
+                k: v for k, v in reaction_table_dict.items() if component_type in k
+            }
+            for idx, name in enumerate(sub_dict.get(component_type + "_names")):
+                number_of_compounds += 1
+                compound_data = {}
+                for key in sub_dict.keys():
+                    # new_key = key.replace(component_type + "_", "")
+                    value = sub_dict.get(key, "")
+                    if "units" in key:
+                        compound_data[key.replace(component_type + "_", "")] = value
+                    else:
+                        try:
+                            compound_data[
+                                key.replace(component_type + "_", "")
+                            ] = value[idx]
+                        except IndexError:
+                            compound_data[key.replace(component_type + "_", "")] = ""
+
+                compound = cls(
+                    smiles=compound_data.get(
+                        "smiles", ""
+                    ),  # blank default in case of solvents/reagents
+                    idx=number_of_compounds,
+                    reaction_smiles=reaction_table_dict.get("reaction_smiles", ""),
+                    workbook=workbook,
+                    demo="no",
+                    reaction_component=component_type.capitalize(),
+                    reaction_component_idx=len(component_list),
+                    reload=True,
+                )
+
+                compound.compound_data.update(compound_data)
+                if component_type == "solvent":
+                    compound.add_solvent_sustainability_flags()
+
+                component_lists[component_type].append(compound)
+
+        return component_lists, units
+
+    def check_copolymer(self):
+        if self.smiles.count("{+n}") > 1:
+            self.errors.append(
+                jsonify(
+                    {
+                        "error": f"Cannot process {self.reaction_component} {self.idx} structure: copolymers are not yet supported"
+                    }
+                )
+            )
+
+    def check_invalid_molecule(self):
+        mol = Chem.MolFromSmiles(self.smiles)
+        if mol is None:
+            self.errors.append(
+                jsonify(
+                    {
+                        "error": f"Cannot process {self.reaction_component} {self.idx} structure"
+                    }
+                )
+            )
+
+    def check_polymer_dummy_atom(self):
+        if self.smiles == "":
+            self.errors.append(
+                jsonify(
+                    {
+                        "error": f"Cannot process Product {self.idx} structure: dummy atoms are not yet supported"
+                    }
+                )
+            )
+
+
+def check_compound_errors(compound_list: List[SketcherCompound]) -> Union[str, None]:
+    """
+    checks errors for lists of sketcher compounds
+    """
+    for compound in compound_list:
+        if compound.errors:
+            return compound.errors[0]
+    return None
+
+
+def check_novel_compounds(compound_list: List[SketcherCompound]) -> Union[str, None]:
+    """
+    should this fn be included in the errors fn?
+    """
+    for compound in compound_list:
+        if compound.novel_compound_table:
+            return compound.novel_compound_table
+    return None
