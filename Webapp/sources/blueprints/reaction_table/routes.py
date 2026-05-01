@@ -3,17 +3,13 @@ This module receives a reaction from Marvin JS as a
 GET request and renders the reaction table template
 """
 
-import re
-from typing import Dict, List, Tuple, Union
+
 from urllib.parse import quote
 from urllib.request import urlopen
 
-from flask import json, jsonify, render_template, request
+from flask import jsonify, render_template, request
 from flask_login import login_required
-from rdkit import Chem
-from sources import models, services
-from sources.auxiliary import smiles_symbols
-from sources.decorators import workbook_member_required
+from sources import services
 from sources.dto import ReactionNoteSchema
 
 from . import reaction_table_bp
