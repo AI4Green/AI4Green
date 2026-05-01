@@ -141,6 +141,20 @@ datalist>option:hover, datalist>option.active {
     background-color: rgba(255, 255, 255, 0.8); /* transparency */
     background-repeat: no-repeat;
 }
+
+.loading-bar::after {
+    content: "Reaction loading, please wait...";
+    position: absolute;
+    top: 58%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    font-family: Arial, sans-serif;
+    color: #333;
+    font-weight: bold;
+    text-align: center;
+}
+
 body.loading{ /* when body has loading class */
     overflow: hidden; /* hide scrolling bar */
 }
