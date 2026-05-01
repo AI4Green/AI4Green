@@ -54,7 +54,6 @@ dash-table = "^5.0.0"
 dash-core-components = "^2.0.0"
 odfpy =  "^1.4.1"
 qrcode = "^7.4.2"
-psmiles = {git = "https://github.com/Ramprasad-Group/psmiles.git"}
 ipinfo = "^5.1.1"
 flask-oidc = "^2.3.1"
 kafka-python = "^2.2.10"

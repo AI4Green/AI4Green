@@ -129,14 +129,14 @@ def add_user(
         person=person.id,
         password_hash=models.User.set_password(password),
         role=role_model.id,
-        is_verified=True
+        is_verified=True,
     )
     click.echo(f"Created {username}")
 
 
-@click.command("update-db")
+@click.command("update-pubchem")
 @with_appcontext
-def update_db() -> None:
+def update_pubchem() -> None:
     """
     Update your database with the latest Pubchem data.
     """

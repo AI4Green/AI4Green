@@ -2,7 +2,7 @@ import io
 import json
 import zipfile
 from datetime import datetime
-from sqlalchemy import cast, String, Integer
+from sqlalchemy import cast, String
 from typing import Any, List, Optional
 
 from sources import services

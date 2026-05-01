@@ -45,7 +45,7 @@ def get_privacy_policy_date() -> datetime.datetime:
     Returns:
         datetime.datetime, datetime the privacy policy was introduced in to the app.
     """
-    return datetime.datetime(2025, 3, 18)
+    return datetime.datetime(2025, 9, 3)
 
 
 def check_is_number(string: str) -> bool:

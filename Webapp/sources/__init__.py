@@ -12,8 +12,8 @@ from sources import config, models
 from sources.auxiliary import get_notification_number, get_workgroups
 from sources.extensions import db, login, ma, mail, migrate, oidc
 from sources.services.message_queue.producers import (
-    LoggingQueueProducer,
     AzureQueueProducer,
+    LoggingQueueProducer,
 )
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -129,7 +129,7 @@ def register_cli(app: Flask) -> None:
     app.cli.add_command(commands.seed_db)
     app.cli.add_command(commands.seed_users)
     app.cli.add_command(commands.download_pubchem)
-    app.cli.add_command(commands.update_db)
+    app.cli.add_command(commands.update_pubchem)
     app.cli.add_command(commands.add_user)
 
 

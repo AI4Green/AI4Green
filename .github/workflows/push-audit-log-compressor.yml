@@ -1,4 +1,4 @@
-name: Build and Push Audit Log Saver to Docker Hub
+name: Build and Push Audit Log Compressor to Docker Hub
 
 on:
   workflow_dispatch:
@@ -10,7 +10,6 @@ on:
         options:
           - uat
           - prod
-
 
 permissions:
   id-token: write
@@ -37,10 +36,10 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./workers/audit_log_saver
-          file: ./workers/audit_log_saver/Dockerfile
+          context: ./workers/audit_log_compressor
+          file: ./workers/audit_log_compressor/Dockerfile
           push: true
-          tags: ai4greeneln/audit_log_saver:uat-latest
+          tags: ai4greeneln/audit_log_compressor:uat-latest
 
   build-and-push-prod:
     if: ${{ github.event.inputs.env == 'prod' }}
@@ -62,7 +61,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./workers/audit_log_saver
-          file: ./workers/audit_log_saver/Dockerfile
+          context: ./workers/audit_log_compressor
+          file: ./workers/audit_log_compressor/Dockerfile
           push: true
-          tags: ai4greeneln/audit_log_saver:prod-latest
+          tags: ai4greeneln/audit_log_compressor:prod-latest

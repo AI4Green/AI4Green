@@ -45,8 +45,19 @@
           </div>
           {% for solvent in solvents %}
           <div class="tab-pane fade" id="list-{{ solvent["Number"] }}" role="tabpanel" aria-labelledby="list-{{ solvent["Number"] }}-list">
-            <div style="border-width: 5px;" class="card {% if solvent["Ranking Discussion"] == "Recommended" %}hazard-acceptable-outline{% elif solvent["Ranking Discussion"] == "Problematic" %}hazard-warning-outline{% elif solvent["Ranking Discussion"] == "Hazardous" %}hazard-hazardous-outline{% elif solvent["Ranking Discussion"] == "Highly Hazardous" %}hazard-highly-hazardous-outline{% endif %}">
+            <div style="border-width: 5px;" class="card {% if solvent["Ranking Discussion"] == "Recommended" %}hazard-acceptable-outline{% elif solvent["Ranking Discussion"] == "Problematic" %}hazard-warning-outline{% elif solvent["Ranking Discussion"] == "Hazardous" %}hazard-hazardous-outline{% elif solvent["Ranking Discussion"] == "Highly Hazardous" %}hazard-highly-hazardous-outline{% endif %}"
+            role="region" aria-labelledby="list-{{ solvent["Number"] }}-list" aria-describedby="desc-{{ solvent['Number'] }}"
+            >
               <div class="card-body">
+                <p id="desc-{{ solvent['Number'] }}" class="sr-only">
+                  Solvent {{ solvent["Solvent"] }}.
+                  Ranking {{ solvent["Ranking Discussion"] }}.
+                  Boiling point {{ solvent["BP"] }} degrees Celsius.
+                  Flash point {{ solvent["FP"] }} degrees Celsius.
+                  Safety {{ solvent["Safety"] }},
+                  Health {{ solvent["Health"] }},
+                  Environment {{ solvent["Env"] }}
+                </p>
                 <a onclick="showTab('default', 'no')" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                 <h5 class="card-title">{{ solvent["Solvent"] }}</h5>
                 <div class="row">
@@ -125,10 +136,21 @@
           </div>
           {% for solvent in solvents %}
           <div class="tab-pane fade" id="list2-{{ solvent["Number"] }}" role="tabpanel" aria-labelledby="list-{{ solvent["Number"] }}-list">
-            <div style="border-width: 5px;" class="card {% if solvent["Ranking Discussion"] == "Recommended" %}hazard-acceptable-outline{% elif solvent["Ranking Discussion"] == "Problematic" %}hazard-warning-outline{% elif solvent["Ranking Discussion"] == "Hazardous" %}hazard-hazardous-outline{% elif solvent["Ranking Discussion"] == "Highly Hazardous" %}hazard-highly-hazardous-outline{% endif %}">
+            <div style="border-width: 5px;" class="card {% if solvent["Ranking Discussion"] == "Recommended" %}hazard-acceptable-outline{% elif solvent["Ranking Discussion"] == "Problematic" %}hazard-warning-outline{% elif solvent["Ranking Discussion"] == "Hazardous" %}hazard-hazardous-outline{% elif solvent["Ranking Discussion"] == "Highly Hazardous" %}hazard-highly-hazardous-outline{% endif %}"
+            role="region" aria-labelledby="list-{{ solvent["Number"] }}-list" aria-describedby="desc-{{ solvent['Number'] }}"
+            >
               <div class="card-body">
+                <p id="desc-{{ solvent['Number'] }}" class="sr-only">
+                  Solvent {{ solvent["Solvent"] }}.
+                  Ranking {{ solvent["Ranking Discussion"] }}.
+                  Boiling point {{ solvent["BP"] }} degrees Celsius.
+                  Flash point {{ solvent["FP"] }} degrees Celsius.
+                  Safety {{ solvent["Safety"] }},
+                  Health {{ solvent["Health"] }},
+                  Environment {{ solvent["Env"] }}
+                </p>
                 <a onclick="showTab('default2', 'no')" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                <h5 class="card-title">{{ solvent["Solvent"] }}</h5>
+                <h5 class="card-title" title>{{ solvent["Solvent"] }}</h5>
                 <div class="row">
                   <div class="col">
                     <h6 class="card-subtitle mb-2 text-muted">{{ solvent["Ranking Discussion"] }}</h6>
