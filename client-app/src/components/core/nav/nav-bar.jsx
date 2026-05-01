@@ -227,12 +227,28 @@ export const NavBar = ({
       {/* Left nav */}
       {fullMenu && (
         <HStack spacing={1}>
-          <NavButton icon={BsHouseDoorFill} to="/" color="white">
+          <Button
+            as="a"
+            href="/"
+            variant="ghost"
+            color="white"
+            leftIcon={<Icon as={BsHouseDoorFill} />}
+          >
             Home
-          </NavButton>
-          <NavButton icon={BsPencilSquare} to="/demo" color="white">
+          </Button>
+          <Button
+            as="a"
+            href="/demo"
+            variant="ghost"
+            color="white"
+            leftIcon={<Icon as={BsPencilSquare} />}
+            _hover={{ bg: "gray.700" }}
+            _active={{ bg: "gray.800" }}
+            size="sm"
+            fontWeight="normal"
+          >
             Demo
-          </NavButton>
+          </Button>
 
           {/* Solvents dropdown */}
           <Menu>
