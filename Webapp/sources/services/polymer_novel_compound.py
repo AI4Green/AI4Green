@@ -3,9 +3,9 @@ from typing import Tuple
 
 from flask import abort, json, request
 from flask_login import current_user
-from psmiles import PolymerSmiles
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
+from rdkit.Chem.rdchem import KekulizeException
 from sources import models, services
 from sources.auxiliary import sanitise_user_input
 from sources.extensions import db
@@ -374,11 +374,43 @@ def check_bracket_balance(smiles):
     return balance
 
 
+def remove_first_end_group(compound: str, start_marker: int, x=1):
+    """
+    Remove the start marker {-} and first end group in a polymer smiles string.
+    Searches backwards from start marker {-} to find the first (last) valid atom, removing everything before that.
+    Valid atoms are upper case, or lower case if aromatic, or in [] brackets.
+
+    Args:
+        compound - smiles string with {-} and {+n} markers
+        start_marker - idx of the start marker {-}
+        x - the index of the atom being checked, relative to the start marker {-}
+    Returns:
+        result - the compound to be tested
+        x - the index of the first valid atom, relative to the start marker {-}
+    """
+    if compound[start_marker - x].isupper():
+        result = "*" + compound[start_marker - x :].replace("{-}", "", 1)
+    elif compound[start_marker - x] in ["b", "c", "n", "o", "p", "s"]:  # aromatic atoms
+        result = "*" + compound[start_marker - x :].replace("{-}", "", 1)
+    elif (
+        compound[start_marker - x] == "]"
+    ):  # for polymers with [] groups e.g C[SiH2]{-}CC{+n}C
+        x += 1
+        while compound[start_marker - x] != "[" and start_marker - x > 0:
+            x += 1  # search backwards
+        result = "*" + compound[start_marker - x :].replace("{-}", "", 1)
+    else:  # for polymers with rings e.g *C1{-}CC{+n}(CCC1)*
+        x += 1  # search backwards
+        result, x = remove_first_end_group(compound, start_marker, x)
+
+    return result, x
+
+
 def find_polymer_repeat_units(
     compound: str,
 ) -> list[str]:
     """
-    Identify the repeat group within a polymer SMILES string.
+    Identify the repeat group within a polymer SMILES string, and the bond type to dummy atoms.
     Must be done before smiles is cleaned.
     Uses {-} and {+n} to find repeat unit.
     """
@@ -392,24 +424,18 @@ def find_polymer_repeat_units(
     results = []
     for i in range(len(start_marker)):
         # START is the letter before {-}
-        if compound[start_marker[i] - 1].isupper():
-            result = (
-                "*" + compound[start_marker[i] - 1] + compound[start_marker[i] + 3 :]
-            )
-        elif (
-            compound[start_marker[i] - 1] == "]"
-        ):  # for polymers with [] groups e.g C[SiH2]{-}CC{+n}C
-            x = 2
-            while compound[start_marker[i] - x] != "[" and start_marker[i] - x > 0:
-                x += 1  # search backwards
-            result = "*" + compound[start_marker[i] - x :].replace("{-}", "")
-        else:  # for polymers with rings e.g *C1{-}CC{+n}(CCC1)*
-            x = 2
-            while (
-                not compound[start_marker[i] - x].isupper() and start_marker[i] - x > 0
-            ):
-                x += 1  # search backwards
-            result = "*" + compound[start_marker[i] - x :].replace("{-}", "")
+        result, x = remove_first_end_group(compound, start_marker[i])
+
+        # check for double/triple bond (to dummy atoms) before start
+        bond_types_dict = {
+            "=": Chem.rdchem.BondType.DOUBLE,
+            "#": Chem.rdchem.BondType.TRIPLE,
+            "$": Chem.rdchem.BondType.QUADRUPLE,
+            ":": Chem.rdchem.BondType.AROMATIC,
+        }
+        bond_type = bond_types_dict.get(
+            compound[start_marker[i] - x - 1], Chem.rdchem.BondType.SINGLE
+        )
 
         diff = len(compound) - len(result)
 
@@ -418,11 +444,11 @@ def find_polymer_repeat_units(
             if (
                 ")" not in result[end_marker[i] - diff : end_marker[i + 1] - diff]
             ):  # no branching at end of SRU
-                results.append(result[: end_marker[i] - diff] + "*")
+                results.append((result[: end_marker[i] - diff] + "*", bond_type))
                 continue
         else:  # last repeat unit
             if ")" not in result[end_marker[i] - diff :]:  # no branching at end of SRU
-                results.append(result[: end_marker[i] - diff] + "*")
+                results.append((result[: end_marker[i] - diff] + "*", bond_type))
                 continue
 
         if result[end_marker[i] - diff + 4] == "(":  # last atom of SRU has a branch
@@ -441,16 +467,17 @@ def find_polymer_repeat_units(
 
         # if end is inside brackets, ----------------------
         if check_bracket_balance(compound[start_marker[i] : end_marker[i]]) == 0:
-            results.append(result + "*")
+            results.append((result + "*", bond_type))
             continue
 
         section = []
         parts = compound[end_marker[i] + 4 :].split(")")
         for p, part in enumerate(parts):
             if "(" in part and i < len(parts) - 1:
-                parts[p] = ")" + part + ")" + parts[p + 1]
-                parts.pop(p + 1)
-                section.append(parts[p])
+                while check_bracket_balance(parts[p]) > 0:
+                    parts[p] = parts[p] + ")" + parts[p + 1]
+                    parts.pop(p + 1)
+                section.append(")" + parts[p])
             else:
                 section.append(")" + part)
 
@@ -458,7 +485,7 @@ def find_polymer_repeat_units(
 
         result = result + "*" + "".join(section[-idx:])
 
-        results.append(result)
+        results.append((result, bond_type))
 
     return results
 
@@ -472,16 +499,261 @@ def clean_polymer_smiles(
     return compound.replace("{+n}", "").replace("{-}", "").replace("-", "")
 
 
-def canonicalise(smiles: str) -> str:
+def identify_symmetry(
+    mol: Chem.rdchem.Mol,
+    anchors: list,
+) -> str:
     """
-    Canonicalise a polymer SMILES string. Not for use when endgroups are known (must have two '*'s)
+    identify symmetry in a molecule with two atoms and reduce
+
+    :param mol: mol with two atoms in backbone e.g *CC*
+    :param anchors: list of atom indices for the neighbours of dummy atoms
+    :return: canonicalised and reduced smiles
+
     """
+    # check for symmetry
+    ranks = list(Chem.CanonicalRankAtoms(mol, breakTies=False))
+
+    if ranks[anchors[0]] != ranks[anchors[1]]:
+        # no symmetry
+        return Chem.MolToSmiles(mol)
+
+    # break bond in symmetry plane and replace with dummy atoms. *CC* > *C*.*C*
+    fragmented_mol = Chem.FragmentOnBonds(
+        mol,
+        [mol.GetBondBetweenAtoms(anchors[0], anchors[1]).GetIdx()],
+        dummyLabels=[(0, 0)],
+    )
+    frags = Chem.GetMolFrags(fragmented_mol, asMols=True, sanitizeFrags=True)
+
+    # return the first fragment
+    return Chem.MolToSmiles(frags[0])
+
+
+def all_ring_bonds(mol):
+    """
+    check if all bonds in mol are within a ring
+
+    :param mol: mol
+    :return: True if all bonds are within a ring
+    """
+
+    for b in mol.GetBonds():
+        ring_bond = b.HasProp("ring")
+
+        # Check if the bond is attached to a dummy atom
+        attached_to_dummy = (
+            b.GetBeginAtom().GetAtomicNum() == 0 or b.GetEndAtom().GetAtomicNum() == 0
+        )
+
+        if not (ring_bond or attached_to_dummy):
+            # standard linear backbone
+            return False
+
+    # everything is in a ring
+    return True
+
+
+def get_repeating_substructure(mol):
+    """
+    identifies repeating substructures in a cyclic mol, based on rotational symmetry and returns substructure
+
+    :param mol: cyclic mol object
+    :return: reduced cyclic mol object, boolean indicating whether repeats were found
+    """
+    Chem.SanitizeMol(mol)
+
+    # Get topological symmetry ranks
+    ranks = list(Chem.CanonicalRankAtoms(mol, breakTies=False))
+    ssr = Chem.GetSymmSSSR(mol)
+
+    for ring in ssr:
+        ring_indices = sorted(list(ring))
+        n = len(ring_indices)
+        ring_ranks = [ranks[i] for i in ring_indices]
+
+        # Find smallest repeating period, i, to divide length n perfectly
+        period = n
+        for i in range(1, n // 2 + 1):
+            if n % i == 0:
+                # Check if the ring ranks are a repetition of the first i elements
+                if ring_ranks[:i] * (n // i) == ring_ranks:
+                    period = i
+                    break
+
+        # if repeats found
+        if period < n:
+            unit_ring_indices = ring_indices[:period]
+
+            # Capture ring segment + substituents
+            final_atom_set = set(unit_ring_indices)
+            other_ring_atoms = set(ring_indices) - set(unit_ring_indices)
+
+            def add_substituents(atom_idx):
+                """
+                recursive function to add substituents on an atom to the final_atom_set list.
+                travels through substituent branches one neighbour atom at a time
+                """
+                atom = mol.GetAtomWithIdx(atom_idx)
+                for neighbour in atom.GetNeighbors():
+                    neighbour_idx = neighbour.GetIdx()
+                    # Only add if neighbor isn't part of the core unit or the rest of the ring
+                    if (
+                        neighbour_idx not in final_atom_set
+                        and neighbour_idx not in other_ring_atoms
+                    ):
+                        final_atom_set.add(neighbour_idx)
+                        add_substituents(neighbour_idx)
+
+            for idx in unit_ring_indices:
+                add_substituents(idx)
+
+            # Create an editable molecule to add dummy atoms
+            rw_mol = Chem.RWMol(mol)
+
+            # Identify "Exit Bonds": Bonds from our unit to the rest of the ring
+            exit_bonds = []
+            for atom_idx in unit_ring_indices:
+                atom = mol.GetAtomWithIdx(atom_idx)
+                for neighbor in atom.GetNeighbors():
+                    nb_idx = neighbor.GetIdx()
+                    # If neighbor is in the ring but NOT in our current repeating unit
+                    if nb_idx in other_ring_atoms:
+                        exit_bonds.append((atom_idx, nb_idx))
+
+            # Add dummy atoms at the exit points
+            for stay_idx, leave_idx in exit_bonds:
+                dummy_idx = rw_mol.AddAtom(Chem.Atom(0))
+                rw_mol.AddBond(
+                    stay_idx,
+                    dummy_idx,
+                    mol.GetBondBetweenAtoms(stay_idx, leave_idx).GetBondType(),
+                )
+
+            # Remove all atoms NOT in our final_atom_set or dummy atoms
+            atoms_to_keep = final_atom_set | {
+                idx for idx in range(mol.GetNumAtoms(), rw_mol.GetNumAtoms())
+            }
+            # remove in reverse to avoid indexing issues
+            for idx in reversed(range(rw_mol.GetNumAtoms())):
+                if idx not in atoms_to_keep:
+                    rw_mol.RemoveAtom(idx)
+
+            return rw_mol, True
+
+    return mol, False
+
+
+def break_cyclic_bond(cyclic_mol):
+    """
+    Break cyclic bond and return as linear mol with dummy atoms
+
+    :param cyclic_mol: mol object for cyclic mol
+    :return: mol object for linear mol
+    """
+    # reset indexing
+    new_order = list(Chem.CanonicalRankAtoms(cyclic_mol, breakTies=True))
+    cyclic_mol = Chem.RWMol(Chem.RenumberAtoms(cyclic_mol, new_order))
+
+    # Identify bonds in backbone
+    for b in cyclic_mol.GetBonds():
+        if b.IsInRing():
+            b.SetProp("backbone", "True")
+
+    # kekulise so we can get bond types as single/double not aromatic
     try:
-        ps = PolymerSmiles(smiles)
-        smiles = ps.canonicalize
-        return str(smiles).replace("[*]", "*")  # change dangling bonds label
-    except UserWarning as e:
-        return f"Error: {str(e)}"
+        Chem.Kekulize(cyclic_mol, clearAromaticFlags=True)
+    except KekulizeException:
+        # If it fails, it might already be non-aromatic
+        pass
+
+    # Find bonds to break
+    bond_to_remove = []
+    for b in cyclic_mol.GetBonds():
+        if b.HasProp("backbone") and not b.HasProp("ring"):
+            bond_to_remove.append(
+                (b.GetBeginAtomIdx(), b.GetEndAtomIdx(), b.GetBondType())
+            )
+            break
+
+    # Break cyclic bond and add dummy atoms back
+    for begin_idx, end_idx, bond_type in bond_to_remove:
+        cyclic_mol.RemoveBond(begin_idx, end_idx)
+
+        # Add first dummy atom (*) and bond it to begin_idx
+        new_idx_1 = cyclic_mol.AddAtom(Chem.Atom(0))
+        cyclic_mol.AddBond(begin_idx, new_idx_1, bond_type)
+
+        # Add second dummy atom (*) and bond it to end_idx
+        new_idx_2 = cyclic_mol.AddAtom(Chem.Atom(0))
+        cyclic_mol.AddBond(end_idx, new_idx_2, bond_type)
+
+    mol = cyclic_mol.GetMol()
+    Chem.SanitizeMol(mol)  # undo kekulisation
+    return mol
+
+
+def canonicalise(unit):
+    """
+    Canonicalise a polymer smiles string and reduce multiples of a repeating unit
+
+    We do this by cyclising the polymer (this reduces many possible representations of the polymer to a single option),
+    then resetting the index, and breaking the first bond.
+    Cyclising also allows checks for rotational symmetry to determine if multiple repeats are present.
+
+    :param unit: tuple of polymer smiles string and rdkit bond type
+    :return: canonical polymer smiles string
+    """
+    if type(unit) == tuple:
+        (smiles, bond_type) = unit
+    else:  # bond_type isn't present in /structure_search_handler route
+        smiles = unit
+        bond_type = None
+
+    smiles = smiles.replace("/", "").replace("\\", "")  # ignore stereochemistry
+    mol = Chem.MolFromSmiles(smiles)
+
+    # Identify the dummy atoms (*) and their neighbors (anchors)
+    dummy_indices = [a.GetIdx() for a in mol.GetAtoms() if a.GetSymbol() == "*"]
+    anchors = [
+        mol.GetAtomWithIdx(idx).GetNeighbors()[0].GetIdx() for idx in dummy_indices
+    ]
+    if bond_type is None:
+        bond_type = mol.GetBondBetweenAtoms(dummy_indices[0], anchors[0]).GetBondType()
+
+    # check for only one atom in backbone e.g *C*
+    if anchors[0] == anchors[1]:
+        return Chem.MolToSmiles(mol)
+
+    # check for bond between anchor atoms, e.g *CC* - these cant be cyclised
+    if mol.GetBondBetweenAtoms(anchors[0], anchors[1]):
+        return identify_symmetry(mol, anchors)
+
+    # Identify bonds in rings
+    for b in mol.GetBonds():
+        if b.IsInRing():
+            b.SetProp("ring", "True")
+
+    # check if all bonds are in rings - these shouldnt be cyclised
+    if all_ring_bonds(mol):
+        return Chem.MolToSmiles(mol)
+
+    # Create the cyclic version
+    cyclic_mol = Chem.RWMol(mol)
+    cyclic_mol.AddBond(anchors[0], anchors[1], bond_type)
+
+    # Remove dummies in reverse order to keep indices stable
+    for idx in sorted(dummy_indices, reverse=True):
+        cyclic_mol.RemoveAtom(idx)
+
+    # reduce multiplication
+    cyclic_mol, repeating = get_repeating_substructure(cyclic_mol.GetMol())
+    if repeating:
+        return Chem.MolToSmiles(cyclic_mol)
+
+    # return to linear form
+    mol = break_cyclic_bond(cyclic_mol)
+    return Chem.MolToSmiles(mol)
 
 
 def find_canonical_repeats(smiles: str) -> list[str] or str:
@@ -496,11 +768,10 @@ def find_canonical_repeats(smiles: str) -> list[str] or str:
     if "[*]" in smiles:  # block dummy atoms like R groups
         return "dummy"
 
-    repeat_units = find_polymer_repeat_units(smiles)
+    repeat_unit_info = find_polymer_repeat_units(smiles)
 
     smiles_list = []
-    for unit in repeat_units:
-        unit = unit.replace("/", "").replace("\\", "")  # ignore stereochemistry
+    for unit in repeat_unit_info:
         smiles_list.append(canonicalise(unit))
 
     return smiles_list

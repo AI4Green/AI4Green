@@ -182,7 +182,7 @@ class TestConfig(BaseConfig):
         "update": "sqlite:///temp_update.sqlite",
         "audit_log": os.getenv(
             "TEST_AUDIT_LOG_DATABASE_URL",
-            "postgresql://postgres:postgres@localhost:5434/ai4gauditlogtest",
+            "postgresql://postgres:postgres@localhost:5434/ai4gauditlog",
         ),
     }
 

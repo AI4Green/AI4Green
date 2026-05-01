@@ -1,8 +1,10 @@
 from datetime import datetime
+import os
 from urllib.parse import urlparse
 
-from flask import Markup, abort, flash, redirect, request, session, url_for
+from flask import Markup, abort, flash, redirect, request, session, url_for, current_app
 from flask_login import current_user, login_user
+import ipinfo
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
@@ -171,3 +173,99 @@ def edit_reaction(
     # validate the reaction is not locked, unless it is a file attachment being edited.
     if reaction.complete == "complete":
         abort(401)
+
+
+def get_request_ip() -> str:
+    """Get the IP address for the request.
+
+    Returns:
+        str: The IP address.
+    """
+    if request.headers.getlist("X-Forwarded-For"):
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        ip = request.remote_addr
+    return ip
+
+
+def get_country_from_ip(ip: str) -> str:
+    """Get the ISO 3166-1 alpha-2 country code from an IP address.
+
+    Args:
+        ip (str): The IP Address.
+
+    Returns:
+        str: The country code.
+    """
+    try:
+        handler = ipinfo.getHandler(current_app.config["IPINFO_API_KEY"])
+        details = handler.getDetails(ip)
+        return details.country
+    except Exception:
+        return None
+
+
+def get_email_domain(email: str) -> str:
+    """Get the domain of an email address.
+
+    Args:
+        email (str): The email address.
+
+    Returns:
+        str: The domain of the email address.
+    """
+    return email.split("@")[-1].lower().strip()
+
+
+def get_blocked_tlds():
+    """
+    Returns list of TLDs that are blocked, listed in blocked_tlds.txt
+
+    Returns:
+        List of TLDs found in blocked_tlds.txt
+    """
+    with open(
+        os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "static",
+            "blocked_tlds.txt",
+        ),
+        "r",
+    ) as f:
+        return set(f.read().splitlines())
+
+
+def get_blocked_country_codes():
+    """
+    Returns list of ISO 3166-1 alpha-2 country coes that are blocked,
+    listed in blocked_country_codes.txt
+
+    Returns:
+        List of TLDs found in blocked_country_codes.txt
+    """
+    with open(
+        os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "static",
+            "blocked_country_codes.txt",
+        ),
+        "r",
+    ) as f:
+        return set(f.read().splitlines())
+
+
+def is_blocked_tld(domain: str) -> bool:
+    """Check the domain TLD is not banned.
+
+    Args:
+        domain (str): the domain.
+
+    Returns:
+        bool: is it blocked?
+    """
+    tld = domain.split(".")[-1]
+    return tld in get_blocked_tlds()
+
+
+def is_blocked_country(country_code: str) -> bool:
+    return country_code in get_blocked_country_codes()
