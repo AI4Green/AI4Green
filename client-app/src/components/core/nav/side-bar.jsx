@@ -25,8 +25,10 @@ import { Link } from "react-router-dom";
 
 export const Sidebar = ({ children }) => {
   const { t } = useTranslation();
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
   const isFullMenu = useBreakpointValue({ base: false, xl: true });
+
+  if (isLoading) return null;
 
   // filter items that the user has permission to access or where no permission is required
   const validItems = sidebarItems(t).filter(
@@ -56,7 +58,7 @@ export const Sidebar = ({ children }) => {
         }
         workgroups={[]}
         user={user}
-        isAuthenticated={true}
+        isAuthenticated={!!isLoading}
       />
       {children}
     </Grid>
