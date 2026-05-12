@@ -67,6 +67,8 @@ function ifCurrentUserIsNotCreator() {
 
 async function sketcherAutoSave() {
   // autosave for when the sketcher has been updated
+  // prevent data loss from editing sketcher
+
   let smiles;
   let rxn;
   let polymerMode = false;
@@ -75,6 +77,15 @@ async function sketcherAutoSave() {
     smiles = await exportSmilesFromMarvin();
     rxn = await exportRXNFromMarvin(); // needed for polymer mode
   } else if (selectedSketcher === "ketcher-select") {
+    const proceed = sketcherDataLossHandler();
+    if (!proceed) {
+      // disable autosave while we reload previous smiles
+      $("#js-load-status").val("loading");
+      let previousSmiles = $("#js-reaction-smiles").val();
+      await reloadSketcherFromSmiles(previousSmiles, selectedSketcher);
+      $("#js-load-status").val("loaded");
+      return;
+    }
     smiles = await exportSmilesFromKetcher();
     rxn = await exportRXNFromKetcher();
   }
@@ -82,6 +93,7 @@ async function sketcherAutoSave() {
     // catches if autosave occurs during a sketcher crash
     return;
   }
+
   // change here for reagent support
   let smilesNew = removeReagentsFromSmiles(smiles);
   $("#js-reaction-smiles").val(smilesNew);

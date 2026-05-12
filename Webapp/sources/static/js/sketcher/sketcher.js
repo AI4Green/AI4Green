@@ -111,12 +111,11 @@ function sketcherDataLossHandler() {
       firstChildNodeID !== "js-novel-compound-input-form"
     ) {
       const text =
-        "Please note that any reaction data already inputted will be lost. Do you wish to continue?";
-      if (confirm(text) === false) {
-        return;
-      }
+        "Please note that any reaction data already inputted will be lost. \n\nThis cannot be undone. \n\nDo you wish to continue?";
+      return confirm(text);
     }
   }
+  return true;
 }
 
 /**
