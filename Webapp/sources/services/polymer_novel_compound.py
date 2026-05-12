@@ -570,6 +570,21 @@ def get_repeating_substructure(mol):
     for ring in ssr:
         ring_indices = sorted(list(ring))
         n = len(ring_indices)
+
+        # only process the ring that contains the macrocycle closure bond
+        has_closure_bond = False
+        for i in range(n):
+            idx1 = ring_indices[i]
+            idx2 = ring_indices[(i + 1) % n]
+            bond = mol.GetBondBetweenAtoms(idx1, idx2)
+            if bond and bond.HasProp('closure'):
+                has_closure_bond = True
+                break
+
+        # If this ring doesn't contain the closure bond, it's a monomer ring (like Benzene). Skip it.
+        if not has_closure_bond:
+            continue
+
         ring_ranks = [ranks[i] for i in ring_indices]
 
         # Find smallest repeating period, i, to divide length n perfectly
@@ -620,6 +635,10 @@ def get_repeating_substructure(mol):
                     # If neighbor is in the ring but NOT in our current repeating unit
                     if nb_idx in other_ring_atoms:
                         exit_bonds.append((atom_idx, nb_idx))
+
+            # do not break original ring bonds
+            if any([rw_mol.GetBondBetweenAtoms(stay_idx, leave_idx).HasProp('ring') for stay_idx, leave_idx in exit_bonds]):
+                continue
 
             # Add dummy atoms at the exit points
             for stay_idx, leave_idx in exit_bonds:
@@ -740,7 +759,9 @@ def canonicalise(unit):
 
     # Create the cyclic version
     cyclic_mol = Chem.RWMol(mol)
-    cyclic_mol.AddBond(anchors[0], anchors[1], bond_type)
+    num_bonds = cyclic_mol.AddBond(anchors[0], anchors[1], bond_type)
+    closure_bond = cyclic_mol.GetBondWithIdx(num_bonds - 1)
+    closure_bond.SetProp('closure', "True")
 
     # Remove dummies in reverse order to keep indices stable
     for idx in sorted(dummy_indices, reverse=True):
