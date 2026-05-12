@@ -21,6 +21,7 @@ $(async function () {
   if (checkIfSaveEnabled()) {
     //
     await reloadReaction();
+    setupSketcherAutosave();
     sketcherLockHandler();
   }
   hideSketcherLoadingCircle();

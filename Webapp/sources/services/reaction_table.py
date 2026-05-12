@@ -138,6 +138,13 @@ def get_compound_data(
     """
 
     # now we have the compound/novel_compound object, we can get all the data
+
+    compound_data["molecular_weights"] = []
+    compound_data["names"] = []
+    compound_data["hazards"] = []
+    compound_data["densities"] = []
+    compound_data["primary_keys"] = []
+
     if isinstance(compound, models.PolymerNovelCompound):
         molecular_weight = services.polymer_novel_compound.get_repeat_unit_weights(
             compound.id, compound.workbook
@@ -146,24 +153,24 @@ def get_compound_data(
         molecular_weight = (
             float(compound.molec_weight) if compound.molec_weight != "" else 0
         )
-    print(compound_data)
-    compound_data["molecular_weight_list"].append(molecular_weight)
+
+    compound_data["molecular_weights"].append(molecular_weight)
 
     compound_name = compound.name if compound.name != "" else "Not found"
-    compound_data["name_list"].append(compound_name)
+    compound_data["names"].append(compound_name)
 
     compound_hazard = (
         compound.hphrase if compound.hphrase != "No hazard codes found" else "Unknown"
     )
-    compound_data["hazard_list"].append(compound_hazard)
+    compound_data["hazards"].append(compound_hazard)
 
     compound_density = compound.density if compound.density != "" else "-"
-    compound_data["density_list"].append(compound_density)
+    compound_data["densities"].append(compound_density)
 
     if novel_compound:
-        compound_data["primary_key_list"].append((compound.name, compound.workbook))
+        compound_data["primary_keys"].append((compound.name, compound.workbook))
     else:
-        compound_data["primary_key_list"].append(compound.id)
+        compound_data["primary_keys"].append(compound.id)
 
 
 class SketcherCompound:
