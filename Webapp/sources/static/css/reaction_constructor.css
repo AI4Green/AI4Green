@@ -147,3 +147,19 @@ body.loading{ /* when body has loading class */
 body.loading .loading-bar{
     display: block; /* when body has loading class, display tha loader */
 }
+
+.reaction-header {
+  background: #f8f9fa;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 15px;
+}
+
+.reaction-badge {
+    background-color: #777778;
+    color: #BDFFD0;
+    font-weight: 600;
+    padding: 0.45rem 0.7rem;
+    border-radius: 6px;
+}
