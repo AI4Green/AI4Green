@@ -56,7 +56,7 @@ export const CoshhCreateModal = () => {
       setIsLoading(true);
 
       const response = await api.create({
-        reactionId: Number(reactionId),
+        reactionId: reactionId,
         templateId: Number(values.templateId[0]),
         templateType: "COSHH", // best to send this here or have a dedicated route?
       });
