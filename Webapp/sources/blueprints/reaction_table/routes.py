@@ -7,7 +7,7 @@ GET request and renders the reaction table template
 from urllib.parse import quote
 from urllib.request import urlopen
 
-from flask import jsonify, render_template, request
+from flask import json, jsonify, render_template, request
 from flask_login import login_required
 from sources import services
 from sources.dto import ReactionNoteSchema
@@ -156,6 +156,68 @@ def autoupdate_reaction_table():
         reaction=reaction,
         reaction_class=r_class,
         polymer_indices=polymer_indices,
+    )
+    return jsonify({"reactionTable": reaction_table})
+
+
+@reaction_table_bp.route("/reload_reaction_table", methods=["GET", "POST"])
+def reload_reaction_table():
+    """
+    Reloads the reaction table from db information using SketcherCompound class, to speed up reload.
+    """
+    workbook = request.json.get("workbook")
+    workgroup = request.json.get("workgroup")
+    reaction_id = request.json.get("reaction_id")
+    demo = request.json.get("demo")
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup, workbook
+    )
+    reaction = services.reaction.get_from_reaction_id_and_workbook_id(
+        reaction_id, workbook.id
+    )
+    # protect against reloading reactions with no reaction table
+    try:
+        reaction_table_data = reaction.reaction_table_data
+        print(reaction_table_data)
+    except AttributeError:
+        print(AttributeError)
+        return jsonify({"message": "Cannot reload reaction table"})
+
+    (
+        compounds,
+        units,
+    ) = services.reaction_table.SketcherCompound.from_reaction_table_dict(
+        json.loads(reaction.reaction_table_data), workbook
+    )
+
+    if demo == "demo":
+        sol_rows = services.solvent.get_default_list()
+    else:
+        sol_rows = services.solvent.get_workbook_list(workbook)
+
+    # Now it renders the reaction table template
+    reaction_table = render_template(
+        "reactions/_reaction_table.html",
+        reactants=compounds["reactant"],
+        reagents=compounds["reagent"],
+        solvents=compounds["solvent"],
+        number_of_reactants=len(compounds["reactant"]),
+        number_of_products=len(compounds["product"]),
+        number_of_reagents=len(compounds["reagent"]),
+        number_of_solvents=len(compounds["solvent"]),
+        units=units,
+        identifiers=[],
+        reactant_table_numbers=[],
+        products=compounds["product"],
+        # product_intended_dps=product_data["intended_dps"],
+        reagent_table_numbers=[],
+        reaction_table_data="",
+        summary_table_data="",
+        sol_rows=sol_rows,
+        reaction=reaction,
+        reaction_class=reaction.reaction_class,
+        reaction_classes=[],
+        polymer_indices={},
     )
     return jsonify({"reactionTable": reaction_table})
 
