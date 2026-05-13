@@ -99,16 +99,16 @@
         <button id="retrosynthesis-export" type="button" class="btn btn-primary" onclick="exportDataToRetrosynthesis()">Retrosynthesis</button>
     </a>
         </p>
-    <br>
-    <!--The loading bar div-->
-    <div class="loading-bar"></div>
-
-    <br>
 
     <div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;"></div>
 
-    <!--Output of reaction table-->
-    <div id="reaction-table-div"></div>
+    <div id="reaction-table" style="position: relative; min-height: 200px">
+        <!--The loading bar div-->
+        <div class="loading-bar"></div>
+        <!--Output of reaction table-->
+        <div id="reaction-table-div">
+        </div>
+    </div>
     <br>
     <p id="summary-div"><input type="submit" value="Summary" id="action-summary" class="btn btn-primary" onclick="showSummary()" style="display: none; width: 100px;"></p>
 

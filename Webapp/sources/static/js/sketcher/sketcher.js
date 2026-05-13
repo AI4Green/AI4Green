@@ -7,6 +7,8 @@ $(async function () {
   /*
     Need to move the functions that are used in search.js into utils to only have to load this script when making the actual reaction page
      */
+  flashUserSaveMessage("Loading reaction, please wait...", 5000);
+
   showSketcherLoadingCircle();
   await setupNewKetcherSketcher();
 
@@ -87,12 +89,12 @@ function generateReactionTable(data) {
   $("#js-reactant-equivalent" + limitingReactantTableNumber).val(1);
   autoChangeRequiredStyling2(colorRoundedReactantMassID);
   let numberOfReactants = Number($("#js-number-of-reactants").val());
-  for (i = 1; i <= numberOfReactants; i++) {
+  for (let i = 1; i <= numberOfReactants; i++) {
     autoChangeRequiredStyling2("#js-reactant-equivalent" + i);
     autoChangeRequiredStyling2("#js-reactant-physical-form" + i);
   }
   let numberOfProducts = Number($("#js-number-of-products").val());
-  for (i = 1; i <= numberOfProducts; i++) {
+  for (let i = 1; i <= numberOfProducts; i++) {
     autoChangeRequiredStyling2("#js-product-physical-form" + i);
   }
 }
@@ -135,8 +137,8 @@ function sketcherDataLossHandler() {
     { id: "js-reactant-rounded-mass", nullVal: "-" },
     { id: "js-reactant-physical-form", nullVal: "-select-" },
     { id: "js-product-physical-form", nullVal: "-select-" },
-    { id: "js-reagent", nullVal: "" },
-    { id: "js-solvent", nullVal: "" },
+    { id: "js-reagent-table-row", nullVal: "" },
+    { id: "js-solvent-table-row", nullVal: "" },
   ];
 
   const hasData = fieldsToCheck.some((field) => {
@@ -161,7 +163,7 @@ function sketcherDataLossHandler() {
  */
 async function reloadReaction() {
   // disable select sketcher buttons until SMILES are loaded into sketcher
-
+  flashUserSaveMessage("Loading reaction table...", 5000);
   $("#js-load-status").val("loading");
   let $sketcherSelectRadioButtons = $('input[name="sketcher-select"]');
   $sketcherSelectRadioButtons.prop("disabled", true);

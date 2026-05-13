@@ -6,7 +6,7 @@ if ($("#js-tutorial").val() === "no") {
 function observer() {
   // this line detects any changes user makes to any input field and saves 0.5 seconds after user stops focus on input
   $(document).on("change", ":input", function (e) {
-    setTimeout(autoSaveCheck(e), 250);
+    setTimeout(() => autoSaveCheck(e), 500);
   });
   // on press remove solvent save
   $(document).on("click", ".js-remove-solvent", function (e) {
@@ -17,6 +17,7 @@ function observer() {
     setTimeout(autoSaveCheck(e), 500);
   });
 }
+
 /**
  * checks whether to autosave and if so what type of save to perform or returns blank if no save should be done
  *
@@ -68,88 +69,98 @@ function ifCurrentUserIsNotCreator() {
 async function sketcherAutoSave() {
   // autosave for when the sketcher has been updated
   // prevent data loss from editing sketcher
+  const loadingBar = $(".loading-bar");
+  try {
+    loadingBar.css("display", "block");
+    let sketcherSmiles, rxn;
+    let polymerMode = false;
+    let selectedSketcher = $('input[name="sketcher-select"]:checked').attr(
+      "id",
+    );
+    const loadStatus = $("#js-load-status");
+    const smilesElement = $("#js-reaction-smiles");
 
-  let sketcherSmiles, rxn;
-  let polymerMode = false;
-  let selectedSketcher = $('input[name="sketcher-select"]:checked').attr("id");
-  const loadStatus = $("#js-load-status");
-  const smilesElement = $("#js-reaction-smiles");
-
-  if (selectedSketcher === "marvin-select") {
-    sketcherSmiles = await exportSmilesFromMarvin();
-    rxn = await exportRXNFromMarvin(); // needed for polymer mode
-  } else if (selectedSketcher === "ketcher-select") {
-    const proceed = sketcherDataLossHandler();
-    if (!proceed) {
-      // disable autosave while we reload previous smiles
-      loadStatus.val("loading");
-      let previousSmiles = smilesElement.val();
-      await reloadSketcherFromSmiles(previousSmiles, selectedSketcher);
-      loadStatus.val("loaded");
+    if (selectedSketcher === "marvin-select") {
+      sketcherSmiles = await exportSmilesFromMarvin();
+      rxn = await exportRXNFromMarvin(); // needed for polymer mode
+    } else if (selectedSketcher === "ketcher-select") {
+      const proceed = sketcherDataLossHandler();
+      if (!proceed) {
+        loadingBar.css("display", "none");
+        // disable autosave while we reload previous smiles
+        loadStatus.val("loading");
+        let previousSmiles = smilesElement.val();
+        await reloadSketcherFromSmiles(previousSmiles, selectedSketcher);
+        loadStatus.val("loaded");
+        return;
+      }
+      [sketcherSmiles, rxn] = await Promise.all([
+        exportSmilesFromKetcher(),
+        exportRXNFromKetcher(),
+      ]);
+    }
+    if (!sketcherSmiles || sketcherSmiles === ">>") {
+      // catches if autosave occurs during a sketcher crash
+      loadingBar.css("display", "none");
       return;
     }
-    [sketcherSmiles, rxn] = await Promise.all([
-      exportSmilesFromKetcher(),
-      exportRXNFromKetcher(),
-    ]);
-  }
-  if (!sketcherSmiles || sketcherSmiles === ">>") {
-    // catches if autosave occurs during a sketcher crash
-    return;
-  }
 
-  // change here for reagent support
-  let smilesNew = removeReagentsFromSmiles(sketcherSmiles);
+    // change here for reagent support
+    let smilesNew = removeReagentsFromSmiles(sketcherSmiles);
 
-  smilesElement.val(smilesNew);
-  $("#js-reaction-rxn").val(rxn);
-  let workgroup = $("#js-active-workgroup").val();
-  let workbook = $("#js-active-workbook").val();
-  let reactionID = $("#js-reaction-id").val();
-  let polymerIndices = identifyPolymers(rxn);
-  if (polymerIndices.length === 0) {
-    polymerMode = true;
-  }
-  let userEmail = "{{ current_user.email }}";
-  let demo = $("#js-demo").val();
-  let tutorial = $("#js-tutorial").val();
-  // change here for reagent support
-  if (sketcherSmiles.includes(">>")) {
-    updateReactionTable(
-      smilesNew,
-      workgroup,
-      workbook,
-      reactionID,
-      polymerIndices,
-      demo,
-      tutorial,
-    );
-    if (demo !== "demo" && tutorial !== "yes") {
-      $.ajax({
-        url: "/_autosave_sketcher",
-        type: "post",
-        data: {
-          workgroup: workgroup,
-          workbook: workbook,
-          reactionID: reactionID,
-          userEmail: userEmail,
-          reactionSmiles: smilesNew,
-          reactionRXN: rxn,
-          polymerMode: polymerMode,
-        },
-        dataType: "json",
-        success: function () {
-          flashUserSaveMessage("Reaction Changes Saved");
-        },
-        error: function () {
-          flashUserErrorSavingMessage();
-        },
-      });
+    smilesElement.val(smilesNew);
+    $("#js-reaction-rxn").val(rxn);
+    let workgroup = $("#js-active-workgroup").val();
+    let workbook = $("#js-active-workbook").val();
+    let reactionID = $("#js-reaction-id").val();
+    let polymerIndices = identifyPolymers(rxn);
+    if (polymerIndices.length === 0) {
+      polymerMode = true;
     }
+    let userEmail = "{{ current_user.email }}";
+    let demo = $("#js-demo").val();
+    let tutorial = $("#js-tutorial").val();
+    // change here for reagent support
+    if (sketcherSmiles.includes(">>")) {
+      loadingBar.css("display", "block");
+      await updateReactionTable(
+        smilesNew,
+        workgroup,
+        workbook,
+        reactionID,
+        polymerIndices,
+        demo,
+        tutorial,
+      );
+      if (demo !== "demo" && tutorial !== "yes") {
+        $.ajax({
+          url: "/_autosave_sketcher",
+          type: "post",
+          data: {
+            workgroup: workgroup,
+            workbook: workbook,
+            reactionID: reactionID,
+            userEmail: userEmail,
+            reactionSmiles: smilesNew,
+            reactionRXN: rxn,
+            polymerMode: polymerMode,
+          },
+          dataType: "json",
+          success: function () {
+            flashUserSaveMessage("Reaction Changes Saved");
+          },
+          error: function () {
+            flashUserErrorSavingMessage();
+          },
+        });
+      }
+    }
+  } finally {
+    loadingBar.css("display", "none");
   }
 }
 
-function updateReactionTable(
+async function updateReactionTable(
   smiles,
   workgroup,
   workbook,
@@ -178,7 +189,6 @@ function updateReactionTable(
     })
     .then(function (item) {
       generateReactionTable(item);
-      $(".loading-bar").css("display", "none");
     });
 }
 
