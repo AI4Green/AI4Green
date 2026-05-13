@@ -6,7 +6,7 @@ if ($("#js-tutorial").val() === "no") {
 function observer() {
   // this line detects any changes user makes to any input field and saves 0.5 seconds after user stops focus on input
   $(document).on("change", ":input", function (e) {
-    setTimeout(autoSaveCheck(e), 500);
+    setTimeout(autoSaveCheck(e), 250);
   });
   // on press remove solvent save
   $(document).on("click", ".js-remove-solvent", function (e) {
@@ -69,34 +69,39 @@ async function sketcherAutoSave() {
   // autosave for when the sketcher has been updated
   // prevent data loss from editing sketcher
 
-  let smiles;
-  let rxn;
+  let sketcherSmiles, rxn;
   let polymerMode = false;
   let selectedSketcher = $('input[name="sketcher-select"]:checked').attr("id");
+  const loadStatus = $("#js-load-status");
+  const smilesElement = $("#js-reaction-smiles");
+
   if (selectedSketcher === "marvin-select") {
-    smiles = await exportSmilesFromMarvin();
+    sketcherSmiles = await exportSmilesFromMarvin();
     rxn = await exportRXNFromMarvin(); // needed for polymer mode
   } else if (selectedSketcher === "ketcher-select") {
     const proceed = sketcherDataLossHandler();
     if (!proceed) {
       // disable autosave while we reload previous smiles
-      $("#js-load-status").val("loading");
-      let previousSmiles = $("#js-reaction-smiles").val();
+      loadStatus.val("loading");
+      let previousSmiles = smilesElement.val();
       await reloadSketcherFromSmiles(previousSmiles, selectedSketcher);
-      $("#js-load-status").val("loaded");
+      loadStatus.val("loaded");
       return;
     }
-    smiles = await exportSmilesFromKetcher();
-    rxn = await exportRXNFromKetcher();
+    [sketcherSmiles, rxn] = await Promise.all([
+      exportSmilesFromKetcher(),
+      exportRXNFromKetcher(),
+    ]);
   }
-  if (smiles === ">>" || smiles === "" || smiles === undefined) {
+  if (!sketcherSmiles || sketcherSmiles === ">>") {
     // catches if autosave occurs during a sketcher crash
     return;
   }
 
   // change here for reagent support
-  let smilesNew = removeReagentsFromSmiles(smiles);
-  $("#js-reaction-smiles").val(smilesNew);
+  let smilesNew = removeReagentsFromSmiles(sketcherSmiles);
+
+  smilesElement.val(smilesNew);
   $("#js-reaction-rxn").val(rxn);
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
@@ -109,7 +114,7 @@ async function sketcherAutoSave() {
   let demo = $("#js-demo").val();
   let tutorial = $("#js-tutorial").val();
   // change here for reagent support
-  if (smiles.includes(">>")) {
+  if (sketcherSmiles.includes(">>")) {
     updateReactionTable(
       smilesNew,
       workgroup,
@@ -119,7 +124,7 @@ async function sketcherAutoSave() {
       demo,
       tutorial,
     );
-    if (demo !== "demo") {
+    if (demo !== "demo" && tutorial !== "yes") {
       $.ajax({
         url: "/_autosave_sketcher",
         type: "post",
@@ -173,6 +178,7 @@ function updateReactionTable(
     })
     .then(function (item) {
       generateReactionTable(item);
+      $(".loading-bar").css("display", "none");
     });
 }
 
@@ -965,14 +971,17 @@ function fade_save_message() {
   $("#reaction-saved-indicator").fadeOut("slow");
 }
 
-function flashUserSaveMessage(message) {
+function flashUserSaveMessage(
+  message = "Reaction Changes Saved",
+  timeout = 1000,
+) {
   let $reactionSaveIndicator = $("#reaction-saved-indicator");
   $reactionSaveIndicator.text(message);
   $reactionSaveIndicator
     .removeClass()
     .addClass("reaction-save-success")
     .fadeIn("fast");
-  setTimeout(fade_save_message, 1000);
+  setTimeout(fade_save_message, timeout);
 }
 
 function flashUserErrorSavingMessage() {
