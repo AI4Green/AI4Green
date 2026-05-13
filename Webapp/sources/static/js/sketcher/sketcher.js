@@ -96,25 +96,63 @@ function generateReactionTable(data) {
     autoChangeRequiredStyling2("#js-product-physical-form" + i);
   }
 }
+
+function checkReactionTableElement(elementId, nullValue) {
+  let hasData = false;
+
+  const $elements = $(`[id^="${elementId}"]`);
+
+  console.log(
+    `Searching for prefix: ${elementId}. Found: ${$elements.length} elements.`,
+  );
+
+  $elements.each(function () {
+    const val = $(this).val().trim();
+
+    // 2. Logic: If it's not empty and not the placeholder, we have data!
+    if (val !== "" && val !== nullValue) {
+      console.log("Data found in:", this.id, "Value:", val);
+      hasData = true;
+      return false; // break the loop early if any data is found
+    }
+  });
+
+  return hasData;
+}
+
 /**
- * Alerts user that continuing with their current input may overwrite existing data
+ * checks to see if reaction table is filled, and if it is warn user that editing sketcher will erase that data
  */
 function sketcherDataLossHandler() {
   const $reactionDiv = $("#reaction-table-div");
-  const reactionDivChildren = $reactionDiv.children().length;
-  const firstChildNodeID = $reactionDiv.children().first().id;
-  let tutorial_mode = $("#js-tutorial").val();
-  // dont ask if in tutorial mode or if novel compound submission form is present
-  if (tutorial_mode !== "yes") {
-    if (
-      reactionDivChildren !== 0 &&
-      firstChildNodeID !== "js-novel-compound-input-form"
-    ) {
-      const text =
-        "Please note that any reaction data already inputted will be lost. \n\nThis cannot be undone. \n\nDo you wish to continue?";
-      return confirm(text);
-    }
+  const tutorial_mode = $("#js-tutorial").val();
+
+  if (tutorial_mode === "yes") {
+    return true;
   }
+
+  const fieldsToCheck = [
+    { id: "js-reactant-rounded-mass", nullVal: "-" },
+    { id: "js-reactant-physical-form", nullVal: "-select-" },
+    { id: "js-product-physical-form", nullVal: "-select-" },
+    { id: "js-reagent", nullVal: "" },
+    { id: "js-solvent", nullVal: "" },
+  ];
+
+  const hasData = fieldsToCheck.some((field) => {
+    return checkReactionTableElement(field.id, field.nullVal);
+  });
+
+  const isNovelCompound =
+    $reactionDiv.children().first().attr("id") ===
+    "js-novel-compound-input-form";
+
+  if (hasData && !isNovelCompound) {
+    const text =
+      "Please note that any reaction data already inputted will be lost. \n\nThis cannot be undone. \n\nDo you wish to continue?";
+    return confirm(text);
+  }
+
   return true;
 }
 
