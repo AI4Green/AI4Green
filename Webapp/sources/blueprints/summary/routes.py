@@ -19,6 +19,7 @@ def summary() -> Response:
     Returns:
         flask.Response: returns the summary table as a json object
     """
+    print(request.form)
     reaction = None
     approval_request = {"status": "None"}  # mimic approval request for front end logic
     review = False

@@ -4,6 +4,7 @@
  * @return {Promise<void>}
  */
 async function showSummary(mode) {
+  flashUserSaveMessage("Generating Summary...", 2000);
   // check if summary table already populated if so warn user
   const reactionDiv = document.getElementById("js-summary-table");
   let tutorial_mode = $("#js-tutorial").val();
@@ -300,10 +301,12 @@ async function showSummary(mode) {
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
   let demo = $("#js-demo").val();
-  let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
-  let polymerIndices = JSON.stringify(
-    identifyPolymers(await exportRXNFromActiveEditor()),
-  );
+  let polymerMode = false;
+  let polymerArray = identifyPolymers(await exportRXNFromActiveEditor());
+  if (polymerArray.length > 0) {
+    polymerMode = true;
+  }
+  let polymerIndices = JSON.stringify(polymerArray);
   let tutorial = getVal("#js-tutorial");
   let reactionID;
   if (demo === "not demo" && tutorial === "no") {
