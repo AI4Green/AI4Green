@@ -72,6 +72,7 @@ async function sketcherAutoSave() {
   const loadingBar = $(".loading-bar");
   try {
     loadingBar.css("display", "block");
+    flashUserSaveMessage("Updating Reaction Table...", 2000);
     let sketcherSmiles, rxn;
     let polymerMode = false;
     let selectedSketcher = $('input[name="sketcher-select"]:checked').attr(

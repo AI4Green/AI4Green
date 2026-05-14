@@ -7,7 +7,6 @@ $(async function () {
   /*
     Need to move the functions that are used in search.js into utils to only have to load this script when making the actual reaction page
      */
-  flashUserSaveMessage("Loading reaction, please wait...", 5000);
 
   showSketcherLoadingCircle();
   await setupNewKetcherSketcher();
@@ -163,7 +162,7 @@ function sketcherDataLossHandler() {
  */
 async function reloadReaction() {
   // disable select sketcher buttons until SMILES are loaded into sketcher
-  flashUserSaveMessage("Loading reaction table...", 5000);
+  flashUserSaveMessage("Loading Reaction Table...", 5000);
   $("#js-load-status").val("loading");
   let $sketcherSelectRadioButtons = $('input[name="sketcher-select"]');
   $sketcherSelectRadioButtons.prop("disabled", true);
