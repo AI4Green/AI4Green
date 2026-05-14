@@ -95,7 +95,7 @@ def request_response(token: str) -> Response:
     ):
         if reaction_approval_request.status.value == "PENDING":
             return render_template(
-                "reactions/sketcher_reload.html",
+                "reactions/reaction_constructor.html",
                 reaction=reaction,
                 load_status="loading",
                 demo="not demo",
