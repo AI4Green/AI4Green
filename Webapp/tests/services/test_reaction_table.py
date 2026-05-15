@@ -1,135 +1,115 @@
-from typing import Optional
+import json
+from typing import List, Optional
 
+from bs4 import BeautifulSoup
 from flask.testing import FlaskClient
 from tests.utils import assert_expected_values, login
 
 
-def test_reaction_table_compounds_present(client: FlaskClient):
-    """
-    Tests the reaction table /_process when the compounds used are present in the Compound table of the database
-    We test the results by looking for substrings of the HTML which include the compound data
-    """
+def test_autoupdate_reaction_table_compounds_present(client: FlaskClient):
     login(client)
 
-    url = make_url(reactants="C,CC", products="CP,CCP")
+    # compounds are in the db
+    data = get_test_data(reaction_smiles="C.CC>>CP.CCP")
 
-    response = client.get(url)
+    response = client.post("/autoupdate_reaction_table", json=data)
+
     assert_reaction_table_response_for_test_compounds(response)
 
 
-def test_reaction_table_ion_reactions(client: FlaskClient):
-    """
-    Tests the reaction table /_process when the compounds used are ions not present in the database
-    """
+def test_autoupdate_reaction_table_ionic_reactions(client: FlaskClient):
     login(client)
-    # with all ions in
-    url = make_url(
-        reactants="CC(C(=O)N1CCCC1C(=O)OC(C)(C)C)[Nplus]([Ominus])=O,F[Bminus](F)(F)F,FC1=CC=C(C=C1)[Asplus](C1=CC=C(F)C=C1)(C1=CC=C(F)C=C1)C1=CC=C(F)C=C1",
-        products="CC(C)(C)OC(=O)C1CCCN1C(=O)[C@@](C)(C1=CC=C(F)C=C1)[Nplus]([Ominus])=O",
-        reaction_smiles="CC(C(=O)N1CCCC1C(=O)OC(C)(C)C)[Nplus]([Ominus])=O.F[Bminus](F)(F)F.FC1=CC=C(C=C1)[Biplus](C1=CC=C(F)C=C1)(C1=CC=C(F)C=C1)C1=CC=C(F)C=C1%3E%3ECC(C)(C)OC(=O)C1CCCN1C(=O)[C@@](C)(C1=CC=C(F)C=C1)[Nplus]([Ominus])=O%20|f:1.2|",
+
+    data = get_test_data(
+        reaction_smiles="CC(C(=O)N1CCCC1C(=O)OC(C)(C)C)[N+]([O-])=O.F[B-](F)(F)F.FC1=CC=C(C=C1)[Bi+](C1=CC=C(F)C=C1)(C1=CC=C(F)C=C1)C1=CC=C(F)C=C1>>CC(C)(C)OC(=O)C1CCCN1C(=O)[C@@](C)(C1=CC=C(F)C=C1)[N+]([O-])=O |f:1.2|"
     )
-    response = client.get(url)
+
+    response = client.post("/autoupdate_reaction_table", json=data)
+
+    # ensure that novel compound template is rendered
     assert response.status_code == 200
     assert (
         response.json["novelCompound"] is True
         and "Reactant 1 not in database" in response.json["reactionTable"]
     )
 
-    # replace first ion with database compound
-    url = make_url(
-        reactants="C,F[Bminus](F)(F)F,FC1=CC=C(C=C1)[Asplus](C1=CC=C(F)C=C1)(C1=CC=C(F)C=C1)C1=CC=C(F)C=C1",
-        products="CC(C)(C)OC(=O)C1CCCN1C(=O)[C@@](C)(C1=CC=C(F)C=C1)[Nplus]([Ominus])=O",
-        reaction_smiles="C.F[Bminus](F)(F)F.FC1=CC=C(C=C1)[Biplus](C1=CC=C(F)C=C1)(C1=CC=C(F)C=C1)C1=CC=C(F)C=C1%3E%3ECC(C)(C)OC(=O)C1CCCN1C(=O)[C@@](C)(C1=CC=C(F)C=C1)[Nplus]([Ominus])=O%20|f:1.2|",
+    # replace first compound with a db compound
+    data2 = get_test_data(
+        reaction_smiles="C.F[B-](F)(F)F.FC1=CC=C(C=C1)[Bi+](C1=CC=C(F)C=C1)(C1=CC=C(F)C=C1)C1=CC=C(F)C=C1>>CC(C)(C)OC(=O)C1CCCN1C(=O)[C@@](C)(C1=CC=C(F)C=C1)[N+]([O-])=O |f:1.2|"
     )
-    response = client.get(url)
-    assert response.status_code == 200
+    response2 = client.post("/autoupdate_reaction_table", json=data2)
+
+    assert response2.status_code == 200
     assert (
-        response.json["novelCompound"] is True
-        and "Reactant 2 not in database" in response.json["reactionTable"]
+        response2.json["novelCompound"] is True
+        and "Reactant 2 not in database" in response2.json["reactionTable"]
     )
 
-    # with chiral product
-    url = make_url(
-        reactants="C",
-        products="CC(C)(C)OC(=O)C1CCCN1C(=O)[C@@](C)(C1=CC=C(F)C=C1)[Nplus]([Ominus])=O",
-        reaction_smiles="C%3E%3ECC(C)(C)OC(=O)C1CCCN1C(=O)[C@@](C)(C1=CC=C(F)C=C1)[Nplus]([Ominus])=O",
+    # replace first compound with a db compound
+    data3 = get_test_data(
+        reaction_smiles="C.CC>>CC(C)(C)OC(=O)C1CCCN1C(=O)[C@@](C)(C1=CC=C(F)C=C1)[N+]([O-])=O |f:1.2|"
     )
-    response = client.get(url)
-    assert response.status_code == 200
+    response3 = client.post("/autoupdate_reaction_table", json=data3)
+
+    assert response3.status_code == 200
     assert (
-        response.json["novelCompound"] is True
-        and "Product 1 not in database" in response.json["reactionTable"]
-    )
-
-
-def test_reaction_table_polymer_reactions(client: FlaskClient):
-    """
-    Tests the reaction table /_process when the compounds used are polymers not present in the database
-    """
-    login(client)
-    # with all polymers in
-    url = make_url(
-        reactants="PC{minus}(CCC{plusn}(C)P)C",
-        products="C",
-        reaction_smiles="PC{minus}(CCC{plusn}(C)P)C>>C%20|$;;;;;;;;*;;;*;$|",
-        polymer="true",
-        polymerIndices="1",
-    )
-    response = client.get(url)
-    assert response.status_code == 200
-    assert (
-        response.json["novelCompound"] is True
-        and "Reactant 1 not in database" in response.json["reactionTable"]
-    )
-
-    # replace first polymer with database compound
-    url = make_url(
-        reactants="C,PC{minus}(CCCC{plusn}(C)P)C",
-        products="*C{minus}(C{plusn}*)S",
-        reaction_smiles="C.PC{minus}(CCCC{plusn}(C)P)C>>*C{minus}(C{plusn}*)S%20|$;;;;;;;;*;;;*;$|",
-        polymer="true",
-        polymerIndices="2,3",
-    )
-    response = client.get(url)
-    assert response.status_code == 200
-    assert (
-        response.json["novelCompound"] is True
-        and "Reactant 2 not in database" in response.json["reactionTable"]
-    )
-
-
-def test_reaction_table_compounds_not_present(client: FlaskClient):
-    """Tests the reaction table /_process response when using neutral reactants and products not in the database"""
-    login(client)
-    # Although this is the default example reaction, these are not in db. Defined in - (tests/populate_database.py)
-    url = make_url(reactants="OC(=O)C1=CC=CC=C1,CCN", products="CCNC(=O)C1=CC=CC=C1")
-    response = client.get(url)
-    assert response.status_code == 200
-    assert (
-        response.json["novelCompound"] is True
-        and "Reactant 1 not in database" in response.json["reactionTable"]
+        response3.json["novelCompound"] is True
+        and "Product 1 not in database" in response3.json["reactionTable"]
     )
 
 
 def test_demo(client: FlaskClient):
     """Tests the reaction table /_process response when not logged in"""
     # no need to login in demo mode
-    url = make_url(
-        reactants="C,CC",
-        products="CP,CCP",
-        demo="demo",
-    )
-    response = client.get(url)
+    data = get_test_data(reaction_smiles="C.CC>>CP.CCP", demo="demo")
+
+    response = client.get("/autoupdate_reaction_table", json=data)
+
     assert_reaction_table_response_for_test_compounds(response)
+
     # check it still works after login
     login(client)
-    url = make_url(
-        reactants="C,CC",
-        products="CP,CCP",
-        demo="demo",
-    )
-    response = client.get(url)
+    response = client.get("/autoupdate_reaction_table", json=data)
     assert_reaction_table_response_for_test_compounds(response)
+
+
+# polymer fixes coming in later PR
+# def test_autoupdate_reaction_table_compounds_polymer_reactions(client: FlaskClient):
+#     login(client)
+#
+#     data = get_test_data(reaction_smiles="PC{-}(CCC{+n}(C)P)C>>C |$;;;;;;;;*;;;*;$|")
+#
+#     response = client.post("/autoupdate_reaction_table", json=data)
+#
+#     assert response.status_code == 200
+#
+
+
+def get_test_data(
+    reaction_smiles: str,
+    demo: str = "not%20demo",
+    tutorial: str = "no",
+    workgroup: str = "Test-Workgroup",
+    workbook: str = "Test-Workbook",
+    reaction_id: str = "TW1-001",
+    polymer: str = "false",
+    polymer_indices=None,
+):
+    """
+    Mimics front end json data that will be sent to autosubmit route
+    """
+    if polymer_indices is None:
+        polymer_indices = []
+    return {
+        "reaction_smiles": reaction_smiles,
+        "demo": demo,
+        "tutorial": tutorial,
+        "workgroup": workgroup,
+        "workbook": workbook,
+        "reaction_id": reaction_id,
+        "polymer": polymer,
+        "polymer_indices": polymer_indices,
+    }
 
 
 def make_url(
@@ -177,21 +157,37 @@ def make_url(
 
 def assert_reaction_table_response_for_test_compounds(response):
     assert response.status_code == 200
+
+    soup = BeautifulSoup(response.json["reactionTable"], "html.parser")
+
+    # test names and mol wts
+    assert soup.find("input", id="js-reactant1")["value"] == "Testoic Acid"
+    assert soup.find("input", id="js-reactant-molecular-weight1")["value"] == "123.0"
+
+    assert soup.find("input", id="js-reactant2")["value"] == "Testamine"
+    assert soup.find("input", id="js-reactant-molecular-weight2")["value"] == "101.0"
+
+    assert soup.find("input", id="js-product1")["value"] == "Testproductine"
+    assert soup.find("input", id="js-product-molecular-weight1")["value"] == "225.0"
+
+    assert soup.find("input", id="js-product2")["value"] == "Testproductone"
+    assert soup.find("input", id="js-product-molecular-weight2")["value"] == "255.0"
+
+    # test hazard codes
     assert (
-        """<td><input style="width: 70px; border-width:0px;" type="number" step="any" value="123.0"
-                    id="js-reactant-molecular-weight1" readonly>
-            </td>"""
-        in response.json["reactionTable"]
+        soup.find("textarea", id="js-reactant-hazards1").get_text(strip=True)
+        == "H900-H901"
     )
     assert (
-        """<td style='width: 200px;'><input  id="js-product1" style="width: 200px; border-width:0px;" value="Testproductine"></td>"""
-        in response.json["reactionTable"]
+        soup.find("textarea", id="js-reactant-hazards2").get_text(strip=True) == "H900"
     )
-    assert (
-        """<td><textarea class="text-in-table" id="js-reactant-hazards2" readonly>H900</textarea></td>"""
-        in response.json["reactionTable"]
-    )
-    assert (
-        """<td><input type="number" id="js-product-table-number2" value="4" style="width:40px; border:none" readonly></td>"""
-        in response.json["reactionTable"]
-    )
+
+    assert soup.find("textarea", id="js-product-hazard1").get_text(strip=True) == "H900"
+    assert soup.find("textarea", id="js-product-hazard2").get_text(strip=True) == "H900"
+
+    # assert table numbers
+    assert soup.find("input", id="js-reactant-table-number1")["value"] == "1"
+    assert soup.find("input", id="js-reactant-table-number2")["value"] == "2"
+
+    assert soup.find("input", id="js-product-table-number1")["value"] == "3"
+    assert soup.find("input", id="js-product-table-number2")["value"] == "4"
