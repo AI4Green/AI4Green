@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from sources import models, services
 from sources.extensions import db
@@ -199,3 +199,24 @@ def chem21_solvent_from_smiles(smiles: str) -> Optional[models.Solvent]:
         .filter(models.Compound.inchi == inchi)
         .first()
     )
+
+
+def get_flag_rate() -> Dict[int, str]:
+    """
+    Get the flag_rate dictionary for converting db flag integers to flag text.
+
+    Returns:
+        Dict[int, str], dictionary for flag conversions
+    """
+    return {
+        1: "hazard-highly-hazardous",
+        4: "hazard-acceptable",
+        3: "hazard-warning",
+        2: "hazard-hazardous",
+        5: "non-chem21",
+    }
+
+
+def convert_sustainability_flag_to_text(flag: int) -> str:
+    conversion_dict = get_flag_rate()
+    return conversion_dict[flag]

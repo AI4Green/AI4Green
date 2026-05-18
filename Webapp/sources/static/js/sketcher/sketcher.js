@@ -9,6 +9,7 @@ $(async function () {
      */
   showSketcherLoadingCircle();
   await setupNewKetcherSketcher();
+  setupSketcherAutosave();
 
   // sleep used to allow sketchers to load scripts and make js Objects
   await sleep(1000);
@@ -20,9 +21,8 @@ $(async function () {
   });
   if (checkIfSaveEnabled()) {
     //
-    reloadReaction();
+    await reloadReaction();
     sketcherLockHandler();
-    setupSketcherAutosave();
   }
   hideSketcherLoadingCircle();
   // Use Promise.race to give setupNewMarvinSketcher() a maximum of 2 seconds
@@ -74,86 +74,86 @@ function loadExampleSmiles() {
  * Then handles the response from the ajax request and either makes the reaction table,
  * prompts for compound data or alerts error
  */
-async function createReactionTable() {
-  let tutorial = getVal($("#js-tutorial"));
-  if (tutorial === "no") {
-    await sketcherAutoSave();
-  }
-  let smiles;
-  try {
-    smiles = await exportSmilesFromActiveEditor();
-  } catch (error) {
-    alert("An error occurred:\n\n" + error.message);
-  }
-  let rxn = await exportRXNFromActiveEditor();
-  $("#js-reaction-rxn").val(rxn);
-  makeReactionSchemeImage("hidden");
-  sketcherDataLossHandler();
-  let [reactants, products] =
-    reactionSmilesToReactantsAndProductsSmiles(smiles);
-  $(".loading-bar").css("display", "block");
-  let smilesNew = removeReagentsFromSmiles(smiles);
-  $("#js-reaction-smiles").val(smilesNew);
-  let workgroup = getVal($("#js-active-workgroup"));
-  let workbook = getVal($("#js-active-workbook"));
-  let reaction_id = getVal($("#js-reaction-id"));
-  let demo_mode = getVal($("#js-demo"));
-  let polymer_mode = $('input[id="polymer-mode-select"]').prop("checked");
-  let polymer_indices = identifyPolymers(await exportRXNFromActiveEditor());
-  smiles = replaceSmilesSymbols(smiles);
-
-  if (rxn.includes("SRU") && polymer_mode === false) {
-    alert("Structural Repeating Units are only available in Polymer Mode.");
-    $(".loading-bar").css("display", "none");
-    return;
-  }
-
-  // Asynchronous request to _process in routes.py
-  $.ajax({
-    type: "GET",
-    contentType: "application/json;charset-utf-08",
-    dataType: "json",
-    url:
-      "/_process?reactants=" +
-      reactants +
-      "&products=" +
-      products +
-      "&reactionSmiles=" +
-      smiles +
-      "&demo=" +
-      demo_mode +
-      "&tutorial=" +
-      tutorial +
-      "&workgroup=" +
-      workgroup +
-      "&workbook=" +
-      workbook +
-      "&reaction_id=" +
-      reaction_id +
-      "&polymer=" +
-      polymer_mode +
-      "&polymerIndices=" +
-      polymer_indices,
-  }).done(function (data) {
-    $(".loading-bar").css("display", "none");
-    if (data.novelCompound) {
-      // one of the compounds is not in database - must be added as novel compound
-      $("#reaction-table-div").html(data.reactionTable).show();
-      sketcherNovelCompoundInputValidate();
-    } else if (data.error) {
-      $("#errorAlert").text(data.error).show();
-      $("#reaction-table-div").hide();
-    } else if (data.reactionTable === "Demo") {
-      alert(
-        "One or more reactants or products are not in the database. Adding novel compounds is not available in Demo mode.",
-      );
-    } else {
-      generateReactionTable(data);
-    }
-  });
-  // when ajax is done
-  document.body.className = "";
-}
+// async function createReactionTable() {
+//   // let tutorial = getVal($("#js-tutorial"));
+//   // if (tutorial === "no") {
+//   //   // await sketcherAutoSave();
+//   // }
+//   // let smiles;
+//   // try {
+//   //   smiles = await exportSmilesFromActiveEditor();
+//   // } catch (error) {
+//   //   alert("An error occurred:\n\n" + error.message);
+//   // }
+//   // let rxn = await exportRXNFromActiveEditor();
+//   // // $("#js-reaction-rxn").val(rxn);
+//   // makeReactionSchemeImage("hidden");
+//   // sketcherDataLossHandler();
+//   // let [reactants, products] =
+//   //   reactionSmilesToReactantsAndProductsSmiles(smiles);
+//   // $(".loading-bar").css("display", "block");
+//   // let smilesNew = removeReagentsFromSmiles(smiles);
+//   // $("#js-reaction-smiles").val(smilesNew);
+//   // let workgroup = getVal($("#js-active-workgroup"));
+//   // let workbook = getVal($("#js-active-workbook"));
+//   // let reaction_id = getVal($("#js-reaction-id"));
+//   // let demo_mode = getVal($("#js-demo"));
+//   // let polymer_mode = $('input[id="polymer-mode-select"]').prop("checked");
+//   // let polymer_indices = identifyPolymers(await exportRXNFromActiveEditor());
+//   // smiles = replaceSmilesSymbols(smiles);
+//   //
+//   // if (rxn.includes("SRU") && polymer_mode === false) {
+//   //   alert("Structural Repeating Units are only available in Polymer Mode.");
+//   //   $(".loading-bar").css("display", "none");
+//   //   return;
+//   // }
+//
+//   // Asynchronous request to _process in routes.py
+//   // $.ajax({
+//   //   type: "GET",
+//   //   contentType: "application/json;charset-utf-08",
+//   //   dataType: "json",
+//   //   url:
+//   //     "/_update_reaction_table?reactants=" +
+//   //     reactants +
+//   //     "&products=" +
+//   //     products +
+//   //     "&reactionSmiles=" +
+//   //     smiles +
+//   //     "&demo=" +
+//   //     demo_mode +
+//   //     "&tutorial=" +
+//   //     tutorial +
+//   //     "&workgroup=" +
+//   //     workgroup +
+//   //     "&workbook=" +
+//   //     workbook +
+//   //     "&reaction_id=" +
+//   //     reaction_id +
+//   //     "&polymer=" +
+//   //     polymer_mode +
+//   //     "&polymerIndices=" +
+//   //     polymer_indices,
+//   // }).done(function (data) {
+//   //   $(".loading-bar").css("display", "none");
+//   //   if (data.novelCompound) {
+//   //     // one of the compounds is not in database - must be added as novel compound
+//   //     $("#reaction-table-div").html(data.reactionTable).show();
+//   //     sketcherNovelCompoundInputValidate();
+//   //   } else if (data.error) {
+//   //     $("#errorAlert").text(data.error).show();
+//   //     $("#reaction-table-div").hide();
+//   //   } else if (data.reactionTable === "Demo") {
+//   //     alert(
+//   //       "One or more reactants or products are not in the database. Adding novel compounds is not available in Demo mode.",
+//   //     );
+//   //   } else {
+//   //     generateReactionTable(data);
+//   //   }
+//   // });
+//   // when ajax is done
+//   document.body.className = "";
+// }
 
 /**
  * Adds the reaction table rendered template from the response to the page HTML.
@@ -211,6 +211,8 @@ function sketcherDataLossHandler() {
  */
 async function reloadReaction() {
   // disable select sketcher buttons until SMILES are loaded into sketcher
+
+  $("#js-load-status").val("loading");
   let $sketcherSelectRadioButtons = $('input[name="sketcher-select"]');
   $sketcherSelectRadioButtons.prop("disabled", true);
 
@@ -219,14 +221,39 @@ async function reloadReaction() {
 
   $sketcherSelectRadioButtons.prop("disabled", false);
 
-  $("#js-load-status").val("loaded");
   // show compound if reloading a reaction where the reaction table has previously been loaded and description is in json
   let js_reaction_table_data = JSON.parse(
     document.getElementById("js-reaction-table-data").value,
   );
   if (Object.keys(js_reaction_table_data).includes("reaction_description")) {
-    await createReactionTable();
+    reloadReactionTable(js_reaction_table_data);
   }
+  $("#js-load-status").val("loaded");
+}
+
+function reloadReactionTable(reactionTableData) {
+  let workbook = $("#js-active-workbook").val();
+  let workgroup = $("#js-active-workgroup").val();
+  let reactionID = $("#js-reaction-id").val();
+  fetch("/reload_reaction_table", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      reaction_table_data: reactionTableData,
+      workbook: workbook,
+      workgroup: workgroup,
+      reaction_id: reactionID,
+    }),
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (item) {
+      generateReactionTable(item);
+      $("#js-load-status").val("loaded");
+    });
 }
 
 /**

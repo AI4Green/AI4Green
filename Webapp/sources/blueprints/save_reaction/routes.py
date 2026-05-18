@@ -133,6 +133,7 @@ def autosave() -> Response:
     reaction = services.reaction.get_current_from_request()
     reaction_name = reaction.name
     reaction_image = str(request.form["reactionImage"])
+    reaction_class = str(request.form.get("reactionClass"))
     polymer_indices = json.loads(request.form.get("polymerIndices"))
     polymerisation_type = str(request.form["polymerisationType"])
 
@@ -415,6 +416,7 @@ def autosave() -> Response:
         "reaction_table_data": reaction_table,
         "summary_table_data": summary_table,
         "polymerisation_type": polymerisation_type,
+        "reaction_class": reaction_class,
     }
     # get current state before updating
     old_reaction_details = services.reaction.get_reaction_details(reaction)

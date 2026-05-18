@@ -258,6 +258,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(search_bp)
 
+    from sources.blueprints.reaction_constructor import reaction_constructor_bp
+
+    app.register_blueprint(reaction_constructor_bp)
+
     from sources.blueprints.retrosynthesis import retrosynthesis_bp
 
     app.register_blueprint(retrosynthesis_bp)

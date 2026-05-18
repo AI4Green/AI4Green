@@ -28,19 +28,15 @@ def solvents() -> Response:
     abort_if_user_not_in_workbook(workgroup_name, workbook_name, workbook)
 
     number = request.form["number"]  # gets the solvent number from the browser
-    flag_rate = {
-        1: "hazard-highly-hazardous",
-        4: "hazard-acceptable",
-        3: "hazard-warning",
-        2: "hazard-hazardous",
-        5: "non-chem21",
-    }  # flag rate dictionary
+
     cas_regex = r"\b[1-9]{1}[0-9]{1,6}-\d{2}-\d\b"
     flag_color = "white"
     hazards = ""
     primary_key = ""
     alert_message = ""
     new_solvent = False
+
+    flag_rate = services.solvent.get_flag_rate()
     cas_number = re.findall(cas_regex, solvent)
     if cas_number:  # if it's a cas, find the corresponding name
         solvent = cas_number[0]
