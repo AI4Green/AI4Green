@@ -7,10 +7,6 @@ from . import spa_bp
 
 def get_spa_dir():
     base_dir = os.path.abspath(os.path.join(current_app.root_path))
-    print("BASE_DIR", base_dir)
-
-    print("FULL", os.path.join(base_dir, "static", "spa"))
-
     return os.path.join(base_dir, "static", "spa")
 
 

@@ -55,7 +55,15 @@ def create_app(c: str = "dev") -> Flask:
 
     register_extensions(app)
 
-    app.context_processor(lambda: inject_session_context(app))
+    @app.context_processor
+    def inject_globals():
+        """
+        Injects app contexts.
+        SPA_PREFIX is needed while we are serving both flask and react to the front end, for use in jinja templates.
+        Returns:
+
+        """
+        return {**inject_session_context(app), "SPA_PREFIX": "/spa"}
 
     with app.app_context():
         from sources.services.retrosynthesis.dashboard import init_dashboard
