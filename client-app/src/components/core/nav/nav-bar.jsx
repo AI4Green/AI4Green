@@ -318,13 +318,18 @@ export const NavBar = ({
             >
               Workgroup
             </MenuButton>
-            <MenuList bg="gray.900" borderColor="gray.700">
+            <MenuList bg="gray.900" color="white">
               {workgroups.map((wg) => (
                 <MenuItem
-                  key={wg}
-                  as={Link}
+                  bg="gray.900"
                   color="white"
-                  to={`/workgroup/${wg}`}
+                  _hover={{
+                    bg: "gray.700",
+                    textDecoration: "underline",
+                  }}
+                  key={wg}
+                  as="a"
+                  href={`/workgroup/${wg}`}
                 >
                   {wg}
                 </MenuItem>
@@ -426,7 +431,6 @@ export const NavBar = ({
                   textDecoration: "underline",
                 }}
                 icon={<BsBoxArrowRight />}
-                color="white"
               >
                 Logout
               </MenuItem>
