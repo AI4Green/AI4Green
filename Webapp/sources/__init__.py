@@ -254,6 +254,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(solvent_guide_bp)
 
+    from sources.blueprints.spa import spa_bp
+
+    app.register_blueprint(spa_bp)
+
     from sources.blueprints.news_feed import news_feed_bp
 
     app.register_blueprint(news_feed_bp)
