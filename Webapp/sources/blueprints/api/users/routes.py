@@ -9,6 +9,7 @@ def me():
     print(current_user.fullname)
     return {
         "fullName": current_user.fullname,
+        "userName": current_user.username,
         "email": current_user.email,
         "permissions": [
             "CreateProjectTypes",

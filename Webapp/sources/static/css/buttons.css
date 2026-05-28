@@ -88,6 +88,18 @@
     text-decoration:underline;
 }
 
+.btn.btn-warning {
+  background-color: var(--primary-yellow);
+  border-color: var(--primary-yellow);
+  color: var(--secondary-grey);
+}
+
+.btn.btn-warning:hover {
+  background-color: var(--primary-yellow-hover);
+  border-color: var(--primary-yellow-hover);
+  text-decoration: underline;
+}
+
 .btn.btn-danger{
     background-color: var(--primary-red);
     border-color: var(--primary-red);

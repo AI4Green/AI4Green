@@ -12,8 +12,12 @@ from . import template_instances_api_bp
 @template_instances_api_bp.route("/", methods=["POST"])
 def save_new_instance():
     data = request.get_json()
-
     # check to make sure current user is owner of reaction
+    reaction = (
+        db.session.query(models.Reaction)
+        # .filter(models.Reaction.creator.id == current_user.id) # todo: security instate creators only can complete forms
+        .filter(models.Reaction.reaction_id == data.get("reactionId")).first()
+    )
 
     # todo: enforce no duplicates
 
@@ -22,7 +26,7 @@ def save_new_instance():
         template_type=data.get("templateType", None),
         template_id=data.get("templateId", None),
         owner_id=current_user.id,
-        reaction_id=data.get("reactionId", None),
+        reaction_id=reaction.id,
         approver_id=current_user.id,  # todo: change this
     )
 
@@ -35,7 +39,7 @@ def save_new_instance():
 @template_instances_api_bp.route("/<int:template_id>", methods=["GET"])
 def get_template_instance(template_id):
     query = models.TemplateInstance.query.get(template_id)
-    data = query.to_dict()  # todo: does this need anymore?
+    data = query.to_dict()
 
     print(data)
     return jsonify(data)
@@ -46,18 +50,15 @@ def save_template_instance(template_id):
     data = request.form
     # files = request.files
 
-    print(data)
-
     # Parse JSON strings from form data
-    # field_responses = json.loads(data.get("fieldResponses", "[]"))
+    field_responses = json.loads(data.get("fieldResponses", "[]"))
     new_field_responses = json.loads(data.get("newFieldResponses", "[]"))
+    # todo: implement files
     # file_field_responses = json.loads(data.get("fileFieldResponses", "[]"))
     # new_file_field_responses = json.loads(data.get("newFileFieldResponses", "[]"))
 
     # section_id = data.get("sectionId")
     template_instance_id = data.get("recordId")
-
-    print(template_instance_id)
 
     processor = services.file_attachments.UploadExperimentDataFiles(request)
 
@@ -82,6 +83,19 @@ def save_template_instance(template_id):
         )
 
         db.session.add(field_response, field_response_value)
+
+    for r in field_responses:
+        field_response_id = r.get("id")
+        value = r.get("value")
+
+        field_response = db.session.query(models.FieldResponse).get(field_response_id)
+
+        field_response_value = models.FieldResponseValue.create(
+            value=value if isinstance(value, str) else json.dumps(value),
+            field_response_id=field_response.id,
+            time_of_response=datetime.now(),
+        )
+        db.session.add(field_response_value)
 
     db.session.commit()
 
