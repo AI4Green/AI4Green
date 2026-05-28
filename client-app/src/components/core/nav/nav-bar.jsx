@@ -173,10 +173,10 @@ const UserMenu = () => {
   );
 };
 
-const NavButton = ({ icon, to, children }) => (
+const NavButton = ({ icon, href, children }) => (
   <Button
-    as={Link}
-    to={to}
+    as="a"
+    href={href}
     variant="ghost"
     color="white"
     leftIcon={<Icon as={icon} />}
@@ -275,8 +275,8 @@ export const NavBar = ({
 
                 <MenuList bg="gray.900" color="white">
                   <MenuItem
-                    as={Link}
-                    to="/solvent-guide"
+                    as="a"
+                    href="/solvent_guide"
                     bg="gray.900"
                     color="white"
                     _hover={{
@@ -287,8 +287,8 @@ export const NavBar = ({
                     Solvent Guide
                   </MenuItem>
                   <MenuItem
-                    as={Link}
-                    to="/solvent-surfer"
+                    as="a"
+                    href="/solvent_PCA"
                     bg="gray.900"
                     color="white"
                     _hover={{
@@ -303,7 +303,7 @@ export const NavBar = ({
             )}
           </Menu>
 
-          <NavButton icon={BsArrowLeftRight} to="/retrosynthesis">
+          <NavButton as="a" icon={BsArrowLeftRight} href="/retrosynthesis/">
             Retrosynthesis
           </NavButton>
 
@@ -332,7 +332,7 @@ export const NavBar = ({
             </MenuList>
           </Menu>
 
-          <NavButton icon={BsSearch} to="/search">
+          <NavButton icon={BsSearch} href="/search">
             Search
           </NavButton>
         </HStack>
@@ -345,11 +345,11 @@ export const NavBar = ({
 
       {/* Right nav */}
       <HStack spacing={1}>
-        <NavButton icon={BsInfoCircleFill} to="/about">
+        <NavButton icon={BsInfoCircleFill} href="/about">
           About AI4Green
         </NavButton>
 
-        <NavButton icon={BsQuestionDiamondFill} to="/info">
+        <NavButton icon={BsQuestionDiamondFill} href="/info">
           Help
         </NavButton>
 
