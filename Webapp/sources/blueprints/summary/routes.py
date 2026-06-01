@@ -53,6 +53,7 @@ def summary() -> Response:
     reagent_data = services.summary.get_reagent_data(request.form)
     solvent_data = services.summary.get_solvent_data(request.form)
     product_data = services.summary.get_product_data(request.form)
+    reaction_description = request.form.get("reactionDescription", "")
 
     # get position of polymers in reaction
     polymer_indices = request.form["polymerIndices"]
@@ -93,8 +94,11 @@ def summary() -> Response:
                     reaction, reactant_data, reagent_data, solvent_data, product_data
                 )
 
+        print(reaction_description)
+
         summary_table = render_template(
             summary_table_html,
+            reaction_description=reaction_description,
             toxicity_alerts=toxicity_types,
             amount_unit=unit_data["amount_unit"],
             volume_unit=unit_data["volume_unit"],
