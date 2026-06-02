@@ -399,36 +399,63 @@
         </td>
     </tr>
 </table>
-<div
-  style="
-    background-color: #fff3cd;
-    border: 1px solid #6c5200;
-    color: #856404;
-    padding: 16px 20px;
-    border-radius: 8px;
-    margin: 20px 0;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-  "
->
-  <div>
-    <strong>Warning:</strong> A COSHH assessment form must be completed before proceeding with hazardous substance work.
-  </div>
 
-  <a
-    href="{{ SPA_PREFIX }}/coshh/new/{{ reaction.reaction_id }}"
-    class="btn btn-warning"
-  >
-    Complete COSHH Form
-  </a>
-</div>
-</div>
+{% if not coshh_id %}
+    <div
+      style="
+        background-color: #fff3cd;
+        border: 1px solid #6c5200;
+        color: #856404;
+        padding: 16px 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+      "
+    >
+      <div>
+        <strong>Warning:</strong> A COSHH assessment form must be completed before proceeding with hazardous substance work.
+      </div>
 
+      <a
+        href="{{ SPA_PREFIX }}/coshh/new/{{ reaction.reaction_id }}"
+        class="btn btn-warning"
+      >
+        Complete COSHH Form
+      </a>
+    </div>
 
+{% else %}
+    <div
+      style="
+        background-color: #d4edda;
+        border: 1px solid #155724;
+        color: #155724;
+        padding: 16px 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+      "
+    >
+      <div>
+        <strong>Completed:</strong> COSHH assessment form has been completed for this reaction.
+      </div>
 
+      <a
+        href="{{ SPA_PREFIX }}/coshh/form/{{ coshh_id }}/edit"
+        class="btn btn-success"
+      >
+        View COSHH Form
+      </a>
+    </div>
+{% endif %}
 
 <input type="hidden" value="{{ number_of_solvents }}" id="js-number-of-solvents" onchange="autoSaveCheck()">
 
