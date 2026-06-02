@@ -41,6 +41,7 @@ def process():
     tutorial = request.args.get("tutorial")
     reaction = None
     workbook = None
+    coshh_id = None
     if demo != "demo" and tutorial != "yes":
         workgroup = request.args.get("workgroup")
         workbook_name = request.args.get("workbook")
@@ -51,6 +52,10 @@ def process():
         reaction = services.reaction.get_from_reaction_id_and_workbook_id(
             reaction_id, workbook.id
         )
+        coshh = models.TemplateInstance.query.filter_by(reaction_id=reaction.id).first()
+
+        if coshh:
+            coshh_id = coshh.id
 
     # get position of polymers in reaction or leave empty if none
     polymer_mode = request.args.get("polymer")
@@ -246,6 +251,7 @@ def process():
         reaction_class=r_class,
         reaction_classes=r_classes,
         polymer_indices=polymer_indices,
+        coshh_id=coshh_id,
     )
     return jsonify({"reactionTable": reaction_table})
 
