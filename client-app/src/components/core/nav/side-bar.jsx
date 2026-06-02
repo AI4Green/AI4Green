@@ -56,9 +56,9 @@ export const Sidebar = ({ children }) => {
             <BrandLink />
           </HStack>
         }
-        workgroups={[]}
+        workgroups={user.workgroups}
         user={user}
-        isAuthenticated={!!isLoading}
+        isAuthenticated={!!user}
       />
       {children}
     </Grid>
