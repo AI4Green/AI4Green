@@ -85,6 +85,10 @@ export const SectionForm = ({
     }
   };
 
+  if (item.external) {
+    return <a href={item.href}>{item.label}</a>;
+  }
+
   return (
     <DefaultContentLayout>
       <Breadcrumbs items={breadcrumbItems} />

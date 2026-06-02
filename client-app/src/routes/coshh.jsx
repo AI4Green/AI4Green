@@ -188,14 +188,17 @@ export const CoshhForm = () => {
               {
                 label: template.workgroup,
                 href: `/workgroup/${template.workgroup}`,
+                external: true,
               },
               {
                 label: template.workbook,
                 href: `/workgroup/${template.workgroup}`,
+                external: true,
               },
               {
                 label: template.reactionCode,
-                href: `/sketcher/${template.workgroup}/${template.workbook}/${template.reationCode}/no`,
+                href: `/sketcher/${template.workgroup}/${template.workbook}/${template.reactionCode}/no`,
+                external: true,
               },
               { label: "COSHH", active: true },
             ]}
