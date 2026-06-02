@@ -38,6 +38,54 @@ def save_new_section():
     return jsonify(new_section.to_dict())
 
 
+@sections_api_bp.route("/", methods=["PUT"])
+def update_section():
+    data = request.get_json()
+
+    project_type_id = data.get("projectTypeId")
+    sections_data = data.get("sections", [])
+
+    updated_sections = []
+
+    try:
+        for item in sections_data:
+            section_id = item.get("id")
+            name = item.get("name")
+            sort_order = item.get("sortOrder")
+
+            # UPDATE existing section
+            if section_id is not None:
+                section = models.Section.query.get(section_id)
+
+                if not section:
+                    continue  # or raise error if you want strict mode
+
+                section.name = name
+                section.sort_order = sort_order
+
+                updated_sections.append(section)
+
+            # CREATE new section
+            else:
+                section = models.Section.create(
+                    name=name,
+                    sort_order=sort_order,
+                    template_id=project_type_id,
+                    section_type_id=1,  # default for now
+                )
+
+                db.session.add(section)
+                updated_sections.append(section)
+
+        db.session.commit()
+
+        return jsonify({"sections": [s.to_dict() for s in updated_sections]}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Failed to update sections", "details": str(e)}), 500
+
+
 @sections_api_bp.route("/<int:section_id>", methods=["GET"])
 def get_section_by_id(section_id):
     section = models.Section.query.get(section_id)
