@@ -38,8 +38,6 @@ export const SectionForm = ({
     feedback: x.fieldResponse?.[0]?.feedback || null,
   }));
 
-  console.log(sectionFields);
-
   const handleSubmit = async (values, fields) => {
     const data = prepareSubmissionData(fields, values);
 
@@ -92,7 +90,7 @@ export const SectionForm = ({
       <Breadcrumbs items={breadcrumbItems} />
       <SectionHeader
         header={headerItems}
-        project={{ name: "bpoog" }}
+        project={{ name: form.reactionID }}
         action={
           <SectionFormAction
             item={item}
