@@ -94,8 +94,6 @@ def summary() -> Response:
                     reaction, reactant_data, reagent_data, solvent_data, product_data
                 )
 
-        print(reaction_description)
-
         summary_table = render_template(
             summary_table_html,
             reaction_description=reaction_description,
