@@ -1,6 +1,12 @@
 {% from "macros/modals.html" import toxicity_modal, suggest_comment_modal, reject_reaction_modal %}
 
 <div id="section-to-print">
+    <div>
+        <p>
+            <label for="js-reaction-description-summary"></label><textarea id="js-reaction-description-summary"  style="width: 100%; box-sizing: border-box" disabled placeholder="Please describe your reaction">{{ reaction_description }}</textarea>
+        </p>
+    </div>
+
 <table class="table table-sm">
     <tr>
         <td style="background-color: rgb(184, 184, 184);"><b>&#8470;</b></td>

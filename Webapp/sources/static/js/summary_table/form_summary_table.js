@@ -16,6 +16,7 @@ async function showSummary(mode) {
       }
     }
   }
+  let reactionDescription = $("#js-reaction-description").val();
   let amountUnit = $("#js-amount-unit").val();
   let volumeUnit = $("#js-volume-unit").val();
   let massUnit = $("#js-mass-unit").val();
@@ -315,6 +316,7 @@ async function showSummary(mode) {
     url: "/_summary",
     type: "post",
     data: {
+      reactionDescription: reactionDescription,
       amountUnit: amountUnit,
       volumeUnit: volumeUnit,
       massUnit: massUnit,
@@ -422,6 +424,9 @@ async function showSummary(mode) {
         ) {
           await updateFileAttachmentList();
         }
+        let $ta = $("#js-reaction-description-summary");
+        $ta.height(0);
+        $ta.height($ta[0].scrollHeight);
       }
     },
   });
