@@ -11,8 +11,8 @@ async function makePDF(mode) {
     "#js-reaction-description-summary",
   );
   const replacement = document.createElement("div");
-
-  replacement.innerHTML = summary.value.replace(/\n/g, "<br>");
+  replacement.textContent = summary.value;
+  replacement.style.whiteSpace = "pre-wrap";
 
   summary.replaceWith(replacement);
 
