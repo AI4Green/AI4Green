@@ -158,9 +158,11 @@ async function reactionTableReload() {
   // reaction name
   $("#js-reaction-name2").val($("#js-reaction-name").val());
   // reaction description
-  $("#js-reaction-description").val(
-    js_reaction_table_data["reaction_description"],
-  );
+
+  let $ta = $("#js-reaction-description");
+  $ta.val(js_reaction_table_data["reaction_description"]);
+  $ta.height(0);
+  $ta.height($ta[0].scrollHeight);
   // polymerisation type
   $("#js-polymerisation-type").val(
     js_reaction_table_data["polymerisation_type"],
