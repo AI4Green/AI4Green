@@ -6,6 +6,16 @@ async function makePDF(mode) {
   // Create the main element to be included in the PDF
   const elementToPrint = createPDFElement(mode);
 
+  // pdf generator strips \n characters, so we need to replace them with <br>
+  const summary = elementToPrint.querySelector(
+    "#js-reaction-description-summary",
+  );
+  const replacement = document.createElement("div");
+  replacement.textContent = summary.value;
+  replacement.style.whiteSpace = "pre-wrap";
+
+  summary.replaceWith(replacement);
+
   // Generate a blob from the HTML element using html2pdf
   const blob = await html2pdf()
     .set(getPDFOptions())
