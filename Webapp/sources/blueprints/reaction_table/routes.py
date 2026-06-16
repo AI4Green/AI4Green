@@ -11,6 +11,7 @@ from urllib.request import urlopen
 from flask import json, jsonify, render_template, request
 from flask_login import login_required
 from rdkit import Chem
+from services import reaction_result_types
 from sources import models, services
 from sources.auxiliary import smiles_symbols
 from sources.decorators import workbook_member_required
@@ -41,12 +42,17 @@ def process():
     tutorial = request.args.get("tutorial")
     reaction = None
     workbook = None
+    result_types = None
     if demo != "demo" and tutorial != "yes":
         workgroup = request.args.get("workgroup")
         workbook_name = request.args.get("workbook")
         workbook = services.workbook.get_workbook_from_group_book_name_combination(
             workgroup, workbook_name
         )
+        result_types = services.reaction_result_types.get_workbook_result_types(
+            workgroup, workbook_name
+        )
+        print(result_types)
         reaction_id = request.args.get("reaction_id")
         reaction = services.reaction.get_from_reaction_id_and_workbook_id(
             reaction_id, workbook.id
@@ -232,6 +238,7 @@ def process():
         number_of_products=number_of_products,
         identifiers=identifiers,
         reactant_table_numbers=[],
+        result_types=result_types,
         products=product_data["name_list"],
         product_mol_weights=product_data["molecular_weight_list"],
         product_hazards=product_data["hazard_list"],
