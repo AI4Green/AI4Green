@@ -399,7 +399,135 @@
         </td>
     </tr>
 </table>
+
+<div class="table-responsive" id="reaction-results-div">
+    <h5>Results</h5>
+
+    <table class="table table-sm" id="js-results-table">
+        <thead>
+            <tr>
+                <th>Result Type</th>
+                <th>Value</th>
+                <th>Unit</th>
+                <th>Notes</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody id="js-results-body">
+
+        {% for result in reaction_results %}
+            <tr>
+                <td>
+                    <select>
+                        {% for result_type in result_types %}
+                            <option
+                                value="{{ result_type.id }}"
+                                {% if result.result_type_id == result_type.id %}selected{% endif %}
+                            >
+                                {{ result_type.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+
+                <td>
+                    <input
+                        type="text"
+                        class="form-control js-result-value"
+                        value="{{ result.value }}"
+                    >
+                </td>
+
+                <td>
+                    <input
+                        type="text"
+                        class="form-control js-result-unit"
+                        value="{{ result.unit }}"
+                        readonly
+                    >
+                </td>
+
+                <td>
+                    <input
+                        type="text"
+                        class="form-control js-result-notes"
+                        value="{{ result.notes }}"
+                    >
+                </td>
+
+                <td>
+                    <button
+                        type="button"
+                        class="btn btn-danger btn-sm js-remove-result"
+                    >
+                        ×
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+    <button
+        type="button"
+        class="btn btn-success"
+        id="js-add-result"
+        onclick="addNewResult()">
+        Add Result
+    </button>
 </div>
+
+<table hidden>
+    <tbody id="js-results-table-new-row">
+        <tr id="js-result-row-x-">
+            <td>
+                <select class="physical-form add-highlight-unfilled-cell" id="js-result-type-x-">
+                    {% for result_type in result_types %}
+                        <option value="{{ result_type.id }}">
+                            {{ result_type.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </td>
+
+            <td>
+                <input
+                    type="text"
+                    class="add-highlight-unfilled-cell"
+                    style="width: 70px;"
+                    id="js-result-value-x-">
+            </td>
+
+            <td>
+                <input
+                    type="text"
+                    style="width: 70px;"
+                    id="js-result-unit-x-"
+                    readonly>
+            </td>
+
+            <td>
+                <input
+                    type="text"
+                    class="text-in-table"  style="width: 100%;"
+                    id="js-result-notes-x-">
+            </td>
+
+            <td>
+                <button
+                    value="-x-"
+                    id="remove-result-x-"
+                    onclick="removeResult(this.value)"
+                    type="button"
+                    class="btn btn-danger btn-sm">
+                    ×
+                </button>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 
 

@@ -1262,3 +1262,16 @@ function fillData(response, component, fieldList, y) {
     }
   }
 }
+
+function addNewResult() {
+  let resultsCounter = $("#js-number-of-results");
+  let numberOfResults = Number(resultsCounter.val()) + 1;
+
+  resultsCounter.val(numberOfResults);
+
+  let newRow = $("#js-results-table-new-row").html();
+
+  newRow = newRow.replaceAll("-x-", "-" + numberOfResults + "-");
+
+  $("#js-results-body").append(newRow);
+}
