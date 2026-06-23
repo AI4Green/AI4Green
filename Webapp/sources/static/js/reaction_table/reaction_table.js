@@ -1275,3 +1275,95 @@ function addNewResult() {
 
   $("#js-results-body").append(newRow);
 }
+
+const RESULT_TYPE_CONFIG = {
+  PERCENTAGE: {
+    unit: "%",
+    render: renderNumberInput,
+  },
+  NUMBER: {
+    unit: "",
+    render: renderNumberInput,
+  },
+  RATIO: {
+    unit: "ratio",
+    render: renderTextInput,
+  },
+  BOOLEAN: {
+    unit: "",
+    render: renderBooleanToggle,
+  },
+};
+
+function updateResultRow(selectEl) {
+  const $row = $(selectEl).closest("tr");
+
+  const $selected = $(selectEl).find(":selected");
+  console.log("outcomeType:", $selected.data("outcome-type"));
+
+  const outcomeType = $selected.data("outcome-type");
+  const unit = $selected.data("unit");
+
+  const config = RESULT_TYPE_CONFIG[outcomeType];
+
+  if (!config) {
+    return;
+  }
+
+  $row.find(".js-result-unit").val(unit || "");
+
+  config.render($row);
+}
+
+function renderNumberInput($row) {
+  const $cell = $row.find(".js-result-value-cell");
+
+  $cell.replaceWith(`
+        <input type="number"
+               class="form-control js-result-value"
+               step="0.1"
+               min="0"
+               max="100"
+               value="">
+    `);
+}
+
+function renderTextInput($row) {
+  const $cell = $row.find(".js-result-value-cell");
+
+  $cell.replaceWith(`
+        <input type="text"
+               class="form-control js-result-value"
+               placeholder="e.g. 95:5"
+               value="">
+    `);
+}
+
+function renderBooleanToggle($row) {
+  const $cell = $row.find(".js-result-value-cell");
+
+  $cell.replaceWith(`
+        <button type="button"
+                class="btn btn-outline-secondary js-result-value js-bool-toggle"
+                data-value="false">
+            False
+        </button>
+    `);
+}
+
+$(document).on("click", ".js-bool-toggle", function () {
+  const $btn = $(this);
+
+  const current = $btn.attr("data-value") === "true";
+
+  const next = !current;
+
+  $btn.attr("data-value", next ? "true" : "false");
+  $btn.text(next ? "True" : "False");
+
+  $btn.toggleClass("btn-success btn-outline-secondary");
+});
+
+$(document).on("change", "#js-results-body select", function () {
+  updateResultRow(this);
+});

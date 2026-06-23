@@ -11,7 +11,6 @@ from urllib.request import urlopen
 from flask import json, jsonify, render_template, request
 from flask_login import login_required
 from rdkit import Chem
-from services import reaction_result_types
 from sources import models, services
 from sources.auxiliary import smiles_symbols
 from sources.decorators import workbook_member_required

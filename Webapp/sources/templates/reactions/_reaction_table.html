@@ -417,6 +417,11 @@
         <tbody id="js-results-body">
 
         {% for result in reaction_results %}
+                {{ result_type.outcome_type }}
+    |
+    {{ result_type.outcome_type.name }}
+    |
+    {{ result_type.outcome_type.value }}
             <tr>
                 <td>
                     <select>
@@ -424,6 +429,8 @@
                             <option
                                 value="{{ result_type.id }}"
                                 {% if result.result_type_id == result_type.id %}selected{% endif %}
+                                data-outcome-type="{{ result_type.outcome_type.value }}"
+                                data-unit="{{ result_type.default_unit }}"
                             >
                                 {{ result_type.name }}
                             </option>
@@ -485,15 +492,20 @@
         <tr id="js-result-row-x-">
             <td>
                 <select class="physical-form add-highlight-unfilled-cell" id="js-result-type-x-">
+                <option value="-select-">
+                    -select-
+                </option>
                     {% for result_type in result_types %}
-                        <option value="{{ result_type.id }}">
+                        <option value="{{ result_type.id }}"
+                        data-outcome-type="{{ result_type.outcome_type }}" data-unit="{{ result_type.default_unit }}">
                             {{ result_type.name }}
                         </option>
                     {% endfor %}
+
                 </select>
             </td>
 
-            <td>
+            <td class="js-result-value-cell">
                 <input
                     type="text"
                     class="add-highlight-unfilled-cell"
@@ -536,6 +548,8 @@
 
 <input type="hidden" value="{{ number_of_solvents }}" id="js-number-of-solvents" onchange="autoSaveCheck()">
 
+
+<input type="hidden" value="{{ number_of_reagents }}" id="js-number-of-reagents">
 
 <input type="hidden" value="{{ number_of_reagents }}" id="js-number-of-reagents">
 
