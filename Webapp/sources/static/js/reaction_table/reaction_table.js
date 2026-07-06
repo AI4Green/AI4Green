@@ -1147,6 +1147,7 @@ function updateStyling() {
     autoChangeRequiredStyling("#js-reactant-physical-form" + i);
     autoChangeRequiredStyling("#js-reactant-rounded-mass" + i);
     autoChangeRequiredStyling("#js-reactant-equivalent" + i);
+    autoChangeRequiredStyling("#js-reactant-rounded-amount" + i);
   }
   let numberOfReagents = getNum($("#js-number-of-reagents"));
   for (let i = 1; i < numberOfReagents + 1; i++) {
