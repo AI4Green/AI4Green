@@ -224,6 +224,8 @@ def process():
             reactants_smiles_list, products_smiles_list
         )
 
+    print(result_types)
+
     # Now it renders the reaction table template
     reaction_table = render_template(
         reaction_table_html,

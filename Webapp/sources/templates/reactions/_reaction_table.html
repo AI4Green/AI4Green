@@ -416,13 +416,7 @@
 
         <tbody id="js-results-body">
 
-        {% for result in reaction_results %}
-                {{ result_type.outcome_type }}
-    |
-    {{ result_type.outcome_type.name }}
-    |
-    {{ result_type.outcome_type.value }}
-            <tr>
+            {% for result in reaction_results %}
                 <td>
                     <select>
                         {% for result_type in result_types %}
@@ -497,7 +491,7 @@
                 </option>
                     {% for result_type in result_types %}
                         <option value="{{ result_type.id }}"
-                        data-outcome-type="{{ result_type.outcome_type }}" data-unit="{{ result_type.default_unit }}">
+                        data-outcome-type="{{ result_type.outcome_type.value }}" data-unit="{{ result_type.default_unit }}">
                             {{ result_type.name }}
                         </option>
                     {% endfor %}
