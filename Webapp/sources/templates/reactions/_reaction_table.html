@@ -95,10 +95,10 @@
                     {% if loop.index == 1 %} value="1" readonly {% else %}
                     {% if reactant_equivalents %}value="{{ reactant_equivalents[loop.index0] }}"{% endif %}
                     {% endif %}></td>
-            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
+            <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0"
                     {% if rounded_reactant_amounts %}value="{{ rounded_reactant_amounts[loop.index0] }}"{% endif %}
                     id="js-reactant-rounded-amount{{ loop.index }}" class="js-reactant-rounded-amounts"
-                    readonly></td>
+                    ></td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
                     {% if rounded_reactant_volumes %}value="{{ rounded_reactant_volumes[loop.index0] }}"{% endif %}
                     id="js-reactant-rounded-volume{{ loop.index }}"
