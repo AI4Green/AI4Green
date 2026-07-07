@@ -1089,6 +1089,12 @@ function updateRequiredStylingLimited() {
   let RoundedReactantMassID =
     "#js-reactant-rounded-mass" + limitingReactantTableNumber;
   autoChangeRequiredStyling2(RoundedReactantMassID);
+  let RoundedReactantAmountID =
+    "#js-reactant-rounded-amount" + limitingReactantTableNumber;
+
+  autoChangeRequiredStyling2(RoundedReactantMassID);
+  autoChangeRequiredStyling2(RoundedReactantAmountID);
+
   for (let i = 1; i <= reactionTable.numberOfReactants; i++) {
     let reactantEquivalentField = $("#js-reactant-equivalent" + i);
     autoChangeRequiredStyling2(reactantEquivalentField);
