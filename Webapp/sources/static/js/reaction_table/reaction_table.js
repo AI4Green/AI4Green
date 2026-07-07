@@ -67,6 +67,10 @@ function updateReactantsAfterLimitingReactantChange() {
         .attr("readonly", true)
         .removeClass("editable-cell")
         .addClass("readonly-cell");
+      $("#js-reactant-rounded-amount" + i)
+        .attr("readonly", true)
+        .removeClass("editable-cell")
+        .addClass("readonly-cell");
     }
   }
 }
@@ -98,6 +102,10 @@ function updateEquivalentsRelativeToNewLimitingReactant(x) {
     .removeClass("editable-cell")
     .addClass("readonly-cell");
   $("#js-reactant-rounded-mass" + x)
+    .attr("readonly", false)
+    .removeClass("readonly-cell")
+    .addClass("editable-cell");
+  $("#js-reactant-rounded-amount" + x)
     .attr("readonly", false)
     .removeClass("readonly-cell")
     .addClass("editable-cell");
