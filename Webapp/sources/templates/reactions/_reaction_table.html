@@ -98,7 +98,7 @@
             <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0"
                     {% if rounded_reactant_amounts %}value="{{ rounded_reactant_amounts[loop.index0] }}"{% endif %}
                     id="js-reactant-rounded-amount{{ loop.index }}" class="js-reactant-rounded-amounts"
-                    readonyl></td>
+                    readonly></td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
                     {% if rounded_reactant_volumes %}value="{{ rounded_reactant_volumes[loop.index0] }}"{% endif %}
                     id="js-reactant-rounded-volume{{ loop.index }}"
