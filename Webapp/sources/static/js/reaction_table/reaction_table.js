@@ -11,7 +11,10 @@ function initialiseReactionTable() {
   // reload before autofill functions
   reactionTableReload();
   // The next functions make changes based on the limiting reactant/main product
+  // sets up event listener
   updateTableAfterLimitingReactantChange();
+  // applies changes to make right cells editable
+  updateReactantsAfterLimitingReactantChange();
   updateMainProduct();
   // autofill for all the components
   autoFillLimitingReactant();
@@ -1108,7 +1111,7 @@ function updateRequiredStylingLimited() {
  */
 function autoChangeRequiredStyling2(styleParameterID, excludedNullValues = []) {
   // doesnt require change parameter
-  const defaultNulLValues = ["-select-", "0", "", "-", 0];
+  const defaultNulLValues = ["-select-", "0", "", "-", 0, "0.00"];
   // remove excluded nullValues from the default nullValues
   let nullValues = defaultNulLValues.filter(
     (item) => !excludedNullValues.includes(item),
