@@ -137,6 +137,7 @@ function setupListeners() {
   setupAmountUnitListener();
   setupAmountListeners();
   setupMassListeners();
+  setupEquivalentListeners();
 }
 
 function setupMassListeners() {
@@ -184,6 +185,20 @@ function setupAmountUnitListener() {
   });
 }
 
+function setupEquivalentListeners() {
+  $(".js-reactant-equivalents").on("input change", function () {
+    // changing equivalents should update amounts and masses
+    updateReactantAmounts();
+    updateReactantMasses();
+  });
+
+  $(".js-product-equivalents").on("input change", function () {
+    // changing equivalents should update amounts and masses
+    updateProductAmounts();
+    updateProductMasses();
+  });
+}
+
 function updateReactantAmounts() {
   let limitingReactantTableNumber = getLimitingReactantTableNumber();
   const limitingReactantAmount = getVal(
@@ -206,8 +221,6 @@ function updateProductAmounts() {
     updateComponentAmount("product", i, limitingReactantAmount);
   }
 }
-
-function updateUnits() {}
 
 function updateComponentAmount(component, index, limitingReactantAmount) {
   let equivalentSelector = $("#js-" + component + "-equivalent" + index);
