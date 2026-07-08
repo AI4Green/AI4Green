@@ -17,7 +17,7 @@ function initialiseReactionTable() {
   updateReactantsAfterLimitingReactantChange();
   updateMainProduct();
   // autofill for all the components
-  autoFillLimitingReactant();
+  setupListeners();
   autofillReactantFields2();
   autofillProductFields2();
   updateStyling();
@@ -131,7 +131,7 @@ function updateMainProduct() {
   });
 }
 
-function autoFillLimitingReactant() {
+function setupListeners() {
   // setup event listeners upon mass or molar amount changes
   setupMassUnitListener();
   setupAmountUnitListener();
@@ -325,47 +325,47 @@ function updateLimitingReagentMass() {
 //   });
 // }
 //
-// /**
-//  * Calculates and auto fills the amount for reactant, reagent, or product when the limiting reactant mass, equivalents,
-//  * or mass/amount units are changed
-//  *
-//  * @param component {string} reactant/solvent/product/reagent
-//  * @param changedParameter {string} the parameter that has triggered the change
-//  * @param loopValue {string} the number combined with the component to make the HTML element ID. e.g, reactant1
-//  */
-// function autofillAmount(component, changedParameter, loopValue) {
-//   $(changedParameter).on("input change", function () {
-//     const limitingReactantTableNumber = getLimitingReactantTableNumber();
-//     const firstReactantAmount = getVal(
-//       $("#js-reactant-amount" + limitingReactantTableNumber),
-//     );
-//     let equivalentSelector = $("#js-" + component + "-equivalent" + loopValue);
-//     const equivalent =
-//       getVal(equivalentSelector) || equivalentSelector.attr("placeholder");
-//     let amount;
-//     // product can have different units to reactant, hence different equation
-//     if (component === "product") {
-//       let reactantAmountUnit = getVal($("#js-amount-unit"));
-//       let productAmountUnit = getVal($("#js-product-amount-unit"));
-//       amount =
-//         (firstReactantAmount * equivalent * amountFactor[reactantAmountUnit]) /
-//         amountFactor[productAmountUnit];
-//     } else {
-//       amount = firstReactantAmount * equivalent;
-//     }
-//     $("#js-" + component + "-amount" + loopValue).val(amount);
-//   });
-// }
-//
-// //Autofill rounded reactant amount in the explicit input field
-// function autofillRoundedAmount(component, changedParameter, loopValue) {
-//   // autofills the rounded amount for reactant, reagent, or product
-//   $(changedParameter).on("input change", function () {
-//     let amount = getNum($("#js-" + component + "-amount" + loopValue));
-//     let roundedAmount = roundedNumber(amount);
-//     $("#js-" + component + "-rounded-amount" + loopValue).val(roundedAmount);
-//   });
-// }
+/**
+ * Calculates and auto fills the amount for reactant, reagent, or product when the limiting reactant mass, equivalents,
+ * or mass/amount units are changed
+ *
+ * @param component {string} reactant/solvent/product/reagent
+ * @param changedParameter {string} the parameter that has triggered the change
+ * @param loopValue {string} the number combined with the component to make the HTML element ID. e.g, reactant1
+ */
+function autofillAmount(component, changedParameter, loopValue) {
+  $(changedParameter).on("input change", function () {
+    const limitingReactantTableNumber = getLimitingReactantTableNumber();
+    const firstReactantAmount = getVal(
+      $("#js-reactant-amount" + limitingReactantTableNumber),
+    );
+    let equivalentSelector = $("#js-" + component + "-equivalent" + loopValue);
+    const equivalent =
+      getVal(equivalentSelector) || equivalentSelector.attr("placeholder");
+    let amount;
+    // product can have different units to reactant, hence different equation
+    if (component === "product") {
+      let reactantAmountUnit = getVal($("#js-amount-unit"));
+      let productAmountUnit = getVal($("#js-product-amount-unit"));
+      amount =
+        (firstReactantAmount * equivalent * amountFactor[reactantAmountUnit]) /
+        amountFactor[productAmountUnit];
+    } else {
+      amount = firstReactantAmount * equivalent;
+    }
+    $("#js-" + component + "-amount" + loopValue).val(amount);
+  });
+}
+
+//Autofill rounded reactant amount in the explicit input field
+function autofillRoundedAmount(component, changedParameter, loopValue) {
+  // autofills the rounded amount for reactant, reagent, or product
+  $(changedParameter).on("input change", function () {
+    let amount = getNum($("#js-" + component + "-amount" + loopValue));
+    let roundedAmount = roundedNumber(amount);
+    $("#js-" + component + "-rounded-amount" + loopValue).val(roundedAmount);
+  });
+}
 
 //Autofill the reactant volume
 function autofillVolume(component, changedParameter, loopValue) {
@@ -471,12 +471,15 @@ function autofillReactantFields2() {
     let reactantDensityID = "#js-reactant-density" + i;
     let reactantConcentrationID = "#js-reactant-concentration" + i;
     let reactantEquivalentID = "#js-reactant-equivalent" + i;
+    let limitingReactantAmountID =
+      "#js-reactant-rounded-amount" + limitingReactantTableNumber;
     // iterate through to autofill for each reactant
     let volumeChangeParameters = [
       limitingReactantMassID,
       reactantDensityID,
       reactantConcentrationID,
       reactantEquivalentID,
+      limitingReactantAmountID,
       "#js-volume-unit",
       "#js-mass-unit",
     ];
@@ -491,6 +494,7 @@ function autofillReactantFields2() {
       let amountMassChangeParameters = [
         reactantEquivalentID,
         limitingReactantMassID,
+        limitingReactantAmountID,
         "#js-amount-unit",
         "#js-mass-unit",
         "#js-reactant-mn" + i,
