@@ -136,6 +136,7 @@ function setupListeners() {
   // setup event listeners upon mass or molar amount changes
   setupMassUnitListener();
   setupAmountUnitListener();
+  setupVolumeUnitListeners();
   setupAmountListeners();
   setupMassListeners();
   setupEquivalentListeners();
@@ -186,6 +187,15 @@ function setupAmountUnitListener() {
     // changing molar unit should change the mass
     updateProductAmounts();
   });
+}
+
+function setupVolumeUnitListeners() {
+  $("#js-volume-unit").on("input change", function () {
+    // changing molar unit should change the mass
+    updateReactantVolumes();
+  });
+
+  // todo: solvent volume units
 }
 
 function setupEquivalentListeners() {
