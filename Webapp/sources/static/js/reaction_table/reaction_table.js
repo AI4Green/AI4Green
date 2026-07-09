@@ -139,6 +139,7 @@ function setupReactantAndProductListeners() {
   setupMassListeners();
   setupEquivalentListeners();
   setupConcentrationListeners();
+  setupVolumeListeners();
 }
 
 function setupMassListeners() {
@@ -202,6 +203,7 @@ function setupVolumeUnitListeners() {
     // changing molar unit should change the mass
     updateReactantVolumes();
     updateReagentVolumes();
+    updateSolventVolumes();
   });
 
   // todo: solvent volume units
@@ -245,6 +247,17 @@ function setupConcentrationListeners() {
       updateReagentMasses();
       updateReagentAmounts();
       updateReagentVolumes();
+    },
+  );
+}
+
+function setupVolumeListeners() {
+  $("#js-solvent-table").on(
+    "input.solventVolume change.solventVolume",
+    ".js-solvent-volumes",
+    function () {
+      console.log("AAAA");
+      updateSolventConcentrations();
     },
   );
 }
@@ -300,6 +313,37 @@ function updateReagentVolumes() {
     updateComponentVolume("reagent", i, limitingReactantAmount);
   }
 }
+
+function updateSolventConcentrations() {
+  // need to consider all solvents to find reaction concentration
+  const limitingReactantAmount = getVal(
+    $("#js-reactant-amount" + getLimitingReactantTableNumber()),
+  );
+  const numberOfSolvents = getVal($("#js-number-of-solvents"));
+  const limitingReactantAmountUnit = getVal($("#js-amount-unit"));
+  const solventVolumeUnit = getVal($("#js-solvent-volume-unit"));
+
+  let totalSolventVolume = 0;
+  for (let i = 1; i <= numberOfSolvents; i++) {
+    totalSolventVolume += Number(getVal($("#js-solvent-volume" + i)));
+  }
+
+  let concentration = calculateReactionConcentration(
+    limitingReactantAmount,
+    totalSolventVolume,
+    limitingReactantAmountUnit,
+    solventVolumeUnit,
+  );
+
+  for (let i = 1; i <= numberOfSolvents; i++) {
+    $("#js-solvent-concentration" + i).val(concentration);
+    $("#js-solvent-rounded-concentration" + i).val(
+      roundedNumber(concentration),
+    );
+  }
+}
+
+function updateSolventVolumes() {}
 
 function updateComponentVolume(component, index) {
   const mass = Number(getVal($("#js-" + component + "-rounded-mass" + index)));
@@ -392,7 +436,6 @@ function updateReagentMasses() {
     $("#js-reactant-amount" + getLimitingReactantTableNumber()),
   );
   const numberOfReagents = getVal($("#js-number-of-reagents"));
-  console.log(numberOfReagents);
   // loop through number of products
   for (let i = 1; i <= numberOfReagents; i++) {
     updateComponentMass("reagent", i, limitingReactantAmount);
@@ -480,6 +523,30 @@ function calculateMassFromEquivalent(
   return (
     (molecularWeight * equivalent * limitingReactantMass) /
     limitingReactantMolecularWeight
+  );
+}
+
+function calculateReactionConcentration(
+  limitingReactantAmount,
+  solventVolume,
+  limitingReactantAmountUnit,
+  solventVolumeUnit,
+) {
+  return (
+    (amountFactor[limitingReactantAmountUnit] * limitingReactantAmount * 1000) /
+    (solventVolume * volumeFactor[solventVolumeUnit])
+  );
+}
+
+function calculateSolventVolumeFromConcentration(
+  limitingReactantAmount,
+  concentration,
+  limitingReactantAmountUnit,
+  solventVolumeUnit,
+) {
+  return (
+    (amountFactor[limitingReactantAmountUnit] * limitingReactantAmount * 1000) /
+    (concentration * volumeFactor[solventVolumeUnit])
   );
 }
 
@@ -800,7 +867,7 @@ function updateProductTableNumber() {
 // function to set up lister events for solvent datalist
 function datalist_initiate(solventInputID, solventDatalistID, solventNumber) {
   autofillSolventData(solventNumber);
-  autofillSolventFields2();
+  // autofillSolventFields2();
   updateStyling();
   for (let option of document.getElementById(solventDatalistID).options) {
     option.onclick = function () {
@@ -1076,68 +1143,68 @@ function autofillSolventTableNumber(x, changedParameter) {
 
 // Solvent autofill functions
 //Autofill solvent concentration in the hidden field
-function autofillSolventConcentration(
-  x,
-  changedParameter,
-  limitingReactantTableNumber,
-) {
-  $(changedParameter).on("input change", function () {
-    let firstReactantAmount = getVal(
-      $("#js-reactant-amount" + limitingReactantTableNumber),
-    );
-    let solventVolumeID = "#js-solvent-volume" + x;
-    let solventVolume = getVal($(solventVolumeID));
-    let solventConcentration = 0;
-    const reactantAmountUnit = getVal($("#js-amount-unit"));
-    const solventVolumeUnit = getVal($("#js-solvent-volume-unit"));
-    if (solventVolume > 0) {
-      // multiply by 1000 to go from concentration in mL to L / decimetres
-      solventConcentration =
-        (amountFactor[reactantAmountUnit] * firstReactantAmount * 1000) /
-        (solventVolume * volumeFactor[solventVolumeUnit]);
-    }
-    let solventConcentrationID = "#js-solvent-concentration" + x;
-    $(solventConcentrationID).val(solventConcentration);
-  });
-}
+// function autofillSolventConcentration(
+//   x,
+//   changedParameter,
+//   limitingReactantTableNumber,
+// ) {
+//   $(changedParameter).on("input change", function () {
+//     let firstReactantAmount = getVal(
+//       $("#js-reactant-amount" + limitingReactantTableNumber),
+//     );
+//     let solventVolumeID = "#js-solvent-volume" + x;
+//     let solventVolume = getVal($(solventVolumeID));
+//     let solventConcentration = 0;
+//     const reactantAmountUnit = getVal($("#js-amount-unit"));
+//     const solventVolumeUnit = getVal($("#js-solvent-volume-unit"));
+//     if (solventVolume > 0) {
+//       // multiply by 1000 to go from concentration in mL to L / decimetres
+//       solventConcentration =
+//         (amountFactor[reactantAmountUnit] * firstReactantAmount * 1000) /
+//         (solventVolume * volumeFactor[solventVolumeUnit]);
+//     }
+//     let solventConcentrationID = "#js-solvent-concentration" + x;
+//     $(solventConcentrationID).val(solventConcentration);
+//   });
+// }
+//
+// //Autofill rounded solvent concentration in the explicit field
+// function autofillRoundedSolventConcentration(x, changedParameter) {
+//   $(changedParameter).on("input change", function () {
+//     let solventConcentrationID = "#js-solvent-concentration" + x;
+//     let solventConcentration = getNum($(solventConcentrationID));
+//     let roundedSolventConcentration = roundedNumber(solventConcentration);
+//     let roundedSolventConcentrationID = "#js-solvent-rounded-concentration" + x;
+//     $(roundedSolventConcentrationID).val(roundedSolventConcentration);
+//   });
+// }
 
-//Autofill rounded solvent concentration in the explicit field
-function autofillRoundedSolventConcentration(x, changedParameter) {
-  $(changedParameter).on("input change", function () {
-    let solventConcentrationID = "#js-solvent-concentration" + x;
-    let solventConcentration = getNum($(solventConcentrationID));
-    let roundedSolventConcentration = roundedNumber(solventConcentration);
-    let roundedSolventConcentrationID = "#js-solvent-rounded-concentration" + x;
-    $(roundedSolventConcentrationID).val(roundedSolventConcentration);
-  });
-}
-
-function autofillSolventFields2() {
-  let numberOfSolvents = getVal($("#js-number-of-solvents"));
-  if (numberOfSolvents > 0) {
-    for (let i = 1; i < numberOfSolvents + 1; i++) {
-      let limitingReactantTableNumber = getLimitingReactantTableNumber();
-      let limitingReactantMass =
-        "#js-reactant-rounded-mass" + limitingReactantTableNumber;
-      let solventVolumeID = "#js-solvent-volume" + i;
-      const solventConcentrationParameters = [
-        limitingReactantMass,
-        solventVolumeID,
-        "#js-mass-unit",
-        "#js-solvent-volume-unit",
-        ".js-reactant-limiting",
-      ];
-      for (const param of solventConcentrationParameters) {
-        autofillSolventConcentration(i, param, limitingReactantTableNumber);
-        autofillRoundedSolventConcentration(i, param);
-      }
-      autofillSolventTableNumber(i, ".js-add-reagent");
-      autofillSolventTableNumber(i, ".js-remove-reagent");
-      autofillSolventTableNumber(i, ".js-add-solvent");
-      autofillSolventTableNumber(i, ".js-remove-solvent");
-    }
-  }
-}
+// function autofillSolventFields2() {
+//   let numberOfSolvents = getVal($("#js-number-of-solvents"));
+//   if (numberOfSolvents > 0) {
+//     for (let i = 1; i < numberOfSolvents + 1; i++) {
+//       let limitingReactantTableNumber = getLimitingReactantTableNumber();
+//       let limitingReactantMass =
+//         "#js-reactant-rounded-mass" + limitingReactantTableNumber;
+//       let solventVolumeID = "#js-solvent-volume" + i;
+//       const solventConcentrationParameters = [
+//         limitingReactantMass,
+//         solventVolumeID,
+//         "#js-mass-unit",
+//         "#js-solvent-volume-unit",
+//         ".js-reactant-limiting",
+//       ];
+//       for (const param of solventConcentrationParameters) {
+//         autofillSolventConcentration(i, param, limitingReactantTableNumber);
+//         autofillRoundedSolventConcentration(i, param);
+//       }
+//       // autofillSolventTableNumber(i, ".js-add-reagent");
+//       // autofillSolventTableNumber(i, ".js-remove-reagent");
+//       // autofillSolventTableNumber(i, ".js-add-solvent");
+//       // autofillSolventTableNumber(i, ".js-remove-solvent");
+//     }
+//   }
+// }
 
 function goToSolventGuide(sol_x) {
   let solventName = getVal($("#js-solvent" + sol_x));
