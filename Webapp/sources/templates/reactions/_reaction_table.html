@@ -10,6 +10,8 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/reaction_table.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/compound_error_flag.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_table.css') }}">
+
 {% endblock %}
 
 
@@ -99,10 +101,14 @@
                     {% if rounded_reactant_amounts %}value="{{ rounded_reactant_amounts[loop.index0] }}"{% endif %}
                     id="js-reactant-rounded-amount{{ loop.index }}" class="js-reactant-rounded-amounts"
                     readonly></td>
-            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
+            <td>
+                <div class="volume-input-wrapper">
+                    <input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
                     {% if rounded_reactant_volumes %}value="{{ rounded_reactant_volumes[loop.index0] }}"{% endif %}
                     id="js-reactant-rounded-volume{{ loop.index }}"
-                    readonly></td>
+                    readonly>
+                </div>
+            </td>
             <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-reactant-rounded-mass{{ loop.index }}" class="js-reactant-rounded-masses"
                     {% if rounded_reactant_masses %}value="{{ rounded_reactant_masses[loop.index0] }}"{% endif %}
                     readonly></td>
