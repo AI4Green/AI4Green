@@ -92,7 +92,7 @@
                     id="js-reactant-density{{ loop.index }}"></td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
                     {% if reactant_сoncentrations %}value="{{ reactant_сoncentrations[loop.index0] }}"{% endif %}
-                    id="js-reactant-concentration{{ loop.index }}"></td>
+                    id="js-reactant-concentration{{ loop.index }}" class="js-reactant-concentrations"></td>
             <td><input style="width: 60px;" type="number" step="any" min="0" id="js-reactant-equivalent{{ loop.index }}" class="js-reactant-equivalents" placeholder="-"
                     {% if loop.index == 1 %} value="1" readonly {% else %}
                     {% if reactant_equivalents %}value="{{ reactant_equivalents[loop.index0] }}"{% endif %}

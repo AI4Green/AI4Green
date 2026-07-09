@@ -17,9 +17,7 @@ function initialiseReactionTable() {
   updateReactantsAfterLimitingReactantChange();
   updateMainProduct();
   // autofill for all the components
-  setupListeners();
-  // autofillReactantFields2();
-  // autofillProductFields2();
+  setupReactantAndProductListeners();
   updateStyling();
   setColours();
   $("#js-load-status").on("change", function () {
@@ -131,7 +129,7 @@ function updateMainProduct() {
   });
 }
 
-function setupListeners() {
+function setupReactantAndProductListeners() {
   // eventually all listeners should be relocated here
   // setup event listeners upon mass or molar amount changes
   setupMassUnitListener();
@@ -140,6 +138,7 @@ function setupListeners() {
   setupAmountListeners();
   setupMassListeners();
   setupEquivalentListeners();
+  setupConcentrationListeners();
 }
 
 function setupMassListeners() {
@@ -203,12 +202,19 @@ function setupEquivalentListeners() {
     // changing equivalents should update amounts and masses
     updateReactantAmounts();
     updateReactantMasses();
+    updateReactantVolumes();
   });
 
   $(".js-product-equivalents").on("input change", function () {
     // changing equivalents should update amounts and masses
     updateProductAmounts();
     updateProductMasses();
+  });
+}
+
+function setupConcentrationListeners() {
+  $(".js-reactant-concentrations").on("input change", function () {
+    updateReactantVolumes();
   });
 }
 
@@ -250,6 +256,7 @@ function updateComponentVolume(component, index) {
     getVal($("#js-" + component + "-concentration" + index)),
   );
   const { volume, calcType } = calcVolume(density, mass, concentration, amount);
+  console.log(volume);
   // update hidden (accurate) value
   $("#js-" + component + "-volume" + index).val(volume);
   // update displayed (rounded) value
@@ -1356,7 +1363,7 @@ function calcVolume(density, mass, concentration, amount) {
   const reactantMassUnit = getVal($("#js-mass-unit"));
   const reactantVolumeUnit = getVal($("#js-volume-unit"));
   const reactantAmountUnit = getVal($("#js-amount-unit"));
-  let volume = "";
+  let volume = "-";
   // track whether conc or density is used to inform user
   let calcType = "";
   if (concentration > 0) {
