@@ -176,12 +176,11 @@ def reload_reaction_table():
         reaction_id, workbook.id
     )
     # protect against reloading reactions with no reaction table
-    try:
-        reaction_table_data = reaction.reaction_table_data
-        print(reaction_table_data)
-    except AttributeError:
-        print(AttributeError)
-        return jsonify({"message": "Cannot reload reaction table"})
+    # try:
+    #     reaction_table_data = reaction.reaction_table_data
+    # except AttributeError:
+    #     print(AttributeError)
+    #     return jsonify({"message": "Cannot reload reaction table"})
 
     (
         compounds,
