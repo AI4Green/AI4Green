@@ -25,6 +25,10 @@ function initialiseReactionTable() {
   });
 }
 
+function applyRequiredStyling(changedParameter, excludedNullValues = []) {
+  autoChangeRequiredStyling2(changedParameter, excludedNullValues);
+}
+
 function hideButtonsInDemoMode() {
   if (getVal($("#js-demo")) === "demo") {
     document.getElementById("reaction-name-description").style.display = "none";
@@ -360,9 +364,10 @@ function updateSolventConcentrations() {
 
   for (let i = 1; i <= numberOfSolvents; i++) {
     $("#js-solvent-concentration" + i).val(concentration);
-    $("#js-solvent-rounded-concentration" + i).val(
-      roundedNumber(concentration),
-    );
+
+    let element = $("#js-solvent-rounded-concentration" + i);
+    element.val(roundedNumber(concentration));
+    applyRequiredStyling(element);
   }
 }
 
@@ -388,9 +393,9 @@ function updateSolventVolumes() {
     );
 
     $("#js-solvent-volume" + i).val(totalSolventVolume / numberOfSolvents);
-    $("#js-solvent-rounded-volume" + i).val(
-      roundedNumber(totalSolventVolume / numberOfSolvents),
-    );
+    let element = $("#js-solvent-rounded-volume" + i);
+    element.val(roundedNumber(totalSolventVolume / numberOfSolvents));
+    applyRequiredStyling(element);
   }
 }
 
@@ -623,10 +628,10 @@ function updateLimitingReactantAmountOnMassChange() {
   $("#js-reactant-amount" + limitingReactantTableNumber).val(amount);
 
   // update rounded (displayed) reactant amount
+  let elem = $("#js-reactant-rounded-amount" + limitingReactantTableNumber);
   let roundedAmount = roundedNumber(amount);
-  $("#js-reactant-rounded-amount" + limitingReactantTableNumber).val(
-    roundedAmount,
-  );
+  elem.val(roundedAmount);
+  applyRequiredStyling(elem);
 }
 
 function updateLimitingReactantMassOnAmountChange() {
@@ -653,8 +658,10 @@ function updateLimitingReactantMassOnAmountChange() {
   $("#js-reactant-mass" + limitingReactantTableNumber).val(mass);
 
   // update rounded (displayed) reactant mass
+  let elem = $("#js-reactant-rounded-mass" + limitingReactantTableNumber);
   let roundedMass = roundedNumber(mass);
-  $("#js-reactant-rounded-mass" + limitingReactantTableNumber).val(roundedMass);
+  elem.val(roundedMass);
+  applyRequiredStyling(elem);
 }
 
 function autoRemoveVolume(component, changedParameter, loopValue) {
