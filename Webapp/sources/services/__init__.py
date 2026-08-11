@@ -20,6 +20,7 @@ from . import (
     reaction,
     reaction_classification,
     reaction_editing_history,
+    reaction_table,
     requests,
     retrosynthesis,
     solvent,
