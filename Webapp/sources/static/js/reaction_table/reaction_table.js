@@ -505,12 +505,14 @@ function updateComponentVolume(component, index) {
 }
 
 function assignVolumeTooltip(calcType, component, index) {
+  console.log("assign tooltip", calcType, component, index);
   const volumeTooltips = {
     concentration: "Calculated from concentration and amount.",
     density: "Calculated from density and mass.",
   };
 
   const $input = $(`#js-${component}-rounded-volume${index}`);
+  console.log("$input length:", $input.length);
   // Remove any existing icon first
   $input.next(".calc-method-icon").remove();
   $input.removeAttr("title");
@@ -530,6 +532,7 @@ function assignVolumeTooltip(calcType, component, index) {
   `);
 
   $input.after($icon);
+  console.log("icon in DOM:", $(".calc-method-icon").length);
 }
 
 function updateComponentAmount(component, index, limitingReactantAmount) {

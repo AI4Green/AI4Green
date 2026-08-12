@@ -27,7 +27,16 @@
         <th scope="col">Limiting Reagent?</th>
         <th scope="col">Mol.Wt</th>
         <th scope="col">Density (g/mL)</th>
-        <th scope="col">Conc. (M)</th>
+        <th scope="col">
+            <div class="input-wrapper">
+                 Conc. (M)
+                 <span class="calc-method-icon"
+                    title="Optional parameter. If provided, volume will be calculated from concentration and amount."
+                 style="right: -15px;">
+                    ℹ️
+                </span>
+            </div>
+        </th>
         <th scope="col">Equiv.</th>
         {#  set up headings with variable units  #}
         {% for unit_type, options in unit_options.items() %}
@@ -182,7 +191,7 @@
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
                     {% if reactant.compound_data.densities %}value="{{ reactant.compound_data.densities if reactant.compound_data.densities is string else reactant.compound_data.densities | join(', ') }}"{% endif %}
                     id="js-reactant-density{{ index }}"></td>
-            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
+            <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0" class="js-reactant-concentrations"
                     {% if reactant.compound_data.сoncentrations %}value="{{ reactant.compound_data.сoncentrations }}"{% endif %}
                     id="js-reactant-concentration{{ index }}"></td>
             <td><input style="width: 60px;" type="number" class="js-reactant-equivalents" step="any" min="0" id="js-reactant-equivalent{{ index }}" placeholder="-"
@@ -193,10 +202,13 @@
                     {% if reactant.compound_data.amounts %}value="{{ reactant.compound_data.amounts }}"{% endif %}
                     id="js-reactant-rounded-amount{{ index }}" class="js-reactant-rounded-amounts js-requires-styling"
                     readonly></td>
-            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
-                    {% if reactant.compound_data.volumes %}value="{{ reactant.compound_data.volumes }}"{% endif %}
-                    id="js-reactant-rounded-volume{{ index }}"
-                    readonly></td>
+            <td>
+                <div class="input-wrapper">
+                    <input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
+                        {% if reactant.compound_data.volumes %}value="{{ reactant.compound_data.volumes }}"{% endif %}
+                        id="js-reactant-rounded-volume{{ index }}" readonly>
+                </div>
+            </td>
             <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-reactant-rounded-mass{{ index }}" class="js-reactant-rounded-masses js-requires-styling"
                     {% if reactant.compound_data.masses %}value="{{ reactant.compound_data.masses }}"{% endif %}
                     {% if index == 1 %} {% else %}
