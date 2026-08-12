@@ -17,7 +17,10 @@ function initialiseReactionTable() {
   updateMainProduct();
   // autofill for all the components
   setupReactantAndProductListeners();
-  updateStyling();
+
+  // styling listeners
+  setupStylingListeners();
+
   setColours();
   $("#js-load-status").on("change", function () {
     autoSaveCheck(null);
@@ -26,6 +29,16 @@ function initialiseReactionTable() {
 
 function applyRequiredStyling(changedParameter, excludedNullValues = []) {
   autoChangeRequiredStyling2(changedParameter, excludedNullValues);
+}
+
+function setupStylingListeners() {
+  $("#reaction-table-div").on(
+    "input.requiredStyling change.requiredStyling",
+    ".js-requires-styling",
+    function () {
+      autoChangeRequiredStyling2(this);
+    },
+  );
 }
 
 /**
@@ -96,7 +109,7 @@ function updateReactantsAfterLimitingReactantChange() {
       $("#js-reactant-equivalent" + i)
         .attr("readonly", false)
         .removeClass("readonly-cell")
-        .addClass("editable-cell");
+        .addClass("editable-cell js-requires-styling");
       $("#js-reactant-rounded-mass" + i)
         .attr("readonly", true)
         .removeClass("editable-cell")

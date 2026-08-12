@@ -185,19 +185,19 @@
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
                     {% if reactant.compound_data.сoncentrations %}value="{{ reactant.compound_data.сoncentrations }}"{% endif %}
                     id="js-reactant-concentration{{ index }}"></td>
-            <td><input style="width: 60px;" type="number" step="any" min="0" id="js-reactant-equivalent{{ index }}" placeholder="-"
+            <td><input style="width: 60px;" type="number" class="js-reactant-equivalents" step="any" min="0" id="js-reactant-equivalent{{ index }}" placeholder="-"
                     {% if index == 1 %} value="1" readonly {% else %}
                     {% if reactant.compound_data.equivalents %}value="{{ reactant.compound_data.equivalents }}"{% endif %}
-                    {% endif %}></td>
+                    {% endif %} ></td>
             <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0"
                     {% if reactant.compound_data.amounts %}value="{{ reactant.compound_data.amounts }}"{% endif %}
-                    id="js-reactant-rounded-amount{{ index }}" class="js-reactant-rounded-amounts"
+                    id="js-reactant-rounded-amount{{ index }}" class="js-reactant-rounded-amounts js-requires-styling"
                     readonly></td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
                     {% if reactant.compound_data.volumes %}value="{{ reactant.compound_data.volumes }}"{% endif %}
                     id="js-reactant-rounded-volume{{ index }}"
                     readonly></td>
-            <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-reactant-rounded-mass{{ index }}" class="js-reactant-rounded-masses"
+            <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-reactant-rounded-mass{{ index }}" class="js-reactant-rounded-masses js-requires-styling"
                     {% if reactant.compound_data.masses %}value="{{ reactant.compound_data.masses }}"{% endif %}
                     {% if index == 1 %} {% else %}
                     readonly
@@ -403,7 +403,7 @@
             <input type="number" step="any" min="0" placeholder="-" id="js-reagent-concentration{{ index }}" style="width: 60px; border:none" value="{{ reagent.compound_data.concentrations if reagent else "" }}">
         </td>
         <td>
-            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-equivalent{{ index }}" style="width: 60px;" class="js-reagent-equivalents add-highlight-unfilled-cell" value="{{ reagent.compound_data.equivalents if reagent else "" }}">
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-equivalent{{ index }}" style="width: 60px;" class="js-reagent-equivalents js-requires-styling" value="{{ reagent.compound_data.equivalents if reagent else "" }}">
         </td>
         <td>
             <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-amount{{ index }}" style="width: 60px; border:none" readonly value="{{ reagent.compound_data.amounts if reagent else "" }}">
