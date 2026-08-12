@@ -1560,8 +1560,6 @@ function styleValidReagent(changedParameter, changedStyling) {
 /**
  * Checks whether a given reagent/solvent row has valid compound data
  * (hazards field populated) and styles the name input accordingly.
- * This is the repeatable check - safe to call on every input/change,
- * and on any bulk reload sweep.
  */
 function checkValidCompoundStyling(component, loopValue) {
   let hazardsID = "#js-" + component + "-hazards" + loopValue;
@@ -1581,7 +1579,7 @@ function autoChangeRequiredStylingValidCompound(component, loop_value) {
   });
 
   if (component === "solvent") {
-    $(changedStyling).removeClass("readonly-cell"); // one-time, not part of the repeated check
+    $(changedStyling).removeClass("readonly-cell");
   }
 }
 
