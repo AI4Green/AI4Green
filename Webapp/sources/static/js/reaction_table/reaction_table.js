@@ -967,7 +967,6 @@ async function removeReagent(removedReagentNumber) {
       }
       // recreate listener events on the cloned elements with updated ids
       autofillReagentData(j);
-      autofillReagentFields2(j);
       updateStyling();
     }
   }

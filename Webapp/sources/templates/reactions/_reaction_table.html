@@ -38,17 +38,21 @@
     {% endfor %}
 
     {#      Reagent/catalyst input  #}
-    {{ reaction_table_components.reagent_or_solvent_heading("reagent", units)}}
+    <tbody id="js-reagent-table">
+        {{ reaction_table_components.reagent_or_solvent_heading("reagent", units)}}
 
-    {% for reagent in reagents %}
-        {{  reaction_table_components.reagent_row(reagent, loop.index) }}
-    {% endfor %}
+        {% for reagent in reagents %}
+            {{  reaction_table_components.reagent_row(reagent, loop.index) }}
+        {% endfor %}
+    </tbody>
 
     {{ reaction_table_components.reagent_or_solvent_heading("solvent", units) }}
 
-    {% for solvent in solvents %}
-        {{  reaction_table_components.solvent_row(solvent, loop.index) }}
-    {% endfor %}
+    <tbody id="js-solvent-table">
+        {% for solvent in solvents %}
+            {{  reaction_table_components.solvent_row(solvent, loop.index) }}
+        {% endfor %}
+     </tbody>
 
     {{ reaction_table_components.product_headings(units) }}
 
