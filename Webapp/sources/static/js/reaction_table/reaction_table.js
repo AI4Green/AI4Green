@@ -35,6 +35,23 @@ function updateAllRequiredStyling() {
   $(".js-requires-styling").each(function () {
     autoChangeRequiredStyling2(this);
   });
+
+  updateAllValidCompoundStyling();
+}
+
+/**
+ * Re-applies valid-compound styling to every reagent and solvent row.
+ * Used on load/reload since values set via .val() never fire input/change.
+ */
+function updateAllValidCompoundStyling() {
+  let numberOfReagents = getNum($("#js-number-of-reagents"));
+  for (let i = 1; i <= numberOfReagents; i++) {
+    checkValidCompoundStyling("reagent", i);
+  }
+  let numberOfSolvents = getNum($("#js-number-of-solvents"));
+  for (let i = 1; i <= numberOfSolvents; i++) {
+    checkValidCompoundStyling("solvent", i);
+  }
 }
 
 function setupStylingListeners() {
@@ -1540,19 +1557,31 @@ function styleValidReagent(changedParameter, changedStyling) {
   }
 }
 
+/**
+ * Checks whether a given reagent/solvent row has valid compound data
+ * (hazards field populated) and styles the name input accordingly.
+ * This is the repeatable check - safe to call on every input/change,
+ * and on any bulk reload sweep.
+ */
+function checkValidCompoundStyling(component, loopValue) {
+  let hazardsID = "#js-" + component + "-hazards" + loopValue;
+  let nameID = "#js-" + component + loopValue;
+  styleValidReagent(hazardsID, nameID);
+}
+
+// existing setup function, unchanged in behaviour, now just delegates the check
 function autoChangeRequiredStylingValidCompound(component, loop_value) {
-  // Catches partially filled in reagent/solvent name box - will highlight red unless a valid compound is entered
-  let changedParameter = "#js-" + component + "-hazards";
-  changedParameter = changedParameter.concat(String(loop_value));
-  let changedStyling = "#js-" + component;
-  changedStyling = changedStyling.concat(String(loop_value));
-  styleValidReagent(changedParameter, changedStyling);
+  let changedParameter = "#js-" + component + "-hazards" + loop_value;
+  let changedStyling = "#js-" + component + loop_value;
+
+  checkValidCompoundStyling(component, loop_value); // initial check on setup
+
   $(changedStyling).on("input change", function () {
-    styleValidReagent(changedParameter, changedStyling);
+    checkValidCompoundStyling(component, loop_value);
   });
 
   if (component === "solvent") {
-    $(changedStyling).removeClass("readonly-cell");
+    $(changedStyling).removeClass("readonly-cell"); // one-time, not part of the repeated check
   }
 }
 
