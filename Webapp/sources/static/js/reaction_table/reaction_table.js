@@ -459,8 +459,8 @@ function updateSolventVolumes() {
       solventVolumeUnit,
     );
 
-    $("#js-solvent-volume" + i).val(totalSolventVolume / numberOfSolvents);
-    let element = $("#js-solvent-rounded-volume" + i);
+    let element = $("#js-solvent-volume" + i);
+    element.val(totalSolventVolume / numberOfSolvents);
     element.val(roundedNumber(totalSolventVolume / numberOfSolvents));
     applyRequiredStyling(element);
   }
@@ -909,7 +909,7 @@ function addNewReagent() {
     .appendTo("#js-reagent-physical-form-dropdown-cell" + reagentNumber);
   autofillReagentData(reagentNumber);
   // autofillReagentFields2(reagentNumber);
-  updateStyling();
+  // updateStyling();
   updateProductTableNumber();
   // update solvent table numbers
   updateSolventTableNumbers();

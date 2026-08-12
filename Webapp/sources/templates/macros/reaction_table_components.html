@@ -137,7 +137,7 @@
 
 
 {%  macro physical_form_dropdown(index, value, type) -%}
-<select size="1" class="physical-form add-highlight-unfilled-cell" id="js-{{ type }}-physical-form{{ index }}">
+<select size="1" class="physical-form js-requires-styling add-highlight-unfilled-cell" id="js-{{ type }}-physical-form{{ index }}">
     {% set options = [
         "-select-",
         "Dense solid",
@@ -341,13 +341,13 @@
         <td><button value="{{ index }}" id="go-to-solvent-guide{{ index }}" title="Open solvent guide in new tab" class="btn btn-primary btn-primary btn-sm" onclick="goToSolventGuide(this.value)">Solvent Guide</button></td>
         <td><button  value="{{ index }}" id="go-to-solvent-surfer" title="Open solvent surfer in new tab" class="btn btn-primary btn-primary btn-sm" onclick="goToSolventSurfer(this.value)">Solvent Surfer</button></td>
         <td></td>
-        <td><input type="number" step="any" min="0" placeholder="-"
+        <td><input type="number" step="any" min="0" placeholder="-" class="js-solvent-concentrations js-requires-styling add-highlight-unfilled-cell"
          id="js-solvent-rounded-concentration{{ index }}" value="{{ solvent.compound_data.concentrations if solvent else "" }}"
-         style="width:60px; border:none" readonly></td>
+         style="width:60px"></td>
         <td></td>
         <td></td>
         <td><input type="number" step="any" min="0" placeholder="-"
-         id="js-solvent-volume{{ index }}" style="width:60px;" class="add-highlight-unfilled-cell" value="{{ solvent.compound_data.volumes if solvent else "" }}"></td>
+         id="js-solvent-volume{{ index }}" style="width:60px;" class="js-solvent-volumes js-requires-styling add-highlight-unfilled-cell" value="{{ solvent.compound_data.volumes if solvent else "" }}"></td>
         <td></td>
         <td>
         {{ physical_form_dropdown(index, solvent.compound_data.physical_forms_text if solvent else "-select-", "solvent") }}
@@ -403,7 +403,7 @@
             <input type="number" step="any" min="0" placeholder="-" id="js-reagent-concentration{{ index }}" style="width: 60px; border:none" value="{{ reagent.compound_data.concentrations if reagent else "" }}">
         </td>
         <td>
-            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-equivalent{{ index }}" style="width: 60px;" class="js-reagent-equivalents js-requires-styling" value="{{ reagent.compound_data.equivalents if reagent else "" }}">
+            <input type="number" step="any" min="0" placeholder="-" id="js-reagent-equivalent{{ index }}" style="width: 60px;" class="js-reagent-equivalents js-requires-styling add-highlight-unfilled-cell" value="{{ reagent.compound_data.equivalents if reagent else "" }}">
         </td>
         <td>
             <input type="number" step="any" min="0" placeholder="-" id="js-reagent-rounded-amount{{ index }}" style="width: 60px; border:none" readonly value="{{ reagent.compound_data.amounts if reagent else "" }}">
