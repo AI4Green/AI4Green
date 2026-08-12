@@ -31,6 +31,12 @@ function applyRequiredStyling(changedParameter, excludedNullValues = []) {
   autoChangeRequiredStyling2(changedParameter, excludedNullValues);
 }
 
+function updateAllRequiredStyling() {
+  $(".js-requires-styling").each(function () {
+    autoChangeRequiredStyling2(this);
+  });
+}
+
 function setupStylingListeners() {
   $("#reaction-table-div").on(
     "input.requiredStyling change.requiredStyling",
@@ -980,7 +986,7 @@ async function removeReagent(removedReagentNumber) {
       }
       // recreate listener events on the cloned elements with updated ids
       autofillReagentData(j);
-      updateStyling();
+      // updateStyling();
     }
   }
   // update the reagent number before the product+solvent table numbers
@@ -1048,7 +1054,7 @@ function updateProductTableNumber() {
 function datalist_initiate(solventInputID, solventDatalistID, solventNumber) {
   autofillSolventData(solventNumber);
   // autofillSolventFields2();
-  updateStyling();
+  // updateStyling();
   for (let option of document.getElementById(solventDatalistID).options) {
     option.onclick = function () {
       document.getElementById(solventInputID).value = option.value;
@@ -1550,32 +1556,32 @@ function autoChangeRequiredStylingValidCompound(component, loop_value) {
   }
 }
 
-function updateStyling() {
-  for (let i = 1; i < reactionTable.numberOfReactants + 1; i++) {
-    autoChangeRequiredStyling("#js-reactant-physical-form" + i);
-    autoChangeRequiredStyling("#js-reactant-rounded-mass" + i);
-    autoChangeRequiredStyling("#js-reactant-equivalent" + i);
-    autoChangeRequiredStyling("#js-reactant-rounded-amount" + i);
-  }
-  let numberOfReagents = getNum($("#js-number-of-reagents"));
-  for (let i = 1; i < numberOfReagents + 1; i++) {
-    autoChangeRequiredStyling("#js-reagent-physical-form" + i);
-    autoChangeRequiredStyling("#js-reagent-equivalent" + i);
-    autoChangeRequiredStyling("js-reagent-hazards" + i);
-    autoChangeRequiredStylingValidCompound("reagent", i);
-  }
-  let numberOfSolvents = getNum($("#js-number-of-solvents"));
-  for (let i = 1; i < numberOfSolvents + 1; i++) {
-    autoChangeRequiredStyling("#js-solvent-physical-form" + i);
-    autoChangeRequiredStyling("#js-solvent-volume" + i);
-    autoChangeRequiredStyling("#js-solvent" + i);
-    autoChangeRequiredStyling("#js-solvent-rounded-concentration" + i);
-    autoChangeRequiredStylingValidCompound("solvent", i);
-  }
-  for (let i = 1; i < reactionTable.numberOfProducts + 1; i++) {
-    autoChangeRequiredStyling("#js-product-physical-form" + i);
-  }
-}
+// function updateStyling() {
+//   for (let i = 1; i < reactionTable.numberOfReactants + 1; i++) {
+//     autoChangeRequiredStyling("#js-reactant-physical-form" + i);
+//     autoChangeRequiredStyling("#js-reactant-rounded-mass" + i);
+//     autoChangeRequiredStyling("#js-reactant-equivalent" + i);
+//     autoChangeRequiredStyling("#js-reactant-rounded-amount" + i);
+//   }
+//   let numberOfReagents = getNum($("#js-number-of-reagents"));
+//   for (let i = 1; i < numberOfReagents + 1; i++) {
+//     autoChangeRequiredStyling("#js-reagent-physical-form" + i);
+//     autoChangeRequiredStyling("#js-reagent-equivalent" + i);
+//     autoChangeRequiredStyling("js-reagent-hazards" + i);
+//     autoChangeRequiredStylingValidCompound("reagent", i);
+//   }
+//   let numberOfSolvents = getNum($("#js-number-of-solvents"));
+//   for (let i = 1; i < numberOfSolvents + 1; i++) {
+//     autoChangeRequiredStyling("#js-solvent-physical-form" + i);
+//     autoChangeRequiredStyling("#js-solvent-volume" + i);
+//     autoChangeRequiredStyling("#js-solvent" + i);
+//     autoChangeRequiredStyling("#js-solvent-rounded-concentration" + i);
+//     autoChangeRequiredStylingValidCompound("solvent", i);
+//   }
+//   for (let i = 1; i < reactionTable.numberOfProducts + 1; i++) {
+//     autoChangeRequiredStyling("#js-product-physical-form" + i);
+//   }
+// }
 
 // utility functions
 function commonGlobalVariables() {
