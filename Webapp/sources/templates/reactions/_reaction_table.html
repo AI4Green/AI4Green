@@ -20,7 +20,7 @@
 {{ reaction_table_components.reaction_description(reaction, tutorial) }}
 
 
-{% if reaction.reaction_type == "POLYMER" %}
+{% if polymer_mode %}
     {{ reaction_table_components.polymerisation_dropdown(reaction.polymerisation_type) }}
 {% else %}
     {{ reaction_table_components.reaction_class_dropdown(reaction_class) }}

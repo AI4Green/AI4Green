@@ -29,6 +29,7 @@ def autoupdate_reaction_table():
     workbook = None
     reaction = None
     polymer_indices = []
+    polymer_mode = False
     if demo != "demo" and tutorial != "yes":
         workgroup = request.json.get("workgroup")
         workbook_name = request.json.get("workbook")
@@ -129,11 +130,13 @@ def autoupdate_reaction_table():
     r_class = None
 
     if not polymer_indices:
-        polymer_indices = list()
         r_class = services.reaction_classification.classify_reaction(
             reactants_smiles_list, product_smiles_list
         )
+    else:
+        polymer_mode = True
 
+    print(polymer_mode, polymer_indices)
     reaction_table_html = "reactions/_reaction_table.html"
 
     # Now it renders the reaction table template
@@ -155,7 +158,7 @@ def autoupdate_reaction_table():
         sol_rows=sol_rows,
         reaction=reaction,
         reaction_class=r_class,
-        polymer_indices=polymer_indices,
+        polymer_mode=polymer_mode,
     )
     return jsonify({"reactionTable": reaction_table})
 
