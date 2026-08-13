@@ -54,7 +54,7 @@
         {% endfor %}
      </tbody>
 
-    {{ reaction_table_components.product_headings(units) }}
+    {{ reaction_table_components.product_headings(units, polymer_mode) }}
 
     {% for product in products %}
         {{  reaction_table_components.product_row(product, loop.index) }}

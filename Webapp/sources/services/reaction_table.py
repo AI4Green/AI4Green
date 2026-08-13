@@ -149,12 +149,12 @@ def get_compound_data(
         molecular_weight = services.polymer_novel_compound.get_repeat_unit_weights(
             compound.id, compound.workbook
         )
+        compound_data["molecular_weights"].extend(molecular_weight)
     else:
         molecular_weight = (
             float(compound.molec_weight) if compound.molec_weight != "" else 0
         )
-
-    compound_data["molecular_weights"].append(molecular_weight)
+        compound_data["molecular_weights"].append(molecular_weight)
 
     compound_name = compound.name if compound.name != "" else "Not found"
     compound_data["names"].append(compound_name)
