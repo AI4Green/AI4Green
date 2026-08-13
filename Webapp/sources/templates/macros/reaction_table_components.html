@@ -319,9 +319,19 @@
                      <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
                 {% endif %}
             </td>
+            <td>
+                {% if product.is_polymer %}
+                    <input type="number" step="any" min="0" value="js-product-mn{{ index }}" placeholder="{{ product.compound_data.molecular_weights | map("float") | sum }}"
+                       id="js-product-mn{{ index }}" style="width: 70px">
+                {% endif %}
+            </td>
             <td></td>
-            <td></td>
-            <td></td>
+            <td>
+                {% if product.is_polymer %}
+                    <input style="width: 60px;" type="number" step="any" min="0" placeholder="1" id="js-product-equivalent{{ index }}"
+                       value="{{ product.compound_data.equivalents if product.compound_data.equivalents else 1 }}">
+                {% endif %}
+            </td>
             <td><input type="number" step="any" placeholder="-" min="0"
                 {% if product.compound_data.amounts %}value="{{ product.compound_data.amounts }}"{% endif %}
                 id="js-product-rounded-amount{{ index }}" style="width: 60px; border:none" readonly></td>
