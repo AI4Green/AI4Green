@@ -305,7 +305,6 @@
 
 {%  macro product_row(product, index) -%}
 <tr class="not-novel-compound-input">
-{{ product.compound_data.molecular_weights }}
             <td><input type="number" id="js-product-table-number{{ index }}" value="{{ product.idx }}" style="width:40px; border:none" readonly></td>
             <td style='width: 200px;'><input  id="js-product{{ index }}" style="width: 200px; border-width:0px;" value="{{ product.compound_data.names if product.compound_data.names is string else product.compound_data.names | join(', ') }}"></td>
             <td><input type="radio" id="js-main-product{{ index }}" name="js-main-product" value="{{ product.idx }}" class="js-main-product"></td>
@@ -322,7 +321,7 @@
             <td>
                 {% if product.is_polymer %}
                     <input type="number" step="any" min="0" value="js-product-mn{{ index }}" placeholder="{{ product.compound_data.molecular_weights | map("float") | sum }}"
-                       id="js-product-mn{{ index }}" style="width: 70px">
+                       id="js-product-mn{{ index }}" style="width: 70px" value="{{ product.compound_data.mns }}>
                 {% endif %}
             </td>
             <td></td>

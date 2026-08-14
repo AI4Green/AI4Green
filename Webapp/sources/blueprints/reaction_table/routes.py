@@ -136,7 +136,6 @@ def autoupdate_reaction_table():
     else:
         polymer_mode = True
 
-    print(polymer_mode, polymer_indices)
     reaction_table_html = "reactions/_reaction_table.html"
 
     # Now it renders the reaction table template
@@ -172,12 +171,16 @@ def reload_reaction_table():
     workgroup = request.json.get("workgroup")
     reaction_id = request.json.get("reaction_id")
     demo = request.json.get("demo")
+    polymer_mode = False
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup, workbook
     )
     reaction = services.reaction.get_from_reaction_id_and_workbook_id(
         reaction_id, workbook.id
     )
+    if reaction.reaction_type.value == "POLYMER":
+        polymer_mode = True
+
     # protect against reloading reactions with no reaction table
     # try:
     #     reaction_table_data = reaction.reaction_table_data
@@ -191,6 +194,10 @@ def reload_reaction_table():
     ) = services.reaction_table.SketcherCompound.from_reaction_table_dict(
         json.loads(reaction.reaction_table_data), workbook
     )
+
+    print(compounds)
+
+    print([x.compound_data for x in compounds["product"]])
 
     if demo == "demo":
         sol_rows = services.solvent.get_default_list()
@@ -219,7 +226,7 @@ def reload_reaction_table():
         reaction=reaction,
         reaction_class=reaction.reaction_class,
         reaction_classes=[],
-        polymer_indices={},
+        polymer_mode=polymer_mode,
     )
     return jsonify({"reactionTable": reaction_table})
 
