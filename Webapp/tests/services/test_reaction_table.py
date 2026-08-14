@@ -74,15 +74,18 @@ def test_demo(client: FlaskClient):
 
 
 # polymer fixes coming in later PR
-# def test_autoupdate_reaction_table_compounds_polymer_reactions(client: FlaskClient):
-#     login(client)
-#
-#     data = get_test_data(reaction_smiles="PC{-}(CCC{+n}(C)P)C>>C |$;;;;;;;;*;;;*;$|")
-#
-#     response = client.post("/autoupdate_reaction_table", json=data)
-#
-#     assert response.status_code == 200
-#
+def test_autoupdate_reaction_table_compounds_polymer_reactions(client: FlaskClient):
+    login(client)
+
+    polymer_smiles = [
+        "PC{-}(CCC{+n}(C)P)C>>C |$;;;;;;;;*;;;*;$|",
+        "C.PC{minus}(CCCC{plusn}(C)P)C>>*C{minus}(C{plusn}*)S%20|$;;;;;;;;*;;;*;$|",
+    ]
+
+    for smi in polymer_smiles:
+        data = get_test_data(reaction_smiles=smi)
+        response = client.post("/autoupdate_reaction_table", json=data)
+        assert response.status_code == 200, f"error with polymer smiles: {smi}"
 
 
 def get_test_data(
