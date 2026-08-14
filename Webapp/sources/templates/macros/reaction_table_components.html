@@ -320,8 +320,8 @@
             </td>
             <td>
                 {% if product.is_polymer %}
-                    <input type="number" step="any" min="0" value="js-product-mn{{ index }}" placeholder="{{ product.compound_data.molecular_weights | map("float") | sum }}"
-                       id="js-product-mn{{ index }}" style="width: 70px" value="{{ product.compound_data.mns }}>
+                    <input type="number" step="any" min="0" value="{{ product.compound_data.mns }}" placeholder="{{ product.compound_data.molecular_weights | map("float") | sum }}"
+                       id="js-product-mn{{ index }}" style="width: 70px">
                 {% endif %}
             </td>
             <td></td>

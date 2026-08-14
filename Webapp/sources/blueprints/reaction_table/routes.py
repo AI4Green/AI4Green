@@ -195,10 +195,6 @@ def reload_reaction_table():
         json.loads(reaction.reaction_table_data), workbook
     )
 
-    print(compounds)
-
-    print([x.compound_data for x in compounds["product"]])
-
     if demo == "demo":
         sol_rows = services.solvent.get_default_list()
     else:
