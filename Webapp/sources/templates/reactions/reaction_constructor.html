@@ -10,9 +10,9 @@
 
 <div id="page-contents" class="container-fluid">
     <input type="hidden" id="js-load-status" value="{{ load_status }}">
-    <div id="name-id" class="reaction-header">
 
-          <h2 class="d-flex align-items-center gap-2 mb-1" style="gap: 0.75rem;">
+    <div id="name-id" class="reaction-header">
+        <h2 class="d-flex align-items-center gap-2 mb-1" style="gap: 0.75rem;">
             <span class="badge reaction-badge">
                 {{ reaction.reaction_id }}
             </span>
@@ -35,43 +35,10 @@
                 <i class="fa fa-lock" style="font-size:18px; color:darkgrey;"></i>
               {% endif %}
             {% endif %}
-          </h2>
+        </h2>
     </div>
 
-{#    Need some help getting started?#}
-{#    <br>#}
-{#    <input type="hidden" id="js-load-status" value="{{ load_status }}">#}
-{#    <a id="tutorial-mode" href="/sketcher_tutorial/yes" class="btn btn-success btn-sm" style="color: white;" target="_blank">Enter Tutorial Mode <i class="bi bi-box-arrow-in-up-right"></i></a>#}
-{#    <br><br>#}
-{#    <div id="editor-instructions">#}
-{#<!--        <p>Please sketch or upload your reaction to begin. Click <a target="_blank" href="{{ url_for('main.marvin_js_help') }}">here</a> to view our Marvin JS help guide.</p>-->#}
-{#        <p>Please note compounds drawn above or underneath the arrow will not be recognised.</p>#}
-{#    </div>#}
-{#        <div>#}
-{#                <label> Polymer Mode?#}
-{#                    <input type="checkbox" id="polymer-mode-select" name="polymer-mode-select" onchange="savePolymerMode()" {% if reaction.reaction_type.value == "POLYMER" %} checked {% endif %}>#}
-{#                </label>#}
-{#        </div>#}
-        <div id="sketchers-div">
-            <div>
-    <!--            Selected Reaction Sketcher:-->
-    <!--            <label> MarvinJS-->
-    <!--                <input type="radio" id="marvin-select" name="sketcher-select" disabled>-->
-    <!--            </label>-->
-                <label> Ketcher
-                    <input type="radio" id="ketcher-select" name="sketcher-select" checked="checked" disabled>
-                </label>
-            </div>
-            <div class="loading-circle"></div>
-            <div id="ketcher-sketcher"></div>
-            <div id="marvin-sketcher" style="width: 1020px; height: 480px"></div>
-        </div>
-{#        <div id="editor-hint">#}
-{#            <p>Hint: You can copy & paste reaction schemes from ChemDraw by selecting the scheme and use CTRL + ALT + C to copy#}
-{#            and then CTRL + V to paste into this sketcher</p>#}
-{#        </div>#}
-
-
+    <!-- ==== Hidden data inputs used by existing JS across all sections ==== -->
     <input type="hidden" id="js-tutorial" value="{{ tutorial }}">
     <input type="hidden" id="js-reaction-name" value="{{ reaction.name }}">
     <input type="hidden" id="js-reaction-id" value="{{ reaction.reaction_id }}">
@@ -92,121 +59,273 @@
         <input type="hidden" value="{{ reaction.creator_person.user.email }}" id="js-creator-email">
         <input type="hidden" value="{{ current_user.email }}" id="js-email">
     {% endif %}
-    <br>
-    <p><button id="demo-button" type="button" class="btn btn-primary" style="width: 100px;" onclick="loadExampleSmiles()">Example</button>
-{#    <p><button id="action-button-submit" type="button" class="btn btn-primary" onclick="createReactionTable()">Submit</button></p>#}
-    <a>
-        <button id="retrosynthesis-export" type="button" class="btn btn-primary" onclick="exportDataToRetrosynthesis()">Retrosynthesis</button>
-    </a>
-        </p>
 
-    <div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;"></div>
+    <div class="row">
 
-    <div id="reaction-table" style="position: relative; min-height: 200px">
-        <!--The loading bar div-->
-        <div class="loading-bar"></div>
-        <!--Output of reaction table-->
-        <div id="reaction-table-div">
-        </div>
-    </div>
-    <br>
-    <p id="summary-div"><input type="submit" value="Summary" id="action-summary" class="btn btn-primary" onclick="showSummary()" style="display: none; width: 100px;"></p>
-
-
-    <!--Output of reaction image and summary table-->
-
-
-    <div id="print-container" class="container-fluid" style="padding-left: 0px">
-        <div id="imageContainer" style="display: none;">
-            <img id="image" />
-        </div>
-        <p id="js-summary-table"></p>
-    </div>
-<!--    end of page buttons-->
-    <br>
-
-
-    <div id="reaction-file-attachments" class="mb-2" style="display:none;">
-        <p>Upload Experimental Data</p>
-        <div id="file-upload-div" class="input-group mb-3 w-25">
-            <input id="upload-files" class="form-control" type="file" multiple>
-            <div class="input-group-append">
-                <button id="file-upload" class="btn btn-outline-secondary" onclick="uploadFiles()" type="button">Upload</button>
-            </div>
-        </div>
-        <div id="file-list">
-{#            file attachments loaded here from get_file_attachment_list#}
-        </div>
-    </div>
-
-
-    <div id="complete-reaction-div" style="display:none;">
-        <button id="complete-reaction-button" type="button" class="btn btn-primary" data-toggle="modal" data-target="#lockingModal">Lock & Sign Reaction</button>
-        <!-- Modal -->
-        <div id="lockingModal" class="modal fade">
-          <div class="modal-dialog" style="top: 30%">
-            <!-- Modal content-->
-            <div class="modal-content">
-              <div class="modal-body">
-                <p>I provide my signature and confirm that to the best of my knowledge the contents of this reaction are accurate.</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="completeReaction()">Confirm</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              </div>
-            </div>
-
-          </div>
+        <!-- ============ SIDE NAV ============ -->
+        <div class="col-lg-2 col-md-3 d-none d-md-block">
+            <nav id="reaction-sidenav" class="nav flex-column sticky-top">
+                <a class="nav-link" href="#section-setup"><i class="bi bi-pencil-square mr-1"></i> Reaction Setup</a>
+                <a class="nav-link" href="#section-notes"><i class="bi bi-journal-text mr-1"></i> Reaction Notes</a>
+                <a class="nav-link" href="#section-results"><i class="bi bi-clipboard-data mr-1"></i> Reaction Results</a>
+                <a class="nav-link" href="#section-summary"><i class="bi bi-file-earmark-bar-graph mr-1"></i> Reaction Summary</a>
+                <a class="nav-link" href="#section-addenda"><i class="bi bi-chat-left-text mr-1"></i> Reaction Addenda</a>
+            </nav>
         </div>
 
+        <!-- ============ MAIN CONTENT ============ -->
+        <div class="col-lg-10 col-md-9">
+            <div id="reaction-accordion">
 
+                <!-- ===================== REACTION SETUP ===================== -->
+                <div class="card reaction-section-card mb-3" id="section-setup">
+                    <div class="card-header">
+                        <button class="section-toggle" type="button" data-toggle="collapse"
+                                data-target="#collapse-setup" aria-expanded="true" aria-controls="collapse-setup">
+                            <span><i class="bi bi-pencil-square mr-2"></i>Reaction Setup</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="collapse-setup" class="collapse show">
+                        <div class="card-body">
 
+                            <div id="sketchers-div">
+                                <div>
+                                    <label> Ketcher
+                                        <input type="radio" id="ketcher-select" name="sketcher-select" checked="checked" disabled>
+                                    </label>
+                                </div>
+                                <div class="loading-circle"></div>
+                                <div id="ketcher-sketcher"></div>
+                                <div id="marvin-sketcher" style="width: 1020px; height: 480px"></div>
+                            </div>
 
+                            <br>
+                            <p>
+                                <button id="demo-button" type="button" class="btn btn-primary" style="width: 100px;" onclick="loadExampleSmiles()">Example</button>
+                                <a>
+                                    <button id="retrosynthesis-export" type="button" class="btn btn-primary" onclick="exportDataToRetrosynthesis()">Retrosynthesis</button>
+                                </a>
+                            </p>
 
-        {% if reaction.complete == 'complete' %}
-            <b>Reaction locked by {{ reaction.creator_person.user.fullname }} at: {{ (reaction.time_of_update|string)[:-7]  }}</b>
-        {% endif %}
-    </div>
+                            <div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;"></div>
 
+                            <div id="reaction-table" style="position: relative; min-height: 200px">
+                                <!--The loading bar div-->
+                                <div class="loading-bar"></div>
+                                <!--Output of reaction table-->
+                                <div id="reaction-table-div">
+                                </div>
+                            </div>
 
-    <br>
-    <button id="print-pdf" onclick="window.print()" class="btn btn-primary" style="display: none; width:140px">Print Summary</button>
-    <div class="notToPrint" id="printoutput"></div>
-    <br>
-    <button id="reaction-note-button" data-toggle="modal" data-target="#new-reaction-note-modal" class="btn btn-primary">Add Note</button>
-<!--    addenda-->
-    <br>
+                        </div>
+                    </div>
+                </div>
 
-    <div id="addenda-content" class="row d-flex justify-content-left">
-        <div class="col-md-8 col-lg-6 mt-5">
-            <div id="addenda-cardholder" class="card shadow-0 border" style="background-color: #f0f2f5;">
-                {% if addenda %}
-                    {% for addendum in addenda %}
-                        <div id="addendum-card{{ loop.index }}" class="card mb-4">
-                            <div class="card-body">
-                                <p id="addendum-text{{ loop.index }}">{{ addendum.text }}</p>
-                                <div class="d-flex justify-content-between">
-                                    <div class="d-flex flex-row align-items-center">
-                                        <p id="addendum-author{{ loop.index }}" class="small mb-0 ms-2 pt-5">{{ addendum.Author.user.fullname }}</p>
+                <!-- ===================== REACTION NOTES ===================== -->
+                <div class="card reaction-section-card mb-3" id="section-notes">
+                    <div class="card-header">
+                        <button class="section-toggle" type="button" data-toggle="collapse"
+                                data-target="#collapse-notes" aria-expanded="true" aria-controls="collapse-notes">
+                            <span><i class="bi bi-journal-text mr-2"></i>Reaction Notes</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="collapse-notes" class="collapse">
+                        <div class="card-body">
+
+                            <!-- Methods -->
+                            <div class="subsection-card" id="reaction-methods">
+                                <div class="subsection-header">
+                                    <h6>Reaction Methods</h6>
+                                    <button id="add-method-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">
+                                        <i class="bi bi-plus-lg"></i> Add Method
+                                    </button>
+                                </div>
+                                <div class="subsection-body" id="reaction-methods-list">
+                                    <p class="empty-placeholder">No methods added yet.</p>
+                                </div>
+                            </div>
+
+                            <!-- Workup -->
+                            <div class="subsection-card" id="reaction-workup">
+                                <div class="subsection-header">
+                                    <h6>Reaction Workup</h6>
+                                    <button id="add-workup-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">
+                                        <i class="bi bi-plus-lg"></i> Add Workup
+                                    </button>
+                                </div>
+                                <div class="subsection-body" id="reaction-workup-list">
+                                    <p class="empty-placeholder">No workup steps added yet.</p>
+                                </div>
+                            </div>
+
+                            <!-- Purification -->
+                            <div class="subsection-card" id="reaction-purification">
+                                <div class="subsection-header">
+                                    <h6>Reaction Purification</h6>
+                                    <button id="add-purification-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">
+                                        <i class="bi bi-plus-lg"></i> Add Purification
+                                    </button>
+                                </div>
+                                <div class="subsection-body" id="reaction-purification-list">
+                                    <p class="empty-placeholder">No purification steps added yet.</p>
+                                </div>
+                            </div>
+
+                            <!-- Experimental data / file attachments -->
+                            <div class="subsection-card" id="reaction-file-attachments">
+                                <div class="subsection-header">
+                                    <h6>Experimental Data</h6>
+                                </div>
+                                <div class="subsection-body">
+                                    <div id="file-upload-div" class="input-group mb-3 w-25">
+                                        <input id="upload-files" class="form-control" type="file" multiple>
+                                        <div class="input-group-append">
+                                            <button id="file-upload" class="btn btn-outline-secondary" onclick="uploadFiles()" type="button">Upload</button>
+                                        </div>
                                     </div>
-                                    <div class="d-flex flex-row align-items-center">
-                                        {% set time = addendum.time_of_creation|string %}
-                                        <p id="addendum-time{{ loop.index }}" class="small mb-0 pt-5">{{ time[:-7] }}</p>
+                                    <div id="file-list">
+                                        {#            file attachments loaded here from get_file_attachment_list#}
                                     </div>
                                 </div>
                             </div>
+
                         </div>
-                    {% endfor %}
-                {% endif %}
+                    </div>
+                </div>
+
+                <!-- ===================== REACTION RESULTS ===================== -->
+                <div class="card reaction-section-card mb-3" id="section-results">
+                    <div class="card-header">
+                        <button class="section-toggle" type="button" data-toggle="collapse"
+                                data-target="#collapse-results" aria-expanded="true" aria-controls="collapse-results">
+                            <span><i class="bi bi-clipboard-data mr-2"></i>Reaction Results</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="collapse-results" class="collapse">
+                        <div class="card-body">
+                            <p>
+                                <button id="add-result-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">
+                                    <i class="bi bi-plus-lg"></i> Add Result
+                                </button>
+                            </p>
+                            <div id="reaction-results-list">
+                                <p class="empty-placeholder">No results added yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================== REACTION SUMMARY ===================== -->
+                <div class="card reaction-section-card mb-3" id="section-summary">
+                    <div class="card-header">
+                        <button class="section-toggle" type="button" data-toggle="collapse"
+                                data-target="#collapse-summary" aria-expanded="true" aria-controls="collapse-summary">
+                            <span><i class="bi bi-file-earmark-bar-graph mr-2"></i>Reaction Summary</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="collapse-summary" class="collapse">
+                        <div class="card-body">
+
+                            <p id="summary-div">
+                                <input type="submit" value="Summary" id="action-summary" class="btn btn-primary" onclick="showSummary()" style="width: 100px;">
+                            </p>
+
+                            <div id="print-container" class="container-fluid" style="padding-left: 0px">
+                                <div id="imageContainer" style="display: none;">
+                                    <img id="image" />
+                                </div>
+                                <p id="js-summary-table"></p>
+                            </div>
+
+                            <br>
+                            <button id="print-pdf" onclick="window.print()" class="btn btn-primary" style="width:140px">Print Summary</button>
+                            <div class="notToPrint" id="printoutput"></div>
+
+                            <hr>
+
+                            <!-- Lock & sign -->
+                            <div id="complete-reaction-div">
+                                <button id="complete-reaction-button" type="button" class="btn btn-primary" data-toggle="modal" data-target="#lockingModal">Lock &amp; Sign Reaction</button>
+                                <!-- Modal -->
+                                <div id="lockingModal" class="modal fade">
+                                    <div class="modal-dialog" style="top: 30%">
+                                        <!-- Modal content-->
+                                        <div class="modal-content">
+                                            <div class="modal-body">
+                                                <p>I provide my signature and confirm that to the best of my knowledge the contents of this reaction are accurate.</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="completeReaction()">Confirm</button>
+                                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% if reaction.complete == 'complete' %}
+                                    <b>Reaction locked by {{ reaction.creator_person.user.fullname }} at: {{ (reaction.time_of_update|string)[:-7]  }}</b>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================== REACTION ADDENDA ===================== -->
+                <div class="card reaction-section-card mb-3" id="section-addenda">
+                    <div class="card-header">
+                        <button class="section-toggle" type="button" data-toggle="collapse"
+                                data-target="#collapse-addenda" aria-expanded="true" aria-controls="collapse-addenda">
+                            <span><i class="bi bi-chat-left-text mr-2"></i>Reaction Addenda</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="collapse-addenda" class="collapse">
+                        <div class="card-body">
+
+                            <button id="reaction-note-button" data-toggle="modal" data-target="#new-reaction-note-modal" class="btn btn-primary">Add Note</button>
+                            <br><br>
+
+                            <div id="addenda-content" class="row d-flex justify-content-left">
+                                <div class="col-md-8 col-lg-6">
+                                    <div id="addenda-cardholder" class="card shadow-0 border" style="background-color: #f0f2f5;">
+                                        {% if addenda %}
+                                            {% for addendum in addenda %}
+                                                <div id="addendum-card{{ loop.index }}" class="card mb-4">
+                                                    <div class="card-body">
+                                                        <p id="addendum-text{{ loop.index }}">{{ addendum.text }}</p>
+                                                        <div class="d-flex justify-content-between">
+                                                            <div class="d-flex flex-row align-items-center">
+                                                                <p id="addendum-author{{ loop.index }}" class="small mb-0 ms-2 pt-5">{{ addendum.Author.user.fullname }}</p>
+                                                            </div>
+                                                            <div class="d-flex flex-row align-items-center">
+                                                                {% set time = addendum.time_of_creation|string %}
+                                                                <p id="addendum-time{{ loop.index }}" class="small mb-0 pt-5">{{ time[:-7] }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-<!--    end of addenda-->
 </div>
-<br>
-<br>
 <!--end of page contents-->
-<div id="blank-addendum"  style="display: none">
+
+<div id="blank-addendum" style="display: none">
     <div id="addendum-card-x-" class="card mb-4">
         <div class="card-body">
             <p id="addendum-text-x-"></p>
@@ -223,7 +342,6 @@
 </div>
 
 <div id="blank-file-attachment" style="display: none">
-
     <div id="file-button-group-x-" class="btn-group btn-group-justified mb-3" role="group" aria-label="">
         <div class="btn-group" role="group">
             <button id="download-file-button-x-" type="button" class="btn btn-outline-primary" onclick="downloadFile(this)" value=""><i class="bi bi-download"></i></button>
@@ -261,6 +379,146 @@ $(function () {
     }
 })
 
+// Read the height of the site navbar (rendered by base.html, unmodified)
+// and expose it as a CSS variable so this page's sticky header and side
+// nav can dock directly beneath it, whatever height it renders at.
+$(function () {
+    function updateNavbarHeightVar() {
+        var navbar = document.querySelector('body > nav');
+        document.documentElement.style.setProperty(
+            '--navbar-height', (navbar ? navbar.offsetHeight : 0) + 'px'
+        );
+    }
+    updateNavbarHeightVar();
+    $(window).on('resize', updateNavbarHeightVar);
+    $(window).on('load', updateNavbarHeightVar);
+});
+
+// Expose the sticky reaction header's rendered height as a CSS variable so
+// the side nav and section scroll-offsets can dock directly beneath it,
+// on top of the navbar.
+$(function () {
+    function updateHeaderHeightVar() {
+        var header = document.getElementById('name-id');
+        document.documentElement.style.setProperty(
+            '--reaction-header-height', (header ? header.offsetHeight : 0) + 'px'
+        );
+    }
+    updateHeaderHeightVar();
+    $(window).on('resize', updateHeaderHeightVar);
+    $(window).on('load', updateHeaderHeightVar);
+});
+
+$(function () {
+    var sections = $("#reaction-sidenav a").map(function () {
+        var target = $($(this).attr("href"));
+
+        return target.length ? {
+            link: this,
+            el: target
+        } : null;
+    }).get();
+
+    var isNavClickScrolling = false;
+    var scrollAnimation;
+
+    function getScrollOffset() {
+        var navbarHeight =
+            parseFloat(
+                getComputedStyle(document.documentElement)
+                    .getPropertyValue("--navbar-height")
+            ) || 0;
+
+        var headerHeight =
+            parseFloat(
+                getComputedStyle(document.documentElement)
+                    .getPropertyValue("--reaction-header-height")
+            ) || 0;
+
+        return navbarHeight + headerHeight;
+    }
+
+    function setActive(link) {
+        $("#reaction-sidenav a").removeClass("active");
+        $(link).addClass("active");
+    }
+
+    function scrollToSection(section, link) {
+        var offset = getScrollOffset();
+
+        // Stop any previous scroll animation
+        $("html, body").stop(true);
+
+        // Ignore scrollspy while this animation is running
+        isNavClickScrolling = true;
+
+        scrollAnimation = $("html, body").animate(
+            {
+                scrollTop: section.offset().top - offset
+            },
+            300,
+            function () {
+                // Re-enable scrollspy after we arrive
+                isNavClickScrolling = false;
+
+                // Make absolutely sure the clicked item stays active
+                setActive(link);
+            }
+        );
+    }
+
+    function updateActive() {
+        // Do nothing while a nav click is controlling the scroll
+        if (isNavClickScrolling) {
+            return;
+        }
+
+        var scrollPos = $(window).scrollTop() + getScrollOffset() + 10;
+        var current = null;
+
+        sections.forEach(function (s) {
+            if (s.el.offset().top <= scrollPos) {
+                current = s.link;
+            }
+        });
+
+        if (current) {
+            setActive(current);
+        } else if (sections.length) {
+            setActive(sections[0].link);
+        }
+    }
+
+    $("#reaction-sidenav a").on("click", function (e) {
+        e.preventDefault();
+
+        var link = this;
+        var section = $($(this).attr("href"));
+        var collapse = section.find(".collapse").first();
+
+        // Immediately activate what the user clicked
+        setActive(link);
+
+        // Prevent scrollspy from fighting the click
+        isNavClickScrolling = true;
+
+        if (collapse.length && !collapse.hasClass("show")) {
+
+            collapse.one("shown.bs.collapse", function () {
+                scrollToSection(section, link);
+            });
+
+            collapse.collapse("show");
+
+        } else {
+            scrollToSection(section, link);
+        }
+    });
+
+    $(window).on("scroll", updateActive);
+
+    updateActive();
+});
 </script>
 
 {% endblock %}
