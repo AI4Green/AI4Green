@@ -242,7 +242,7 @@ const NO_WRAPPER_COMPONENTS = [Header, Content];
  * Creates a field based on its input type.
  */
 export const Field = ({ field, isDisabled, item }) => {
-  const inputType = field.inputType.name.toUpperCase();
+  const inputType = field.inputType.title.toUpperCase();
   const [, Component] =
     Object.entries(INPUT_TYPES_MAP).find(
       ([key]) => key.toUpperCase() === inputType,
