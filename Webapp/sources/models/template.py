@@ -76,4 +76,11 @@ class Template(Model):
             "time_of_update": self.time_of_update,
             "creator_id": self.creator_id,
             "institution_id": self.institution_id,
+            "stage": self.status.value.capitalize(),
+            "inUseCount": len(
+                self.template_instances
+            ),  # camel case for returning to front end
+            "permissions": [
+                "CanPublish"
+            ],  # included here for dev todo: implement permission at admin level
         }
