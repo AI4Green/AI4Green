@@ -3,7 +3,7 @@ import { ProjectTypeCanvas } from "pages/project-type";
 import { Route, Routes } from "react-router-dom";
 import { ProjectTypeList } from "pages/project-type";
 
-export const ProjectType = () => {
+export const CoshhForms = () => {
   return (
     <Routes>
       <Route path="/" element={<ProjectTypeList />} />

@@ -3,7 +3,7 @@ import { ContentPage } from "pages/content";
 import { NotFound } from "pages/error";
 import { Home } from "pages/home";
 import { Route, Routes } from "react-router-dom";
-import { ProjectType } from "./project-type";
+import { CoshhForms } from "./coshh-forms";
 import { COSHH } from "./coshh.jsx";
 
 export const Root = () => {
@@ -22,7 +22,7 @@ export const Root = () => {
           element={<ContentPage contentKey="documentation" />}
         />
 
-        <Route path="project-types/*" element={<ProjectType />} />
+        <Route path="project-types/*" element={<CoshhForms />} />
         <Route path="coshh/*" element={<COSHH />} />
       </Route>
 
