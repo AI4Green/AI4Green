@@ -1,5 +1,5 @@
 import { HStack, Text, Tooltip } from "@chakra-ui/react";
-import { useProjectType } from "api/project-type";
+import { useCoshhForm } from "api/project-type";
 import { Badge } from "components/core/Badge";
 import { Breadcrumbs } from "components/core/breadcrumbs";
 import { Area } from "components/project-type/canvas/area";
@@ -10,7 +10,7 @@ import { useParams } from "react-router-dom";
 
 export const CoshhFormCanvas = () => {
   const { coshhFormId } = useParams();
-  const { data: coshhForm } = useProjectType(coshhFormId);
+  const { data: coshhForm } = useCoshhForm(coshhFormId);
   const breadcrumbs = [
     {
       label: "Home",

@@ -39,10 +39,10 @@ export const useProjectTypesList = () => {
   );
 };
 
-export const useProjectType = (projectTypeId) => {
+export const useCoshhForm = (coshhFormId) => {
   const { apiFetcher } = useBackendApi();
   return useSWR(
-    projectTypeId ? fetchKeys.projectType(projectTypeId) : null,
+    coshhFormId ? fetchKeys.projectType(coshhFormId) : null,
     async (url) => {
       const data = await apiFetcher(url);
 
