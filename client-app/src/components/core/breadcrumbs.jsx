@@ -17,6 +17,10 @@ export const Breadcrumbs = ({ items = [] }) => (
       <BreadcrumbItem key={index} isCurrentPage={index === items.length - 1}>
         {!item.href ? (
           <Text color="gray.600">{truncateText(item?.label, 50)}</Text>
+        ) : item.external ? (
+          <a href={item.href} style={{ color: "#3182ce" }}>
+            {truncateText(item?.label, 50)}
+          </a>
         ) : (
           <BreadcrumbLink
             as={Link}

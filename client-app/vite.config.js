@@ -6,6 +6,10 @@ import path from "path";
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   base: "/spa/",
+  build: {
+    outDir: path.resolve(__dirname, "../Webapp/sources/static/spa"),
+    emptyOutDir: true,
+  },
   server: {
     port: 8000,
     // proxy: {

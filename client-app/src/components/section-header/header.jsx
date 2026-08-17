@@ -18,7 +18,6 @@ export const SectionHeader = ({ header, project, owner, action }) => (
           </Heading>
         )}
       </HStack>
-      <ExperimentHeading projectName={project.name} owner={owner} />
     </VStack>
 
     <VStack align="end">{action}</VStack>
