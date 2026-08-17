@@ -17,8 +17,8 @@ export const CoshhFormCanvas = () => {
       href: "/",
     },
     {
-      label: "Project Type Management",
-      href: "/project-types",
+      label: "COSHH Form Management",
+      href: "/coshh-form-management",
     },
     {
       label: coshhForm.name,
