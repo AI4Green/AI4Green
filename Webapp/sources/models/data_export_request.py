@@ -13,6 +13,8 @@ class ApprovalStatus(Enum):
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
     EXPIRED = "EXPIRED"
+    DRAFT = "DRAFT"
+    CHANGES_SUGGESTED = "CHANGES_SUGGESTED"
 
 
 class ExportFormat(Enum):
