@@ -3,7 +3,8 @@
     "baseUrl": "src",
         "paths": {
           "pages/*": ["pages/*"],
-          "components/*": ["components/*"]
+          "components/*": ["components/*"],
+          "config/*": ["config/*"]
         },
     "allowJs": true
   },
