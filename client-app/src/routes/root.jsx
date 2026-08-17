@@ -22,7 +22,7 @@ export const Root = () => {
           element={<ContentPage contentKey="documentation" />}
         />
 
-        <Route path="project-types/*" element={<CoshhForms />} />
+        <Route path="coshh-form-management/*" element={<CoshhForms />} />
         <Route path="coshh/*" element={<COSHH />} />
       </Route>
 

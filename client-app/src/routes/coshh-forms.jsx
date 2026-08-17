@@ -1,12 +1,12 @@
 import { NotFound } from "pages/error";
 import { ProjectTypeCanvas } from "pages/project-type";
 import { Route, Routes } from "react-router-dom";
-import { ProjectTypeList } from "pages/project-type";
+import { CoshhFormsList } from "pages/project-type";
 
 export const CoshhForms = () => {
   return (
     <Routes>
-      <Route path="/" element={<ProjectTypeList />} />
+      <Route path="/" element={<CoshhFormsList />} />
       <Route path="/:projectTypeId">
         <Route index element={<ProjectTypeCanvas />} />
         <Route path="sections/:sectionId" element={<ProjectTypeCanvas />} />
