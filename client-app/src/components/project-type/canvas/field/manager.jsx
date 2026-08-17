@@ -143,7 +143,7 @@ const ChildField = ({ field, fields, setFields, depth }) => (
 const FieldContent = ({ field, fields, setFields, dragRef, isChild }) => {
   const [, Component] =
     Object.entries(FIELD_TYPES_MAP).find(
-      ([key]) => key.toUpperCase() === field.inputType?.name.toUpperCase(),
+      ([key]) => key.toUpperCase() === field.inputType?.title.toUpperCase(),
     ) || [];
 
   if (!Component) return null;
@@ -209,8 +209,8 @@ export const Info = ({ field }) => (
     )}
 
     <Badge
-      label={INPUT_TYPES_MAP[field.inputType.name].label}
-      leftIcon={INPUT_TYPES_MAP[field.inputType.name].icon}
+      label={INPUT_TYPES_MAP[field.inputType.title].label}
+      leftIcon={INPUT_TYPES_MAP[field.inputType.title].icon}
       colorScheme="gray"
       fontSize="xxs"
       fontWeight="light"

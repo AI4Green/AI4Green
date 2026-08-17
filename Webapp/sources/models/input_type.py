@@ -15,3 +15,9 @@ class InputType(Model):
     title = db.Column(db.String, nullable=False)
 
     field = db.relationship("Field", back_populates="input_type")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+        }
