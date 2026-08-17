@@ -7,7 +7,7 @@ export const CoshhForms = () => {
   return (
     <Routes>
       <Route path="/" element={<CoshhFormsList />} />
-      <Route path="/:projectTypeId">
+      <Route path="/:coshhFormId">
         <Route index element={<CoshhFormCanvas />} />
         <Route path="sections/:sectionId" element={<CoshhFormCanvas />} />
         <Route

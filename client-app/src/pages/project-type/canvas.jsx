@@ -9,8 +9,8 @@ import { DefaultContentLayout } from "layouts/default";
 import { useParams } from "react-router-dom";
 
 export const CoshhFormCanvas = () => {
-  const { projectTypeId } = useParams();
-  const { data: projectType } = useProjectType(projectTypeId);
+  const { coshhFormId } = useParams();
+  const { data: coshhForm } = useProjectType(coshhFormId);
   const breadcrumbs = [
     {
       label: "Home",
@@ -21,7 +21,7 @@ export const CoshhFormCanvas = () => {
       href: "/project-types",
     },
     {
-      label: projectType.name,
+      label: coshhForm.name,
     },
   ];
   return (
@@ -29,12 +29,12 @@ export const CoshhFormCanvas = () => {
       <Breadcrumbs items={breadcrumbs} />
       <HStack spacing={4}>
         <Tooltip
-          label={projectType.description}
+          label={coshhForm.description}
           hasArrow
           placement="right"
           fontSize="xs"
         >
-          <Text fontWeight="medium">{projectType.name}</Text>
+          <Text fontWeight="medium">{coshhForm.name}</Text>
         </Tooltip>
         <Badge
           label="Project Type"
@@ -45,7 +45,7 @@ export const CoshhFormCanvas = () => {
       </HStack>
       <Area />
       <HStack align="start" spacing={6} w="full">
-        <Section projectType={projectType} />
+        <Section projectType={coshhForm} />
       </HStack>
     </DefaultContentLayout>
   );

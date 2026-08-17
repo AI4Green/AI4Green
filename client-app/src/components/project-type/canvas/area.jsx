@@ -18,17 +18,16 @@ export const BASE_PATH = "/project-types";
 
 export const Area = () => {
   const navigate = useNavigate();
-  const { projectTypeId, sectionId } = useParams();
+  const { coshhFormId, sectionId } = useParams();
   const toast = useToast();
 
-  const { data: sections, mutate } =
-    useSectionsListByProjectType(projectTypeId);
+  const { data: sections, mutate } = useSectionsListByProjectType(coshhFormId);
   const { sections: api } = useBackendApi();
 
   const handleAddSection = async () => {
     try {
       const newSection = {
-        projectTypeId: Number(projectTypeId),
+        projectTypeId: Number(coshhFormId),
         name: "New Section",
         sortOrder: sections ? sections.length + 1 : 1,
       };
@@ -38,7 +37,7 @@ export const Area = () => {
 
       if (response?.id) {
         navigate(
-          `${BASE_PATH}/${projectTypeId}/sections/${response.id}?action=edit`,
+          `${BASE_PATH}/${coshhFormId}/sections/${response.id}?action=edit`,
         );
       }
     } catch (error) {

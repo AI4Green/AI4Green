@@ -9,7 +9,7 @@ import { NewButton } from "layouts/default";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-export const ProjectTypeTable = () => {
+export const CoshhFormTable = () => {
   // const { user } = useUser();
   const user = {
     id: "user-123",
