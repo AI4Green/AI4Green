@@ -8,7 +8,7 @@ import { TITLE_ICON_COMPONENTS } from "constants";
 import { DefaultContentLayout } from "layouts/default";
 import { useParams } from "react-router-dom";
 
-export const ProjectTypeCanvas = () => {
+export const CoshhFormCanvas = () => {
   const { projectTypeId } = useParams();
   const { data: projectType } = useProjectType(projectTypeId);
   const breadcrumbs = [
