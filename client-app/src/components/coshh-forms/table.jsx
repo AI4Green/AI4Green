@@ -1,5 +1,5 @@
 import { HStack } from "@chakra-ui/react";
-import { useProjectTypesList } from "api/coshh-forms";
+import { useCoshhFormsList } from "api/coshh-forms";
 import { DataTable, DataTableGlobalFilter } from "components/core/data-table";
 import { columns } from "components/coshh-forms/columns";
 import { CreateOrEditProjectTypeModal } from "components/coshh-forms/modal-form";
@@ -52,19 +52,19 @@ const New = () => {
 };
 
 const useTableData = () => {
-  const { data: projectTypes } = useProjectTypesList();
+  const { data: coshhForms } = useCoshhFormsList();
   const tableData = useMemo(
     () =>
-      projectTypes?.map((projectType) => ({
-        id: projectType.id,
-        name: projectType.name,
-        description: projectType.description,
-        stage: projectType.stage,
-        inUseCount: projectType.inUseCount,
-        permissions: projectType.permissions,
-        targetPath: `${projectType.id}`,
+      coshhForms?.map((coshhForm) => ({
+        id: coshhForm.id,
+        name: coshhForm.name,
+        description: coshhForm.description,
+        stage: coshhForm.stage,
+        inUseCount: coshhForm.inUseCount,
+        permissions: coshhForm.permissions,
+        targetPath: `${coshhForm.id}`,
       })),
-    [projectTypes],
+    [coshhForms],
   );
 
   return { data: tableData ?? [] };

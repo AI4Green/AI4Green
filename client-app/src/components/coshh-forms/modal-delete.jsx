@@ -8,7 +8,7 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { useProjectTypesList } from "api";
+import { useCoshhFormsList } from "api";
 import { Modal, useModalState } from "components/core/modal";
 import { GLOBAL_PARAMETERS } from "constants";
 import { useBackendApi } from "contexts";
@@ -25,7 +25,7 @@ export const DeleteModal = () => {
   const location = useLocation();
 
   const { projectTypes: action } = useBackendApi();
-  const { data: list, mutate } = useProjectTypesList();
+  const { data: list, mutate } = useCoshhFormsList();
 
   const { t } = useTranslation();
   const toast = useToast();
@@ -56,7 +56,7 @@ export const DeleteModal = () => {
 
       if (response && (response.status === 204 || response.status === 200)) {
         toast({
-          title: "Project type deleted",
+          title: "COSHH form deleted",
           status: "success",
           duration: GLOBAL_PARAMETERS.ToastDuration,
           isClosable: true,
@@ -102,7 +102,7 @@ export const DeleteModal = () => {
             {feedback.message}
           </Alert>
         )}
-        <Text>Are you sure you want to delete this project type?</Text>
+        <Text>Are you sure you want to delete this COSHH form?</Text>
 
         <VStack
           align="flex-start"
