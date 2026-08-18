@@ -242,7 +242,7 @@ const List = ({ sections }) => {
 };
 
 const Actions = ({ isLoading, formRef, isEditing }) => {
-  const { coshhFormId, sectionTypeId } = useParams();
+  const { coshhFormId } = useParams();
   const navigate = useNavigate();
 
   return (
@@ -256,15 +256,13 @@ const Actions = ({ isLoading, formRef, isEditing }) => {
           colorScheme="blue"
           onClick={() => {
             navigate(
-              // `${BASE_PATH}/${projectTypeId}/section-types/${sectionTypeId}/sections?action=edit&type=area-sections`,
               `${BASE_PATH}/${coshhFormId}?action=edit&type=area-sections`,
-              {
-                replace: true,
-              },
+              { replace: true },
             );
           }}
         />
       )}
+
       {isEditing && (
         <HStack spacing={4}>
           <IconButton
@@ -277,6 +275,7 @@ const Actions = ({ isLoading, formRef, isEditing }) => {
             fontSize="lg"
             isLoading={isLoading}
           />
+
           <IconButton
             size="sm"
             fontSize="lg"
@@ -285,12 +284,9 @@ const Actions = ({ isLoading, formRef, isEditing }) => {
             variant="ghost"
             colorScheme="yellow"
             onClick={() => {
-              navigate(
-                `${BASE_PATH}/${projectTypeId}/section-types/${sectionTypeId}/sections`,
-                {
-                  replace: true,
-                },
-              );
+              navigate(`${BASE_PATH}/${coshhFormId}`, {
+                replace: true,
+              });
             }}
             isLoading={isLoading}
           />
