@@ -41,6 +41,7 @@ def save_new_section():
 @sections_api_bp.route("/", methods=["PUT"])
 def update_section():
     data = request.get_json()
+    print(data)
 
     project_type_id = data.get("projectTypeId")
     sections_data = data.get("sections", [])
@@ -71,7 +72,7 @@ def update_section():
                     name=name,
                     sort_order=sort_order,
                     template_id=project_type_id,
-                    section_type_id=1,  # default for now
+                    # section_type_id=1,  # default for now
                 )
 
                 db.session.add(section)
@@ -82,6 +83,7 @@ def update_section():
         return jsonify({"sections": [s.to_dict() for s in updated_sections]}), 200
 
     except Exception as e:
+        print(e)
         db.session.rollback()
         return jsonify({"error": "Failed to update sections", "details": str(e)}), 500
 

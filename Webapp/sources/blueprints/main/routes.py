@@ -164,6 +164,9 @@ def sketcher(
     )
     addenda = services.reaction.get_addenda(reaction)
 
+    # entry function for react
+    vite_entry = services.spa.vite_entry
+
     if reaction.reaction_smiles:
         load_status = "loading"
     else:
@@ -178,6 +181,7 @@ def sketcher(
         tutorial=tutorial,
         addenda=addenda,
         review=False,
+        vite_entry=vite_entry,
     )
 
 

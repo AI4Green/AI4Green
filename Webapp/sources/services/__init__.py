@@ -25,6 +25,7 @@ from . import (
     retrosynthesis,
     solvent,
     solvent_surfer,
+    spa,
     summary,
     sustainability,
     user,

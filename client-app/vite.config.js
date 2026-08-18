@@ -10,12 +10,12 @@ export default defineConfig({
     outDir: path.resolve(__dirname, "../Webapp/sources/static/spa"),
     emptyOutDir: true,
     manifest: true,
-  },
 
-  rollupOptions: {
-    input: {
-      app: resolve(__dirname, "index.html"),
-      coshhForm: resolve(__dirname, "src/entries/coshh-form.jsx"),
+    rollupOptions: {
+      input: {
+        app: path.resolve(__dirname, "index.html"),
+        coshhForm: path.resolve(__dirname, "src/entries/coshh-form.jsx"),
+      },
     },
   },
   server: {

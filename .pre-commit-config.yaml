@@ -16,6 +16,7 @@ repos:
       - id: flake8
         args:
           - "--ignore=E203,E402,F401,W503,E501"
+          - "--per-file-ignores=Webapp/sources/services/spa.py:E222,E231,E241,E272,E702" # ignore markup html string
   - repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
