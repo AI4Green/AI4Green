@@ -26,6 +26,7 @@ async function reactionTableReload() {
   // define lists
   const styleElements = [
     "reactant-rounded-mass",
+    "reactant-rounded-amount",
     "reactant-equivalent",
     "reactant-physical-form",
     "reagent-equivalent",

@@ -171,8 +171,12 @@ function generateReactionTable(data) {
   );
   let colorRoundedReactantMassID =
     "#js-reactant-rounded-mass" + limitingReactantTableNumber;
-  $("#js-reactant-equivalent" + limitingReactantTableNumber).val(1);
   autoChangeRequiredStyling2(colorRoundedReactantMassID);
+
+  let colorRoundedReactantAmountID =
+    "#js-reactant-rounded-amount" + limitingReactantTableNumber;
+  autoChangeRequiredStyling2(colorRoundedReactantAmountID);
+
   let numberOfReactants = Number($("#js-number-of-reactants").val());
   for (i = 1; i <= numberOfReactants; i++) {
     autoChangeRequiredStyling2("#js-reactant-equivalent" + i);

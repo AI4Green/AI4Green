@@ -95,7 +95,7 @@
                     {% if loop.index == 1 %} value="1" readonly {% else %}
                     {% if reactant_equivalents %}value="{{ reactant_equivalents[loop.index0] }}"{% endif %}
                     {% endif %}></td>
-            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
+            <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0"
                     {% if rounded_reactant_amounts %}value="{{ rounded_reactant_amounts[loop.index0] }}"{% endif %}
                     id="js-reactant-rounded-amount{{ loop.index }}" class="js-reactant-rounded-amounts"
                     readonly></td>
@@ -105,9 +105,7 @@
                     readonly></td>
             <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-reactant-rounded-mass{{ loop.index }}" class="js-reactant-rounded-masses"
                     {% if rounded_reactant_masses %}value="{{ rounded_reactant_masses[loop.index0] }}"{% endif %}
-                    {% if loop.index == 1 %} {% else %}
-                    readonly
-                    {% endif %}></td>
+                    readonly></td>
             <td><select size="1" class="physical-form" id="js-reactant-physical-form{{ loop.index }}">
                     <option value="-select-" selected>-select-</option>
                     <option value="Dense solid">Dense solid</option>
