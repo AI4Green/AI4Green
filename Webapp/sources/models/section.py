@@ -11,11 +11,6 @@ class Section(Model):
 
     sort_order = db.Column(db.Integer)
 
-    section_type_id = db.Column(
-        db.Integer, db.ForeignKey("SectionType.id"), nullable=False
-    )
-    section_type = db.relationship("SectionType", back_populates="sections")
-
     template_id = db.Column(db.Integer, db.ForeignKey("Template.id"))
     template = db.relationship("Template", back_populates="sections")
 

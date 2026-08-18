@@ -32,12 +32,6 @@ def upgrade_():
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
-        "SectionType",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("name", sa.String(), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
         "Template",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name", sa.Text(), nullable=False),
@@ -67,12 +61,7 @@ def upgrade_():
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name", sa.String(), nullable=False),
         sa.Column("sort_order", sa.Integer(), nullable=True),
-        sa.Column("section_type_id", sa.Integer(), nullable=False),
         sa.Column("template_id", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["section_type_id"],
-            ["SectionType.id"],
-        ),
         sa.ForeignKeyConstraint(
             ["template_id"],
             ["Template.id"],

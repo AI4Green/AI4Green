@@ -43,7 +43,6 @@ from .reaction_note import ReactionNote
 from .retrosynthesis import Retrosynthesis
 from .role import Role
 from .section import Section
-from .section_type import SectionType
 from .select_field_options import SelectFieldOptions
 from .solvent import Solvent
 from .template import Template
