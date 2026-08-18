@@ -134,8 +134,7 @@ export const CoshhCreateModal = () => {
 
 export const CoshhForm = () => {
   const { formId } = useParams();
-  const { projectType: projectTypesApi, projects: projectApi } =
-    useBackendApi();
+  const { coshhForms: coshhFormsApi, projects: projectApi } = useBackendApi();
   const toast = useToast();
 
   const [data, setData] = useState(null);
@@ -156,7 +155,7 @@ export const CoshhForm = () => {
       }
     };
     loadCoshhData();
-  }, [formId, projectTypesApi, toast]);
+  }, [formId, coshhFormsApi, toast]);
 
   const itemContext = {
     id: template.id,
