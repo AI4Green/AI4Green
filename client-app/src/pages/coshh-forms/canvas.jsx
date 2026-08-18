@@ -1,9 +1,9 @@
 import { HStack, Text, Tooltip } from "@chakra-ui/react";
-import { useCoshhForm } from "api/project-type";
+import { useCoshhForm } from "api/coshh-forms";
 import { Badge } from "components/core/Badge";
 import { Breadcrumbs } from "components/core/breadcrumbs";
-import { Area } from "components/project-type/canvas/area";
-import { Section } from "components/project-type/canvas/section";
+import { Area } from "components/coshh-forms/canvas/area";
+import { Section } from "components/coshh-forms/canvas/section";
 import { TITLE_ICON_COMPONENTS } from "constants";
 import { DefaultContentLayout } from "layouts/default";
 import { useParams } from "react-router-dom";

@@ -11,7 +11,7 @@ import {
 import { useSectionsListByProjectType } from "api/section";
 import { Badge } from "components/core/Badge";
 import { InlineDraggableListField } from "components/core/forms";
-import { BASE_PATH } from "components/project-type/canvas/area";
+import { BASE_PATH } from "components/coshh-forms/canvas/area";
 import { GLOBAL_PARAMETERS, STAGES, TITLE_ICON_COMPONENTS } from "constants";
 import { useBackendApi } from "contexts";
 import { Form, Formik } from "formik";

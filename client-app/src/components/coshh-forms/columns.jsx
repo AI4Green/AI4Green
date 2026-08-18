@@ -2,8 +2,8 @@ import { Flex, Icon, Text, useDisclosure, Spinner } from "@chakra-ui/react";
 import { useProjectTypesList } from "api";
 import { ActionButton } from "components/core/action-button";
 import { DataTableColumnHeader } from "components/core/data-table";
-import { DeleteModal } from "components/project-type/modal-delete";
-import { CreateOrEditProjectTypeModal } from "components/project-type/modal-form";
+import { DeleteModal } from "components/coshh-forms/modal-delete";
+import { CreateOrEditProjectTypeModal } from "components/coshh-forms/modal-form";
 import { MoveStageModal } from "components/stage/move-stage";
 import {
   PROJECT_TYPE_MANAGEMENT_PERMISSIONS,

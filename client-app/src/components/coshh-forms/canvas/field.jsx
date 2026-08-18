@@ -5,7 +5,7 @@ import { Badge } from "components/core/Badge";
 import {
   INPUT_TYPES_MAP,
   InputTypePalette,
-} from "components/project-type/canvas/field/input-type-palette";
+} from "components/coshh-forms/canvas/field/input-type-palette";
 import { INPUT_TYPES_MAP as FIELD_TYPES_MAP } from "components/section-field";
 import { STAGES, TOAST_DEFAULTS } from "constants";
 import { useBackendApi } from "contexts";

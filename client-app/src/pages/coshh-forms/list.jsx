@@ -1,6 +1,6 @@
 import { HStack } from "@chakra-ui/react";
 import { Breadcrumbs } from "components/core/breadcrumbs";
-import { CoshhFormTable } from "components/project-type/table";
+import { CoshhFormTable } from "components/coshh-forms/table";
 import { TITLE_ICON_COMPONENTS } from "constants/experiment-ui";
 import {
   DefaultContentHeader,

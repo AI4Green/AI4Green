@@ -1,8 +1,8 @@
 import { HStack } from "@chakra-ui/react";
-import { useProjectTypesList } from "../../api/project-type.js";
+import { useProjectTypesList } from "api/coshh-forms";
 import { DataTable, DataTableGlobalFilter } from "components/core/data-table";
-import { columns } from "components/project-type/columns";
-import { CreateOrEditProjectTypeModal } from "components/project-type/modal-form";
+import { columns } from "components/coshh-forms/columns";
+import { CreateOrEditProjectTypeModal } from "components/coshh-forms/modal-form";
 import { PROJECT_TYPE_MANAGEMENT_PERMISSIONS } from "constants";
 import { useUser } from "contexts";
 import { NewButton } from "layouts/default";

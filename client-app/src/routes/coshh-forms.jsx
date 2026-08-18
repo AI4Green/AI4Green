@@ -1,7 +1,7 @@
 import { NotFound } from "pages/error";
-import { CoshhFormCanvas } from "pages/project-type";
+import { CoshhFormCanvas } from "pages/coshh-forms";
 import { Route, Routes } from "react-router-dom";
-import { CoshhFormsList } from "pages/project-type";
+import { CoshhFormsList } from "pages/coshh-forms";
 
 export const CoshhForms = () => {
   return (

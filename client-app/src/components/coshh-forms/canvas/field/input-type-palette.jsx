@@ -2,7 +2,7 @@ import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { Divider, HStack, Icon, Text, VStack } from "@chakra-ui/react";
 import { useInputTypes } from "api";
 import { Badge } from "components/core/Badge";
-import { DRAG_TYPES } from "components/project-type/canvas/field";
+import { DRAG_TYPES } from "components/coshh-forms/canvas/field";
 import { INPUT_TYPES } from "constants";
 import { useEffect, useRef, useState } from "react";
 import {
