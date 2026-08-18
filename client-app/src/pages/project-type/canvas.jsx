@@ -37,7 +37,7 @@ export const CoshhFormCanvas = () => {
           <Text fontWeight="medium">{coshhForm.name}</Text>
         </Tooltip>
         <Badge
-          label="Project Type"
+          label="COSHH Form"
           colorScheme="gray"
           leftIcon={TITLE_ICON_COMPONENTS.ProjectType}
           fontSize="xxs"
@@ -45,7 +45,7 @@ export const CoshhFormCanvas = () => {
       </HStack>
       <Area />
       <HStack align="start" spacing={6} w="full">
-        <Section projectType={coshhForm} />
+        <Section coshhForm={coshhForm} />
       </HStack>
     </DefaultContentLayout>
   );

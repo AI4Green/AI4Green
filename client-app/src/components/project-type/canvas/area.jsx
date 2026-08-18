@@ -14,7 +14,7 @@ import { useBackendApi } from "contexts";
 import { SECTION_TYPES, TITLE_ICON_COMPONENTS } from "constants";
 import { useNavigate, useParams } from "react-router-dom";
 
-export const BASE_PATH = "/project-types";
+export const BASE_PATH = "/coshh-form-management";
 
 export const Area = () => {
   const navigate = useNavigate();
@@ -74,7 +74,7 @@ export const Area = () => {
             size="xs"
             onClick={() => {
               navigate(
-                `${BASE_PATH}/${projectTypeId}/sections/${section.id}?action=edit&type=section-fields`,
+                `${BASE_PATH}/${coshhFormId}/sections/${section.id}?action=edit&type=section-fields`,
                 {
                   replace: true,
                 },

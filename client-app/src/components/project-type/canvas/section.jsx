@@ -30,9 +30,9 @@ import { array, object, string } from "yup";
 
 import { Field } from "./field";
 
-export const Section = ({ isCollapsed = false, projectType }) => {
+export const Section = ({ isCollapsed = false, coshhForm }) => {
   const [searchParams] = useSearchParams();
-  const { projectTypeId, sectionTypeId, sectionId } = useParams();
+  const { coshhFormId, sectionTypeId, sectionId } = useParams();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,8 +41,7 @@ export const Section = ({ isCollapsed = false, projectType }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(!isCollapsed);
 
-  const { data: sections, mutate } =
-    useSectionsListByProjectType(projectTypeId);
+  const { data: sections, mutate } = useSectionsListByProjectType(coshhFormId);
 
   const { sections: api } = useBackendApi();
 
@@ -51,7 +50,7 @@ export const Section = ({ isCollapsed = false, projectType }) => {
 
   const formRef = useRef();
 
-  const canEdit = projectType.stage === STAGES.Draft;
+  const canEdit = coshhForm.stage === STAGES.Draft;
   const isEditing =
     canEdit &&
     searchParams.get("action") === "edit" &&
@@ -74,7 +73,7 @@ export const Section = ({ isCollapsed = false, projectType }) => {
   const handleSectionsSubmit = async ({ sections }) => {
     setIsLoading(true);
     const model = {
-      projectTypeId: Number(projectTypeId),
+      projectTypeId: Number(coshhFormId),
       // sectionTypeId: Number(sectionTypeId),
       sections: sections.map((section) => ({
         id: section.id.startsWith("temp") ? null : Number(section.id),
@@ -243,7 +242,7 @@ const List = ({ sections }) => {
 };
 
 const Actions = ({ isLoading, formRef, isEditing }) => {
-  const { projectTypeId, sectionTypeId } = useParams();
+  const { coshhFormId, sectionTypeId } = useParams();
   const navigate = useNavigate();
 
   return (
@@ -258,7 +257,7 @@ const Actions = ({ isLoading, formRef, isEditing }) => {
           onClick={() => {
             navigate(
               // `${BASE_PATH}/${projectTypeId}/section-types/${sectionTypeId}/sections?action=edit&type=area-sections`,
-              `${BASE_PATH}/${projectTypeId}?action=edit&type=area-sections`,
+              `${BASE_PATH}/${coshhFormId}?action=edit&type=area-sections`,
               {
                 replace: true,
               },
