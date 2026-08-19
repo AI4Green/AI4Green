@@ -121,7 +121,7 @@ export const CreateOrEditProjectTypeModal = () => {
       innerRef={formRef}
       initialValues={initialValues()}
       onSubmit={handleSubmit}
-      validationSchema={validationSchema(projectTypes, projectType)}
+      validationSchema={validationSchema(coshhForms, projectType)}
     >
       <Form noValidate>
         <VStack align="stretch" spacing={4}>
@@ -150,7 +150,7 @@ export const CreateOrEditProjectTypeModal = () => {
               <MultiSelectField
                 name="source"
                 label="Import from"
-                options={projectTypes
+                options={coshhForms
                   .filter((x) => x.stage === STAGES.Ready)
                   .map((projectType) => ({
                     label: projectType.name,
