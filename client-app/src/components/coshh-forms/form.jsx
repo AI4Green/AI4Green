@@ -1,127 +1,240 @@
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Modal, useModalState } from "components/core/modal";
 import { useRef, useEffect, useState } from "react";
-import { VStack, Alert, AlertIcon, useToast } from "@chakra-ui/react";
+import {
+  VStack,
+  HStack,
+  Box,
+  Heading,
+  Button,
+  CloseButton,
+  Alert,
+  AlertIcon,
+  useToast,
+} from "@chakra-ui/react";
 import { SectionForm } from "components/section-form";
 import { Formik, Form } from "formik";
 import { useBackendApi } from "contexts";
 import { useCoshhFormsList, useProject } from "api";
 import { FormikInput, MultiSelectField } from "components/core/forms";
 
-export const CoshhCreateModal = () => {
-  const { reactionId } = useParams();
-
-  const navigate = useNavigate();
-  const location = useLocation();
-
+const useCoshhCreateForm = ({ reactionId, onCreated }) => {
   const { projects: api } = useBackendApi();
   const { data: templates = [] } = useCoshhFormsList();
-
   const toast = useToast();
   const formRef = useRef();
 
-  const {
-    isModalOpen,
-    setIsModalOpen,
-    isLoading,
-    setIsLoading,
-    feedback,
-    setFeedback,
-    handleReset,
-  } = useModalState(location, navigate, formRef);
+  const [isLoading, setIsLoading] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
-  useEffect(() => {
-    setIsModalOpen(true);
-  }, [setIsModalOpen]);
-
-  const initialValues = {
-    templateId: [],
-  };
+  const initialValues = { templateId: [] };
 
   const handleSubmit = async (values) => {
     try {
       setIsLoading(true);
+      setFeedback(null);
 
       const response = await api.create({
-        reactionId: reactionId,
+        reactionId,
         templateId: Number(values.templateId[0]),
-        templateType: "COSHH", // best to send this here or have a dedicated route?
+        templateType: "COSHH",
       });
+
+      if (!response.ok) throw new Error("Failed to create COSHH form");
+
       const data = await response.json();
 
       if (data?.id || data?.uuid) {
         toast({
           title: "COSHH form created",
           status: "success",
-          duration: 10,
+          duration: 10000,
           isClosable: true,
           position: "top",
         });
-
-        // handleReset();
-
-        navigate(`/coshh/form/${data.id}/edit`);
+        onCreated(data);
       }
     } catch (e) {
-      console.log(e);
-      setFeedback({
-        status: "error",
-        message: "Failed to create COSHH form",
-      });
+      console.error(e);
+      setFeedback({ status: "error", message: "Failed to create COSHH form" });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const modalBody = (
-    <Formik
-      innerRef={formRef}
-      initialValues={initialValues}
-      onSubmit={handleSubmit}
-    >
-      {() => (
-        <Form noValidate>
-          <VStack spacing={4} align="stretch">
-            {feedback && (
-              <Alert status={feedback.status}>
-                <AlertIcon />
-                {feedback.message}
-              </Alert>
-            )}
+  return {
+    formRef,
+    templates,
+    initialValues,
+    feedback,
+    isLoading,
+    handleSubmit,
+  };
+};
 
-            <MultiSelectField
-              isRequired
-              name="templateId"
-              label="COSHH Template"
-              options={templates.map((template) => ({
-                label: template.name,
-                value: String(template.id),
-                description: template.description,
-              }))}
-            />
-          </VStack>
-        </Form>
-      )}
-    </Formik>
+const CoshhCreateFormContent = ({
+  formRef,
+  templates,
+  initialValues,
+  feedback,
+  onSubmit,
+}) => (
+  <Formik innerRef={formRef} initialValues={initialValues} onSubmit={onSubmit}>
+    {() => (
+      <Form noValidate>
+        <VStack spacing={4} align="stretch">
+          {feedback && (
+            <Alert status={feedback.status}>
+              <AlertIcon />
+              {feedback.message}
+            </Alert>
+          )}
+          <MultiSelectField
+            isRequired
+            name="templateId"
+            label="COSHH Template"
+            options={templates.map((template) => ({
+              label: template.name,
+              value: String(template.id),
+              description: template.description,
+            }))}
+          />
+        </VStack>
+      </Form>
+    )}
+  </Formik>
+);
+
+// modal for routed/standalone page
+export const CoshhCreateModal = ({
+  reactionId,
+  onCreated,
+  isOpen,
+  onClose,
+}) => {
+  const {
+    formRef,
+    templates,
+    initialValues,
+    feedback,
+    isLoading,
+    handleSubmit,
+  } = useCoshhCreateForm({ reactionId, onCreated });
+
+  const body = (
+    <CoshhCreateFormContent
+      formRef={formRef}
+      templates={templates}
+      initialValues={initialValues}
+      feedback={feedback}
+      onSubmit={handleSubmit}
+    />
   );
 
   return (
     <Modal
-      body={modalBody}
+      body={body}
       title="Create COSHH Form"
       actionBtnCaption="Create"
       actionBtnColorScheme="green"
-      onAction={() => formRef.current.handleSubmit()}
+      onAction={() => formRef.current?.handleSubmit()}
       isLoading={isLoading}
-      isOpen={isModalOpen}
-      onClose={handleReset}
+      isOpen={isOpen}
+      onClose={onClose}
     />
   );
 };
 
-export const RoutedCoshhForm = () => {
-  const { formId } = useParams();
-  return <CoshhForm formId={formId} />;
+// for embedding into reaction constructor
+export const CoshhCreateInline = ({
+  reactionId,
+  onCreated,
+  isOpen,
+  onClose,
+}) => {
+  const {
+    formRef,
+    templates,
+    initialValues,
+    feedback,
+    isLoading,
+    handleSubmit,
+  } = useCoshhCreateForm({ reactionId, onCreated });
+
+  if (!isOpen) return null;
+
+  return (
+    <Box borderWidth="1px" borderRadius="md" p={4} bg="white">
+      <HStack justify="space-between" mb={3}>
+        <Heading size="sm">Create COSHH Form</Heading>
+        <CloseButton onClick={onClose} />
+      </HStack>
+
+      <CoshhCreateFormContent
+        formRef={formRef}
+        templates={templates}
+        initialValues={initialValues}
+        feedback={feedback}
+        onSubmit={handleSubmit}
+      />
+
+      <Button
+        mt={4}
+        colorScheme="green"
+        onClick={() => formRef.current?.handleSubmit()}
+        isLoading={isLoading}
+      >
+        Create
+      </Button>
+    </Box>
+  );
+};
+
+// routed standalone page
+export const RoutedCoshhCreateModal = () => {
+  const { reactionId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const formRef = useRef();
+
+  const { isModalOpen, setIsModalOpen, handleReset } = useModalState(
+    location,
+    navigate,
+    formRef,
+  );
+
+  useEffect(() => {
+    setIsModalOpen(true);
+  }, [setIsModalOpen]);
+
+  return (
+    <CoshhCreateModal
+      reactionId={reactionId}
+      isOpen={isModalOpen}
+      onClose={handleReset}
+      onCreated={(data) => navigate(`/coshh/form/${data.id}/edit`)}
+    />
+  );
+};
+
+// embedded in the card
+export const EmbeddedCoshh = ({ reactionId, initialFormId = null }) => {
+  const [formId, setFormId] = useState(initialFormId);
+  const [isCreateOpen, setIsCreateOpen] = useState(!initialFormId);
+
+  if (formId) return <CoshhForm formId={formId} />;
+
+  return (
+    <CoshhCreateInline
+      reactionId={reactionId}
+      isOpen={isCreateOpen}
+      onClose={() => setIsCreateOpen(false)}
+      onCreated={(data) => {
+        setFormId(data.id);
+        setIsCreateOpen(false);
+      }}
+    />
+  );
 };
 
 export const CoshhForm = ({ formId }) => {

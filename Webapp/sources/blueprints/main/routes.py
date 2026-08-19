@@ -164,6 +164,9 @@ def sketcher(
     )
     addenda = services.reaction.get_addenda(reaction)
 
+    # todo: connect template instances
+    coshh_instance = None
+
     # entry function for react
     vite_entry = services.spa.vite_entry
 
@@ -182,6 +185,7 @@ def sketcher(
         addenda=addenda,
         review=False,
         vite_entry=vite_entry,
+        coshh_instance=coshh_instance,
     )
 
 

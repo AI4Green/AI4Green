@@ -137,8 +137,12 @@
                         <div class="card-body">
                             <div
                                 id="coshh-form-root"
-                                data-form-id="1"
+                                data-reaction-id="{{ reaction.id }}"
+                                {% if coshh_instance %}
+                                    data-form-id="{{ coshh_instance.id }}"
+                                {% endif %}
                             ></div>
+
                         </div>
                     </div>
                 </div>

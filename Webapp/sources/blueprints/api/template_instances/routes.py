@@ -40,7 +40,6 @@ def get_template_instance(template_id):
     query = models.TemplateInstance.query.get(template_id)
     data = query.to_dict()
 
-    print(data)
     return jsonify(data)
 
 

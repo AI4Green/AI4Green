@@ -172,7 +172,7 @@ class BaseConfig(object):  # class to store configuration variables
     VITE_DEV_SERVER = os.getenv(
         "VITE_DEV_SERVER", False
     )  # assume in prod unless specified
-    VITE_DEV_SERVER_URL = os.getenv("REACT_APP_URL", "http://localhost:8000/")
+    VITE_DEV_SERVER_URL = os.getenv("REACT_APP_URL", "http://localhost:8000/spa")
 
 
 class TestConfig(BaseConfig):
