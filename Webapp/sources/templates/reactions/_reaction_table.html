@@ -10,6 +10,8 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/reaction_table.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/compound_error_flag.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_table.css') }}">
+
 {% endblock %}
 
 
@@ -46,7 +48,16 @@
             <th scope="col">Limiting Reagent?</th>
             <th scope="col">Mol.Wt</th>
             <th scope="col">Density (g/mL)</th>
-            <th scope="col">Conc. (M)</th>
+            <th scope="col">
+                <div class="input-wrapper">
+                     Conc. (M)
+                     <span class="calc-method-icon"
+                        title="Optional parameter. If provided, volume will be calculated from concentration and amount."
+                     style="right: -15px;">
+                        ℹ️
+                    </span>
+                </div>
+            </th>
             <th scope="col">Equiv.</th>
             <th scope="col">Amount<br>
                 <select size="1" name="amountUnit" id="js-amount-unit">
@@ -88,10 +99,12 @@
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
                     {% if reactant_densities %}value="{{ reactant_densities[loop.index0] }}"{% endif %}
                     id="js-reactant-density{{ loop.index }}"></td>
-            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
-                    {% if reactant_сoncentrations %}value="{{ reactant_сoncentrations[loop.index0] }}"{% endif %}
-                    id="js-reactant-concentration{{ loop.index }}"></td>
-            <td><input style="width: 60px;" type="number" step="any" min="0" id="js-reactant-equivalent{{ loop.index }}" placeholder="-"
+            <td>
+                <input style="width: 60px;" type="number" step="any" placeholder="-" min="0"
+                        {% if reactant_сoncentrations %}value="{{ reactant_сoncentrations[loop.index0] }}"{% endif %}
+                        id="js-reactant-concentration{{ loop.index }}" class="js-reactant-concentrations">
+            </td>
+            <td><input style="width: 60px;" type="number" step="any" min="0" id="js-reactant-equivalent{{ loop.index }}" class="js-reactant-equivalents" placeholder="-"
                     {% if loop.index == 1 %} value="1" readonly {% else %}
                     {% if reactant_equivalents %}value="{{ reactant_equivalents[loop.index0] }}"{% endif %}
                     {% endif %}></td>
@@ -99,10 +112,14 @@
                     {% if rounded_reactant_amounts %}value="{{ rounded_reactant_amounts[loop.index0] }}"{% endif %}
                     id="js-reactant-rounded-amount{{ loop.index }}" class="js-reactant-rounded-amounts"
                     readonly></td>
-            <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
+            <td>
+                <div class="input-wrapper">
+                    <input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
                     {% if rounded_reactant_volumes %}value="{{ rounded_reactant_volumes[loop.index0] }}"{% endif %}
                     id="js-reactant-rounded-volume{{ loop.index }}"
-                    readonly></td>
+                    readonly>
+                </div>
+            </td>
             <td><input style="width: 60px;" type="number" step="any" placeholder="-" min="0" id="js-reactant-rounded-mass{{ loop.index }}" class="js-reactant-rounded-masses"
                     {% if rounded_reactant_masses %}value="{{ rounded_reactant_masses[loop.index0] }}"{% endif %}
                     readonly></td>
@@ -260,7 +277,7 @@
                        id="js-product-molecular-weight{{ loop.index }}" style="width: 70px; border:none" readonly></td>
             <td></td>
             <td></td>
-            <td><input style="width: 60px;" type="number" step="any" min="0" id="js-product-equivalent{{ loop.index }}" placeholder="1" value="1"
+            <td><input style="width: 60px;" type="number" step="any" min="0" id="js-product-equivalent{{ loop.index }}" class="js-product-equivalents" placeholder="1" value="1"
                     {% if product_equivalents %} value="{{ product_equivalents[loop.index0] }}" {% endif %}></td>
             <td><input type="number" step="any" placeholder="-" min="0"
                 {% if rounded_product_amounts %}value="{{ rounded_product_amounts[loop.index0] }}"{% endif %}

@@ -1,0 +1,14 @@
+.input-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+
+.calc-method-icon {
+    position: absolute;
+    right: 12px;
+    top: 20%;
+    transform: translateY(-50%);
+    cursor: help;
+    font-size: 0.7em;
+}

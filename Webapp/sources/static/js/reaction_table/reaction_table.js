@@ -17,9 +17,7 @@ function initialiseReactionTable() {
   updateReactantsAfterLimitingReactantChange();
   updateMainProduct();
   // autofill for all the components
-  setupListeners();
-  // autofillReactantFields2();
-  // autofillProductFields2();
+  setupReactantAndProductListeners();
   updateStyling();
   setColours();
   $("#js-load-status").on("change", function () {
@@ -131,12 +129,16 @@ function updateMainProduct() {
   });
 }
 
-function setupListeners() {
+function setupReactantAndProductListeners() {
+  // eventually all listeners should be relocated here
   // setup event listeners upon mass or molar amount changes
   setupMassUnitListener();
   setupAmountUnitListener();
+  setupVolumeUnitListeners();
   setupAmountListeners();
   setupMassListeners();
+  setupEquivalentListeners();
+  setupConcentrationListeners();
 }
 
 function setupMassListeners() {
@@ -146,6 +148,7 @@ function setupMassListeners() {
     updateProductAmounts();
     updateReactantMasses();
     updateProductMasses();
+    updateReactantVolumes();
   });
 }
 
@@ -156,6 +159,7 @@ function setupAmountListeners() {
     updateProductAmounts();
     updateReactantMasses();
     updateProductMasses();
+    updateReactantVolumes();
   });
 }
 
@@ -184,6 +188,36 @@ function setupAmountUnitListener() {
   });
 }
 
+function setupVolumeUnitListeners() {
+  $("#js-volume-unit").on("input change", function () {
+    // changing molar unit should change the mass
+    updateReactantVolumes();
+  });
+
+  // todo: solvent volume units
+}
+
+function setupEquivalentListeners() {
+  $(".js-reactant-equivalents").on("input change", function () {
+    // changing equivalents should update amounts and masses
+    updateReactantAmounts();
+    updateReactantMasses();
+    updateReactantVolumes();
+  });
+
+  $(".js-product-equivalents").on("input change", function () {
+    // changing equivalents should update amounts and masses
+    updateProductAmounts();
+    updateProductMasses();
+  });
+}
+
+function setupConcentrationListeners() {
+  $(".js-reactant-concentrations").on("input change", function () {
+    updateReactantVolumes();
+  });
+}
+
 function updateReactantAmounts() {
   let limitingReactantTableNumber = getLimitingReactantTableNumber();
   const limitingReactantAmount = getVal(
@@ -207,7 +241,56 @@ function updateProductAmounts() {
   }
 }
 
-function updateUnits() {}
+function updateReactantVolumes() {
+  let limitingReactantTableNumber = getLimitingReactantTableNumber();
+  for (let i = 1; i <= reactionTable.numberOfReactants; i++) {
+    updateComponentVolume("reactant", i);
+  }
+}
+
+function updateComponentVolume(component, index) {
+  const mass = Number(getVal($("#js-" + component + "-rounded-mass" + index)));
+  let amount = Number(getVal($("#js-" + component + "-amount" + index)));
+  let density = Number(getVal($("#js-" + component + "-density" + index)));
+  let concentration = Number(
+    getVal($("#js-" + component + "-concentration" + index)),
+  );
+  const { volume, calcType } = calcVolume(density, mass, concentration, amount);
+  console.log(volume);
+  // update hidden (accurate) value
+  $("#js-" + component + "-volume" + index).val(volume);
+  // update displayed (rounded) value
+  $("#js-" + component + "-rounded-volume" + index).val(roundedNumber(volume));
+  assignVolumeTooltip(calcType, component, index);
+}
+
+function assignVolumeTooltip(calcType, component, index) {
+  const volumeTooltips = {
+    concentration: "Calculated from concentration and amount.",
+    density: "Calculated from density and mass.",
+  };
+
+  const $input = $(`#js-${component}-rounded-volume${index}`);
+  // Remove any existing icon first
+  $input.next(".calc-method-icon").remove();
+  $input.removeAttr("title");
+
+  if (calcType === "") {
+    // if no volume, break early
+    return;
+  }
+
+  const $icon = $(`
+    <span
+      class="calc-method-icon"
+      title="${volumeTooltips[calcType]}"
+      >
+      ℹ️
+    </span>
+  `);
+
+  $input.after($icon);
+}
 
 function updateComponentAmount(component, index, limitingReactantAmount) {
   let equivalentSelector = $("#js-" + component + "-equivalent" + index);
@@ -394,29 +477,29 @@ function updateLimitingReactantMassOnAmountChange() {
   $("#js-reactant-rounded-mass" + limitingReactantTableNumber).val(roundedMass);
 }
 
-//Autofill the reactant volume
-function autofillVolume(component, changedParameter, loopValue) {
-  // autofills the volume for reactant or reagent
-  $(changedParameter).on("input change", function () {
-    const mass = getVal($("#js-" + component + "-rounded-mass" + loopValue));
-    let amount = getVal($("#js-" + component + "-amount" + loopValue));
-    let density = getVal($("#js-" + component + "-density" + loopValue));
-    let concentration = getVal(
-      $("#js-" + component + "-concentration" + loopValue),
-    );
-    const volume = calcVolume(density, mass, concentration, amount);
-    $("#js-" + component + "-volume" + loopValue).val(volume);
-  });
-}
-
-function autofillRoundedVolume(component, changedParameter, loopValue) {
-  // autofills the rounded volume for reactant, reagent, or product
-  $(changedParameter).on("input change", function () {
-    let volume = getNum($("#js-" + component + "-volume" + loopValue));
-    let roundedVolume = roundedNumber(volume);
-    $("#js-" + component + "-rounded-volume" + loopValue).val(roundedVolume);
-  });
-}
+// //Autofill the reactant volume
+// function autofillVolume(component, changedParameter, loopValue) {
+//   // autofills the volume for reactant or reagent
+//   $(changedParameter).on("input change", function () {
+//     const mass = getVal($("#js-" + component + "-rounded-mass" + loopValue));
+//     let amount = getVal($("#js-" + component + "-amount" + loopValue));
+//     let density = getVal($("#js-" + component + "-density" + loopValue));
+//     let concentration = getVal(
+//       $("#js-" + component + "-concentration" + loopValue),
+//     );
+//     const volume = calcVolume(density, mass, concentration, amount);
+//     $("#js-" + component + "-volume" + loopValue).val(volume);
+//   });
+// }
+//
+// function autofillRoundedVolume(component, changedParameter, loopValue) {
+//   // autofills the rounded volume for reactant, reagent, or product
+//   $(changedParameter).on("input change", function () {
+//     let volume = getNum($("#js-" + component + "-volume" + loopValue));
+//     let roundedVolume = roundedNumber(volume);
+//     $("#js-" + component + "-rounded-volume" + loopValue).val(roundedVolume);
+//   });
+// }
 
 function autoRemoveVolume(component, changedParameter, loopValue) {
   $(changedParameter).on("input change", function () {
@@ -439,7 +522,6 @@ function autofillReagentData(x) {
     postReagentData(reagentName, x);
   });
 }
-
 function postReagentData(reagentName, x) {
   return new Promise(function (resolve) {
     let workbook = getVal($("#js-active-workbook"));
@@ -1268,32 +1350,37 @@ function roundedNumber(x) {
  * We take the mass of compound we need and calculate and return volume of compound that is needed to get this mass
  * Either density or concentration of the compound is used with preference to density if both are used.
  *
- * @param density {number}
- * @param mass {Number}
- * @param concentration {Number}
- * @param amount {number} in moles
- * @returns {number}
+ * @param {number} density - Density of the reactant.
+ * @param {number} mass - Mass of the reactant.
+ * @param {number} concentration - Concentration of the solution.
+ * @param {number} amount - Amount of substance.
+ * @returns {{volume: number|string, calcType: string}} An object containing:
+ *   - `volume`: The calculated volume, or an empty string if it cannot be calculated.
+ *   - `calcType`: The method used to calculate the volume (e.g. `"concentration"` or `"density"`).
  */
 function calcVolume(density, mass, concentration, amount) {
   // calculates volume for reactant or reagent
   const reactantMassUnit = getVal($("#js-mass-unit"));
   const reactantVolumeUnit = getVal($("#js-volume-unit"));
   const reactantAmountUnit = getVal($("#js-amount-unit"));
-  let volume;
-  if (density > 0 && concentration == 0) {
-    // divide by volumefactor
-    volume =
-      (mass * massFactor[reactantMassUnit]) /
-      (density * volumeFactor[reactantVolumeUnit]);
-  } else if (density == 0 && concentration > 0) {
-    // divide by 1000 because mL is 1 not 0.001
+  let volume = "-";
+  // track whether conc or density is used to inform user
+  let calcType = "";
+  if (concentration > 0) {
+    // Use concentration in preference to density
     volume =
       (amountFactor[reactantAmountUnit] * amount) /
       ((concentration * volumeFactor[reactantVolumeUnit]) / 1000);
-  } else {
-    volume = 0;
+    calcType = "concentration";
+  } else if (density > 0) {
+    // Fall back to density
+    volume =
+      (mass * massFactor[reactantMassUnit]) /
+      (density * volumeFactor[reactantVolumeUnit]);
+    calcType = "density";
   }
-  return volume;
+
+  return { volume, calcType };
 }
 
 /**
