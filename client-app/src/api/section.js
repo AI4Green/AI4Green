@@ -25,7 +25,7 @@ export const getSectionsApi = ({ api }) => ({
     api.get(fetchKeys.file(sectionId, recordId, fileLocation, fileName)),
 });
 
-export const useSectionsListByProjectType = (id) => {
+export const useSectionsListByCoshhForm = (id) => {
   const { apiFetcher } = useBackendApi();
 
   return useSWR(

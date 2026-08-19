@@ -8,7 +8,7 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { FaPlus } from "react-icons/fa";
-import { useSectionsListByProjectType } from "api";
+import { useSectionsListByCoshhForm } from "api";
 import { Badge } from "components/core/Badge";
 import { useBackendApi } from "contexts";
 import { SECTION_TYPES, TITLE_ICON_COMPONENTS } from "constants";
@@ -21,7 +21,7 @@ export const Area = () => {
   const { coshhFormId, sectionId } = useParams();
   const toast = useToast();
 
-  const { data: sections, mutate } = useSectionsListByProjectType(coshhFormId);
+  const { data: sections, mutate } = useSectionsListByCoshhForm(coshhFormId);
   const { sections: api } = useBackendApi();
 
   const handleAddSection = async () => {
