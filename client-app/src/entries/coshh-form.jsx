@@ -11,13 +11,20 @@ const rootElement = document.getElementById("coshh-form-root");
 
 if (rootElement) {
   const reactionId = rootElement.dataset.reactionId;
+  const workgroupName = rootElement.dataset.workgroupName;
+  const workbookName = rootElement.dataset.workbookName;
   const formId = rootElement.dataset.formId || null;
 
   createRoot(rootElement).render(
     <React.StrictMode>
       <ChakraProvider>
         <BackendApiProvider>
-          <EmbeddedCoshh reactionId={reactionId} initialFormId={formId} />
+          <EmbeddedCoshh
+            reactionId={reactionId}
+            initialFormId={formId}
+            workgroupName={workgroupName}
+            workbookName={workbookName}
+          />
         </BackendApiProvider>
       </ChakraProvider>
     </React.StrictMode>,

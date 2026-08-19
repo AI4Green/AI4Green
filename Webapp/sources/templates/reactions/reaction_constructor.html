@@ -137,7 +137,9 @@
                         <div class="card-body">
                             <div
                                 id="coshh-form-root"
-                                data-reaction-id="{{ reaction.id }}"
+                                data-reaction-id="{{ reaction.reaction_id }}"
+                                data-workgroup-name="{{ active_workgroup }}"
+                                data-workbook-name="{{ active_workbook }}"
                                 {% if coshh_instance %}
                                     data-form-id="{{ coshh_instance.id }}"
                                 {% endif %}

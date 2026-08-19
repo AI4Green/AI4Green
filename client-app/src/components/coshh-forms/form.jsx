@@ -18,7 +18,12 @@ import { useBackendApi } from "contexts";
 import { useCoshhFormsList, useProject } from "api";
 import { FormikInput, MultiSelectField } from "components/core/forms";
 
-const useCoshhCreateForm = ({ reactionId, onCreated }) => {
+const useCoshhCreateForm = ({
+  reactionId,
+  workgroupName,
+  workbookName,
+  onCreated,
+}) => {
   const { projects: api } = useBackendApi();
   const { data: templates = [] } = useCoshhFormsList();
   const toast = useToast();
@@ -36,6 +41,8 @@ const useCoshhCreateForm = ({ reactionId, onCreated }) => {
 
       const response = await api.create({
         reactionId,
+        workgroupName,
+        workbookName,
         templateId: Number(values.templateId[0]),
         templateType: "COSHH",
       });
@@ -148,6 +155,8 @@ export const CoshhCreateModal = ({
 // for embedding into reaction constructor
 export const CoshhCreateInline = ({
   reactionId,
+  workgroupName,
+  workbookName,
   onCreated,
   isOpen,
   onClose,
@@ -159,7 +168,12 @@ export const CoshhCreateInline = ({
     feedback,
     isLoading,
     handleSubmit,
-  } = useCoshhCreateForm({ reactionId, onCreated });
+  } = useCoshhCreateForm({
+    reactionId,
+    workgroupName,
+    workbookName,
+    onCreated,
+  });
 
   if (!isOpen) return null;
 
@@ -218,7 +232,12 @@ export const RoutedCoshhCreateModal = () => {
 };
 
 // embedded in the card
-export const EmbeddedCoshh = ({ reactionId, initialFormId = null }) => {
+export const EmbeddedCoshh = ({
+  reactionId,
+  initialFormId = null,
+  workbookName,
+  workgroupName,
+}) => {
   const [formId, setFormId] = useState(initialFormId);
   const [isCreateOpen, setIsCreateOpen] = useState(!initialFormId);
 
@@ -227,6 +246,8 @@ export const EmbeddedCoshh = ({ reactionId, initialFormId = null }) => {
   return (
     <CoshhCreateInline
       reactionId={reactionId}
+      workgroupName={workgroupName}
+      workbookName={workbookName}
       isOpen={isCreateOpen}
       onClose={() => setIsCreateOpen(false)}
       onCreated={(data) => {
