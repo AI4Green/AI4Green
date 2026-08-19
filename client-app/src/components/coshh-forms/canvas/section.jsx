@@ -8,7 +8,7 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { useSectionsListByProjectType } from "api/section";
+import { useSectionsListByCoshhForm } from "api/section";
 import { Badge } from "components/core/Badge";
 import { InlineDraggableListField } from "components/core/forms";
 import { BASE_PATH } from "components/coshh-forms/canvas/area";
@@ -41,7 +41,7 @@ export const Section = ({ isCollapsed = false, coshhForm }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(!isCollapsed);
 
-  const { data: sections, mutate } = useSectionsListByProjectType(coshhFormId);
+  const { data: sections, mutate } = useSectionsListByCoshhForm(coshhFormId);
 
   const { sections: api } = useBackendApi();
 
@@ -73,7 +73,7 @@ export const Section = ({ isCollapsed = false, coshhForm }) => {
   const handleSectionsSubmit = async ({ sections }) => {
     setIsLoading(true);
     const model = {
-      projectTypeId: Number(coshhFormId),
+      coshhFormId: Number(coshhFormId),
       // sectionTypeId: Number(sectionTypeId),
       sections: sections.map((section) => ({
         id: section.id.startsWith("temp") ? null : Number(section.id),
@@ -192,13 +192,13 @@ export const Section = ({ isCollapsed = false, coshhForm }) => {
         )}
       </VStack>
 
-      {section && <Field section={section} projectType={projectType} />}
+      {section && <Field section={section} coshhForm={coshhForm} />}
     </>
   );
 };
 
 const List = ({ sections }) => {
-  const { projectTypeId, sectionTypeId, sectionId } = useParams();
+  const { coshhFormId, sectionTypeId, sectionId } = useParams();
   const navigate = useNavigate();
 
   return (
@@ -214,7 +214,7 @@ const List = ({ sections }) => {
                   <Text fontSize="xs" fontWeight="light">
                     {section.sortOrder}.
                   </Text>
-                  <Icon as={TITLE_ICON_COMPONENTS[section.sectionType.name]} />
+                  {/*<Icon as={TITLE_ICON_COMPONENTS[section.sectionType.name]} />*/}
                 </HStack>
               }
               justifyContent="flex-start"
@@ -223,7 +223,7 @@ const List = ({ sections }) => {
               size="xs"
               onClick={() => {
                 navigate(
-                  `${BASE_PATH}/${projectTypeId}/section-types/${sectionTypeId}/sections/${section.id}`,
+                  `${BASE_PATH}/${coshhFormId}/section-types/${sectionTypeId}/sections/${section.id}`,
                   {
                     replace: true,
                   },
