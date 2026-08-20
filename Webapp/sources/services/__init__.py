@@ -4,6 +4,7 @@ from . import (
     auth,
     compound,
     controlled_substances,
+    coshh_forms,
     data_access_history,
     data_export,
     data_export_history,

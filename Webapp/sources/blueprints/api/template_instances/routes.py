@@ -16,19 +16,14 @@ def save_new_instance():
     workgroup_name = data.get("workgroupName", "")
     workbook_name = data.get("workbookName", "")
 
-    print(reaction_id, workgroup_name, workbook_name)
-
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
     )
-
-    print(type(workbook.id), type(reaction_id))
 
     # check to make sure current user is owner of reaction
     reaction = services.reaction.get_from_reaction_id_and_workbook_id(
         reaction_id, workbook.id
     )
-    print(reaction)
 
     # todo: enforce no duplicates
 
