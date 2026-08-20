@@ -17,7 +17,7 @@ if (rootElement) {
 
   createRoot(rootElement).render(
     <React.StrictMode>
-      <ChakraProvider>
+      <ChakraProvider resetCSS={false}>
         <BackendApiProvider>
           <EmbeddedCoshh
             reactionId={reactionId}
