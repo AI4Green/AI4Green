@@ -284,7 +284,7 @@ export const CoshhForm = ({ formId }) => {
 
   const itemContext = {
     id: template.id,
-    isOwner: true, // Usually true if they just created it
+    isOwner: true, // todo: control non creator functionality
     type: "COSHH",
     approvalStatus: {
       stage: template.approvalStatus,
