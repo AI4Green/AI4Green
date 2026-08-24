@@ -155,6 +155,7 @@ function setupMassListeners() {
     updateReagentAmounts();
     updateReagentMasses();
     updateReagentVolumes();
+    updateSolventVolumes();
   });
 }
 
@@ -169,6 +170,7 @@ function setupAmountListeners() {
     updateReagentAmounts();
     updateReagentMasses();
     updateReagentVolumes();
+    updateSolventVolumes();
   });
 }
 
@@ -191,7 +193,6 @@ function setupAmountUnitListener() {
     updateLimitingReactantAmountOnMassChange();
     updateReactantAmounts();
     updateReagentAmounts();
-    // todo: add reagents and solvents to unit listeners
   });
 
   $("#js-product-amount-unit").on("input change", function () {
