@@ -175,9 +175,33 @@ def get_compound_data(
 
 class SketcherCompound:
     """
-    A compound that has been processed from the sketcher.
-    This class should contain all the functions needed to process smiles from front end and include all the info needed to render the reaction table
-    on a compound basis
+    Represent and process a compound from the reaction sketcher or reaction table.
+
+    A SketcherCompound stores information about an individual reaction
+    component, such as a reactant, reagent, solvent, or product. During
+    initialization it validates the supplied structure, determines whether the
+    compound is a polymer. Retrieves existing compound data or prepares information for a novel compound.
+
+    The class also supports reconstructing compounds from saved reaction-table
+    data via from_reaction_table_dict.
+
+    Attributes:
+        smiles (str): SMILES representation of the compound.
+        inchi (str): InChI representation of the compound, if available.
+        idx (int): Index of the compound within the reaction.
+        reaction_component_idx (int): Index within its reaction component group.
+        reaction_component (str): Component type: "Reactant", "Reagent", "Solvent", or "Product".
+        workbook: Workbook associated with the reaction.
+        demo: Indicates whether the sketcher is in demo mode.
+        is_novel_compound (bool): Whether the compound is a novel compound
+        is_polymer (bool): Whether the compound is a polymer.
+        novel_compound_table: Response containing the novel-compound table,
+            when one needs to be created.
+        compound_data (dict): Stored or reconstructed data for the compound.
+        reload (bool): Whether the compound is being reconstructed from saved
+            reaction-table data.
+        errors (list): Validation errors encountered while processing the
+            compound.
     """
 
     def __init__(
@@ -210,17 +234,18 @@ class SketcherCompound:
 
         self.check_invalid_molecule()
         self.check_polymer_dummy_atom()
-        self.check_copolymer()
         if not reload:
             if not self.errors and self.reaction_component != "Solvent":
                 self.process_compound()
 
     def process_compound(self):
-        # find out if compound is a novel compound (if polymer then novel compound is always true)# fails for polymers lmao
+        """
+        Determines if compound is known, either in Compound or NovelCompound tables. If yes, compounds data is extracted from db.
+        If no, renders new novel compound table.
+        """
         compound, novel_compound = get_compound_all_tables(
             self.smiles, self.workbook, self.is_polymer, self.demo
         )
-        # only check for novel compound if reaction is not being reloaded
         if compound is None:
             self.handle_new_novel_compound()
 
@@ -229,6 +254,9 @@ class SketcherCompound:
             get_compound_data(self.compound_data, compound, novel_compound)
 
     def check_for_polymer(self, polymer_indices, reaction_smiles):
+        """
+        Calls polymer compound check functions
+        """
         if polymer_indices is not None:
             self.check_polymer_indices_for_polymer(polymer_indices)
         else:
@@ -236,7 +264,7 @@ class SketcherCompound:
 
     def check_polymer_indices_for_polymer(self, polymer_indices):
         """
-        Set is_polymer to True if idx in polymer indices and process smiles
+        Set is_polymer to True if idx in polymer indices and then process smiles
         """
         if self.idx in polymer_indices:
             self.is_polymer = True
@@ -245,6 +273,9 @@ class SketcherCompound:
             )
 
     def check_reaction_smiles_for_polymer(self, reaction_smiles):
+        """
+        Searches reaction smiles for compounds containing polymer syntax and sets is_polymer to True if found
+        """
         reactant_smiles, product_smiles = get_reactants_and_products_list(
             reaction_smiles
         )
@@ -257,6 +288,9 @@ class SketcherCompound:
                 self.is_polymer = True
 
     def handle_new_novel_compound(self):
+        """
+        Renders new novel compound table
+        """
         if self.demo == "demo":
             self.errors.append(jsonify({"reactionTable": "Demo", "novelCompound": ""}))
             return
@@ -279,6 +313,9 @@ class SketcherCompound:
         )
 
     def add_solvent_sustainability_flags(self):
+        """
+        Adds solvent sustainability flags to compound data
+        """
         flag = services.solvent.sustainability_from_primary_key(
             self.compound_data["ids"]
         )
@@ -360,17 +397,12 @@ class SketcherCompound:
 
         return component_lists, units
 
-    def check_copolymer(self):
-        if self.smiles.count("{+n}") > 1:
-            self.errors.append(
-                jsonify(
-                    {
-                        "error": f"Cannot process {self.reaction_component} {self.idx} structure: copolymers are not yet supported"
-                    }
-                )
-            )
-
     def check_invalid_molecule(self):
+        """
+        Checks whether molecule is valid by using smiles to initialise a RDKit molecule. If None, add error message to self.errors
+        Returns:
+
+        """
         mol = Chem.MolFromSmiles(self.smiles)
         if mol is None:
             self.errors.append(
@@ -382,6 +414,11 @@ class SketcherCompound:
             )
 
     def check_polymer_dummy_atom(self):
+        """
+        Empty smiles string indicates compound contains a dummy atom. Adds error message if this is the case
+        Returns:
+
+        """
         if self.smiles == "":
             self.errors.append(
                 jsonify(
@@ -404,7 +441,7 @@ def check_compound_errors(compound_list: List[SketcherCompound]) -> Union[str, N
 
 def check_novel_compounds(compound_list: List[SketcherCompound]) -> Union[str, None]:
     """
-    should this fn be included in the errors fn?
+    Checks for novel compounds in compound list and returns novel compound table rendered when compound was processed
     """
     for compound in compound_list:
         if compound.novel_compound_table:
