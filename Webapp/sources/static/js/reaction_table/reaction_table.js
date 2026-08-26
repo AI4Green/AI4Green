@@ -9,7 +9,6 @@ function initialiseReactionTable() {
   $('input[name="reactant-limiting"]').first().prop("checked", true);
   hideButtonsInDemoMode();
   // reload before autofill functions
-  reactionTableReload();
   // The next functions make changes based on the limiting reactant/main product
   // sets up event listener
   updateTableAfterLimitingReactantChange();
@@ -29,6 +28,15 @@ function applyRequiredStyling(changedParameter, excludedNullValues = []) {
   autoChangeRequiredStyling2(changedParameter, excludedNullValues);
 }
 
+/**
+ * Hides specific buttons when the application is in demo mode.
+ *
+ * This function checks if the element with the ID "js-demo" has a value of "demo".
+ * If it does, it hides the elements with the following IDs:
+ * - "reaction-name-description"
+ * - "js-add-new-reagent-by-table"
+ * - "js-add-new-solvent-by-table"
+ */
 function hideButtonsInDemoMode() {
   if (getVal($("#js-demo")) === "demo") {
     document.getElementById("reaction-name-description").style.display = "none";
@@ -39,6 +47,17 @@ function hideButtonsInDemoMode() {
   }
 }
 
+/**
+ * Event listener for limiting reactant change.
+ * Updates the reaction table and related fields when the limiting reactant selection changes.
+ *
+ * This function listens for clicks on elements with the class "js-reactant-limiting".
+ * When triggered, it:
+ * - Updates the limiting reactant table number in the HTML.
+ * - Calls `updateReactantsAfterLimitingReactantChange()` to refresh reactant data.
+ * - Sends an AJAX request to autofill reactant fields and updates required styling.
+ * - Calls functions to autofill solvent and product fields.
+ */
 function updateTableAfterLimitingReactantChange() {
   $(".js-reactant-limiting").click(function () {
     // update the limiting reactant table number in the html
@@ -56,6 +75,18 @@ function updateTableAfterLimitingReactantChange() {
   });
 }
 
+/**
+ * Updates reactant fields when the limiting reactant changes.
+ *
+ * This function iterates through all reactants in the reaction table and:
+ * - Recalculates equivalents relative to the new limiting reactant.
+ * - Updates the "readonly" and "editable" states of equivalent and mass fields accordingly.
+ *
+ * If a reactant is marked as limiting, its equivalents are recalculated.
+ * Otherwise:
+ * - The equivalent field becomes editable.
+ * - The rounded mass field becomes read-only.
+ */
 function updateReactantsAfterLimitingReactantChange() {
   for (let i = 1; i < reactionTable.numberOfReactants + 1; i++) {
     if ($("#js-reactant-limiting" + i).is(":checked")) {
@@ -78,6 +109,19 @@ function updateReactantsAfterLimitingReactantChange() {
   }
 }
 
+/**
+ * Updates the equivalents of all reactants and reagents when a new limiting reactant is selected.
+ *
+ * @param {number} x - The index of the newly selected limiting reactant.
+ *
+ * This function:
+ * - Calculates a change factor to normalize the new limiting reactant's equivalents to 1.
+ * - Scales the equivalents of all other reactants accordingly.
+ * - Updates reagent equivalents based on the same scaling factor.
+ * - Adjusts the readonly and editable states of relevant input fields:
+ *   - The limiting reactant's equivalent is set to 1 and marked as readonly.
+ *   - The limiting reactant's mass field becomes editable.
+ */
 function updateEquivalentsRelativeToNewLimitingReactant(x) {
   // x is the limiting reactant integer and i is the integer for each reactant
   // updates the classes of reactants - controls readonly and style properties when limiting reactant changes
@@ -92,7 +136,7 @@ function updateEquivalentsRelativeToNewLimitingReactant(x) {
     $reactantEquivalent.val(newEquivalentValue);
   }
   // Scales and updates equivalents for reagents
-  let reagentNumber = getVal($("#js-number-of-reagents"));
+  let reagentNumber = Number(getVal($("#js-number-of-reagents")));
   for (let i = 1; i < reagentNumber + 1; i++) {
     let $reagentEquivalent = $("#js-reagent-equivalent" + i);
     let newEquivalentValue = getVal($reagentEquivalent) / changeFactor;
@@ -114,6 +158,16 @@ function updateEquivalentsRelativeToNewLimitingReactant(x) {
     .addClass("editable-cell");
 }
 
+/**
+ * Adds an event listener to update the hidden variable storing the main product's table number upon main product
+ * selection change.
+ *
+ * This function:
+ * - Listens for clicks on elements with the class "js-main-product".
+ * - Retrieves the selected main product's table number.
+ * - Adjusts the table number by subtracting the total number of reactants, reagents, and solvents.
+ * - Stores the updated value in the hidden input field "js-main-product-table-number".
+ */
 function updateMainProduct() {
   $(".js-main-product").click(function () {
     // updates the hidden variable main product table number
@@ -664,6 +718,18 @@ function updateLimitingReactantMassOnAmountChange() {
   applyRequiredStyling(elem);
 }
 
+/**
+ * Event listener for volume removal. Clears the rounded volume if both the density and concentration are empty.
+ *
+ * @param {string} component - The type of component being updated (`reactant`, `solvent`, `product`, or `reagent`).
+ * @param {string} changedParameter - The jQuery selector that triggered the change (`#id` or `.class`).
+ * @param {string} loopValue - The numeric identifier combined with the component name to form the HTML element ID (e.g., `reactant1`).
+ *
+ * This function:
+ * - Listens for `input` or `change` events on the specified `changedParameter`.
+ * - Checks if both density and concentration fields for the component are empty.
+ * - If both fields are empty, clears the rounded volume field.
+ */
 function autoRemoveVolume(component, changedParameter, loopValue) {
   $(changedParameter).on("input change", function () {
     // if reactant density + mol conc are both empty then set volume to also be empty not just '0'
@@ -685,6 +751,28 @@ function autofillReagentData(x) {
     postReagentData(reagentName, x);
   });
 }
+
+/**
+ * Posts reagent data to the server and handles the response to either update the reagent fields or handle errors.
+ * This function is called when the reagent name is updated in the input field.
+ * It handles cases such as reagent not found, CAS number not found, or successful reagent retrieval.
+ *
+ * @param {string} reagentName - The name of the reagent entered by the user.
+ * @param {number} x - The index number of the reagent, used to generate the specific reagent element IDs (e.g., `js-reagent1`).
+ *
+ * @returns {Promise} Resolves with a message indicating the result of the operation:
+ * - "CAS not found" if the reagent’s CAS number was not found.
+ * - "Reagent not found" if the reagent is not found, and partial matches are returned.
+ * - "Reagent found" if the reagent data is found and the fields are populated.
+ *
+ * This function:
+ * - Sends an AJAX `POST` request to the server with the reagent data.
+ * - If no reagent data is found, it returns early without making changes.
+ * - If the CAS number is not found, it triggers the `novelCompoundInput` function for manual input.
+ * - If the reagent is not found, it populates a `datalist` with partial matches.
+ * - If the reagent is found, it populates various fields with the reagent's attributes and applies styling.
+ * - Calls `autoSaveCheck()` to save the state after the reagent is found.
+ */
 function postReagentData(reagentName, x) {
   return new Promise(function (resolve) {
     let workbook = getVal($("#js-active-workbook"));
@@ -779,6 +867,20 @@ function addNewReagent() {
   postReagentData("", reagentNumber);
 }
 
+/**
+ * Removes a reagent from the reaction table and updates the relevant table numbers and field IDs for remaining reagents.
+ * This function is triggered when the user clicks the "remove reagent" button.
+ * It also handles updating the table numbers for reagents, solvents, and products, and reassigns IDs and event listeners to remaining reagents.
+ *
+ * @param {number} removedReagentNumber - The index (1-based) of the reagent to be removed from the table.
+ *
+ * This function:
+ * - Removes the HTML row of the reagent being deleted.
+ * - Loops through the remaining reagents, adjusting the table number and field IDs.
+ * - Replaces the HTML elements with updated IDs and reattaches event listeners.
+ * - Updates the reagent, solvent, and product table numbers.
+ * - Calls `updateSolventTableNumbers()` and `updateProductTableNumber()` to ensure accurate table numbering across the entire form.
+ */
 async function removeReagent(removedReagentNumber) {
   // called from remove reagent button
   removedReagentNumber = Number(removedReagentNumber);
@@ -829,7 +931,6 @@ async function removeReagent(removedReagentNumber) {
       }
       // recreate listener events on the cloned elements with updated ids
       autofillReagentData(j);
-      autofillReagentFields2(j);
       updateStyling();
     }
   }
@@ -842,6 +943,16 @@ async function removeReagent(removedReagentNumber) {
   updateProductTableNumber();
 }
 
+/**
+ * Updates the table numbers for the solvent rows based on the current number of reactants and reagents.
+ * This function is called when the table numbers for reactants or reagents are updated, and it adjusts the
+ * solvent table numbers accordingly.
+ *
+ * The solvent table numbers are calculated by adding the number of reactants and reagents to the current
+ * solvent row index.
+ *
+ * This function will only update the solvent table numbers if the number of solvents is greater than zero.
+ */
 function updateSolventTableNumbers() {
   let reactantNumber = getNum($("#js-number-of-reactants"));
   let reagentNumber = getNum($("#js-number-of-reagents"));
@@ -1292,23 +1403,37 @@ function autoChangeRequiredStyling(changedParameter, excludedNullValues = []) {
   });
 }
 
+/**
+ * Function called to change styling on reagent and solvet changing
+ * @param changedParameter
+ * @param changedStyling
+ */
+function styleValidReagent(changedParameter, changedStyling) {
+  if (getVal($(changedParameter)) === "") {
+    $(changedStyling)
+      .removeClass("remove-highlight-filled-cell")
+      .addClass("add-highlight-unfilled-cell");
+  } else {
+    $(changedStyling)
+      .removeClass("add-highlight-unfilled-cell")
+      .addClass("readonly-cell remove-highlight-filled-cell");
+  }
+}
+
 function autoChangeRequiredStylingValidCompound(component, loop_value) {
   // Catches partially filled in reagent/solvent name box - will highlight red unless a valid compound is entered
   let changedParameter = "#js-" + component + "-hazards";
   changedParameter = changedParameter.concat(String(loop_value));
   let changedStyling = "#js-" + component;
   changedStyling = changedStyling.concat(String(loop_value));
+  styleValidReagent(changedParameter, changedStyling);
   $(changedStyling).on("input change", function () {
-    if (getVal($(changedParameter)) === "") {
-      $(changedStyling)
-        .removeClass("remove-highlight-filled-cell")
-        .addClass("add-highlight-unfilled-cell");
-    } else {
-      $(changedStyling)
-        .removeClass("add-highlight-unfilled-cell")
-        .addClass("remove-highlight-filled-cell");
-    }
+    styleValidReagent(changedParameter, changedStyling);
   });
+
+  if (component === "solvent") {
+    $(changedStyling).removeClass("readonly-cell");
+  }
 }
 
 function updateStyling() {
