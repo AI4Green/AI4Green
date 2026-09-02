@@ -17,7 +17,10 @@ function initialiseReactionTable() {
   updateMainProduct();
   // autofill for all the components
   setupReactantAndProductListeners();
-  updateStyling();
+
+  // styling listeners
+  setupStylingListeners();
+
   setColours();
   $("#js-load-status").on("change", function () {
     autoSaveCheck(null);
@@ -26,6 +29,39 @@ function initialiseReactionTable() {
 
 function applyRequiredStyling(changedParameter, excludedNullValues = []) {
   autoChangeRequiredStyling2(changedParameter, excludedNullValues);
+}
+
+function updateAllRequiredStyling() {
+  $(".js-requires-styling").each(function () {
+    autoChangeRequiredStyling2(this);
+  });
+
+  updateAllValidCompoundStyling();
+}
+
+/**
+ * Re-applies valid-compound styling to every reagent and solvent row.
+ * Used on load/reload since values set via .val() never fire input/change.
+ */
+function updateAllValidCompoundStyling() {
+  let numberOfReagents = getNum($("#js-number-of-reagents"));
+  for (let i = 1; i <= numberOfReagents; i++) {
+    checkValidCompoundStyling("reagent", i);
+  }
+  let numberOfSolvents = getNum($("#js-number-of-solvents"));
+  for (let i = 1; i <= numberOfSolvents; i++) {
+    checkValidCompoundStyling("solvent", i);
+  }
+}
+
+function setupStylingListeners() {
+  $("#reaction-table-div").on(
+    "input.requiredStyling change.requiredStyling",
+    ".js-requires-styling",
+    function () {
+      autoChangeRequiredStyling2(this);
+    },
+  );
 }
 
 /**
@@ -96,7 +132,7 @@ function updateReactantsAfterLimitingReactantChange() {
       $("#js-reactant-equivalent" + i)
         .attr("readonly", false)
         .removeClass("readonly-cell")
-        .addClass("editable-cell");
+        .addClass("editable-cell js-requires-styling");
       $("#js-reactant-rounded-mass" + i)
         .attr("readonly", true)
         .removeClass("editable-cell")
@@ -209,6 +245,7 @@ function setupMassListeners() {
     updateReagentAmounts();
     updateReagentMasses();
     updateReagentVolumes();
+    updateSolventVolumes();
   });
 }
 
@@ -223,6 +260,7 @@ function setupAmountListeners() {
     updateReagentAmounts();
     updateReagentMasses();
     updateReagentVolumes();
+    updateSolventVolumes();
   });
 }
 
@@ -245,7 +283,6 @@ function setupAmountUnitListener() {
     updateLimitingReactantAmountOnMassChange();
     updateReactantAmounts();
     updateReagentAmounts();
-    // todo: add reagents and solvents to unit listeners
   });
 
   $("#js-product-amount-unit").on("input change", function () {
@@ -446,8 +483,8 @@ function updateSolventVolumes() {
       solventVolumeUnit,
     );
 
-    $("#js-solvent-volume" + i).val(totalSolventVolume / numberOfSolvents);
-    let element = $("#js-solvent-rounded-volume" + i);
+    let element = $("#js-solvent-volume" + i);
+    element.val(totalSolventVolume / numberOfSolvents);
     element.val(roundedNumber(totalSolventVolume / numberOfSolvents));
     applyRequiredStyling(element);
   }
@@ -469,12 +506,14 @@ function updateComponentVolume(component, index) {
 }
 
 function assignVolumeTooltip(calcType, component, index) {
+  console.log("assign tooltip", calcType, component, index);
   const volumeTooltips = {
     concentration: "Calculated from concentration and amount.",
     density: "Calculated from density and mass.",
   };
 
   const $input = $(`#js-${component}-rounded-volume${index}`);
+  console.log("$input length:", $input.length);
   // Remove any existing icon first
   $input.next(".calc-method-icon").remove();
   $input.removeAttr("title");
@@ -494,6 +533,7 @@ function assignVolumeTooltip(calcType, component, index) {
   `);
 
   $input.after($icon);
+  console.log("icon in DOM:", $(".calc-method-icon").length);
 }
 
 function updateComponentAmount(component, index, limitingReactantAmount) {
@@ -859,8 +899,7 @@ function addNewReagent() {
     .prop("id", reagentPhysicalFormID)
     .appendTo("#js-reagent-physical-form-dropdown-cell" + reagentNumber);
   autofillReagentData(reagentNumber);
-  // autofillReagentFields2(reagentNumber);
-  updateStyling();
+
   updateProductTableNumber();
   // update solvent table numbers
   updateSolventTableNumbers();
@@ -931,7 +970,6 @@ async function removeReagent(removedReagentNumber) {
       }
       // recreate listener events on the cloned elements with updated ids
       autofillReagentData(j);
-      updateStyling();
     }
   }
   // update the reagent number before the product+solvent table numbers
@@ -998,8 +1036,6 @@ function updateProductTableNumber() {
 // function to set up lister events for solvent datalist
 function datalist_initiate(solventInputID, solventDatalistID, solventNumber) {
   autofillSolventData(solventNumber);
-  // autofillSolventFields2();
-  updateStyling();
   for (let option of document.getElementById(solventDatalistID).options) {
     option.onclick = function () {
       document.getElementById(solventInputID).value = option.value;
@@ -1420,46 +1456,29 @@ function styleValidReagent(changedParameter, changedStyling) {
   }
 }
 
+/**
+ * Checks whether a given reagent/solvent row has valid compound data
+ * (hazards field populated) and styles the name input accordingly.
+ */
+function checkValidCompoundStyling(component, loopValue) {
+  let hazardsID = "#js-" + component + "-hazards" + loopValue;
+  let nameID = "#js-" + component + loopValue;
+  styleValidReagent(hazardsID, nameID);
+}
+
+// existing setup function, unchanged in behaviour, now just delegates the check
 function autoChangeRequiredStylingValidCompound(component, loop_value) {
-  // Catches partially filled in reagent/solvent name box - will highlight red unless a valid compound is entered
-  let changedParameter = "#js-" + component + "-hazards";
-  changedParameter = changedParameter.concat(String(loop_value));
-  let changedStyling = "#js-" + component;
-  changedStyling = changedStyling.concat(String(loop_value));
-  styleValidReagent(changedParameter, changedStyling);
+  let changedParameter = "#js-" + component + "-hazards" + loop_value;
+  let changedStyling = "#js-" + component + loop_value;
+
+  checkValidCompoundStyling(component, loop_value); // initial check on setup
+
   $(changedStyling).on("input change", function () {
-    styleValidReagent(changedParameter, changedStyling);
+    checkValidCompoundStyling(component, loop_value);
   });
 
   if (component === "solvent") {
     $(changedStyling).removeClass("readonly-cell");
-  }
-}
-
-function updateStyling() {
-  for (let i = 1; i < reactionTable.numberOfReactants + 1; i++) {
-    autoChangeRequiredStyling("#js-reactant-physical-form" + i);
-    autoChangeRequiredStyling("#js-reactant-rounded-mass" + i);
-    autoChangeRequiredStyling("#js-reactant-equivalent" + i);
-    autoChangeRequiredStyling("#js-reactant-rounded-amount" + i);
-  }
-  let numberOfReagents = getNum($("#js-number-of-reagents"));
-  for (let i = 1; i < numberOfReagents + 1; i++) {
-    autoChangeRequiredStyling("#js-reagent-physical-form" + i);
-    autoChangeRequiredStyling("#js-reagent-equivalent" + i);
-    autoChangeRequiredStyling("js-reagent-hazards" + i);
-    autoChangeRequiredStylingValidCompound("reagent", i);
-  }
-  let numberOfSolvents = getNum($("#js-number-of-solvents"));
-  for (let i = 1; i < numberOfSolvents + 1; i++) {
-    autoChangeRequiredStyling("#js-solvent-physical-form" + i);
-    autoChangeRequiredStyling("#js-solvent-volume" + i);
-    autoChangeRequiredStyling("#js-solvent" + i);
-    autoChangeRequiredStyling("#js-solvent-rounded-concentration" + i);
-    autoChangeRequiredStylingValidCompound("solvent", i);
-  }
-  for (let i = 1; i < reactionTable.numberOfProducts + 1; i++) {
-    autoChangeRequiredStyling("#js-product-physical-form" + i);
   }
 }
 

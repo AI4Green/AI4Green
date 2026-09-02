@@ -168,6 +168,7 @@ function reloadReactionTable(reactionTableData) {
     })
     .then(function (item) {
       generateReactionTable(item);
+      updateAllRequiredStyling();
       $("#js-load-status").val("loaded");
     });
 }
