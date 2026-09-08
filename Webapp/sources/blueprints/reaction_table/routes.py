@@ -1,12 +1,7 @@
-"""
-This module receives a reaction from Marvin JS as a
-GET request and renders the reaction table template
-"""
-
-
 from urllib.parse import quote
 from urllib.request import urlopen
 
+import flask
 from flask import json, jsonify, render_template, request
 from flask_login import login_required
 from sources import services
@@ -17,11 +12,9 @@ from . import reaction_table_bp
 
 @reaction_table_bp.route("/autoupdate_reaction_table", methods=["GET", "POST"])
 # @workbook_member_required
-def autoupdate_reaction_table():
+def autoupdate_reaction_table() -> flask.Response:
     """
-    I guess the idea is to take any smiles from the front end and generate the reaction table
-
-    Needs to get reaction from db too, but ignore for now
+    Updates the reaction table on sketcher change by processing the reaction smiles
     """
     # get user workbook
     demo = request.json.get("demo")
@@ -107,7 +100,6 @@ def autoupdate_reaction_table():
 
     # check errors first add reagents here for reagent support
     for compound_group in (reactants, products):
-        # now handles co polymer, dummy atom and invalid molecule errors
         error = services.reaction_table.check_compound_errors(compound_group)
         if error:
             return error
@@ -116,7 +108,6 @@ def autoupdate_reaction_table():
             compound_group
         )
         if novel_compound_row:
-            # this should be changed i think
             return novel_compound_row
 
     identifiers = []
@@ -138,7 +129,6 @@ def autoupdate_reaction_table():
 
     reaction_table_html = "reactions/_reaction_table.html"
 
-    # Now it renders the reaction table template
     reaction_table = render_template(
         reaction_table_html,
         reactants=reactants,
@@ -150,7 +140,6 @@ def autoupdate_reaction_table():
         reactant_table_numbers=[],
         products=products,
         units=default_units,
-        # product_intended_dps=product_data["intended_dps"],
         reagent_table_numbers=[],
         reaction_table_data="",
         summary_table_data="",
@@ -163,9 +152,12 @@ def autoupdate_reaction_table():
 
 
 @reaction_table_bp.route("/reload_reaction_table", methods=["GET", "POST"])
-def reload_reaction_table():
+def reload_reaction_table() -> flask.Response:
     """
-    Reloads the reaction table from db information using SketcherCompound class, to speed up reload.
+    Reloads the reaction table from db information using SketcherCompound class to speed up reload.
+
+    Returns:
+        flask.Response: A JSON response with the rendered reaction table
     """
     workbook = request.json.get("workbook")
     workgroup = request.json.get("workgroup")
@@ -232,7 +224,7 @@ def reload_reaction_table():
 @reaction_table_bp.doc(security="sessionAuth")
 def save_reaction_note():
     """
-    Saves an reaction_note to the reaction object
+    Saves a reaction_note to the reaction object
 
     Returns:
         flask.Response: A JSON response with the reaction_note object
