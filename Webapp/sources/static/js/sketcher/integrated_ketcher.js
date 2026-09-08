@@ -31,10 +31,17 @@ function displayKetcher() {
 /**
  * Autosave when the sketcher is edited
  */
+
+let sketcherAutosaveTimeout;
+
 function setupKetcherAutosave() {
   getKetcher().then((ketcher) => {
     ketcher.editor.subscribe("change", function () {
-      setTimeout(autoSaveCheck(null, true), 100);
+      clearTimeout(sketcherAutosaveTimeout);
+      sketcherAutosaveTimeout = setTimeout(
+        () => autoSaveCheck(null, true),
+        800,
+      );
     });
   });
 }

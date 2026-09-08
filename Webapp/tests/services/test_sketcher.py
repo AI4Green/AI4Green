@@ -9,9 +9,11 @@ def test_sketcher(client: FlaskClient):
     url = make_url()
     response = client.post(url)
     assert response.status_code == 200
+    print(response.data)
     # assert sketchers are present
+    assert b"""<div id="ketcher-sketcher"></div>""" in response.data
     assert (
-        b"""<div id="ketcher-sketcher"></div>\n        <div id="marvin-sketcher" style="width: 1020px; height: 480px"></div>"""
+        b"""<div id="marvin-sketcher" style="width: 1020px; height: 480px"></div>"""
         in response.data
     )
 

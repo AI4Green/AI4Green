@@ -142,6 +142,7 @@ function removeReagentsFromSmiles(smiles) {
  * Shows the loading circle for the chemical sketcher
  */
 function showSketcherLoadingCircle() {
+  flashUserSaveMessage("Loading Sketcher...");
   $(".loading-circle").css("display", "block");
 }
 /**
