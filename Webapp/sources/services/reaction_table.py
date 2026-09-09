@@ -149,12 +149,12 @@ def get_compound_data(
         molecular_weight = services.polymer_novel_compound.get_repeat_unit_weights(
             compound.id, compound.workbook
         )
+        compound_data["molecular_weights"].extend(molecular_weight)
     else:
         molecular_weight = (
             float(compound.molec_weight) if compound.molec_weight != "" else 0
         )
-
-    compound_data["molecular_weights"].append(molecular_weight)
+        compound_data["molecular_weights"].append(molecular_weight)
 
     compound_name = compound.name if compound.name != "" else "Not found"
     compound_data["names"].append(compound_name)
@@ -225,6 +225,7 @@ class SketcherCompound:
         self.reaction_component = reaction_component
         self.is_novel_compound = False
         self.is_polymer = False
+        self.is_copolymer = False
         self.novel_compound_table = None
         self.compound_data = {}
         self.reload = reload
@@ -268,9 +269,11 @@ class SketcherCompound:
         """
         if self.idx in polymer_indices:
             self.is_polymer = True
-            self.smiles = services.polymer_novel_compound.find_canonical_repeat(
+            self.smiles = services.polymer_novel_compound.find_canonical_repeats(
                 self.smiles
             )
+            if len(self.smiles) > 1:
+                self.is_copolymer = True
 
     def check_reaction_smiles_for_polymer(self, reaction_smiles):
         """
@@ -286,6 +289,7 @@ class SketcherCompound:
         if self.reaction_component in ["Reactant", "Product"]:
             if "{+n}" in smiles_list[self.reaction_component_idx]:
                 self.is_polymer = True
+                # need to update smiles here with canonical repeats?
 
     def handle_new_novel_compound(self):
         """
@@ -403,15 +407,18 @@ class SketcherCompound:
         Returns:
 
         """
-        mol = Chem.MolFromSmiles(self.smiles)
-        if mol is None:
-            self.errors.append(
-                jsonify(
-                    {
-                        "error": f"Cannot process {self.reaction_component} {self.idx} structure"
-                    }
+        # convert to list, loop needed for polymers/copolymers
+        smiles_list = self.smiles if isinstance(self.smiles, list) else [self.smiles]
+
+        for i, smi in enumerate(smiles_list):
+            mol = Chem.MolFromSmiles(smi)
+            if mol is None:
+                label = f"{self.reaction_component} {self.idx}"
+                if self.is_polymer:
+                    label += f" (fragment {i})"
+                self.errors.append(
+                    jsonify({"error": f"Cannot process {label} structure"})
                 )
-            )
 
     def check_polymer_dummy_atom(self):
         """

@@ -115,7 +115,7 @@ async function sketcherAutoSave() {
     let workbook = $("#js-active-workbook").val();
     let reactionID = $("#js-reaction-id").val();
     let polymerIndices = identifyPolymers(rxn);
-    if (polymerIndices.length === 0) {
+    if (polymerIndices.length > 0) {
       polymerMode = true;
     }
     let userEmail = "{{ current_user.email }}";

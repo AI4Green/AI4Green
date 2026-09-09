@@ -10,7 +10,6 @@ function novelCompoundDataFromSketcher() {
   let smiles = $("#js-new-compound-smiles").val();
   let workgroup = $("#js-active-workgroup").val();
   let workbook = $("#js-active-workbook").val();
-  let polymerMode = $('input[id="polymer-mode-select"]').prop("checked");
   let polymer = $("#js-polymer").val();
   let requestData = {
     name: name,
@@ -23,12 +22,11 @@ function novelCompoundDataFromSketcher() {
     workgroup: workgroup,
     component: "component",
     source: "sketcher",
-    polymerMode: polymerMode,
     polymer: polymer, // from reaction_table/routes via html
   };
 
   // sends polymers to polymer db
-  if (polymerMode && polymer === "True") {
+  if (polymer === "True") {
     novelCompoundURL = "/_polymer_novel_compound";
   } else {
     novelCompoundURL = "/_novel_compound";
@@ -45,7 +43,7 @@ function novelCompoundDataFromSketcher() {
     if (data.feedback === "Compound added to the database") {
       $("#js-novel-compound-input-form").hide();
       $("#js-load-status").val("loaded");
-      $("#action-button-submit").click();
+      sketcherAutoSave();
     }
   });
 }

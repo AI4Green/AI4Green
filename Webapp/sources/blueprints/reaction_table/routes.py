@@ -22,6 +22,7 @@ def autoupdate_reaction_table() -> flask.Response:
     workbook = None
     reaction = None
     polymer_indices = []
+    polymer_mode = False
     if demo != "demo" and tutorial != "yes":
         workgroup = request.json.get("workgroup")
         workbook_name = request.json.get("workbook")
@@ -120,10 +121,11 @@ def autoupdate_reaction_table() -> flask.Response:
     r_class = None
 
     if not polymer_indices:
-        polymer_indices = list()
         r_class = services.reaction_classification.classify_reaction(
             reactants_smiles_list, product_smiles_list
         )
+    else:
+        polymer_mode = True
 
     reaction_table_html = "reactions/_reaction_table.html"
 
@@ -144,7 +146,7 @@ def autoupdate_reaction_table() -> flask.Response:
         sol_rows=sol_rows,
         reaction=reaction,
         reaction_class=r_class,
-        polymer_indices=polymer_indices,
+        polymer_mode=polymer_mode,
     )
     return jsonify({"reactionTable": reaction_table})
 
@@ -161,12 +163,22 @@ def reload_reaction_table() -> flask.Response:
     workgroup = request.json.get("workgroup")
     reaction_id = request.json.get("reaction_id")
     demo = request.json.get("demo")
+    polymer_mode = False
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup, workbook
     )
     reaction = services.reaction.get_from_reaction_id_and_workbook_id(
         reaction_id, workbook.id
     )
+    if reaction.reaction_type.value == "POLYMER":
+        polymer_mode = True
+
+    # protect against reloading reactions with no reaction table
+    # try:
+    #     reaction_table_data = reaction.reaction_table_data
+    # except AttributeError:
+    #     print(AttributeError)
+    #     return jsonify({"message": "Cannot reload reaction table"})
 
     (
         compounds,
@@ -202,7 +214,7 @@ def reload_reaction_table() -> flask.Response:
         reaction=reaction,
         reaction_class=reaction.reaction_class,
         reaction_classes=[],
-        polymer_indices={},
+        polymer_mode=polymer_mode,
     )
     return jsonify({"reactionTable": reaction_table})
 

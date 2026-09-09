@@ -8,7 +8,7 @@
     <label> CAS: <input type="text" id="js-new-compound-cas"  placeholder="Optional" class="no_autosave"> </label>
     <label> Density (g/mL): <input type="text" id="js-new-compound-density" placeholder="Optional" class="no_autosave"> </label>
     <label> Conc. (M): <input type="text" id="js-new-compound-concentration" placeholder="Optional" class="no_autosave"> </label>
-    <input  id="js-new-compound-smiles" hidden value="{{ smiles }}">
+    <input  id="js-new-compound-smiles" hidden value='{{ smiles | tojson }}'>
     <input  id="js-polymer" hidden value="{{ polymer }}">
     <button class="btn btn-outline-dark" id="js-new-compound-submit" onclick="novelCompoundDataFromSketcher()"> Input </button>
 </div>
