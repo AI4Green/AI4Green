@@ -190,7 +190,10 @@
                     id="js-reactant-molecular-weight{{ index }}" readonly>
                 <br>
                 {% if reactant.is_polymer %}
-                     <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
+                    <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
+                    <span style="font-weight: bold; font-size: 90%"><br>M<sub>n</sub> = </span>
+                    <input style="width: 70px;" type="number" step="any" min="0" placeholder="{{ reactant.compound_data.molecular_weights }}"
+                           value="js-reactant-mn{{ index }}" id="js-reactant-mn{{ index }}">
                 {% endif %}
             </td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
