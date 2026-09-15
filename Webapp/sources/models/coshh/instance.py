@@ -6,6 +6,15 @@ from sources.models.template_instance import InstanceType, TemplateInstance
 class COSHHInstance(TemplateInstance):
     __tablename__ = "COSHHInstance"
 
+    id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "TemplateInstance.id",
+            ondelete="CASCADE",
+        ),
+        primary_key=True,
+    )
+
     # approval
     approval_status = db.Column(
         db.Enum(ApprovalStatus), nullable=False, default=ApprovalStatus.DRAFT

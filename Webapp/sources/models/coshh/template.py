@@ -22,11 +22,6 @@ class COSHHTemplate(Template):
         cascade="all, delete-orphan",
     )
 
-    instances = db.relationship(
-        "COSHHInstance",
-        back_populates="template",
-    )
-
     # map back to parent template
     __mapper_args__ = {
         "polymorphic_identity": TemplateType.COSHH,

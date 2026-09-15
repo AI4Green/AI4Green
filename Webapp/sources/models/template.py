@@ -59,6 +59,12 @@ class Template(Model):
         db.Enum(TemplateStatus), nullable=False, default=TemplateStatus.DRAFT
     )
 
+    template_instances = db.relationship(
+        "TemplateInstance",
+        back_populates="template",
+        cascade="all, delete-orphan",  # if appropriate
+    )
+
     # Polymorphic config, uncomment for additional child template
     __mapper_args__ = {"polymorphic_on": template_type}
 
