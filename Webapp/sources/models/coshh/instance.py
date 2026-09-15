@@ -1,6 +1,6 @@
-from models.data_export_request import ApprovalStatus
-from models.template_instance import InstanceType, TemplateInstance
 from sources.extensions import db
+from sources.models.data_export_request import ApprovalStatus
+from sources.models.template_instance import InstanceType, TemplateInstance
 
 
 class COSHHInstance(TemplateInstance):

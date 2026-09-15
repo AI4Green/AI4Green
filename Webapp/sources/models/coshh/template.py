@@ -1,5 +1,5 @@
-from models.template import Template, TemplateType
 from sources.extensions import db
+from sources.models.template import Template, TemplateType
 
 
 class COSHHTemplate(Template):
