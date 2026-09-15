@@ -1,0 +1,30 @@
+export const INPUT_TYPES = {
+  Content: "content",
+  Text: "text",
+  Description: "description",
+  Number: "number",
+  ReactionScheme: "reaction",
+  MultiReactionScheme: "multi-reaction",
+  Radio: "radio",
+  Multiple: "multiple",
+  File: "file",
+  Header: "header",
+  SubstanceTable: "substances",
+  ChemicalDisposalTable: "chemicaldisposal",
+  SortableList: "sortable-list",
+  ProjectGroupPlanTable: "projectgroup-plan",
+  ProjectGroupHazardTable: "projectgroup-hazard",
+  ImageFile: "image-file",
+  YieldTable: "yield",
+  MultiYieldTable: "multi-yield",
+  GreenMetricsTable: "greenmetrics",
+  MultiGreenMetricsTable: "multi-greenmetrics",
+  DateAndTime: "datetime",
+  FormattedTextInput: "formatted-text-input",
+};
+
+export const FIELDS = {
+  YieldCalculationField: "Calculate Yield",
+  ReactionSchemeField: "Draw Structure",
+  GreenMetricsCalculationField: "Calculate Green Metrics",
+};
