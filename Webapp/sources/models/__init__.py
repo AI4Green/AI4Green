@@ -12,6 +12,7 @@ from .comment import Comment
 from .compound import Compound
 from .compound_data_error_report import CompoundDataErrorReport
 from .controlled_substances import ControlledSubstanceUsage
+from .coshh import COSHHInstance, COSHHTemplate
 from .data_export_request import DataExportRequest, data_export_request_approvers
 from .element import Element
 from .field import Field

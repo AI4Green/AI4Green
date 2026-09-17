@@ -11,7 +11,7 @@ class Section(Model):
 
     sort_order = db.Column(db.Integer)
 
-    template_id = db.Column(db.Integer, db.ForeignKey("Template.id"))
-    template = db.relationship("Template", back_populates="sections")
+    template_id = db.Column(db.Integer, db.ForeignKey("COSHHTemplate.id"))
+    template = db.relationship("COSHHTemplate", back_populates="sections")
 
     fields = db.relationship("Field", back_populates="section")
