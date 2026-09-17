@@ -55,3 +55,4 @@ from .wg_status_request import WGStatusRequest
 from .workbook import WorkBook
 from .workgroup import WorkGroup
 from .workgroup_request import WorkGroupRequest
+from .workup import WorkupSection, WorkupTemplate

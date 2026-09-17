@@ -16,6 +16,13 @@ class Section(Model):
 
     fields = db.relationship("Field", back_populates="section")
 
+    section_type = db.Column(db.String(50), nullable=False)
+
+    __mapper_args__ = {
+        "polymorphic_on": section_type,
+        "polymorphic_identity": "section",
+    }
+
     def to_dict(self):
         return {
             "id": self.id,
