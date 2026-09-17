@@ -13,7 +13,7 @@ import {
   // getRegistrationRulesApi,
   // getReportsApi,
   getSectionsApi,
-  // getUserApi,
+  getUserApi,
 } from "api";
 import ky from "ky";
 import { createContext, useCallback, useContext, useMemo } from "react";
@@ -26,6 +26,7 @@ export const useBackendApi = () => useContext(BackendApiContext);
 /** Default KY instance options for hitting the backend API */
 export const getBackendDefaults = (language) => ({
   prefixUrl: "/api/",
+  credentials: "include",
   headers: {
     "Accept-Language": language,
   },
@@ -56,46 +57,30 @@ export const BackendApiProvider = ({ children }) => {
 
   const baseContext = useMemo(() => ({ api, apiFetcher }), [api, apiFetcher]);
 
-  // need to reinstate actual api calls
-  const mockContext = useMemo(
+  const context = useMemo(
     () => ({
       ...baseContext,
-      account: {
-        logout: async () => {
-          console.log("Mock logout - no server needed");
-          return Promise.resolve();
-        },
-        // ... other mock methods
-      },
-      // ...
+      account: getAccountApi(baseContext),
+      users: getUserApi(baseContext),
+      // registrationRules: getRegistrationRulesApi(baseContext),
+      // projects: getProjectsApi(baseContext),
+      // projectGroups: getProjectGroupsApi(baseContext),
+      projectTypes: getProjectTypesApi(baseContext),
+      // plans: getPlansApi(baseContext),
+      // notes: getNotesApi(baseContext),
+      // literatureReviews: getLiteratureReviewsApi(baseContext),
+      // reports: getReportsApi(baseContext),
+      // reactionTable: getReactionTableApi(baseContext),
+      // predictions: getPredictionsApi(baseContext),
+      // comments: getCommentsApi(baseContext),
+      sections: getSectionsApi(baseContext),
+      // fields: getFieldsApi(baseContext),
     }),
     [baseContext],
   );
 
-  // const context = useMemo(
-  //   () => ({
-  //     ...baseContext,
-  //     account: getAccountApi(baseContext),
-  //     // users: getUserApi(baseContext),
-  //     // registrationRules: getRegistrationRulesApi(baseContext),
-  //     // projects: getProjectsApi(baseContext),
-  //     // projectGroups: getProjectGroupsApi(baseContext),
-  //     projectTypes: getProjectTypesApi(baseContext),
-  //     // plans: getPlansApi(baseContext),
-  //     // notes: getNotesApi(baseContext),
-  //     // literatureReviews: getLiteratureReviewsApi(baseContext),
-  //     // reports: getReportsApi(baseContext),
-  //     // reactionTable: getReactionTableApi(baseContext),
-  //     // predictions: getPredictionsApi(baseContext),
-  //     // comments: getCommentsApi(baseContext),
-  //     sections: getSectionsApi(baseContext),
-  //     // fields: getFieldsApi(baseContext),
-  //   }),
-  //   [baseContext],
-  // );
-
   return (
-    <BackendApiContext.Provider value={mockContext}>
+    <BackendApiContext.Provider value={context}>
       {children}
     </BackendApiContext.Provider>
   );

@@ -138,6 +138,10 @@ def register_blueprints(app: Flask) -> None:
     Registers blueprints for the app.
     """
 
+    from sources.blueprints.api import api
+
+    app.register_blueprint(api)
+
     from sources.blueprints.workgroup import workgroup_bp
 
     app.register_blueprint(workgroup_bp)
@@ -216,6 +220,10 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(save_reaction_bp)
 
+    from sources.blueprints.react_entry import react_entry_bp
+
+    app.register_blueprint(react_entry_bp)
+
     from sources.blueprints.reaction_approval import reaction_approval_bp
 
     app.register_blueprint(reaction_approval_bp, url_prefix="/reaction_approval")
@@ -273,10 +281,6 @@ def register_blueprints(app: Flask) -> None:
     from sources.blueprints.audit_logs import audit_log_bp
 
     app.register_blueprint(audit_log_bp)
-
-    from sources.blueprints.coshh import coshh_bp
-
-    app.register_blueprint(coshh_bp)
 
 
 def inject_session_context(app: Flask) -> Dict[str, str]:

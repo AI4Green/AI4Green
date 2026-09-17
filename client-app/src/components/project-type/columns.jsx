@@ -1,4 +1,4 @@
-import { Flex, Icon, Text, useDisclosure } from "@chakra-ui/react";
+import { Flex, Icon, Text, useDisclosure, Spinner } from "@chakra-ui/react";
 import { useProjectTypesList } from "api";
 import { ActionButton } from "components/core/action-button";
 import { DataTableColumnHeader } from "components/core/data-table";
@@ -118,7 +118,9 @@ export const columns = [
 ];
 
 const Action = ({ projectType, inUse }) => {
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
+  if (isLoading) return <Spinner boxSize={16} />;
+
   const [searchParams, setSearchParams] = useSearchParams();
   const action = searchParams.get("action");
   const id = searchParams.get("id");
