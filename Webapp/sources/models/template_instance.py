@@ -3,28 +3,18 @@ from enum import Enum
 from sources.extensions import db
 
 from .base import Model
-from .data_export_request import ApprovalStatus
 
 
 class InstanceType(Enum):
+    GENERIC = "GENERIC"
     COSHH = "COSHH"
-    REACTION = "REACTION"  # included here for future use
-
-
-class TemplateApprovalStatus(Enum):
-    DRAFT = ("DRAFT",)
-    SUBMITTED = ("SUBMITTED",)
-    APPROVED = ("APPROVED",)
-    REJECTED = ("REJECTED",)
-    CHANGES_SUGGESTED = ("CHANGES_SUGGESTED",)
 
 
 class TemplateInstance(Model):
     __tablename__ = "TemplateInstance"
 
     id = db.Column(db.Integer, primary_key=True)
-    uuid = db.Column(db.Text)
-    template_type = db.Column(db.Enum(InstanceType))
+    uuid = db.Column(db.Text)  # identifier, needed? or just use the id?
 
     owner_id = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
     owner = db.relationship(
@@ -41,14 +31,15 @@ class TemplateInstance(Model):
         "FieldResponse", back_populates="template_instance"
     )
 
-    # approval
-    approval_status = db.Column(
-        db.Enum(TemplateApprovalStatus), nullable=False, default="DRAFT"
+    instance_type = db.Column(
+        db.Enum(InstanceType),
+        nullable=False,
     )
-    approver_id = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
-    approver = db.relationship(
-        "User", backref="template_approvals", foreign_keys=[approver_id]
-    )  # backref used so we dont have to edit user table
+    # Polymorphic config, uncomment for additional child template
+    __mapper_args__ = {
+        "polymorphic_on": instance_type,
+        "polymorphic_identity": InstanceType.GENERIC,
+    }
 
     def to_dict(self):
         workbook = self.reaction.workbook
