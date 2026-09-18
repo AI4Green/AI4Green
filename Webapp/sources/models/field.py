@@ -20,3 +20,12 @@ class Field(Model):
 
     input_type_id = db.Column(db.Integer, db.ForeignKey("InputType.id"))
     input_type = db.relationship("InputType", back_populates="field")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "sort_order": self.sort_order,
+            "mandatory": self.mandatory,
+            "section_id": self.section_id,
+        }

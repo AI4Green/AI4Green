@@ -62,9 +62,10 @@ export const Section = ({ isCollapsed = false, projectType }) => {
     searchParams.get("action") === "edit" &&
     searchParams.get("type") === "section-fields";
 
-  const filteredSections = sections?.filter(
-    (section) => section.sectionType.id === Number(sectionTypeId),
-  );
+  // const filteredSections = sections?.filter(
+  //   (section) => section.sectionType.id === Number(sectionTypeId),
+  // );
+  const filteredSections = sections || [];
 
   const section = filteredSections?.find(
     (section) => section.id === Number(sectionId),
@@ -74,7 +75,7 @@ export const Section = ({ isCollapsed = false, projectType }) => {
     setIsLoading(true);
     const model = {
       projectTypeId: Number(projectTypeId),
-      sectionTypeId: Number(sectionTypeId),
+      // sectionTypeId: Number(sectionTypeId),
       sections: sections.map((section) => ({
         id: section.id.startsWith("temp") ? null : Number(section.id),
         name: section.content,
@@ -125,7 +126,7 @@ export const Section = ({ isCollapsed = false, projectType }) => {
     }
   };
 
-  if (!sectionTypeId) return null;
+  // if (!sectionTypeId) return null;
 
   return (
     <>
@@ -256,7 +257,8 @@ const Actions = ({ isLoading, formRef, isEditing }) => {
           colorScheme="blue"
           onClick={() => {
             navigate(
-              `${BASE_PATH}/${projectTypeId}/section-types/${sectionTypeId}/sections?action=edit&type=area-sections`,
+              // `${BASE_PATH}/${projectTypeId}/section-types/${sectionTypeId}/sections?action=edit&type=area-sections`,
+              `${BASE_PATH}/${projectTypeId}/sections?action=edit&type=area-sections`,
               {
                 replace: true,
               },

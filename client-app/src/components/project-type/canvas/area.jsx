@@ -1,15 +1,57 @@
-import { Button, Divider, HStack, Icon } from "@chakra-ui/react";
-import { useSectionTypesList } from "api/project-type";
+import {
+  Button,
+  Divider,
+  HStack,
+  Icon,
+  Text,
+  useToast,
+  IconButton,
+} from "@chakra-ui/react";
+import { FaPlus } from "react-icons/fa";
+import { useSectionsListByProjectType } from "api";
 import { Badge } from "components/core/Badge";
+import { useBackendApi } from "contexts";
 import { SECTION_TYPES, TITLE_ICON_COMPONENTS } from "constants";
 import { useNavigate, useParams } from "react-router-dom";
 
-export const BASE_PATH = "/project-type-management";
+export const BASE_PATH = "/project-types";
 
 export const Area = () => {
   const navigate = useNavigate();
-  const { projectTypeId, sectionTypeId } = useParams();
-  const { data: sectionTypes } = useSectionTypesList();
+  const { projectTypeId, sectionId } = useParams();
+  const toast = useToast();
+
+  const { data: sections, mutate } =
+    useSectionsListByProjectType(projectTypeId);
+  const { sections: api } = useBackendApi();
+
+  console.log("SSSSS", sections);
+
+  const handleAddSection = async () => {
+    try {
+      const newSection = {
+        projectTypeId: Number(projectTypeId),
+        name: "New Section",
+        sortOrder: sections ? sections.length + 1 : 1,
+      };
+
+      const response = await api.save(newSection);
+      await mutate();
+
+      if (response?.id) {
+        navigate(
+          `${BASE_PATH}/${projectTypeId}/sections/${response.id}?action=edit`,
+        );
+      }
+    } catch (error) {
+      toast({
+        title: "Error creating section",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
   return (
     <HStack
@@ -21,23 +63,21 @@ export const Area = () => {
       borderColor="blue.100"
       maxW="2xl"
     >
-      <Badge label="Areas" colorScheme="blue" />
+      <Badge label="Sections" colorScheme="blue" />
+      <Divider orientation="vertical" height="20px" />
 
       <HStack spacing={2} align="center">
-        <Divider orientation="vertical" height="20px" />
-        {sectionTypes.map((sectionType) => (
+        {sections.map((section) => (
           <Button
             borderRadius="xl"
-            key={sectionType.id}
+            key={section.id}
             justifyContent="flex-start"
-            leftIcon={<Icon as={TITLE_ICON_COMPONENTS[sectionType.name]} />}
-            variant={
-              Number(sectionTypeId) === sectionType.id ? "solid" : "ghost"
-            }
+            leftIcon={<Icon as={TITLE_ICON_COMPONENTS[section.name]} />}
+            variant={Number(sectionId) === section.id ? "solid" : "ghost"}
             size="xs"
             onClick={() => {
               navigate(
-                `${BASE_PATH}/${projectTypeId}/section-types/${sectionType.id}/sections`,
+                `${BASE_PATH}/${projectTypeId}/sections/${section.id}?action=edit&type=section-fields`,
                 {
                   replace: true,
                 },
@@ -47,9 +87,29 @@ export const Area = () => {
               bg: "blue.50",
             }}
           >
-            {sectionTypeLabels[sectionType.name]}
+            {section.name}
           </Button>
         ))}
+        {/* Empty state helper text */}
+        {sections?.length === 0 && (
+          <Text fontSize="xs" color="gray.400" fontStyle="italic">
+            No sections yet.
+          </Text>
+        )}
+
+        <Button
+          leftIcon={<FaPlus />}
+          aria-label="Add Section"
+          size="xs"
+          colorScheme="blue"
+          variant="ghost"
+          borderRadius="full"
+          onClick={handleAddSection}
+          _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
+        >
+          {" "}
+          Add Section{" "}
+        </Button>
       </HStack>
     </HStack>
   );

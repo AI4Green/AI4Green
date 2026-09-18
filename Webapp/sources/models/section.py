@@ -15,3 +15,12 @@ class Section(Model):
     template = db.relationship("COSHHTemplate", back_populates="sections")
 
     fields = db.relationship("Field", back_populates="section")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "sortOrder": self.sort_order,
+            "sectionType": self.section_type.to_dict(),
+            "templateId": self.template_id,
+        }

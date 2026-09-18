@@ -1,5 +1,5 @@
 import { HStack } from "@chakra-ui/react";
-import { useProjectTypesList } from "api/project-type";
+import { useProjectTypesList } from "../../api/project-type.js";
 import { DataTable, DataTableGlobalFilter } from "components/core/data-table";
 import { columns } from "components/project-type/columns";
 import { CreateOrEditProjectTypeModal } from "components/project-type/modal-form";
@@ -52,44 +52,21 @@ const New = () => {
 };
 
 const useTableData = () => {
-  // const { data: projectTypes } = useProjectTypesList();
-
-  const mockTableData = useMemo(
-    () => [
-      {
-        id: "1",
-        name: "Standard Web API",
-        description: "A template for RESTful services using Node.js",
-        stage: "Draft", // <--- Must exist in STATUS_ICON_COMPONENTS
-        inUseCount: 0,
-        permissions: ["CanPublish", "CanPutInDraft", "CanDeprecate"],
-        targetPath: "1",
-      },
-      {
-        id: "2",
-        name: "React Component Library",
-        description: "Shared UI components for internal projects",
-        stage: "Ready", // <--- Must exist in STATUS_ICON_COMPONENTS
-        inUseCount: 15,
-        permissions: ["CanPublish", "CanPutInDraft", "CanDeprecate"],
-        targetPath: "2",
-      },
-    ],
-    [], // No dependencies needed for static mock data
+  const { data: projectTypes } = useProjectTypesList();
+  const tableData = useMemo(
+    () =>
+      projectTypes?.map((projectType) => ({
+        id: projectType.id,
+        name: projectType.name,
+        description: projectType.description,
+        stage: projectType.stage,
+        inUseCount: projectType.inUseCount,
+        permissions: projectType.permissions,
+        targetPath: `${projectType.id}`,
+      })),
+    [projectTypes],
   );
+  console.log("PROJECT LIST", tableData);
 
-  // const tableData = useMemo(
-  //   () =>
-  //     projectTypes?.map((projectType) => ({
-  //       id: projectType.id,
-  //       name: projectType.name,
-  //       description: projectType.description,
-  //       stage: projectType.stage,
-  //       inUseCount: projectType.inUseCount,
-  //       permissions: projectType.permissions,
-  //       targetPath: `${projectType.id}`,
-  //     })),
-  //   [projectTypes],
-  // );
-  return { data: mockTableData ?? [] };
+  return { data: tableData ?? [] };
 };

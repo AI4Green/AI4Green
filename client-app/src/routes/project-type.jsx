@@ -9,10 +9,7 @@ export const ProjectType = () => {
       <Route path="/" element={<ProjectTypeList />} />
       <Route path="/:projectTypeId">
         <Route index element={<ProjectTypeCanvas />} />
-        <Route
-          path="section-types/:sectionTypeId/sections"
-          element={<ProjectTypeCanvas />}
-        />
+        <Route path="sections/:sectionId" element={<ProjectTypeCanvas />} />
         <Route
           path="section-types/:sectionTypeId/sections/:sectionId"
           element={<ProjectTypeCanvas />}
