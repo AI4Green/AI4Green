@@ -48,3 +48,52 @@ def get_section_by_id(section_id):
 def get_section_fields(section_id):
     section = models.Section.query.get(section_id)
     return [x.to_dict() for x in section.fields]
+
+
+@sections_api_bp.route("/<int:section_id>/fields", methods=["POST"])
+def save_new_fields(section_id):
+    data = request.get_json()
+
+    # get all fields with session id
+    existing_fields = models.Section.query.get(section_id).fields
+    existing_ids = {f.id for f in existing_fields}
+
+    # find all ids from front end request
+    incoming_ids = {f.get("id", None) for f in data}
+
+    # identify which ids have been deleted and remove them
+    ids_to_delete = existing_ids - incoming_ids
+    if ids_to_delete:
+        db.session.query(models.Field).filter(
+            models.Field.id.in_(ids_to_delete)
+        ).delete()
+
+    # now update/create remaining fields
+    for f in data:
+        # if an id exists, try to find it
+        fid = f.get("id", None)
+        if fid:
+            query = models.Field.query.filter(models.Field.id == fid)
+            query.update(
+                {
+                    "section_id": section_id,
+                    "name": f.get("name"),
+                    "sort_order": f.get("sortOrder"),
+                    "input_type_id": f.get("inputType"),
+                    "mandatory": f.get("mandatory"),
+                }
+            )
+
+        else:
+            new_field = models.Field.create(
+                section_id=section_id,
+                name=f.get("name"),
+                sort_order=f.get("sortOrder"),
+                input_type_id=f.get("inputType"),
+                mandatory=f.get("mandatory"),
+            )
+            db.session.add(new_field)
+    db.session.commit()
+
+    return jsonify({"message": "success"}), 201
+    # todo: handle multiple input fields, create new select_field_options?
