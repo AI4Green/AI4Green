@@ -21,6 +21,11 @@ class WorkupTemplate(Template):
         cascade="all, delete-orphan",
     )
 
+    workbook_id = db.Column(
+        db.ForeignKey("WorkBook.id", ondelete="CASCADE"), nullable=False
+    )
+    workbook = db.relationship("WorkBook", back_populates="workup_templates")
+
     # map back to parent template
     __mapper_args__ = {
         "polymorphic_identity": TemplateType.WORKUP,
