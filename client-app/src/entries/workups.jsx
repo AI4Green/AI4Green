@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { ChakraProvider } from "@chakra-ui/react";
 
-import { EmbeddedCoshh } from "components/coshh-forms/form";
+import { EmbeddedWorkup } from "components/workups/embedded-workup";
 
 import { BackendApiProvider } from "contexts";
 // import theme from "theme";

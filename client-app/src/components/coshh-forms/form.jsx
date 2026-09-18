@@ -16,101 +16,10 @@ import { SectionForm } from "components/section-form";
 import { Formik, Form } from "formik";
 import { useBackendApi } from "contexts";
 import { useCoshhFormsList, useProject } from "api";
-import { FormikInput, MultiSelectField } from "components/core/forms";
-
-const useCoshhCreateForm = ({
-  reactionId,
-  workgroupName,
-  workbookName,
-  onCreated,
-}) => {
-  const { projects: api } = useBackendApi();
-  const { data: templates = [] } = useCoshhFormsList();
-  const toast = useToast();
-  const formRef = useRef();
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [feedback, setFeedback] = useState(null);
-
-  const initialValues = { templateId: [] };
-
-  const handleSubmit = async (values) => {
-    try {
-      setIsLoading(true);
-      setFeedback(null);
-
-      const response = await api.create({
-        reactionId,
-        workgroupName,
-        workbookName,
-        templateId: Number(values.templateId[0]),
-        templateType: "COSHH",
-      });
-
-      if (!response.ok) throw new Error("Failed to create COSHH form");
-
-      const data = await response.json();
-
-      if (data?.id || data?.uuid) {
-        toast({
-          title: "COSHH form created",
-          status: "success",
-          duration: 10000,
-          isClosable: true,
-          position: "top",
-        });
-        onCreated(data);
-      }
-    } catch (e) {
-      console.error(e);
-      setFeedback({ status: "error", message: "Failed to create COSHH form" });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return {
-    formRef,
-    templates,
-    initialValues,
-    feedback,
-    isLoading,
-    handleSubmit,
-  };
-};
-
-const CoshhCreateFormContent = ({
-  formRef,
-  templates,
-  initialValues,
-  feedback,
-  onSubmit,
-}) => (
-  <Formik innerRef={formRef} initialValues={initialValues} onSubmit={onSubmit}>
-    {() => (
-      <Form noValidate>
-        <VStack spacing={4} align="stretch">
-          {feedback && (
-            <Alert status={feedback.status}>
-              <AlertIcon />
-              {feedback.message}
-            </Alert>
-          )}
-          <MultiSelectField
-            isRequired
-            name="templateId"
-            label="COSHH Template"
-            options={templates.map((template) => ({
-              label: template.name,
-              value: String(template.id),
-              description: template.description,
-            }))}
-          />
-        </VStack>
-      </Form>
-    )}
-  </Formik>
-);
+import { useCreateFormFromTemplate } from "components/templates";
+import { TemplateSelectorForm } from "components/templates/select.jsx";
+import { TemplateCreateModalInline } from "components/templates/create.jsx";
+import { CoshhCreateInline } from "components/coshh-forms";
 
 // modal for routed/standalone page
 export const CoshhCreateModal = ({
@@ -119,18 +28,15 @@ export const CoshhCreateModal = ({
   isOpen,
   onClose,
 }) => {
-  const {
-    formRef,
-    templates,
-    initialValues,
-    feedback,
-    isLoading,
-    handleSubmit,
-  } = useCoshhCreateForm({ reactionId, onCreated });
+  const { formRef, initialValues, feedback, isLoading, handleSubmit } =
+    useCreateFormFromTemplate({ templateType: "COSHH", reactionId, onCreated });
+
+  const { data: templates = [] } = useCoshhFormsList();
 
   const body = (
-    <CoshhCreateFormContent
+    <TemplateSelectorForm
       formRef={formRef}
+      label={"COSHH"}
       templates={templates}
       initialValues={initialValues}
       feedback={feedback}
@@ -149,58 +55,6 @@ export const CoshhCreateModal = ({
       isOpen={isOpen}
       onClose={onClose}
     />
-  );
-};
-
-// for embedding into reaction constructor
-export const CoshhCreateInline = ({
-  reactionId,
-  workgroupName,
-  workbookName,
-  onCreated,
-  isOpen,
-  onClose,
-}) => {
-  const {
-    formRef,
-    templates,
-    initialValues,
-    feedback,
-    isLoading,
-    handleSubmit,
-  } = useCoshhCreateForm({
-    reactionId,
-    workgroupName,
-    workbookName,
-    onCreated,
-  });
-
-  if (!isOpen) return null;
-
-  return (
-    <Box borderWidth="1px" borderRadius="md" p={4} bg="white">
-      <HStack justify="space-between" mb={3}>
-        <Heading size="sm">Create COSHH Form</Heading>
-        <CloseButton onClick={onClose} />
-      </HStack>
-
-      <CoshhCreateFormContent
-        formRef={formRef}
-        templates={templates}
-        initialValues={initialValues}
-        feedback={feedback}
-        onSubmit={handleSubmit}
-      />
-
-      <Button
-        mt={4}
-        colorScheme="green"
-        onClick={() => formRef.current?.handleSubmit()}
-        isLoading={isLoading}
-      >
-        Create
-      </Button>
-    </Box>
   );
 };
 
