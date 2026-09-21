@@ -159,8 +159,6 @@ export const INPUT_TYPES_MAP = {
 
 export const InputTypePalette = ({ onAdd }) => {
   const { data: inputTypes } = useInputTypes();
-  console.log("inputTYpes:", inputTypes);
-
   return (
     <VStack
       px={2}

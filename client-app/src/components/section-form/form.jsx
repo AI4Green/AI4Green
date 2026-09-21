@@ -29,14 +29,18 @@ export const SectionForm = ({
   const formRef = useRef();
   const { sections: sectionApis } = useBackendApi();
 
-  const sectionFields = form?.fieldResponses.map((x) => ({
-    ...x.field,
+  console.log(form.fields);
+
+  const sectionFields = form?.fields.map((x) => ({
+    ...x,
     response: {
-      id: x.id,
-      value: x.response,
+      id: x.fieldResponse?.[0]?.id || null,
+      value: x.fieldResponse?.[0]?.fieldResponseValues?.[0]?.value || null,
     },
-    feedback: x.feedback,
+    feedback: x.fieldResponse?.[0]?.feedback || null,
   }));
+
+  console.log(sectionFields);
 
   const handleSubmit = async (values, fields) => {
     const data = prepareSubmissionData(fields, values);
@@ -77,7 +81,8 @@ export const SectionForm = ({
         toast(toastOptions("Section values saved successfully", "success"));
         await item.action.mutate();
       }
-    } catch {
+    } catch (e) {
+      console.log(e);
       toast(toastOptions(t("feedback.error_title"), "error"));
     } finally {
       setIsLoading(false);
@@ -88,7 +93,8 @@ export const SectionForm = ({
     <DefaultContentLayout>
       <Breadcrumbs items={breadcrumbItems} />
       <SectionHeader
-        {...headerItems}
+        header={headerItems}
+        project={{ name: "bpoog" }}
         action={
           <SectionFormAction
             item={item}
@@ -146,10 +152,11 @@ const toastOptions = (title, status) => ({
 });
 
 const SectionFormAction = ({ item, isInstructor, isLoading, formRef }) => {
+  console.log("Button Clicked");
   const hasRequiredPermissions = [
     STAGES_PERMISSIONS.OwnerCanEdit,
     STAGES_PERMISSIONS.OwnerCanEditCommented,
-  ].some((permission) => item.stage?.permissions.includes(permission));
+  ].some((permission) => item.approvalStatus?.permissions.includes(permission));
 
   const canUserSave =
     !isInstructor &&

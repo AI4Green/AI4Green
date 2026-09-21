@@ -153,8 +153,6 @@ const Action = ({ projectType, inUse }) => {
     mutate: mutate,
   };
 
-  console.log("USER", user);
-
   const actions = {
     edit: {
       isEligible: () =>

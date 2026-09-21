@@ -55,7 +55,7 @@ const evaluateField = (field, fields, values) => {
  */
 export const prepareSubmissionData = (fields, values) => {
   const data = fields.map((field) => evaluateField(field, fields, values));
-
+  console.log("preparesubmissiondata", data);
   const uniqueData = Object.values(
     data.reduce((uniqueItems, itemArray) => {
       itemArray?.forEach((item) => {
@@ -64,6 +64,7 @@ export const prepareSubmissionData = (fields, values) => {
       return uniqueItems;
     }, {}),
   );
+  console.log(uniqueData);
 
   const {
     fieldResponses,
@@ -133,7 +134,7 @@ const processObject = (acc, obj, isNew) => {
  * @returns true if the field is a file type
  */
 const isFieldFileType = (inputType) => {
-  const type = inputType.name.toUpperCase();
+  const type = inputType.title.toUpperCase();
   return (
     type === INPUT_TYPES.File.toUpperCase() ||
     type === INPUT_TYPES.ImageFile.toUpperCase() ||
@@ -160,7 +161,7 @@ const processFieldResponseWithFiles = (
   acc[isNew ? SUBMISSION_KEYS.NewFiles : SUBMISSION_KEYS.Files].push(
     ...fieldResponseWithFiles.map((response) => {
       if (
-        inputType.name.toUpperCase() ===
+        inputType.title.toUpperCase() ===
         INPUT_TYPES.ReactionScheme.toUpperCase()
       ) {
         return response.reactionSketch?.reactionImage?.image ?? new Blob();

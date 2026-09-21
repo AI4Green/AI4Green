@@ -40,3 +40,17 @@ class TemplateInstance(Model):
         "polymorphic_on": instance_type,
         "polymorphic_identity": InstanceType.GENERIC,
     }
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "uuid": self.uuid,
+            # "template_type": self.template_type.value,
+            "owner_id": self.owner_id,
+            "template_id": self.template_id,
+            "reaction_id": self.reaction_id,
+            "approver_id": self.approver_id,
+            "sections": [x.to_dict() for x in self.template.sections],
+            # "fieldResponses": [x.to_dict() for x in self.field_responses],
+            "approvalStatus": self.approval_status.value[0],
+        }

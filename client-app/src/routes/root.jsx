@@ -4,14 +4,13 @@ import { NotFound } from "pages/error";
 import { Home } from "pages/home";
 import { Route, Routes } from "react-router-dom";
 import { ProjectType } from "./project-type";
+import { COSHH } from "./coshh.jsx";
 
 export const Root = () => {
   return (
     <Routes>
-      {/* 1. Home page usually stands alone */}
       <Route path="/" element={<Home />} />
 
-      {/* 2. Routes that share the DefaultLayout */}
       <Route path="/" element={<DefaultLayout />}>
         <Route
           path="greenchemistry"
@@ -23,11 +22,10 @@ export const Root = () => {
           element={<ContentPage contentKey="documentation" />}
         />
 
-        {/* If you want ProjectType to be the fallback INSIDE the layout */}
         <Route path="project-types/*" element={<ProjectType />} />
+        <Route path="coshh/*" element={<COSHH />} />
       </Route>
 
-      {/* 3. Global Catch-all for 404s (Outside the layout) */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

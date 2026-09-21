@@ -29,4 +29,5 @@ class Field(Model):
             "mandatory": self.mandatory,
             "section_id": self.section_id,
             "inputType": self.input_type.to_dict(),
+            "fieldResponse": [x.to_dict() for x in self.field_response],
         }

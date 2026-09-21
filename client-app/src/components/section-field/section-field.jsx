@@ -84,7 +84,8 @@ const useFieldPermissions = (item, field, isInstructor) => {
     STAGES_PERMISSIONS.OwnerCanEditCommented,
   ].some(
     (permission) =>
-      item.stage?.permissions.includes(permission) && !field.feedback?.approved,
+      item.approvalStatus?.permissions.includes(permission) &&
+      !field.feedback?.approved,
   );
 
   const canEdit =
