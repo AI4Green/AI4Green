@@ -1,10 +1,9 @@
 import uuid
 from datetime import datetime
 
-import services.file_attachments
 from flask import json, jsonify, request
 from flask_login import current_user
-from sources import db, models
+from sources import db, models, services
 
 from . import template_instances_api_bp
 
