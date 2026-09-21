@@ -9,16 +9,16 @@ import {
   OptionsField,
   TextAreaField,
 } from "components/core/forms";
-// import {
-//   ChemicalDisposableTable,
-//   GreenMetricsCalculator,
-//   GroupPlanTable,
-//   HazardSummaryTable,
-//   ProductYieldTable,
-//   ReactionScheme,
-//   TabbedImportPanel,
-// } from "components/experiment-forms";
-// import { Feedback } from "components/feedback/feedback";
+import {
+  ChemicalDisposableTable,
+  GreenMetricsCalculator,
+  // GroupPlanTable,
+  HazardSummaryTable,
+  ProductYieldTable,
+  ReactionScheme,
+  TabbedImportPanel,
+} from "components/experiment-forms";
+import { Feedback } from "components/feedback/feedback";
 import { FIELDS, INPUT_TYPES, SECTION_TYPES } from "constants";
 
 const FieldWrapper = ({ hasFeedback = true, field, item, children }) => (
