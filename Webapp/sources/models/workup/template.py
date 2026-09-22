@@ -24,7 +24,7 @@ class WorkupTemplate(Template):
     workbook_id = db.Column(
         db.ForeignKey("WorkBook.id", ondelete="CASCADE"), nullable=False
     )
-    workbook = db.relationship("WorkBook", back_populates="workup_templates")
+    workbook = db.relationship("WorkBook", backref="workup_templates")
 
     # map back to parent template
     __mapper_args__ = {

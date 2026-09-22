@@ -39,8 +39,19 @@ class WorkupSection(Section):
         primary_key=True,
     )
 
-    step_type = db.Column(Enum(WorkupStepType), nullable=False)
+    step_type = db.Column(db.Enum(WorkupStepType), nullable=False)
+
+    template_id = db.Column(
+        db.Integer,
+        db.ForeignKey("WorkupTemplate.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    template = db.relationship(
+        "WorkupTemplate",
+        back_populates="steps",
+    )
 
     details = db.Column(db.Text)
 
-    __mapper_args__ = {"polymorphic_identity": "workup"}
+    __mapper_args__ = {"polymorphic_identity": "WorkupSection"}
