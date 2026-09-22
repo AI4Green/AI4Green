@@ -81,9 +81,9 @@ def update_section():
 
         return jsonify({"sections": [s.to_dict() for s in updated_sections]}), 200
 
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        return jsonify({"error": "Failed to update sections", "details": str(e)}), 500
+        return jsonify({"error": "Failed to update sections"}), 500
 
 
 @sections_api_bp.route("/<int:section_id>", methods=["GET"])
