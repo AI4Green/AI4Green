@@ -16,12 +16,6 @@ class COSHHTemplate(Template):
         primary_key=True,
     )
 
-    sections = db.relationship(
-        "Section",
-        back_populates="template",
-        cascade="all, delete-orphan",
-    )
-
     # map back to parent template
     __mapper_args__ = {
         "polymorphic_identity": TemplateType.COSHH,

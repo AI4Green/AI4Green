@@ -15,12 +15,6 @@ class WorkupTemplate(Template):
         primary_key=True,
     )
 
-    steps = db.relationship(
-        "WorkupSection",
-        back_populates="template",
-        cascade="all, delete-orphan",
-    )
-
     workbook_id = db.Column(
         db.ForeignKey("WorkBook.id", ondelete="CASCADE"), nullable=False
     )
