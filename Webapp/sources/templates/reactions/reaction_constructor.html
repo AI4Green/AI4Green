@@ -128,17 +128,27 @@
                 <div class="card reaction-section-card mb-3" id="coshh-form">
                     <div class="card-header">
                         <button class="section-toggle" type="button" data-toggle="collapse"
-                                data-target="#collapse-results" aria-expanded="true" aria-controls="collapse-results">
+                                data-target="#collapse-coshh" aria-expanded="true" aria-controls="collapse-coshh">
                             <span><i class="bi bi-exclamation-triangle mr-1"></i>COSHH Form</span>
                             <i class="bi bi-chevron-down"></i>
                         </button>
                     </div>
-                    <div id="collapse-results" class="collapse">
+                    <div id="collapse-coshh" class="collapse">
                         <div class="card-body">
-                            coshh form
+                            <div
+                                id="coshh-form-root"
+                                data-reaction-id="{{ reaction.reaction_id }}"
+                                data-workgroup-name="{{ active_workgroup }}"
+                                data-workbook-name="{{ active_workbook }}"
+                                {% if coshh_instance %}
+                                    data-form-id="{{ coshh_instance.id }}"
+                                {% endif %}
+                            ></div>
+
                         </div>
                     </div>
                 </div>
+                {{ vite_entry("src/entries/coshh-form.jsx") }}
 
 
                 <!-- ===================== REACTION NOTES ===================== -->

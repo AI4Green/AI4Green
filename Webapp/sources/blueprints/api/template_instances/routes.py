@@ -11,11 +11,18 @@ from . import template_instances_api_bp
 @template_instances_api_bp.route("/", methods=["POST"])
 def save_new_instance():
     data = request.get_json()
+
+    reaction_id = data.get("reactionId", "")
+    workgroup_name = data.get("workgroupName", "")
+    workbook_name = data.get("workbookName", "")
+
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
+
     # check to make sure current user is owner of reaction
-    reaction = (
-        db.session.query(models.Reaction)
-        # .filter(models.Reaction.creator.id == current_user.id) # todo: security instate creators only can complete forms
-        .filter(models.Reaction.reaction_id == data.get("reactionId")).first()
+    reaction = services.reaction.get_from_reaction_id_and_workbook_id(
+        reaction_id, workbook.id
     )
 
     # todo: enforce no duplicates
@@ -40,7 +47,6 @@ def get_template_instance(template_id):
     query = models.TemplateInstance.query.get(template_id)
     data = query.to_dict()
 
-    print(data)
     return jsonify(data)
 
 
