@@ -42,6 +42,7 @@ class TemplateInstance(Model):
     }
 
     def to_dict(self):
+        workbook = self.reaction.workbook
         return {
             "id": self.id,
             "uuid": self.uuid,
@@ -53,4 +54,7 @@ class TemplateInstance(Model):
             "sections": [x.to_dict() for x in self.template.sections],
             "fieldResponses": [x.to_dict() for x in self.field_responses],
             "approvalStatus": self.approval_status.value[0],
+            "reactionCode": self.reaction.reaction_id,
+            "workbook": workbook.name,
+            "workgroup": workbook.WorkGroup.name,
         }

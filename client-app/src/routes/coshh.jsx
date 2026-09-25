@@ -185,11 +185,25 @@ export const CoshhForm = () => {
             form={section}
             isInstructor={false}
             breadcrumbItems={[
-              { label: "Reactions", href: "/reactions" },
+              {
+                label: template.workgroup,
+                href: `/workgroup/${template.workgroup}`,
+                external: true,
+              },
+              {
+                label: template.workbook,
+                href: `/workgroup/${template.workgroup}`,
+                external: true,
+              },
+              {
+                label: template.reactionCode,
+                href: `/sketcher/${template.workgroup}/${template.workbook}/${template.reactionCode}/no`,
+                external: true,
+              },
               { label: "COSHH", active: true },
             ]}
             headerItems={{
-              title: section.title || "COSHH Assessment",
+              title: section.name || "COSHH Assessment",
               subtitle: `Editing instance ${template.uuid}`,
               name: section.title || "SECTION",
             }}

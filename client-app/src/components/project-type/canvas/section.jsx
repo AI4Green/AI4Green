@@ -84,7 +84,7 @@ export const Section = ({ isCollapsed = false, projectType }) => {
     };
 
     try {
-      await api.save(model);
+      await api.update(model);
       setIsLoading(false);
 
       toast({
@@ -258,7 +258,7 @@ const Actions = ({ isLoading, formRef, isEditing }) => {
           onClick={() => {
             navigate(
               // `${BASE_PATH}/${projectTypeId}/section-types/${sectionTypeId}/sections?action=edit&type=area-sections`,
-              `${BASE_PATH}/${projectTypeId}/sections?action=edit&type=area-sections`,
+              `${BASE_PATH}/${projectTypeId}?action=edit&type=area-sections`,
               {
                 replace: true,
               },

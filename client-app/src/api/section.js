@@ -16,6 +16,8 @@ export const fetchKeys = {
 export const getSectionsApi = ({ api }) => ({
   save: (values) => api.post(`sections/`, { json: values }),
 
+  update: (values) => api.put(`sections/`, { json: values }),
+
   saveFieldResponses: (formValues) =>
     api.put(`sections/`, { body: formValues }),
 
