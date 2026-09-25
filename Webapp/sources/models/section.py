@@ -21,7 +21,6 @@ class Section(Model):
             "id": self.id,
             "name": self.name,
             "sortOrder": self.sort_order,
-            "sectionType": self.section_type.to_dict(),
             "templateId": self.template_id,
             "fields": [x.to_dict() for x in self.fields],
         }

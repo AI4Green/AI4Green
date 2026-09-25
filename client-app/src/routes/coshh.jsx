@@ -18,7 +18,7 @@ import {
 import { SectionForm } from "components/section-form";
 import { Formik, Form } from "formik";
 import { useBackendApi } from "contexts";
-import { useProjectTypesList, useProject } from "api";
+import { useCoshhFormsList, useProject } from "api";
 import { FormikInput, MultiSelectField } from "components/core/forms";
 
 export const CoshhCreateModal = () => {
@@ -28,7 +28,7 @@ export const CoshhCreateModal = () => {
   const location = useLocation();
 
   const { projects: api } = useBackendApi();
-  const { data: templates = [] } = useProjectTypesList();
+  const { data: templates = [] } = useCoshhFormsList();
 
   const toast = useToast();
   const formRef = useRef();
@@ -134,8 +134,7 @@ export const CoshhCreateModal = () => {
 
 export const CoshhForm = () => {
   const { formId } = useParams();
-  const { projectType: projectTypesApi, projects: projectApi } =
-    useBackendApi();
+  const { coshhForms: coshhFormsApi, projects: projectApi } = useBackendApi();
   const toast = useToast();
 
   const [data, setData] = useState(null);
@@ -156,7 +155,7 @@ export const CoshhForm = () => {
       }
     };
     loadCoshhData();
-  }, [formId, projectTypesApi, toast]);
+  }, [formId, coshhFormsApi, toast]);
 
   const itemContext = {
     id: template.id,

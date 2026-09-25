@@ -1,9 +1,9 @@
 import { Flex, Icon, Text, useDisclosure, Spinner } from "@chakra-ui/react";
-import { useProjectTypesList } from "api";
+import { useCoshhFormsList } from "api";
 import { ActionButton } from "components/core/action-button";
 import { DataTableColumnHeader } from "components/core/data-table";
-import { DeleteModal } from "components/project-type/modal-delete";
-import { CreateOrEditProjectTypeModal } from "components/project-type/modal-form";
+import { DeleteModal } from "components/coshh-forms/modal-delete";
+import { CreateOrEditProjectTypeModal } from "components/coshh-forms/modal-form";
 import { MoveStageModal } from "components/stage/move-stage";
 import {
   PROJECT_TYPE_MANAGEMENT_PERMISSIONS,
@@ -109,7 +109,7 @@ export const columns = [
       <DataTableColumnHeader column={column} title="Actions" />
     ),
     cell: ({ row }) => (
-      <Action projectType={row.original} inUse={row.original.inUseCount > 0} />
+      <Action coshhForm={row.original} inUse={row.original.inUseCount > 0} />
     ),
     meta: {
       width: 1,
@@ -117,7 +117,7 @@ export const columns = [
   },
 ];
 
-const Action = ({ projectType, inUse }) => {
+const Action = ({ coshhForm, inUse }) => {
   const { user, isLoading } = useUser();
   if (isLoading) return <Spinner boxSize={16} />;
 
@@ -143,11 +143,11 @@ const Action = ({ projectType, inUse }) => {
     onClose: onDeprecateClose,
   } = useDisclosure();
 
-  const { mutate } = useProjectTypesList();
+  const { mutate } = useCoshhFormsList();
   const modalDefaultProps = {
     record: {
-      id: projectType.id,
-      title: projectType.name,
+      id: coshhForm.id,
+      title: coshhForm.name,
     },
     type: STAGE_TYPES.ProjectType,
     mutate: mutate,
@@ -158,10 +158,10 @@ const Action = ({ projectType, inUse }) => {
       isEligible: () =>
         user.permissions.includes(
           PROJECT_TYPE_MANAGEMENT_PERMISSIONS.EditProjectTypes,
-        ) && projectType.stage === STAGES.Draft,
+        ) && coshhForm.stage === STAGES.Draft,
       icon: <FaLink />,
       label: "Edit",
-      onClick: () => setSearchParams({ action: "edit", id: projectType.id }),
+      onClick: () => setSearchParams({ action: "edit", id: coshhForm.id }),
     },
     delete: {
       isEligible: () =>
@@ -169,16 +169,16 @@ const Action = ({ projectType, inUse }) => {
         user.permissions.includes(
           PROJECT_TYPE_MANAGEMENT_PERMISSIONS.DeleteProjectTypes,
         ) &&
-        projectType.stage === STAGES.Draft,
+        coshhForm.stage === STAGES.Draft,
       icon: <FaTrash />,
       label: "Delete",
-      onClick: () => setSearchParams({ action: "delete", id: projectType.id }),
+      onClick: () => setSearchParams({ action: "delete", id: coshhForm.id }),
     },
     publish: {
       isEligible: () =>
         user.permissions.includes(
           PROJECT_TYPE_MANAGEMENT_PERMISSIONS.EditProjectTypes,
-        ) && projectType.permissions.includes(STAGES_PERMISSIONS.CanPublish),
+        ) && coshhForm.permissions.includes(STAGES_PERMISSIONS.CanPublish),
 
       icon: <FaPaperPlane />,
       label: "Publish",
@@ -188,7 +188,7 @@ const Action = ({ projectType, inUse }) => {
       isEligible: () =>
         user.permissions.includes(
           PROJECT_TYPE_MANAGEMENT_PERMISSIONS.EditProjectTypes,
-        ) && projectType.permissions.includes(STAGES_PERMISSIONS.CanPutInDraft),
+        ) && coshhForm.permissions.includes(STAGES_PERMISSIONS.CanPutInDraft),
 
       icon: <FaDraftingCompass />,
       label: "Convert to Draft",
@@ -198,7 +198,7 @@ const Action = ({ projectType, inUse }) => {
       isEligible: () =>
         user.permissions.includes(
           PROJECT_TYPE_MANAGEMENT_PERMISSIONS.EditProjectTypes,
-        ) && projectType.permissions.includes(STAGES_PERMISSIONS.CanDeprecate),
+        ) && coshhForm.permissions.includes(STAGES_PERMISSIONS.CanDeprecate),
       icon: <FaTrash />,
       label: "Deprecate",
       onClick: onDeprecateOpen,
@@ -213,9 +213,9 @@ const Action = ({ projectType, inUse }) => {
       {isPublishOpen && (
         <MoveStageModal
           fixedNextStage={STAGES.Ready}
-          modalTitle="Publish Project Type"
-          modalMessage="Are you sure you want to publish this project type?"
-          successMessage="Project type published successfully"
+          modalTitle="Publish COSHH Form"
+          modalMessage="Are you sure you want to publish this COSHH form?"
+          successMessage="COSHH Form published successfully"
           isModalOpen={isPublishOpen}
           onModalClose={onPublishClose}
           {...modalDefaultProps}

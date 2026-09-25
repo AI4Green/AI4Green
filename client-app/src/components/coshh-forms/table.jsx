@@ -1,15 +1,15 @@
 import { HStack } from "@chakra-ui/react";
-import { useProjectTypesList } from "../../api/project-type.js";
+import { useCoshhFormsList } from "api/coshh-forms";
 import { DataTable, DataTableGlobalFilter } from "components/core/data-table";
-import { columns } from "components/project-type/columns";
-import { CreateOrEditProjectTypeModal } from "components/project-type/modal-form";
+import { columns } from "components/coshh-forms/columns";
+import { CreateOrEditProjectTypeModal } from "components/coshh-forms/modal-form";
 import { PROJECT_TYPE_MANAGEMENT_PERMISSIONS } from "constants";
 import { useUser } from "contexts";
 import { NewButton } from "layouts/default";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-export const ProjectTypeTable = () => {
+export const CoshhFormTable = () => {
   // const { user } = useUser();
   const user = {
     id: "user-123",
@@ -23,6 +23,7 @@ export const ProjectTypeTable = () => {
     ],
   };
   const { data } = useTableData();
+  console.log(data);
   const [searchValue, setSearchValue] = useState("");
   return (
     <DataTable data={data} columns={columns} globalFilter={searchValue}>
@@ -52,19 +53,19 @@ const New = () => {
 };
 
 const useTableData = () => {
-  const { data: projectTypes } = useProjectTypesList();
+  const { data: coshhForms } = useCoshhFormsList();
   const tableData = useMemo(
     () =>
-      projectTypes?.map((projectType) => ({
-        id: projectType.id,
-        name: projectType.name,
-        description: projectType.description,
-        stage: projectType.stage,
-        inUseCount: projectType.inUseCount,
-        permissions: projectType.permissions,
-        targetPath: `${projectType.id}`,
+      coshhForms?.map((coshhForm) => ({
+        id: coshhForm.id,
+        name: coshhForm.name,
+        description: coshhForm.description,
+        stage: coshhForm.stage,
+        inUseCount: coshhForm.inUseCount,
+        permissions: coshhForm.permissions,
+        targetPath: `${coshhForm.id}`,
       })),
-    [projectTypes],
+    [coshhForms],
   );
 
   return { data: tableData ?? [] };

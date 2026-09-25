@@ -8,10 +8,10 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { useSectionsListByProjectType } from "api/section";
+import { useSectionsListByCoshhForm } from "api/section";
 import { Badge } from "components/core/Badge";
 import { InlineDraggableListField } from "components/core/forms";
-import { BASE_PATH } from "components/project-type/canvas/area";
+import { BASE_PATH } from "components/coshh-forms/canvas/area";
 import { GLOBAL_PARAMETERS, STAGES, TITLE_ICON_COMPONENTS } from "constants";
 import { useBackendApi } from "contexts";
 import { Form, Formik } from "formik";
@@ -30,9 +30,9 @@ import { array, object, string } from "yup";
 
 import { Field } from "./field";
 
-export const Section = ({ isCollapsed = false, projectType }) => {
+export const Section = ({ isCollapsed = false, coshhForm }) => {
   const [searchParams] = useSearchParams();
-  const { projectTypeId, sectionTypeId, sectionId } = useParams();
+  const { coshhFormId, sectionTypeId, sectionId } = useParams();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,8 +41,7 @@ export const Section = ({ isCollapsed = false, projectType }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(!isCollapsed);
 
-  const { data: sections, mutate } =
-    useSectionsListByProjectType(projectTypeId);
+  const { data: sections, mutate } = useSectionsListByCoshhForm(coshhFormId);
 
   const { sections: api } = useBackendApi();
 
@@ -51,7 +50,7 @@ export const Section = ({ isCollapsed = false, projectType }) => {
 
   const formRef = useRef();
 
-  const canEdit = projectType.stage === STAGES.Draft;
+  const canEdit = coshhForm.stage === STAGES.Draft;
   const isEditing =
     canEdit &&
     searchParams.get("action") === "edit" &&
@@ -74,7 +73,7 @@ export const Section = ({ isCollapsed = false, projectType }) => {
   const handleSectionsSubmit = async ({ sections }) => {
     setIsLoading(true);
     const model = {
-      projectTypeId: Number(projectTypeId),
+      coshhFormId: Number(coshhFormId),
       // sectionTypeId: Number(sectionTypeId),
       sections: sections.map((section) => ({
         id: section.id.startsWith("temp") ? null : Number(section.id),
@@ -193,13 +192,13 @@ export const Section = ({ isCollapsed = false, projectType }) => {
         )}
       </VStack>
 
-      {section && <Field section={section} projectType={projectType} />}
+      {section && <Field section={section} coshhForm={coshhForm} />}
     </>
   );
 };
 
 const List = ({ sections }) => {
-  const { projectTypeId, sectionTypeId, sectionId } = useParams();
+  const { coshhFormId, sectionTypeId, sectionId } = useParams();
   const navigate = useNavigate();
 
   return (
@@ -215,7 +214,7 @@ const List = ({ sections }) => {
                   <Text fontSize="xs" fontWeight="light">
                     {section.sortOrder}.
                   </Text>
-                  <Icon as={TITLE_ICON_COMPONENTS[section.sectionType.name]} />
+                  {/*<Icon as={TITLE_ICON_COMPONENTS[section.sectionType.name]} />*/}
                 </HStack>
               }
               justifyContent="flex-start"
@@ -224,7 +223,7 @@ const List = ({ sections }) => {
               size="xs"
               onClick={() => {
                 navigate(
-                  `${BASE_PATH}/${projectTypeId}/section-types/${sectionTypeId}/sections/${section.id}`,
+                  `${BASE_PATH}/${coshhFormId}/section-types/${sectionTypeId}/sections/${section.id}`,
                   {
                     replace: true,
                   },
@@ -243,7 +242,7 @@ const List = ({ sections }) => {
 };
 
 const Actions = ({ isLoading, formRef, isEditing }) => {
-  const { projectTypeId, sectionTypeId } = useParams();
+  const { coshhFormId } = useParams();
   const navigate = useNavigate();
 
   return (
@@ -257,15 +256,13 @@ const Actions = ({ isLoading, formRef, isEditing }) => {
           colorScheme="blue"
           onClick={() => {
             navigate(
-              // `${BASE_PATH}/${projectTypeId}/section-types/${sectionTypeId}/sections?action=edit&type=area-sections`,
-              `${BASE_PATH}/${projectTypeId}?action=edit&type=area-sections`,
-              {
-                replace: true,
-              },
+              `${BASE_PATH}/${coshhFormId}?action=edit&type=area-sections`,
+              { replace: true },
             );
           }}
         />
       )}
+
       {isEditing && (
         <HStack spacing={4}>
           <IconButton
@@ -278,6 +275,7 @@ const Actions = ({ isLoading, formRef, isEditing }) => {
             fontSize="lg"
             isLoading={isLoading}
           />
+
           <IconButton
             size="sm"
             fontSize="lg"
@@ -286,12 +284,9 @@ const Actions = ({ isLoading, formRef, isEditing }) => {
             variant="ghost"
             colorScheme="yellow"
             onClick={() => {
-              navigate(
-                `${BASE_PATH}/${projectTypeId}/section-types/${sectionTypeId}/sections`,
-                {
-                  replace: true,
-                },
-              );
+              navigate(`${BASE_PATH}/${coshhFormId}`, {
+                replace: true,
+              });
             }}
             isLoading={isLoading}
           />

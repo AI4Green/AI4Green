@@ -5,7 +5,7 @@ import { Badge } from "components/core/Badge";
 import {
   INPUT_TYPES_MAP,
   InputTypePalette,
-} from "components/project-type/canvas/field/input-type-palette";
+} from "components/coshh-forms/canvas/field/input-type-palette";
 import { INPUT_TYPES_MAP as FIELD_TYPES_MAP } from "components/section-field";
 import { STAGES, TOAST_DEFAULTS } from "constants";
 import { useBackendApi } from "contexts";
@@ -17,13 +17,13 @@ import { BASE_PATH } from "./area";
 import { FormActions } from "./field/action";
 import { FieldManager, Info } from "./field/manager";
 
-export const Field = ({ section, projectType }) => {
+export const Field = ({ section, coshhForm }) => {
   const [searchParams] = useSearchParams();
-  const { projectTypeId, sectionTypeId, sectionId } = useParams();
+  const { coshhFormId, sectionTypeId, sectionId } = useParams();
   const navigate = useNavigate();
   const { fields: api } = useBackendApi();
 
-  const canEdit = projectType.stage === STAGES.Draft;
+  const canEdit = coshhForm.stage === STAGES.Draft;
   const isEditing =
     canEdit &&
     searchParams.get("action") === "edit" &&
@@ -67,7 +67,7 @@ export const Field = ({ section, projectType }) => {
         status: "success",
       });
       await mutate();
-      navigate(`${BASE_PATH}/${projectTypeId}/sections/${sectionId}`, {
+      navigate(`${BASE_PATH}/${coshhFormId}/sections/${sectionId}`, {
         replace: true,
       });
     } catch (error) {
@@ -84,10 +84,9 @@ export const Field = ({ section, projectType }) => {
 
   const handleCancel = () => {
     setFields(orderFields(data));
-    navigate(
-      `${BASE_PATH}/${projectTypeId}/section-types/${sectionTypeId}/sections/${sectionId}`,
-      { replace: true },
-    );
+    navigate(`${BASE_PATH}/${coshhFormId}/sections/${sectionId}`, {
+      replace: true,
+    });
   };
 
   const handleDrop = useCallback(

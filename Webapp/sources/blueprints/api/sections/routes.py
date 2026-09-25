@@ -42,7 +42,7 @@ def save_new_section():
 def update_section():
     data = request.get_json()
 
-    project_type_id = data.get("projectTypeId")
+    coshh_form_id = data.get("coshhFormId")
     sections_data = data.get("sections", [])
 
     updated_sections = []
@@ -70,8 +70,7 @@ def update_section():
                 section = models.Section.create(
                     name=name,
                     sort_order=sort_order,
-                    template_id=project_type_id,
-                    section_type_id=1,  # default for now
+                    template_id=coshh_form_id,
                 )
 
                 db.session.add(section)

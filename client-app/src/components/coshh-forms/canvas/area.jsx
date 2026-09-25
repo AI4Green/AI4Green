@@ -8,27 +8,26 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { FaPlus } from "react-icons/fa";
-import { useSectionsListByProjectType } from "api";
+import { useSectionsListByCoshhForm } from "api";
 import { Badge } from "components/core/Badge";
 import { useBackendApi } from "contexts";
 import { SECTION_TYPES, TITLE_ICON_COMPONENTS } from "constants";
 import { useNavigate, useParams } from "react-router-dom";
 
-export const BASE_PATH = "/project-types";
+export const BASE_PATH = "/coshh-form-management";
 
 export const Area = () => {
   const navigate = useNavigate();
-  const { projectTypeId, sectionId } = useParams();
+  const { coshhFormId, sectionId } = useParams();
   const toast = useToast();
 
-  const { data: sections, mutate } =
-    useSectionsListByProjectType(projectTypeId);
+  const { data: sections, mutate } = useSectionsListByCoshhForm(coshhFormId);
   const { sections: api } = useBackendApi();
 
   const handleAddSection = async () => {
     try {
       const newSection = {
-        projectTypeId: Number(projectTypeId),
+        projectTypeId: Number(coshhFormId),
         name: "New Section",
         sortOrder: sections ? sections.length + 1 : 1,
       };
@@ -38,7 +37,7 @@ export const Area = () => {
 
       if (response?.id) {
         navigate(
-          `${BASE_PATH}/${projectTypeId}/sections/${response.id}?action=edit`,
+          `${BASE_PATH}/${coshhFormId}/sections/${response.id}?action=edit`,
         );
       }
     } catch (error) {
@@ -75,7 +74,7 @@ export const Area = () => {
             size="xs"
             onClick={() => {
               navigate(
-                `${BASE_PATH}/${projectTypeId}/sections/${section.id}?action=edit&type=section-fields`,
+                `${BASE_PATH}/${coshhFormId}/sections/${section.id}?action=edit&type=section-fields`,
                 {
                   replace: true,
                 },

@@ -1,17 +1,17 @@
 import { HStack } from "@chakra-ui/react";
 import { Breadcrumbs } from "components/core/breadcrumbs";
-import { ProjectTypeTable } from "components/project-type/table";
+import { CoshhFormTable } from "components/coshh-forms/table";
 import { TITLE_ICON_COMPONENTS } from "constants/experiment-ui";
 import {
   DefaultContentHeader,
   DefaultContentLayout,
 } from "../../layouts/default";
 
-export const ProjectTypeList = () => {
+export const CoshhFormsList = () => {
   const breadcrumbItems = [
     { label: "Home", href: "/" },
     {
-      label: "Project Type Management",
+      label: "COSHH Form Management",
     },
   ];
   return (
@@ -19,11 +19,11 @@ export const ProjectTypeList = () => {
       <Breadcrumbs items={breadcrumbItems} />
       <HStack>
         <DefaultContentHeader
-          header="Project Type Management"
+          header="COSHH Form Management"
           icon={TITLE_ICON_COMPONENTS.ProjectType}
         />
       </HStack>
-      <ProjectTypeTable />
+      <CoshhFormTable />
     </DefaultContentLayout>
   );
 };

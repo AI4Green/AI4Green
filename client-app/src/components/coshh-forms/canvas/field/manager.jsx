@@ -6,7 +6,7 @@ import {
 import { reorder } from "@atlaskit/pragmatic-drag-and-drop/reorder";
 import { Box, HStack, Icon, Text, VStack } from "@chakra-ui/react";
 import { Badge } from "components/core/Badge";
-import { DRAG_TYPES } from "components/project-type/canvas/field";
+import { DRAG_TYPES } from "components/coshh-forms/canvas/field";
 import { INPUT_TYPES_MAP as FIELD_TYPES_MAP } from "components/section-field";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {

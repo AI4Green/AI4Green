@@ -2,12 +2,12 @@ import { useBackendApi } from "contexts";
 import useSWR from "swr";
 
 export const fetchKeys = {
-  projectTypesList: "templates",
-  projectType: (projectTypeId) => `templates/${projectTypeId}`,
+  coshhFormsList: "templates",
+  coshhForm: (coshhFormId) => `templates/${coshhFormId}`,
   sectionTypesList: "templates/section_types",
 };
 
-export const getProjectTypesApi = ({ api }) => ({
+export const getCoshhFormsApi = ({ api }) => ({
   create: ({ values }) =>
     api.post("templates", {
       json: values,
@@ -24,11 +24,11 @@ export const getProjectTypesApi = ({ api }) => ({
     api.post(`templates/${id}/advance`, { json: { stageName } }),
 });
 
-export const useProjectTypesList = () => {
+export const useCoshhFormsList = () => {
   const { apiFetcher } = useBackendApi();
 
   return useSWR(
-    fetchKeys.projectTypesList,
+    fetchKeys.coshhFormsList,
     async (url) => {
       const data = await apiFetcher(url);
       return data;
@@ -39,10 +39,10 @@ export const useProjectTypesList = () => {
   );
 };
 
-export const useProjectType = (projectTypeId) => {
+export const useCoshhForm = (coshhFormId) => {
   const { apiFetcher } = useBackendApi();
   return useSWR(
-    projectTypeId ? fetchKeys.projectType(projectTypeId) : null,
+    coshhFormId ? fetchKeys.coshhForm(coshhFormId) : null,
     async (url) => {
       const data = await apiFetcher(url);
 

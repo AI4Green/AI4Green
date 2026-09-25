@@ -7,7 +7,7 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { useProjectTypesList } from "api";
+import { useCoshhFormsList } from "api";
 import {
   FormikInput,
   MultiSelectField,
@@ -32,7 +32,7 @@ export const CreateOrEditProjectTypeModal = () => {
   const location = useLocation();
 
   const { projectTypes: action } = useBackendApi();
-  const { data: projectTypes, mutate } = useProjectTypesList();
+  const { data: coshhForms, mutate } = useCoshhFormsList();
 
   const { t } = useTranslation();
   const toast = useToast();
@@ -50,7 +50,7 @@ export const CreateOrEditProjectTypeModal = () => {
   } = useModalState(location, navigate, formRef);
 
   const projectType = isEditAction
-    ? projectTypes?.find((projectType) => projectType.id === Number(id))
+    ? coshhForms?.find((coshhForm) => coshhForm.id === Number(id))
     : null;
 
   useEffect(() => {
@@ -60,8 +60,8 @@ export const CreateOrEditProjectTypeModal = () => {
   const initialValues = () => {
     return projectType
       ? {
-          name: projectType.name,
-          description: projectType.description,
+          name: coshhForm.name,
+          description: coshhForm.description,
           source: [],
         }
       : {
@@ -121,7 +121,7 @@ export const CreateOrEditProjectTypeModal = () => {
       innerRef={formRef}
       initialValues={initialValues()}
       onSubmit={handleSubmit}
-      validationSchema={validationSchema(projectTypes, projectType)}
+      validationSchema={validationSchema(coshhForms, projectType)}
     >
       <Form noValidate>
         <VStack align="stretch" spacing={4}>
@@ -150,7 +150,7 @@ export const CreateOrEditProjectTypeModal = () => {
               <MultiSelectField
                 name="source"
                 label="Import from"
-                options={projectTypes
+                options={coshhForms
                   .filter((x) => x.stage === STAGES.Ready)
                   .map((projectType) => ({
                     label: projectType.name,
