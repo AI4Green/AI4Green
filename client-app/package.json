@@ -58,5 +58,13 @@
     "vite-plugin-raw": "^1.0.3",
     "vite-tsconfig-paths": "^5.1.4",
     "webpack": "^5.101.0"
+  },
+  "overrides": {
+    "html2pdf.js": {
+      "jspdf": "4.2.1"
+    },
+    "jspdf": {
+      "jspdf": "4.2.1"
+    }
   }
 }
