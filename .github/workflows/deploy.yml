@@ -54,16 +54,11 @@ jobs:
         working-directory: client-app
         run: npm run build
 
-      - name: Verify Vite build
-        run: |
-          echo "SPA build contents:"
-          find Webapp/sources/static/spa -type f
-          test -f Webapp/sources/static/spa/.vite/manifest.json
-
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
           name: python-app
+          include-hidden-files: true
           path: |
             .
             !venv/
@@ -89,11 +84,6 @@ jobs:
           app-name: "ai4green-uat"
           slot-name: "Production"
           publish-profile: ${{ secrets.azureWebAppPublishProfile }}
-
-      - name: Verify downloaded Vite build
-        run: |
-          find Webapp/sources/static/spa -type f
-          test -f Webapp/sources/static/spa/.vite/manifest.json
 
   deploy-prod:
     runs-on: ubuntu-latest
