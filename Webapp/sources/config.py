@@ -168,7 +168,11 @@ class BaseConfig(object):  # class to store configuration variables
         "MESSAGE_QUEUE_CONNECTION_STRING", default_conn_str
     )
 
-    REACT_APP_URL = os.getenv("REACT_APP_URL", "http://localhost:8000/")
+    # config for vite, used for react
+    VITE_DEV_SERVER = (
+        os.getenv("VITE_DEV_SERVER", "false").lower() == "true"
+    )  # assume in prod unless specified
+    VITE_DEV_SERVER_URL = os.getenv("REACT_APP_URL", "http://localhost:8000/spa")
 
 
 class TestConfig(BaseConfig):

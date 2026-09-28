@@ -164,6 +164,11 @@ def sketcher(
     )
     addenda = services.reaction.get_addenda(reaction)
 
+    coshh_instance = services.coshh_forms.get_coshh_form_from_reaction_id(reaction_id)
+
+    # entry function for react
+    vite_entry = services.spa.vite_entry
+
     if reaction.reaction_smiles:
         load_status = "loading"
     else:
@@ -178,6 +183,8 @@ def sketcher(
         tutorial=tutorial,
         addenda=addenda,
         review=False,
+        vite_entry=vite_entry,
+        coshh_instance=coshh_instance,
     )
 
 
