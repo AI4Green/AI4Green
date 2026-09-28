@@ -30,6 +30,7 @@ function novelCompoundDataFromSketcher() {
     novelCompoundURL = "/_polymer_novel_compound";
   } else {
     novelCompoundURL = "/_novel_compound";
+    requestData.smiles = JSON.parse(smiles);
     requestData.cas = cas;
   }
 

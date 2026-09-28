@@ -11,7 +11,10 @@ class TemplateType(Enum):
     """
 
     COSHH = "COSHH"
-    REACTIONS = "REACTIONS"
+    REACTION = "REACTION"
+    WORKUP = "WORKUP"
+    PURIFICATION = "PURIFICATION"
+    RESULTS = "RESULTS"
 
 
 class TemplateStatus(Enum):
@@ -27,8 +30,6 @@ class Template(Model):
     """
     For more specific templates, you can inherit from this class using alembic polymorphism:
     needs specific TemplateType Eum value. You will also need to uncomment out the polymorphic config in this model
-
-    ps: I havent tested this
     eg/
 
     Class NewTemplate(Template):
@@ -54,15 +55,18 @@ class Template(Model):
     )
     institution = db.relationship("Institution", backref="template")
 
-    sections = db.relationship("Section", back_populates="template")
-    template_instances = db.relationship("TemplateInstance", back_populates="template")
-
     status = db.Column(
         db.Enum(TemplateStatus), nullable=False, default=TemplateStatus.DRAFT
     )
 
-    # # Polymorphic config, uncomment for additional child template
-    # __mapper_args__ = {"polymorphic_on": template_type}
+    template_instances = db.relationship(
+        "TemplateInstance",
+        back_populates="template",
+        cascade="all, delete-orphan",  # if appropriate
+    )
+
+    # Polymorphic config, uncomment for additional child template
+    __mapper_args__ = {"polymorphic_on": template_type}
 
     def to_dict(self):
         """
