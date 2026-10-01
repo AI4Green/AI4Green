@@ -21,13 +21,17 @@ def get_conditions(solved_routes: dict) -> Dict[str, dict]:
 
     """
     conditions_results = {}
-    for (
-        route_label,
-        route,
-    ) in solved_routes.items():
+    reaction_cache = {}
+
+    for route_label, route in solved_routes.items():
         conditions_results.update(
-            RouteConditions(route_label, route).get_route_conditions()
+            RouteConditions(
+                route_label,
+                route,
+                reaction_cache,
+            ).get_route_conditions()
         )
+
     return conditions_results
 
 
@@ -36,9 +40,10 @@ class RouteConditions:
     Class to handle conditions for a specific route.
     """
 
-    def __init__(self, route_label: str, route: dict):
+    def __init__(self, route_label: str, route: dict, reaction_cache: dict):
         self.route_label = route_label
         self.route = route
+        self.reaction_cache = reaction_cache
 
     def get_route_conditions(self) -> Dict:
         """
@@ -52,9 +57,19 @@ class RouteConditions:
             # child smiles are the reactants. if there are none it is a terminal node.
             if self._not_terminal(node):
                 # get the conditions or make note of the failed api call
-                api_status, reaction_conditions = ReactionConditions(
-                    node
-                ).get_reaction_conditions()
+                reaction = ReactionConditions(node)
+
+                if reaction.reaction_smiles in self.reaction_cache:
+                    api_status, reaction_conditions = self.reaction_cache[
+                        reaction.reaction_smiles
+                    ]
+                else:
+                    api_status, reaction_conditions = reaction.get_reaction_conditions()
+
+                    self.reaction_cache[reaction.reaction_smiles] = (
+                        api_status,
+                        reaction_conditions,
+                    )
 
                 if api_status == "failed":
                     reaction_conditions = "Condition Prediction Unsuccessful"
