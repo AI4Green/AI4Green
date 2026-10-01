@@ -234,6 +234,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         State("validated-smiles", "data"),
         State("smiles-input", "pattern"),
         State("enhancement-dropdown", "value"),
+        State("stock-checklist", "value"),
         State("iterations-input", "value"),
         State("time-limit-input", "value"),
         State("max-depth-input", "value"),
@@ -244,6 +245,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         validated_smiles: str,
         smiles_regex: str,
         enhancement: str,
+        selected_stocks: List[str],
         iterations: int,
         time_limit: int,
         max_depth: int,
@@ -258,6 +260,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             validated_smiles - the validated SMILES string
             smiles_regex - contains 'invalid' if SMILES are not valid and prompts user to enter valid SMILES
             enhancement - the selected enhancement type from the dropdown
+            selected_stocks - the stocks selected for use by the user for the retro search
             iterations - the number of iterations for the search
             time_limit - the time limit for the search (in seconds)
             max_depth - the maximum depth of the search tree
@@ -276,12 +279,16 @@ def init_dashboard(server: Flask) -> classes.Dash:
         time_limit = time_limit if time_limit is not None else 60
         max_depth = max_depth if max_depth is not None else 7
         enhancement = enhancement if enhancement else "Default"
+        selected_stocks = selected_stocks if selected_stocks else ["all"]
+
+        stocks = ",".join(selected_stocks)
 
         request_url = (
             f"{retrosynthesis_base_url}/retrosynthesis_api/"
             f"?key={retrosynthesis_api_key}"
             f"&smiles={validated_smiles}"
             f"&enhancement={enhancement}"
+            f"&stocks={stocks}"
             f"&iterations={iterations}"
             f"&time_limit={time_limit}"
             f"&max_depth={max_depth}"
@@ -788,6 +795,52 @@ def init_dashboard(server: Flask) -> classes.Dash:
             bool: The opposite of the current state (i.e., toggles open/close).
         """
         return not is_open
+
+    @dash_app.callback(
+        Output("stock-checklist", "value"),
+        Output("previous-stock-selection", "data"),
+        Output("stock-dropdown-label", "children"),
+        Input("stock-checklist", "value"),
+        State("previous-stock-selection", "data"),
+        prevent_initial_call=True,
+    )
+    def update_stock_selection(selected_stocks, previous_stocks):
+        selected_stocks = selected_stocks or []
+        previous_stocks = previous_stocks or []
+
+        newly_selected = set(selected_stocks) - set(previous_stocks)
+
+        # If "All" has just been selected, deselect everything else
+        if "all" in newly_selected:
+            updated_stocks = ["all"]
+
+        # If an individual stock is selected while "All" is active,
+        # deselect "All"
+        elif "all" in selected_stocks and len(selected_stocks) > 1:
+            updated_stocks = [
+                stock for stock in selected_stocks if stock != "all"
+            ]
+
+        else:
+            updated_stocks = selected_stocks
+
+        stock_labels = {
+            "zinc": "ZINC",
+            "paroutes": "PaRoutes",
+            "askcos": "ASKCOS",
+            "naturals": "Natural products",
+            "simples": "Simple Stocks",
+        }
+
+        # Keep the default text when "All" is selected or nothing is selected
+        if not updated_stocks or "all" in updated_stocks:
+            dropdown_label = "Select Stocks"
+        else:
+            dropdown_label = ", ".join(
+                stock_labels[stock] for stock in updated_stocks
+            )
+
+        return updated_stocks, updated_stocks, dropdown_label
 
     @dash_app.callback(
         Output("modal-save-message", "children"),
