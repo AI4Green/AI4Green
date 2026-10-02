@@ -338,7 +338,7 @@ function setupConcentrationListeners() {
   $(".js-reactant-concentrations").on("input change", function () {
     updateReactantVolumes();
   });
-  // bind reagent listener to reaction table div to capture any dynamically added rows
+
   $("#js-reagent-table").on(
     "input.reagentEquivalent change.reagentEquivalent",
     ".js-reagent-concentrations",
@@ -353,16 +353,18 @@ function setupConcentrationListeners() {
     "input.reactionConcentration change.reactionConcentration",
     ".js-solvent-concentrations",
     function () {
-      // need to sync all concentrations first
-      let concentration = this.value;
+      const concentration = this.value;
       const numberOfSolvents = getVal($("#js-number-of-solvents"));
 
-      // Sync all concentration inputs
       for (let i = 1; i <= numberOfSolvents; i++) {
         $("#js-solvent-concentration" + i).val(concentration);
-        $("#js-solvent-rounded-concentration" + i).val(
-          roundedNumber(concentration),
-        );
+
+        const $roundedInput = $("#js-solvent-rounded-concentration" + i);
+
+        // Don't overwrite the input the user is currently typing into
+        if (!$roundedInput.is(this)) {
+          $roundedInput.val(concentration);
+        }
       }
 
       updateSolventVolumes();
@@ -466,26 +468,44 @@ function updateSolventVolumes() {
   const limitingReactantAmount = Number(
     getVal($("#js-reactant-amount" + getLimitingReactantTableNumber())),
   );
+
   const numberOfSolvents = Number(getVal($("#js-number-of-solvents")));
   const limitingReactantAmountUnit = getVal($("#js-amount-unit"));
   const solventVolumeUnit = getVal($("#js-solvent-volume-unit"));
 
-  // let totalSolventVolume = 0;
   for (let i = 1; i <= numberOfSolvents; i++) {
-    let concentration = Number(
-      getVal($("#js-solvent-rounded-concentration" + i)),
+    const concentrationValue = getVal(
+      $("#js-solvent-rounded-concentration" + i),
     );
-    // assume equal split of volume between reaction solvents to maintain concentration
-    let totalSolventVolume = calculateSolventVolumeFromConcentration(
+
+    // User may temporarily have an empty value while typing
+    if (concentrationValue === "") {
+      continue;
+    }
+
+    const concentration = Number(concentrationValue);
+
+    // Prevent division by zero / NaN / Infinity
+    if (!Number.isFinite(concentration) || concentration <= 0) {
+      continue;
+    }
+
+    const totalSolventVolume = calculateSolventVolumeFromConcentration(
       limitingReactantAmount,
       concentration,
       limitingReactantAmountUnit,
       solventVolumeUnit,
     );
 
-    let element = $("#js-solvent-volume" + i);
-    element.val(totalSolventVolume / numberOfSolvents);
-    element.val(roundedNumber(totalSolventVolume / numberOfSolvents));
+    const volume = totalSolventVolume / numberOfSolvents;
+
+    // Don't ever put Infinity/NaN into a number input
+    if (!Number.isFinite(volume)) {
+      continue;
+    }
+
+    const element = $("#js-solvent-volume" + i);
+    element.val(roundedNumber(volume));
     applyRequiredStyling(element);
   }
 }
