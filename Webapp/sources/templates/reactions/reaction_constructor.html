@@ -205,7 +205,7 @@
                             <!-- Experimental data / file attachments -->
                             <div class="subsection-card" id="reaction-file-attachments">
                                 <div class="subsection-header">
-                                    <h6>Experimental Data</h6>
+                                    <h6>File Attachments</h6>
                                 </div>
                                 <div class="subsection-body">
                                     <div id="file-upload-div" class="input-group mb-3 w-25">
@@ -234,13 +234,13 @@
                     </div>
                     <div id="collapse-results" class="collapse">
                         <div class="card-body">
-                            <p>
-                                <button id="add-result-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">
-                                    <i class="bi bi-plus-lg"></i> Add Result
-                                </button>
-                            </p>
+{#                            <p>#}
+{#                                <button id="add-result-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">#}
+{#                                    <i class="bi bi-plus-lg"></i> Add Result#}
+{#                                </button>#}
+{#                            </p>#}
                             <div id="reaction-results-list">
-                                <p class="empty-placeholder">No results added yet.</p>
+                                <p class="empty-placeholder">More result types coming soon...</p>
                             </div>
                         </div>
                     </div>
@@ -257,7 +257,7 @@
                     </div>
                     <div id="collapse-sustainability" class="collapse">
                         <div class="card-body">
-                            sustainability
+                            <p class="empty-placeholder">Sustainability dashboard coming soon...</p>
                         </div>
                     </div>
                 </div>
@@ -276,7 +276,7 @@
                         <div class="card-body">
 
                             <p id="summary-div">
-                                <input type="submit" value="Summary" id="action-summary" class="btn btn-primary" onclick="showSummary()" style="display: none; width: 100px;">
+                                <input type="submit" value="Generate Summary" id="action-summary" class="btn btn-primary" onclick="showSummary()" style="display: none; width: auto;">
                             </p>
 
                             <div id="print-container" class="container-fluid" style="padding-left: 0px">
@@ -287,7 +287,7 @@
                             </div>
 
                             <br>
-                            <button id="print-pdf" onclick="window.print()" class="btn btn-primary" style="width:140px">Print Summary</button>
+                            <button id="print-pdf" onclick="window.print()" class="btn btn-primary" style="display: none; width:140px">Print Summary</button>
                             <div class="notToPrint" id="printoutput"></div>
 
                             <hr>
