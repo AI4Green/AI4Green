@@ -174,7 +174,7 @@ body.loading .loading-bar{
 #name-id {
     position: sticky;
     top: var(--navbar-height, 56px);
-    z-index: 1020;
+    z-index: 900;
     background: #fff;
     padding: .75rem 0;
     border-bottom: 1px solid #e9ecef;
@@ -189,6 +189,7 @@ body.loading .loading-bar{
 /* ---- Side nav ---- */
 #reaction-sidenav {
     top: calc(var(--navbar-height, 56px) + var(--reaction-header-height, 70px) + 1rem);
+    z-index: 1;
 }
 #reaction-sidenav .nav-link {
     color: #495057;

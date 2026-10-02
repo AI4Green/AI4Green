@@ -337,12 +337,14 @@ class SketcherCompound:
             workbook:
 
         Returns:
-            dict: A list of SketcherCompound instances representing individual reactants and products.
+            component_lists: dict: A list of SketcherCompound instances representing individual reactants and products.
+            units: dict: Dict of reaction-level parameters, defined by reaction_param_keys
         """
 
         component_lists = {"reactant": [], "reagent": [], "solvent": [], "product": []}
         units = {}
 
+        # reaction name and description are extracted at the reload_reaction_table route
         reaction_param_keys = [
             "limiting_reactant_table_number",
             "main_product",

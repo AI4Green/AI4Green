@@ -1,4 +1,5 @@
 import { Button, HStack, Text, useToast, VStack } from "@chakra-ui/react";
+import { useEffect } from "react";
 import { Breadcrumbs } from "components/core/breadcrumbs";
 import { SectionField, validationSchema } from "components/section-field";
 import { SectionHeader } from "components/section-header/header";
@@ -15,6 +16,25 @@ import { useTranslation } from "react-i18next";
 import { FaSave } from "react-icons/fa";
 
 import { initialValues, prepareSubmissionData } from ".";
+
+const AutoSave = ({ values, handleSubmit, fields, delay = 1000 }) => {
+  const firstRender = useRef(true);
+
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      handleSubmit(values, fields);
+    }, delay);
+
+    return () => clearTimeout(timeout);
+  }, [values, delay]);
+
+  return null;
+};
 
 export const SectionForm = ({
   item,
@@ -74,8 +94,7 @@ export const SectionForm = ({
       setIsLoading(true);
       const response = await item.action.save(formData);
       if (response && (response.status === 204 || response.status === 200)) {
-        toast(toastOptions("Section values saved successfully", "success"));
-        await item.action.mutate();
+        // toast(toastOptions("Section values saved successfully", "success"));
       }
     } catch (e) {
       console.log(e);
@@ -91,7 +110,7 @@ export const SectionForm = ({
 
   return (
     <DefaultContentLayout>
-      <Breadcrumbs items={breadcrumbItems} />
+      {/*<Breadcrumbs items={breadcrumbItems} />*/}
       <SectionHeader
         header={headerItems}
         project={{ name: form.reactionID }}
@@ -118,6 +137,12 @@ export const SectionForm = ({
       >
         {({ values }) => (
           <Form noValidate>
+            <AutoSave
+              values={values}
+              fields={sectionFields}
+              handleSubmit={handleSubmit}
+              delay={1000}
+            />
             <VStack align="stretch" spacing={[3, 4]}>
               {sectionFields
                 .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -152,7 +177,6 @@ const toastOptions = (title, status) => ({
 });
 
 const SectionFormAction = ({ item, isInstructor, isLoading, formRef }) => {
-  console.log("Button Clicked");
   const hasRequiredPermissions = [
     STAGES_PERMISSIONS.OwnerCanEdit,
     STAGES_PERMISSIONS.OwnerCanEditCommented,
