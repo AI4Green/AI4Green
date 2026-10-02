@@ -512,25 +512,64 @@ function assignVolumeTooltip(calcType, component, index) {
   };
 
   const $input = $(`#js-${component}-rounded-volume${index}`);
-  // Remove any existing icon first
-  $input.next(".calc-method-icon").remove();
-  $input.removeAttr("title");
 
-  if (calcType === "") {
-    // if no volume, break early
+  const previousCalcType = $input.data("calc-type");
+  const previousVolume = $input.data("calculated-volume");
+  const currentVolume = $input.val();
+
+  // Update tooltip
+  if (calcType) {
+    $input.attr("title", volumeTooltips[calcType]);
+  } else {
+    $input.removeAttr("title");
+  }
+
+  // Store current calculation state
+  $input.data("calc-type", calcType);
+  $input.data("calculated-volume", currentVolume);
+
+  // Don't show a toast during initial setup
+  if (previousCalcType === undefined) {
     return;
   }
 
-  const $icon = $(`
-    <span
-      class="calc-method-icon"
-      title="${volumeTooltips[calcType]}"
-      >
-      ℹ️
+  // Only notify if this particular calculation changed
+  const calculationChanged =
+    previousCalcType !== calcType || previousVolume !== currentVolume;
+
+  if (calculationChanged && calcType) {
+    showVolumeCalculationToast($input, calcType);
+  }
+}
+
+function showVolumeCalculationToast($input, calcType) {
+  const messages = {
+    concentration: "Calculated from concentration and amount",
+    density: "Calculated from density and mass",
+  };
+
+  if (!messages[calcType]) {
+    return;
+  }
+
+  const $wrapper = $input.closest(".input-wrapper");
+
+  // Remove an existing toast for this input
+  $wrapper.find(".calculation-toast").remove();
+
+  const $toast = $(`
+    <span class="calculation-toast">
+      ${messages[calcType]}
     </span>
   `);
 
-  $input.after($icon);
+  $wrapper.append($toast);
+
+  setTimeout(() => {
+    $toast.fadeOut(300, function () {
+      $(this).remove();
+    });
+  }, 2000);
 }
 
 function updateComponentAmount(component, index, limitingReactantAmount) {
