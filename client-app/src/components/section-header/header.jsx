@@ -4,14 +4,21 @@ import { TITLE_ICON_COMPONENTS } from "constants";
 import { useUser } from "contexts";
 
 export const SectionHeader = ({ header, project, owner, action }) => (
-  <HStack w="full" justify="space-between" borderBottomWidth={1} py={4}>
+  <HStack
+    w="full"
+    justify="space-between"
+    borderBottomWidth={1}
+    py={4}
+    px={4}
+    bg="gray.50"
+  >
     <VStack spacing={4} align="start">
       <HStack spacing={6}>
         {header.title && (
           <Heading
             as="h2"
             fontSize={{ base: "sm", lg: "md" }}
-            fontWeight="normal"
+            fontWeight="bold"
             color="gray.700"
           >
             {header.title}
@@ -20,7 +27,7 @@ export const SectionHeader = ({ header, project, owner, action }) => (
       </HStack>
     </VStack>
 
-    <VStack align="end">{action}</VStack>
+    {/*<VStack align="end">{action}</VStack>*/}
   </HStack>
 );
 

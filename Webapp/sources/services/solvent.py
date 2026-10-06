@@ -144,6 +144,7 @@ def sustainability_from_primary_key(primary_key: Union[int, Tuple, str]) -> int:
     # not all compounds have been characterised as solvents and may give an error. Then we stick with the integer system
     # and assign a value of 5 which translates to non-chem21 or unknown
 
+    sustainability_phrase = None
     if services.all_compounds.validate_primary_key(primary_key):
         primary_key = services.all_compounds.primary_key_resolver(primary_key)
         if isinstance(primary_key, int):
@@ -218,5 +219,7 @@ def get_flag_rate() -> Dict[int, str]:
 
 
 def convert_sustainability_flag_to_text(flag: int) -> str:
+    if not flag:
+        return "non-chem21"
     conversion_dict = get_flag_rate()
     return conversion_dict[flag]

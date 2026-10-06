@@ -338,7 +338,7 @@ function setupConcentrationListeners() {
   $(".js-reactant-concentrations").on("input change", function () {
     updateReactantVolumes();
   });
-  // bind reagent listener to reaction table div to capture any dynamically added rows
+
   $("#js-reagent-table").on(
     "input.reagentEquivalent change.reagentEquivalent",
     ".js-reagent-concentrations",
@@ -353,16 +353,18 @@ function setupConcentrationListeners() {
     "input.reactionConcentration change.reactionConcentration",
     ".js-solvent-concentrations",
     function () {
-      // need to sync all concentrations first
-      let concentration = this.value;
+      const concentration = this.value;
       const numberOfSolvents = getVal($("#js-number-of-solvents"));
 
-      // Sync all concentration inputs
       for (let i = 1; i <= numberOfSolvents; i++) {
         $("#js-solvent-concentration" + i).val(concentration);
-        $("#js-solvent-rounded-concentration" + i).val(
-          roundedNumber(concentration),
-        );
+
+        const $roundedInput = $("#js-solvent-rounded-concentration" + i);
+
+        // Don't overwrite the input the user is currently typing into
+        if (!$roundedInput.is(this)) {
+          $roundedInput.val(concentration);
+        }
       }
 
       updateSolventVolumes();
@@ -466,26 +468,44 @@ function updateSolventVolumes() {
   const limitingReactantAmount = Number(
     getVal($("#js-reactant-amount" + getLimitingReactantTableNumber())),
   );
+
   const numberOfSolvents = Number(getVal($("#js-number-of-solvents")));
   const limitingReactantAmountUnit = getVal($("#js-amount-unit"));
   const solventVolumeUnit = getVal($("#js-solvent-volume-unit"));
 
-  // let totalSolventVolume = 0;
   for (let i = 1; i <= numberOfSolvents; i++) {
-    let concentration = Number(
-      getVal($("#js-solvent-rounded-concentration" + i)),
+    const concentrationValue = getVal(
+      $("#js-solvent-rounded-concentration" + i),
     );
-    // assume equal split of volume between reaction solvents to maintain concentration
-    let totalSolventVolume = calculateSolventVolumeFromConcentration(
+
+    // User may temporarily have an empty value while typing
+    if (concentrationValue === "") {
+      continue;
+    }
+
+    const concentration = Number(concentrationValue);
+
+    // Prevent division by zero / NaN / Infinity
+    if (!Number.isFinite(concentration) || concentration <= 0) {
+      continue;
+    }
+
+    const totalSolventVolume = calculateSolventVolumeFromConcentration(
       limitingReactantAmount,
       concentration,
       limitingReactantAmountUnit,
       solventVolumeUnit,
     );
 
-    let element = $("#js-solvent-volume" + i);
-    element.val(totalSolventVolume / numberOfSolvents);
-    element.val(roundedNumber(totalSolventVolume / numberOfSolvents));
+    const volume = totalSolventVolume / numberOfSolvents;
+
+    // Don't ever put Infinity/NaN into a number input
+    if (!Number.isFinite(volume)) {
+      continue;
+    }
+
+    const element = $("#js-solvent-volume" + i);
+    element.val(roundedNumber(volume));
     applyRequiredStyling(element);
   }
 }
@@ -506,34 +526,70 @@ function updateComponentVolume(component, index) {
 }
 
 function assignVolumeTooltip(calcType, component, index) {
-  console.log("assign tooltip", calcType, component, index);
   const volumeTooltips = {
     concentration: "Calculated from concentration and amount.",
     density: "Calculated from density and mass.",
   };
 
   const $input = $(`#js-${component}-rounded-volume${index}`);
-  console.log("$input length:", $input.length);
-  // Remove any existing icon first
-  $input.next(".calc-method-icon").remove();
-  $input.removeAttr("title");
 
-  if (calcType === "") {
-    // if no volume, break early
+  const previousCalcType = $input.data("calc-type");
+  const previousVolume = $input.data("calculated-volume");
+  const currentVolume = $input.val();
+
+  // Update tooltip
+  if (calcType) {
+    $input.attr("title", volumeTooltips[calcType]);
+  } else {
+    $input.removeAttr("title");
+  }
+
+  // Store current calculation state
+  $input.data("calc-type", calcType);
+  $input.data("calculated-volume", currentVolume);
+
+  // Don't show a toast during initial setup
+  if (previousCalcType === undefined) {
     return;
   }
 
-  const $icon = $(`
-    <span
-      class="calc-method-icon"
-      title="${volumeTooltips[calcType]}"
-      >
-      ℹ️
+  // Only notify if this particular calculation changed
+  const calculationChanged =
+    previousCalcType !== calcType || previousVolume !== currentVolume;
+
+  if (calculationChanged && calcType) {
+    showVolumeCalculationToast($input, calcType);
+  }
+}
+
+function showVolumeCalculationToast($input, calcType) {
+  const messages = {
+    concentration: "Calculated from concentration and amount",
+    density: "Calculated from density and mass",
+  };
+
+  if (!messages[calcType]) {
+    return;
+  }
+
+  const $wrapper = $input.closest(".input-wrapper");
+
+  // Remove an existing toast for this input
+  $wrapper.find(".calculation-toast").remove();
+
+  const $toast = $(`
+    <span class="calculation-toast">
+      ${messages[calcType]}
     </span>
   `);
 
-  $input.after($icon);
-  console.log("icon in DOM:", $(".calc-method-icon").length);
+  $wrapper.append($toast);
+
+  setTimeout(() => {
+    $toast.fadeOut(300, function () {
+      $(this).remove();
+    });
+  }, 2000);
 }
 
 function updateComponentAmount(component, index, limitingReactantAmount) {
