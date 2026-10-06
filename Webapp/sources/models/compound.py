@@ -11,7 +11,7 @@ class Compound(Model):
     cas = db.Column(db.Text, nullable=False, unique=True)
     name = db.Column(db.Text, nullable=False)
     smiles = db.Column(db.Text)
-    inchi = db.Column(db.Text)
+    inchi = db.Column(db.Text, index=True)
     inchikey = db.Column(db.Text)
     molec_formula = db.Column(db.Text)
     density = db.Column(db.Float(53))
