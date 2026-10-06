@@ -2,13 +2,14 @@ from datetime import datetime
 
 import pytz
 from flask import jsonify, request
-from flask_login import current_user
+from flask_login import current_user, login_required
 from sources import db, models
 
 from . import templates_api_bp
 
 
 @templates_api_bp.route("/", methods=["GET"])
+@login_required
 def get_templates():
     template_type = request.args.get("type", None)
     # todo: move db queries to services?
@@ -26,12 +27,14 @@ def get_templates():
 
 
 @templates_api_bp.route("/<int:template_id>", methods=["GET"])
+@login_required
 def get_template(template_id):
     template = models.Template.query.get(template_id)
     return jsonify(template.to_dict())
 
 
 @templates_api_bp.route("/", methods=["POST"])
+@login_required
 def create_new_template():
     data = request.get_json()
     source_id = data.get("source_id", None)
@@ -60,6 +63,7 @@ def create_new_template():
 
 
 @templates_api_bp.route("/<int:template_id>/sections", methods=["GET"])
+@login_required
 def get_template_sections(template_id):
     query = models.Template.query.get(template_id)
     return jsonify([x.to_dict() for x in query.sections])

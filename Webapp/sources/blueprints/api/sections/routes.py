@@ -1,11 +1,12 @@
 from flask import jsonify, request
-from flask_login import current_user
+from flask_login import current_user, login_required
 from sources import db, models
 
 from . import sections_api_bp
 
 
 @sections_api_bp.route("/", methods=["GET"])
+@login_required
 def get_sections():
     # get sections per user
     query = (
@@ -18,6 +19,7 @@ def get_sections():
 
 
 @sections_api_bp.route("/", methods=["POST"])
+@login_required
 def save_new_section():
     data = request.get_json()
 
@@ -39,6 +41,7 @@ def save_new_section():
 
 
 @sections_api_bp.route("/", methods=["PUT"])
+@login_required
 def update_section():
     data = request.get_json()
 
@@ -86,18 +89,21 @@ def update_section():
 
 
 @sections_api_bp.route("/<int:section_id>", methods=["GET"])
+@login_required
 def get_section_by_id(section_id):
     section = models.Section.query.get(section_id)
     return jsonify(section.to_dict)
 
 
 @sections_api_bp.route("/<int:section_id>/fields", methods=["GET"])
+@login_required
 def get_section_fields(section_id):
     section = models.Section.query.get(section_id)
     return [x.to_dict() for x in section.fields]
 
 
 @sections_api_bp.route("/<int:section_id>/fields", methods=["POST"])
+@login_required
 def save_new_fields(section_id):
     data = request.get_json()
 
