@@ -177,7 +177,7 @@ stock_options = [
     {"label": "ZINC", "value": "zinc"},
     {"label": "PaRoutes", "value": "paroutes"},
     {"label": "ASKCOS", "value": "askcos"},
-    {"label": "Natural products", "value": "naturals"},
+    {"label": "Natural Products", "value": "naturals"},
     {"label": "Simple Stocks", "value": "simples"},
 ]
 
