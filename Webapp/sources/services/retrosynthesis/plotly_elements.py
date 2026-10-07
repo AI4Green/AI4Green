@@ -46,9 +46,10 @@ loading_circle = html.Div(
                     value=0,
                     striped=True,
                     animated=True,
+                    color="success",
                     style={
-                        "width": "400px",
-                        "height": "20px",
+                        "width": "800px",
+                        "height": "25px",
                     },
                 ),
                 html.Div(
@@ -57,7 +58,9 @@ loading_circle = html.Div(
                     style={
                         "marginTop": "10px",
                         "textAlign": "center",
-                        "fontSize": "16px",
+                        "fontSize": "20px",
+                        "fontFamily": "Helvetica",
+                        "fontWeight": "1000",
                     },
                 ),
             ],

@@ -1,5 +1,6 @@
 import os
 import re
+import time
 from typing import Dict, List, Literal, Optional, Tuple, Union
 from urllib.parse import quote
 
@@ -388,7 +389,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             "Interactive display for retrosynthesis completed.",
             None,
             dash.no_update,
-            65,
+            55,
             "Retrosynthesis complete",
         )
 
@@ -401,9 +402,10 @@ def init_dashboard(server: Flask) -> classes.Dash:
     )
     def start_conditions_calculation(solved_routes: dict):
         if solved_routes and solved_routes.get("routes"):
+            time.sleep(1)
             return (
                 solved_routes["uuid"],
-                80,
+                70,
                 "Calculating conditions",
             )
 
