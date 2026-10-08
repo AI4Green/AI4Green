@@ -1,5 +1,6 @@
 import os
 import re
+import time
 from typing import Dict, List, Literal, Optional, Tuple, Union
 from urllib.parse import quote
 
@@ -230,7 +231,9 @@ def init_dashboard(server: Flask) -> classes.Dash:
         Output("user-message", "children", allow_duplicate=True),
         Output("computed-retrosynthesis-uuid", "data"),
         Output("interval-container", "children", allow_duplicate=True),
-        Output("loading-display", "display", allow_duplicate=True),
+        Output("loading-display", "hidden", allow_duplicate=True),
+        Output("retrosynthesis-progress-bar", "value", allow_duplicate=True),
+        Output("retrosynthesis-progress-text", "children", allow_duplicate=True),
         State("validated-smiles", "data"),
         State("smiles-input", "pattern"),
         State("enhancement-dropdown", "value"),
@@ -250,7 +253,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         time_limit: int,
         max_depth: int,
         n_clicks: int,
-    ) -> Tuple[str, str, Optional[dcc.Interval], str]:
+    ) -> Tuple[str, str, Optional[dcc.Interval], bool, int, str]:
         """
         Called when the user clicks the retrosynthesis button.
         Starts the retrosynthesis process in a background thread.
@@ -271,7 +274,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             children for the dcc.Interval container element
         """
         if utils.smiles_not_valid(smiles_regex):
-            return "Please enter a valid SMILES", "", None, "hide"
+            return "Please enter a valid SMILES", "", None, True, 0, ""
 
         validated_smiles = utils.encodings_to_smiles_symbols(validated_smiles)
 
@@ -302,21 +305,26 @@ def init_dashboard(server: Flask) -> classes.Dash:
             "Retrosynthesis process started. Please wait...",
             unique_identifier,
             interval,
-            "show",
+            False,
+            20,
+            "Obtaining stocks and templates"
         )
+
 
     @dash_app.callback(
         Output("computed-retrosynthesis-routes", "data"),
         Output("user-message", "children", allow_duplicate=True),
         Output("interval-container", "children", allow_duplicate=True),
-        Output("loading-display", "display", allow_duplicate=True),
+        Output("loading-display", "hidden", allow_duplicate=True),
+        Output("retrosynthesis-progress-bar", "value", allow_duplicate=True),
+        Output("retrosynthesis-progress-text", "children", allow_duplicate=True),
         Input("interval-component", "n_intervals"),
         State("computed-retrosynthesis-uuid", "data"),
         prevent_initial_call=True,
     )
     def check_retrosynthesis_status(
         n_intervals: int, task_id: str
-    ) -> Tuple[Optional[dict], str, Optional[None], str]:
+    ) -> Tuple[Optional[dict], str, Optional[None], bool, int, str]:
         """
         Check the status of the retrosynthesis process and remove interval element and return results if completed.
 
@@ -335,34 +343,87 @@ def init_dashboard(server: Flask) -> classes.Dash:
             f"{retrosynthesis_base_url}/results/{task_id}"
             f"?key={retrosynthesis_api_key}"
         )
-        retro_api_status, solved_routes, raw_routes = (
+        retro_api_status, solved_routes, raw_routes, stage = (
             retrosynthesis_api.retrosynthesis_results_poll(request_url)
         )
 
         if retro_api_status == "running":
-            return dash.no_update, "Processing...", dash.no_update, dash.no_update
+            if stage == "obtaining_resources":
+                progress_value = 20
+                progress_text = "Obtaining stocks and templates"
+
+            elif stage == "running_retrosynthesis":
+                progress_value = 45
+                progress_text = "Running retrosynthesis"
+
+            else:
+                progress_value = dash.no_update
+                progress_text = dash.no_update
+
+            return (
+                dash.no_update,
+                "Processing...",
+                dash.no_update,
+                dash.no_update,
+                progress_value,
+                progress_text,
+            )
 
         if retro_api_status == "error":
-            return dash.no_update, f"Retrosynthesis failed.", None, "hide"
+            return (
+                dash.no_update,
+                "Retrosynthesis failed.",
+                None,
+                True,
+                dash.no_update,
+                dash.no_update,
+            )
 
-        retrosynthesis_output = {"uuid": task_id, "routes": solved_routes}
+        retrosynthesis_output = {
+            "uuid": task_id,
+            "routes": solved_routes,
+        }
+
         return (
             retrosynthesis_output,
             "Interactive display for retrosynthesis completed.",
             None,
             dash.no_update,
+            55,
+            "Retrosynthesis complete",
         )
 
     @dash_app.callback(
-        Output("loading-display", "display", allow_duplicate=True),
-        Output("computed-conditions-data", "data"),
-        State("computed-retrosynthesis-uuid", "data"),
+        Output("conditions-calculation-trigger", "data"),
+        Output("retrosynthesis-progress-bar", "value", allow_duplicate=True),
+        Output("retrosynthesis-progress-text", "children", allow_duplicate=True),
         Input("computed-retrosynthesis-routes", "data"),
         prevent_initial_call=True,
     )
+    def start_conditions_calculation(solved_routes: dict):
+        if solved_routes and solved_routes.get("routes"):
+            time.sleep(1)
+            return (
+                solved_routes["uuid"],
+                70,
+                "Calculating conditions",
+            )
+
+        return dash.no_update, dash.no_update, dash.no_update
+
+    @dash_app.callback(
+        Output("loading-display", "hidden", allow_duplicate=True),
+        Output("computed-conditions-data", "data"),
+        State("computed-retrosynthesis-uuid", "data"),
+        State("computed-retrosynthesis-routes", "data"),
+        Input("conditions-calculation-trigger", "data"),
+        prevent_initial_call=True,
+    )
     def new_conditions(
-        unique_identifier: str, solved_routes: dict
-    ) -> Tuple[Optional[str], Optional[dict]]:
+            unique_identifier: str,
+            solved_routes: dict,
+            _conditions_trigger: str,
+    ) -> Tuple[Optional[bool], Optional[dict]]:
         """
         Called upon completion of a new retrosynthesis routes
         Generates conditions for each corresponding forward reaction in the retrosynthetic routes
@@ -387,7 +448,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
             conditions = conditions_api.get_conditions(solved_routes["routes"])
             conditions_output = {"uuid": unique_identifier, "routes": conditions}
             return dash.no_update, conditions_output
-        return "hide", dash.no_update
+        return True, dash.no_update
 
     @dash_app.callback(
         Output("active-conditions-data", "data"),
@@ -654,7 +715,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
                 return {"background-color": background_colour, "width": "100%"}
 
     @dash_app.callback(
-        Output("loading-display", "display", allow_duplicate=True),
+        Output("loading-display", "hidden", allow_duplicate=True),
         Output("retrosynthesis-cytoscape", "elements"),
         Output("retrosynthesis-cytoscape", "stylesheet"),
         State("active-retrosynthesis-routes", "data"),
@@ -663,7 +724,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
     )
     def display_retrosynthesis(
         active_retrosynthesis: dict, selected_route: str
-    ) -> Tuple[str, List[dict], List[dict]]:
+    ) -> Tuple[bool, List[dict], List[dict]]:
         """
         Called when there is a change to the routes dropdown or active routes
         Create the nodes, edges, and stylesheet to generate the interactive cytoscape
@@ -686,7 +747,7 @@ def init_dashboard(server: Flask) -> classes.Dash:
         elements = retro_cytoscape.make_cytoscape_elements()
         style_sheet = retro_cytoscape.make_cytoscape_stylesheet()
         return (
-            "hide",
+            True,
             elements,
             style_sheet,
         )
