@@ -240,6 +240,21 @@ def upgrade_():
         ],
     )
 
+    role_table = sa.table(
+        "Role",
+        sa.column("name", sa.String()),
+        sa.column("role_description", sa.String()),
+    )
+    op.bulk_insert(
+        role_table,
+        [
+            {
+                "name": "H&S Admin",
+                "role_description": "H&S Admin with permissions to design COSHH templates",
+            },
+        ],
+    )
+
     # ### end Alembic commands ###
 
 
@@ -256,6 +271,23 @@ def downgrade_():
     op.drop_table("Section")
     op.drop_table("COSHHTemplate")
     op.drop_table("Template")
+
+    bind = op.get_bind()
+
+    sa.Enum(name="templatetype").drop(
+        bind,
+        checkfirst=True,
+    )
+
+    sa.Enum(name="templatestatus").drop(
+        bind,
+        checkfirst=True,
+    )
+
+    sa.Enum(name="instancetype").drop(
+        bind,
+        checkfirst=True,
+    )
     # ### end Alembic commands ###
 
 
