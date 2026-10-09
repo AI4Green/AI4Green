@@ -10,20 +10,8 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 export const CoshhFormTable = () => {
-  // const { user } = useUser();
-  const user = {
-    id: "user-123",
-    name: "Dev User",
-    email: "dev@example.com",
-    // Ensure this includes the specific permission the UI is looking for
-    permissions: [
-      "CreateProjectTypes",
-      "EditProjectTypes",
-      "DeleteProjectTypes",
-    ],
-  };
+  const { user } = useUser();
   const { data } = useTableData();
-  console.log(data);
   const [searchValue, setSearchValue] = useState("");
   return (
     <DataTable data={data} columns={columns} globalFilter={searchValue}>

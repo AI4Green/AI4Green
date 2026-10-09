@@ -31,7 +31,6 @@ def save_new_section():
         name=name,
         sort_order=sort_order,
         template_id=template_id,
-        section_type_id=1,  # default for now, change later (possibly with modal?)
     )
 
     db.session.add(new_section)

@@ -1,6 +1,8 @@
 from datetime import datetime
+from tempfile import template
 
 import pytz
+import services.templates
 from flask import jsonify, request
 from flask_login import current_user, login_required
 from sources import db, models
@@ -11,26 +13,21 @@ from . import templates_api_bp
 @templates_api_bp.route("/", methods=["GET"])
 @login_required
 def get_templates():
-    template_type = request.args.get("type", None)
-    # todo: move db queries to services?
-    query = db.session.query(models.Template).filter(
-        models.Template.creator_id == current_user.id
-    )
+    template_type = request.args.get("template_type", None)
+    print(template_type)
+    template_list = []
 
-    if template_type:
-        query = query.filter(models.Template.template_type == template_type)
+    if template_type == "COSHH":
+        template_list = services.templates.list_coshh_as_dict()
 
-    if not query:
-        return []
-
-    return jsonify([x.to_dict() for x in query.all()])
+    return jsonify(template_list)
 
 
 @templates_api_bp.route("/<int:template_id>", methods=["GET"])
 @login_required
 def get_template(template_id):
-    template = models.Template.query.get(template_id)
-    return jsonify(template.to_dict())
+    template_object = models.Template.query.get(template_id)
+    return jsonify(template_object.to_dict())
 
 
 @templates_api_bp.route("/", methods=["POST"])
@@ -40,26 +37,21 @@ def create_new_template():
     source_id = data.get("source_id", None)
     name = data.get("name", None)
     description = data.get("description", None)
+    template_type = data.get("templateType", None)
+
+    new_template = {}
 
     # todo: handle errors if name or desc are missing
     # todo: include institution id per user
 
     # if no source id, create a blank template with default values
     if not source_id:
-        new_template = models.Template.create(
-            name=name,
-            description=description,
-            template_type=models.template.TemplateType.COSHH,
-            time_of_creation=datetime.now(pytz.timezone("Europe/London")).replace(
-                tzinfo=None
-            ),
-            creator_id=current_user.id,
-            institution_id=1,
-        )
-        db.session.add(new_template)
-        db.session.commit()
+        if template_type == "COSHH":
+            new_template = services.templates.create_new_coshh_template(
+                name, description
+            )
 
-        return jsonify(new_template.to_dict()), 200
+    return jsonify(new_template), 200
 
 
 @templates_api_bp.route("/<int:template_id>/sections", methods=["GET"])
