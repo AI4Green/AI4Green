@@ -37,6 +37,10 @@ def create_new_template():
     source_id = data.get("source_id", None)
     name = data.get("name", None)
     description = data.get("description", None)
+    template_type = data.get("templateType", None)
+
+    if template_type:
+        template_type = models.template.TemplateType.COSHH
 
     # todo: handle errors if name or desc are missing
     # todo: include institution id per user
@@ -46,7 +50,7 @@ def create_new_template():
         new_template = models.Template.create(
             name=name,
             description=description,
-            template_type=models.template.TemplateType.COSHH,
+            template_type=template_type,
             time_of_creation=datetime.now(pytz.timezone("Europe/London")).replace(
                 tzinfo=None
             ),

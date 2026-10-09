@@ -23,7 +23,6 @@ export const CoshhFormTable = () => {
     ],
   };
   const { data } = useTableData();
-  console.log(data);
   const [searchValue, setSearchValue] = useState("");
   return (
     <DataTable data={data} columns={columns} globalFilter={searchValue}>
