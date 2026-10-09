@@ -25,6 +25,8 @@ def downgrade(engine_name):
 
 
 def upgrade_():
+    op.execute("ALTER TYPE approvalstatus ADD VALUE IF NOT EXISTS 'DRAFT'")
+
     approval_status_enum = postgresql.ENUM(
         "PENDING",
         "APPROVED",
