@@ -104,6 +104,7 @@ def request_response(token: str) -> Response:
                 tutorial="no",
                 addenda=addenda,
                 review=True,
+                vite_entry=services.spa.vite_entry,
             )
         else:
             flash("A review has already been submitted for this reaction!")
