@@ -289,6 +289,10 @@ function setupAmountUnitListener() {
     // changing molar unit should change the mass
     updateProductAmounts();
   });
+
+  $("#js-product-mass-unit").on("input change", function () {
+    updateProductMasses();
+  });
 }
 
 function setupVolumeUnitListeners() {

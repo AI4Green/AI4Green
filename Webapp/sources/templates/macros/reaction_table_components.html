@@ -330,10 +330,8 @@
             </td>
             <td></td>
             <td>
-                {% if product.is_polymer %}
-                    <input style="width: 60px;" type="number" step="any" min="0" placeholder="1" id="js-product-equivalent{{ index }}"
-                       value="{{ product.compound_data.equivalents if product.compound_data.equivalents else 1 }}">
-                {% endif %}
+                <input style="width: 60px;" type="number" step="any" min="0" placeholder="1" id="js-product-equivalent{{ index }}"
+                   value="{{ product.compound_data.equivalents if product.compound_data.equivalents else 1 }}">
             </td>
             <td><input type="number" step="any" placeholder="-" min="0"
                 {% if product.compound_data.amounts %}value="{{ product.compound_data.amounts }}"{% endif %}
