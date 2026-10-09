@@ -17,10 +17,9 @@ def create_new_coshh_template(name: str, description: str) -> Dict:
     Returns:
         Models.COSHHTemplate.to_dict(), Dict, dictionary representation of db object
     """
-    new_template = models.COSHHTemplate.create(
+    new_template = models.COSHHTemplate(
         name=name,
         description=description,
-        template_type=models.template.TemplateType.COSHH,
         time_of_creation=datetime.now(pytz.timezone("Europe/London")).replace(
             tzinfo=None
         ),
