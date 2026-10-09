@@ -17,7 +17,7 @@ def get_templates():
     template_list = []
 
     if template_type == "COSHH":
-        template_list = services.templates.list_coshh()
+        template_list = services.templates.list_coshh_as_dict()
 
     return jsonify(template_list)
 

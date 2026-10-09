@@ -29,6 +29,7 @@ from . import (
     spa,
     summary,
     sustainability,
+    template_instances,
     templates,
     user,
     utils,

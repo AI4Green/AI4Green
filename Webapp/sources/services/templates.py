@@ -32,7 +32,7 @@ def create_new_coshh_template(name: str, description: str) -> Dict:
     return new_template.to_dict()
 
 
-def list_coshh() -> List[Dict]:
+def list_coshh_as_dict() -> List[Dict]:
     """
     Queries COSHHTemplate table and returns all templates for current user
     Returns:
@@ -42,3 +42,16 @@ def list_coshh() -> List[Dict]:
         models.Template.creator_id == current_user.id
     )
     return [x.to_dict() for x in query.all()]
+
+
+def get_coshh_template_by_id(template_id: int) -> Dict:
+    """
+    Get COSHHTemplate by template id
+    Args:
+        template_id: str, the template id
+
+    Returns:
+        models.COSHHTemplate
+    """
+    template = db.session.get(models.COSHHTemplate, template_id)
+    return template if template else None

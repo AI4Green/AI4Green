@@ -15,6 +15,9 @@ def save_new_instance():
     reaction_id = data.get("reactionId", "")
     workgroup_name = data.get("workgroupName", "")
     workbook_name = data.get("workbookName", "")
+    template_type = data.get("templateType", "")
+    template_id = data.get("templateId", "")
+    new_instance = {}
 
     workbook = services.workbook.get_workbook_from_group_book_name_combination(
         workgroup_name, workbook_name
@@ -27,19 +30,12 @@ def save_new_instance():
 
     # todo: enforce no duplicates
 
-    new_instance = models.TemplateInstance.create(
-        uuid=str(uuid.uuid4()),
-        template_type=data.get("templateType", None),
-        template_id=data.get("templateId", None),
-        owner_id=current_user.id,
-        reaction_id=reaction.id,
-        approver_id=current_user.id,  # todo: change this
-    )
+    if template_type == "COSHH":
+        new_instance = services.template_instances.add_new_coshh_instance(
+            template_id, reaction
+        )
 
-    db.session.add(new_instance)
-    db.session.commit()
-
-    return jsonify(new_instance.to_dict())
+    return jsonify(new_instance)
 
 
 @template_instances_api_bp.route("/<int:template_id>", methods=["GET"])
