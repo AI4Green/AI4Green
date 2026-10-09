@@ -2,13 +2,14 @@ import uuid
 from datetime import datetime
 
 from flask import json, jsonify, request
-from flask_login import current_user
+from flask_login import current_user, login_required
 from sources import db, models, services
 
 from . import template_instances_api_bp
 
 
 @template_instances_api_bp.route("/", methods=["POST"])
+@login_required
 def save_new_instance():
     data = request.get_json()
 
@@ -39,6 +40,7 @@ def save_new_instance():
 
 
 @template_instances_api_bp.route("/<int:template_id>", methods=["GET"])
+@login_required
 def get_template_instance(template_id):
     query = models.TemplateInstance.query.get(template_id)
     data = query.to_dict()
@@ -47,6 +49,7 @@ def get_template_instance(template_id):
 
 
 @template_instances_api_bp.route("/<int:template_id>", methods=["PUT"])
+@login_required
 def save_template_instance(template_id):
     data = request.form
     # files = request.files

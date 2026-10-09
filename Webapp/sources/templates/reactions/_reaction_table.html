@@ -16,11 +16,11 @@
 
 {% import "macros/reaction_table_components.html" as reaction_table_components %}
 
-{{ reaction_table_components.reaction_description(reaction, tutorial) }}
+{{ reaction_table_components.reaction_description(reaction_name, reaction_description, tutorial) }}
 
 
 {% if polymer_mode %}
-    {{ reaction_table_components.polymerisation_dropdown(reaction.polymerisation_type) }}
+    {{ reaction_table_components.polymerisation_dropdown(polymerisation_type) }}
 {% else %}
     {{ reaction_table_components.reaction_class_dropdown(reaction_class) }}
 {% endif %}
