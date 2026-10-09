@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pytz
+import services.templates
 from flask import jsonify, request
 from flask_login import current_user
 from sources import db, models
@@ -11,18 +12,12 @@ from . import templates_api_bp
 @templates_api_bp.route("/", methods=["GET"])
 def get_templates():
     template_type = request.args.get("type", None)
-    # todo: move db queries to services?
-    query = db.session.query(models.Template).filter(
-        models.Template.creator_id == current_user.id
-    )
+    template_list = []
 
-    if template_type:
-        query = query.filter(models.Template.template_type == template_type)
+    if template_type == "COSHH":
+        template_list = services.templates.list_coshh()
 
-    if not query:
-        return []
-
-    return jsonify([x.to_dict() for x in query.all()])
+    return jsonify(template_list)
 
 
 @templates_api_bp.route("/<int:template_id>", methods=["GET"])
@@ -39,7 +34,9 @@ def create_new_template():
     description = data.get("description", None)
     template_type = data.get("templateType", None)
 
-    if template_type:
+    new_template = {}
+
+    if template_type == "COSH":
         template_type = models.template.TemplateType.COSHH
 
     # todo: handle errors if name or desc are missing
@@ -47,20 +44,12 @@ def create_new_template():
 
     # if no source id, create a blank template with default values
     if not source_id:
-        new_template = models.Template.create(
-            name=name,
-            description=description,
-            template_type=template_type,
-            time_of_creation=datetime.now(pytz.timezone("Europe/London")).replace(
-                tzinfo=None
-            ),
-            creator_id=current_user.id,
-            institution_id=1,
-        )
-        db.session.add(new_template)
-        db.session.commit()
+        if template_type == "COSH":
+            new_template = services.templates.create_new_coshh_template(
+                name, description
+            )
 
-        return jsonify(new_template.to_dict()), 200
+    return jsonify(new_template), 200
 
 
 @templates_api_bp.route("/<int:template_id>/sections", methods=["GET"])

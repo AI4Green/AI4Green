@@ -29,6 +29,7 @@ from . import (
     spa,
     summary,
     sustainability,
+    templates,
     user,
     utils,
     workbook,
