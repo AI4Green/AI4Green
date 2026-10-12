@@ -27,18 +27,67 @@ retro_tree = cyto.Cytoscape(
 )
 
 """
-Loading circle
+Retrosynthesis progress display
 """
 loading_circle = html.Div(
-    id="loading-div",
+    id="loading-display",
     children=[
-        dcc.Loading(
-            id="loading-display",
-            children=html.Div(id="loading-output-1"),
-            type="circle",
-            fullscreen=True,
+        html.Div(
+            children=[
+                html.I(
+                    className="fa fa-spinner fa-spin",
+                    style={
+                        "fontSize": "40px",
+                        "marginBottom": "20px",
+                    },
+                ),
+                dbc.Progress(
+                    id="retrosynthesis-progress-bar",
+                    value=0,
+                    striped=True,
+                    animated=True,
+                    color="success",
+                    style={
+                        "width": "800px",
+                        "height": "25px",
+                    },
+                ),
+                html.Div(
+                    id="retrosynthesis-progress-text",
+                    children="",
+                    style={
+                        "marginTop": "10px",
+                        "textAlign": "center",
+                        "fontSize": "20px",
+                        "fontFamily": "Helvetica",
+                        "fontWeight": "1000",
+                    },
+                ),
+            ],
+            style={
+                "backgroundColor": "white",
+                "padding": "25px",
+                "borderRadius": "8px",
+                "minWidth": "450px",
+                "display": "flex",
+                "flexDirection": "column",
+                "alignItems": "center",
+            },
         ),
     ],
+    hidden=True,
+    style={
+        "position": "fixed",
+        "top": "0",
+        "left": "0",
+        "width": "100%",
+        "height": "100%",
+        "zIndex": "9999",
+        "backgroundColor": "rgba(255, 255, 255, 0.8)",
+        "display": "flex",
+        "alignItems": "center",
+        "justifyContent": "center",
+    },
 )
 
 """
@@ -128,7 +177,7 @@ stock_options = [
     {"label": "ZINC", "value": "zinc"},
     {"label": "PaRoutes", "value": "paroutes"},
     {"label": "ASKCOS", "value": "askcos"},
-    {"label": "Natural products", "value": "naturals"},
+    {"label": "Natural Products", "value": "naturals"},
     {"label": "Simple Stocks", "value": "simples"},
 ]
 
@@ -371,6 +420,7 @@ sustainability_data = [
     dcc.Store(id="active-sustainability-data", storage_type="memory"),
     dcc.Store(id="weighted-sustainability-data", storage_type="memory"),
     dcc.Store(id="user-uploaded-route-sustainability-data", storage_type="memory"),
+    dcc.Store(id="conditions-calculation-trigger", storage_type="memory"),
 ]
 
 other_data_stores = [

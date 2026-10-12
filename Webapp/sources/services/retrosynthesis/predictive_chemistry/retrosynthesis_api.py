@@ -31,31 +31,37 @@ def retrosynthesis_api_call(request_url: str, retrosynthesis_base_url: str) -> s
         return "failed", failure_message, ""
 
 
-def retrosynthesis_results_poll(request_url: str) -> Tuple[str, dict, dict]:
+def retrosynthesis_results_poll(request_url: str) -> Tuple[str, dict, dict, str]:
     """Poll the retrosynthesis API for the results of a job.
 
     Args:
         request_url (str): The URL to the results endpoint, containing the job ID.
 
     Returns:
-        Tuple[str, dict, dict]: Status, solved routes, raw routes
+        Tuple[str, dict, dict, str]: Status, solved routes, raw routes, current stage
     """
     try:
         response = requests.get(request_url)
+
         if not response.ok:
-            return "error", {}, {}
+            return "error", {}, {}, "error"
 
         data = response.json()
+
         status = data.get("status", "error")
+        stage = data.get("stage", "obtaining_resources")
+
         if status == "error":
-            return status, {}, {}
+            return status, {}, {}, "error"
 
         results = data.get("results", {})
         solved_routes = results.get("solved_route_dict", {})
         raw_routes = results.get("raw_routes", {})
-        return status, solved_routes, raw_routes
+
+        return status, solved_routes, raw_routes, stage
+
     except Exception:
-        return "error", {}, {}
+        return "error", {}, {}, "error"
 
 
 def validate_retrosynthesis_api_response(
