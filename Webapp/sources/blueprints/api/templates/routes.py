@@ -1,11 +1,9 @@
 from datetime import datetime
-from tempfile import template
 
 import pytz
-import services.templates
 from flask import jsonify, request
 from flask_login import current_user, login_required
-from sources import db, models
+from sources import db, models, services
 
 from . import templates_api_bp
 
@@ -14,7 +12,6 @@ from . import templates_api_bp
 @login_required
 def get_templates():
     template_type = request.args.get("template_type", None)
-    print(template_type)
     template_list = []
 
     if template_type == "COSHH":
