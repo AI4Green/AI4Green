@@ -1,6 +1,6 @@
 import os
 
-from flask import current_app, render_template, send_from_directory
+from flask import abort, current_app, render_template, send_from_directory
 from sources import services
 
 from . import spa_bp
@@ -29,7 +29,13 @@ def serve_spa_files(path=""):
         full_path = os.path.join(spa_dir, path)
 
         if os.path.isfile(full_path):
-            return send_from_directory(spa_dir, path)
+            try:
+                return send_from_directory(spa_dir, path)
+            except FileNotFoundError:
+                abort(404)
 
     # React Router fallback
-    return send_from_directory(spa_dir, "index.html")
+    try:
+        return send_from_directory(spa_dir, "index.html")
+    except FileNotFoundError:
+        abort(404)
