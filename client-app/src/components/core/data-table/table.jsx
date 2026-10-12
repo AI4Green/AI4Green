@@ -45,7 +45,7 @@ export function DataTable({
 }) {
   const [sorting, setSorting] = useState([]);
   const [expanded, setExpanded] = useState({});
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleRowClick = (path) => path && navigate(path);
 

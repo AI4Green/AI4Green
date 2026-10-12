@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tutorial.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reaction_constructor.css') }}">
     {% import "macros/tutorial.html" as tut %}
+    {% import "macros/modals.html" as modals %}
 </head>
 
 <div id="page-contents" class="container-fluid">
@@ -404,6 +405,8 @@
 <input type="hidden" value="{{ active_workbook }}" id="js-active-workbook">
 
 {{  tut.tutorial_macro() }}
+
+{{ modals.reaction_note_modal() }}
 
 <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/autosave.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/reaction_table/input_novel_compounds.js') }}"></script>

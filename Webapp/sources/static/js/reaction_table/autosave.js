@@ -491,6 +491,8 @@ function controlLockedReactionFunctionality() {
   $("#reaction-note-button").show().prop("disabled", false);
   $("#new-reaction-note-modal").find("*").prop("disabled", false);
   $("#file-list").find("*").prop("disabled", false);
+  // enable collapsable sections
+  $(".section-toggle").prop("disabled", false);
   // only the creator can upload or delete files or add reaction note comments
   if (ifCurrentUserIsNotCreator()) {
     $(".delete-file-button").prop("disabled", true);
