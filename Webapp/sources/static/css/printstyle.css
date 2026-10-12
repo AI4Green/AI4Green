@@ -1,50 +1,129 @@
 @media print {
-  body * {
-    visibility: hidden;
-  }
-  #print-container * {
-    visibility: visible;
-  }
-  #print-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-  }
-  #qr-print-container * {
-    visibility: visible;
-  }
-  #qr-title {
-    display: block;
-    margin-left: 0;
-    font-size: 60;
-    white-space: nowrap
-  }
-  #qr-code {
-    display: block;
-    margin-left: 0;
-    width: 700;
-    height: 700;
-  }
-  #qr-prompt {
-    margin-left: 0;
-    margin-right: 0;
-    font-size: 40;
-    white-space: nowrap
-  }
-  #qr-expiry {
-    margin-left: 0;
-    margin-right: 0;
-    font-size: 30;
-    white-space: nowrap
-  }
+    /* ---- Hide everything except the summary ---- */
+    body * {
+        visibility: hidden;
+    }
+    #print-container,
+    #print-container * {
+        visibility: visible;
+    }
 
+    /* Remove layout space taken by hidden content */
+    body > nav,
+    #name-id,
+    #reaction-sidenav,
+    #reaction-accordion > .reaction-section-card:not(#section-summary),
+    #section-summary .card-header,
+    #page-contents > .row > .col-md-3,
+    #page-contents > .row > .col-lg-2 {
+        display: none !important;
+    }
+
+    /* ---- Force the collapsed summary open ---- */
+    #collapse-summary {
+        display: block !important;
+        height: auto !important;
+    }
+
+    /* ---- Un-box ancestors so nothing offsets or clips the print ---- */
+    #page-contents > .row {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    #page-contents,
+    #page-contents > .row > .col-md-9,
+    #page-contents > .row > .col-lg-10 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    #section-summary,
+    #section-summary .card-body {
+        position: static !important;
+        overflow: visible !important;
+        transform: none !important;
+        border: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* ---- Print container ---- */
+    #print-container {
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding-left: 0 !important;
+        box-sizing: border-box;
+    }
+    #print-container * {
+        display: block;
+    }
+
+    /* Restore proper table/input display (overrides the block rule above) */
+    #print-container table {
+        display: table !important;
+        width: 100% !important;
+        table-layout: fixed;
+    }
+    #print-container tr {
+        display: table-row !important;
+    }
+    #print-container td,
+    #print-container th {
+        display: table-cell !important;
+    }
+    #print-container input,
+    #print-container textarea,
+    #print-container select {
+        display: inline-block !important;
+    }
+
+    /* Reaction scheme image */
+    #imageContainer,
+    #imageContainer * {
+        position: static !important;
+    }
+    #image {
+        display: block;
+        max-width: 100%;
+        height: auto;
+    }
+
+
+    /* QR print container (unchanged, but no longer relies on visibility) */
+    #qr-title {
+        display: block;
+        margin-left: 0;
+        font-size: 60px;
+        white-space: nowrap;
+    }
+    #qr-code {
+        display: block;
+        margin-left: 0;
+        width: 700px;
+        height: 700px;
+    }
+    #qr-prompt {
+        margin-left: 0;
+        margin-right: 0;
+        font-size: 40px;
+        white-space: nowrap;
+    }
+    #qr-expiry {
+        margin-left: 0;
+        margin-right: 0;
+        font-size: 30px;
+        white-space: nowrap;
+    }
 }
 
-tr {
-  page-break-inside: avoid;
-}
+tr { page-break-inside: avoid; }
 
 #outer-print-div {
-  border: 1px solid #000;
-  padding: 10px;
+    border: 1px solid #000;
+    padding: 10px;
 }

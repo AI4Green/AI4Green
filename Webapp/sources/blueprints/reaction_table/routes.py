@@ -170,6 +170,7 @@ def reload_reaction_table() -> flask.Response:
     reaction = services.reaction.get_from_reaction_id_and_workbook_id(
         reaction_id, workbook.id
     )
+    reaction_table_data = json.loads(reaction.reaction_table_data)
     if reaction.reaction_type.value == "POLYMER":
         polymer_mode = True
 
@@ -184,7 +185,7 @@ def reload_reaction_table() -> flask.Response:
         compounds,
         units,
     ) = services.reaction_table.SketcherCompound.from_reaction_table_dict(
-        json.loads(reaction.reaction_table_data), workbook
+        reaction_table_data, workbook
     )
 
     if demo == "demo":
@@ -211,9 +212,10 @@ def reload_reaction_table() -> flask.Response:
         reaction_table_data="",
         summary_table_data="",
         sol_rows=sol_rows,
-        reaction=reaction,
+        reaction_description=reaction_table_data.get("reaction_description", ""),
+        polymerisation_type=reaction.polymerisation_type,
+        reaction_name=reaction.name,
         reaction_class=reaction.reaction_class,
-        reaction_classes=[],
         polymer_mode=polymer_mode,
     )
     return jsonify({"reactionTable": reaction_table})

@@ -69,7 +69,7 @@
                 <a class="nav-link" href="#coshh-form"><i class="bi bi-exclamation-triangle mr-1"></i> COSHH Form</a>
                 <a class="nav-link" href="#section-notes"><i class="bi bi-journal-text mr-1"></i> Reaction Notes</a>
                 <a class="nav-link" href="#section-results"><i class="bi bi-clipboard-data mr-1"></i> Reaction Results</a>
-                <a class="nav-link" href="#sustainability"><i class="bi bi-recycle mr-1"></i> Reaction Sustainabilty</a>
+                <a class="nav-link" href="#sustainability"><i class="bi bi-recycle mr-1"></i> Reaction Sustainability</a>
                 <a class="nav-link" href="#section-summary"><i class="bi bi-file-earmark-bar-graph mr-1"></i> Reaction Summary</a>
                 <a class="nav-link" href="#section-addenda"><i class="bi bi-chat-left-text mr-1"></i> Reaction Addenda</a>
             </nav>
@@ -167,12 +167,12 @@
                             <div class="subsection-card" id="reaction-methods">
                                 <div class="subsection-header">
                                     <h6>Reaction Methods</h6>
-                                    <button id="add-method-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">
-                                        <i class="bi bi-plus-lg"></i> Add Method
-                                    </button>
+{#                                    <button id="add-method-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">#}
+{#                                        <i class="bi bi-plus-lg"></i> Add Method#}
+{#                                    </button>#}
                                 </div>
                                 <div class="subsection-body" id="reaction-methods-list">
-                                    <p class="empty-placeholder">No methods added yet.</p>
+                                    <p class="empty-placeholder">Coming soon...</p>
                                 </div>
                             </div>
 
@@ -180,12 +180,12 @@
                             <div class="subsection-card" id="reaction-workup">
                                 <div class="subsection-header">
                                     <h6>Reaction Workup</h6>
-                                    <button id="add-workup-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">
-                                        <i class="bi bi-plus-lg"></i> Add Workup
-                                    </button>
+{#                                    <button id="add-workup-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">#}
+{#                                        <i class="bi bi-plus-lg"></i> Add Workup#}
+{#                                    </button>#}
                                 </div>
                                 <div class="subsection-body" id="reaction-workup-list">
-                                    <p class="empty-placeholder">No workup steps added yet.</p>
+                                    <p class="empty-placeholder">Coming soon...</p>
                                 </div>
                             </div>
 
@@ -193,19 +193,19 @@
                             <div class="subsection-card" id="reaction-purification">
                                 <div class="subsection-header">
                                     <h6>Reaction Purification</h6>
-                                    <button id="add-purification-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">
-                                        <i class="bi bi-plus-lg"></i> Add Purification
-                                    </button>
+{#                                    <button id="add-purification-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">#}
+{#                                        <i class="bi bi-plus-lg"></i> Add Purification#}
+{#                                    </button>#}
                                 </div>
                                 <div class="subsection-body" id="reaction-purification-list">
-                                    <p class="empty-placeholder">No purification steps added yet.</p>
+                                    <p class="empty-placeholder">Coming soon...</p>
                                 </div>
                             </div>
 
                             <!-- Experimental data / file attachments -->
                             <div class="subsection-card" id="reaction-file-attachments">
                                 <div class="subsection-header">
-                                    <h6>Experimental Data</h6>
+                                    <h6>File Attachments</h6>
                                 </div>
                                 <div class="subsection-body">
                                     <div id="file-upload-div" class="input-group mb-3 w-25">
@@ -215,7 +215,6 @@
                                         </div>
                                     </div>
                                     <div id="file-list">
-                                        {#            file attachments loaded here from get_file_attachment_list#}
                                     </div>
                                 </div>
                             </div>
@@ -235,13 +234,13 @@
                     </div>
                     <div id="collapse-results" class="collapse">
                         <div class="card-body">
-                            <p>
-                                <button id="add-result-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">
-                                    <i class="bi bi-plus-lg"></i> Add Result
-                                </button>
-                            </p>
+{#                            <p>#}
+{#                                <button id="add-result-button" type="button" class="btn btn-primary btn-sm" onclick="void(0)">#}
+{#                                    <i class="bi bi-plus-lg"></i> Add Result#}
+{#                                </button>#}
+{#                            </p>#}
                             <div id="reaction-results-list">
-                                <p class="empty-placeholder">No results added yet.</p>
+                                <p class="empty-placeholder">More result types coming soon...</p>
                             </div>
                         </div>
                     </div>
@@ -251,14 +250,14 @@
                 <div class="card reaction-section-card mb-3" id="sustainability">
                     <div class="card-header">
                         <button class="section-toggle" type="button" data-toggle="collapse"
-                                data-target="#collapse-results" aria-expanded="true" aria-controls="collapse-results">
-                            <span><i class="bi bi-recycle mr-2"></i>Reaction Sustainabilty</span>
+                                data-target="#collapse-sustainability" aria-expanded="true" aria-controls="collapse-sustainability">
+                            <span><i class="bi bi-recycle mr-2"></i>Reaction Sustainability</span>
                             <i class="bi bi-chevron-down"></i>
                         </button>
                     </div>
-                    <div id="collapse-results" class="collapse">
+                    <div id="collapse-sustainability" class="collapse">
                         <div class="card-body">
-                            sustainability
+                            <p class="empty-placeholder">Sustainability dashboard coming soon...</p>
                         </div>
                     </div>
                 </div>
@@ -277,7 +276,7 @@
                         <div class="card-body">
 
                             <p id="summary-div">
-                                <input type="submit" value="Summary" id="action-summary" class="btn btn-primary" onclick="showSummary()" style="width: 100px;">
+                                <input type="submit" value="Generate Summary" id="action-summary" class="btn btn-primary" onclick="showSummary()" style="display: none; width: auto;">
                             </p>
 
                             <div id="print-container" class="container-fluid" style="padding-left: 0px">
@@ -288,34 +287,10 @@
                             </div>
 
                             <br>
-                            <button id="print-pdf" onclick="window.print()" class="btn btn-primary" style="width:140px">Print Summary</button>
+                            <button id="print-pdf" onclick="window.print()" class="btn btn-primary" style="display: none; width:140px">Print Summary</button>
                             <div class="notToPrint" id="printoutput"></div>
 
                             <hr>
-
-                            <!-- Lock & sign -->
-                            <div id="complete-reaction-div">
-                                <button id="complete-reaction-button" type="button" class="btn btn-primary" data-toggle="modal" data-target="#lockingModal">Lock &amp; Sign Reaction</button>
-                                <!-- Modal -->
-                                <div id="lockingModal" class="modal fade">
-                                    <div class="modal-dialog" style="top: 30%">
-                                        <!-- Modal content-->
-                                        <div class="modal-content">
-                                            <div class="modal-body">
-                                                <p>I provide my signature and confirm that to the best of my knowledge the contents of this reaction are accurate.</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="completeReaction()">Confirm</button>
-                                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {% if reaction.complete == 'complete' %}
-                                    <b>Reaction locked by {{ reaction.creator_person.user.fullname }} at: {{ (reaction.time_of_update|string)[:-7]  }}</b>
-                                {% endif %}
-                            </div>
 
                         </div>
                     </div>
@@ -365,6 +340,30 @@
                     </div>
                 </div>
 
+            </div>
+                                        <!-- Lock & sign -->
+            <div id="complete-reaction-div">
+                <button id="complete-reaction-button" type="button" class="btn btn-primary" data-toggle="modal" data-target="#lockingModal">Lock &amp; Sign Reaction</button>
+                <!-- Modal -->
+                <div id="lockingModal" class="modal fade">
+                    <div class="modal-dialog" style="top: 30%">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <p>I provide my signature and confirm that to the best of my knowledge the contents of this reaction are accurate.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="completeReaction()">Confirm</button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if reaction.complete == 'complete' %}
+                    <b>Reaction locked by {{ reaction.creator_person.user.fullname }} at: {{ (reaction.time_of_update|string)[:-7]  }}</b>
+                {% endif %}
+            <br><br><br>
             </div>
         </div>
     </div>
