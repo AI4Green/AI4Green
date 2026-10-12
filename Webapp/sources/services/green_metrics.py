@@ -19,3 +19,23 @@ def calculate_atom_economy(reactants_molecular_weights_sum: float, products_mole
     return atom_economy
 
 
+def calculate_carbon_efficiency(reactants_carbon_moles: float, products_carbon_moles_sum: float) -> float:
+    """
+    Calculate the carbon efficiency of a chemical reaction.
+
+    Carbon efficiency is a measure of how effectively carbon atoms are utilized in a chemical reaction. 
+    It is calculated as the ratio of the number of carbon atoms in the desired product to the total number of carbon atoms in all reactants, multiplied by 100.
+    (mol product × C atoms in product) / ∑(mol reactant × C atoms in reactant) × 100 
+
+    Args:
+        reactants_carbon_moles (float): The total number of carbon moles in the reactants.
+        products_carbon_moles_sum (float): The sum of carbon moles in the products.
+    Returns:
+        float: The carbon efficiency percentage.
+    """
+    
+    if reactants_carbon_moles == 0:
+        raise ValueError("The total number of carbon moles in reactants cannot be zero.")
+
+    carbon_efficiency = (products_carbon_moles_sum / reactants_carbon_moles) * 100
+    return carbon_efficiency
