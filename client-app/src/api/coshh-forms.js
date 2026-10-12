@@ -2,7 +2,7 @@ import { useBackendApi } from "contexts";
 import useSWR from "swr";
 
 export const fetchKeys = {
-  coshhFormsList: "templates",
+  coshhFormsList: "templates?template_type=COSHH",
   coshhForm: (coshhFormId) => `templates/${coshhFormId}`,
   sectionTypesList: "templates/section_types",
 };

@@ -92,7 +92,7 @@ def seed_users() -> None:
 @click.option(
     "--role",
     prompt=True,
-    type=click.Choice(["admin", "standard"], case_sensitive=False),
+    type=click.Choice(["admin", "standard", "H&S admin"], case_sensitive=False),
 )
 @with_appcontext
 def add_user(
@@ -100,7 +100,7 @@ def add_user(
     email: str,
     fullname: str,
     password: str,
-    role: Union[Literal["admin"], Literal["standard"]],
+    role: Union[Literal["admin"], Literal["standard"], Literal["h&s admin"]],
 ) -> None:
     """
     Adds a user to the database.
@@ -115,7 +115,7 @@ def add_user(
     """
     role_model = (
         db.session.query(models.Role)
-        .filter(func.lower(models.Role.name) == role)
+        .filter(func.lower(models.Role.name) == role.lower())
         .first()
     )
     if role_model is None:
@@ -150,7 +150,7 @@ def update_pubchem() -> None:
 
     for update_date_link in list_of_updates:
         # Download the update.
-        download_url = f"https://ftp.ncbi.nlm.nih.gov/pubchem/Compound/Monthly/{update_date_link}Extras/CID-LCSS.xml.gz"
+        download_url = f"https://ftp.ncbi.nlm.nih.gov/pubchem/Compound/Monthly/{update_date_link}Extras/CID-LCSS.xml.gz"  # noqa: E231
         pubchem_download.download_pubchem_database(download_url, "Pubchem-update")
 
         # Unzip and make changes.
