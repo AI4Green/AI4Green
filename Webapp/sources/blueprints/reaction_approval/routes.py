@@ -88,6 +88,9 @@ def request_response(token: str) -> Response:
 
     addenda = services.reaction.get_addenda(reaction)
 
+    # entry function for react
+    vite_entry = services.spa.vite_entry
+
     # check user is a required approver AND a PI in the workgroup
     if (
         current_user.Person in reaction_approval_request.required_approvers
@@ -103,6 +106,7 @@ def request_response(token: str) -> Response:
                 active_workbook=workbook.name,
                 tutorial="no",
                 addenda=addenda,
+                vite_entry=vite_entry,
                 review=True,
             )
         else:
