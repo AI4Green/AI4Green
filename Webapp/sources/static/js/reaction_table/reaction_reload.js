@@ -228,23 +228,3 @@ async function reactionTableReload() {
     }
   }
 }
-
-/**
- * When a user reloads a reaction they are not the creator of we disable inputs to prevent them editing the reaction
- * We enable the options to print a PDF summary and to download/view file attachments.
- */
-function controlNonCreatorFunctionality() {
-  $("#page-contents :input").prop("disabled", true);
-  $("#print-pdf").prop("disabled", false);
-  $("#file-list").find("*").prop("disabled", false);
-  $(".delete-file-button").prop("disabled", true);
-  // keep the review buttons active for review
-  $("#approve-reaction").prop("disabled", false);
-  $("#suggest-changes").prop("disabled", false);
-  $("#reject-reaction").prop("disabled", false);
-  $("#suggest-comment-modal").find(":disabled").prop("disabled", false);
-  $("#reject-reaction-modal").find(":disabled").prop("disabled", false);
-  // enable collapsable sections
-  $(".section-toggle").prop("disabled", false);
-  $("#reaction-note-button").hide();
-}
