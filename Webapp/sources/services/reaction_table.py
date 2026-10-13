@@ -358,7 +358,10 @@ class SketcherCompound:
         ]
 
         for param in reaction_param_keys:
-            units[param] = reaction_table_dict.pop(param)
+            try:
+                units[param] = reaction_table_dict.pop(param)
+            except KeyError:
+                continue
 
         number_of_compounds = 0
         for component_type, component_list in component_lists.items():

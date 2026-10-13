@@ -244,5 +244,7 @@ function controlNonCreatorFunctionality() {
   $("#reject-reaction").prop("disabled", false);
   $("#suggest-comment-modal").find(":disabled").prop("disabled", false);
   $("#reject-reaction-modal").find(":disabled").prop("disabled", false);
+  // enable collapsable sections
+  $(".section-toggle").prop("disabled", false);
   $("#reaction-note-button").hide();
 }
