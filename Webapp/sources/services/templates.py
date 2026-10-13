@@ -39,7 +39,7 @@ def list_coshh_as_dict() -> List[Dict]:
         List[models.COSHHTemplate.to_dict()], dictionary representation of all COSHHTemplate objects
     """
 
-    query = db.session.query(models.COSHHTemplate).all()
+    query = db.session.query(models.COSHHTemplate)
     return [x.to_dict() for x in query.all()]
 
 
