@@ -19,7 +19,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { DataTableViewOptions } from "./view-options";
 
@@ -42,10 +41,10 @@ export function DataTable({
   globalFilter,
   FooterCellAddRow, // TODO: In future, we can add make this flexible.
   children,
+  onRowClick, // needed to remove router
 }) {
   const [sorting, setSorting] = useState([]);
   const [expanded, setExpanded] = useState({});
-  // const navigate = useNavigate();
 
   const handleRowClick = (path) => path && navigate(path);
 
@@ -134,21 +133,20 @@ export function DataTable({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <Tr
-                  tabIndex={0}
+                  tabIndex={onRowClick ? 0 : undefined}
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   bgColor={row.getIsExpanded() ? "blackAlpha.100" : ""}
                   _hover={{
                     bg: "blackAlpha.50",
-                    cursor: row.original.targetPath ? "pointer" : "default",
+                    cursor: onRowClick ? "pointer" : "default",
                   }}
-                  onClick={() => handleRowClick(row.original.targetPath)}
+                  onClick={() => onRowClick?.(row.original)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      handleRowClick(row.original.targetPath);
+                      onRowClick?.(row.original);
                     }
                   }}
-                  transition="all 0.3s ease-in-out"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <Td

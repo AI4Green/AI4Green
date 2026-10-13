@@ -8,13 +8,24 @@ import { useUser } from "contexts";
 import { NewButton } from "layouts/default";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const CoshhFormTable = () => {
   const { user } = useUser();
   const { data } = useTableData();
+  const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
   return (
-    <DataTable data={data} columns={columns} globalFilter={searchValue}>
+    <DataTable
+      data={data}
+      columns={columns}
+      globalFilter={searchValue}
+      onRowClick={(row) => {
+        if (row.targetPath) {
+          navigate(row.targetPath);
+        }
+      }}
+    >
       <HStack flex={1} justifyContent="flex-start">
         <DataTableGlobalFilter
           searchValue={searchValue}
