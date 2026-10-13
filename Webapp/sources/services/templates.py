@@ -34,13 +34,12 @@ def create_new_coshh_template(name: str, description: str) -> Dict:
 
 def list_coshh_as_dict() -> List[Dict]:
     """
-    Queries COSHHTemplate table and returns all templates for current user
+    Queries COSHHTemplate table and returns all templates. Templates can only be made by H&S admin.
     Returns:
         List[models.COSHHTemplate.to_dict()], dictionary representation of all COSHHTemplate objects
     """
-    query = db.session.query(models.COSHHTemplate).filter(
-        models.Template.creator_id == current_user.id
-    )
+
+    query = db.session.query(models.COSHHTemplate).all()
     return [x.to_dict() for x in query.all()]
 
 
