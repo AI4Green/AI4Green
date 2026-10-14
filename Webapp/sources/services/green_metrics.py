@@ -428,3 +428,157 @@ def calculate_renewables_percentage(
         raise ValueError("Renewables intensity cannot exceed process mass intensity.")
 
     return (renewables_intensity / process_mass_intensity) * 100
+
+
+def calculate_waste_intensity(
+    total_mass_input: float,
+    total_waste_mass: float,
+) -> float:
+    """
+    Calculate the waste intensity (WI) of a chemical process.
+
+    WI is the mass of waste produced per unit mass of total input. Unlike the
+    E-factor, it is expressed per unit of input, not per unit of product.
+        WI = total waste produced / total mass input
+
+    Args:
+        total_mass_input (float): Total mass of all materials used in the
+            process (any consistent mass unit, e.g. g or kg).
+        total_waste_mass (float): Total mass of waste produced (same unit as
+            total_mass_input).
+
+    Returns:
+        float: Waste intensity as a ratio (dimensionless, e.g. kg/kg). An
+            ideal process has WI = 0.
+
+    Raises:
+        ValueError: If the total mass input is zero or negative, the waste
+            mass is negative, or the waste mass is greater than the total
+            mass input.
+    """
+    if total_mass_input <= 0:
+        raise ValueError("Total mass input must be positive.")
+
+    if total_waste_mass < 0:
+        raise ValueError("Total waste mass cannot be negative.")
+
+    if total_waste_mass > total_mass_input:
+        raise ValueError("Total waste mass cannot exceed total mass input.")
+
+    return total_waste_mass / total_mass_input
+
+
+def calculate_waste_percentage(
+    total_mass_input: float,
+    total_waste_mass: float,
+) -> float:
+    """
+    Calculate the waste percentage (WP) of a chemical process.
+
+    WP is the percentage of the total mass input that ends up as waste.
+        WP = total waste produced / total mass input x 100
+
+    Total mass input should cover the same materials as PMI, including water,
+    so that WP and PMI describe the same process boundaries.
+
+    Args:
+        total_mass_input (float): Total mass of all materials used in the
+            process, including water (any consistent mass unit, e.g. g or kg).
+        total_waste_mass (float): Total mass of waste produced (same unit as
+            total_mass_input).
+
+    Returns:
+        float: Waste percentage. An ideal process has WP = 0%.
+
+    Raises:
+        ValueError: If the total mass input is zero or negative, the waste
+            mass is negative, or the waste mass is greater than the total
+            mass input.
+    """
+    if total_mass_input <= 0:
+        raise ValueError("Total mass input must be positive.")
+
+    if total_waste_mass < 0:
+        raise ValueError("Total waste mass cannot be negative.")
+
+    if total_waste_mass > total_mass_input:
+        raise ValueError("Total waste mass cannot exceed total mass input.")
+
+    return (total_waste_mass / total_mass_input) * 100
+    
+
+    def calculate_turnover_number(
+    catalyst_moles: float,
+    product_moles: float,
+) -> float:
+    """
+    Calculate the turnover number (TON) of a catalysed reaction.
+
+    TON is the number of moles of product formed per mole of catalyst. It
+    shows how many times each catalyst unit is used before the reaction
+    stops. Higher values mean less catalyst is needed.
+        TON = moles of product formed / moles of catalyst
+
+    Args:
+        catalyst_moles (float): Moles of catalyst used.
+        product_moles (float): Moles of desired product formed.
+
+    Returns:
+        float: Turnover number as a ratio (dimensionless, mol/mol).
+
+    Raises:
+        ValueError: If the catalyst moles are zero or negative, or the
+            product moles are negative.
+    """
+    if catalyst_moles <= 0:
+        raise ValueError("Catalyst moles must be positive.")
+
+    if product_moles < 0:
+        raise ValueError("Product moles cannot be negative.")
+
+    return product_moles / catalyst_moles
+
+
+def calculate_space_time_yield(
+    reactor_volume: float,
+    reaction_time: float,
+    desired_product_mass: float,
+) -> float:
+    """
+    Calculate the space-time yield (STY) of a chemical process.
+
+    STY is the mass of desired product made per unit reactor volume per unit
+    time. It measures how productively the reactor is used.
+        STY = mass of desired product / (reactor volume x reaction time)
+
+    The result has units of (mass unit) / (volume unit x time unit), set by
+    the inputs, e.g. g / (L x h) = g L^-1 h^-1. Values are only comparable
+    if the same units are used.
+
+    Args:
+        reactor_volume (float): Volume of the reactor (any volume unit,
+            e.g. L or m^3).
+        reaction_time (float): Reaction time (any time unit, e.g. h).
+        desired_product_mass (float): Mass of the desired product obtained
+            (any mass unit, e.g. g or kg).
+
+    Returns:
+        float: Space-time yield, in mass / (volume x time).
+
+    Raises:
+        ValueError: If the reactor volume or reaction time is zero or
+            negative, or the product mass is negative.
+    """
+    if reactor_volume <= 0:
+        raise ValueError("Reactor volume must be positive.")
+
+    if reaction_time <= 0:
+        raise ValueError("Reaction time must be positive.")
+
+    if desired_product_mass < 0:
+        raise ValueError("Desired product mass cannot be negative.")
+
+    return desired_product_mass / (reactor_volume * reaction_time)
+
+
+    
