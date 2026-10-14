@@ -441,9 +441,11 @@ def calculate_waste_intensity(
     E-factor, it is expressed per unit of input, not per unit of product.
         WI = total waste produced / total mass input
 
+    Total mass input should cover the same materials as PMI, including water.
+
     Args:
         total_mass_input (float): Total mass of all materials used in the
-            process (any consistent mass unit, e.g. g or kg).
+            process, including water (any consistent mass unit, e.g. g or kg).
         total_waste_mass (float): Total mass of waste produced (same unit as
             total_mass_input).
 
@@ -505,9 +507,9 @@ def calculate_waste_percentage(
         raise ValueError("Total waste mass cannot exceed total mass input.")
 
     return (total_waste_mass / total_mass_input) * 100
-    
 
-    def calculate_turnover_number(
+
+def calculate_turnover_number(
     catalyst_moles: float,
     product_moles: float,
 ) -> float:
@@ -581,4 +583,131 @@ def calculate_space_time_yield(
     return desired_product_mass / (reactor_volume * reaction_time)
 
 
-    
+def calculate_percentage_yield(
+    limiting_reactant_moles: float,
+    product_moles: float,
+    product_per_limiting_reactant: float = 1.0,
+) -> float:
+    """
+    Calculate the percentage yield of a chemical reaction.
+
+    Percentage yield is the moles of desired product isolated as a percentage
+    of the maximum possible from the limiting reactant.
+        Yield = mol product / (mol limiting reactant x ratio) x 100
+
+    The ratio is the stoichiometric coefficient of the product divided by
+    that of the limiting reactant, e.g. 0.5 for 2 A -> B. The default of 1
+    covers 1:1 reactions.
+
+    Yields above 100% are returned, not rejected. They usually mean the
+    product was wet or impure.
+
+    Args:
+        limiting_reactant_moles (float): Moles of limiting reactant used.
+        product_moles (float): Moles of desired product isolated.
+        product_per_limiting_reactant (float): Moles of product formed per
+            mole of limiting reactant in the balanced equation. Defaults
+            to 1.0.
+
+    Returns:
+        float: Percentage yield.
+
+    Raises:
+        ValueError: If the limiting reactant moles or the stoichiometric
+            ratio are zero or negative, or the product moles are negative.
+    """
+    if limiting_reactant_moles <= 0:
+        raise ValueError("Limiting reactant moles must be positive.")
+
+    if product_per_limiting_reactant <= 0:
+        raise ValueError("Stoichiometric ratio must be positive.")
+
+    if product_moles < 0:
+        raise ValueError("Product moles cannot be negative.")
+
+    theoretical_product_moles = limiting_reactant_moles * product_per_limiting_reactant
+    return (product_moles / theoretical_product_moles) * 100
+
+
+def calculate_percentage_conversion(
+    initial_limiting_reactant_mass: float,
+    final_limiting_reactant_mass: float,
+) -> float:
+    """
+    Calculate the percentage conversion of the limiting reactant.
+
+    Conversion is the percentage of the limiting reactant used up in the
+    reaction. It does not show whether the reactant became the desired
+    product.
+        Conversion = 100 - (final mass / initial mass x 100)
+                   = (initial mass - final mass) / initial mass x 100
+
+    Args:
+        initial_limiting_reactant_mass (float): Mass of limiting reactant at
+            the start (any consistent mass unit, e.g. g or kg).
+        final_limiting_reactant_mass (float): Mass of limiting reactant left
+            at the end (same unit as initial_limiting_reactant_mass).
+
+    Returns:
+        float: Percentage conversion.
+
+    Raises:
+        ValueError: If the initial mass is zero or negative, the final mass
+            is negative, or the final mass is greater than the initial mass.
+    """
+    if initial_limiting_reactant_mass <= 0:
+        raise ValueError("Initial limiting reactant mass must be positive.")
+
+    if final_limiting_reactant_mass < 0:
+        raise ValueError("Final limiting reactant mass cannot be negative.")
+
+    if final_limiting_reactant_mass > initial_limiting_reactant_mass:
+        raise ValueError("Final limiting reactant mass cannot exceed initial mass.")
+
+    return (
+        (initial_limiting_reactant_mass - final_limiting_reactant_mass)
+        / initial_limiting_reactant_mass
+        * 100
+    )
+
+
+def calculate_percentage_selectivity(
+    percentage_conversion: float,
+    percentage_yield: float,
+) -> float:
+    """
+    Calculate the percentage selectivity of a chemical reaction.
+
+    Selectivity is the percentage of the consumed limiting reactant that
+    became the desired product.
+        Selectivity = % yield / % conversion x 100
+
+    This matches mol desired product / mol reactant consumed when the yield
+    accounts for stoichiometry, e.g. from calculate_percentage_yield with
+    the correct ratio.
+
+    Args:
+        percentage_conversion (float): Conversion as a percentage, e.g. from
+            calculate_percentage_conversion.
+        percentage_yield (float): Yield as a percentage, e.g. from
+            calculate_percentage_yield.
+
+    Returns:
+        float: Percentage selectivity. An ideal reaction has 100%.
+
+    Raises:
+        ValueError: If conversion is zero or negative (selectivity is
+            undefined at zero conversion), yield is negative, or yield is
+            greater than conversion.
+    """
+    if percentage_conversion <= 0:
+        raise ValueError("Percentage conversion must be positive.")
+
+    if percentage_yield < 0:
+        raise ValueError("Percentage yield cannot be negative.")
+
+    if percentage_yield > percentage_conversion:
+        if not math.isclose(percentage_yield, percentage_conversion):
+            raise ValueError("Percentage yield cannot exceed percentage conversion.")
+
+    return (percentage_yield / percentage_conversion) * 100
