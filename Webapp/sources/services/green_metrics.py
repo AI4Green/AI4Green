@@ -163,3 +163,119 @@ def calculate_mass_productivity(
     """
     mass_intensity = calculate_mass_intensity(total_mass_used, desired_product_mass)
     return 100 / mass_intensity
+
+
+def calculate_e_factor(
+    total_mass_used: float,
+    desired_product_mass: float,
+) -> float:
+    """
+    Calculate the E-factor of a chemical process.
+
+    The E-factor is the mass of waste generated per unit mass of desired
+    product. Waste is everything used in the process that does not end up
+    as the desired product.
+        E-factor = (total mass used - mass of desired product) / mass of desired product
+                 = MI - 1
+
+    Args:
+        total_mass_used (float): Total mass of all materials used in the
+            process, excluding water (any consistent mass unit, e.g. g or kg).
+        desired_product_mass (float): Mass of the desired product obtained
+            (same unit as total_mass_used).
+
+    Returns:
+        float: E-factor as a ratio (dimensionless, e.g. kg/kg). An ideal
+            process has E-factor = 0; lower is better.
+
+    Raises:
+        ValueError: If either input is zero or negative, or if the product
+            mass is greater than the total mass used.
+    """
+    if desired_product_mass > total_mass_used:
+        raise ValueError("Desired product mass cannot exceed total mass used.")
+
+    mass_intensity = calculate_mass_intensity(total_mass_used, desired_product_mass)
+    return mass_intensity - 1
+
+
+def calculate_effective_mass_yield(
+    non_benign_mass_used: float,
+    desired_product_mass: float,
+) -> float:
+    """
+    Calculate the effective mass yield (EMY) of a chemical process.
+
+    EMY is the mass of desired product as a percentage of the mass of
+    non-benign materials used. Materials judged benign (e.g. water, NaCl)
+    are left out of the denominator. Aocess that relies on benign
+    materials scores higher.
+        EMY = mass of desired product / mass of non-benign materials used x 100
+
+    Deciding which materials count as benign is done before calling this
+    function, using toxicity or hazard data. That judgement is not made here.
+
+    Args:
+        non_benign_mass_used (float): Total mass of all non-benign materials
+            used in the process (any consistent mass unit, e.g. g or kg).
+        desired_product_mass (float): Mass of the desired product obtained
+            (same unit as non_benign_mass_used).
+
+    Returns:
+        float: Effective mass yield as a percentage. Can exceed 100% if most
+            of the materials used are benign.
+
+    Raises:
+        ValueError: If the non-benign mass is zero or negative, or the product
+            mass is negative.
+    """
+    if non_benign_mass_used <= 0:
+        raise ValueError("Non-benign mass used must be positive.")
+
+    if desired_product_mass < 0:
+        raise ValueError("Desired product mass cannot be negative.")
+
+    return (desired_product_mass / non_benign_mass_used) * 100
+
+
+def calculate_optimum_efficiency(
+    reaction_mass_efficiency: float,
+    atom_economy: float,
+) -> float:
+    """
+    Calculate the optimum efficiency (OE) of a chemical reaction.
+
+    OE compares the actual mass efficiency of a reaction with its theoretical
+    best. It shows how close a reaction comes to its atom economy once real
+    yield and excess reactants are taken into account.
+        OE = RME / AE x 100
+
+    If yield is 100% and reactants are used in exact stoichiometric amounts,
+    RME equals AE and OE is 100%. OE therefore cannot distinguish between
+    reactions when only structures are known.
+
+    Args:
+        reaction_mass_efficiency (float): Reaction mass efficiency as a
+            percentage, e.g. from calculate_reaction_mass_efficiency.
+        atom_economy (float): Atom economy as a percentage, e.g. from
+            calculate_atom_economy.
+
+    Returns:
+        float: Optimum efficiency as a percentage. An ideal reaction has
+            OE = 100%.
+
+    Raises:
+        ValueError: If atom economy is zero or negative, reaction mass
+            efficiency is negative, or reaction mass efficiency is greater
+            than atom economy.
+    """
+    if atom_economy <= 0:
+        raise ValueError("Atom economy must be positive.")
+
+    if reaction_mass_efficiency < 0:
+        raise ValueError("Reaction mass efficiency cannot be negative.")
+
+    if reaction_mass_efficiency > atom_economy:
+        raise ValueError("Reaction mass efficiency cannot exceed atom economy.")
+
+    return (reaction_mass_efficiency / atom_economy) * 100
