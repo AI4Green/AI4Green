@@ -1,3 +1,6 @@
+import math
+
+
 def calculate_atom_economy(
     reactants_molecular_weight_sum: float,
     desired_product_molecular_weight: float,
@@ -22,13 +25,23 @@ def calculate_atom_economy(
         float: Atom economy as a percentage.
 
     Raises:
-        ValueError: If either input is zero or negative.
+        ValueError: If either input is zero or negative, or if the desired
+            product molecular weight is greater than the reactant sum.
     """
     if reactants_molecular_weight_sum <= 0:
         raise ValueError("Sum of reactant molecular weights must be positive.")
 
     if desired_product_molecular_weight <= 0:
         raise ValueError("Desired product molecular weight must be positive.")
+
+    if desired_product_molecular_weight > reactants_molecular_weight_sum:
+        if not math.isclose(
+            desired_product_molecular_weight, reactants_molecular_weight_sum
+        ):
+            raise ValueError(
+                "Desired product molecular weight cannot exceed sum of "
+                "reactant molecular weights."
+            )
 
     return (desired_product_molecular_weight / reactants_molecular_weight_sum) * 100
 
@@ -55,14 +68,20 @@ def calculate_carbon_efficiency(
         float: Carbon efficiency as a percentage.
 
     Raises:
-        ValueError: If the reactant sum is zero or negative, or the product value
-            is negative.
+        ValueError: If the reactant sum is zero or negative, the product value
+            is negative, or the product value is greater than the reactant sum.
     """
     if reactants_carbon_moles_sum <= 0:
         raise ValueError("Sum of reactant carbon moles must be positive.")
 
     if desired_product_carbon_moles < 0:
         raise ValueError("Desired product carbon moles cannot be negative.")
+
+    if desired_product_carbon_moles > reactants_carbon_moles_sum:
+        raise ValueError(
+            "Desired product carbon moles cannot exceed sum of reactant "
+            "carbon moles."
+        )
 
     return (desired_product_carbon_moles / reactants_carbon_moles_sum) * 100
 
@@ -79,15 +98,17 @@ def calculate_reaction_mass_efficiency(
         RME = (mass of desired product) / (sum of masses of all reactants) x 100
 
     Args:
-        reactants_mass_sum (float): Sum of masses of all reactants (g).
-        desired_product_mass (float): Mass of the desired product obtained (g).
+        reactants_mass_sum (float): Sum of masses of all reactants (any
+            consistent mass unit, e.g. g or kg).
+        desired_product_mass (float): Mass of the desired product obtained
+            (same unit as reactants_mass_sum).
 
     Returns:
         float: Reaction mass efficiency as a percentage.
 
     Raises:
-        ValueError: If the reactant sum is zero or negative, or the product mass
-            is negative.
+        ValueError: If the reactant sum is zero or negative, the product mass
+            is negative, or the product mass is greater than the reactant sum.
     """
     if reactants_mass_sum <= 0:
         raise ValueError("Sum of reactant masses must be positive.")
@@ -95,9 +116,12 @@ def calculate_reaction_mass_efficiency(
     if desired_product_mass < 0:
         raise ValueError("Desired product mass cannot be negative.")
 
+    if desired_product_mass > reactants_mass_sum:
+        raise ValueError("Desired product mass cannot exceed sum of reactant masses.")
+
     return (desired_product_mass / reactants_mass_sum) * 100
 
-    
+
 def calculate_mass_intensity(
     total_mass_used: float,
     desired_product_mass: float,
@@ -124,7 +148,8 @@ def calculate_mass_intensity(
             An ideal process has MI = 1.
 
     Raises:
-        ValueError: If either input is zero or negative.
+        ValueError: If either input is zero or negative, or if the product
+            mass is greater than the total mass used.
     """
     if total_mass_used <= 0:
         raise ValueError("Total mass used must be positive.")
@@ -132,9 +157,12 @@ def calculate_mass_intensity(
     if desired_product_mass <= 0:
         raise ValueError("Desired product mass must be positive.")
 
+    if desired_product_mass > total_mass_used:
+        raise ValueError("Desired product mass cannot exceed total mass used.")
+
     return total_mass_used / desired_product_mass
 
-    
+
 def calculate_mass_productivity(
     total_mass_used: float,
     desired_product_mass: float,
@@ -159,7 +187,8 @@ def calculate_mass_productivity(
             MP = 100%.
 
     Raises:
-        ValueError: If either input is zero or negative.
+        ValueError: If either input is zero or negative, or if the product
+            mass is greater than the total mass used.
     """
     mass_intensity = calculate_mass_intensity(total_mass_used, desired_product_mass)
     return 100 / mass_intensity
@@ -192,9 +221,6 @@ def calculate_e_factor(
         ValueError: If either input is zero or negative, or if the product
             mass is greater than the total mass used.
     """
-    if desired_product_mass > total_mass_used:
-        raise ValueError("Desired product mass cannot exceed total mass used.")
-
     mass_intensity = calculate_mass_intensity(total_mass_used, desired_product_mass)
     return mass_intensity - 1
 
@@ -208,7 +234,7 @@ def calculate_effective_mass_yield(
 
     EMY is the mass of desired product as a percentage of the mass of
     non-benign materials used. Materials judged benign (e.g. water, NaCl)
-    are left out of the denominator. Aocess that relies on benign
+    are left out of the denominator. A process that relies on benign
     materials scores higher.
         EMY = mass of desired product / mass of non-benign materials used x 100
 
@@ -276,6 +302,129 @@ def calculate_optimum_efficiency(
         raise ValueError("Reaction mass efficiency cannot be negative.")
 
     if reaction_mass_efficiency > atom_economy:
-        raise ValueError("Reaction mass efficiency cannot exceed atom economy.")
+        if not math.isclose(reaction_mass_efficiency, atom_economy):
+            raise ValueError("Reaction mass efficiency cannot exceed atom economy.")
 
     return (reaction_mass_efficiency / atom_economy) * 100
+
+
+def calculate_process_mass_intensity(
+    total_mass_used_including_water: float,
+    desired_product_mass: float,
+) -> float:
+    """
+    Calculate the process mass intensity (PMI) of a chemical process.
+
+    PMI is the total mass of materials used per unit mass of desired product,
+    including water. It has the same form as mass intensity (MI), but MI
+    excludes water and PMI includes it.
+        PMI = total mass used (including water) / mass of desired product
+
+    Total mass used includes reactants, reagents, catalysts, solvents,
+    workup/purification materials and water.
+
+    Args:
+        total_mass_used_including_water (float): Total mass of all materials
+            used in the process, including water (any consistent mass unit,
+            e.g. g or kg).
+        desired_product_mass (float): Mass of the desired product obtained
+            (same unit as total_mass_used_including_water).
+
+    Returns:
+        float: Process mass intensity as a ratio (dimensionless, e.g. kg/kg).
+            An ideal process has PMI = 1.
+
+    Raises:
+        ValueError: If either input is zero or negative, or if the product
+            mass is greater than the total mass used.
+    """
+    if total_mass_used_including_water <= 0:
+        raise ValueError("Total mass used must be positive.")
+
+    if desired_product_mass <= 0:
+        raise ValueError("Desired product mass must be positive.")
+
+    if desired_product_mass > total_mass_used_including_water:
+        raise ValueError("Desired product mass cannot exceed total mass used.")
+
+    return total_mass_used_including_water / desired_product_mass
+
+
+def calculate_renewables_intensity(
+    renewable_mass_used: float,
+    desired_product_mass: float,
+) -> float:
+    """
+    Calculate the renewables intensity (RI) of a chemical process.
+
+    RI is the mass of renewably derivable materials used per unit mass of
+    desired product. RI alone does not show what share of the inputs is
+    renewable; use renewables percentage for that.
+        RI = mass of renewably derivable materials used / mass of desired product
+
+    Deciding which materials count as renewably derivable is done before
+    calling this function. That judgement is not made here.
+
+    Args:
+        renewable_mass_used (float): Total mass of renewably derivable
+            materials used in the process (any consistent mass unit,
+            e.g. g or kg).
+        desired_product_mass (float): Mass of the desired product obtained
+            (same unit as renewable_mass_used).
+
+    Returns:
+        float: Renewables intensity as a ratio (dimensionless, e.g. kg/kg).
+
+    Raises:
+        ValueError: If the renewable mass is negative, or the product mass is
+            zero or negative.
+    """
+    if renewable_mass_used < 0:
+        raise ValueError("Renewable mass used cannot be negative.")
+
+    if desired_product_mass <= 0:
+        raise ValueError("Desired product mass must be positive.")
+
+    return renewable_mass_used / desired_product_mass
+
+
+def calculate_renewables_percentage(
+    renewables_intensity: float,
+    process_mass_intensity: float,
+) -> float:
+    """
+    Calculate the renewables percentage (RP) of a chemical process.
+
+    RP is the percentage of the total mass of materials used that is
+    renewably derivable.
+        RP = RI / PMI x 100
+           = mass of renewably derivable materials / total mass used x 100
+
+    RI and PMI must be calculated over the same set of materials (the same
+    process boundaries). If PMI includes water or workup materials, the
+    renewable mass behind RI must be judged over those same materials.
+
+    Args:
+        renewables_intensity (float): Renewables intensity, e.g. from
+            calculate_renewables_intensity.
+        process_mass_intensity (float): Process mass intensity, e.g. from
+            calculate_process_mass_intensity.
+
+    Returns:
+        float: Renewables percentage. 100% means all materials used are
+            renewably derivable.
+
+    Raises:
+        ValueError: If PMI is zero or negative, RI is negative, or RI is
+            greater than PMI.
+    """
+    if process_mass_intensity <= 0:
+        raise ValueError("Process mass intensity must be positive.")
+
+    if renewables_intensity < 0:
+        raise ValueError("Renewables intensity cannot be negative.")
+
+    if renewables_intensity > process_mass_intensity:
+        raise ValueError("Renewables intensity cannot exceed process mass intensity.")
+
+    return (renewables_intensity / process_mass_intensity) * 100
