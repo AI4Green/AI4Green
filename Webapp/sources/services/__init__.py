@@ -10,6 +10,7 @@ from . import (
     data_export_history,
     email_services,
     file_attachments,
+    green_metrics,
     hazard_code,
     interactive,
     ions,
