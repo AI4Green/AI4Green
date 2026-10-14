@@ -98,3 +98,68 @@ def calculate_reaction_mass_efficiency(
     return (desired_product_mass / reactants_mass_sum) * 100
 
     
+def calculate_mass_intensity(
+    total_mass_used: float,
+    desired_product_mass: float,
+) -> float:
+    """
+    Calculate the mass intensity (MI) of a chemical process.
+
+    MI is the total mass of materials used per unit mass of desired product.
+    Unlike RME, it includes everything that goes into the process, not just
+    the reactants.
+        MI = total mass used (excluding water) / mass of desired product
+
+    Total mass used includes reactants, reagents, catalysts, solvents and
+    workup/purification materials. Water is excluded.
+
+    Args:
+        total_mass_used (float): Total mass of all materials used in the
+            process, excluding water (any consistent mass unit, e.g. g or kg).
+        desired_product_mass (float): Mass of the desired product obtained
+            (same unit as total_mass_used).
+
+    Returns:
+        float: Mass intensity as a ratio (dimensionless, e.g. kg/kg).
+            An ideal process has MI = 1.
+
+    Raises:
+        ValueError: If either input is zero or negative.
+    """
+    if total_mass_used <= 0:
+        raise ValueError("Total mass used must be positive.")
+
+    if desired_product_mass <= 0:
+        raise ValueError("Desired product mass must be positive.")
+
+    return total_mass_used / desired_product_mass
+
+    
+def calculate_mass_productivity(
+    total_mass_used: float,
+    desired_product_mass: float,
+) -> float:
+    """
+    Calculate the mass productivity (MP) of a chemical process.
+
+    MP is the percentage of the total mass of materials used that ends up in
+    the desired product. It is the reciprocal of mass intensity, expressed as
+    a percentage.
+        MP = mass of desired product / total mass used (excluding water) x 100
+           = 100 / MI
+
+    Args:
+        total_mass_used (float): Total mass of all materials used in the
+            process, excluding water (any consistent mass unit, e.g. g or kg).
+        desired_product_mass (float): Mass of the desired product obtained
+            (same unit as total_mass_used).
+
+    Returns:
+        float: Mass productivity as a percentage. An ideal process has
+            MP = 100%.
+
+    Raises:
+        ValueError: If either input is zero or negative.
+    """
+    mass_intensity = calculate_mass_intensity(total_mass_used, desired_product_mass)
+    return 100 / mass_intensity
