@@ -24,7 +24,7 @@ class TemplateInstance(Model):
     template_id = db.Column(db.Integer, db.ForeignKey("Template.id"), nullable=False)
     template = db.relationship("Template", back_populates="template_instances")
 
-    reaction_id = db.Column(db.Integer, db.ForeignKey("Reaction.id"), nullable=False)
+    reaction_id = db.Column(db.Integer, db.ForeignKey("Reaction.id"), nullable=True)
     reaction = db.relationship("Reaction", backref="template_instances")
 
     field_responses = db.relationship(
