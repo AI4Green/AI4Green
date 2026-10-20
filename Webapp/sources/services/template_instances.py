@@ -10,13 +10,14 @@ def add_new_coshh_instance(template_id, reaction) -> Dict:
     # ensure new template is a coshh template
     template = services.templates.get_coshh_template_by_id(template_id)
     new_instance = {}
+    reaction_id = reaction.id if reaction else None
 
     if template is not None:
         new_instance = models.COSHHInstance(
             uuid=str(uuid.uuid4()),
             template=template,
             owner_id=current_user.id,
-            reaction_id=reaction.id,
+            reaction_id=reaction_id,
             approver_id=current_user.id,  # todo: change this
         )
         db.session.add(new_instance)

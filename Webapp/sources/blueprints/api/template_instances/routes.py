@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from flask import json, jsonify, request
+from flask import abort, json, jsonify, request
 from flask_login import current_user, login_required
 from sources import db, models, services
 
@@ -18,16 +18,24 @@ def save_new_instance():
     workbook_name = data.get("workbookName", "")
     template_type = data.get("templateType", "")
     template_id = data.get("templateId", "")
+    origin = data.get("origin", "")
     new_instance = {}
 
-    workbook = services.workbook.get_workbook_from_group_book_name_combination(
-        workgroup_name, workbook_name
-    )
+    if origin == "standalone":
+        reaction = None
 
-    # check to make sure current user is owner of reaction
-    reaction = services.reaction.get_from_reaction_id_and_workbook_id(
-        reaction_id, workbook.id
-    )
+    if origin == "reactionConstructor":
+        workbook = services.workbook.get_workbook_from_group_book_name_combination(
+            workgroup_name, workbook_name
+        )
+
+        # check to make sure current user is owner of reaction
+        reaction = services.reaction.get_from_reaction_id_and_workbook_id(
+            reaction_id, workbook.id
+        )
+
+        if not services.reaction.check_current_user_is_creator(reaction):
+            abort(404)
 
     # todo: enforce no duplicates
 

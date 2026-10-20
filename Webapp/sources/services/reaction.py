@@ -3,10 +3,18 @@ from typing import Dict, List, Union
 
 import pytz
 from flask import request
+from flask_login import current_user
 from sources import models, services
 from sources.auxiliary import abort_if_user_not_in_workbook
 from sources.extensions import db
 from sqlalchemy import func, update
+
+# flake8: noqa # need to silence flake8 for the html block
+
+
+def check_current_user_is_creator(reaction: models.Reaction) -> bool:
+    """Return whether the current user created the reaction."""
+    return current_user.is_authenticated and reaction.creator_id == current_user.id
 
 
 def get_from_name_and_workbook_id(name: str, workbook_id: int) -> models.Reaction:
