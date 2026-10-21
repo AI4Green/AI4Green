@@ -1,7 +1,10 @@
 import { HStack } from "@chakra-ui/react";
-import { useCoshhFormsList } from "api/coshh-forms";
+import { useCoshhFormsList, useCoshhInstanceList } from "api/coshh-forms";
 import { DataTable, DataTableGlobalFilter } from "components/core/data-table";
-import { columns } from "components/coshh-forms/columns";
+import {
+  coshhFormColumns,
+  coshhInstanceColumns,
+} from "components/coshh-forms/columns";
 import { CreateOrEditProjectTypeModal } from "components/coshh-forms/modal-form";
 import { PROJECT_TYPE_MANAGEMENT_PERMISSIONS } from "constants";
 import { useUser } from "contexts";
@@ -12,13 +15,43 @@ import { useNavigate } from "react-router-dom";
 
 export const CoshhFormTable = () => {
   const { user } = useUser();
-  const { data } = useTableData();
+  const { data } = useCoshhFormTableData();
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
   return (
     <DataTable
       data={data}
-      columns={columns}
+      columns={coshhFormColumns}
+      globalFilter={searchValue}
+      onRowClick={(row) => {
+        if (row.targetPath) {
+          navigate(row.targetPath);
+        }
+      }}
+    >
+      <HStack flex={1} justifyContent="flex-start">
+        <DataTableGlobalFilter
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+          placeholder="Search"
+        />
+        {user.permissions?.includes(
+          PROJECT_TYPE_MANAGEMENT_PERMISSIONS.CreateProjectTypes,
+        ) && <New />}
+      </HStack>
+    </DataTable>
+  );
+};
+
+export const CoshhInstanceTable = () => {
+  const { user } = useUser();
+  const { data } = useCoshhInstanceTableData();
+  const navigate = useNavigate();
+  const [searchValue, setSearchValue] = useState("");
+  return (
+    <DataTable
+      data={data}
+      columns={coshhInstanceColumns}
       globalFilter={searchValue}
       onRowClick={(row) => {
         if (row.targetPath) {
@@ -51,7 +84,7 @@ const New = () => {
   );
 };
 
-const useTableData = () => {
+const useCoshhFormTableData = () => {
   const { data: coshhForms } = useCoshhFormsList();
   const tableData = useMemo(
     () =>
@@ -65,6 +98,25 @@ const useTableData = () => {
         targetPath: `${coshhForm.id}`,
       })),
     [coshhForms],
+  );
+
+  return { data: tableData ?? [] };
+};
+
+const useCoshhInstanceTableData = () => {
+  const { data: coshhInstances } = useCoshhInstanceList();
+  const tableData = useMemo(
+    () =>
+      coshhInstances?.map((coshhInstance) => ({
+        id: coshhInstance.id,
+        name: coshhInstance.name,
+        description: coshhInstance.description,
+        stage: coshhInstance.stage,
+        inUseCount: coshhInstance.inUseCount,
+        permissions: coshhInstance.permissions,
+        targetPath: `${coshhInstance.id}`,
+      })),
+    [coshhInstances],
   );
 
   return { data: tableData ?? [] };

@@ -34,4 +34,4 @@ def list_coshh_as_dict():
     """
 
     instances = models.COSHHInstance.query.filter_by(owner_id=current_user.id).all()
-    return [instance.to_dict() for instance in instances]
+    return [instance.to_summary_dict() for instance in instances]

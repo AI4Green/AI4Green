@@ -24,7 +24,7 @@ import {
 } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
 
-export const columns = [
+export const coshhFormColumns = [
   {
     accessorKey: "name",
     header: ({ column }) => (
@@ -99,6 +99,86 @@ export const columns = [
       );
     },
 
+    meta: {
+      width: 1,
+    },
+  },
+  {
+    id: "actions",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Actions" />
+    ),
+    cell: ({ row }) => (
+      <Action coshhForm={row.original} inUse={row.original.inUseCount > 0} />
+    ),
+    meta: {
+      width: 1,
+    },
+  },
+];
+
+export const coshhInstanceColumns = [
+  {
+    accessorKey: "uuid",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Unique Identifier" />
+    ),
+    cell: ({ cell }) => (
+      <Flex alignItems="center" gap={2}>
+        <Icon
+          as={TITLE_ICON_COMPONENTS.ProjectType}
+          color="green.600"
+          fontSize="lg"
+        />
+        <Text>{cell.getValue()}</Text>
+      </Flex>
+    ),
+    meta: {
+      width: 1,
+    },
+  },
+  {
+    accessorKey: "reaction_code",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Reaction Code" />
+    ),
+    meta: {
+      width: "sm",
+    },
+  },
+  {
+    accessorKey: "workgroup",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Workgroup" />
+    ),
+    meta: {
+      width: "sm",
+    },
+  },
+  {
+    accessorKey: "workbook",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Workbook" />
+    ),
+    meta: {
+      width: "sm",
+    },
+  },
+
+  {
+    accessorKey: "stage",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Approval Status" />
+    ),
+    cell: ({ row, cell }) => (
+      <Flex alignItems="center" gap={2}>
+        {/*<Icon*/}
+        {/*  as={STATUS_ICON_COMPONENTS[row.original.stage].icon}*/}
+        {/*  color={STATUS_ICON_COMPONENTS[row.original.stage].color}*/}
+        {/*/>*/}
+        {cell.getValue()}
+      </Flex>
+    ),
     meta: {
       width: 1,
     },

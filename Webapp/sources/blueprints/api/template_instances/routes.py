@@ -122,5 +122,6 @@ def get_template_instances():
 
     if instance_type == "COSHH":
         instance_list = services.template_instances.list_coshh_as_dict()
+        print(instance_list[0])
 
     return jsonify(instance_list)
