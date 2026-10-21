@@ -108,12 +108,12 @@ const useCoshhInstanceTableData = () => {
   const tableData = useMemo(
     () =>
       coshhInstances?.map((coshhInstance) => ({
-        id: coshhInstance.id,
-        name: coshhInstance.name,
-        description: coshhInstance.description,
-        stage: coshhInstance.stage,
-        inUseCount: coshhInstance.inUseCount,
-        permissions: coshhInstance.permissions,
+        uuid: coshhInstance.uuid,
+        reaction_code: coshhInstance.reaction_code,
+        workbook: coshhInstance.workbook,
+        workgroup: coshhInstance.workgroup,
+        stage: coshhInstance.approval_status,
+        template: coshhInstance.template_name,
         targetPath: `${coshhInstance.id}`,
       })),
     [coshhInstances],

@@ -1,5 +1,5 @@
 import { Flex, Icon, Text, useDisclosure, Spinner } from "@chakra-ui/react";
-import { useCoshhFormsList } from "api";
+import { useCoshhFormsList, useCoshhInstanceList } from "api";
 import { ActionButton } from "components/core/action-button";
 import { DataTableColumnHeader } from "components/core/data-table";
 import { DeleteModal } from "components/coshh-forms/modal-delete";
@@ -134,7 +134,7 @@ export const coshhInstanceColumns = [
       </Flex>
     ),
     meta: {
-      width: 1,
+      width: "lg",
     },
   },
   {
@@ -143,7 +143,7 @@ export const coshhInstanceColumns = [
       <DataTableColumnHeader column={column} title="Reaction Code" />
     ),
     meta: {
-      width: "sm",
+      width: "1",
     },
   },
   {
@@ -164,32 +164,45 @@ export const coshhInstanceColumns = [
       width: "sm",
     },
   },
-
   {
-    accessorKey: "stage",
+    accessorKey: "template",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Approval Status" />
-    ),
-    cell: ({ row, cell }) => (
-      <Flex alignItems="center" gap={2}>
-        {/*<Icon*/}
-        {/*  as={STATUS_ICON_COMPONENTS[row.original.stage].icon}*/}
-        {/*  color={STATUS_ICON_COMPONENTS[row.original.stage].color}*/}
-        {/*/>*/}
-        {cell.getValue()}
-      </Flex>
+      <DataTableColumnHeader column={column} title="Template" />
     ),
     meta: {
-      width: 1,
+      width: "sm",
     },
   },
+
+  // add here for approval status when review is up
+  // {
+  //   accessorKey: "stage",
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader column={column} title="Approval Status" />
+  //   ),
+  //   cell: ({ row, cell }) => (
+  //     <Flex alignItems="center" gap={2}>
+  //       {/*<Icon*/}
+  //       {/*  as={STATUS_ICON_COMPONENTS[row.original.stage].icon}*/}
+  //       {/*  color={STATUS_ICON_COMPONENTS[row.original.stage].color}*/}
+  //       {/*/>*/}
+  //       {cell.getValue()}
+  //     </Flex>
+  //   ),
+  //   meta: {
+  //     width: 1,
+  //   },
+  // },
   {
     id: "actions",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Actions" />
     ),
     cell: ({ row }) => (
-      <Action coshhForm={row.original} inUse={row.original.inUseCount > 0} />
+      <InstanceAction
+        coshhForm={row.original}
+        inUse={row.original.inUseCount > 0}
+      />
     ),
     meta: {
       width: 1,
@@ -325,6 +338,35 @@ const Action = ({ coshhForm, inUse }) => {
           {...modalDefaultProps}
         />
       )}
+    </>
+  );
+};
+
+const InstanceAction = ({ coshhForm, inUse }) => {
+  const { user, isLoading } = useUser();
+  if (isLoading) return <Spinner boxSize={16} />;
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const action = searchParams.get("action");
+  const id = searchParams.get("id");
+
+  const { mutate } = useCoshhInstanceList();
+
+  const actions = {
+    delete: {
+      isEligible: () => true,
+      icon: <FaTrash />,
+      label: "Delete",
+      onClick: () => setSearchParams({ action: "delete", id: coshhForm.id }),
+    },
+  };
+  return (
+    <>
+      <ActionButton actions={actions} size="xs" />
+      {action === "edit" && id && <CreateOrEditProjectTypeModal />}
+      {action === "delete" && id && <DeleteModal />}
+
+      {/* Add approval requests here */}
     </>
   );
 };

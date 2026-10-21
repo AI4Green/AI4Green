@@ -58,9 +58,9 @@ class TemplateInstance(Model):
         Returns:
             dict: summary representation of this instance.
         """
-        reaction_code = None
-        workbook_name = None
-        workgroup_name = None
+        reaction_code = "No Reaction"
+        workbook_name = "No Workbook"
+        workgroup_name = "No Workgroup"
 
         if self.reaction_id:
             reaction_code = self.reaction.reaction_id
