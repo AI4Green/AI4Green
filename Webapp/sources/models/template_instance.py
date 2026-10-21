@@ -52,18 +52,15 @@ class TemplateInstance(Model):
             workbook_name = workbook.name
             workgroup_name = workbook.WorkGroup.name
 
-        workbook = self.reaction.workbook if self.reaction_id else None
         return {
             "id": self.id,
             "uuid": self.uuid,
-            # "template_type": self.template_type.value,
+            "instance_type": self.instance_type.value,
             "owner_id": self.owner_id,
             "template_id": self.template_id,
             "reaction_id": self.reaction_id,
-            "approver_id": self.approver_id,
             "sections": [x.to_dict() for x in self.template.sections],
             "fieldResponses": [x.to_dict() for x in self.field_responses],
-            "approvalStatus": self.approval_status.value[0],
             "reactionCode": reaction_code,
             "workbook": workbook_name,
             "workgroup": workgroup_name,

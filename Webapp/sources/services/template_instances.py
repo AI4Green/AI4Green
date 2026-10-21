@@ -24,3 +24,14 @@ def add_new_coshh_instance(template_id, reaction) -> Dict:
         db.session.commit()
 
     return new_instance.to_dict()
+
+
+def list_coshh_as_dict():
+    """
+    Queries COSHHInstance table and returns all coshh instances for the current user.
+    Returns:
+        List[models.COSHHInstance.to_dict()], dictionary representation of all COSHHInstances objects
+    """
+
+    instances = models.COSHHInstance.query.filter_by(owner_id=current_user.id).all()
+    return [instance.to_dict() for instance in instances]
