@@ -21,7 +21,7 @@ class Field(Model):
     input_type_id = db.Column(db.Integer, db.ForeignKey("InputType.id"))
     input_type = db.relationship("InputType", back_populates="field")
 
-    def to_dict(self):
+    def to_dict(self, template_instance_id=None):
         return {
             "id": self.id,
             "name": self.name,
@@ -29,5 +29,9 @@ class Field(Model):
             "mandatory": self.mandatory,
             "section_id": self.section_id,
             "inputType": self.input_type.to_dict(),
-            "fieldResponse": [x.to_dict() for x in self.field_response],
+            "fieldResponse": [
+                x.to_dict()
+                for x in self.field_response
+                if x.template_instance_id == template_instance_id
+            ],
         }

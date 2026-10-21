@@ -16,11 +16,11 @@ class Section(Model):
 
     fields = db.relationship("Field", back_populates="section")
 
-    def to_dict(self):
+    def to_dict(self, template_instance_id=None):
         return {
             "id": self.id,
             "name": self.name,
             "sortOrder": self.sort_order,
             "templateId": self.template_id,
-            "fields": [x.to_dict() for x in self.fields],
+            "fields": [x.to_dict(template_instance_id) for x in self.fields],
         }
