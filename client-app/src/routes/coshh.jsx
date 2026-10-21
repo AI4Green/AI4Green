@@ -12,7 +12,7 @@ export const COSHH = () => {
 
       <Route path="new" element={<RoutedCoshhCreateModal />} />
 
-      <Route path="form/:formId/edit" element={<EmbeddedCoshh />} />
+      <Route path="my-coshh-forms/:formId" element={<EmbeddedCoshh />} />
     </Routes>
   );
 };

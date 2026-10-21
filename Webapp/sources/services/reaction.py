@@ -14,7 +14,10 @@ from sqlalchemy import func, update
 
 def check_current_user_is_creator(reaction: models.Reaction) -> bool:
     """Return whether the current user created the reaction."""
-    return current_user.is_authenticated and reaction.creator_id == current_user.id
+    return (
+        current_user.is_authenticated
+        and reaction.creator_person.user.id == current_user.id
+    )
 
 
 def get_from_name_and_workbook_id(name: str, workbook_id: int) -> models.Reaction:

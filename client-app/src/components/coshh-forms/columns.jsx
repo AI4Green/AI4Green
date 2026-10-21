@@ -354,7 +354,7 @@ const InstanceAction = ({ coshhForm, inUse }) => {
 
   const actions = {
     delete: {
-      isEligible: () => true,
+      isEligible: () => true, // mock eligibility for now
       icon: <FaTrash />,
       label: "Delete",
       onClick: () => setSearchParams({ action: "delete", id: coshhForm.id }),
