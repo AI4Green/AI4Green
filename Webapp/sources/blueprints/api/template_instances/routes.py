@@ -113,6 +113,14 @@ def save_template_instance(template_id):
 
     return jsonify({"message": "success!"}), 200
 
-    # query = models.TemplateInstance.query.get(template_id)
-    # data = query.to_dict() # todo: does this need anymore?
-    # return jsonify(data)
+
+@template_instances_api_bp.route("/", methods=["GET"])
+@login_required
+def get_template_instances():
+    instance_type = request.args.get("instance_type", None)
+    instance_list = []
+
+    if instance_type == "COSHH":
+        instance_list = services.template_instances.list_coshh_as_dict()
+
+    return jsonify(instance_list)

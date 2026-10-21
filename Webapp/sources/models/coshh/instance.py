@@ -27,3 +27,13 @@ class COSHHInstance(TemplateInstance):
     __mapper_args__ = {
         "polymorphic_identity": InstanceType.COSHH,
     }
+
+    def to_dict(self):
+        data = super().to_dict()
+        data.update(
+            {
+                "approver_id": self.approver_id,
+                "approvalStatus": self.approval_status.value,
+            }
+        )
+        return data
