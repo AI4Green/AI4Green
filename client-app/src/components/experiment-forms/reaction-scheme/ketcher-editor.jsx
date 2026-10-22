@@ -125,32 +125,6 @@ export const KetcherEditor = ({ parentName, name, isDisabled }) => {
           onLoad={handleKetcherOnLoad}
           style={{ pointerEvents: isLoading || isDisabled ? "none" : "auto" }}
         />
-        <HStack>
-          {!isDisabled && !field.value?.sketcherSmiles && (
-            <Button
-              leftIcon={<GiMaterialsScience />}
-              isLoading={isLoading}
-              disabled={isLoading}
-              colorScheme="purple"
-              size="sm"
-              onClick={handleDataGenerate}
-            >
-              Generate reaction data
-            </Button>
-          )}
-          {!isDisabled && field.value?.sketcherSmiles && (
-            <Button
-              leftIcon={<FaSync />}
-              isLoading={isLoading}
-              disabled={isLoading}
-              colorScheme="orange"
-              size="sm"
-              onClick={handleKetcherReset}
-            >
-              Reset
-            </Button>
-          )}
-        </HStack>
         <FormHelpError
           isInvalid={Boolean(feedback)}
           error={feedback}
