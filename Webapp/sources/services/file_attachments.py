@@ -417,14 +417,13 @@ class UploadExperimentDataFiles(BaseFileUploader):
 class UploadInstanceFiles(BaseFileUploader):
     def __init__(self, ajax_request, instance):
         super().__init__(ajax_request)
+        if not instance:
+            raise ValueError("instance required")
         self.instance = instance
-        self.pending_file = []
+        self.pending_files = []
 
     def validate_react_submission(self):
-        if not self.instance:
-            raise ValueError("instance required")
-
-        # josn keys for loop, resolve is the the function that returns the field from the provided id
+        # json keys for loop, resolve is the the function that returns the field from the provided id
         upload_sets = [
             (
                 "newFiles",
@@ -440,11 +439,7 @@ class UploadInstanceFiles(BaseFileUploader):
 
         for file_key, meta_key, resolve in upload_sets:
             files = self.files_to_upload.getlist(file_key)
-            try:
-                metadata = json.loads(self.form.get(meta_key, "[]"))
-
-            except json.JSONDecodeError:
-                abort(400, description=f"invalid JSON in {meta_key}")
+            metadata = json.loads(self.form.get(meta_key, "[]"))
 
             if len(files) != len(metadata):
                 abort(400, description=f"{file_key}/{meta_key} length mismatch")
@@ -453,12 +448,19 @@ class UploadInstanceFiles(BaseFileUploader):
                 if self.file_security_validation(file) != "success":
                     abort(400, description=f"invalid file: {file.filename}")
                 field = resolve(self.instance, meta.get("id"))
-                self.validated_files.append((field, file))
+                self.pending_files.append((field, file))
 
     def save_pending_files(self):
-        for field, file in self.validated_files:
+        for field, file in self.pending_files:
             filename = str(uuid.uuid4())
             self.save_blob(file, filename)
             self.uploaded_blob_names.append(filename)  # record immediately after upload
             self.get_save_info(file, filename)
             self.save_as_field_response(field)
+
+    def save_as_field_response(self, field):
+        # save_dict holds datetimes, which json.dumps can't serialise
+        value = {k: v for k, v in self.save_dict.items() if k != "current_time"}
+        value["time_of_upload"] = value["time_of_upload"].isoformat()
+        value["display_name"] = secure_filename(value["display_name"]) or "file"
+        return services.field_response.save_value(self.instance, field, value)

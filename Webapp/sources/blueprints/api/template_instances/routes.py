@@ -59,12 +59,13 @@ def save_template_instance(instance_id):
 
     data = request.form
 
+    # validate files first
+    processor = services.file_attachments.UploadInstanceFiles(request, instance)
+    processor.validate_react_submission()
+
     # Parse JSON strings from form data
     field_responses = json.loads(data.get("fieldResponses", "[]"))
     new_field_responses = json.loads(data.get("newFieldResponses", "[]"))
-
-    file_field_responses = json.loads(data.get("fileFieldResponses", "[]"))
-    new_file_field_responses = json.loads(data.get("newFileFieldResponses", "[]"))
 
     # new responses: nfr["id"] is a FIELD id
     for nfr in new_field_responses:
@@ -76,11 +77,15 @@ def save_template_instance(instance_id):
         field = services.field.get_field_from_field_response(instance, fr.get("id"))
         services.field_response.save_value(instance, field, fr.get("value"))
 
-    print(file_field_responses, new_file_field_responses)
-
-    # processor = services.file_attachments.UploadExperimentDataFiles(request)
-    # processor.process_react_submission()
-
-    db.session.commit()
+    # track file save status to catch any errors caused by saving files
+    committed = False
+    try:
+        processor.save_pending_files()
+        db.session.commit()
+        committed = True
+    finally:
+        if not committed:
+            db.session.rollback()
+            processor.delete_uploaded_blobs()
 
     return jsonify({"message": "success!"}), 200
