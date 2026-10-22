@@ -63,6 +63,9 @@ def save_template_instance(instance_id):
     field_responses = json.loads(data.get("fieldResponses", "[]"))
     new_field_responses = json.loads(data.get("newFieldResponses", "[]"))
 
+    file_field_responses = json.loads(data.get("fileFieldResponses", "[]"))
+    new_file_field_responses = json.loads(data.get("newFileFieldResponses", "[]"))
+
     # new responses: nfr["id"] is a FIELD id
     for nfr in new_field_responses:
         field = services.field.get_field(instance, nfr.get("id"))
@@ -73,11 +76,8 @@ def save_template_instance(instance_id):
         field = services.field.get_field_from_field_response(instance, fr.get("id"))
         services.field_response.save_value(instance, field, fr.get("value"))
 
-    # file_field_responses = json.loads(data.get("fileFieldResponses", "[]"))
-    # new_file_field_responses = json.loads(data.get("newFileFieldResponses", "[]"))
-    #
-    # print(file_field_responses, new_file_field_responses)
-    #
+    print(file_field_responses, new_file_field_responses)
+
     # processor = services.file_attachments.UploadExperimentDataFiles(request)
     # processor.process_react_submission()
 
