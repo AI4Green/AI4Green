@@ -15,7 +15,7 @@ def get_field_from_field_response(
     instance: models.TemplateInstance, response_id: int
 ) -> models.Field:
     """Resolve a FieldResponse id on this instance to its Field."""
-    fr = db.session.get(models.FieldResponse, response_id)
-    if fr is None or fr.template_instance_id != instance.id:
+    field_response = db.session.get(models.FieldResponse, response_id)
+    if field_response is None or field_response.template_instance_id != instance.id:
         abort(403)
-    return get_field(instance, fr.field_id)
+    return get_field(instance, field_response.field_id)
