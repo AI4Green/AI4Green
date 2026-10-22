@@ -51,83 +51,41 @@ def get_template_instance(template_id):
 @template_instances_api_bp.route("/<int:instance_id>", methods=["PUT"])
 @login_required
 def save_template_instance(instance_id):
-    instance = models.TemplateInstance.query.get_or_404(instance_id)
+    instance = db.get_or_404(models.TemplateInstance, instance_id)
 
-    # TODO: enforce who may edit this instance, e.g.
-    if current_user.id not in (
-        instance.owner_id,
-        getattr(instance, "approver_id", None),
-    ):
+    # only the owner can edit
+    if current_user.id != instance.owner_id:
         abort(403)
 
     data = request.form
+
+    # validate files first
+    processor = services.file_attachments.UploadInstanceFiles(request, instance)
+    processor.validate_react_submission()
 
     # Parse JSON strings from form data
     field_responses = json.loads(data.get("fieldResponses", "[]"))
     new_field_responses = json.loads(data.get("newFieldResponses", "[]"))
 
-    # todo: implement files
-    # file_field_responses = json.loads(data.get("fileFieldResponses", "[]"))
-    # new_file_field_responses = json.loads(data.get("newFileFieldResponses", "[]"))
+    # new responses: nfr["id"] is a FIELD id
+    for nfr in new_field_responses:
+        field = services.field.get_field(instance, nfr.get("id"))
+        services.field_response.save_value(instance, field, nfr.get("value"))
 
-    # processor = services.file_attachments.UploadExperimentDataFiles(request)
-    # processor.process_react_submission()
+    # existing responses: fr["id"] is a FIELD RESPONSE id
+    for fr in field_responses:
+        field = services.field.get_field_from_field_response(instance, fr.get("id"))
+        services.field_response.save_value(instance, field, fr.get("value"))
 
-    def serialise(value):
-        return value if isinstance(value, str) else json.dumps(value)
-
-    def save_value(field_id, value):
-        """Append a value to this instance's response for the field,
-        creating the response if it doesn't exist yet."""
-        field = models.Field.query.get(field_id)
-        if field is None or field.section.template_id != instance.template_id:
-            abort(400, description="Field does not belong to this template")
-
-        field_response_object = models.FieldResponse.query.filter_by(
-            template_instance_id=instance.id, field_id=field.id
-        ).first()
-
-        if field_response_object is None:
-            field_response_object = models.FieldResponse.create(
-                field_id=field.id,
-                template_instance_id=instance.id,
-            )
-            db.session.add(field_response_object)
-            db.session.flush()
-
-        serialised = serialise(value)
-
-        latest = (
-            models.FieldResponseValue.query.filter_by(
-                field_response_id=field_response_object.id
-            )
-            .order_by(
-                models.FieldResponseValue.time_of_response.desc(),
-                models.FieldResponseValue.id.desc(),
-            )
-            .first()
-        )
-        if latest is not None and latest.value == serialised:
-            return  # unchanged, don't append a duplicate
-
-        field_response_value = models.FieldResponseValue.create(
-            value=serialised,
-            field_response_id=field_response_object.id,
-            time_of_response=datetime.now(),
-        )
-        db.session.add(field_response_value)
-
-    # new responses: r["id"] is a FIELD id
-    for r in new_field_responses:
-        save_value(r.get("id"), r.get("value"))
-
-    # existing responses: r["id"] is a FIELD RESPONSE id
-    for r in field_responses:
-        field_response = models.FieldResponse.query.get_or_404(r.get("id"))
-        if field_response.template_instance_id != instance.id:
-            abort(403)
-        save_value(field_response.field_id, r.get("value"))
-
-    db.session.commit()
+    # track file save status to catch any errors caused by saving files
+    committed = False
+    try:
+        processor.save_pending_files()
+        db.session.commit()
+        committed = True
+    finally:
+        if not committed:
+            db.session.rollback()
+            processor.delete_uploaded_blobs()
 
     return jsonify({"message": "success!"}), 200

@@ -183,6 +183,7 @@ async function reloadReaction() {
   if (Object.keys(js_reaction_table_data).includes("reaction_description")) {
     await reloadReactionTable(js_reaction_table_data);
   }
+  await updateFileAttachmentList();
 
   let js_summary_table_data = JSON.parse($("#js-summary-table-data").val());
   // load summary table if it has previously been loaded, element sustainability is used because this is autofilled upon load.
@@ -316,4 +317,28 @@ function controlNonCreatorFunctionality() {
   // enable collapsable sections
   $(".section-toggle").prop("disabled", false);
   $("#reaction-note-button").hide();
+}
+
+/**
+ * Fetch request to backend to get the updated reaction attachments in order for the current reaction.
+ */
+function updateFileAttachmentList() {
+  const { workgroup, workbook, reactionID } = getReactionFormVariables();
+  return fetch("/get_file_attachment_list", {
+    method: "POST",
+    body: JSON.stringify({
+      workgroup: workgroup,
+      workbook: workbook,
+      reactionID: reactionID,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.json()) // Parse the JSON response
+    .then((data) => {
+      // empty the list of attachments then repopulate with the response data
+      $("#file-list").empty();
+      showFileAttachmentButtons(data.file_attachments);
+    });
 }
