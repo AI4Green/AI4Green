@@ -131,6 +131,11 @@
                                href="{{ url_for('workgroup_membership_summary.workgroup_membership_summary') }}"
                                type="button">
                                 <i class="bi bi-people-fill"></i> Membership Summary</a>
+
+                            <a id="coshh-templates" class="dropdown-item"
+                               href="/spa/my-coshh-forms"
+                               type="button">
+                                <i class="bi bi-exclamation-diamond"></i> My COSHH Forms </a>
                             {% if user_role == 'H&S Admin' %}
                             <a id="coshh-templates" class="dropdown-item"
                                href="/spa/coshh-form-management"
