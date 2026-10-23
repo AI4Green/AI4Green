@@ -446,7 +446,6 @@ class UploadInstanceFiles(BaseFileUploader):
                 abort(400, description=f"{file_key}/{meta_key} length mismatch")
 
             for file, meta in zip(files, metadata):
-                print(file, meta)
                 value = meta.get("value") or {}
 
                 # find files marked for deletion and append the FieldResponse id and file uuid to pending deletions
