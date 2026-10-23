@@ -1,6 +1,7 @@
 import { HStack } from "@chakra-ui/react";
 import { useCoshhFormsList, useCoshhInstanceList } from "api/coshh-forms";
 import { DataTable, DataTableGlobalFilter } from "components/core/data-table";
+import { CoshhCreateModal } from "components/coshh-forms/form.jsx";
 import {
   coshhFormColumns,
   coshhInstanceColumns,
@@ -65,9 +66,7 @@ export const CoshhInstanceTable = () => {
           setSearchValue={setSearchValue}
           placeholder="Search"
         />
-        {user.permissions?.includes(
-          PROJECT_TYPE_MANAGEMENT_PERMISSIONS.CreateProjectTypes,
-        ) && <New />}
+        <NewForm />
       </HStack>
     </DataTable>
   );
@@ -80,6 +79,25 @@ const New = () => {
     <>
       <NewButton onClick={() => setSearchParams({ action: "new" })} />
       {action === "new" && <CreateOrEditProjectTypeModal />}
+    </>
+  );
+};
+
+const NewForm = () => {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isOpen = searchParams.get("action") === "new";
+
+  const close = () => setSearchParams({});
+
+  return (
+    <>
+      <NewButton onClick={() => setSearchParams({ action: "new" })} />
+      <CoshhCreateModal
+        isOpen={isOpen}
+        onClose={close}
+        onCreated={(data) => navigate(`${data.id}`)}
+      />
     </>
   );
 };

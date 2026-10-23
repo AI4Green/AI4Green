@@ -23,7 +23,7 @@ export const Root = () => {
         />
 
         <Route path="coshh-form-management/*" element={<CoshhForms />} />
-        <Route path="coshh/*" element={<COSHH />} />
+        <Route path="my-coshh-forms/*" element={<COSHH />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

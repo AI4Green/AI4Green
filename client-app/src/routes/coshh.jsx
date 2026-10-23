@@ -8,11 +8,9 @@ import { CoshhInstanceList } from "pages/coshh-forms";
 export const COSHH = () => {
   return (
     <Routes>
-      <Route path="my-coshh-forms" element={<CoshhInstanceList />} />
+      <Route path="" element={<CoshhInstanceList />} />
 
-      <Route path="new" element={<RoutedCoshhCreateModal />} />
-
-      <Route path="my-coshh-forms/:formId" element={<EmbeddedCoshh />} />
+      <Route path=":formId" element={<EmbeddedCoshh />} />
     </Routes>
   );
 };
