@@ -235,11 +235,17 @@ export const RoutedCoshhCreateModal = () => {
 };
 
 // embedded in the card
-export const EmbeddedCoshh = ({ reactionId, workbookName, workgroupName }) => {
+export const EmbeddedCoshh = ({
+  reactionId,
+  workbookName,
+  workgroupName,
+  initialFormId,
+}) => {
   const { formId: routeFormId } = useParams();
+  const [createdFormId, setCreatedFormId] = useState(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(true);
 
-  const [formId, setFormId] = useState(routeFormId);
-  const [isCreateOpen, setIsCreateOpen] = useState(!routeFormId);
+  const formId = createdFormId ?? initialFormId ?? routeFormId ?? null;
 
   if (formId) return <CoshhForm formId={formId} />;
 
