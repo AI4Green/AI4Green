@@ -1,7 +1,8 @@
+import io
 import uuid
 from datetime import datetime
 
-from flask import abort, json, jsonify, request
+from flask import abort, json, jsonify, request, send_file
 from flask_login import current_user, login_required
 from sources import db, models, services
 
@@ -80,6 +81,7 @@ def save_template_instance(instance_id):
     # track file save status to catch any errors caused by saving files
     committed = False
     try:
+        processor.apply_deletions()
         processor.save_pending_files()
         db.session.commit()
         committed = True
@@ -89,3 +91,32 @@ def save_template_instance(instance_id):
             processor.delete_uploaded_blobs()
 
     return jsonify({"message": "success!"}), 200
+
+
+@template_instances_api_bp.route(
+    "/<int:instance_id>/files/<file_uuid>", methods=["GET"]
+)
+@login_required
+def download_instance_file(instance_id, file_uuid):
+    instance = db.get_or_404(models.TemplateInstance, instance_id)
+    if current_user.id != instance.owner_id:
+        abort(403)
+
+    meta = services.field_response.find_file_metadata(instance, file_uuid)
+    if meta is None:
+        abort(404)
+
+    blob = services.file_attachments.get_blob(file_uuid)
+    contents = blob.download_blob().readall()
+    if (
+        services.file_attachments.sha256_from_file_contents(contents)
+        != meta["sha256_checksum"]
+    ):
+        abort(500, description="Integrity check failed")
+
+    return send_file(
+        io.BytesIO(contents),
+        mimetype=(meta.get("file_details") or {}).get("mimetype"),
+        as_attachment=True,
+        download_name=meta["display_name"],
+    )

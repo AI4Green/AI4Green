@@ -421,6 +421,7 @@ class UploadInstanceFiles(BaseFileUploader):
             raise ValueError("instance required")
         self.instance = instance
         self.pending_files = []
+        self.pending_deletions = []
 
     def validate_react_submission(self):
         # json keys for loop, resolve is the the function that returns the field from the provided id
@@ -445,18 +446,48 @@ class UploadInstanceFiles(BaseFileUploader):
                 abort(400, description=f"{file_key}/{meta_key} length mismatch")
 
             for file, meta in zip(files, metadata):
+                value = meta.get("value") or {}
+
+                # find files marked for deletion and append the FieldResponse id and file uuid to pending deletions
+                # dont think isNew check is needed, but keeping as a failsafe
+                if value.get("isMarkedForDeletion") and not value.get("isNew"):
+                    resolve(self.instance, meta.get("id"))
+                    self.pending_deletions.append(
+                        {"id": meta.get("id"), "uuid": value.get("uuid")}
+                    )
+                    continue
+
+                # is the file is not new or marked for deletion, just ignore it
+                if not value.get("isNew"):
+                    continue
+
+                # if the file is new and not marked for deletion, save it
                 if self.file_security_validation(file) != "success":
                     abort(400, description=f"invalid file: {file.filename}")
                 field = resolve(self.instance, meta.get("id"))
                 self.pending_files.append((field, file))
 
+    def build_file_value(self):
+        """JSON-safe metadata dict for the file most recently processed by get_save_info."""
+        value = {k: v for k, v in self.save_dict.items() if k != "current_time"}
+        value["time_of_upload"] = value["time_of_upload"].isoformat()
+        value["display_name"] = secure_filename(value["display_name"]) or "file"
+        return value
+
     def save_pending_files(self):
+        uploaded_by_field = {}  # field.id -> (field, [metadata, ...])
+
         for field, file in self.pending_files:
             filename = str(uuid.uuid4())
             self.save_blob(file, filename)
             self.uploaded_blob_names.append(filename)  # record immediately after upload
             self.get_save_info(file, filename)
-            self.save_as_field_response(field)
+            _, items = uploaded_by_field.setdefault(field.id, (field, []))
+            items.append(self.build_file_value())
+
+        # one appended value per field, holding existing files plus the new ones
+        for field, new_items in uploaded_by_field.values():
+            services.field_response.append_files(self.instance, field, new_items)
 
     def save_as_field_response(self, field):
         # save_dict holds datetimes, which json.dumps can't serialise
@@ -464,3 +495,6 @@ class UploadInstanceFiles(BaseFileUploader):
         value["time_of_upload"] = value["time_of_upload"].isoformat()
         value["display_name"] = secure_filename(value["display_name"]) or "file"
         return services.field_response.save_value(self.instance, field, value)
+
+    def apply_deletions(self):
+        services.field_response.remove_files(self.instance, self.pending_deletions)

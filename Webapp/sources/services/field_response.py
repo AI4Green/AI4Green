@@ -1,10 +1,12 @@
 import json
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, TypedDict
 
 from flask import abort
 from sources import models
 from sources.extensions import db
+
+from .field import get_field_from_field_response
 
 
 def serialise(value):
@@ -76,3 +78,100 @@ def save_value(
     )
     db.session.add(field_response_value)
     return field_response_value
+
+
+def find_file_metadata(instance, file_uuid):
+    """Return the stored file metadata dict with this uuid on the instance, or None."""
+    rows = (
+        models.FieldResponseValue.query.join(models.FieldResponse)
+        .filter(models.FieldResponse.template_instance_id == instance.id)
+        .all()
+    )
+    for row in rows:
+        try:
+            parsed = json.loads(row.value)
+        except (TypeError, ValueError):
+            continue
+        items = parsed if isinstance(parsed, list) else [parsed]
+        for meta in items:
+            if isinstance(meta, dict) and meta.get("uuid") == file_uuid:
+                return meta
+    return None
+
+
+class FileDeletion(TypedDict):
+    id: int  # FieldRespond id
+    uuid: str  # uuid of the file to remove
+
+
+def remove_files(
+    instance: models.TemplateInstance, deletions: List[FileDeletion]
+) -> None:
+    """Append a new value for each affected field with the given file uuids omitted.
+
+    Nothing is deleted from the database or storage. A new FieldResponseValue is
+    appended without the file, so the audit history is preserved.
+    """
+    for d in deletions:
+        field = get_field_from_field_response(instance, d.get("id"))
+        field_response = get_or_create_field_response(instance, field)
+
+        latest = (
+            models.FieldResponseValue.query.filter_by(
+                field_response_id=field_response.id
+            )
+            .order_by(
+                models.FieldResponseValue.time_of_response.desc(),
+                models.FieldResponseValue.id.desc(),
+            )
+            .first()
+        )
+
+        # parse saved dict, if exists, and
+        try:
+            parsed = json.loads(latest.value) if latest else []
+        except (TypeError, ValueError):
+            parsed = []
+        items = parsed if isinstance(parsed, list) else [parsed]
+
+        if not any(
+            isinstance(m, dict) and m.get("uuid") == d.get("uuid") for m in items
+        ):
+            continue  # already removed (autosave resends), nothing to append
+
+        remaining = [
+            m
+            for m in items
+            if not (isinstance(m, dict) and m.get("uuid") == d.get("uuid"))
+        ]
+        save_value(instance, field, remaining)
+
+
+def _latest_value(fr: models.FieldResponse):
+    return (
+        models.FieldResponseValue.query.filter_by(field_response_id=fr.id)
+        .order_by(
+            models.FieldResponseValue.time_of_response.desc(),
+            models.FieldResponseValue.id.desc(),
+        )
+        .first()
+    )
+
+
+def _load_items(latest):
+    """Stored value -> list of metadata dicts (handles legacy single-dict values)."""
+    if latest is None:
+        return []
+    try:
+        parsed = json.loads(latest.value)
+    except (TypeError, ValueError):
+        return []
+    items = parsed if isinstance(parsed, list) else [parsed]
+    return [m for m in items if isinstance(m, dict)]
+
+
+def append_files(instance, field, new_items):
+    """Append one value holding the field's current files plus the new ones."""
+    fr = get_or_create_field_response(instance, field)
+    existing = _load_items(_latest_value(fr))
+    return save_value(instance, field, existing + new_items)
