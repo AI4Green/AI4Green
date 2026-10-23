@@ -145,3 +145,33 @@ def remove_files(
             if not (isinstance(m, dict) and m.get("uuid") == d.get("uuid"))
         ]
         save_value(instance, field, remaining)
+
+
+def _latest_value(fr: models.FieldResponse):
+    return (
+        models.FieldResponseValue.query.filter_by(field_response_id=fr.id)
+        .order_by(
+            models.FieldResponseValue.time_of_response.desc(),
+            models.FieldResponseValue.id.desc(),
+        )
+        .first()
+    )
+
+
+def _load_items(latest):
+    """Stored value -> list of metadata dicts (handles legacy single-dict values)."""
+    if latest is None:
+        return []
+    try:
+        parsed = json.loads(latest.value)
+    except (TypeError, ValueError):
+        return []
+    items = parsed if isinstance(parsed, list) else [parsed]
+    return [m for m in items if isinstance(m, dict)]
+
+
+def append_files(instance, field, new_items):
+    """Append one value holding the field's current files plus the new ones."""
+    fr = get_or_create_field_response(instance, field)
+    existing = _load_items(_latest_value(fr))
+    return save_value(instance, field, existing + new_items)

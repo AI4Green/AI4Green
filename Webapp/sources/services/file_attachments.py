@@ -446,6 +446,7 @@ class UploadInstanceFiles(BaseFileUploader):
                 abort(400, description=f"{file_key}/{meta_key} length mismatch")
 
             for file, meta in zip(files, metadata):
+                print(file, meta)
                 value = meta.get("value") or {}
 
                 # find files marked for deletion and append the FieldResponse id and file uuid to pending deletions
@@ -467,13 +468,27 @@ class UploadInstanceFiles(BaseFileUploader):
                 field = resolve(self.instance, meta.get("id"))
                 self.pending_files.append((field, file))
 
+    def build_file_value(self):
+        """JSON-safe metadata dict for the file most recently processed by get_save_info."""
+        value = {k: v for k, v in self.save_dict.items() if k != "current_time"}
+        value["time_of_upload"] = value["time_of_upload"].isoformat()
+        value["display_name"] = secure_filename(value["display_name"]) or "file"
+        return value
+
     def save_pending_files(self):
+        uploaded_by_field = {}  # field.id -> (field, [metadata, ...])
+
         for field, file in self.pending_files:
             filename = str(uuid.uuid4())
             self.save_blob(file, filename)
             self.uploaded_blob_names.append(filename)  # record immediately after upload
             self.get_save_info(file, filename)
-            self.save_as_field_response(field)
+            _, items = uploaded_by_field.setdefault(field.id, (field, []))
+            items.append(self.build_file_value())
+
+        # one appended value per field, holding existing files plus the new ones
+        for field, new_items in uploaded_by_field.values():
+            services.field_response.append_files(self.instance, field, new_items)
 
     def save_as_field_response(self, field):
         # save_dict holds datetimes, which json.dumps can't serialise
