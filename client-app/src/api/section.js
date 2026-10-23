@@ -9,8 +9,8 @@ export const fetchKeys = {
   listBySectionType: (id, name) =>
     `sections/section-type/${name}/project/${id}`, // edit here to filter by project type
 
-  file: (sectionId, recordId, fileLocation, fileName) =>
-    `sections/file?sectionId=${sectionId}&recordId=${recordId}&fileLocation=${fileLocation}&name=${fileName}`,
+  instanceFile: (instanceId, fileUuid) =>
+    `template-instances/${instanceId}/files/${fileUuid}`,
 };
 
 export const getSectionsApi = ({ api }) => ({
@@ -21,8 +21,8 @@ export const getSectionsApi = ({ api }) => ({
   saveFieldResponses: (formValues) =>
     api.put(`sections/`, { body: formValues }),
 
-  downloadSectionFile: (sectionId, recordId, fileLocation, fileName) =>
-    api.get(fetchKeys.file(sectionId, recordId, fileLocation, fileName)),
+  downloadInstanceFile: (instanceId, fileUuid) =>
+    api.get(fetchKeys.instanceFile(instanceId, fileUuid)),
 });
 
 export const useSectionsListByCoshhForm = (id) => {

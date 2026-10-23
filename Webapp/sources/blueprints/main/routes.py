@@ -164,7 +164,7 @@ def sketcher(
     )
     addenda = services.reaction.get_addenda(reaction)
 
-    coshh_instance = services.coshh_forms.get_coshh_form_from_reaction_id(reaction_id)
+    coshh_instance = services.coshh_forms.get_coshh_form_from_reaction_pk(reaction.id)
 
     # entry function for react
     vite_entry = services.spa.vite_entry

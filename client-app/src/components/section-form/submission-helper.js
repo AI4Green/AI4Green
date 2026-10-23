@@ -55,7 +55,6 @@ const evaluateField = (field, fields, values) => {
  */
 export const prepareSubmissionData = (fields, values) => {
   const data = fields.map((field) => evaluateField(field, fields, values));
-  console.log("preparesubmissiondata", data);
   const uniqueData = Object.values(
     data.reduce((uniqueItems, itemArray) => {
       itemArray?.forEach((item) => {
@@ -64,7 +63,6 @@ export const prepareSubmissionData = (fields, values) => {
       return uniqueItems;
     }, {}),
   );
-  console.log(uniqueData);
 
   const {
     fieldResponses,

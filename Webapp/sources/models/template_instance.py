@@ -103,7 +103,7 @@ class TemplateInstance(Model):
         data = self.to_summary_dict()
         data.update(
             {
-                "sections": [x.to_dict() for x in self.template.sections],
+                "sections": [x.to_dict(self.id) for x in self.template.sections],
                 "fieldResponses": [x.to_dict() for x in self.field_responses],
             }
         )

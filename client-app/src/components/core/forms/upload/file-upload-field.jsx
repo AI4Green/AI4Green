@@ -73,6 +73,7 @@ export const FileUploadField = ({
   isRequired,
   isDisabled,
   isMultiple, // allow multiple files to be uploaded
+  onDownload,
 }) => {
   const [field, meta, helpers] = useField(name);
 
@@ -210,7 +211,9 @@ export const FileUploadField = ({
             <Tag key={f.name} colorScheme="green">
               <TagLabel>
                 <Link
-                  onClick={async () => await handleDownload(f.download, f.name)}
+                  onClick={async () =>
+                    await handleDownload(() => onDownload(f), f.name)
+                  }
                 >
                   {f.name}
                 </Link>

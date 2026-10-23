@@ -1,7 +1,8 @@
+import io
 import uuid
 from datetime import datetime
 
-from flask import abort, json, jsonify, request
+from flask import abort, json, jsonify, request, send_file
 from flask_login import current_user, login_required
 from sources import db, models, services
 
@@ -56,62 +57,77 @@ def get_template_instance(template_id):
     return jsonify(data)
 
 
-@template_instances_api_bp.route("/<int:template_id>", methods=["PUT"])
+@template_instances_api_bp.route("/<int:instance_id>", methods=["PUT"])
 @login_required
-def save_template_instance(template_id):
+def save_template_instance(instance_id):
+    instance = db.get_or_404(models.TemplateInstance, instance_id)
+
+    # only the owner can edit
+    if current_user.id != instance.owner_id:
+        abort(403)
+
     data = request.form
-    # files = request.files
+
+    # validate files first
+    processor = services.file_attachments.UploadInstanceFiles(request, instance)
+    processor.validate_react_submission()
 
     # Parse JSON strings from form data
     field_responses = json.loads(data.get("fieldResponses", "[]"))
     new_field_responses = json.loads(data.get("newFieldResponses", "[]"))
-    # todo: implement files
-    # file_field_responses = json.loads(data.get("fileFieldResponses", "[]"))
-    # new_file_field_responses = json.loads(data.get("newFileFieldResponses", "[]"))
 
-    # section_id = data.get("sectionId")
-    template_instance_id = data.get("recordId")
+    # new responses: nfr["id"] is a FIELD id
+    for nfr in new_field_responses:
+        field = services.field.get_field(instance, nfr.get("id"))
+        services.field_response.save_value(instance, field, nfr.get("value"))
 
-    processor = services.file_attachments.UploadExperimentDataFiles(request)
+    # existing responses: fr["id"] is a FIELD RESPONSE id
+    for fr in field_responses:
+        field = services.field.get_field_from_field_response(instance, fr.get("id"))
+        services.field_response.save_value(instance, field, fr.get("value"))
 
-    processor.process_react_submission()
-
-    # save new responses
-    for r in new_field_responses:
-        field_id = r.get("id")
-        value = r.get("value")
-
-        field = models.Field.query.get(field_id)
-
-        field_response = models.FieldResponse.create(
-            field_id=field.id,
-            template_instance_id=template_instance_id,
-        )
-
-        field_response_value = models.FieldResponseValue.create(
-            value=value if isinstance(value, str) else json.dumps(value),
-            field_response_id=field_response.id,
-            time_of_response=datetime.now(),
-        )
-
-        db.session.add(field_response, field_response_value)
-
-    for r in field_responses:
-        field_response_id = r.get("id")
-        value = r.get("value")
-
-        field_response = db.session.query(models.FieldResponse).get(field_response_id)
-
-        field_response_value = models.FieldResponseValue.create(
-            value=value if isinstance(value, str) else json.dumps(value),
-            field_response_id=field_response.id,
-            time_of_response=datetime.now(),
-        )
-        db.session.add(field_response_value)
-
-    db.session.commit()
+    # track file save status to catch any errors caused by saving files
+    committed = False
+    try:
+        processor.apply_deletions()
+        processor.save_pending_files()
+        db.session.commit()
+        committed = True
+    finally:
+        if not committed:
+            db.session.rollback()
+            processor.delete_uploaded_blobs()
 
     return jsonify({"message": "success!"}), 200
+
+
+@template_instances_api_bp.route(
+    "/<int:instance_id>/files/<file_uuid>", methods=["GET"]
+)
+@login_required
+def download_instance_file(instance_id, file_uuid):
+    instance = db.get_or_404(models.TemplateInstance, instance_id)
+    if current_user.id != instance.owner_id:
+        abort(403)
+
+    meta = services.field_response.find_file_metadata(instance, file_uuid)
+    if meta is None:
+        abort(404)
+
+    blob = services.file_attachments.get_blob(file_uuid)
+    contents = blob.download_blob().readall()
+    if (
+        services.file_attachments.sha256_from_file_contents(contents)
+        != meta["sha256_checksum"]
+    ):
+        abort(500, description="Integrity check failed")
+
+    return send_file(
+        io.BytesIO(contents),
+        mimetype=(meta.get("file_details") or {}).get("mimetype"),
+        as_attachment=True,
+        download_name=meta["display_name"],
+    )
 
 
 @template_instances_api_bp.route("/", methods=["GET"])
