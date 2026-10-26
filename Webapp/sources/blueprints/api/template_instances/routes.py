@@ -51,7 +51,9 @@ def save_new_instance():
 @template_instances_api_bp.route("/<int:template_id>", methods=["GET"])
 @login_required
 def get_template_instance(template_id):
-    query = models.TemplateInstance.query.get(template_id)
+    query = models.TemplateInstance.query.get_or_404(template_id)
+    if query.owner_id != current_user.id:
+        abort(403)
     data = query.to_dict()
 
     return jsonify(data)
