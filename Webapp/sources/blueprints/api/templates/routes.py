@@ -1,10 +1,10 @@
 from datetime import datetime
 
 import pytz
-from decorators import hs_admin_required
 from flask import jsonify, request
 from flask_login import current_user, login_required
 from sources import db, models, services
+from sources.decorators import hs_admin_required
 
 from . import templates_api_bp
 
