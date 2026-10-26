@@ -61,7 +61,14 @@ export const useProject = (id) => {
       const data = await apiFetcher(url);
       return data;
     },
-    { suspense: true },
+    {
+      suspense: true,
+      onError: (err) => {
+        if ([401, 403, 404].includes(err?.response?.status)) {
+          window.location.replace("/");
+        }
+      },
+    },
   );
 };
 
