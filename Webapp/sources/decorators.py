@@ -179,3 +179,24 @@ def admin_required(f: Callable[..., Response]) -> Callable[..., Response]:
         return f(*args, **kwargs)
 
     return decorated_function
+
+
+def hs_admin_required(f: Callable[..., Response]) -> Callable[..., Response]:
+    """
+        Decorates function f to check whether user is an H&S admin
+        and redirects to homepage if they are not.
+
+       The current user role is used to verify whether the user is an admin.
+
+    Returns:
+        redirect to home if user is not an admin
+    """
+
+    @wraps(f)
+    def decorated_function(*args: Any, **kwargs: Any):
+        if not current_user.Role.name == "H&S Admin":
+            flash("You do not have permission to view this page")
+            return redirect(url_for("main.index"))
+        return f(*args, **kwargs)
+
+    return decorated_function
