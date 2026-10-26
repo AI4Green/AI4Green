@@ -19,16 +19,24 @@ def save_new_instance():
     workbook_name = data.get("workbookName", "")
     template_type = data.get("templateType", "")
     template_id = data.get("templateId", "")
+    origin = data.get("origin", "")
     new_instance = {}
 
-    workbook = services.workbook.get_workbook_from_group_book_name_combination(
-        workgroup_name, workbook_name
-    )
+    if origin == "standalone":
+        reaction = None
 
-    # check to make sure current user is owner of reaction
-    reaction = services.reaction.get_from_reaction_id_and_workbook_id(
-        reaction_id, workbook.id
-    )
+    if origin == "reactionConstructor":
+        workbook = services.workbook.get_workbook_from_group_book_name_combination(
+            workgroup_name, workbook_name
+        )
+
+        # check to make sure current user is owner of reaction
+        reaction = services.reaction.get_from_reaction_id_and_workbook_id(
+            reaction_id, workbook.id
+        )
+
+        if not services.reaction.check_current_user_is_creator(reaction):
+            abort(404)
 
     # todo: enforce no duplicates
 
@@ -120,3 +128,15 @@ def download_instance_file(instance_id, file_uuid):
         as_attachment=True,
         download_name=meta["display_name"],
     )
+
+
+@template_instances_api_bp.route("/", methods=["GET"])
+@login_required
+def get_template_instances():
+    instance_type = request.args.get("instance_type", None)
+    instance_list = []
+
+    if instance_type == "COSHH":
+        instance_list = services.template_instances.list_coshh_as_dict()
+
+    return jsonify(instance_list)

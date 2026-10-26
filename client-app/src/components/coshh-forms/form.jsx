@@ -23,6 +23,7 @@ const useCoshhCreateForm = ({
   workgroupName,
   workbookName,
   onCreated,
+  origin,
 }) => {
   const { projects: api } = useBackendApi();
   const { data: templates = [] } = useCoshhFormsList();
@@ -45,6 +46,7 @@ const useCoshhCreateForm = ({
         workbookName,
         templateId: Number(values.templateId[0]),
         templateType: "COSHH",
+        origin,
       });
 
       if (!response.ok) throw new Error("Failed to create COSHH form");
@@ -126,7 +128,7 @@ export const CoshhCreateModal = ({
     feedback,
     isLoading,
     handleSubmit,
-  } = useCoshhCreateForm({ reactionId, onCreated });
+  } = useCoshhCreateForm({ reactionId, onCreated, origin: "standalone" });
 
   const body = (
     <CoshhCreateFormContent
@@ -173,6 +175,7 @@ export const CoshhCreateInline = ({
     workgroupName,
     workbookName,
     onCreated,
+    origin: "reactionConstructor",
   });
 
   if (!isOpen) return null;
@@ -234,12 +237,15 @@ export const RoutedCoshhCreateModal = () => {
 // embedded in the card
 export const EmbeddedCoshh = ({
   reactionId,
-  initialFormId = null,
   workbookName,
   workgroupName,
+  initialFormId,
 }) => {
-  const [formId, setFormId] = useState(initialFormId);
-  const [isCreateOpen, setIsCreateOpen] = useState(!initialFormId);
+  const { formId: routeFormId } = useParams();
+  const [createdFormId, setCreatedFormId] = useState(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(true);
+
+  const formId = createdFormId ?? initialFormId ?? routeFormId ?? null;
 
   if (formId) return <CoshhForm formId={formId} />;
 

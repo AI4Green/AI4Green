@@ -1,5 +1,5 @@
 import { Flex, Icon, Text, useDisclosure, Spinner } from "@chakra-ui/react";
-import { useCoshhFormsList } from "api";
+import { useCoshhFormsList, useCoshhInstanceList } from "api";
 import { ActionButton } from "components/core/action-button";
 import { DataTableColumnHeader } from "components/core/data-table";
 import { DeleteModal } from "components/coshh-forms/modal-delete";
@@ -24,7 +24,7 @@ import {
 } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
 
-export const columns = [
+export const coshhFormColumns = [
   {
     accessorKey: "name",
     header: ({ column }) => (
@@ -110,6 +110,99 @@ export const columns = [
     ),
     cell: ({ row }) => (
       <Action coshhForm={row.original} inUse={row.original.inUseCount > 0} />
+    ),
+    meta: {
+      width: 1,
+    },
+  },
+];
+
+export const coshhInstanceColumns = [
+  {
+    accessorKey: "uuid",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Unique Identifier" />
+    ),
+    cell: ({ cell }) => (
+      <Flex alignItems="center" gap={2}>
+        <Icon
+          as={TITLE_ICON_COMPONENTS.ProjectType}
+          color="green.600"
+          fontSize="lg"
+        />
+        <Text>{cell.getValue()}</Text>
+      </Flex>
+    ),
+    meta: {
+      width: "lg",
+    },
+  },
+  {
+    accessorKey: "reaction_code",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Reaction Code" />
+    ),
+    meta: {
+      width: "1",
+    },
+  },
+  {
+    accessorKey: "workgroup",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Workgroup" />
+    ),
+    meta: {
+      width: "sm",
+    },
+  },
+  {
+    accessorKey: "workbook",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Workbook" />
+    ),
+    meta: {
+      width: "sm",
+    },
+  },
+  {
+    accessorKey: "template",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Template" />
+    ),
+    meta: {
+      width: "sm",
+    },
+  },
+
+  // add here for approval status when review is up
+  // {
+  //   accessorKey: "stage",
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader column={column} title="Approval Status" />
+  //   ),
+  //   cell: ({ row, cell }) => (
+  //     <Flex alignItems="center" gap={2}>
+  //       {/*<Icon*/}
+  //       {/*  as={STATUS_ICON_COMPONENTS[row.original.stage].icon}*/}
+  //       {/*  color={STATUS_ICON_COMPONENTS[row.original.stage].color}*/}
+  //       {/*/>*/}
+  //       {cell.getValue()}
+  //     </Flex>
+  //   ),
+  //   meta: {
+  //     width: 1,
+  //   },
+  // },
+  {
+    id: "actions",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Actions" />
+    ),
+    cell: ({ row }) => (
+      <InstanceAction
+        coshhForm={row.original}
+        inUse={row.original.inUseCount > 0}
+      />
     ),
     meta: {
       width: 1,
@@ -245,6 +338,35 @@ const Action = ({ coshhForm, inUse }) => {
           {...modalDefaultProps}
         />
       )}
+    </>
+  );
+};
+
+const InstanceAction = ({ coshhForm, inUse }) => {
+  const { user, isLoading } = useUser();
+  if (isLoading) return <Spinner boxSize={16} />;
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const action = searchParams.get("action");
+  const id = searchParams.get("id");
+
+  const { mutate } = useCoshhInstanceList();
+
+  const actions = {
+    delete: {
+      isEligible: () => true, // mock eligibility for now
+      icon: <FaTrash />,
+      label: "Delete",
+      onClick: () => setSearchParams({ action: "delete", id: coshhForm.id }),
+    },
+  };
+  return (
+    <>
+      <ActionButton actions={actions} size="xs" />
+      {action === "edit" && id && <CreateOrEditProjectTypeModal />}
+      {action === "delete" && id && <DeleteModal />}
+
+      {/* Add approval requests here */}
     </>
   );
 };
