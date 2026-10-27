@@ -11,7 +11,6 @@ from . import summary_bp
 
 
 @summary_bp.route("/_summary", methods=["POST"])
-@login_required
 def summary() -> Response:
     """
     This function receives the reaction data, and renders the summary page including calculating green metrics,
