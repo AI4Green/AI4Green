@@ -257,7 +257,7 @@ export const EmbeddedCoshh = ({
       isOpen={isCreateOpen}
       onClose={() => setIsCreateOpen(false)}
       onCreated={(data) => {
-        setFormId(data.id);
+        setCreatedFormId(data.id);
         setIsCreateOpen(false);
       }}
     />
