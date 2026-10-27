@@ -21,6 +21,9 @@ from .field_response_value import FieldResponseValue
 from .hazard_code import HazardCode
 from .input_type import InputType
 from .institution import Institution
+from .inventory_item import InventoryItem
+from .inventory_ledger import InventoryLedgerEntry
+from .location import Location
 from .news_item import NewsItem
 from .notification import Notification
 from .novel_compound import NovelCompound
@@ -54,4 +57,5 @@ from .wb_status_request import WBStatusRequest
 from .wg_status_request import WGStatusRequest
 from .workbook import WorkBook
 from .workgroup import WorkGroup
+from .workgroup_compound import WorkgroupCompound
 from .workgroup_request import WorkGroupRequest
