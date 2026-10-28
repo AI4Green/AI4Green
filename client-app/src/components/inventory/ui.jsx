@@ -84,7 +84,8 @@ export const InvButton = ({ primary = false, ...props }) => {
       _hover={{
         bg: primary ? INV.accentHover : INV.sub,
         borderColor: primary ? INV.accentHover : INV.accent,
-        _disabled: { bg, borderColor },
+        ...underline,
+        _disabled: { bg, borderColor, textDecoration: "none" },
       }}
       {...props}
     />

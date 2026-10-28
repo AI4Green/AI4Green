@@ -81,6 +81,7 @@ const SegmentButton = ({ isPressed, position, ...props }) => (
       fontWeight: 500,
       ...underline,
     }}
+    _hover={underline}
     _focusVisible={{ ...focusRing, ...underline }}
     {...props}
   />
