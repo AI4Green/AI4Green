@@ -55,7 +55,7 @@ export function summarise(wc) {
       .map(([unit, qty]) => `${formatQuantity(qty)} ${unit}`)
       .join(" + ") || "0";
 
-  const locations = [...new Set(active.map((i) => i.location))];
+  const locations = [...new Set(active.map((i) => i.location.name))];
 
   const expired = active.filter((i) => {
     const d = daysUntil(i.expiryDate);

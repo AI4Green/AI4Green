@@ -26,8 +26,7 @@ export const Root = () => {
         <Route path="coshh-form-management/*" element={<CoshhForms />} />
         <Route path="my-coshh-forms/*" element={<COSHH />} />
 
-        {/*  TODO: connect workgroup to router path*/}
-        <Route path="inventory" element={<InventoryPage />} />
+        <Route path="inventory/:workgroupName" element={<InventoryPage />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
