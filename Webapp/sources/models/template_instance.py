@@ -73,6 +73,7 @@ class TemplateInstance(Model):
             "uuid": self.uuid,
             "instance_type": self.instance_type.value,
             "owner_id": self.owner_id,
+            "owner_email": self.owner.email,
             "template_id": self.template_id,
             "template_name": self.template.name,
             "reaction_id": self.reaction_id,
