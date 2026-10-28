@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-// import { fetchInventory } from "./inventoryApi";
+import { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useWorkgroupInventory } from "api";
 import { daysUntil, EXPIRY_WARNING_DAYS, summarise } from "./utils.jsx";
 import InventoryFilters from "./inventory-filters.jsx";
 import CompoundTable from "./compound-table.jsx";
-import ContainersTable from "./Containers-table";
+import ContainersTable from "./containers-table.jsx";
 // import "./inventory.css";
 
 const PAGE_SIZE = 10;
@@ -16,32 +17,17 @@ const INITIAL_FILTERS = {
 };
 
 /**
- * Props (supplied by whatever mounts the page, e.g. from the Flask template):
- *   workgroupId    used to load the right inventory
- *   workgroupName  shown in the breadcrumb
+ * Workgroup inventory page, routed at /inventory/:workgroupName.
+ * Loading is handled by the surrounding Suspense boundary.
  */
-export default function InventoryPage({ workgroupId, workgroupName }) {
-  const [data, setData] = useState([]);
-  const [loadState, setLoadState] = useState("loading"); // loading | ready | error
+export default function InventoryPage() {
+  const { workgroupName } = useParams();
+  const { data: inventory } = useWorkgroupInventory(workgroupName);
+  const data = inventory.compounds;
+
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [view, setView] = useState("compound"); // compound | containers
   const [page, setPage] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoadState("loading");
-    fetchInventory(workgroupId)
-      .then((d) => {
-        if (!cancelled) {
-          setData(d);
-          setLoadState("ready");
-        }
-      })
-      .catch(() => !cancelled && setLoadState("error"));
-    return () => {
-      cancelled = true;
-    };
-  }, [workgroupId]);
 
   const updateFilters = (next) => {
     setFilters(next);
@@ -55,9 +41,11 @@ export default function InventoryPage({ workgroupId, workgroupName }) {
   // Options for the filter dropdowns
   const { locations, suppliers } = useMemo(() => {
     const items = data.flatMap((wc) => wc.items);
-    const uniq = (key) =>
-      [...new Set(items.map((i) => i[key]).filter(Boolean))].sort();
-    return { locations: uniq("location"), suppliers: uniq("supplier") };
+    const uniq = (values) => [...new Set(values.filter(Boolean))].sort();
+    return {
+      locations: uniq(items.map((i) => i.location.name)),
+      suppliers: uniq(items.map((i) => i.supplier)),
+    };
   }, [data]);
 
   // Headline numbers, always for the whole workgroup (not the filtered view)
@@ -83,7 +71,7 @@ export default function InventoryPage({ workgroupId, workgroupName }) {
         items: wc.items.filter(
           (i) =>
             (filters.showArchived || !i.isArchived) &&
-            (!filters.location || i.location === filters.location) &&
+            (!filters.location || i.location.name === filters.location) &&
             (!filters.supplier || i.supplier === filters.supplier),
         ),
       }))
@@ -200,20 +188,10 @@ export default function InventoryPage({ workgroupId, workgroupName }) {
         />
 
         <div className="inv-card inv-table-card">
-          {loadState === "loading" && (
-            <p className="inv-empty" role="status">
-              Loading inventory...
-            </p>
-          )}
-          {loadState === "error" && (
-            <p className="inv-empty" role="alert">
-              Could not load the inventory. Please refresh and try again.
-            </p>
-          )}
-          {loadState === "ready" && total === 0 && (
+          {total === 0 && (
             <p className="inv-empty">No stock matches your search.</p>
           )}
-          {loadState === "ready" && total > 0 && (
+          {total > 0 && (
             <>
               {view === "compound" ? (
                 <CompoundTable

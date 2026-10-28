@@ -57,7 +57,7 @@ export default function ContainersTable({
                   <div className="inv-cas">{item.cas}</div>
                 </td>
               )}
-              <td>{item.location}</td>
+              <td>{item.location.name}</td>
               <td>
                 {formatQuantity(item.quantity)} {item.unit}
               </td>

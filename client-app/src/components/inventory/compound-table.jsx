@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import ContainersTable, { Badge } from "./Containers-table";
+import ContainersTable, { Badge } from "./containers-table.jsx";
 
 const COLUMN_COUNT = 8;
 
