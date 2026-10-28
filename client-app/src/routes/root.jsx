@@ -5,6 +5,7 @@ import { Home } from "pages/home";
 import { Route, Routes } from "react-router-dom";
 import { CoshhForms } from "./coshh-forms";
 import { COSHH } from "./coshh.jsx";
+import InventoryPage from "components/inventory/inventory-page.jsx";
 
 export const Root = () => {
   return (
@@ -24,6 +25,9 @@ export const Root = () => {
 
         <Route path="coshh-form-management/*" element={<CoshhForms />} />
         <Route path="my-coshh-forms/*" element={<COSHH />} />
+
+        {/*  TODO: connect workgroup to router path*/}
+        <Route path="inventory" element={<InventoryPage />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
