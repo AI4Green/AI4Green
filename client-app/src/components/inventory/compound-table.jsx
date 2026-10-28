@@ -1,5 +1,25 @@
+import {
+  Box,
+  Table,
+  Tbody,
+  Text,
+  Thead,
+  Tr,
+  VisuallyHidden,
+} from "@chakra-ui/react";
 import { Fragment, useState } from "react";
-import ContainersTable, { Badge } from "./containers-table.jsx";
+import ContainersTable from "./containers-table.jsx";
+import {
+  Badge,
+  BareIconButton,
+  HazardTag,
+  INV,
+  InvTd,
+  InvTh,
+  LinkButton,
+  Muted,
+  tableProps,
+} from "./ui.jsx";
 
 const COLUMN_COUNT = 8;
 
@@ -20,100 +40,101 @@ export default function CompoundTable({ rows, onItemAction, onAddContainer }) {
     });
 
   return (
-    <table className="inv-table">
-      <thead>
-        <tr>
-          <th className="inv-col-toggle">
-            <span className="inv-sr">Expand</span>
-          </th>
-          <th>Compound</th>
-          <th>Hazards</th>
-          <th>Total stock</th>
-          <th>Containers</th>
-          <th>Locations</th>
-          <th>Status</th>
-          <th>
-            <span className="inv-sr">Actions</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
+    <Table {...tableProps}>
+      <Thead>
+        <Tr>
+          <InvTh w="44px">
+            <VisuallyHidden>Expand</VisuallyHidden>
+          </InvTh>
+          <InvTh>Compound</InvTh>
+          <InvTh>Hazards</InvTh>
+          <InvTh>Total stock</InvTh>
+          <InvTh>Containers</InvTh>
+          <InvTh>Locations</InvTh>
+          <InvTh>Status</InvTh>
+          <InvTh>
+            <VisuallyHidden>Actions</VisuallyHidden>
+          </InvTh>
+        </Tr>
+      </Thead>
+      <Tbody>
         {rows.map(({ wc, summary, items }) => {
           const isOpen = expanded.has(wc.id);
           const name = wc.compound.name;
 
           return (
             <Fragment key={wc.id}>
-              <tr className={isOpen ? "inv-row-open" : undefined}>
-                <td>
-                  <button
-                    type="button"
-                    className="inv-expand"
+              <Tr bg={isOpen ? INV.rowOpen : undefined}>
+                <InvTd>
+                  <BareIconButton
                     aria-expanded={isOpen}
                     aria-label={`${isOpen ? "Collapse" : "Expand"} ${name}`}
                     onClick={() => toggle(wc.id)}
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      aria-hidden="true"
-                    >
-                      <polyline
-                        points={isOpen ? "3,6 8,11 13,6" : "6,3 11,8 6,13"}
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      />
-                    </svg>
-                  </button>
-                </td>
-                <td>
-                  <b>{name}</b>
-                  <div className="inv-cas">{wc.compound.cas}</div>
-                </td>
-                <td>
+                    icon={
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        aria-hidden="true"
+                      >
+                        <polyline
+                          points={isOpen ? "3,6 8,11 13,6" : "6,3 11,8 6,13"}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                    }
+                  />
+                </InvTd>
+                <InvTd>
+                  <Text as="b">{name}</Text>
+                  <Muted>{wc.compound.cas}</Muted>
+                </InvTd>
+                <InvTd>
                   {wc.compound.hazards.map((h) => (
-                    <span key={h} className="inv-hazard">
-                      {h}
-                    </span>
+                    <HazardTag key={h}>{h}</HazardTag>
                   ))}
-                </td>
-                <td>{summary.totalLabel}</td>
-                <td>{summary.containerCount}</td>
-                <td>{summary.locations.join(", ") || "-"}</td>
-                <td>
+                </InvTd>
+                <InvTd>{summary.totalLabel}</InvTd>
+                <InvTd>{summary.containerCount}</InvTd>
+                <InvTd>{summary.locations.join(", ") || "-"}</InvTd>
+                <InvTd>
                   <Badge tone={summary.status.tone}>
                     {summary.status.label}
                   </Badge>
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    className="inv-link"
+                </InvTd>
+                <InvTd>
+                  <LinkButton
                     aria-label={`Add container of ${name}`}
                     onClick={() => onAddContainer(wc)}
                   >
                     Add container
-                  </button>
-                </td>
-              </tr>
+                  </LinkButton>
+                </InvTd>
+              </Tr>
               {isOpen && (
-                <tr>
-                  <td colSpan={COLUMN_COUNT} className="inv-expansion">
-                    <div className="inv-sub">
+                <Tr>
+                  <InvTd
+                    colSpan={COLUMN_COUNT}
+                    px={0}
+                    py={0}
+                    borderColor={INV.line}
+                  >
+                    <Box bg={INV.sub} pt={0} pr="14px" pb="12px" pl="56px">
                       <ContainersTable
                         items={items}
+                        nested
                         onItemAction={onItemAction}
                       />
-                    </div>
-                  </td>
-                </tr>
+                    </Box>
+                  </InvTd>
+                </Tr>
               )}
             </Fragment>
           );
         })}
-      </tbody>
-    </table>
+      </Tbody>
+    </Table>
   );
 }

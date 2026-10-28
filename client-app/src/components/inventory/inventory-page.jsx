@@ -1,3 +1,4 @@
+import { Box, Flex, Grid, Heading, HStack, Text } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useWorkgroupInventory } from "api";
@@ -5,7 +6,22 @@ import { daysUntil, EXPIRY_WARNING_DAYS, summarise } from "./utils.jsx";
 import InventoryFilters from "./inventory-filters.jsx";
 import CompoundTable from "./compound-table.jsx";
 import ContainersTable from "./containers-table.jsx";
-// import "./inventory.css";
+import { Card, EmptyState, INV, InvButton, MOBILE, Muted } from "./ui.jsx";
+
+/** Summary tile with a label and a large figure. */
+const StatCard = ({ label, value, unit }) => (
+  <Card px="20px" py="16px">
+    <Muted>{label}</Muted>
+    <Text fontSize="28px" fontWeight={600}>
+      {value}{" "}
+      {unit && (
+        <Text as="span" fontSize="14px" fontWeight={400} color={INV.muted}>
+          {unit}
+        </Text>
+      )}
+    </Text>
+  </Card>
+);
 
 const PAGE_SIZE = 10;
 const INITIAL_FILTERS = {
@@ -132,51 +148,62 @@ export default function InventoryPage() {
   const handleManageLocations = () => console.log("TODO go to locations page");
 
   return (
-    <div className="inv-page">
-      <div className="inv-inner">
-        <header className="inv-header">
-          <div>
-            <p className="inv-crumb">Workgroups / {workgroupName}</p>
-            <h1>Inventory</h1>
-          </div>
-          <div className="inv-header-actions">
-            <button
-              type="button"
-              className="inv-btn"
-              onClick={handleManageLocations}
+    <Box bg={INV.bg} color={INV.ink} minH="100vh">
+      <Flex
+        direction="column"
+        gap="24px"
+        maxW="1280px"
+        mx="auto"
+        px="40px"
+        py="32px"
+        sx={{ [MOBILE]: { px: "16px", py: "20px" } }}
+      >
+        <Flex
+          as="header"
+          justify="space-between"
+          align="flex-end"
+          wrap="wrap"
+          gap="16px"
+        >
+          <Box>
+            <Text m={0} mb="4px" fontSize="12px" color={INV.muted}>
+              Workgroups / {workgroupName}
+            </Text>
+            <Heading
+              as="h1"
+              m={0}
+              fontSize="32px"
+              fontWeight={600}
+              lineHeight="inherit"
             >
+              Inventory
+            </Heading>
+          </Box>
+          <HStack spacing="12px">
+            <InvButton onClick={handleManageLocations}>
               Manage locations
-            </button>
-            <button
-              type="button"
-              className="inv-btn inv-btn-primary"
-              onClick={handleAddStock}
-            >
+            </InvButton>
+            <InvButton primary onClick={handleAddStock}>
               + Add stock
-            </button>
-          </div>
-        </header>
+            </InvButton>
+          </HStack>
+        </Flex>
 
-        <section className="inv-stats" aria-label="Summary">
-          <div className="inv-card inv-stat">
-            <div className="inv-cas">Containers in stock</div>
-            <div className="inv-stat-value">{stats.containers}</div>
-          </div>
-          <div className="inv-card inv-stat">
-            <div className="inv-cas">Low stock</div>
-            <div className="inv-stat-value">
-              {stats.lowStock} <span>compounds</span>
-            </div>
-          </div>
-          <div className="inv-card inv-stat">
-            <div className="inv-cas">
-              Expiring within {EXPIRY_WARNING_DAYS} days
-            </div>
-            <div className="inv-stat-value">
-              {stats.expiring} <span>containers</span>
-            </div>
-          </div>
-        </section>
+        <Grid
+          as="section"
+          aria-label="Summary"
+          templateColumns="repeat(3, 1fr)"
+          gap="16px"
+          sx={{ [MOBILE]: { gridTemplateColumns: "1fr" } }}
+        >
+          <StatCard label="Containers in stock" value={stats.containers} />
+          <StatCard label="Low stock" value={stats.lowStock} unit="compounds" />
+          <StatCard
+            label={`Expiring within ${EXPIRY_WARNING_DAYS} days`}
+            value={stats.expiring}
+            unit="containers"
+          />
+        </Grid>
 
         <InventoryFilters
           filters={filters}
@@ -187,9 +214,9 @@ export default function InventoryPage() {
           onViewChange={updateView}
         />
 
-        <div className="inv-card inv-table-card">
+        <Card overflowX="auto">
           {total === 0 && (
-            <p className="inv-empty">No stock matches your search.</p>
+            <EmptyState>No stock matches your search.</EmptyState>
           )}
           {total > 0 && (
             <>
@@ -206,35 +233,31 @@ export default function InventoryPage() {
                   onItemAction={handleItemAction}
                 />
               )}
-              <div className="inv-pager">
-                <span className="inv-cas">
+              <Flex justify="space-between" align="center" px="14px" py="12px">
+                <Muted as="span">
                   Showing {start + 1} to {Math.min(start + PAGE_SIZE, total)} of{" "}
                   {total} {noun}
-                </span>
-                <div>
-                  <button
-                    type="button"
-                    className="inv-btn"
-                    disabled={page === 0}
+                </Muted>
+                <HStack spacing="8px">
+                  <InvButton
+                    isDisabled={page === 0}
                     onClick={() => setPage(page - 1)}
                   >
                     Previous
-                  </button>
-                  <button
-                    type="button"
-                    className="inv-btn"
-                    disabled={start + PAGE_SIZE >= total}
+                  </InvButton>
+                  <InvButton
+                    isDisabled={start + PAGE_SIZE >= total}
                     onClick={() => setPage(page + 1)}
                   >
                     Next
-                  </button>
-                </div>
-              </div>
+                  </InvButton>
+                </HStack>
+              </Flex>
             </>
           )}
-        </div>
-      </div>
-    </div>
+        </Card>
+      </Flex>
+    </Box>
   );
 }
 

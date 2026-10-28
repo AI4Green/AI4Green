@@ -1,3 +1,91 @@
+import {
+  Button,
+  Checkbox,
+  Flex,
+  FormControl,
+  FormLabel,
+  Input,
+  Select,
+} from "@chakra-ui/react";
+import { focusRing, INV, underline } from "./ui.jsx";
+
+// shared look for the search box and dropdowns
+const controlProps = {
+  variant: "outline",
+  h: "44px",
+  fontSize: "14px",
+  borderRadius: "8px",
+  borderColor: INV.lineStrong,
+  bg: "white",
+  color: INV.ink,
+  focusBorderColor: INV.accent,
+  _hover: { borderColor: INV.lineStrong },
+};
+
+/**
+ * Labelled filter control.
+ * @param {object} props
+ * @param {string} props.id Id for the control, linked to the label.
+ * @param {string} props.label Label text.
+ * @param {boolean} [props.grow] Take up the remaining row width.
+ */
+const Field = ({ id, label, grow = false, children }) => (
+  <FormControl
+    id={id}
+    display="flex"
+    flexDirection="column"
+    gap="4px"
+    w="auto"
+    flex={grow ? 1 : undefined}
+    minW={grow ? "260px" : undefined}
+  >
+    <FormLabel
+      m={0}
+      fontSize="12px"
+      fontWeight={500}
+      color={INV.muted}
+      lineHeight="inherit"
+    >
+      {label}
+    </FormLabel>
+    {children}
+  </FormControl>
+);
+
+/**
+ * One half of the "By compound / All containers" toggle. The selected half is
+ * underlined as well as coloured, so the state doesn't rely on colour alone.
+ */
+const SegmentButton = ({ isPressed, position, ...props }) => (
+  <Button
+    variant="unstyled"
+    display="inline-flex"
+    h="auto"
+    minW={0}
+    minH="44px"
+    px="16px"
+    lineHeight="inherit"
+    fontSize="14px"
+    fontWeight={400}
+    bg="white"
+    color={INV.ink}
+    border="1px solid"
+    borderColor={INV.control}
+    borderRadius={position === "first" ? "8px 0 0 8px" : "0 8px 8px 0"}
+    borderLeftWidth={position === "last" ? 0 : "1px"}
+    aria-pressed={isPressed}
+    _pressed={{
+      bg: INV.accentSoft,
+      borderColor: INV.accent,
+      color: INV.accent,
+      fontWeight: 500,
+      ...underline,
+    }}
+    _focusVisible={{ ...focusRing, ...underline }}
+    {...props}
+  />
+);
+
 export default function InventoryFilters({
   filters,
   onChange,
@@ -13,22 +101,22 @@ export default function InventoryFilters({
     });
 
   return (
-    <div className="inv-filters">
-      <div className="inv-field inv-field-grow">
-        <label htmlFor="inv-search">Search</label>
-        <input
-          id="inv-search"
+    <Flex wrap="wrap" gap="16px" align="flex-end">
+      <Field id="inv-search" label="Search" grow>
+        <Input
+          {...controlProps}
           type="search"
+          px="12px"
           placeholder="Name, CAS number, barcode or lot"
           value={filters.search}
           onChange={set("search")}
         />
-      </div>
+      </Field>
 
-      <div className="inv-field">
-        <label htmlFor="inv-location">Location</label>
-        <select
-          id="inv-location"
+      <Field id="inv-location" label="Location">
+        <Select
+          {...controlProps}
+          ps="12px"
           value={filters.location}
           onChange={set("location")}
         >
@@ -38,13 +126,13 @@ export default function InventoryFilters({
               {l}
             </option>
           ))}
-        </select>
-      </div>
+        </Select>
+      </Field>
 
-      <div className="inv-field">
-        <label htmlFor="inv-supplier">Supplier</label>
-        <select
-          id="inv-supplier"
+      <Field id="inv-supplier" label="Supplier">
+        <Select
+          {...controlProps}
+          ps="12px"
           value={filters.supplier}
           onChange={set("supplier")}
         >
@@ -54,43 +142,59 @@ export default function InventoryFilters({
               {s}
             </option>
           ))}
-        </select>
-      </div>
+        </Select>
+      </Field>
 
-      <div className="inv-field">
-        <label htmlFor="inv-status">Status</label>
-        <select id="inv-status" value={filters.status} onChange={set("status")}>
+      <Field id="inv-status" label="Status">
+        <Select
+          {...controlProps}
+          ps="12px"
+          value={filters.status}
+          onChange={set("status")}
+        >
           <option value="">Any status</option>
           <option value="low">Low stock</option>
           <option value="expiring">Expiring soon</option>
-        </select>
-      </div>
+        </Select>
+      </Field>
 
-      <div className="inv-segmented" role="group" aria-label="View">
-        <button
-          type="button"
-          aria-pressed={view === "compound"}
+      <Flex role="group" aria-label="View">
+        <SegmentButton
+          position="first"
+          isPressed={view === "compound"}
           onClick={() => onViewChange("compound")}
         >
           By compound
-        </button>
-        <button
-          type="button"
-          aria-pressed={view === "containers"}
+        </SegmentButton>
+        <SegmentButton
+          position="last"
+          isPressed={view === "containers"}
+          // mockup draws an accent seam when the left half is selected
+          borderLeftWidth={view === "compound" ? "1px" : 0}
+          borderLeftColor={view === "compound" ? INV.accent : undefined}
           onClick={() => onViewChange("containers")}
         >
           All containers
-        </button>
-      </div>
+        </SegmentButton>
+      </Flex>
 
-      <label className="inv-check">
-        <input
-          type="checkbox"
-          checked={filters.showArchived}
-          onChange={set("showArchived")}
-        />
+      <Checkbox
+        isChecked={filters.showArchived}
+        onChange={set("showArchived")}
+        spacing="8px"
+        minH="44px"
+        sx={{
+          ".chakra-checkbox__label": { fontSize: "14px" },
+          ".chakra-checkbox__control": { borderColor: INV.control },
+          ".chakra-checkbox__control[data-checked], .chakra-checkbox__control[data-checked][data-hover]":
+            { bg: INV.accent, borderColor: INV.accent },
+          ".chakra-checkbox__control[data-focus-visible]": focusRing,
+          ".chakra-checkbox__control[data-focus-visible] ~ .chakra-checkbox__label":
+            underline,
+        }}
+      >
         Show archived
-      </label>
-    </div>
+      </Checkbox>
+    </Flex>
   );
 }

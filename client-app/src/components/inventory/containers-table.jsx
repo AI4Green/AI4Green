@@ -1,8 +1,21 @@
+import {
+  Table,
+  Tbody,
+  Text,
+  Thead,
+  Tr,
+  VisuallyHidden,
+} from "@chakra-ui/react";
+import {
+  Badge,
+  EmptyState,
+  InvTd,
+  InvTh,
+  LinkButton,
+  Muted,
+  tableProps,
+} from "./ui.jsx";
 import { formatDate, formatQuantity, itemState } from "./utils.jsx";
-
-export function Badge({ tone, children }) {
-  return <span className={`inv-badge inv-${tone}`}>{children}</span>;
-}
 
 const ACTIONS = [
   ["adjust", "Adjust"],
@@ -14,33 +27,35 @@ const ACTIONS = [
 /**
  * One row per InventoryItem.
  * Pass showCompound for the flat "All containers" view, where items carry
- * compoundName and cas. Inside an expanded compound row it is omitted.
+ * compoundName and cas. Pass nested when rendered inside an expanded compound
+ * row, which uses a denser layout.
  */
 export default function ContainersTable({
   items,
   showCompound = false,
+  nested = false,
   onItemAction,
 }) {
   if (items.length === 0) {
-    return <p className="inv-empty">No containers to show.</p>;
+    return <EmptyState>No containers to show.</EmptyState>;
   }
 
   return (
-    <table className="inv-table">
-      <thead>
-        <tr>
-          {showCompound && <th>Compound</th>}
-          <th>Location</th>
-          <th>Quantity</th>
-          <th>Lot</th>
-          <th>Expiry</th>
-          <th>State</th>
-          <th>
-            <span className="inv-sr">Actions</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
+    <Table {...tableProps}>
+      <Thead>
+        <Tr>
+          {showCompound && <InvTh nested={nested}>Compound</InvTh>}
+          <InvTh nested={nested}>Location</InvTh>
+          <InvTh nested={nested}>Quantity</InvTh>
+          <InvTh nested={nested}>Lot</InvTh>
+          <InvTh nested={nested}>Expiry</InvTh>
+          <InvTh nested={nested}>State</InvTh>
+          <InvTh nested={nested}>
+            <VisuallyHidden>Actions</VisuallyHidden>
+          </InvTh>
+        </Tr>
+      </Thead>
+      <Tbody>
         {items.map((item) => {
           const state = item.isArchived
             ? { label: "Archived", tone: "muted" }
@@ -50,41 +65,39 @@ export default function ContainersTable({
             : ACTIONS;
 
           return (
-            <tr key={item.id}>
+            <Tr key={item.id}>
               {showCompound && (
-                <td>
-                  <b>{item.compoundName}</b>
-                  <div className="inv-cas">{item.cas}</div>
-                </td>
+                <InvTd nested={nested}>
+                  <Text as="b">{item.compoundName}</Text>
+                  <Muted>{item.cas}</Muted>
+                </InvTd>
               )}
-              <td>{item.location.name}</td>
-              <td>
+              <InvTd nested={nested}>{item.location.name}</InvTd>
+              <InvTd nested={nested}>
                 {formatQuantity(item.quantity)} {item.unit}
-              </td>
-              <td>{item.lotNumber || "-"}</td>
-              <td>{formatDate(item.expiryDate)}</td>
-              <td>
+              </InvTd>
+              <InvTd nested={nested}>{item.lotNumber || "-"}</InvTd>
+              <InvTd nested={nested}>{formatDate(item.expiryDate)}</InvTd>
+              <InvTd nested={nested}>
                 <Badge tone={state.tone}>{state.label}</Badge>
-              </td>
-              <td className="inv-actions">
+              </InvTd>
+              <InvTd nested={nested} whiteSpace="nowrap">
                 {actions.map(([key, label]) => (
-                  <button
+                  <LinkButton
                     key={key}
-                    type="button"
-                    className="inv-link"
                     aria-label={`${label} container ${
                       item.lotNumber || item.id
                     }`}
                     onClick={() => onItemAction(key, item)}
                   >
                     {label}
-                  </button>
+                  </LinkButton>
                 ))}
-              </td>
-            </tr>
+              </InvTd>
+            </Tr>
           );
         })}
-      </tbody>
-    </table>
+      </Tbody>
+    </Table>
   );
 }
