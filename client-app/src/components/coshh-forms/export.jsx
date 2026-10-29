@@ -8,6 +8,8 @@ import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { FaPrint } from "react-icons/fa";
+// `?inline` returns the stylesheet as a string without applying it to the app
+import printCss from "./coshh-print.css?inline";
 
 /*
  * Print / PDF export for COSHH form instances.
@@ -19,36 +21,6 @@ import { FaPrint } from "react-icons/fa";
  * embedded coshh-form entry behave identically. PDFs come from the browser's
  * "Save as PDF" print destination; the document title becomes the default filename.
  */
-
-/**
- * Stylesheet for the printable view, injected into the print frame's <head>.
- * Every rule is scoped to `.coshh-print` and sized in points for A4 output.
- * @type {string}
- */
-const PRINT_CSS = `
-.coshh-print { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; color: #000; background: #fff; line-height: 1.4; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-.coshh-print *, .coshh-print *::before, .coshh-print *::after { box-sizing: border-box; }
-.coshh-print h1 { font-size: 18pt; margin: 0 0 4pt; }
-.coshh-print .coshh-section { border: 1pt solid #888; border-radius: 4pt; padding: 0 8pt 8pt; margin: 12pt 0 0; }
-.coshh-print h2 { font-size: 13pt; margin: 0 -8pt 8pt; padding: 5pt 8pt; background: #f0f0f0; border-bottom: 1pt solid #888; border-radius: 4pt 4pt 0 0; page-break-after: avoid; break-after: avoid; }
-.coshh-print h3 { font-size: 11pt; margin: 10pt 0 4pt; text-decoration: underline; page-break-after: avoid; break-after: avoid; }
-.coshh-print .coshh-meta { width: 100%; border-collapse: collapse; margin-bottom: 8pt; }
-.coshh-print .coshh-meta th { text-align: left; width: 28%; font-weight: bold; }
-.coshh-print .coshh-meta th, .coshh-print .coshh-meta td { padding: 2pt 4pt; border: 0.75pt solid #999; }
-.coshh-print .coshh-field { margin: 0 0 8pt; page-break-inside: avoid; break-inside: avoid; }
-.coshh-print .coshh-label { font-weight: bold; margin-bottom: 2pt; }
-.coshh-print .coshh-value { border: 0.75pt solid #999; border-radius: 3pt; padding: 4pt 6pt; min-height: 18pt; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
-.coshh-print .coshh-value p { margin: 0; }
-.coshh-print .coshh-value table.coshh-table { margin-top: 0; }
-.coshh-print .coshh-content { border: 0.75pt solid #ccc; border-radius: 3pt; padding: 4pt 6pt; background: #fafafa; white-space: pre-wrap; overflow-wrap: anywhere; }
-.coshh-print .coshh-empty { color: #777; font-style: italic; }
-.coshh-print ul { margin: 2pt 0; padding-left: 16pt; }
-.coshh-print table.coshh-table { width: 100%; border-collapse: collapse; margin-top: 2pt; font-size: 9.5pt; }
-.coshh-print table.coshh-table th, .coshh-print table.coshh-table td { border: 0.75pt solid #999; padding: 2pt 4pt; text-align: left; vertical-align: top; white-space: pre-wrap; overflow-wrap: anywhere; }
-.coshh-print table.coshh-table th { background: #eee; }
-.coshh-print tr { page-break-inside: avoid; break-inside: avoid; }
-.coshh-print .coshh-footer { margin-top: 16pt; font-size: 8.5pt; color: #555; }
-`;
 
 /**
  * Tags kept by {@link sanitizeHtml}. Formatted text fields hold Quill HTML, so
@@ -413,9 +385,10 @@ const exportTitle = (instance) =>
   `COSHH-${instance.reaction_code}-${instance.uuid}`.replace(/[^\w.-]+/g, "_");
 
 /**
- * Builds the empty HTML document loaded into the print frame: the title, A4 page
- * setup, {@link PRINT_CSS} and a `#root` container that the print view is
- * rendered into. The title is safe to interpolate because {@link exportTitle}
+ * Builds the empty HTML document loaded into the print frame: the title, the
+ * print stylesheet (coshh-print.css, which includes the A4 page setup) and a
+ * `#root` container that the print view is rendered into. The title is safe to
+ * interpolate because {@link exportTitle}
  * restricts it to [\w.-].
  * @param {object} instance - The form instance.
  * @returns {string} A complete HTML document string.
@@ -423,7 +396,7 @@ const exportTitle = (instance) =>
 const renderPrintShell = (instance) =>
   `<!doctype html><html lang="en"><head><meta charset="utf-8">` +
   `<title>${exportTitle(instance)}</title>` +
-  `<style>@page { size: A4; margin: 15mm; } body { margin: 0; }${PRINT_CSS}</style>` +
+  `<style>${printCss}</style>` +
   `</head><body><div id="root"></div></body></html>`;
 
 /**
