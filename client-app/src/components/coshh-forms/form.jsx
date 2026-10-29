@@ -17,6 +17,7 @@ import { Formik, Form } from "formik";
 import { useBackendApi } from "contexts";
 import { useCoshhFormsList, useProject } from "api";
 import { FormikInput, MultiSelectField } from "components/core/forms";
+import { CoshhExportActions } from "./export";
 
 const useCoshhCreateForm = ({
   reactionId,
@@ -306,6 +307,7 @@ export const CoshhForm = ({ formId }) => {
   };
   return (
     <>
+      <CoshhExportActions formId={template.id} />
       {template.sections
         ?.sort((a, b) => a.sortOrder - b.sortOrder)
         .map((section) => (
