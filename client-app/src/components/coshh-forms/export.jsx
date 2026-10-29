@@ -58,8 +58,8 @@ let cleanupPrintFrame = null;
  * the user can print or choose "Save as PDF". The frame and its React root are
  * removed after printing, or when the next print starts.
  * @param {object} instance - The form instance, as returned by the project API.
- * @returns {Promise<void>} Resolves once the print dialog has been opened;
- *   rejects if the print view fails to render.
+ * @returns {Promise<void>} Resolves once the print view has rendered, just
+ *   before the print dialog opens; rejects if the print view fails to render.
  */
 export const printCoshhInstance = (instance) =>
   new Promise((resolve, reject) => {
@@ -97,10 +97,16 @@ export const printCoshhInstance = (instance) =>
             <CoshhPrintView instance={instance} exportedAt={new Date()} />,
           );
         });
-        frameWindow.addEventListener("afterprint", cleanup, { once: true });
+        // Defer cleanup so the frame isn't removed while its own print() call is
+        // still on the stack, which can stop the rest of this handler running.
+        frameWindow.addEventListener("afterprint", () => setTimeout(cleanup), {
+          once: true,
+        });
+        // Resolve before printing: print() blocks until the dialog closes in
+        // most browsers, and callers shouldn't depend on it ever returning.
+        resolve();
         frameWindow.focus();
         frameWindow.print();
-        resolve();
       } catch (e) {
         cleanup();
         reject(e);
