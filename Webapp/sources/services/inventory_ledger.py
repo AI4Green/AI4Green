@@ -1,17 +1,19 @@
 from decimal import Decimal
+from typing import Any, Optional, Union
 
-from models.inventory_ledger import StockChangeReason
-from sources import db, models
+from sources import models
+from sources.extensions import db
+from sources.models.inventory_ledger import StockChangeReason
 
 
 def adjust_stock(
-    item_id,
-    change,
-    reason,
-    user_id,
-    reaction_id=None,
-    notes=None,
-):
+    item_id: int,
+    change: Union[Decimal, float, int],
+    reason: Union[StockChangeReason, str],
+    user_id: int,
+    reaction_id: Optional[int] = None,
+    notes: Optional[str] = None,
+) -> models.InventoryLedgerEntry:
     """The only place that should ever write InventoryItem.quantity.
 
     Locks the item row, checks the result isn't negative, writes the ledger
@@ -54,8 +56,13 @@ def adjust_stock(
 
 
 def create_inventory_item(
-    workgroup_compound_id, location_id, quantity, unit, user_id, **fields
-):
+    workgroup_compound_id: int,
+    location_id: int,
+    quantity: Union[Decimal, float, int],
+    unit: str,
+    user_id: int,
+    **fields: Any,
+) -> models.InventoryItem:
     """Create a container with quantity 0, then record the initial amount as 'received'.
 
     `fields` takes the optional columns (supplier, lot_number, purity, barcode,
@@ -68,16 +75,18 @@ def create_inventory_item(
         unit=unit,
         **fields,
     )
+    db.session.add(item)
+    db.session.flush()  # get item.id, and load its compound and location for the check
     if not item.belongs_to_single_workgroup():
         raise ValueError("Compound and location must belong to the same workgroup.")
 
-    db.session.add(item)
-    db.session.flush()  # get item.id
     adjust_stock(item.id, quantity, StockChangeReason.RECEIVED, user_id)
     return item
 
 
-def dispose_item(item_id, user_id, notes=None):
+def dispose_item(
+    item_id: int, user_id: int, notes: Optional[str] = None
+) -> models.InventoryItem:
     """Write off the remaining quantity and archive the container."""
     item = (
         db.session.query(models.InventoryItem)

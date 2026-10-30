@@ -14,6 +14,8 @@ from . import (
     file_attachments,
     hazard_code,
     interactive,
+    inventory,
+    inventory_ledger,
     ions,
     message_queue,
     notifications,
