@@ -1,5 +1,18 @@
 export const EXPIRY_WARNING_DAYS = 30;
 
+// digits-digits-check digit, e.g. 67-64-1 or 1310-73-2; matches the backend's
+// CAS regex, which doesn't allow a leading zero
+export const CAS_PATTERN = /^[1-9]\d{1,6}-\d{2}-\d$/;
+
+/** Today's local date as YYYY-MM-DD, the format date inputs use. */
+export function todayIso() {
+  const today = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(
+    today.getDate(),
+  )}`;
+}
+
 /** Whole days from today until an ISO date (negative if past), or null. */
 export function daysUntil(iso) {
   if (!iso) return null;
