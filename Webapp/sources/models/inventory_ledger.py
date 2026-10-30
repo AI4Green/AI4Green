@@ -49,3 +49,4 @@ class InventoryLedgerEntry(db.Model):
     )
 
     inventory_item = db.relationship("InventoryItem", back_populates="ledger_entries")
+    user = db.relationship("User")
