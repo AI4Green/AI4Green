@@ -6,6 +6,7 @@ import { Route, Routes } from "react-router-dom";
 import { CoshhForms } from "./coshh-forms";
 import { COSHH } from "./coshh.jsx";
 import InventoryPage from "components/inventory/inventory-page.jsx";
+import LocationsPage from "components/inventory/locations-page.jsx";
 
 export const Root = () => {
   return (
@@ -27,6 +28,10 @@ export const Root = () => {
         <Route path="my-coshh-forms/*" element={<COSHH />} />
 
         <Route path="inventory/:workgroupName" element={<InventoryPage />} />
+        <Route
+          path="inventory/:workgroupName/locations"
+          element={<LocationsPage />}
+        />
       </Route>
 
       <Route path="*" element={<NotFound />} />
