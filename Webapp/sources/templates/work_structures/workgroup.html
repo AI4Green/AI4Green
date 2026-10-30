@@ -37,6 +37,7 @@
                     <p><a href="/PI_status_request/Senior%20Researcher/Principal%20Investigator/{{ workgroup_selected }}" id="PI-status-request" class="btn btn-primary">Request PI Status</a></p>
                     <p><a href="{{ url_for('manage_workbook.manage_workbook', workgroup=workgroup_selected) }}" id="manage-workbook" class="btn btn-primary">Manage Workbooks</a></p>
                 {% endif %}
+            <p><a href="{{ url_for('spa.serve_spa_files', path='inventory/' ~ workgroup_selected) }}" id="inventory" class="btn btn-primary">Inventory</a></p>
             </div>
             <div class="col-3">
                 <p><b>Choose a Workbook to view or create reactions</b></p>
