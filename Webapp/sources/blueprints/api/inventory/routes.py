@@ -3,7 +3,6 @@ from flask_login import login_required
 from sources.auxiliary import security_member_workgroup
 
 from . import inventory_api_bp
-from .mock_data import build_mock_inventory
 
 
 @inventory_api_bp.route("/<workgroup_name>", methods=["GET"])
@@ -21,4 +20,4 @@ def get_workgroup_inventory(workgroup_name):
         abort(404)
 
     # todo: replace with real queries once the inventory services exist
-    return jsonify(build_mock_inventory(workgroup_name))
+    return jsonify("{}")
