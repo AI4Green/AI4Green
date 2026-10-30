@@ -1,12 +1,23 @@
-import { Box, Flex, Grid, Heading, HStack, Text } from "@chakra-ui/react";
+import { Flex, Grid, HStack, Text } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link as RouterLink, useParams } from "react-router-dom";
 import { useWorkgroupInventory } from "api";
 import { daysUntil, EXPIRY_WARNING_DAYS, summarise } from "./utils.jsx";
 import InventoryFilters from "./inventory-filters.jsx";
 import CompoundTable from "./compound-table.jsx";
 import ContainersTable from "./containers-table.jsx";
-import { Card, EmptyState, INV, InvButton, MOBILE, Muted } from "./ui.jsx";
+import { AddStockModal } from "./add-stock-modal.jsx";
+import { HistoryDrawer } from "./history-drawer.jsx";
+import { AdjustModal, DisposeModal, MoveModal } from "./item-modals.jsx";
+import {
+  Card,
+  EmptyState,
+  INV,
+  InvButton,
+  InvPage,
+  MOBILE,
+  Muted,
+} from "./ui.jsx";
 
 /** Summary tile with a label and a large figure. */
 const StatCard = ({ label, value, unit }) => (
@@ -40,10 +51,22 @@ export default function InventoryPage() {
   const { workgroupName } = useParams();
   const { data: inventory } = useWorkgroupInventory(workgroupName);
   const data = inventory.compounds;
+  // Only principal investigators and senior researchers can change stock. The
+  // backend enforces this too; here it just hides actions that would fail.
+  const { canEdit } = inventory.permissions;
 
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [view, setView] = useState("compound"); // compound | containers
   const [page, setPage] = useState(0);
+  // The open modal or drawer, or null. `type` is an item action (adjust |
+  // move | dispose | history), addContainer or addStock.
+  const [dialog, setDialog] = useState(null);
+
+  // The compound each container belongs to, so item actions can show its name
+  const compoundByItemId = useMemo(
+    () => new Map(data.flatMap((wc) => wc.items.map((item) => [item.id, wc]))),
+    [data],
+  );
 
   const updateFilters = (next) => {
     setFilters(next);
@@ -137,127 +160,123 @@ export default function InventoryPage() {
   const pageList = list.slice(start, start + PAGE_SIZE);
   const noun = view === "compound" ? "compounds" : "containers";
 
-  // Placeholders: wire these to modals and routes in the next pass.
-  const handleItemAction = (action, item) => {
-    // action is one of: adjust | move | dispose | history
-    console.log("TODO open", action, "for item", item.id);
+  // action is one of: adjust | move | dispose | history
+  const handleItemAction = (action, item) =>
+    setDialog({ type: action, item, wc: compoundByItemId.get(item.id) });
+  const handleAddContainer = (wc) => setDialog({ type: "addContainer", wc });
+  const handleAddStock = () => setDialog({ type: "addStock" });
+  const closeDialog = () => setDialog(null);
+
+  // props shared by the modals and drawer for a single container
+  const itemDialogProps = dialog?.item && {
+    workgroupName,
+    item: dialog.item,
+    compound: dialog.wc.compound,
+    onClose: closeDialog,
   };
-  const handleAddContainer = (wc) =>
-    console.log("TODO add container for", wc.id);
-  const handleAddStock = () => console.log("TODO open add stock form");
-  const handleManageLocations = () => console.log("TODO go to locations page");
 
   return (
-    <Box bg={INV.bg} color={INV.ink} minH="100vh">
-      <Flex
-        direction="column"
-        gap="24px"
-        maxW="1280px"
-        mx="auto"
-        px="40px"
-        py="32px"
-        sx={{ [MOBILE]: { px: "16px", py: "20px" } }}
-      >
-        <Flex
-          as="header"
-          justify="space-between"
-          align="flex-end"
-          wrap="wrap"
-          gap="16px"
-        >
-          <Box>
-            <Text m={0} mb="4px" fontSize="12px" color={INV.muted}>
-              Workgroups / {workgroupName}
-            </Text>
-            <Heading
-              as="h1"
-              m={0}
-              fontSize="32px"
-              fontWeight={600}
-              lineHeight="inherit"
-            >
-              Inventory
-            </Heading>
-          </Box>
-          <HStack spacing="12px">
-            <InvButton onClick={handleManageLocations}>
-              Manage locations
-            </InvButton>
+    <InvPage
+      breadcrumb={`Workgroups / ${workgroupName}`}
+      title="Inventory"
+      actions={
+        <>
+          <InvButton as={RouterLink} to="locations">
+            Manage locations
+          </InvButton>
+          {canEdit && (
             <InvButton primary onClick={handleAddStock}>
               + Add stock
             </InvButton>
-          </HStack>
-        </Flex>
-
-        <Grid
-          as="section"
-          aria-label="Summary"
-          templateColumns="repeat(3, 1fr)"
-          gap="16px"
-          sx={{ [MOBILE]: { gridTemplateColumns: "1fr" } }}
-        >
-          <StatCard label="Containers in stock" value={stats.containers} />
-          <StatCard label="Low stock" value={stats.lowStock} unit="compounds" />
-          <StatCard
-            label={`Expiring within ${EXPIRY_WARNING_DAYS} days`}
-            value={stats.expiring}
-            unit="containers"
-          />
-        </Grid>
-
-        <InventoryFilters
-          filters={filters}
-          onChange={updateFilters}
-          locations={locations}
-          suppliers={suppliers}
-          view={view}
-          onViewChange={updateView}
+          )}
+        </>
+      }
+    >
+      <Grid
+        as="section"
+        aria-label="Summary"
+        templateColumns="repeat(3, 1fr)"
+        gap="16px"
+        sx={{ [MOBILE]: { gridTemplateColumns: "1fr" } }}
+      >
+        <StatCard label="Containers in stock" value={stats.containers} />
+        <StatCard label="Low stock" value={stats.lowStock} unit="compounds" />
+        <StatCard
+          label={`Expiring within ${EXPIRY_WARNING_DAYS} days`}
+          value={stats.expiring}
+          unit="containers"
         />
+      </Grid>
 
-        <Card overflowX="auto">
-          {total === 0 && (
-            <EmptyState>No stock matches your search.</EmptyState>
-          )}
-          {total > 0 && (
-            <>
-              {view === "compound" ? (
-                <CompoundTable
-                  rows={pageList}
-                  onItemAction={handleItemAction}
-                  onAddContainer={handleAddContainer}
-                />
-              ) : (
-                <ContainersTable
-                  items={pageList}
-                  showCompound
-                  onItemAction={handleItemAction}
-                />
-              )}
-              <Flex justify="space-between" align="center" px="14px" py="12px">
-                <Muted as="span">
-                  Showing {start + 1} to {Math.min(start + PAGE_SIZE, total)} of{" "}
-                  {total} {noun}
-                </Muted>
-                <HStack spacing="8px">
-                  <InvButton
-                    isDisabled={page === 0}
-                    onClick={() => setPage(page - 1)}
-                  >
-                    Previous
-                  </InvButton>
-                  <InvButton
-                    isDisabled={start + PAGE_SIZE >= total}
-                    onClick={() => setPage(page + 1)}
-                  >
-                    Next
-                  </InvButton>
-                </HStack>
-              </Flex>
-            </>
-          )}
-        </Card>
-      </Flex>
-    </Box>
+      <InventoryFilters
+        filters={filters}
+        onChange={updateFilters}
+        locations={locations}
+        suppliers={suppliers}
+        view={view}
+        onViewChange={updateView}
+      />
+
+      <Card overflowX="auto">
+        {total === 0 && <EmptyState>No stock matches your search.</EmptyState>}
+        {total > 0 && (
+          <>
+            {view === "compound" ? (
+              <CompoundTable
+                rows={pageList}
+                canEdit={canEdit}
+                onItemAction={handleItemAction}
+                onAddContainer={handleAddContainer}
+              />
+            ) : (
+              <ContainersTable
+                items={pageList}
+                showCompound
+                canEdit={canEdit}
+                onItemAction={handleItemAction}
+              />
+            )}
+            <Flex justify="space-between" align="center" px="14px" py="12px">
+              <Muted as="span">
+                Showing {start + 1} to {Math.min(start + PAGE_SIZE, total)} of{" "}
+                {total} {noun}
+              </Muted>
+              <HStack spacing="8px">
+                <InvButton
+                  isDisabled={page === 0}
+                  onClick={() => setPage(page - 1)}
+                >
+                  Previous
+                </InvButton>
+                <InvButton
+                  isDisabled={start + PAGE_SIZE >= total}
+                  onClick={() => setPage(page + 1)}
+                >
+                  Next
+                </InvButton>
+              </HStack>
+            </Flex>
+          </>
+        )}
+      </Card>
+
+      {dialog?.type === "adjust" && <AdjustModal {...itemDialogProps} />}
+      {dialog?.type === "move" && (
+        <MoveModal {...itemDialogProps} locations={inventory.locations} />
+      )}
+      {dialog?.type === "dispose" && <DisposeModal {...itemDialogProps} />}
+      {dialog?.type === "history" && <HistoryDrawer {...itemDialogProps} />}
+      {(dialog?.type === "addContainer" || dialog?.type === "addStock") && (
+        <AddStockModal
+          workgroupName={workgroupName}
+          compounds={data}
+          locations={inventory.locations}
+          workbooks={inventory.workbooks}
+          workgroupCompound={dialog.wc}
+          onClose={closeDialog}
+        />
+      )}
+    </InvPage>
   );
 }
 

@@ -2,7 +2,17 @@ import {
   Badge as ChakraBadge,
   Box,
   Button,
+  Flex,
+  Heading,
+  HStack,
   IconButton,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Td,
   Text,
   Th,
@@ -30,6 +40,8 @@ export const INV = {
   rowOpen: "#fafbf9",
   sub: "#f1f5f2",
   subLine: "#e1e8e3",
+  danger: "#8a2a1b",
+  dangerHover: "#6e2115",
 };
 
 // replaces Chakra's box-shadow focus ring with the mockup's outline
@@ -61,14 +73,35 @@ const bareButton = {
   _focusVisible: { ...focusRing, ...underline },
 };
 
+// shared look for text inputs, selects and textareas
+export const controlProps = {
+  variant: "outline",
+  h: "44px",
+  fontSize: "14px",
+  borderRadius: "8px",
+  borderColor: INV.lineStrong,
+  bg: "white",
+  color: INV.ink,
+  focusBorderColor: INV.accent,
+  _hover: { borderColor: INV.lineStrong },
+};
+
+// solid colours for the filled button styles, keyed by InvButton's tone
+const SOLID = {
+  primary: { bg: INV.accent, hover: INV.accentHover },
+  danger: { bg: INV.danger, hover: INV.dangerHover },
+};
+
 /**
- * Outlined button, or the solid accent button with `primary`.
+ * Outlined button, or a solid button with `primary` (accent) or `danger` (red).
  * @param {object} props
  * @param {boolean} [props.primary] Use the solid accent style.
+ * @param {boolean} [props.danger] Use the solid red style, for destructive actions.
  */
-export const InvButton = ({ primary = false, ...props }) => {
-  const bg = primary ? INV.accent : "white";
-  const borderColor = primary ? INV.accent : INV.control;
+export const InvButton = ({ primary = false, danger = false, ...props }) => {
+  const solid = danger ? SOLID.danger : primary ? SOLID.primary : null;
+  const bg = solid ? solid.bg : "white";
+  const borderColor = solid ? solid.bg : INV.control;
   return (
     <Button
       {...bareButton}
@@ -77,13 +110,13 @@ export const InvButton = ({ primary = false, ...props }) => {
       border="1px solid"
       borderColor={borderColor}
       bg={bg}
-      color={primary ? "white" : INV.ink}
+      color={solid ? "white" : INV.ink}
       fontSize="14px"
-      fontWeight={primary ? 500 : 400}
+      fontWeight={solid ? 500 : 400}
       _disabled={{ opacity: 0.5, cursor: "default" }}
       _hover={{
-        bg: primary ? INV.accentHover : INV.sub,
-        borderColor: primary ? INV.accentHover : INV.accent,
+        bg: solid ? solid.hover : INV.sub,
+        borderColor: solid ? solid.hover : INV.accent,
         ...underline,
         _disabled: { bg, borderColor, textDecoration: "none" },
       }}
@@ -91,6 +124,122 @@ export const InvButton = ({ primary = false, ...props }) => {
     />
   );
 };
+
+/**
+ * Inventory-styled modal with a title, body and Cancel / action footer.
+ * The action button submits the form whose id is `formId`, so Enter in a field
+ * submits too; pass `onAction` instead for modals without a form. Leave out
+ * `actionLabel` for an information-only modal with just a Close button.
+ * @param {object} props
+ * @param {boolean} props.isOpen Whether the modal is shown.
+ * @param {() => void} props.onClose Called on Cancel, Escape or overlay click.
+ * @param {string} props.title Heading text.
+ * @param {string} [props.actionLabel] Text of the action button.
+ * @param {string} [props.formId] Id of the form the action button submits.
+ * @param {() => void} [props.onAction] Click handler when there is no form.
+ * @param {boolean} [props.isLoading] Show the action button as busy.
+ * @param {boolean} [props.danger] Style the action as destructive.
+ * @param {string} [props.size] Chakra modal size, "md" by default.
+ */
+export const InvModal = ({
+  isOpen,
+  onClose,
+  title,
+  actionLabel,
+  formId,
+  onAction,
+  isLoading = false,
+  danger = false,
+  size = "md",
+  children,
+}) => (
+  <Modal
+    isOpen={isOpen}
+    onClose={onClose}
+    size={size}
+    isCentered
+    scrollBehavior="inside"
+  >
+    <ModalOverlay />
+    <ModalContent borderRadius="12px" color={INV.ink} mx="16px">
+      <ModalHeader fontSize="18px" fontWeight={600} pr="56px">
+        {title}
+      </ModalHeader>
+      <ModalCloseButton
+        w="44px"
+        h="44px"
+        top="8px"
+        right="8px"
+        _focusVisible={focusRing}
+      />
+      <ModalBody fontSize="14px">{children}</ModalBody>
+      <ModalFooter gap="12px">
+        <InvButton onClick={onClose} isDisabled={isLoading}>
+          {actionLabel ? "Cancel" : "Close"}
+        </InvButton>
+        {actionLabel && (
+          <InvButton
+            primary={!danger}
+            danger={danger}
+            type={formId ? "submit" : "button"}
+            form={formId}
+            onClick={formId ? undefined : onAction}
+            isLoading={isLoading}
+          >
+            {actionLabel}
+          </InvButton>
+        )}
+      </ModalFooter>
+    </ModalContent>
+  </Modal>
+);
+
+/**
+ * Page frame shared by the inventory pages: background, centred column,
+ * breadcrumb, heading and header actions.
+ * @param {object} props
+ * @param {React.ReactNode} props.breadcrumb Small text above the heading.
+ * @param {string} props.title Page heading.
+ * @param {React.ReactNode} [props.actions] Buttons shown beside the heading.
+ */
+export const InvPage = ({ breadcrumb, title, actions, children }) => (
+  <Box bg={INV.bg} color={INV.ink} minH="100vh">
+    <Flex
+      direction="column"
+      gap="24px"
+      maxW="1280px"
+      mx="auto"
+      px="40px"
+      py="32px"
+      sx={{ [MOBILE]: { px: "16px", py: "20px" } }}
+    >
+      <Flex
+        as="header"
+        justify="space-between"
+        align="flex-end"
+        wrap="wrap"
+        gap="16px"
+      >
+        <Box>
+          <Text m={0} mb="4px" fontSize="12px" color={INV.muted}>
+            {breadcrumb}
+          </Text>
+          <Heading
+            as="h1"
+            m={0}
+            fontSize="32px"
+            fontWeight={600}
+            lineHeight="inherit"
+          >
+            {title}
+          </Heading>
+        </Box>
+        {actions && <HStack spacing="12px">{actions}</HStack>}
+      </Flex>
+      {children}
+    </Flex>
+  </Box>
+);
 
 /** Borderless accent-coloured text button, underlined on hover, focus and press. */
 export const LinkButton = (props) => (
@@ -138,6 +287,24 @@ export const Card = (props) => (
 /** Small muted secondary text, used for CAS numbers and labels. */
 export const Muted = (props) => (
   <Text as="div" color={INV.muted} fontSize="12px" {...props} />
+);
+
+/**
+ * Error box shown at the top of a modal when its action fails. Announced to
+ * screen readers when it appears.
+ */
+export const ErrorMessage = (props) => (
+  <Box
+    role="alert"
+    mb="16px"
+    px="12px"
+    py="10px"
+    borderRadius="8px"
+    bg={TONES.exp.bg}
+    color={TONES.exp.color}
+    fontSize="14px"
+    {...props}
+  />
 );
 
 /** Centred placeholder shown when a table has no rows. */

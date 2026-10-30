@@ -21,7 +21,7 @@ import {
   tableProps,
 } from "./ui.jsx";
 
-const COLUMN_COUNT = 10;
+const COLUMN_COUNT = 8;
 
 /**
  * rows: [{ wc, summary, items }]
