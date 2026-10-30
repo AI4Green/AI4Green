@@ -16,9 +16,8 @@ from typing import Any, Callable, Dict
 
 from apiflask import abort
 from flask import Response, jsonify, request
-from flask_login import login_required
+from flask_login import current_user, login_required
 from sources import models, services
-from sources.auxiliary import security_member_workgroup
 from sources.extensions import db
 from sources.services.inventory import InventoryNotFoundError, InventoryValidationError
 
@@ -33,6 +32,9 @@ def _member_workgroup(workgroup_name: str) -> models.WorkGroup:
     """
     Gets the workgroup if the current user is a member of it.
 
+    The decorators in sources.decorators make the same check, but they flash a
+    message and redirect to the home page, which a JSON API can't use.
+
     Args:
         workgroup_name: The workgroup name from the URL.
 
@@ -40,7 +42,10 @@ def _member_workgroup(workgroup_name: str) -> models.WorkGroup:
         The workgroup.
     """
     workgroup = services.workgroup.from_name(workgroup_name)
-    if workgroup is None or not security_member_workgroup(workgroup_name):
+    if (
+        workgroup is None
+        or services.workgroup.get_user_type(workgroup_name, current_user) is None
+    ):
         abort(404)
     return workgroup
 
