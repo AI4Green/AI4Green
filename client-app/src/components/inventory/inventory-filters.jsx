@@ -7,20 +7,7 @@ import {
   Input,
   Select,
 } from "@chakra-ui/react";
-import { focusRing, INV, underline } from "./ui.jsx";
-
-// shared look for the search box and dropdowns
-const controlProps = {
-  variant: "outline",
-  h: "44px",
-  fontSize: "14px",
-  borderRadius: "8px",
-  borderColor: INV.lineStrong,
-  bg: "white",
-  color: INV.ink,
-  focusBorderColor: INV.accent,
-  _hover: { borderColor: INV.lineStrong },
-};
+import { controlProps, focusRing, INV, underline } from "./ui.jsx";
 
 /**
  * Labelled filter control.
