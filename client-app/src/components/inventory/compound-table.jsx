@@ -21,15 +21,21 @@ import {
   tableProps,
 } from "./ui.jsx";
 
-const COLUMN_COUNT = 8;
+const COLUMN_COUNT = 10;
 
 /**
  * rows: [{ wc, summary, items }]
  *   wc       the WorkgroupCompound
  *   summary  result of summarise(wc)
  *   items    containers to show when the row is expanded (already filtered)
+ * canEdit shows the actions that change stock; without it only History shows.
  */
-export default function CompoundTable({ rows, onItemAction, onAddContainer }) {
+export default function CompoundTable({
+  rows,
+  canEdit,
+  onItemAction,
+  onAddContainer,
+}) {
   const [expanded, setExpanded] = useState(() => new Set());
 
   const toggle = (id) =>
@@ -105,12 +111,14 @@ export default function CompoundTable({ rows, onItemAction, onAddContainer }) {
                   </Badge>
                 </InvTd>
                 <InvTd>
-                  <LinkButton
-                    aria-label={`Add container of ${name}`}
-                    onClick={() => onAddContainer(wc)}
-                  >
-                    Add container
-                  </LinkButton>
+                  {canEdit && (
+                    <LinkButton
+                      aria-label={`Add container of ${name}`}
+                      onClick={() => onAddContainer(wc)}
+                    >
+                      Add container
+                    </LinkButton>
+                  )}
                 </InvTd>
               </Tr>
               {isOpen && (
@@ -125,6 +133,7 @@ export default function CompoundTable({ rows, onItemAction, onAddContainer }) {
                       <ContainersTable
                         items={items}
                         nested
+                        canEdit={canEdit}
                         onItemAction={onItemAction}
                       />
                     </Box>
