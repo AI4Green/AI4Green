@@ -1,27 +1,53 @@
 :root {
   /* Navbar colour variables */
-  --hover-underline-color: var(--primary-green);
-  --active-text-color: var(--tertiary-green);
+  --hover-underline-color: var(--brand-green);
+  --active-text-color: var(--brand-green);
 }
 
 /* Base navbar styling */
 #main-navbar {
-  background: var(--primary-grey) !important;
+  background: #fff;
+  border-bottom: 1px solid var(--brand-border);
+  box-shadow: 0 2px 8px rgba(24, 36, 44, 0.04);
   margin-bottom: 2.5rem;
+}
+
+#main-navbar .navbar-brand {
+  padding: 0;
+  margin-right: 1.5rem;
+}
+
+.navbar-logo {
+  height: 40px;
+  width: auto;
+}
+
+/* default link colour, darker than Bootstrap's navbar-light grey for contrast */
+#main-navbar .navbar-nav .nav-link {
+  color: var(--brand-text-muted);
+}
+
+/* the reaction autosave messages shown in the navbar */
+#main-navbar .reaction-save-success {
+  color: var(--brand-green);
+}
+
+#main-navbar .reaction-save-failure {
+  color: #b02a37;
 }
 
 /* ------ Navigation Items ------ */
 /* Active state styling */
-.navbar-nav .nav-item.active .nav-link {
+#main-navbar .navbar-nav .nav-item.active .nav-link {
   font-weight: bold;
   color: var(--active-text-color);
 }
 
 /* Hover and focus state styling - changes text colour to green*/
-.navbar-nav .nav-item .nav-link:hover,
-.navbar-nav .nav-item .nav-link:focus,
-.navbar-nav .dropdown-toggle:focus,
-.navbar-nav .dropdown.show .dropdown-toggle {
+#main-navbar .navbar-nav .nav-item .nav-link:hover,
+#main-navbar .navbar-nav .nav-item .nav-link:focus,
+#main-navbar .navbar-nav .dropdown-toggle:focus,
+#main-navbar .navbar-nav .dropdown.show .dropdown-toggle {
   text-decoration: none;
   position: relative;
   color: var(--active-text-color);
@@ -65,8 +91,10 @@
 /* Dropdown menu container */
 .dropdown-menu {
   width: 250px;
-  background-color: var(--secondary-grey);
-  border: 1px solid var(--primary-grey);
+  background-color: #fff;
+  border: 1px solid var(--brand-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(24, 36, 44, 0.08);
   padding: 0.5rem 0;
   margin-top: 0.5rem;
   top: 100%;
@@ -84,7 +112,7 @@
 /* Dropdown items */
 .dropdown-menu .dropdown-item {
   padding: 0.5rem 1.5rem;
-  color: #fff;
+  color: var(--brand-navy);
   transition: all 0.2s ease-in-out;
   white-space: nowrap;
   overflow: hidden;
@@ -94,8 +122,23 @@
 .dropdown-menu .dropdown-item:hover,
 .dropdown-menu .dropdown-item:focus {
   color: var(--active-text-color);
-  background-color: var(--secondary-grey);
+  background-color: var(--brand-green-tint);
   font-weight: bold;
+}
+
+/* Logout */
+.dropdown-menu .dropdown-item.dropdown-item-danger {
+  color: #b02a37;
+}
+
+.dropdown-menu .dropdown-item.dropdown-item-danger:hover,
+.dropdown-menu .dropdown-item.dropdown-item-danger:focus {
+  color: #b02a37;
+  background-color: #fbeaec;
+}
+
+.dropdown-divider {
+  border-top-color: var(--brand-border);
 }
 
 /*!* Ensure dropdown shows properly *!*/

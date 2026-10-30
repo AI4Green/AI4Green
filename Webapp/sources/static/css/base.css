@@ -13,6 +13,14 @@
 --primary-red-hover: #BB6A61;
 --primary-yellow: #f0ad4e;
 --primary-yellow-hover: #ec971f;
+/* 2026 brand, sampled from AI4Green_logo_light.png. Used on the landing page for now */
+--brand-navy: #18242c;
+--brand-green: #46703f;
+--brand-green-hover: #375a31;
+--brand-green-tint: #eef3ec;
+--brand-surface: #f7f8f7;
+--brand-border: #e2e7e1;
+--brand-text-muted: #5b6670;
 }
 
 html, body {
@@ -33,6 +41,83 @@ main {
 
 .footer {
     flex-shrink: 0;
+}
+
+.btn.btn-brand {
+    background-color: var(--brand-green);
+    border-color: var(--brand-green);
+    color: #fff;
+}
+
+.btn.btn-brand:hover,
+.btn.btn-brand:focus {
+    background-color: var(--brand-green-hover);
+    border-color: var(--brand-green-hover);
+    color: #fff;
+    text-decoration: underline;
+}
+
+.cookie-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem 1.5rem;
+    padding: 0.875rem 1.5rem;
+    background: #fff;
+    border-top: 1px solid var(--brand-border);
+    box-shadow: 0 -4px 16px rgba(24, 36, 44, 0.08);
+    color: var(--brand-navy);
+    font-size: 0.95rem;
+}
+
+.cookie-banner a {
+    color: var(--brand-green);
+    text-decoration: underline;
+}
+
+.cookie-banner a:hover,
+.cookie-banner a:focus {
+    color: var(--brand-green-hover);
+}
+
+.site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: var(--brand-surface);
+    border-top: 1px solid var(--brand-border);
+}
+
+.site-footer-logo {
+    height: 48px;
+    width: auto;
+}
+
+.site-footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.site-footer-links li + li::before {
+    content: "|";
+    margin: 0 0.75rem;
+    color: var(--brand-border);
+}
+
+.site-footer-links a {
+    color: var(--brand-text-muted);
+    font-size: 0.875rem;
+}
+
+.site-footer-links a:hover,
+.site-footer-links a:focus {
+    color: var(--brand-green);
 }
 
 #content {
@@ -60,6 +145,11 @@ main {
 
 .text-secondary-green {
     color: var(--secondary-green);
+}
+
+/* The light logo has a solid white background; multiply hides it on light backgrounds */
+.logo-on-light {
+    mix-blend-mode: multiply;
 }
 
 .text-grey {

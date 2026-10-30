@@ -1,0 +1,263 @@
+/* Landing page in the 2026 brand style. Colour tokens are in base.css. */
+
+.landing-page {
+    color: var(--brand-navy);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.landing-page h1,
+.landing-page h2,
+.landing-page h3 {
+    color: var(--brand-navy);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.landing-page a:not(.btn) {
+    color: var(--brand-green);
+    text-decoration: underline;
+}
+
+.landing-page a:not(.btn):hover {
+    color: var(--brand-green-hover);
+}
+
+.landing-page .text-brand-green {
+    color: var(--brand-green);
+}
+
+.landing-page .text-brand-muted {
+    color: var(--brand-text-muted);
+}
+
+/* --- Hero ------------------------------------------------------------------ */
+
+.landing-hero {
+    background: var(--brand-surface);
+}
+
+/* crops the white bands above and below the banner's photo */
+.landing-banner {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1774 / 625;
+    object-fit: cover;
+}
+
+.landing-hero-text {
+    padding: 2.5rem 1rem 1.5rem;
+}
+
+.landing-hero-text h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+}
+
+.landing-values {
+    list-style: none;
+    padding: 0;
+    margin: 1.25rem 0 0;
+    color: var(--brand-text-muted);
+}
+
+.landing-values li {
+    display: inline-block;
+    margin-right: 1rem;
+}
+
+.landing-values li::before {
+    content: "";
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: 0.4rem;
+    border-radius: 50%;
+    background: var(--brand-green);
+}
+
+/* the banner image shows this text on wide screens; keep it for screen readers */
+@media (min-width: 992px) {
+    .landing-hero-text {
+        position: absolute !important;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+}
+
+/* the short green rule from the banner, under section headings */
+.section-rule {
+    width: 4rem;
+    height: 2px;
+    margin: 1rem 0 0;
+    border: 0;
+    background: var(--brand-green);
+}
+
+.section-rule.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* --- Welcome and sign in ---------------------------------------------------- */
+
+.landing-welcome {
+    padding: 3.5rem 0;
+}
+
+/* the logo image has white padding around the wordmark (left 15%, top and bottom 26%
+   of its width), so it's pulled up, down and left to line up with the text */
+.landing-logo {
+    width: 280px;
+    max-width: 100%;
+    height: auto;
+    margin: -72px 0 -72px -43px;
+}
+
+.landing-intro {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--brand-text-muted);
+    max-width: 34rem;
+}
+
+.signin-card {
+    background: #fff;
+    border: 1px solid var(--brand-border);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 6px 24px rgba(24, 36, 44, 0.06);
+}
+
+.signin-card label {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.signin-card .form-control:focus {
+    border-color: var(--brand-green);
+    box-shadow: 0 0 0 0.2rem rgba(70, 112, 63, 0.25);
+}
+
+.signin-divider {
+    display: flex;
+    align-items: center;
+    margin: 1.25rem 0;
+    color: var(--brand-text-muted);
+    font-size: 0.875rem;
+}
+
+.signin-divider::before,
+.signin-divider::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid var(--brand-border);
+}
+
+.signin-divider::before {
+    margin-right: 0.75rem;
+}
+
+.signin-divider::after {
+    margin-left: 0.75rem;
+}
+
+/* --- Buttons ---------------------------------------------------------------- */
+
+.landing-page .btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.55rem 1.25rem;
+}
+
+.landing-page .btn-brand-outline {
+    background-color: transparent;
+    border-color: var(--brand-green);
+    color: var(--brand-green);
+}
+
+.landing-page .btn-brand-navy-outline {
+    background-color: #fff;
+    border-color: var(--brand-navy);
+    color: var(--brand-navy);
+}
+
+.landing-page .btn-brand-outline:hover,
+.landing-page .btn-brand-outline:focus,
+.landing-page .btn-brand-navy-outline:hover,
+.landing-page .btn-brand-navy-outline:focus {
+    background-color: var(--brand-green-tint);
+    text-decoration: underline;
+}
+
+.landing-page .btn:focus-visible {
+    outline: 3px solid var(--brand-navy);
+    outline-offset: 2px;
+}
+
+/* --- Sections --------------------------------------------------------------- */
+
+.landing-section {
+    padding: 4rem 0;
+}
+
+.landing-section-surface {
+    background: var(--brand-surface);
+}
+
+.landing-section-tint {
+    background: var(--brand-green-tint);
+}
+
+.landing-card {
+    height: 100%;
+    background: #fff;
+    border: 1px solid var(--brand-border);
+    border-radius: 12px;
+    padding: 1.75rem;
+}
+
+.landing-card p {
+    color: var(--brand-text-muted);
+    margin-bottom: 0;
+}
+
+.landing-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+    border-radius: 50%;
+    background: var(--brand-green-tint);
+    color: var(--brand-green);
+}
+
+.landing-icon svg {
+    width: 1.4rem;
+    height: 1.4rem;
+}
+
+.landing-stat {
+    font-size: 2.25rem;
+    font-weight: 600;
+    color: var(--brand-green);
+    margin-bottom: 0.5rem;
+}
+
+.landing-quote {
+    border-left: 3px solid var(--brand-green);
+}
+
+.landing-quote blockquote {
+    margin: 0;
+    color: var(--brand-navy);
+    font-size: 1.05rem;
+    line-height: 1.6;
+}

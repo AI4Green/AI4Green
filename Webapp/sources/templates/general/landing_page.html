@@ -1,278 +1,222 @@
 {% extends "base.html" %}
-{% block title %}AI4Green - The Sustainable Chemistry ELN{% endblock %}
+{% block title %}AI4Green - The Electronic Lab Notebook for Academic Chemists{% endblock %}
 {% block scripts %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.2/feather.min.js" integrity="sha512-zMm7+ZQ8AZr1r3W8Z8lDATkH05QG5Gm2xc6MlsCdBz9l6oE8Y7IXByMgSm/rdRQrhuHt99HAYfMljBOEZ68q5A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/landing_page.css') }}">
 {% endblock %}
 {% block content %}
 
-<body>
-    <div class="jumbotron jumbotron-fluid home bg-gradient-custom min-vh-100 non-spaced-page-content">
-        <div class="container-fluid">
-            <div class="row align-items-center min-vh-100">
-                <div class="col-md-6">
-                    <img src="/static/img/ai4green_logo_transparent.svg" alt="AI4Green Logo" class="img-fluid" style="max-width: 80%;">
-                </div>
-                <div class="col-md-4">
-                    <div class="container text-center">
-                        <h2 class="h2 fw-bold mb-4">Welcome Back</h2>
-                        <div class="form-group mb-4">
-                            <form action="" method="post" novalidate>
-                                {{ form.hidden_tag() }}
-                                {{ form.username.label(class="form-label") }}
-                                {{ form.username(id="username", aria_describedby="username-error", autocomplete="username") }}<br>
-                                {% for error in form.username.errors %}
-                                    <div id="username-error" class="alert alert-danger" style="margin: auto; width: 70%"
-                                         aria-live="polite">
-                                        {{ error }}
-                                    </div>
-                                    <br>
-                                {% endfor %}
-                                {{ form.password.label(class="form-label") }}
-                                {{ form.password(id="password", aria_describedby="password-error", autocomplete="current-password") }}<br>
-                                {% for error in form.password.errors %}
-                                    <div id="password-error" class="alert alert-danger" style="margin: auto; width: 70%"
-                                         aria-live="polite">
-                                        {{ error }}
-                                    </div>
-                                    <br>
-                                {% endfor %}
-                                {{ form.remember_me() }} {{ form.remember_me.label }}<br>
-                                {{ form.submit() }}
-                            </form>
-                            <a class="btn btn-primary" id="sso" href="/auth/oidc_login">Use Single Sign-on</a>
-                        </div>
-                        <div class="d-flex flex-column gap-2">
-                           <p>
-                              <a id="reset-password" class="fw-bold text-warning"
-                                 href="{{ url_for('reset_password.reset_password_request') }}">
-                                Reset Your Password 🔑
-                              </a>
-                           </p>
-                           <p>
-                              <a id="register" class="btn btn-light text-dark shadow-lg fw-bold px-4 py-2 rounded-pill text-decoration-none"
-                                 href="{{ url_for('auth.register') }}">
-                                Click to Register 🌱
-                              </a>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="d-flex flex-column align-items-center gap-4 mb-5">
-                <div class="bounce pb-5">
-                    <i data-feather="chevron-down" class="text-primary-green" style="width: 2rem; height: 2rem;"></i>
-                </div>
-                <a target="_blank" href="https://www.youtube.com/watch?v=TnjoJcUreG8&list=PL7u_tOd0vTynC0tgWt0cb7jLlnEoDwiO4&index=4" class="btn btn-success px-4 py-2 rounded">
-                    Watch Demo
-                </a>
-            </div>
+<div class="landing-page">
+    <!-- Hero: the banner on wide screens, the same text as HTML on narrow ones -->
+    <section class="landing-hero non-spaced-page-content">
+        <img src="{{ url_for('static', filename='img/AI4Green_banner_light.png') }}"
+             alt="" width="1774" height="887" class="landing-banner d-none d-lg-block">
+        <div class="landing-hero-text container">
+            <h1>The Electronic Lab Notebook for <span class="text-brand-green">Academic Chemists</span></h1>
+            <hr class="section-rule">
+            <ul class="landing-values">
+                <li>FAIR Data</li>
+                <li>Reproducible Research</li>
+                <li>Greener Chemistry</li>
+            </ul>
         </div>
-    </div>
+    </section>
 
-    <!-- Features Section -->
-    <div class="py-5 bg-white">
+    <!-- Welcome and sign in -->
+    <section class="landing-welcome">
         <div class="container">
-            <h2 class="h2 fw-bold text-center mb-5">
-                The Electronic Lab Notebook for Sustainable Chemistry
-            </h2>
-            <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
-                <!-- First Row -->
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary-green">
-                                <i data-feather="droplet" style="width: 2rem; height: 2rem;"></i>
-                            </div>
-                            <h3 class="h5 fw-bold">Smart Reaction Planning</h3>
-                            <p class="text-muted">AI-powered assistance for greener solvents, synthetic routes and reduced environmental impact.</p>
-                        </div>
+            <div class="row align-items-center">
+                <div class="col-lg-7 mb-5 mb-lg-0">
+                    <img src="{{ url_for('static', filename='img/AI4Green_logo_light.png') }}"
+                         alt="AI4Green" width="1254" height="1254" class="landing-logo logo-on-light">
+                    <p class="landing-intro mt-2">
+                        AI4Green helps chemists manage their research data, work more efficiently,
+                        securely collaborate around the world, and be more sustainable.
+                    </p>
+                    <div class="mt-4">
+                        <a id="register" class="btn btn-brand mr-2 mb-2" href="{{ url_for('auth.register') }}">
+                            Create an account
+                        </a>
+                        <a class="btn btn-brand-outline mb-2" target="_blank" rel="noopener noreferrer"
+                           href="https://www.youtube.com/watch?v=TnjoJcUreG8&list=PL7u_tOd0vTynC0tgWt0cb7jLlnEoDwiO4&index=4">
+                            Watch the demo
+                        </a>
                     </div>
                 </div>
 
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary-green">
-                                <i data-feather="flag" style="width: 2rem; height: 2rem;"></i>
+                <div class="col-lg-5">
+                    <div class="signin-card">
+                        <h2 class="h4 mb-4">Welcome back</h2>
+                        <form action="" method="post" novalidate>
+                            {{ form.hidden_tag() }}
+                            <div class="form-group">
+                                {{ form.username.label() }}
+                                {{ form.username(id="username", class_="form-control", aria_describedby="username-error", autocomplete="username") }}
+                                {% for error in form.username.errors %}
+                                    <div id="username-error" class="alert alert-danger mt-2 mb-0" aria-live="polite">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
                             </div>
-                            <h3 class="h5 fw-bold">Sustainability Metrics</h3>
-                            <p class="text-muted">Real-time calculation of green chemistry metrics and environmental impact assessments.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary-green">
-                                <i data-feather="database" style="width: 2rem; height: 2rem;"></i>
+                            <div class="form-group">
+                                {{ form.password.label() }}
+                                {{ form.password(id="password", class_="form-control", aria_describedby="password-error", autocomplete="current-password") }}
+                                {% for error in form.password.errors %}
+                                    <div id="password-error" class="alert alert-danger mt-2 mb-0" aria-live="polite">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
                             </div>
-                            <h3 class="h5 fw-bold">Digital Lab Records</h3>
-                            <p class="text-muted">Secure, searchable, standardised, and exportable documentation of all your experimental procedures.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                <!-- Second Row -->
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary-green">
-                                <i data-feather="cloud" style="width: 2rem; height: 2rem;"></i>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="form-check">
+                                    {{ form.remember_me(class_="form-check-input") }}
+                                    {{ form.remember_me.label(class_="form-check-label") }}
+                                </div>
+                                <a id="reset-password" href="{{ url_for('reset_password.reset_password_request') }}">
+                                    Forgot password?
+                                </a>
                             </div>
-                            <h3 class="h5 fw-bold">Cloud-Based Platform</h3>
-                            <p class="text-muted">Access your data anywhere, anytime, with automatic backups, timestamps, and signatures.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary-green">
-                                <i data-feather="share-2" style="width: 2rem; height: 2rem;"></i>
-                            </div>
-                            <h3 class="h5 fw-bold">Collaboration Tools</h3>
-                            <p class="text-muted">Share procedures, results, and insights securely with team members globally.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary-green">
-                                <i data-feather="lock" style="width: 2rem; height: 2rem;"></i>
-                            </div>
-                            <h3 class="h5 fw-bold">Data Security</h3>
-                            <p class="text-muted">Enterprise-grade security with encrypted data storage and compliance features.</p>
-                        </div>
+                            {{ form.submit(class_="btn btn-brand btn-block") }}
+                        </form>
+                        <div class="signin-divider">or</div>
+                        <a class="btn btn-brand-navy-outline btn-block" id="sso" href="/auth/oidc_login">Use Single Sign-on</a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Stats Section -->
-    <div class="py-5 bg-grey">
+    <!-- Features -->
+    <section class="landing-section landing-section-surface">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>Everything your research group needs</h2>
+                <hr class="section-rule mx-auto">
+            </div>
+            <div class="row">
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="landing-card">
+                        <span class="landing-icon"><i data-feather="droplet" aria-hidden="true"></i></span>
+                        <h3 class="h5">Smart Reaction Planning</h3>
+                        <p>AI-powered assistance for greener solvents, synthetic routes and reduced environmental impact.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="landing-card">
+                        <span class="landing-icon"><i data-feather="flag" aria-hidden="true"></i></span>
+                        <h3 class="h5">Sustainability Metrics</h3>
+                        <p>Real-time calculation of green chemistry metrics and environmental impact assessments.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="landing-card">
+                        <span class="landing-icon"><i data-feather="database" aria-hidden="true"></i></span>
+                        <h3 class="h5">Digital Lab Records</h3>
+                        <p>Secure, searchable, standardised, and exportable documentation of all your experimental procedures.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="landing-card">
+                        <span class="landing-icon"><i data-feather="cloud" aria-hidden="true"></i></span>
+                        <h3 class="h5">Cloud-Based Platform</h3>
+                        <p>Access your data anywhere, anytime, with automatic backups, timestamps, and signatures.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="landing-card">
+                        <span class="landing-icon"><i data-feather="share-2" aria-hidden="true"></i></span>
+                        <h3 class="h5">Collaboration Tools</h3>
+                        <p>Share procedures, results, and insights securely with team members globally.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="landing-card">
+                        <span class="landing-icon"><i data-feather="lock" aria-hidden="true"></i></span>
+                        <h3 class="h5">Data Security</h3>
+                        <p>Enterprise-grade security with encrypted data storage and compliance features.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Highlights -->
+    <section class="landing-section">
         <div class="container">
             <div class="row text-center">
-                <div class="col-md-4">
-                    <div class="p-3">
-                        <div class="display-3 text-primary-green mb-2">Safety</div>
-                        <div class="text-white">Professional standard COSHH matrix with automatic hazard identification.</div>
-                    </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="landing-stat">Safety</div>
+                    <p class="text-brand-muted mb-0">Professional standard COSHH matrix with automatic hazard identification.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="landing-stat">Data</div>
+                    <p class="text-brand-muted mb-0">150,000+ Compound database for the quick input of compounds and automatic molar calculations.</p>
                 </div>
                 <div class="col-md-4">
-                    <div class="p-3">
-                        <div class="display-3 text-primary-green mb-2">Data</div>
-                        <div class="text-white">150,000+ Compound database for the quick input of compounds and automatic molar calculations.</div>
+                    <div class="landing-stat">Synthesis</div>
+                    <p class="text-brand-muted mb-0">Built for chemists by chemists with support for synthetic chemistry including polymers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="landing-section landing-section-surface">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>What our users say</h2>
+                <hr class="section-rule mx-auto">
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <figure class="landing-card landing-quote mb-0">
+                        <blockquote>"I would recommend this to my peers as it is a much more streamlined approach to handling data, and it can be retained and accessed easily in the future."</blockquote>
+                    </figure>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <figure class="landing-card landing-quote mb-0">
+                        <blockquote>"All experimentals are available anywhere at the click of a button, which makes writing manuscripts easier."</blockquote>
+                    </figure>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <figure class="landing-card landing-quote mb-0">
+                        <blockquote>"It's a great tool for everyday work and have encouraged other members of our research group to join, and it has significantly streamlined the planning/write-up process."</blockquote>
+                    </figure>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community -->
+    <section class="landing-section landing-section-tint">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>Built with our community</h2>
+                <hr class="section-rule mx-auto">
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5 mb-4">
+                    <div class="landing-card">
+                        <span class="landing-icon"><i data-feather="github" aria-hidden="true"></i></span>
+                        <h3 class="h5">Open Source</h3>
+                        <p>All our code is on <a id="github-link" href="https://github.com/AI4Green/AI4Green" target="_blank" rel="noopener noreferrer">GitHub</a> and we welcome any contributors.</p>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="p-3">
-                        <div class="display-3 text-primary-green mb-2">Synthesis</div>
-                        <div class="text-white">Built for chemists by chemists with support for synthetic chemistry including polymers.</div>
+                <div class="col-md-6 col-lg-5 mb-4">
+                    <div class="landing-card">
+                        <span class="landing-icon"><i data-feather="message-circle" aria-hidden="true"></i></span>
+                        <h3 class="h5">Want something new?</h3>
+                        <p>AI4Green is constantly improving, and we work with our community to make this the best ELN for synthetic chemists who are passionate about sustainability. Email us at <a id="email-link" href="mailto:ai4green@nottingham.ac.uk">ai4green@nottingham.ac.uk</a>.</p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
+</div>
 
-    <!-- Testimonials Section -->
-    <div class="py-5 bg-white">
-        <div class="container">
-            <h2 class="h2 fw-bold text-center mb-5">
-                What Our Users Say
-            </h2>
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="bg-grey rounded-circle p-3 me-3">
-                                    <i data-feather="user" class="text-primary-green" style="width: 1.5rem; height: 1.5rem;"></i>
-                                </div>
-                            </div>
-                            <p class="text-muted">"I would recommend this to my peers as it is a much more streamlined approach to handling data, and it can be retained and accessed easily in the future."</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="bg-grey rounded-circle p-3 me-3">
-                                    <i data-feather="user" class="text-primary-green" style="width: 1.5rem; height: 1.5rem;"></i>
-                                </div>
-                            </div>
-                            <p class="text-muted">"All experimentals are available anywhere at the click of a button, which makes writing manuscripts easier."</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="bg-grey rounded-circle p-3 me-3">
-                                    <i data-feather="user" class="text-primary-green" style="width: 1.5rem; height: 1.5rem;"></i>
-                                </div>
-                            </div>
-                            <p class="text-muted">"It's a great tool for everyday work and have encouraged other members of our research group to join, and it has significantly streamlined the planning/write-up process."</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Our Section    -->
-     <div class="py-5 bg-green">
-        <div class="container">
-            <h2 class="h2 fw-bold text-center mb-5 text-grey">
-                What We Say
-            </h2>
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                <!-- First Row -->
-                <div class="col">
-                    <div class="card h-100 shadow-sm bg-grey">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary-green">
-                                <i data-feather="github" style="width: 2rem; height: 2rem;"></i>
-                            </div>
-                            <h3 class="h5 fw-bold text-primary-green">Open Source</h3>
-                            <p class="text-primary-green">All our code is on <a class="text-secondary-green" id="github-link" href="https://github.com/AI4Green/AI4Green">GitHub</a> and we welcome any contributors</p>
-                        </div>
-                    </div>
-                </div>
-                 <div class="col">
-                    <div class="card h-100 shadow-sm bg-grey">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary-green">
-                                <i data-feather="message-circle" style="width: 2rem; height: 2rem;"></i>
-                            </div>
-                            <h3 class="h5 fw-bold text-primary-green">Want something new?</h3>
-                            <p class="text-primary-green">AI4Green is constantly improving, and we work with our community to make this the best ELN for synthetic chemists who are passionate about sustainability. Email us at <a class="text-secondary-green" id="email-link" href="mailto:ai4green@nottingham.ac.uk">ai4green@nottingham.ac.uk</a>.</p>
-                        </div>
-                    </div>
-                </div>
-             </div>
-        </div>
-     </div>
-
-    <script>
-        // Wait for the page to load completely
-        window.addEventListener('load', function() {
-            // Initialize Feather icons
-            feather.replace();
-        });
-    </script>
-</body>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        feather.replace();
+    });
+</script>
 {% endblock %}
