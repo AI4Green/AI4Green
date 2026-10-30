@@ -28,12 +28,13 @@ const ACTIONS = [
  * One row per InventoryItem.
  * Pass showCompound for the flat "All containers" view, where items carry
  * compoundName and cas. Pass nested when rendered inside an expanded compound
- * row, which uses a denser layout.
+ * row, which uses a denser layout. Without canEdit, only History is offered.
  */
 export default function ContainersTable({
   items,
   showCompound = false,
   nested = false,
+  canEdit = false,
   onItemAction,
 }) {
   if (items.length === 0) {
@@ -60,9 +61,10 @@ export default function ContainersTable({
           const state = item.isArchived
             ? { label: "Archived", tone: "muted" }
             : itemState(item);
-          const actions = item.isArchived
-            ? ACTIONS.filter(([key]) => key === "history")
-            : ACTIONS;
+          const actions =
+            item.isArchived || !canEdit
+              ? ACTIONS.filter(([key]) => key === "history")
+              : ACTIONS;
 
           return (
             <Tr key={item.id}>
