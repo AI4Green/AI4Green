@@ -14,8 +14,35 @@
     animation: bounce 2s ease-in-out 2;
 }
 
+/* the welcome band on the home page, and the band flash messages are shown in */
 .jumbotron.jumbotron-fluid.home {
-  background: linear-gradient(90deg, var(--primary-grey) 50%, var(--primary-green));
+  background: linear-gradient(90deg, var(--brand-surface) 40%, var(--brand-green-tint));
+  border-bottom: 1px solid var(--brand-border);
+  padding: 2.5rem 0;
+}
+
+.home-welcome {
+  color: var(--brand-navy);
+  font-weight: 600;
+  margin: 0;
+}
+
+.home-welcome .home-welcome-name {
+  color: var(--brand-green);
+}
+
+/* the quick access panels on the home page */
+.icon-panel {
+  background-color: var(--brand-surface);
+  border: 1px solid var(--brand-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.icon-panel-header {
+  background-color: #fff;
+  border-bottom: 1px solid var(--brand-border);
+  color: var(--brand-navy);
 }
 
 .non-spaced-page-content {
