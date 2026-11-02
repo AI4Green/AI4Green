@@ -33,7 +33,7 @@
 }
 
 #main-navbar .reaction-save-failure {
-  color: #b02a37;
+  color: var(--brand-danger);
 }
 
 /* ------ Navigation Items ------ */
@@ -128,12 +128,12 @@
 
 /* Logout */
 .dropdown-menu .dropdown-item.dropdown-item-danger {
-  color: #b02a37;
+  color: var(--brand-danger);
 }
 
 .dropdown-menu .dropdown-item.dropdown-item-danger:hover,
 .dropdown-menu .dropdown-item.dropdown-item-danger:focus {
-  color: #b02a37;
+  color: var(--brand-danger);
   background-color: #fbeaec;
 }
 

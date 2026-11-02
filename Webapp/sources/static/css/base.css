@@ -15,12 +15,15 @@
 --primary-yellow-hover: #ec971f;
 /* 2026 brand, sampled from AI4Green_logo_light.png. Used on the landing page for now */
 --brand-navy: #18242c;
+--brand-navy-hover: #2c3b45;
 --brand-green: #46703f;
 --brand-green-hover: #375a31;
 --brand-green-tint: #eef3ec;
 --brand-surface: #f7f8f7;
 --brand-border: #e2e7e1;
 --brand-text-muted: #5b6670;
+--brand-danger: #b02a37;
+--brand-danger-hover: #8f222d;
 }
 
 html, body {
