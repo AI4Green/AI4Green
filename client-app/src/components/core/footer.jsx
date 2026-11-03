@@ -62,10 +62,13 @@ const BigFooter = ({ copyrightText, links }) => (
       direction={{ base: "column", md: "row" }}
       px={12}
     >
+      {/* served by Flask, like the favicon in index.html. The logo has a white
+          background; multiply hides it on the grey footer */}
       <Image
-        h="75px"
-        src="/assets/UoN-light.png"
-        alt="University of Nottingham logo"
+        h="64px"
+        src="/static/img/AI4Green_logo_light_small.png"
+        alt="AI4Green"
+        sx={{ mixBlendMode: "multiply" }}
       />
 
       <HStack justify="center" spacing={6}>

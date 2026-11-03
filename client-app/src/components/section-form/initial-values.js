@@ -71,6 +71,22 @@ const getInitialValue = (field, recordId, sectionId, sectionApis) => {
   }
 };
 
+/**
+ * Gets a field's saved response: the response record's id and its most recent
+ * value. Uses `??` rather than `||` so falsy answers such as `0` or `false` are
+ * kept instead of being treated as unanswered.
+ * @param {object} field - A template field, including its `fieldResponse` list.
+ * @returns {{ id: (number|null), value: * }} The response id and latest value,
+ *   each `null` when there is no response.
+ */
+export const getLatestResponse = (field) => {
+  const response = field.fieldResponse?.[0];
+  return {
+    id: response?.id ?? null,
+    value: response?.fieldResponseValues?.at(-1)?.value ?? null,
+  };
+};
+
 export const initialValues = (
   sectionFields,
   recordId,
