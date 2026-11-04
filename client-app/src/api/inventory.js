@@ -43,6 +43,8 @@ export const fetchKeys = {
   workgroup: (workgroupName) => workgroupPath(workgroupName),
   itemHistory: (workgroupName, itemId) =>
     `${itemPath(workgroupName, itemId)}/history`,
+  chemInventoryConnection: (workgroupName) =>
+    `${workgroupPath(workgroupName)}/cheminventory/connection`,
 };
 
 /**
@@ -117,6 +119,38 @@ export const getInventoryApi = ({ api }) => ({
     api.patch(locationPath(workgroupName, locationId), {
       json: { isArchived },
     }),
+
+  /**
+   * Connect ChemInventory with an API token, or replace the token. The backend
+   * checks it with ChemInventory before saving, and never sends it back.
+   * The token goes in the JSON body only, never in a URL, so it isn't logged.
+   * Resolves to the new connection status.
+   */
+  saveChemInventoryConnection: (workgroupName, token) =>
+    api
+      .put(fetchKeys.chemInventoryConnection(workgroupName), {
+        json: { token },
+      })
+      .json(),
+
+  /** Disconnect ChemInventory, deleting the stored token. */
+  deleteChemInventoryConnection: (workgroupName) =>
+    api.delete(fetchKeys.chemInventoryConnection(workgroupName)),
+
+  /**
+   * Search the workgroup's ChemInventory by CAS number or name. Resolves to
+   * `{ type, query, locations, containerCount, truncated }`, where each
+   * location has `id`, `name` and the matching `containers`.
+   * @param {string} workgroupName The workgroup name
+   * @param {"cas" | "name"} type What to search by
+   * @param {string} query The CAS number or name
+   */
+  searchChemInventory: (workgroupName, type, query) =>
+    api
+      .post(`${workgroupPath(workgroupName)}/cheminventory/search`, {
+        json: { type, query },
+      })
+      .json(),
 });
 
 /**
@@ -154,6 +188,23 @@ export const useItemHistory = (workgroupName, itemId) => {
       : null,
     apiFetcher,
     // the drawer shows the error; retrying in the background won't fix a 4xx
+    { shouldRetryOnError: false },
+  );
+};
+
+/**
+ * Get whether a workgroup has connected ChemInventory: `{ available,
+ * configured, canManage, tokenHint, cheminventoryUser, inventoryName,
+ * connectedBy, connectedAt }`. Never includes the token.
+ * @param {string} workgroupName The workgroup name
+ * @returns
+ */
+export const useChemInventoryConnection = (workgroupName) => {
+  const { apiFetcher } = useBackendApi();
+
+  return useSWR(
+    workgroupName ? fetchKeys.chemInventoryConnection(workgroupName) : null,
+    apiFetcher,
     { shouldRetryOnError: false },
   );
 };
