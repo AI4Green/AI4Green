@@ -4,6 +4,7 @@
 This is a configuration module for the app
 """
 import os
+import secrets
 
 from dotenv import load_dotenv
 from sources.services.controlled_substances import (
@@ -22,7 +23,7 @@ class BaseConfig(object):  # class to store configuration variables
     The Flask-WTF extension uses it to protect web forms against
     Cross-Site Request Forgery."""
     SERVER_NAME = os.getenv("SERVER_NAME", None)
-    SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
+    SECRET_KEY = os.getenv("SECRET_KEY") or secrets.token_hex(32)
     WTF_CSRF_ENABLED = False
     LIVESERVER_TIMEOUT = 10
     MAX_CONTENT_LENGTH = 1024 * 1024 * 2
