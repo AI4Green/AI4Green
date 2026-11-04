@@ -19,6 +19,13 @@ from flask import Response, jsonify, request
 from flask_login import current_user, login_required
 from sources import models, services
 from sources.extensions import db
+from sources.services.cheminventory import (
+    ChemInventoryError,
+    ChemInventoryNotConnectedError,
+    ChemInventoryRejectedError,
+    ChemInventoryUnavailableError,
+    ChemInventoryValidationError,
+)
 from sources.services.inventory import InventoryNotFoundError, InventoryValidationError
 
 from . import inventory_api_bp
@@ -101,6 +108,39 @@ def _run(action: Callable[[], Any]) -> Any:
     except InventoryNotFoundError:
         db.session.rollback()
         abort(404)
+
+
+def _run_cheminventory(action: Callable[[], Any], token_check: bool = False) -> Any:
+    """
+    Runs a ChemInventory service call, turning its errors into JSON error
+    responses. Every message comes from the service and is safe to show.
+
+    Args:
+        action: The service call.
+        token_check: Whether the call is checking a token the user just
+            entered, in which case ChemInventory refusing it is the user's
+            input error (400) rather than a problem with ChemInventory (502).
+
+    Returns:
+        Whatever the service call returns.
+    """
+    try:
+        return action()
+    except ChemInventoryValidationError as error:
+        db.session.rollback()
+        abort(400, str(error))
+    except ChemInventoryRejectedError as error:
+        db.session.rollback()
+        abort(400 if token_check else 502, str(error))
+    except ChemInventoryError as error:
+        db.session.rollback()
+        abort(502, str(error))
+    except ChemInventoryNotConnectedError as error:
+        db.session.rollback()
+        abort(409, str(error))
+    except ChemInventoryUnavailableError as error:
+        db.session.rollback()
+        abort(503, str(error))
 
 
 # --- Reading -----------------------------------------------------------------
@@ -243,3 +283,64 @@ def add_novel_compound(workgroup_name: str) -> Response:
     data = _json_body()
     compound = _run(lambda: services.inventory.add_novel_compound(workgroup, data))
     return jsonify(compound), 201
+
+
+# --- ChemInventory -----------------------------------------------------------
+# Read-only view of a workgroup's ChemInventory account. Any member can view
+# it; principal investigators and senior researchers can set or remove the
+# API token, which is never sent back to the browser.
+
+
+@inventory_api_bp.route("/<workgroup_name>/cheminventory/search", methods=["POST"])
+@login_required
+def search_cheminventory(workgroup_name: str) -> Response:
+    """
+    Searches the workgroup's ChemInventory by CAS number or name
+    (`{"type": "cas" | "name", "query": ...}`), returning the matching
+    containers grouped by location. A JSON POST rather than a GET, so another
+    site can't make a member's browser run searches (e.g. with an image tag)
+    to load ChemInventory and this server.
+    """
+    workgroup = _member_workgroup(workgroup_name)
+    data = _json_body()
+    results = _run_cheminventory(lambda: services.cheminventory.search(workgroup, data))
+    return jsonify(results)
+
+
+@inventory_api_bp.route("/<workgroup_name>/cheminventory/connection", methods=["GET"])
+@login_required
+def get_cheminventory_connection(workgroup_name: str) -> Response:
+    """Gets whether the workgroup has connected ChemInventory, without the token."""
+    workgroup = _member_workgroup(workgroup_name)
+    return jsonify(services.cheminventory.get_connection_status(workgroup))
+
+
+@inventory_api_bp.route("/<workgroup_name>/cheminventory/connection", methods=["PUT"])
+@login_required
+def save_cheminventory_connection(workgroup_name: str) -> Response:
+    """
+    Connects ChemInventory with an API token (`{"token": ...}`), or replaces
+    the token. The token is checked with ChemInventory before it's saved.
+    """
+    workgroup = _editor_workgroup(workgroup_name)
+    data = _json_body()
+    _run_cheminventory(
+        lambda: services.cheminventory.save_connection(workgroup, data),
+        token_check=True,
+    )
+    return jsonify(services.cheminventory.get_connection_status(workgroup))
+
+
+@inventory_api_bp.route(
+    "/<workgroup_name>/cheminventory/connection", methods=["DELETE"]
+)
+@login_required
+def delete_cheminventory_connection(workgroup_name: str) -> Response:
+    """
+    Disconnects ChemInventory, deleting the stored token. Takes no body: a
+    cross-site DELETE needs a CORS preflight, which this app never allows, so
+    another site can't send it.
+    """
+    workgroup = _editor_workgroup(workgroup_name)
+    _run_cheminventory(lambda: services.cheminventory.delete_connection(workgroup))
+    return jsonify({"message": "ChemInventory disconnected"})
