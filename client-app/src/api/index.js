@@ -4,3 +4,4 @@ export * from "./coshh-forms";
 export * from "./account";
 export * from "./field";
 export * from "./user";
+export * from "./inventory";
