@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List, Optional
 
 from flask.testing import FlaskClient
 from sources import models
@@ -29,20 +29,33 @@ def assert_expected_values(actual_data: Dict, expected_data: Dict):
     for key, expected_value in expected_data.items():
         assert (
             actual_data[key] == expected_value
-        ), f"{expected_value} not found in data for key: {key}"
+        ), f"{expected_value} missing for key: {key}"
 
 
-def add_workgroup(name: str) -> models.WorkGroup:
+def add_workgroup(
+    name: str,
+    principal_investigator: Optional[List[models.Person]] = None,
+    senior_researcher: Optional[List[models.Person]] = None,
+    standard_member: Optional[List[models.Person]] = None,
+) -> models.WorkGroup:
     """Adds a workgroup with default parameters to the database.
     Args:
         name: str, the name of the workgroup to be created.
+        principal_investigator: the workgroup's PIs, defaulting to the first person in the database.
+        senior_researcher: the workgroup's senior researchers, defaulting to none.
+        standard_member: the workgroup's standard members, defaulting to none.
     Returns:
         workgroup: WorkGroup object, the created workgroup."""
 
-    p1 = db.session.query(models.Person).first()
+    if principal_investigator is None:
+        principal_investigator = [db.session.query(models.Person).first()]
     institution1 = db.session.query(models.Institution).first()
     workgroup = models.WorkGroup.create(
-        name=name, institution=institution1.id, principal_investigator=[p1]
+        name=name,
+        institution=institution1.id,
+        principal_investigator=principal_investigator,
+        senior_researcher=senior_researcher or [],
+        standard_member=standard_member or [],
     )
     db.session.commit()
     return workgroup

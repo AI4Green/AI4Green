@@ -1,5 +1,5 @@
 import re
-from typing import List, Optional, Tuple
+from typing import List, Mapping, Optional, Tuple
 
 from flask import abort, request
 from flask_login import current_user
@@ -203,26 +203,37 @@ def extract_compound_name(primary_key: str) -> Optional[str]:
 
 
 class NewNovelCompound:
-    def __init__(self, workbook):
+    def __init__(
+        self, workbook: models.WorkBook, form: Optional[Mapping[str, str]] = None
+    ):
+        """
+        Reads and prepares a new novel compound for validation.
+
+        Args:
+            workbook: The workbook the compound will belong to.
+            form: The compound's fields as strings, keyed as in the reaction
+                table's form (name, cas, smiles, molWeight, density,
+                concentration, hPhrase, source). Defaults to `request.form`;
+                the inventory API passes values from its JSON body instead.
+        """
+        self._form = form if form is not None else request.form
         self.workbook = workbook
-        self.name = sanitise_user_input(request.form["name"])
+        self.name = sanitise_user_input(self._form["name"])
         self.density = (
-            float(request.form["density"]) if request.form["density"] != "" else None
+            float(self._form["density"]) if self._form["density"] != "" else None
         )
         self.concentration = (
-            float(request.form["concentration"])
-            if request.form["concentration"] != ""
+            float(self._form["concentration"])
+            if self._form["concentration"] != ""
             else None
         )
         self.mol_weight = (
-            float(request.form["molWeight"])
-            if request.form["molWeight"] != ""
-            else None
+            float(self._form["molWeight"]) if self._form["molWeight"] != "" else None
         )
 
-        self.hazard_codes = sanitise_user_input(request.form["hPhrase"])
-        self.smiles = sanitise_user_input(request.form["smiles"])
-        self.cas = sanitise_user_input(request.form["cas"])
+        self.hazard_codes = sanitise_user_input(self._form["hPhrase"])
+        self.smiles = sanitise_user_input(self._form["smiles"])
+        self.cas = sanitise_user_input(self._form["cas"])
         self.mol_weight = self._get_mol_weight()
         self.feedback = ""
         self.validation = ""
@@ -245,9 +256,9 @@ class NewNovelCompound:
 
     def _get_mol_weight(self) -> Optional[float]:
         """Gets molecular weight from the request form or calculate from smiles if not provided"""
-        if request.form["molWeight"] and request.form["molWeight"] != "":
-            return float(request.form["molWeight"])
-        elif request.form["smiles"] and Chem.MolFromSmiles(self.smiles):
+        if self._form["molWeight"] and self._form["molWeight"] != "":
+            return float(self._form["molWeight"])
+        elif self._form["smiles"] and Chem.MolFromSmiles(self.smiles):
             return services.all_compounds.mol_weight_from_smiles(self.smiles)
         else:
             return None
@@ -327,7 +338,7 @@ class NewNovelCompound:
         """
         Validates the CAS number from the request. Checks it fits the expected CAS pattern with a regular expression
         """
-        cas = sanitise_user_input(request.form["cas"])
+        cas = sanitise_user_input(self._form["cas"])
         if cas:
             cas_regex = r"^[0-9]{1,7}-\d{2}-\d$"
             if not re.findall(cas_regex, cas):
@@ -394,7 +405,7 @@ class NewNovelCompound:
         If the SMILES string is provided confirm that it can generate a structure in rdkit.
         Validation ignored for compounds drawn in the sketcher to prevent blocking users if there is issue with rdkit.
         """
-        if self.smiles and request.form["source"] != "sketcher":
+        if self.smiles and self._form["source"] != "sketcher":
             mol = Chem.MolFromSmiles(self.smiles)
             if mol is None:
                 self.feedback = (

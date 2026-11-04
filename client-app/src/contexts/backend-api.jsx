@@ -2,6 +2,7 @@ import {
   getAccountApi,
   // getCommentsApi,
   getFieldsApi,
+  getInventoryApi,
   // getLiteratureReviewsApi,
   // getNotesApi,
   // getPlansApi,
@@ -75,6 +76,7 @@ export const BackendApiProvider = ({ children }) => {
       // comments: getCommentsApi(baseContext),
       sections: getSectionsApi(baseContext),
       fields: getFieldsApi(baseContext),
+      inventory: getInventoryApi(baseContext),
     }),
     [baseContext],
   );
