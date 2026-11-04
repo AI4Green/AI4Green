@@ -14,7 +14,7 @@ from typing import Dict
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
-from sources import models, services
+from sources import models
 from sources.extensions import db
 from tests.populate_database import add_test_user
 from tests.utils import add_workgroup, login
@@ -41,7 +41,14 @@ def inventory_setup(app: Flask) -> Dict[str, int]:
         Ids the tests need: the main workbook's id.
     """
     with app.app_context():
-        pi = services.person.from_email("test_user@test.com")
+        # look up by username, not email: test_auth.py::test_update_email
+        # changes this user's email when the whole suite runs
+        pi = (
+            db.session.query(models.Person)
+            .join(models.User)
+            .filter(models.User.username == "test_username")
+            .one()
+        )
         senior = add_test_user(
             "inv_senior", "inv_senior@test.com", "Senior Tester", PASSWORD, True
         )
