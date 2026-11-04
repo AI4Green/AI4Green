@@ -314,7 +314,7 @@
 
                             <div id="addenda-content" class="row d-flex justify-content-left">
                                 <div class="col-md-8 col-lg-6">
-                                    <div id="addenda-cardholder" class="card shadow-0 border" style="background-color: #f0f2f5;">
+                                    <div id="addenda-cardholder" class="card shadow-0 border addenda-cardholder">
                                         {% if addenda %}
                                             {% for addendum in addenda %}
                                                 <div id="addendum-card{{ loop.index }}" class="card mb-4">
@@ -354,8 +354,8 @@
                                 <p>I provide my signature and confirm that to the best of my knowledge the contents of this reaction are accurate.</p>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="completeReaction()">Confirm</button>
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="completeReaction()">Confirm</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </div>
@@ -403,6 +403,7 @@
 
 <input type="hidden" value="{{ active_workgroup }}" id="js-active-workgroup">
 <input type="hidden" value="{{ active_workbook }}" id="js-active-workbook">
+<input type="hidden" value="{{ review }}" id="js-review">
 
 {{  tut.tutorial_macro() }}
 

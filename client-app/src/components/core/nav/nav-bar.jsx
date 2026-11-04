@@ -13,6 +13,8 @@ import {
   VStack,
   Flex,
   IconButton,
+  Image,
+  MenuDivider,
   Spacer,
   Icon,
 } from "@chakra-ui/react";
@@ -36,10 +38,12 @@ import {
   BsBoxArrowInRight,
   BsList,
   BsChevronDown,
+  BsExclamationDiamond,
 } from "react-icons/bs";
 // import { UpdateUserEmailModal } from "components/admin/user-management/modal/update-user-email";
 import { LoadingModal } from "components/core/loading-modal";
 import { navbarItems } from "config/navbar-items";
+import { BRAND_COLORS, PROJECT_TYPE_MANAGEMENT_PERMISSIONS } from "constants";
 import { useBackendApi, useUser } from "contexts";
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -173,20 +177,103 @@ const UserMenu = () => {
   );
 };
 
+// hover, keyboard focus and open-dropdown states share the green text and underline bar
+const navItemStyles = {
+  variant: "ghost",
+  size: "sm",
+  fontWeight: "normal",
+  color: BRAND_COLORS.textMuted,
+  _before: {
+    position: "absolute",
+    left: 0,
+    bottom: "-4px",
+    width: "100%",
+    height: "3px",
+    bg: BRAND_COLORS.green,
+    borderRadius: "1.5px",
+  },
+  _hover: {
+    bg: "transparent",
+    color: BRAND_COLORS.green,
+    _before: { content: '""' },
+  },
+  _focusVisible: {
+    color: BRAND_COLORS.green,
+    _before: { content: '""' },
+  },
+  _expanded: {
+    color: BRAND_COLORS.green,
+    _before: { content: '""' },
+  },
+  _active: { bg: "transparent" },
+};
+
+const menuListStyles = {
+  bg: "white",
+  color: BRAND_COLORS.navy,
+  borderColor: BRAND_COLORS.border,
+  borderRadius: "8px",
+  boxShadow: "0 8px 24px rgba(24, 36, 44, 0.08)",
+  py: 2,
+  minW: "250px",
+};
+
+const menuItemStyles = {
+  as: "a",
+  px: 6,
+  py: 2,
+  bg: "white",
+  color: BRAND_COLORS.navy,
+  _hover: {
+    bg: BRAND_COLORS.greenTint,
+    color: BRAND_COLORS.green,
+    fontWeight: "bold",
+  },
+  _focus: {
+    bg: BRAND_COLORS.greenTint,
+    color: BRAND_COLORS.green,
+    fontWeight: "bold",
+  },
+};
+
+const dangerMenuItemStyles = {
+  ...menuItemStyles,
+  color: BRAND_COLORS.danger,
+  _hover: { bg: BRAND_COLORS.dangerTint, color: BRAND_COLORS.danger },
+  _focus: { bg: BRAND_COLORS.dangerTint, color: BRAND_COLORS.danger },
+};
+
+const DropdownChevron = ({ isOpen }) => (
+  <BsChevronDown
+    style={{
+      transition: "transform 0.2s",
+      transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+    }}
+  />
+);
+
 const NavButton = ({ icon, href, children }) => (
-  <Button
-    as="a"
-    href={href}
-    variant="ghost"
-    color="white"
-    leftIcon={<Icon as={icon} />}
-    _hover={{ bg: "gray.700" }}
-    _active={{ bg: "gray.800" }}
-    size="sm"
-    fontWeight="normal"
-  >
+  <Button as="a" href={href} leftIcon={<Icon as={icon} />} {...navItemStyles}>
     {children}
   </Button>
+);
+
+const NavDropdown = ({ icon, label, children }) => (
+  <Menu>
+    {({ isOpen }) => (
+      <>
+        <MenuButton
+          as={Button}
+          leftIcon={<Icon as={icon} />}
+          rightIcon={<DropdownChevron isOpen={isOpen} />}
+          {...navItemStyles}
+        >
+          {label}
+        </MenuButton>
+        <MenuList {...menuListStyles}>{children}</MenuList>
+      </>
+    )}
+  </Menu>
 );
 
 export const NavBar = ({
@@ -201,8 +288,8 @@ export const NavBar = ({
   return (
     <Flex
       as="nav"
-      bg="#777778FF"
-      color="white"
+      bg="white"
+      color={BRAND_COLORS.textMuted}
       px={4}
       py={2}
       align="center"
@@ -210,132 +297,72 @@ export const NavBar = ({
       top={0}
       zIndex={1000}
       borderBottom="1px solid"
-      borderColor="gray.700"
-      boxShadow="sm"
+      borderColor={BRAND_COLORS.border}
+      boxShadow="0 2px 8px rgba(24, 36, 44, 0.04)"
     >
       {/* Mobile toggle */}
       {!fullMenu && (
         <IconButton
           icon={<BsList />}
           variant="ghost"
-          color="white"
+          color={BRAND_COLORS.navy}
           mr={2}
           aria-label="Toggle navigation"
         />
       )}
 
+      {/* served by Flask, like the logo in the footer */}
+      <Box as="a" href="/" mr={6} flexShrink={0}>
+        <Image
+          h="40px"
+          w="auto"
+          src="/static/img/AI4Green_logo_light_small.png"
+          alt="AI4Green home"
+        />
+      </Box>
+
       {/* Left nav */}
       {fullMenu && (
         <HStack spacing={1}>
-          <Button
-            as="a"
-            href="/"
-            variant="ghost"
-            color="white"
-            leftIcon={<Icon as={BsHouseDoorFill} />}
-          >
+          <NavButton icon={BsHouseDoorFill} href="/">
             Home
-          </Button>
-          <Button
-            as="a"
-            href="/demo"
-            variant="ghost"
-            color="white"
-            leftIcon={<Icon as={BsPencilSquare} />}
-            _hover={{ bg: "gray.700" }}
-            _active={{ bg: "gray.800" }}
-            size="sm"
-            fontWeight="normal"
-          >
+          </NavButton>
+          <NavButton icon={BsPencilSquare} href="/demo">
             Demo
-          </Button>
+          </NavButton>
 
-          {/* Solvents dropdown */}
-          <Menu>
-            {({ isOpen }) => (
-              <>
-                <MenuButton
-                  as={Button}
-                  variant="ghost"
-                  color="white"
-                  size="sm"
-                  leftIcon={<BsDropletFill />}
-                  rightIcon={
-                    <BsChevronDown
-                      style={{
-                        transition: "transform 0.2s",
-                        transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                      }}
-                    />
-                  }
-                  _hover={{ bg: "gray.700" }}
-                >
-                  Solvents
-                </MenuButton>
+          <NavDropdown icon={BsDropletFill} label="Solvents">
+            <MenuItem
+              icon={<BsJournalText />}
+              href="/solvent_guide"
+              {...menuItemStyles}
+            >
+              Solvent Guide
+            </MenuItem>
+            <MenuItem
+              icon={<BsSearch />}
+              href="/solvent_PCA"
+              {...menuItemStyles}
+            >
+              Solvent Surfer
+            </MenuItem>
+          </NavDropdown>
 
-                <MenuList bg="gray.900" color="white">
-                  <MenuItem
-                    as="a"
-                    href="/solvent_guide"
-                    bg="gray.900"
-                    color="white"
-                    _hover={{
-                      bg: "gray.700",
-                      textDecoration: "underline",
-                    }}
-                  >
-                    Solvent Guide
-                  </MenuItem>
-                  <MenuItem
-                    as="a"
-                    href="/solvent_PCA"
-                    bg="gray.900"
-                    color="white"
-                    _hover={{
-                      bg: "gray.700",
-                      textDecoration: "underline",
-                    }}
-                  >
-                    Solvent Surfer
-                  </MenuItem>
-                </MenuList>
-              </>
-            )}
-          </Menu>
-
-          <NavButton as="a" icon={BsArrowLeftRight} href="/retrosynthesis/">
+          <NavButton icon={BsArrowLeftRight} href="/retrosynthesis/">
             Retrosynthesis
           </NavButton>
 
-          {/* Workgroup dropdown */}
-          <Menu>
-            <MenuButton
-              as={Button}
-              color="white"
-              variant="ghost"
-              size="sm"
-              leftIcon={<BsPeopleFill />}
-            >
-              Workgroup
-            </MenuButton>
-            <MenuList bg="gray.900" color="white">
-              {workgroups.map((wg) => (
-                <MenuItem
-                  bg="gray.900"
-                  color="white"
-                  _hover={{
-                    bg: "gray.700",
-                    textDecoration: "underline",
-                  }}
-                  key={wg}
-                  as="a"
-                  href={`/workgroup/${wg}`}
-                >
-                  {wg}
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
+          <NavDropdown icon={BsPeopleFill} label="Workgroup">
+            {workgroups.map((wg) => (
+              <MenuItem
+                key={wg}
+                href={`/workgroup/${encodeURIComponent(wg)}`}
+                {...menuItemStyles}
+              >
+                {wg}
+              </MenuItem>
+            ))}
+          </NavDropdown>
 
           <NavButton icon={BsSearch} href="/search">
             Search
@@ -359,85 +386,77 @@ export const NavBar = ({
         </NavButton>
 
         {isAuthenticated ? (
-          <Menu>
-            <MenuButton
-              as={Button}
-              variant="ghost"
-              color="white"
-              leftIcon={<BsPersonCircle color="white" />}
-              rightIcon={
-                <BsChevronDown
-                  style={{
-                    transition: "transform 0.2s",
-                  }}
-                />
-              }
+          <NavDropdown icon={BsPersonCircle} label={user.userName}>
+            <MenuItem
+              icon={<BsBellFill />}
+              href="/notifications"
+              {...menuItemStyles}
             >
-              {user.userName}
-            </MenuButton>
-            <MenuList bg="gray.900" color="white">
+              Notifications
+            </MenuItem>
+            <MenuItem
+              icon={<BsGearFill />}
+              href="/manage_account"
+              {...menuItemStyles}
+            >
+              Manage Account
+            </MenuItem>
+            <MenuItem
+              icon={<BsEyeFill />}
+              href="/accessibility"
+              {...menuItemStyles}
+            >
+              Accessibility
+            </MenuItem>
+            <MenuItem
+              icon={<BsPeopleFill />}
+              href="/workgroup_membership_summary"
+              {...menuItemStyles}
+            >
+              Membership Summary
+            </MenuItem>
+            {/* COSHH pages are SPA routes, so navigate client side */}
+            <MenuItem
+              icon={<BsExclamationDiamond />}
+              {...menuItemStyles}
+              as={Link}
+              to="/my-coshh-forms"
+            >
+              My COSHH Forms
+            </MenuItem>
+            {/* only H&S Admins are given CreateProjectTypes by /api/users/me */}
+            {user.permissions?.includes(
+              PROJECT_TYPE_MANAGEMENT_PERMISSIONS.CreateProjectTypes,
+            ) && (
               <MenuItem
-                bg="gray.900"
-                color="white"
-                _hover={{
-                  bg: "gray.700",
-                  textDecoration: "underline",
-                }}
-                icon={<BsBellFill />}
+                icon={<BsExclamationDiamond />}
+                {...menuItemStyles}
+                as={Link}
+                to="/coshh-form-management"
               >
-                Notifications
+                Manage COSHH Templates
               </MenuItem>
+            )}
+            {user.role === "Admin" && (
               <MenuItem
-                bg="gray.900"
-                color="white"
-                _hover={{
-                  bg: "gray.700",
-                  textDecoration: "underline",
-                }}
-                icon={<BsGearFill />}
+                icon={<BsSpeedometer2 />}
+                href="/admin_dashboard"
+                {...menuItemStyles}
               >
-                Manage Account
+                Admin Dashboard
               </MenuItem>
-              <MenuItem
-                bg="gray.900"
-                color="white"
-                _hover={{
-                  bg: "gray.700",
-                  textDecoration: "underline",
-                }}
-                icon={<BsEyeFill />}
-              >
-                Accessibility
-              </MenuItem>
-              <MenuItem
-                bg="gray.900"
-                color="white"
-                _hover={{
-                  bg: "gray.700",
-                  textDecoration: "underline",
-                }}
-                icon={<BsPeopleFill />}
-              >
-                Membership Summary
-              </MenuItem>
-              {user.role === "Admin" && (
-                <MenuItem icon={<BsSpeedometer2 />}>Admin Dashboard</MenuItem>
-              )}
-              <MenuItem
-                bg="red"
-                color="white"
-                _hover={{
-                  bg: "gray.700",
-                  textDecoration: "underline",
-                }}
-                icon={<BsBoxArrowRight />}
-              >
-                Logout
-              </MenuItem>
-            </MenuList>
-          </Menu>
+            )}
+            <MenuDivider borderColor={BRAND_COLORS.border} />
+            <MenuItem
+              icon={<BsBoxArrowRight />}
+              href="/auth/logout"
+              {...dangerMenuItemStyles}
+            >
+              Logout
+            </MenuItem>
+          </NavDropdown>
         ) : (
-          <NavButton icon={BsBoxArrowInRight} to="/login">
+          <NavButton icon={BsBoxArrowInRight} href="/auth/login">
             Log in
           </NavButton>
         )}

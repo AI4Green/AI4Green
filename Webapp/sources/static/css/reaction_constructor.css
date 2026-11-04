@@ -53,9 +53,8 @@
   transform: translate(-50%, -50%);
   font-size: 60px;
 
-    color: #82f5a8;
+    color: var(--brand-green);
     animation: spin2 1s linear infinite;
-    -webkit-text-stroke: 2px #7c7d7c;/* White border around the flask icon */
 }
 
 @keyframes spin2 {
@@ -77,13 +76,13 @@
 .reaction-save-success{
     padding-right: 15px;
     display: inline;
-    color: white
+    color: var(--brand-green);
 }
 
 .reaction-save-failure{
     padding-right: 15px;
     display: inline;
-    color: white;
+    color: var(--brand-danger);
 }
 
 .reaction-save-hidden{
@@ -106,7 +105,7 @@ option {
 }
 
 datalist>option:hover, datalist>option.active {
-    border: 2px solid blue;
+    border: 2px solid var(--brand-green);
 }
 
 .loading-circle {
@@ -114,7 +113,7 @@ datalist>option:hover, datalist>option.active {
   height: 60px;
   border: 3px solid #ccc;
   border-radius: 50%;
-  border-top: 3px solid #007bff;
+  border-top: 3px solid var(--brand-green);
   animation: spin 1s linear infinite; /* The spin animation will rotate the circle */
 }
 
@@ -137,10 +136,28 @@ datalist>option:hover, datalist>option.active {
     width: 100%;
     height: 100%; /* full screen */
     min-height: 100px; /* Ensure it's visible if the table is empty */
-    background-image: url('http://i.stack.imgur.com/FhHRx.gif');
-    background-position: 50% 50%; /* centre */
     background-color: rgba(255, 255, 255, 0.8); /* transparency */
-    background-repeat: no-repeat;
+}
+
+/* spinner drawn in CSS, centred in the overlay */
+.loading-bar::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 48px;
+    height: 48px;
+    margin: -24px 0 0 -24px;
+    border: 4px solid var(--brand-green-tint);
+    border-top-color: var(--brand-green);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loading-bar::after {
+        animation-duration: 2.4s;
+    }
 }
 
 body.loading{ /* when body has loading class */
@@ -151,16 +168,16 @@ body.loading .loading-bar{
 }
 
 .reaction-header {
-  background: #f8f9fa;
-  border: 1px solid #e5e5e5;
+  background: var(--brand-surface);
+  border: 1px solid var(--brand-border);
   border-radius: 8px;
   padding: 10px 14px;
   margin-bottom: 15px;
 }
 
 .reaction-badge {
-    background-color: #777778;
-    color: #BDFFD0;
+    background-color: var(--brand-green);
+    color: #fff;
     font-weight: 600;
     padding: 0.45rem 0.7rem;
     border-radius: 6px;
@@ -176,9 +193,9 @@ body.loading .loading-bar{
     top: var(--navbar-height, 56px);
     z-index: 900;
     background: #fff;
-    padding: .75rem 0;
-    border-bottom: 1px solid #e9ecef;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    padding: .75rem 14px; /* keeps .reaction-header's side padding so the badge sits inside the box */
+    border-bottom: 1px solid var(--brand-border);
+    box-shadow: 0 2px 4px rgba(24, 36, 44, 0.04);
 }
 
 /* Offset anchored scroll targets so they don't hide under navbar + header */
@@ -192,26 +209,27 @@ body.loading .loading-bar{
     z-index: 1;
 }
 #reaction-sidenav .nav-link {
-    color: #495057;
+    color: var(--brand-text-muted);
     border-left: 3px solid transparent;
     padding: .5rem .9rem;
     border-radius: 0 .375rem .375rem 0;
     font-size: .92rem;
 }
 #reaction-sidenav .nav-link:hover {
-    background: #f1f4f9;
-    color: #0d6efd;
+    background: var(--brand-surface);
+    color: var(--brand-green);
+    text-decoration: underline;
 }
 #reaction-sidenav .nav-link.active {
-    color: var(--tertiary-green);
-    border-left-color: #0d6efd;
-    background: var(--primary-grey);
+    color: var(--brand-green);
+    border-left-color: var(--brand-green);
+    background: var(--brand-green-tint);
     font-weight: 600;
 }
 
 /* ---- Section cards ---- */
 .reaction-section-card {
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--brand-border);
     border-radius: .6rem;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
@@ -219,7 +237,7 @@ body.loading .loading-bar{
 .reaction-section-card > .card-header {
     background: #fff;
     padding: 0;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--brand-border);
 }
 .reaction-section-card > .card-header .section-toggle {
     width: 100%;
@@ -227,15 +245,24 @@ body.loading .loading-bar{
     padding: 1rem 1.25rem;
     font-size: 1.05rem;
     font-weight: 600;
-    color: #212529;
+    color: var(--brand-navy);
+    background: transparent;
+    border: 0;
     text-decoration: none;
     display: flex;
+    transition: background-color .2s ease, color .2s ease;
     align-items: center;
     justify-content: space-between;
 }
-.reaction-section-card > .card-header .section-toggle:hover {
-    color: #0d6efd;
+.reaction-section-card > .card-header .section-toggle:hover,
+.reaction-section-card > .card-header .section-toggle:focus-visible {
+    color: var(--brand-green);
+    background: var(--brand-surface);
     text-decoration: none;
+}
+/* underline the title, not the chevron, for WCAG hover cues like the buttons */
+.reaction-section-card > .card-header .section-toggle:hover > span {
+    text-decoration: underline;
 }
 .reaction-section-card .section-toggle .bi-chevron-down {
     transition: transform .2s ease;
@@ -246,12 +273,12 @@ body.loading .loading-bar{
 
 /* ---- Subsections (inside Reaction Notes / Results) ---- */
 .subsection-card {
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--brand-border);
     border-radius: .5rem;
     margin-bottom: 1rem;
 }
 .subsection-header {
-    background: #f8f9fa;
+    background: var(--brand-surface);
     padding: .65rem 1rem;
     border-radius: .5rem .5rem 0 0;
     display: flex;
@@ -261,6 +288,7 @@ body.loading .loading-bar{
 .subsection-header h6 {
     margin: 0;
     font-weight: 600;
+    color: var(--brand-navy);
 }
 .subsection-body {
     padding: 1rem;
@@ -269,4 +297,9 @@ body.loading .loading-bar{
     color: #adb5bd;
     font-style: italic;
     font-size: .9rem;
+}
+
+/* the box holding reaction addenda */
+.addenda-cardholder {
+    background-color: var(--brand-surface);
 }

@@ -1,5 +1,6 @@
 from flask import (
     Response,
+    abort,
     current_app,
     flash,
     jsonify,
@@ -138,6 +139,12 @@ def review_reaction_approve() -> Response:
             }
         )
 
+    if (
+        approval_request.status.value != "PENDING"
+        or current_user.Person not in approval_request.required_approvers
+    ):
+        abort(403)
+
     request_status = services.reaction.ReactionApprovalRequestResponse(approval_request)
     request_status.approve()
 
@@ -165,6 +172,12 @@ def review_reaction_reject() -> Response:
                 "redirect_url": url_for("main.index"),
             }
         )
+
+    if (
+        approval_request.status.value != "PENDING"
+        or current_user.Person not in approval_request.required_approvers
+    ):
+        abort(403)
 
     request_status = services.reaction.ReactionApprovalRequestResponse(approval_request)
     request_status.reject(request.json.get("comments"))
@@ -196,6 +209,12 @@ def review_reaction_suggest_changes() -> Response:
                 "redirect_url": url_for("main.index"),
             }
         )
+
+    if (
+        approval_request.status.value != "PENDING"
+        or current_user.Person not in approval_request.required_approvers
+    ):
+        abort(403)
 
     request_status = services.reaction.ReactionApprovalRequestResponse(approval_request)
     request_status.suggest_changes(request.json.get("comments"))
