@@ -22,7 +22,7 @@ from sources import models, services
 from sources.extensions import db
 from sources.services import cheminventory
 from tests.populate_database import add_test_user
-from tests.utils import add_workgroup, login
+from tests.utils import add_workgroup, login, main_test_person
 
 WORKGROUP = "ChemInventory-Workgroup"
 OTHER_WORKGROUP = "ChemInventory-Other"
@@ -171,7 +171,7 @@ def cheminventory_setup(app: Flask) -> Dict[str, int]:
         The main workgroup's id.
     """
     with app.app_context():
-        pi = services.person.from_email("test_user@test.com")
+        pi = main_test_person()
         senior = add_test_user(
             "ci_senior", "ci_senior@test.com", "CI Senior", PASSWORD, True
         )

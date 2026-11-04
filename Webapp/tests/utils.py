@@ -25,6 +25,25 @@ def login(
         assert "_user_id" in session, "user should be logged in"
 
 
+def main_test_person() -> models.Person:
+    """
+    Returns the Person for the main test user from tests/populate_database.py.
+
+    Looks the user up by username rather than email, because
+    test_auth.py::test_update_email changes this user's email when the
+    whole suite runs.
+
+    Returns:
+        The main test user's Person.
+    """
+    return (
+        db.session.query(models.Person)
+        .join(models.User)
+        .filter(models.User.username == "test_username")
+        .one()
+    )
+
+
 def assert_expected_values(actual_data: Dict, expected_data: Dict):
     for key, expected_value in expected_data.items():
         assert (
