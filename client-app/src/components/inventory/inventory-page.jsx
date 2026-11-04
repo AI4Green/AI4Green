@@ -1,51 +1,55 @@
-import { Flex, Grid, HStack, Text } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
+import { useChemInventoryConnection, useWorkgroupInventory } from "api";
 import { useMemo, useState } from "react";
 import { Link as RouterLink, useParams } from "react-router-dom";
-import { useWorkgroupInventory } from "api";
-import { daysUntil, EXPIRY_WARNING_DAYS, summarise } from "./utils.jsx";
-import InventoryFilters from "./inventory-filters.jsx";
-import CompoundTable from "./compound-table.jsx";
-import ContainersTable from "./containers-table.jsx";
+import InventoryBrowser from "./inventory-browser.jsx";
+import { SegmentButton } from "./inventory-filters.jsx";
+import ChemInventoryView from "./cheminventory-view.jsx";
+import { ChemInventoryModal } from "./cheminventory-modal.jsx";
 import { AddStockModal } from "./add-stock-modal.jsx";
 import { HistoryDrawer } from "./history-drawer.jsx";
 import { AdjustModal, DisposeModal, MoveModal } from "./item-modals.jsx";
-import {
-  Card,
-  EmptyState,
-  INV,
-  InvButton,
-  InvPage,
-  MOBILE,
-  Muted,
-} from "./ui.jsx";
+import { INV, InvButton, InvPage } from "./ui.jsx";
 
-/** Summary tile with a label and a large figure. */
-const StatCard = ({ label, value, unit }) => (
-  <Card px="20px" py="16px">
-    <Muted>{label}</Muted>
-    <Text fontSize="28px" fontWeight={600}>
-      {value}{" "}
-      {unit && (
-        <Text as="span" fontSize="14px" fontWeight={400} color={INV.muted}>
-          {unit}
-        </Text>
-      )}
-    </Text>
-  </Card>
-);
-
-const PAGE_SIZE = 10;
-const INITIAL_FILTERS = {
-  search: "",
-  location: "",
-  supplier: "",
-  status: "",
-  showArchived: false,
+const SOURCES = {
+  ai4green: "ai4green",
+  chemInventory: "cheminventory",
 };
 
 /**
+ * Switches between the AI4Green inventory and the workgroup's ChemInventory.
+ * @param {object} props
+ * @param {string} props.source The selected source.
+ * @param {(source: string) => void} props.onChange Called with the new source.
+ */
+const SourceToggle = ({ source, onChange }) => (
+  <Flex role="group" aria-label="Inventory source">
+    <SegmentButton
+      position="first"
+      isPressed={source === SOURCES.ai4green}
+      onClick={() => onChange(SOURCES.ai4green)}
+    >
+      AI4Green
+    </SegmentButton>
+    <SegmentButton
+      position="last"
+      isPressed={source === SOURCES.chemInventory}
+      borderLeftWidth={source === SOURCES.ai4green ? "1px" : 0}
+      borderLeftColor={source === SOURCES.ai4green ? INV.accent : undefined}
+      onClick={() => onChange(SOURCES.chemInventory)}
+    >
+      ChemInventory
+    </SegmentButton>
+  </Flex>
+);
+
+/**
  * Workgroup inventory page, routed at /inventory/:workgroupName.
- * Loading is handled by the surrounding Suspense boundary.
+ * Shows the AI4Green inventory, or, when the server has ChemInventory set up,
+ * a search of the workgroup's ChemInventory stock.
+ * Loading the AI4Green inventory is handled by the surrounding Suspense
+ * boundary; the ChemInventory connection loads separately so it can't hold
+ * the page up.
  */
 export default function InventoryPage() {
   const { workgroupName } = useParams();
@@ -55,11 +59,14 @@ export default function InventoryPage() {
   // backend enforces this too; here it just hides actions that would fail.
   const { canEdit } = inventory.permissions;
 
-  const [filters, setFilters] = useState(INITIAL_FILTERS);
-  const [view, setView] = useState("compound"); // compound | containers
-  const [page, setPage] = useState(0);
+  const { data: connection, mutate: mutateConnection } =
+    useChemInventoryConnection(workgroupName);
+  const showSourceToggle = Boolean(connection?.available);
+  const [source, setSource] = useState(SOURCES.ai4green);
+  const isChemInventory = showSourceToggle && source === SOURCES.chemInventory;
+
   // The open modal or drawer, or null. `type` is an item action (adjust |
-  // move | dispose | history), addContainer or addStock.
+  // move | dispose | history), addContainer, addStock or chemInventory.
   const [dialog, setDialog] = useState(null);
 
   // The compound each container belongs to, so item actions can show its name
@@ -68,104 +75,19 @@ export default function InventoryPage() {
     [data],
   );
 
-  const updateFilters = (next) => {
-    setFilters(next);
-    setPage(0);
-  };
-  const updateView = (next) => {
-    setView(next);
-    setPage(0);
-  };
-
-  // Options for the filter dropdowns
-  const { locations, suppliers } = useMemo(() => {
-    const items = data.flatMap((wc) => wc.items);
-    const uniq = (values) => [...new Set(values.filter(Boolean))].sort();
-    return {
-      locations: uniq(items.map((i) => i.location.name)),
-      suppliers: uniq(items.map((i) => i.supplier)),
-    };
-  }, [data]);
-
-  // Headline numbers, always for the whole workgroup (not the filtered view)
-  const stats = useMemo(() => {
-    const summaries = data.map(summarise);
-    return {
-      containers: summaries.reduce((n, s) => n + s.containerCount, 0),
-      lowStock: summaries.filter((s) => s.belowMin).length,
-      expiring: summaries.reduce((n, s) => n + s.expiring + s.expired, 0),
-    };
-  }, [data]);
-
-  // Apply search and filters. Totals come from the full compound; only the
-  // containers shown in the expanded row are narrowed by item-level filters.
-  const rows = useMemo(() => {
-    const q = filters.search.trim().toLowerCase();
-    const itemFilterOn = Boolean(filters.location || filters.supplier);
-
-    return data
-      .map((wc) => ({
-        wc,
-        summary: summarise(wc),
-        items: wc.items.filter(
-          (i) =>
-            (filters.showArchived || !i.isArchived) &&
-            (!filters.location || i.location.name === filters.location) &&
-            (!filters.supplier || i.supplier === filters.supplier),
-        ),
-      }))
-      .filter(({ wc, summary, items }) => {
-        if (itemFilterOn && items.length === 0) return false;
-        if (filters.status === "low" && !summary.belowMin) return false;
-        if (
-          filters.status === "expiring" &&
-          summary.expiring + summary.expired === 0
-        ) {
-          return false;
-        }
-        if (q) {
-          const inCompound =
-            wc.compound.name.toLowerCase().includes(q) ||
-            wc.compound.cas.includes(q);
-          const inItems = wc.items.some((i) =>
-            [i.lotNumber, i.barcode].some(
-              (v) => v && v.toLowerCase().includes(q),
-            ),
-          );
-          if (!inCompound && !inItems) return false;
-        }
-        return true;
-      });
-  }, [data, filters]);
-
-  const flatItems = useMemo(
-    () =>
-      rows.flatMap(({ wc, items }) =>
-        items
-          .filter(
-            (i) => filters.status !== "expiring" || isExpiringOrExpired(i),
-          )
-          .map((i) => ({
-            ...i,
-            compoundName: wc.compound.name,
-            cas: wc.compound.cas,
-          })),
-      ),
-    [rows, filters.status],
-  );
-
-  const list = view === "compound" ? rows : flatItems;
-  const total = list.length;
-  const start = page * PAGE_SIZE;
-  const pageList = list.slice(start, start + PAGE_SIZE);
-  const noun = view === "compound" ? "compounds" : "containers";
-
   // action is one of: adjust | move | dispose | history
   const handleItemAction = (action, item) =>
     setDialog({ type: action, item, wc: compoundByItemId.get(item.id) });
   const handleAddContainer = (wc) => setDialog({ type: "addContainer", wc });
   const handleAddStock = () => setDialog({ type: "addStock" });
+  const handleOpenChemInventorySettings = () =>
+    setDialog({ type: "chemInventory" });
   const closeDialog = () => setDialog(null);
+
+  const handleChemInventoryChanged = async (isConnected) => {
+    await mutateConnection();
+    if (isConnected) setSource(SOURCES.chemInventory);
+  };
 
   // props shared by the modals and drawer for a single container
   const itemDialogProps = dialog?.item && {
@@ -180,85 +102,47 @@ export default function InventoryPage() {
       breadcrumb={`Workgroups / ${workgroupName}`}
       title="Inventory"
       actions={
-        <>
-          <InvButton as={RouterLink} to="locations">
-            Manage locations
-          </InvButton>
-          {canEdit && (
-            <InvButton primary onClick={handleAddStock}>
-              + Add stock
+        isChemInventory ? (
+          connection.canManage && (
+            <InvButton onClick={handleOpenChemInventorySettings}>
+              ChemInventory settings
             </InvButton>
-          )}
-        </>
+          )
+        ) : (
+          <>
+            <InvButton as={RouterLink} to="locations">
+              Manage locations
+            </InvButton>
+            {canEdit && (
+              <InvButton primary onClick={handleAddStock}>
+                + Add stock
+              </InvButton>
+            )}
+          </>
+        )
       }
     >
-      <Grid
-        as="section"
-        aria-label="Summary"
-        templateColumns="repeat(3, 1fr)"
-        gap="16px"
-        sx={{ [MOBILE]: { gridTemplateColumns: "1fr" } }}
-      >
-        <StatCard label="Containers in stock" value={stats.containers} />
-        <StatCard label="Low stock" value={stats.lowStock} unit="compounds" />
-        <StatCard
-          label={`Expiring within ${EXPIRY_WARNING_DAYS} days`}
-          value={stats.expiring}
-          unit="containers"
+      {showSourceToggle && (
+        <SourceToggle source={source} onChange={setSource} />
+      )}
+
+      {isChemInventory ? (
+        <ChemInventoryView
+          // a new connection may search a different inventory, so start afresh
+          key={connection.connectedAt ?? "not-connected"}
+          workgroupName={workgroupName}
+          connection={connection}
+          onOpenSettings={handleOpenChemInventorySettings}
         />
-      </Grid>
-
-      <InventoryFilters
-        filters={filters}
-        onChange={updateFilters}
-        locations={locations}
-        suppliers={suppliers}
-        view={view}
-        onViewChange={updateView}
-      />
-
-      <Card overflowX="auto">
-        {total === 0 && <EmptyState>No stock matches your search.</EmptyState>}
-        {total > 0 && (
-          <>
-            {view === "compound" ? (
-              <CompoundTable
-                rows={pageList}
-                canEdit={canEdit}
-                onItemAction={handleItemAction}
-                onAddContainer={handleAddContainer}
-              />
-            ) : (
-              <ContainersTable
-                items={pageList}
-                showCompound
-                canEdit={canEdit}
-                onItemAction={handleItemAction}
-              />
-            )}
-            <Flex justify="space-between" align="center" px="14px" py="12px">
-              <Muted as="span">
-                Showing {start + 1} to {Math.min(start + PAGE_SIZE, total)} of{" "}
-                {total} {noun}
-              </Muted>
-              <HStack spacing="8px">
-                <InvButton
-                  isDisabled={page === 0}
-                  onClick={() => setPage(page - 1)}
-                >
-                  Previous
-                </InvButton>
-                <InvButton
-                  isDisabled={start + PAGE_SIZE >= total}
-                  onClick={() => setPage(page + 1)}
-                >
-                  Next
-                </InvButton>
-              </HStack>
-            </Flex>
-          </>
-        )}
-      </Card>
+      ) : (
+        <InventoryBrowser
+          key="ai4green"
+          compounds={data}
+          canEdit={canEdit}
+          onItemAction={handleItemAction}
+          onAddContainer={handleAddContainer}
+        />
+      )}
 
       {dialog?.type === "adjust" && <AdjustModal {...itemDialogProps} />}
       {dialog?.type === "move" && (
@@ -276,11 +160,14 @@ export default function InventoryPage() {
           onClose={closeDialog}
         />
       )}
+      {dialog?.type === "chemInventory" && connection && (
+        <ChemInventoryModal
+          workgroupName={workgroupName}
+          connection={connection}
+          onChanged={handleChemInventoryChanged}
+          onClose={closeDialog}
+        />
+      )}
     </InvPage>
   );
-}
-
-function isExpiringOrExpired(item) {
-  const d = daysUntil(item.expiryDate);
-  return d !== null && d <= EXPIRY_WARNING_DAYS;
 }
