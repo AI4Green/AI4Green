@@ -277,7 +277,7 @@ def test_key_rotation(app: Flask, client: FlaskClient, monkeypatch: pytest.Monke
     monkeypatch.setitem(
         app.config,
         "CHEMINVENTORY_ENCRYPTION_KEY",
-        f"{new_key},{ENCRYPTION_KEY}",  # noqa: E231
+        f"{new_key},{ENCRYPTION_KEY}",
     )
     assert _search(client).status_code == 200
 
