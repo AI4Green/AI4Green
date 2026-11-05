@@ -41,6 +41,12 @@ export const describeError = async (error) => {
     const detail = await readErrorMessage(error.response);
     return detail ?? "Check the details and try again.";
   }
+  // ChemInventory: not connected (409), unreachable or refusing (502), or not
+  // set up on this server (503). The backend writes these messages for users.
+  if (status === 409 || status === 502 || status === 503) {
+    const detail = await readErrorMessage(error.response);
+    if (detail) return detail;
+  }
   return "Something went wrong. Please try again.";
 };
 

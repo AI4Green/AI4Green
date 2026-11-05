@@ -17,7 +17,7 @@ from flask.testing import FlaskClient
 from sources import models
 from sources.extensions import db
 from tests.populate_database import add_test_user
-from tests.utils import add_workgroup, login
+from tests.utils import add_workgroup, login, main_test_person
 
 WORKGROUP = "Inventory-Workgroup"
 OTHER_WORKGROUP = "Inventory-Other"
@@ -41,14 +41,7 @@ def inventory_setup(app: Flask) -> Dict[str, int]:
         Ids the tests need: the main workbook's id.
     """
     with app.app_context():
-        # look up by username, not email: test_auth.py::test_update_email
-        # changes this user's email when the whole suite runs
-        pi = (
-            db.session.query(models.Person)
-            .join(models.User)
-            .filter(models.User.username == "test_username")
-            .one()
-        )
+        pi = main_test_person()
         senior = add_test_user(
             "inv_senior", "inv_senior@test.com", "Senior Tester", PASSWORD, True
         )

@@ -17,31 +17,35 @@ import {
   Text,
   Th,
 } from "@chakra-ui/react";
+import { BRAND_COLORS } from "constants";
 
 /*
- * Shared styling for the inventory page. Colours and sizes are taken from the
- * original inventory.css mockup. Variants and sizes are always set explicitly
- * so the page doesn't shift if the app theme's defaults change.
+ * Shared styling for the inventory pages, in the 2026 brand (BRAND_COLORS,
+ * which mirrors Flask's base.css and buttons.css). Sizes come from the original
+ * inventory.css mockup. Variants and sizes are always set explicitly so the
+ * page doesn't shift if the app theme's defaults change.
  */
 
 export const INV = {
-  accent: "#17543d",
-  accentHover: "#0f3d2c",
-  accentSoft: "#e3f1ea",
-  ink: "#1b2a24",
-  muted: "#56665e",
-  line: "#dce3de",
-  lineStrong: "#c4cfc8",
+  accent: BRAND_COLORS.green,
+  accentHover: BRAND_COLORS.greenHover,
+  accentSoft: BRAND_COLORS.greenTint,
+  ink: BRAND_COLORS.navy,
+  inkHover: BRAND_COLORS.navyHover,
+  muted: BRAND_COLORS.textMuted,
+  line: BRAND_COLORS.border,
+  lineStrong: "#c9d0d5",
   // borders of interactive controls; the lightest shade in this palette with
   // 3:1 contrast against every background they sit on (WCAG 1.4.11)
-  control: "#7e8c84",
-  rowLine: "#e8ede9",
-  bg: "#f6f7f4",
-  rowOpen: "#fafbf9",
-  sub: "#f1f5f2",
-  subLine: "#e1e8e3",
-  danger: "#8a2a1b",
-  dangerHover: "#6e2115",
+  control: "#7b8790",
+  rowLine: "#edf0ee",
+  bg: BRAND_COLORS.surface,
+  rowOpen: "#fbfcfb",
+  sub: "#f3f6f2",
+  subLine: BRAND_COLORS.border,
+  danger: BRAND_COLORS.danger,
+  dangerHover: BRAND_COLORS.dangerHover,
+  dangerSoft: BRAND_COLORS.dangerTint,
 };
 
 // replaces Chakra's box-shadow focus ring with the mockup's outline
@@ -93,15 +97,16 @@ const SOLID = {
 };
 
 /**
- * Outlined button, or a solid button with `primary` (accent) or `danger` (red).
+ * Button in the brand's styles: white with a navy outline by default (like
+ * .btn-secondary), or solid green with `primary` or solid red with `danger`.
  * @param {object} props
- * @param {boolean} [props.primary] Use the solid accent style.
+ * @param {boolean} [props.primary] Use the solid green style.
  * @param {boolean} [props.danger] Use the solid red style, for destructive actions.
  */
 export const InvButton = ({ primary = false, danger = false, ...props }) => {
   const solid = danger ? SOLID.danger : primary ? SOLID.primary : null;
   const bg = solid ? solid.bg : "white";
-  const borderColor = solid ? solid.bg : INV.control;
+  const borderColor = solid ? solid.bg : INV.ink;
   return (
     <Button
       {...bareButton}
@@ -112,11 +117,11 @@ export const InvButton = ({ primary = false, danger = false, ...props }) => {
       bg={bg}
       color={solid ? "white" : INV.ink}
       fontSize="14px"
-      fontWeight={solid ? 500 : 400}
+      fontWeight={500}
       _disabled={{ opacity: 0.5, cursor: "default" }}
       _hover={{
-        bg: solid ? solid.hover : INV.sub,
-        borderColor: solid ? solid.hover : INV.accent,
+        bg: solid ? solid.hover : INV.accentSoft,
+        borderColor: solid ? solid.hover : INV.ink,
         ...underline,
         _disabled: { bg, borderColor, textDecoration: "none" },
       }}
@@ -319,11 +324,12 @@ export const EmptyState = (props) => (
   />
 );
 
+// every pair has at least 4.5:1 text contrast (WCAG 1.4.3)
 const TONES = {
-  ok: { bg: "#e3f1ea", color: "#17543d" },
+  ok: { bg: INV.accentSoft, color: INV.accentHover },
   low: { bg: "#fff1d6", color: "#7a4b00" },
-  exp: { bg: "#fce6e1", color: "#8a2a1b" },
-  muted: { bg: "#eceeed", color: "#4a5750" },
+  exp: { bg: INV.dangerSoft, color: INV.danger },
+  muted: { bg: "#eceff1", color: INV.muted },
 };
 
 /**
@@ -358,7 +364,7 @@ export const HazardTag = (props) => (
     borderColor={INV.lineStrong}
     borderRadius="4px"
     fontSize="11px"
-    color="#3c4c44"
+    color={INV.ink}
     {...props}
   />
 );

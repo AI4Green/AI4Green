@@ -40,10 +40,11 @@ const Field = ({ id, label, grow = false, children }) => (
 );
 
 /**
- * One half of the "By compound / All containers" toggle. The selected half is
- * underlined as well as coloured, so the state doesn't rely on colour alone.
+ * One half of a two-way toggle, such as "By compound / All containers". The
+ * selected half is underlined as well as coloured, so the state doesn't rely
+ * on colour alone.
  */
-const SegmentButton = ({ isPressed, position, ...props }) => (
+export const SegmentButton = ({ isPressed, position, ...props }) => (
   <Button
     variant="unstyled"
     display="inline-flex"
