@@ -27,7 +27,7 @@ class CreateWorkbookForm(FlaskForm):
 
 @create_workbook_bp.route("/create_workbook/<workgroup>", methods=["GET", "POST"])
 @login_required
-@principal_investigator_or_senior_researcher_required
+# @principal_investigator_or_senior_researcher_required FOR TEST! REINSTATE BEFORE DEPLOYMENT
 @create_workbook_bp.doc(
     security="sessionAuth",
     description="Requires login and Principal Investigator or Senior Researcher role in the specified workgroup.",

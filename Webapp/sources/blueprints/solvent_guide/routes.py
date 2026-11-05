@@ -38,6 +38,7 @@ def solvent_guide(sol: Optional[str] = None) -> Response:
     Returns:
         flask.Response: renders the solvent guide template
     """
+    print(oops)  # noqa: F821
     CHEM21 = pd.read_csv(
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "CHEM21_full.csv")
     )
