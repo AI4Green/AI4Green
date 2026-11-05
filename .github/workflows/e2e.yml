@@ -2,6 +2,9 @@ name: E2E (Playwright)
 
 on: [pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   e2e:
     # pinned: Playwright only supports specific Ubuntu releases, and ubuntu-latest
