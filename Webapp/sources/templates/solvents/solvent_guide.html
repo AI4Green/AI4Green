@@ -19,7 +19,7 @@
         <div class="collapse" id="collapse{{ loop.index }}">
           {% for solvent in solvents %}
           {% if solvent["Family"] == family %}
-          <button id="solvent{{ loop.index }}" class="my-0 py-1 pl-5 btn btn-link" style="white-space: normal; text-align: left" data-toggle="list" onclick="showTab({{ solvent['Number'] }}, 'no')">{{ solvent["Solvent"] }}</button>
+          <button id="solvent{{ loop.index }}" class="my-0 py-1 pl-5 btn btn-link" style="white-space: normal; text-align: left" onclick="showTab({{ solvent['Number'] }}, 'no')">{{ solvent["Solvent"] }}</button>
           <br>
           {% endif %}
           {% endfor %}

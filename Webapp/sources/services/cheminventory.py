@@ -184,7 +184,7 @@ def encrypt_token(workgroup_id: int, token: str) -> str:
         The encrypted token, as text.
     """
     newest_key = _encryption_keys()[0]
-    return newest_key.encrypt(f"{workgroup_id}:{token}".encode()).decode()  # noqa: E231
+    return newest_key.encrypt(f"{workgroup_id}:{token}".encode()).decode()
 
 
 def decrypt_token(workgroup_id: int, encrypted_token: str) -> str:
@@ -741,11 +741,7 @@ def _group_by_location(raw_containers: List[Dict[str, Any]]) -> List[Dict[str, A
     for raw in raw_containers:
         location_id = _as_int(raw.get("location"))
         name = _truncate(raw.get("locationtext"), 255) or "Unknown location"
-        key = (
-            f"id:{location_id}"  # noqa: E231
-            if location_id is not None
-            else f"name:{name}"  # noqa: E231
-        )
+        key = f"id:{location_id}" if location_id is not None else f"name:{name}"
         if key not in locations:
             locations[key] = {
                 "id": location_id,
