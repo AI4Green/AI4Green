@@ -16,7 +16,7 @@ import re
 from collections import defaultdict
 from datetime import date
 from decimal import Decimal
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 from flask_login import current_user
 from sources import models, services
@@ -276,6 +276,51 @@ def _hazard_codes(hphrase: Optional[str]) -> List[str]:
     return [code for code in codes if HAZARD_CODE_PATTERN.fullmatch(code)]
 
 
+def _hazard_statements(codes: Iterable[str]) -> Dict[str, str]:
+    """
+    Looks up the hazard statements for some H-codes in one query.
+
+    Args:
+        codes: H-codes, e.g. from _hazard_codes. Duplicates are fine.
+
+    Returns:
+        Each code's statement (e.g. `{"H225": "Highly flammable liquid and
+        vapour"}`). Codes missing from the HazardCode table are left out.
+    """
+    unique_codes = set(codes)
+    if not unique_codes:
+        return {}
+    rows = (
+        db.session.query(models.HazardCode.code, models.HazardCode.phrase)
+        .filter(models.HazardCode.code.in_(unique_codes))
+        .all()
+    )
+    return {code: phrase for code, phrase in rows}
+
+
+def _serialise_hazards(
+    chemical: Chemical, statements: Dict[str, str]
+) -> Dict[str, Any]:
+    """
+    A chemical's hazards as the front end uses them.
+
+    Args:
+        chemical: The compound or novel compound.
+        statements: Hazard statements by H-code, from _hazard_statements.
+
+    Returns:
+        `hazards` (its H-codes) and `hazardStatements` (the statement for each
+        of those codes that has one).
+    """
+    codes = _hazard_codes(chemical.hphrase)
+    return {
+        "hazards": codes,
+        "hazardStatements": {
+            code: statements[code] for code in codes if code in statements
+        },
+    }
+
+
 def _iso(value: Optional[date]) -> Optional[str]:
     """Formats an optional date or datetime as ISO 8601."""
     return value.isoformat() if value else None
@@ -319,11 +364,23 @@ def serialise_item(item: models.InventoryItem, today: date) -> Dict[str, Any]:
 
 
 def _serialise_workgroup_compound(
-    wc: models.WorkgroupCompound, items: List[models.InventoryItem], today: date
+    wc: models.WorkgroupCompound,
+    items: List[models.InventoryItem],
+    today: date,
+    hazard_statements: Dict[str, str],
 ) -> Dict[str, Any]:
     """
     A compound the workgroup holds, with its containers. The total only counts
     active containers in the threshold unit, as there's no unit conversion.
+
+    Args:
+        wc: The workgroup compound.
+        items: Its containers.
+        today: The date used to flag expired and expiring containers.
+        hazard_statements: Hazard statements by H-code, from _hazard_statements.
+
+    Returns:
+        The compound, its stock summary and its containers.
     """
     chemical = wc.chemical
     total = sum(
@@ -339,7 +396,7 @@ def _serialise_workgroup_compound(
         "compound": {
             "name": chemical.name,
             "cas": chemical.cas or "",
-            "hazards": _hazard_codes(chemical.hphrase),
+            **_serialise_hazards(chemical, hazard_statements),
             "isNovel": wc.novel_compound_id is not None,
         },
         "preferredSupplier": wc.preferred_supplier,
@@ -363,12 +420,13 @@ def serialise_chemical(
     is_novel = isinstance(chemical, models.NovelCompound)
     held = _find_workgroup_compound(workgroup, chemical)
     workbook = db.session.get(models.WorkBook, chemical.workbook) if is_novel else None
+    hazard_statements = _hazard_statements(_hazard_codes(chemical.hphrase))
     return {
         "source": "novel" if is_novel else "compound",
         "id": chemical.id,
         "name": chemical.name,
         "cas": chemical.cas or "",
-        "hazards": _hazard_codes(chemical.hphrase),
+        **_serialise_hazards(chemical, hazard_statements),
         "workbook": workbook.name if workbook else None,
         "workgroupCompoundId": held.id if held else None,
     }
@@ -429,8 +487,16 @@ def get_inventory(workgroup: models.WorkGroup) -> Dict[str, Any]:
     for item in items:
         items_by_compound[item.workgroup_compound_id].append(item)
 
+    # one query for every compound's hazard statements, rather than one each
+    hazard_statements = _hazard_statements(
+        code
+        for wc in workgroup_compounds
+        for code in _hazard_codes(wc.chemical.hphrase)
+    )
     compounds = [
-        _serialise_workgroup_compound(wc, items_by_compound[wc.id], today)
+        _serialise_workgroup_compound(
+            wc, items_by_compound[wc.id], today, hazard_statements
+        )
         for wc in workgroup_compounds
     ]
     compounds.sort(key=lambda c: c["compound"]["name"].lower())

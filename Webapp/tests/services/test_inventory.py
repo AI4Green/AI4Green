@@ -293,6 +293,10 @@ def test_lookup_by_cas_and_name(client: FlaskClient, inventory_setup):
     assert by_cas.json["status"] == "found"
     assert by_cas.json["compound"]["name"] == COMPOUND_NAME
     assert by_cas.json["compound"]["hazards"] == ["H900", "H901"]
+    assert by_cas.json["compound"]["hazardStatements"] == {
+        "H900": "Caution testing",
+        "H901": "May cause tests",
+    }
 
     by_name = _lookup(client, COMPOUND_NAME.lower())
     assert by_name.json["compound"]["cas"] == COMPOUND_CAS

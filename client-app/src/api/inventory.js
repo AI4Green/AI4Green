@@ -61,8 +61,9 @@ export const getInventoryApi = ({ api }) => ({
    * - `{ status: "not_found", suggestions }`: a name with no exact match, and
    *   up to a few similar compound names
    * `compound` is `{ source: "compound" | "novel", id, name, cas, hazards,
-   * workbook, workgroupCompoundId }`; `workbook` is set for novel compounds and
-   * `workgroupCompoundId` when the workgroup already holds the compound.
+   * hazardStatements, workbook, workgroupCompoundId }`; `hazardStatements`
+   * maps each H-code to its statement, `workbook` is set for novel compounds
+   * and `workgroupCompoundId` when the workgroup already holds the compound.
    */
   lookupCompound: (workgroupName, query) =>
     api

@@ -16,6 +16,7 @@ import {
   Td,
   Text,
   Th,
+  Tooltip,
 } from "@chakra-ui/react";
 import { BRAND_COLORS } from "constants";
 
@@ -352,22 +353,39 @@ export const Badge = ({ tone, ...props }) => (
   />
 );
 
-/** Outlined chip for a single H-code. */
-export const HazardTag = (props) => (
-  <Box
-    as="span"
-    display="inline-block"
-    px="6px"
-    py="2px"
-    mr="4px"
-    border="1px solid"
-    borderColor={INV.lineStrong}
-    borderRadius="4px"
-    fontSize="11px"
-    color={INV.ink}
-    {...props}
-  />
-);
+/**
+ * Outlined chip for a single H-code. With a `statement`, hovering or focusing
+ * the chip shows the hazard statement in a tooltip. The chip is focusable then,
+ * so keyboard users can read it too.
+ * @param {object} props
+ * @param {string} [props.statement] The hazard statement, e.g. "Highly
+ *   flammable liquid and vapour".
+ */
+export const HazardTag = ({ statement, ...props }) => {
+  const tag = (
+    <Box
+      as="span"
+      display="inline-block"
+      px="6px"
+      py="2px"
+      mr="4px"
+      border="1px solid"
+      borderColor={INV.lineStrong}
+      borderRadius="4px"
+      fontSize="11px"
+      color={INV.ink}
+      cursor={statement ? "help" : undefined}
+      tabIndex={statement ? 0 : undefined}
+      {...props}
+    />
+  );
+  if (!statement) return tag;
+  return (
+    <Tooltip label={statement} hasArrow openDelay={200}>
+      {tag}
+    </Tooltip>
+  );
+};
 
 // Chakra's Table theme sets its own fonts, line heights and padding; these
 // reset them to the mockup's values. `nested` is the denser table shown
