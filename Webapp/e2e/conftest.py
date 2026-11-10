@@ -8,10 +8,12 @@ tests, and served from a background thread on a free local port. Playwright's
 """
 
 import threading
+import uuid
 from pathlib import Path
 from typing import Callable, Iterator, List
 
 import pytest
+from e2e import populate_database as e2e_populate_database
 from e2e.pages.home_page import HomePage
 from e2e.pages.login_page import LoginPage
 from e2e.seed_data import (
@@ -83,6 +85,8 @@ def app() -> Iterator[Flask]:
         ):
             populate_database.insert_test_data()
             add_roles_workgroup()
+            e2e_populate_database.add_coshh_data()
+            e2e_populate_database.add_inventory_data()
 
     yield app
 
@@ -234,3 +238,20 @@ def log_in_as(new_context) -> Iterator[Callable[[str, str], Page]]:
     yield _log_in_as
     errors = [error for page_errors in errors_per_page for error in page_errors]
     assert not errors, f"Uncaught JavaScript errors on the page: {errors}"
+
+
+@pytest.fixture
+def inventory_container(app: Flask) -> str:
+    """
+    Add a fresh container of the stocked compound for one test to act on.
+
+    Args:
+        app: The seeded Flask application.
+
+    Returns:
+        The container's lot number, which is unique and labels its row actions.
+    """
+    lot_number = f"E2E-{uuid.uuid4().hex[:8].upper()}"
+    with app.app_context():
+        e2e_populate_database.add_inventory_container(lot_number)
+    return lot_number
