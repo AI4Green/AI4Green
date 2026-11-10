@@ -8,6 +8,9 @@ Access:
   senior researcher (services.inventory.EDITOR_ROLES), otherwise 403.
 - Writes only accept JSON bodies. App-wide CSRF tokens are disabled, and a
   cross-site HTML form can't send JSON, so this is what stops forged requests.
+  The CSV import has to accept a multipart file upload, which a form *can*
+  send, so it requires the IMPORT_HEADER custom header instead: a cross-site
+  page can't add one without a CORS preflight, which this API doesn't allow.
 
 Errors are JSON (APIFlask) with a `message` the front end can show.
 """
@@ -33,6 +36,9 @@ from . import inventory_api_bp
 EDITOR_ONLY_MESSAGE = (
     "Only principal investigators and senior researchers can change the inventory."
 )
+# Custom header the CSV import routes require, as their CSRF protection
+IMPORT_HEADER = "X-AI4Green-Request"
+IMPORT_HEADER_VALUE = "inventory-import"
 
 
 def _member_workgroup(workgroup_name: str) -> models.WorkGroup:
@@ -87,6 +93,15 @@ def _json_body() -> Dict[str, Any]:
     if not isinstance(data, dict):
         abort(400, "The request body must be a JSON object.")
     return data
+
+
+def _require_import_header() -> None:
+    """
+    Refuses multipart requests without the import's custom header, which is
+    what protects the CSV import from cross-site form posts.
+    """
+    if request.headers.get(IMPORT_HEADER) != IMPORT_HEADER_VALUE:
+        abort(400, "This request is missing a required header.")
 
 
 def _run(action: Callable[[], Any]) -> Any:
@@ -283,6 +298,53 @@ def add_novel_compound(workgroup_name: str) -> Response:
     data = _json_body()
     compound = _run(lambda: services.inventory.add_novel_compound(workgroup, data))
     return jsonify(compound), 201
+
+
+# --- CSV import --------------------------------------------------------------
+# Both routes take a multipart upload (`file`, optional `workbookId`) and run
+# the whole import. Preview always rolls back; import saves only if every row
+# is valid. Neither keeps anything between requests.
+
+
+def _import_csv(workgroup_name: str, save: bool) -> Dict[str, Any]:
+    """
+    Checks access and the CSRF header, then runs the CSV import.
+
+    Args:
+        workgroup_name: The workgroup name from the URL.
+        save: Whether to save the import, or only preview it.
+
+    Returns:
+        The import result from services.inventory_import.import_csv.
+    """
+    workgroup = _editor_workgroup(workgroup_name)
+    _require_import_header()
+    file = request.files.get("file")
+    workbook_id = request.form.get("workbookId")
+    return _run(
+        lambda: services.inventory_import.import_csv(
+            workgroup, file, workbook_id, save=save
+        )
+    )
+
+
+@inventory_api_bp.route("/<workgroup_name>/import/preview", methods=["POST"])
+@login_required
+def preview_import(workgroup_name: str) -> Response:
+    """Checks a CSV import and shows what it would do, without saving it."""
+    return jsonify(_import_csv(workgroup_name, save=False))
+
+
+@inventory_api_bp.route("/<workgroup_name>/import", methods=["POST"])
+@login_required
+def import_inventory(workgroup_name: str) -> Response:
+    """
+    Imports a CSV file of containers. Saves nothing unless every row is valid;
+    otherwise returns 400 with the same per-row results as the preview.
+    """
+    result = _import_csv(workgroup_name, save=True)
+    status = 201 if result["saved"] else 400
+    return jsonify(result), status
 
 
 # --- ChemInventory -----------------------------------------------------------

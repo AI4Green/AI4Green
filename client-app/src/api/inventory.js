@@ -10,8 +10,29 @@ import useSWR from "swr";
  *
  * Every write sends a JSON body. A cross-site HTML form can't, and app-wide
  * CSRF tokens are currently disabled, so the backend rejects anything that
- * isn't `application/json`.
+ * isn't `application/json`. The CSV import is the exception: see
+ * IMPORT_HEADERS.
  */
+
+/*
+ * The CSV import has to send a multipart file upload, which a cross-site form
+ * could also send, so it carries this header instead; the backend refuses
+ * import requests without it.
+ */
+const IMPORT_HEADERS = { "X-AI4Green-Request": "inventory-import" };
+
+/**
+ * Builds the multipart body for a CSV import.
+ * @param {File} file The CSV file.
+ * @param {number | null} workbookId The workbook for new novel compounds.
+ * @returns {FormData} The body.
+ */
+const importBody = (file, workbookId) => {
+  const body = new FormData();
+  body.append("file", file);
+  if (workbookId) body.append("workbookId", String(workbookId));
+  return body;
+};
 
 /** Builds the base path for a workgroup's inventory. */
 const workgroupPath = (workgroupName) =>
@@ -120,6 +141,41 @@ export const getInventoryApi = ({ api }) => ({
     api.patch(locationPath(workgroupName, locationId), {
       json: { isArchived },
     }),
+
+  /**
+   * Check a CSV import without saving it. Resolves to `{ saved: false, rows,
+   * summary }`: each row has `row` (its spreadsheet row number), `name`,
+   * `compound`, `compoundStatus` ("existing" | "new_novel"), `location`,
+   * `locationStatus` ("existing" | "new"), `quantity`, `unit`, `error` and
+   * `warnings`; `summary` has `rowCount`, `errorCount`, `newLocationCount`
+   * and `newCompoundCount`. A problem with the file itself is a 400 with a
+   * `message`.
+   * @param {string} workgroupName The workgroup name
+   * @param {File} file The CSV file
+   * @param {number | null} workbookId The workbook for new novel compounds
+   */
+  previewImport: (workgroupName, file, workbookId) =>
+    api
+      .post(`${workgroupPath(workgroupName)}/import/preview`, {
+        body: importBody(file, workbookId),
+        headers: IMPORT_HEADERS,
+      })
+      .json(),
+
+  /**
+   * Import a CSV file. Saves everything or nothing: if any row is invalid the
+   * request fails with a 400 whose body is the same as a preview's.
+   * @param {string} workgroupName The workgroup name
+   * @param {File} file The CSV file
+   * @param {number | null} workbookId The workbook for new novel compounds
+   */
+  importInventory: (workgroupName, file, workbookId) =>
+    api
+      .post(`${workgroupPath(workgroupName)}/import`, {
+        body: importBody(file, workbookId),
+        headers: IMPORT_HEADERS,
+      })
+      .json(),
 
   /**
    * Connect ChemInventory with an API token, or replace the token. The backend
