@@ -99,7 +99,12 @@ export default function CompoundTable({
                 </InvTd>
                 <InvTd>
                   {wc.compound.hazards.map((h) => (
-                    <HazardTag key={h}>{h}</HazardTag>
+                    <HazardTag
+                      key={h}
+                      statement={wc.compound.hazardStatements?.[h]}
+                    >
+                      {h}
+                    </HazardTag>
                   ))}
                 </InvTd>
                 <InvTd>{summary.totalLabel}</InvTd>

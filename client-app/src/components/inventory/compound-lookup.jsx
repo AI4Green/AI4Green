@@ -50,6 +50,7 @@ export const heldCompound = (wc) => ({
   name: wc.compound.name,
   cas: wc.compound.cas,
   hazards: wc.compound.hazards,
+  hazardStatements: wc.compound.hazardStatements,
   preferredSupplier: wc.preferredSupplier,
   thresholdUnit: wc.thresholdUnit,
 });
@@ -86,7 +87,9 @@ const CompoundCard = ({ compound, action }) => {
         {compound.hazards?.length > 0 && (
           <Box mt="4px">
             {compound.hazards.map((h) => (
-              <HazardTag key={h}>{h}</HazardTag>
+              <HazardTag key={h} statement={compound.hazardStatements?.[h]}>
+                {h}
+              </HazardTag>
             ))}
           </Box>
         )}
