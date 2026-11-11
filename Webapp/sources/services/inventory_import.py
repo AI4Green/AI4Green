@@ -422,7 +422,7 @@ def _find_chemical(
         if chemical is not None:
             if cas:
                 result.warnings.append(
-                    f"CAS {cas} isn't in the database, but the SMILES matched "
+                    f"CAS {cas} isn't in the database, but the SMILES matched Novel Compound "
                     f"{chemical.name}."
                 )
             elif chemical.name.lower() != name.lower():
