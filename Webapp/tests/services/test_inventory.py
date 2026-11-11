@@ -249,6 +249,32 @@ def test_archived_location_blocked_while_it_has_containers(
     assert response.status_code == 400
 
 
+def test_barcodes_are_unique_among_active_containers(
+    client: FlaskClient, inventory_setup
+):
+    """A barcode already on an active container is refused, until that
+    container is disposed of."""
+    login(client)
+    shelf = _add_location(client, BASE, "Barcode shelf")
+    item_id = _add_item(client, BASE, shelf, barcode="INV-BC-1")
+
+    lookup = _lookup(client, COMPOUND_CAS)
+    body = {
+        "workgroupCompoundId": lookup.json["compound"]["workgroupCompoundId"],
+        "locationId": shelf,
+        "quantity": 1,
+        "unit": "g",
+        "barcode": " INV-BC-1 ",  # trimmed before it's compared
+    }
+    response = client.post(f"{BASE}/items", json=body)
+    assert response.status_code == 400
+    assert "INV-BC-1" in response.json["message"]
+
+    client.post(f"{BASE}/items/{item_id}/dispose", json={})
+    response = client.post(f"{BASE}/items", json=body)
+    assert response.status_code == 201
+
+
 def test_location_names_are_unique_ignoring_case(client: FlaskClient, inventory_setup):
     """A second location with the same name in a different case is refused."""
     login(client)
