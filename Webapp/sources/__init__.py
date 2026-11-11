@@ -274,10 +274,6 @@ def register_blueprints(app: Flask) -> None:
 
     app.register_blueprint(export_data_bp)
 
-    from sources.blueprints.search import search_bp
-
-    app.register_blueprint(search_bp)
-
     from sources.blueprints.retrosynthesis import retrosynthesis_bp
 
     app.register_blueprint(retrosynthesis_bp)
