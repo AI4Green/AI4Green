@@ -5,3 +5,4 @@ export * from "./account";
 export * from "./field";
 export * from "./user";
 export * from "./inventory";
+export * from "./search";
