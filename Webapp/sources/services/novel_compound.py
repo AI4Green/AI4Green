@@ -113,6 +113,7 @@ def add(
     inchi: Optional[str],
     inchi_key: Optional[str],
     workbook_id: int,
+    commit: bool = True,
 ) -> models.NovelCompound:
     """
     Creates a novel compound in the database.
@@ -129,6 +130,9 @@ def add(
         inchi: InChI notation.
         inchi_key: InChIKey.
         workbook_id: Workbook ID.
+        commit: Whether to commit. With False the compound is only flushed, so
+            a caller making several changes (e.g. the inventory CSV import)
+            can save them all together or roll them all back.
 
     Returns:
         NovelCompound model.
@@ -147,7 +151,10 @@ def add(
         workbook=workbook_id,
     )
     db.session.add(nc)
-    db.session.commit()
+    if commit:
+        db.session.commit()
+    else:
+        db.session.flush()
     return nc
 
 

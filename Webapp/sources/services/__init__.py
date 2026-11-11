@@ -17,6 +17,7 @@ from . import (
     integration_history,
     interactive,
     inventory,
+    inventory_import,
     inventory_ledger,
     ions,
     message_queue,

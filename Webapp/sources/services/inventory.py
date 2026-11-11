@@ -600,6 +600,26 @@ def add_item(workgroup: models.WorkGroup, data: Dict[str, Any]) -> models.Invent
     Returns:
         The new container.
     """
+    item = create_item(workgroup, data)
+    db.session.commit()
+    return item
+
+
+def create_item(
+    workgroup: models.WorkGroup, data: Dict[str, Any]
+) -> models.InventoryItem:
+    """
+    Validates and adds a container, recording it as received in the ledger,
+    without committing. add_item commits; the CSV import commits once for
+    the whole file.
+
+    Args:
+        workgroup: The workgroup receiving the stock.
+        data: As for add_item.
+
+    Returns:
+        The new container, flushed so it has an id.
+    """
     # validate the plain fields before anything is added to the session
     quantity = _read_quantity(data.get("quantity"), "Quantity", allow_zero=False)
     unit = _read_unit(data.get("unit"))
@@ -612,6 +632,8 @@ def add_item(workgroup: models.WorkGroup, data: Dict[str, Any]) -> models.Invent
     location = _get_active_location(
         workgroup, _read_id(data.get("locationId"), "Location")
     )
+    if barcode:
+        _check_barcode_is_free(workgroup, barcode)
 
     wc = _resolve_workgroup_compound(workgroup, data)
     # the first container sets the compound's defaults
@@ -634,8 +656,55 @@ def add_item(workgroup: models.WorkGroup, data: Dict[str, Any]) -> models.Invent
         date_received=date_received,
         expiry_date=expiry_date,
     )
-    db.session.commit()
     return item
+
+
+def _check_barcode_is_free(workgroup: models.WorkGroup, barcode: str) -> None:
+    """
+    Refuses a barcode that's already on one of the workgroup's active
+    containers, as each barcode should identify one container.
+
+    Args:
+        workgroup: The workgroup.
+        barcode: The new container's barcode, already trimmed.
+
+    Raises:
+        InventoryValidationError: If a container already has the barcode.
+    """
+    existing = find_item_by_barcode(workgroup, barcode)
+    if existing is not None:
+        raise InventoryValidationError(
+            f"Barcode {barcode} is already on a container of "
+            f"{existing.workgroup_compound.chemical.name}."
+        )
+
+
+def find_item_by_barcode(
+    workgroup: models.WorkGroup, barcode: str
+) -> Optional[models.InventoryItem]:
+    """
+    Finds the workgroup's active container with a barcode. create_item uses
+    it to keep barcodes unique, and the CSV import to skip containers it has
+    already added. Disposed containers are left out, as their barcodes may
+    be reused.
+
+    Args:
+        workgroup: The workgroup.
+        barcode: The barcode, already trimmed.
+
+    Returns:
+        The container, or None.
+    """
+    return (
+        db.session.query(models.InventoryItem)
+        .join(models.WorkgroupCompound)
+        .filter(
+            models.WorkgroupCompound.workgroup_id == workgroup.id,
+            models.InventoryItem.barcode == barcode,
+            models.InventoryItem.is_archived.is_(False),
+        )
+        .first()
+    )
 
 
 def adjust_item(
@@ -758,13 +827,53 @@ def add_location(workgroup: models.WorkGroup, data: Dict[str, Any]) -> models.Lo
     Returns:
         The new location.
     """
+    location = create_location(workgroup, data)
+    db.session.commit()
+    return location
+
+
+def create_location(
+    workgroup: models.WorkGroup, data: Dict[str, Any]
+) -> models.Location:
+    """
+    Validates and adds a storage location without committing.
+
+    Args:
+        workgroup: The workgroup.
+        data: As for add_location.
+
+    Returns:
+        The new location, flushed so it has an id.
+    """
     fields = _read_location_fields(data)
     _check_location_name_is_unique(workgroup, fields["name"])
 
     location = models.Location(workgroup_id=workgroup.id, is_archived=False, **fields)
     db.session.add(location)
-    db.session.commit()
+    db.session.flush()
     return location
+
+
+def find_location(workgroup: models.WorkGroup, name: str) -> Optional[models.Location]:
+    """
+    Finds one of the workgroup's locations by name, ignoring case, as location
+    names are unique that way.
+
+    Args:
+        workgroup: The workgroup.
+        name: The location name.
+
+    Returns:
+        The location (which may be archived), or None.
+    """
+    return (
+        db.session.query(models.Location)
+        .filter(
+            models.Location.workgroup_id == workgroup.id,
+            func.lower(models.Location.name) == name.strip().lower(),
+        )
+        .first()
+    )
 
 
 def edit_location(
@@ -886,25 +995,94 @@ def lookup_compound(
     if len(text) > MAX_LOOKUP_QUERY_LENGTH:
         raise InventoryValidationError("That search is too long.")
 
+    chemical = find_chemical(workgroup, text)
+    if chemical is None:
+        if CAS_PATTERN.fullmatch(text):
+            return {"status": "cas_not_found", "cas": text}
+        return {"status": "not_found", "suggestions": _suggestions(workgroup, text)}
+
+    return {"status": "found", "compound": serialise_chemical(chemical, workgroup)}
+
+
+def find_chemical(workgroup: models.WorkGroup, text: str) -> Optional[Chemical]:
+    """
+    Finds a compound by CAS number or exact name (ignoring case for novel
+    compounds), in the Compound database first and then in the novel
+    compounds of the user's workbooks in this workgroup.
+
+    Args:
+        workgroup: The workgroup.
+        text: A CAS number or compound name, already trimmed.
+
+    Returns:
+        The compound or novel compound, or None.
+    """
     novel_compounds = _user_novel_compounds_query(workgroup)
     if CAS_PATTERN.fullmatch(text):
-        chemical = (
+        return (
             services.compound.from_cas(text)
             or novel_compounds.filter(models.NovelCompound.cas == text).first()
         )
-        if chemical is None:
-            return {"status": "cas_not_found", "cas": text}
-    else:
-        chemical = (
-            services.compound.from_name(text)
-            or novel_compounds.filter(
-                func.lower(models.NovelCompound.name) == text.lower()
-            ).first()
-        )
-        if chemical is None:
-            return {"status": "not_found", "suggestions": _suggestions(workgroup, text)}
+    return (
+        services.compound.from_name(text)
+        or novel_compounds.filter(
+            func.lower(models.NovelCompound.name) == text.lower()
+        ).first()
+    )
 
-    return {"status": "found", "compound": serialise_chemical(chemical, workgroup)}
+
+def find_chemical_by_inchi(
+    workgroup: models.WorkGroup, inchi: str
+) -> Optional[Chemical]:
+    """
+    Finds a compound by structure, as an InChI, in the Compound database first
+    and then in the novel compounds of the user's workbooks in this workgroup.
+
+    Args:
+        workgroup: The workgroup.
+        inchi: The structure's InChI, e.g. from
+            services.all_compounds.smiles_to_inchi.
+
+    Returns:
+        The compound or novel compound, or None.
+    """
+    return (
+        services.compound.from_inchi(inchi)
+        or _user_novel_compounds_query(workgroup)
+        .filter(models.NovelCompound.inchi == inchi)
+        .first()
+    )
+
+
+def get_user_workbook(workgroup: models.WorkGroup, workbook_id: Any) -> models.WorkBook:
+    """
+    Gets one of the user's workbooks in this workgroup, for novel compounds.
+
+    Args:
+        workgroup: The workgroup.
+        workbook_id: The workbook id from the request.
+
+    Returns:
+        The workbook.
+
+    Raises:
+        InventoryValidationError: If the id isn't a positive integer.
+        InventoryNotFoundError: If the user has no such workbook here.
+    """
+    workbook_id = _read_id(workbook_id, "Workbook")
+    workbook = next(
+        (
+            wb
+            for wb in services.workbook.get_workbooks_from_user_group_combination(
+                workgroup.name
+            )
+            if wb.id == workbook_id
+        ),
+        None,
+    )
+    if workbook is None:
+        raise InventoryNotFoundError()
+    return workbook
 
 
 def _form_number(value: Optional[float]) -> str:
@@ -928,20 +1106,25 @@ def add_novel_compound(
     Returns:
         The new compound, serialised as for the lookup.
     """
-    workbook_id = _read_id(data.get("workbookId"), "Workbook")
-    workbook = next(
-        (
-            wb
-            for wb in services.workbook.get_workbooks_from_user_group_combination(
-                workgroup.name
-            )
-            if wb.id == workbook_id
-        ),
-        None,
-    )
-    if workbook is None:
-        raise InventoryNotFoundError()
+    workbook = get_user_workbook(workgroup, data.get("workbookId"))
+    novel_compound = create_novel_compound(workbook, data)
+    db.session.commit()
+    return serialise_chemical(novel_compound, workgroup)
 
+
+def create_novel_compound(
+    workbook: models.WorkBook, data: Dict[str, Any]
+) -> models.NovelCompound:
+    """
+    Validates and adds a novel compound to a workbook without committing.
+
+    Args:
+        workbook: One of the user's workbooks, from get_user_workbook.
+        data: As for add_novel_compound; `workbookId` isn't used.
+
+    Returns:
+        The new novel compound, flushed so it has an id.
+    """
     name = _read_required_text(data.get("name"), "Name", 200)
     cas = _read_text(data.get("cas"), "CAS number", 20)
     if cas and not CAS_PATTERN.fullmatch(cas):
@@ -973,7 +1156,7 @@ def add_novel_compound(
     if new_compound.validate() != "validation_successful":
         raise InventoryValidationError(new_compound.feedback)
 
-    novel_compound = services.novel_compound.add(
+    return services.novel_compound.add(
         new_compound.name,
         new_compound.cas,
         new_compound.mol_formula,
@@ -985,5 +1168,5 @@ def add_novel_compound(
         new_compound.inchi,
         new_compound.inchi_key,
         workbook.id,
+        commit=False,
     )
-    return serialise_chemical(novel_compound, workgroup)

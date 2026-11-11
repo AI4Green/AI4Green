@@ -8,6 +8,7 @@ import ChemInventoryView from "./cheminventory-view.jsx";
 import { ChemInventoryModal } from "./cheminventory-modal.jsx";
 import { AddStockModal } from "./add-stock-modal.jsx";
 import { HistoryDrawer } from "./history-drawer.jsx";
+import { ImportModal } from "./import-modal.jsx";
 import { AdjustModal, DisposeModal, MoveModal } from "./item-modals.jsx";
 import { INV, InvButton, InvPage } from "./ui.jsx";
 
@@ -66,7 +67,7 @@ export default function InventoryPage() {
   const isChemInventory = showSourceToggle && source === SOURCES.chemInventory;
 
   // The open modal or drawer, or null. `type` is an item action (adjust |
-  // move | dispose | history), addContainer, addStock or chemInventory.
+  // move | dispose | history), addContainer, addStock, import or chemInventory.
   const [dialog, setDialog] = useState(null);
 
   // The compound each container belongs to, so item actions can show its name
@@ -80,6 +81,7 @@ export default function InventoryPage() {
     setDialog({ type: action, item, wc: compoundByItemId.get(item.id) });
   const handleAddContainer = (wc) => setDialog({ type: "addContainer", wc });
   const handleAddStock = () => setDialog({ type: "addStock" });
+  const handleImport = () => setDialog({ type: "import" });
   const handleOpenChemInventorySettings = () =>
     setDialog({ type: "chemInventory" });
   const closeDialog = () => setDialog(null);
@@ -114,9 +116,12 @@ export default function InventoryPage() {
               Manage locations
             </InvButton>
             {canEdit && (
-              <InvButton primary onClick={handleAddStock}>
-                + Add stock
-              </InvButton>
+              <>
+                <InvButton onClick={handleImport}>Import CSV</InvButton>
+                <InvButton primary onClick={handleAddStock}>
+                  + Add stock
+                </InvButton>
+              </>
             )}
           </>
         )
@@ -157,6 +162,13 @@ export default function InventoryPage() {
           locations={inventory.locations}
           workbooks={inventory.workbooks}
           workgroupCompound={dialog.wc}
+          onClose={closeDialog}
+        />
+      )}
+      {dialog?.type === "import" && (
+        <ImportModal
+          workgroupName={workgroupName}
+          workbooks={inventory.workbooks}
           onClose={closeDialog}
         />
       )}
