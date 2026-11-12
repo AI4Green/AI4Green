@@ -94,6 +94,22 @@ export const getInventoryApi = ({ api }) => ({
       .json(),
 
   /**
+   * Find the workgroup's compounds matching a drawn structure. Read-only; it's
+   * a POST because a structure can be too long for a URL.
+   * @param {string} workgroupName The workgroup.
+   * @param {{ smiles: string, mode: "exact" | "substructure" }} query The
+   *   structure from the sketcher and how to match it.
+   * @returns {Promise<{ workgroupCompoundIds: number[] }>} The matching
+   *   compounds' ids, as in the inventory payload's `compounds[].id`.
+   */
+  structureSearch: (workgroupName, { smiles, mode }) =>
+    api
+      .post(`${workgroupPath(workgroupName)}/structure-search`, {
+        json: { smiles, mode },
+      })
+      .json(),
+
+  /**
    * Add a novel compound to one of the workgroup's workbooks, as the reaction
    * table does. Resolves to the new compound, in the same shape as a lookup.
    */
