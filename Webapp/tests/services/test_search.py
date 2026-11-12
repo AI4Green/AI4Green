@@ -8,12 +8,16 @@ Test-Workbook:
 - TW1-002 "a test polymer reaction": the same, with the polymer *C* in
   place of C
 
-Other test modules can add reactions to the same workbook, so these tests
-check which reactions are or aren't found rather than exact counts.
+Earlier test modules (e.g. test_autosave) edit these reactions, so the
+`seeded_reactions` fixture resets them to their seeded values for this module
+and puts the edits back afterwards. Other modules can also add reactions to
+the same workbook, so these tests check which reactions are or aren't found
+rather than exact counts.
 """
 
+import json
 from datetime import datetime, timedelta
-from typing import Dict, Iterator, List
+from typing import Any, Dict, Iterator, List
 
 import pytest
 import pytz
@@ -21,7 +25,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 from sources import models
 from sources.extensions import db
-from tests.populate_database import add_test_user
+from tests.populate_database import add_test_user, reaction_table_json_contents
 from tests.utils import login
 
 SEARCH_URL = "/api/search/reactions"
@@ -33,9 +37,33 @@ OUTSIDER = "search_outsider"
 OUTSIDER_PASSWORD = "search_pw"
 # hexamine: in none of the seeded reactions
 UNUSED_SMILES = "C1N2CN3CN1CN(C2)C3"
+SEEDED_DESCRIPTION = "testing a reaction involving compounds from the test family"
+# The searched fields of each reaction, as tests/populate_database.py seeds them
+SEEDED_REACTIONS: Dict[str, Dict[str, Any]] = {
+    REACTION: {
+        "name": "a test reaction",
+        "description": SEEDED_DESCRIPTION,
+        "reactants": ["C", "CC"],
+        "products": ["CP", "CPP"],
+        "reagents": ["CCC", "CCCCC"],
+        "solvent": [-5],
+        "reaction_smiles": "C.CC>>CP.CPP",
+        "status": "active",
+    },
+    POLYMER_REACTION: {
+        "name": "a test polymer reaction",
+        "description": SEEDED_DESCRIPTION,
+        "reactants": ["*C*", "CC"],
+        "products": ["CP", "CPP"],
+        "reagents": ["CCC", "CCCCC"],
+        "solvent": [-5],
+        "reaction_smiles": "*C*.CC>>CP.CPP",
+        "status": "active",
+    },
+}
 
 
-def _search(client: FlaskClient, **criteria) -> Dict:
+def _search(client: FlaskClient, **criteria: object) -> Dict:
     """Searches the Test-Workbook and returns the JSON response, checking it succeeded."""
     body = {"workgroup": WORKGROUP, "workbook": WORKBOOK, **criteria}
     response = client.post(SEARCH_URL, json=body)
@@ -54,6 +82,32 @@ def _structure(smiles: str, mode: str = "exact", roles: List[str] = None) -> Dic
 def _found(response: Dict) -> Dict[str, Dict]:
     """The results keyed by reaction ID."""
     return {result["reactionId"]: result for result in response["results"]}
+
+
+@pytest.fixture(scope="module", autouse=True)
+def seeded_reactions(app: Flask) -> Iterator[None]:
+    """
+    Resets TW1-001 and TW1-002 to their seeded values for this module, then
+    restores whatever earlier test modules had saved, so later modules are
+    unaffected.
+    """
+    seeded_table_data = json.dumps(reaction_table_json_contents())
+    saved: Dict[str, Dict[str, Any]] = {}
+    with app.app_context():
+        for reaction_id, seeded_fields in SEEDED_REACTIONS.items():
+            reaction = _seeded_reaction(reaction_id)
+            fields = {**seeded_fields, "reaction_table_data": seeded_table_data}
+            saved[reaction_id] = {name: getattr(reaction, name) for name in fields}
+            for name, value in fields.items():
+                setattr(reaction, name, value)
+        db.session.commit()
+    yield
+    with app.app_context():
+        for reaction_id, original_fields in saved.items():
+            reaction = _seeded_reaction(reaction_id)
+            for name, value in original_fields.items():
+                setattr(reaction, name, value)
+        db.session.commit()
 
 
 @pytest.fixture(scope="module")
@@ -140,7 +194,7 @@ def test_needs_a_search_term(client: FlaskClient):
         ),
         (
             {"structure": _structure("*C*", mode="substructure")},
-            "not supported for polymers",
+            "not yet supported for polymers",
         ),
     ],
 )

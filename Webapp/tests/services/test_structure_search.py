@@ -107,7 +107,7 @@ def test_polymer_exact_search():
 
 def test_polymer_substructure_search_is_not_supported():
     """Substructure search isn't defined for polymer repeat units."""
-    with pytest.raises(StructureSearchError, match="not supported for polymers"):
+    with pytest.raises(StructureSearchError, match="not yet supported for polymers"):
         build_query("*C*", SearchMode.SUBSTRUCTURE)
 
 
