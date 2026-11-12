@@ -142,6 +142,7 @@ export default function InventoryPage() {
       ) : (
         <InventoryBrowser
           key="ai4green"
+          workgroupName={workgroupName}
           compounds={data}
           canEdit={canEdit}
           onItemAction={handleItemAction}
