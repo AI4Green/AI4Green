@@ -82,9 +82,15 @@ def _add_location(client: FlaskClient, base: str, name: str) -> int:
     return response.json["id"]
 
 
-def _add_item(client: FlaskClient, base: str, location_id: int, **overrides) -> int:
-    """Adds a container of the seeded compound and returns its id."""
-    lookup = _lookup(client, COMPOUND_CAS, base)
+def _add_item(
+    client: FlaskClient,
+    base: str,
+    location_id: int,
+    cas: str = COMPOUND_CAS,
+    **overrides,
+) -> int:
+    """Adds a container of a seeded compound (by default Testoic Acid) and returns its id."""
+    lookup = _lookup(client, cas, base)
     compound = lookup.json["compound"]
     body = {
         "workgroupCompoundId": compound["workgroupCompoundId"],
@@ -411,3 +417,83 @@ def test_novel_compound_validation_errors_are_reported(
     )
     assert response.status_code == 400
     assert "SMILES" in response.json["message"]
+
+
+# --- Structure search --------------------------------------------------------
+
+# seeded in tests/populate_database.py: Testoic Acid (COMPOUND_CAS) is methane
+# (C) and Testamine is ethane (CC)
+ETHANE_CAS = "123-45-7"
+
+
+def _structure_search(client: FlaskClient, smiles: str, mode: str, base: str = BASE):
+    """Runs a structure search on the workgroup's inventory and returns the response."""
+    return client.post(
+        f"{base}/structure-search", json={"smiles": smiles, "mode": mode}
+    )
+
+
+def _workgroup_compound_id(client: FlaskClient, cas: str) -> int:
+    """The workgroup's WorkgroupCompound id for a stocked compound."""
+    return _lookup(client, cas).json["compound"]["workgroupCompoundId"]
+
+
+def test_structure_search(client: FlaskClient, inventory_setup):
+    """Exact searches find the same compound; substructure searches find compounds containing it."""
+    login(client)
+    location_id = _add_location(client, BASE, "Structure search shelf")
+    _add_item(client, BASE, location_id)
+    _add_item(client, BASE, location_id, cas=ETHANE_CAS)
+    methane = _workgroup_compound_id(client, COMPOUND_CAS)
+    ethane = _workgroup_compound_id(client, ETHANE_CAS)
+
+    response = _structure_search(client, "C", "exact")
+    assert response.status_code == 200
+    ids = response.json["workgroupCompoundIds"]
+    assert methane in ids and ethane not in ids
+
+    ids = _structure_search(client, "CC", "substructure").json["workgroupCompoundIds"]
+    assert ethane in ids and methane not in ids
+
+    ids = _structure_search(client, "C", "substructure").json["workgroupCompoundIds"]
+    assert methane in ids and ethane in ids
+
+
+def test_standard_member_can_structure_search(client: FlaskClient, inventory_setup):
+    """Structure search only reads, so any member can use it."""
+    login(client, "inv_member", PASSWORD)
+    assert _structure_search(client, "C", "exact").status_code == 200
+
+
+def test_structure_search_non_member_gets_404(client: FlaskClient, inventory_setup):
+    """Non-members can't search the inventory, or tell the workgroup exists."""
+    login(client, "inv_outsider", PASSWORD)
+    assert _structure_search(client, "C", "exact").status_code == 404
+
+
+def test_structure_search_rejects_form_posts(client: FlaskClient, inventory_setup):
+    """Only JSON bodies are accepted."""
+    login(client)
+    response = client.post(
+        f"{BASE}/structure-search", data={"smiles": "C", "mode": "exact"}
+    )
+    assert response.status_code == 415
+
+
+@pytest.mark.parametrize(
+    "smiles, mode, message",
+    [
+        ("thisIsDefinitelyNotASmilesString", "exact", "Invalid structure"),
+        ("", "substructure", "Draw a structure"),
+        ("C", "similar", "exact or a substructure"),
+        ("*C*", "exact", "Polymer structures"),
+    ],
+)
+def test_structure_search_validation(
+    client: FlaskClient, inventory_setup, smiles: str, mode: str, message: str
+):
+    """Structures that can't be searched are a 400 with a message to show."""
+    login(client)
+    response = _structure_search(client, smiles, mode)
+    assert response.status_code == 400
+    assert message in response.json["message"]
