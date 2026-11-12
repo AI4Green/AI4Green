@@ -196,6 +196,20 @@ def lookup_compound(workgroup_name: str) -> Response:
     return jsonify(result)
 
 
+@inventory_api_bp.route("/<workgroup_name>/structure-search", methods=["POST"])
+@login_required
+def structure_search(workgroup_name: str) -> Response:
+    """
+    Finds the workgroup's compounds matching a drawn structure. The body is
+    `{smiles, mode}`, where mode is "exact" or "substructure". It's a POST
+    because structures can be too long for a URL; it only reads data.
+    """
+    workgroup = _member_workgroup(workgroup_name)
+    data = _json_body()
+    ids = _run(lambda: services.inventory.search_by_structure(workgroup, data))
+    return jsonify({"workgroupCompoundIds": ids})
+
+
 # --- Containers --------------------------------------------------------------
 
 
