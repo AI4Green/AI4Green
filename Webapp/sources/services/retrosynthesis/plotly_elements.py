@@ -27,18 +27,67 @@ retro_tree = cyto.Cytoscape(
 )
 
 """
-Loading circle
+Retrosynthesis progress display
 """
 loading_circle = html.Div(
-    id="loading-div",
+    id="loading-display",
     children=[
-        dcc.Loading(
-            id="loading-display",
-            children=html.Div(id="loading-output-1"),
-            type="circle",
-            fullscreen=True,
+        html.Div(
+            children=[
+                html.I(
+                    className="fa fa-spinner fa-spin",
+                    style={
+                        "fontSize": "40px",
+                        "marginBottom": "20px",
+                    },
+                ),
+                dbc.Progress(
+                    id="retrosynthesis-progress-bar",
+                    value=0,
+                    striped=True,
+                    animated=True,
+                    color="success",
+                    style={
+                        "width": "800px",
+                        "height": "25px",
+                    },
+                ),
+                html.Div(
+                    id="retrosynthesis-progress-text",
+                    children="",
+                    style={
+                        "marginTop": "10px",
+                        "textAlign": "center",
+                        "fontSize": "20px",
+                        "fontFamily": "Helvetica",
+                        "fontWeight": "1000",
+                    },
+                ),
+            ],
+            style={
+                "backgroundColor": "white",
+                "padding": "25px",
+                "borderRadius": "8px",
+                "minWidth": "450px",
+                "display": "flex",
+                "flexDirection": "column",
+                "alignItems": "center",
+            },
         ),
     ],
+    hidden=True,
+    style={
+        "position": "fixed",
+        "top": "0",
+        "left": "0",
+        "width": "100%",
+        "height": "100%",
+        "zIndex": "9999",
+        "backgroundColor": "rgba(255, 255, 255, 0.8)",
+        "display": "flex",
+        "alignItems": "center",
+        "justifyContent": "center",
+    },
 )
 
 """
@@ -54,7 +103,7 @@ inputs = html.Div(
                 dcc.Dropdown(
                     id="routes-dropdown",
                     placeholder="Route (Number of Steps)",
-                    style={"width": "100%", "border": "1px solid #9FA6B2"},
+                    style={"width": "100%"},
                 ),
                 html.Div(id="routes_output"),
             ],
@@ -80,7 +129,7 @@ enhancement_dropdown = html.Div(
                     {"label": "Enhanced Solve Rate", "value": "dUCT-v2"},
                 ],
                 placeholder="Select Enhancement Type",
-                style={"width": "100%", "border": "1px solid #9FA6B2"},
+                style={"width": "100%"},
             ),
             style={"flex-grow": "1"},
         ),
@@ -117,6 +166,78 @@ enhancement_dropdown = html.Div(
         ),
     ],
     style={"display": "flex", "align-items": "center", "gap": "5px"},
+)
+
+"""
+Stock Dropdown
+"""
+
+stock_options = [
+    {"label": "All Stocks", "value": "all"},
+    {"label": "ZINC", "value": "zinc"},
+    {"label": "PaRoutes", "value": "paroutes"},
+    {"label": "ASKCOS", "value": "askcos"},
+    {"label": "Natural Products", "value": "naturals"},
+    {"label": "Simple Stocks", "value": "simples"},
+]
+
+stock_dropdown = html.Div(
+    [
+        dbc.Button(
+            [
+                html.Span(
+                    html.Span(
+                        "Select Stocks",
+                        id="stock-dropdown-label",
+                        style={
+                            "direction": "ltr",
+                        },
+                    ),
+                    style={
+                        "flex": "1",
+                        "minWidth": "0",
+                        "overflow": "hidden",
+                        "whiteSpace": "nowrap",
+                        "textOverflow": "ellipsis",
+                        "direction": "rtl",
+                        "textAlign": "left",
+                    },
+                ),
+                html.I(
+                    className="fa fa-chevron-down",
+                    style={"marginLeft": "8px"},
+                ),
+            ],
+            id="stock-dropdown-button",
+            style={
+                "width": "100%",
+                "backgroundColor": "white",
+                "color": "#6c757d",
+                "border": "1px solid #ccc",
+                "borderRadius": "4px",
+                "fontWeight": "normal",
+                "display": "flex",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "padding": "6px 12px",
+                "boxShadow": "none",
+                "overflow": "hidden",
+            },
+        ),
+        dbc.Popover(
+            dbc.PopoverBody(
+                dbc.Checklist(
+                    id="stock-checklist",
+                    options=stock_options,
+                    value=["all"],
+                )
+            ),
+            target="stock-dropdown-button",
+            trigger="legacy",
+            placement="bottom",
+        ),
+    ],
+    style={"width": "100%"},
 )
 
 """
@@ -171,6 +292,7 @@ search_toggle_button = html.Div(
 """
 Smiles field + Retrosynthesis button
 """
+
 smiles_field_and_retrosynthesis_button = dbc.Row(
     className="gx-2",
     children=[
@@ -202,22 +324,35 @@ smiles_field_and_retrosynthesis_button = dbc.Row(
                 ),
             ],
         ),
+
         # Column 2: Route Dropdown
         dbc.Col(
-            width=3,
+            width=2,
             children=[
                 inputs,
                 html.Div(id="route-score"),
             ],
         ),
+
         # Column 3: Enhancement Dropdown
         dbc.Col(
             width=3,
-            children=[enhancement_dropdown],
+            children=[
+                enhancement_dropdown,
+            ],
         ),
-        # Column 4: Save to Workbook Button
+
+        # Column 4: Stock Dropdown
         dbc.Col(
-            width=3,
+            width=2,
+            children=[
+                stock_dropdown,
+            ],
+        ),
+
+        # Column 5: Save to Workbook Button
+        dbc.Col(
+            width=2,
             children=[
                 html.Button(
                     "Save To Workbook",
@@ -228,8 +363,10 @@ smiles_field_and_retrosynthesis_button = dbc.Row(
                 )
             ],
         ),
+
+        # Full-width row underneath for search configuration
         dbc.Col(
-            width=12,  # Takes full width below the above fields
+            width=12,
             children=[
                 html.Div(
                     style={"display": "flex", "align-items": "center"},
@@ -242,7 +379,6 @@ smiles_field_and_retrosynthesis_button = dbc.Row(
         ),
     ],
 )
-
 
 """Header and inputs"""
 header_and_inputs = html.Div(
@@ -284,12 +420,14 @@ sustainability_data = [
     dcc.Store(id="active-sustainability-data", storage_type="memory"),
     dcc.Store(id="weighted-sustainability-data", storage_type="memory"),
     dcc.Store(id="user-uploaded-route-sustainability-data", storage_type="memory"),
+    dcc.Store(id="conditions-calculation-trigger", storage_type="memory"),
 ]
 
 other_data_stores = [
     dcc.Location(id="url"),
     dcc.Store(id="window-width", data=0, storage_type="memory"),
     dcc.Store(id="test-temp", data=0, storage_type="memory"),
+    dcc.Store(id="previous-stock-selection",data=["all"],storage_type="memory"),
     dcc.Store(id="new-reaction-url", data="", storage_type="memory"),
     dcc.Store(id="new-reaction-success", data=False, storage_type="memory"),
     dcc.Store(id="save-functionality-status", data=""),

@@ -168,6 +168,18 @@ class BaseConfig(object):  # class to store configuration variables
         "MESSAGE_QUEUE_CONNECTION_STRING", default_conn_str
     )
 
+    # ChemInventory integration (read-only, per-workgroup API tokens).
+    # The encryption key is a Fernet key that encrypts the stored tokens. In
+    # Azure it comes from an App Setting referencing a Key Vault secret. Without
+    # it the integration reports itself as unavailable. To rotate, put the new
+    # key first followed by the old one, comma-separated ("new,old"); tokens are
+    # re-encrypted with the new key as they're used, then the old key can go.
+    # The API URL must be https://.
+    CHEMINVENTORY_ENCRYPTION_KEY = os.getenv("CHEMINVENTORY_ENCRYPTION_KEY", "")
+    CHEMINVENTORY_API_URL = os.getenv(
+        "CHEMINVENTORY_API_URL", "https://app.cheminventory.net/api"
+    )
+
     # config for vite, used for react
     VITE_DEV_SERVER = (
         os.getenv("VITE_DEV_SERVER", "false").lower() == "true"

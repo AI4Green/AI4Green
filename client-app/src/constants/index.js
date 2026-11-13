@@ -1,3 +1,4 @@
+export * from "./brand-colors";
 export * from "./experiment-ui";
 export * from "./global-parameters";
 export * from "./input-types";

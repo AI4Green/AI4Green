@@ -1,21 +1,26 @@
-from flask_login import current_user
+from flask_login import current_user, login_required
 from sources.auxiliary import get_workgroups
 
 from . import users_api_bp
 
 
-@users_api_bp.route("/me", methods=["GET", "POST"])
+@users_api_bp.route("/me", methods=["GET"])
+@login_required
 def me():
+    permissions = ["ViewProjectTypes"]
+    if current_user.Role.name == "H&S Admin":
+        permissions.extend(
+            [
+                "CreateProjectTypes",
+                "EditProjectTypes",
+                "DeleteProjectTypes",
+            ]
+        )
     # sparse route atm for passing login, needs to update permissions based on roles
     return {
         "fullName": current_user.fullname,
         "userName": current_user.username,
         "email": current_user.email,
-        "permissions": [
-            "CreateProjectTypes",
-            "EditProjectTypes",
-            "DeleteProjectTypes",
-            "ViewProjectTypes",
-        ],
+        "permissions": permissions,
         "workgroups": get_workgroups(),
     }

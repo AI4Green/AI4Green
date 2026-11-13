@@ -17,12 +17,14 @@ import { Formik, Form } from "formik";
 import { useBackendApi } from "contexts";
 import { useCoshhFormsList, useProject } from "api";
 import { FormikInput, MultiSelectField } from "components/core/forms";
+import { CoshhExportActions } from "./export";
 
 const useCoshhCreateForm = ({
   reactionId,
   workgroupName,
   workbookName,
   onCreated,
+  origin,
 }) => {
   const { projects: api } = useBackendApi();
   const { data: templates = [] } = useCoshhFormsList();
@@ -45,6 +47,7 @@ const useCoshhCreateForm = ({
         workbookName,
         templateId: Number(values.templateId[0]),
         templateType: "COSHH",
+        origin,
       });
 
       if (!response.ok) throw new Error("Failed to create COSHH form");
@@ -126,7 +129,7 @@ export const CoshhCreateModal = ({
     feedback,
     isLoading,
     handleSubmit,
-  } = useCoshhCreateForm({ reactionId, onCreated });
+  } = useCoshhCreateForm({ reactionId, onCreated, origin: "standalone" });
 
   const body = (
     <CoshhCreateFormContent
@@ -173,6 +176,7 @@ export const CoshhCreateInline = ({
     workgroupName,
     workbookName,
     onCreated,
+    origin: "reactionConstructor",
   });
 
   if (!isOpen) return null;
@@ -234,12 +238,15 @@ export const RoutedCoshhCreateModal = () => {
 // embedded in the card
 export const EmbeddedCoshh = ({
   reactionId,
-  initialFormId = null,
   workbookName,
   workgroupName,
+  initialFormId,
 }) => {
-  const [formId, setFormId] = useState(initialFormId);
-  const [isCreateOpen, setIsCreateOpen] = useState(!initialFormId);
+  const { formId: routeFormId } = useParams();
+  const [createdFormId, setCreatedFormId] = useState(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(true);
+
+  const formId = createdFormId ?? initialFormId ?? routeFormId ?? null;
 
   if (formId) return <CoshhForm formId={formId} />;
 
@@ -251,7 +258,7 @@ export const EmbeddedCoshh = ({
       isOpen={isCreateOpen}
       onClose={() => setIsCreateOpen(false)}
       onCreated={(data) => {
-        setFormId(data.id);
+        setCreatedFormId(data.id);
         setIsCreateOpen(false);
       }}
     />
@@ -300,6 +307,7 @@ export const CoshhForm = ({ formId }) => {
   };
   return (
     <>
+      <CoshhExportActions formId={template.id} />
       {template.sections
         ?.sort((a, b) => a.sortOrder - b.sortOrder)
         .map((section) => (
@@ -308,24 +316,6 @@ export const CoshhForm = ({ formId }) => {
             item={itemContext}
             form={section}
             isInstructor={false}
-            breadcrumbItems={[
-              {
-                label: template.workgroup,
-                href: `/workgroup/${template.workgroup}`,
-                external: true,
-              },
-              {
-                label: template.workbook,
-                href: `/workgroup/${template.workgroup}`,
-                external: true,
-              },
-              {
-                label: template.reactionCode,
-                href: `/sketcher/${template.workgroup}/${template.workbook}/${template.reactionCode}/no`,
-                external: true,
-              },
-              { label: "COSHH", active: true },
-            ]}
             headerItems={{
               title: section.name || "COSHH Assessment",
               subtitle: `Editing instance ${template.uuid}`,

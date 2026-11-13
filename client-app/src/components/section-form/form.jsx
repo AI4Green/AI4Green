@@ -15,7 +15,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaSave } from "react-icons/fa";
 
-import { initialValues, prepareSubmissionData } from ".";
+import { getLatestResponse, initialValues, prepareSubmissionData } from ".";
 
 const AutoSave = ({ values, handleSubmit, fields, delay = 1000 }) => {
   const firstRender = useRef(true);
@@ -51,10 +51,7 @@ export const SectionForm = ({
 
   const sectionFields = form?.fields.map((x) => ({
     ...x,
-    response: {
-      id: x.fieldResponse?.[0]?.id || null,
-      value: x.fieldResponse?.[0]?.fieldResponseValues?.at(-1)?.value || null,
-    },
+    response: getLatestResponse(x),
     feedback: x.fieldResponse?.[0]?.feedback || null,
   }));
 
@@ -110,7 +107,6 @@ export const SectionForm = ({
 
   return (
     <DefaultContentLayout>
-      {/*<Breadcrumbs items={breadcrumbItems} />*/}
       <SectionHeader
         header={headerItems}
         project={{ name: form.reactionID }}
@@ -187,21 +183,5 @@ const SectionFormAction = ({ item, isInstructor, isLoading, formRef }) => {
     (item.type.toUpperCase() === SECTION_TYPES.ProjectGroup.toUpperCase() ||
       (item.isOwner && hasRequiredPermissions));
 
-  return (
-    <HStack pb={1}>
-      {canUserSave && (
-        <Button
-          colorScheme="green"
-          leftIcon={<FaSave />}
-          size="sm"
-          isLoading={isLoading}
-          onClick={() => formRef.current.handleSubmit()}
-        >
-          <Text fontSize="sm" fontWeight="medium">
-            Save
-          </Text>
-        </Button>
-      )}
-    </HStack>
-  );
+  return <HStack pb={1}></HStack>;
 };

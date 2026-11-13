@@ -420,12 +420,6 @@ async function showSummary(mode) {
         if (demo === "not demo" && tutorial === "no" && mode !== "reload") {
           showLoadingOverlay("Creating Summary");
           displayOverlayWhilstMakingPDF("summary");
-        } else if (
-          demo === "not demo" &&
-          tutorial === "no" &&
-          mode === "reload"
-        ) {
-          await updateFileAttachmentList();
         }
         let $ta = $("#js-reaction-description-summary");
         $ta.height(0);

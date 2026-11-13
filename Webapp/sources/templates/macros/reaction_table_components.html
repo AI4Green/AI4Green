@@ -1,11 +1,11 @@
-{% macro reaction_description(reaction, tutorial) -%}
+{% macro reaction_description(reaction_name, reaction_description, tutorial) -%}
 <div class="container-fluid" style="padding-left: 0px">
     <div id="reaction-name-description">
         <p>
-            <textarea disabled id="js-reaction-name2" style="resize: horizontal;" rows="1" cols="50" placeholder="Please enter your reaction name">{% if tutorial == "yes" %}Tutorial Reaction{% else %}{{ reaction.name }}{% endif %}</textarea>
+            <textarea disabled id="js-reaction-name2" style="resize: horizontal;" rows="1" cols="50" placeholder="Please enter your reaction name">{% if tutorial == "yes" %}Tutorial Reaction{% else %}{{ reaction_name }}{% endif %}</textarea>
         </p>
         <p>
-            <textarea id="js-reaction-description" rows="4" cols="100" placeholder="Please describe your reaction"></textarea>
+            <textarea id="js-reaction-description" rows="4" cols="100" placeholder="Please describe your reaction">{{ reaction_description }}</textarea>
         </p>
     </div>
     <p><b>Please fill in the highlighted boxes to proceed</b></p>
@@ -28,14 +28,15 @@
         <th scope="col">Mol.Wt</th>
         <th scope="col">Density (g/mL)</th>
         <th scope="col">
-            <div class="input-wrapper">
-                 Conc. (M)
-                 <span class="calc-method-icon"
+            <span class="concentration-heading">
+                Conc. (M)
+                <span
+                    class="calc-method-icon"
                     title="Optional parameter. If provided, volume will be calculated from concentration and amount."
-                 style="right: -15px;">
-                    ℹ️
+                >
+                    <i class="bi bi-info-circle"></i>
                 </span>
-            </div>
+            </span>
         </th>
         <th scope="col">Equiv.</th>
         {#  set up headings with variable units  #}
@@ -190,7 +191,10 @@
                     id="js-reactant-molecular-weight{{ index }}" readonly>
                 <br>
                 {% if reactant.is_polymer %}
-                     <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
+                    <span style="font-style: italic; font-size: 80%;">Repeating Wt.</span>
+                    <span style="font-weight: bold; font-size: 90%"><br>M<sub>n</sub> = </span>
+                    <input style="width: 70px;" type="number" step="any" min="0" placeholder="{{ reactant.compound_data.molecular_weights }}"
+                           value="{{ reactant.compound_data.mns}}" id="js-reactant-mn{{ index }}">
                 {% endif %}
             </td>
             <td><input style="width: 60px; border-width:0px;" type="number" step="any" placeholder="-" min="0"
@@ -326,10 +330,8 @@
             </td>
             <td></td>
             <td>
-                {% if product.is_polymer %}
-                    <input style="width: 60px;" type="number" step="any" min="0" placeholder="1" id="js-product-equivalent{{ index }}"
-                       value="{{ product.compound_data.equivalents if product.compound_data.equivalents else 1 }}">
-                {% endif %}
+                <input style="width: 60px;" type="number" step="any" min="0" placeholder="1" id="js-product-equivalent{{ index }}"
+                   value="{{ product.compound_data.equivalents if product.compound_data.equivalents else 1 }}">
             </td>
             <td><input type="number" step="any" placeholder="-" min="0"
                 {% if product.compound_data.amounts %}value="{{ product.compound_data.amounts }}"{% endif %}
@@ -506,32 +508,6 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal" id="report-compound-data-close">Close</button>
         <button type="button" class="btn btn-danger" id="report-compound-data-submit" onclick="reportCompoundSubmit()" disabled>Report</button>
-      </div>
-    </div>
-  </div>
-</div>
-{%- endmacro %}
-
-{% macro reaction_note_modal() -%}
-    <!-- reaction-note modal window -->
-<div class="modal fade" id="new-reaction-note-modal" tabindex="-1" role="dialog" aria-labelledby="new-reaction-note-modal-title" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="new-reaction-note-modal-title">Add Note</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" id="new-reaction-note-body">
-          <div id="modal-new-reaction-note-inner-body">
-              <label for="new-reaction-note-text">Add a note to amend any missing or incorrect details in the reaction.</label>
-              <textarea id="new-reaction-note-text" style="width: 100%; height:10rem"></textarea>
-          </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-dismiss="modal" id="new-reaction-note-close">Close</button>
-        <button type="button" class="btn btn-success" id="new-reaction-note-submit" data-dismiss="modal" onclick="saveNewReactionNoteToDatabase()" disabled>Submit</button>
       </div>
     </div>
   </div>

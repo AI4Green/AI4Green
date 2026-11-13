@@ -1,115 +1,189 @@
+/* Buttons in the 2026 brand. Colour tokens are in base.css.
+   Every button keeps an underline on hover for WCAG (links and buttons are
+   distinguishable without colour), and each variant sets its :active colour so
+   Bootstrap's blue doesn't flash on click. */
+
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.btn:focus,
+.btn.focus {
+  box-shadow: 0 0 0 0.2rem rgba(70, 112, 63, 0.35);
+}
+
+/* ------ Quick access icon buttons (home page) ------ */
 .btn.icon {
     height: 70px;
     width: 70px;
-    background-color: var(--icon-background);
-    border-color: var(--icon-background);
+    background-color: var(--brand-green-tint);
+    border-color: var(--brand-green-tint);
     border-radius: 35px;
     text-align: center;
     margin: 7px;
     line-height: 80px;
-    color: var(--primary-grey);
+    color: var(--brand-green);
     transition: all 0.3s linear;
     font-size: 40;
 }
 
 .icon:hover {
-  background-color: var(--primary-grey);
-  border-color: var(--primary-grey);
-  color: var(--primary-green);
+  background-color: var(--brand-green);
+  border-color: var(--brand-green);
+  color: #fff;
   transform: scale(1.1);
 }
 
 .icon.focused {
-  background-color: var(--primary-grey);
-  border-color: var(--primary-green);
+  background-color: var(--brand-green);
+  border-color: var(--brand-navy);
   border-width: 3;
-  color: var(--primary-green);
+  color: #fff;
   transform: scale(1.1);
 }
 
-
+/* ------ Primary: solid brand green, for everyday actions ------ */
 .btn.btn-primary {
-  background-color: var(--primary-grey);
-  border-color: var(--primary-grey);
-  color: var(--tertiary-green);
+  background-color: var(--brand-green);
+  border-color: var(--brand-green);
+  color: #fff;
 }
 
-.btn.btn-primary:hover {
-  background-color: var(--primary-grey-hover);
-  border-color: var(--primary-grey-hover);
-  text-decoration:underline;
-}
-
-.btn.btn-outline-primary {
-  border-color: var(--primary-grey);
-  color: var(--primary-grey);
-}
-
-.btn.btn-outline-primary:hover {
-  color: var(--primary-grey);
-  background-color: var(--primary-green);
-  text-decoration:underline;
-}
-
-.btn.btn-secondary {
-  background-color: var(--primary-green);
-  border-color: var(--primary-green);
-  color: var(--secondary-grey);
-}
-
-.btn.btn-secondary:hover {
-  background-color: var(--primary-green-hover);
-  border-color: var(--primary-green-hover);
-  color: var(--secondary-grey);
-  text-decoration:underline;
-}
-
-.btn.btn-success {
-    background-color: var(--primary-green);
-  border-color: var(--primary-green);
-  color: var(--secondary-grey);
-}
-
-.btn.btn-success:hover {
-  background-color: var(--primary-green-hover);
-  border-color: var(--primary-green-hover);
-    text-decoration:underline;
-}
-
-.btn.btn-info {
-  background-color: var(--primary-blue);
-  border-color: var(--primary-blue);
-  color: var(--secondary-grey);
-}
-
-.btn.btn-info:hover {
-  background-color: var(--primary-blue-hover);
-  border-color: var(--primary-blue-hover);
-    text-decoration:underline;
-}
-
-.btn.btn-warning {
-  background-color: var(--primary-yellow);
-  border-color: var(--primary-yellow);
-  color: var(--secondary-grey);
-}
-
-.btn.btn-warning:hover {
-  background-color: var(--primary-yellow-hover);
-  border-color: var(--primary-yellow-hover);
+.btn.btn-primary:hover,
+.btn.btn-primary:not(:disabled):not(.disabled):active {
+  background-color: var(--brand-green-hover);
+  border-color: var(--brand-green-hover);
+  color: #fff;
   text-decoration: underline;
 }
 
-.btn.btn-danger{
-    background-color: var(--primary-red);
-    border-color: var(--primary-red);
-  color: var(--secondary-grey);
+.btn.btn-outline-primary {
+  border-color: var(--brand-green);
+  color: var(--brand-green);
 }
 
-.btn.btn-danger:hover {
-  background-color: var(--primary-red-hover);
-  border-color: var(--primary-red-hover);
-    text-decoration:underline;
+.btn.btn-outline-primary:hover,
+.btn.btn-outline-primary:not(:disabled):not(.disabled):active {
+  background-color: var(--brand-green-tint);
+  border-color: var(--brand-green);
+  color: var(--brand-green-hover);
+  text-decoration: underline;
+}
+
+/* ------ Success: solid navy, for saving, accepting and confirming ------ */
+.btn.btn-success {
+  background-color: var(--brand-navy);
+  border-color: var(--brand-navy);
+  color: #fff;
+}
+
+.btn.btn-success:hover,
+.btn.btn-success:not(:disabled):not(.disabled):active {
+  background-color: var(--brand-navy-hover);
+  border-color: var(--brand-navy-hover);
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* ------ Secondary: white with a navy outline ------ */
+.btn.btn-secondary {
+  background-color: #fff;
+  border-color: var(--brand-navy);
+  color: var(--brand-navy);
+}
+
+.btn.btn-secondary:hover,
+.btn.btn-secondary:not(:disabled):not(.disabled):active {
+  background-color: var(--brand-green-tint);
+  border-color: var(--brand-navy);
+  color: var(--brand-navy);
+  text-decoration: underline;
+}
+
+.btn.btn-outline-dark {
+  border-color: var(--brand-navy);
+  color: var(--brand-navy);
+}
+
+.btn.btn-outline-dark:hover,
+.btn.btn-outline-dark:not(:disabled):not(.disabled):active {
+  background-color: var(--brand-navy);
+  border-color: var(--brand-navy);
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* ------ Info: solid slate ------ */
+.btn.btn-info {
+  background-color: var(--brand-text-muted);
+  border-color: var(--brand-text-muted);
+  color: #fff;
+}
+
+.btn.btn-info:hover,
+.btn.btn-info:not(:disabled):not(.disabled):active {
+  background-color: var(--brand-navy);
+  border-color: var(--brand-navy);
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* ------ Warning: amber with navy text ------ */
+.btn.btn-warning {
+  background-color: var(--primary-yellow);
+  border-color: var(--primary-yellow);
+  color: var(--brand-navy);
+}
+
+.btn.btn-warning:hover,
+.btn.btn-warning:not(:disabled):not(.disabled):active {
+  background-color: var(--primary-yellow-hover);
+  border-color: var(--primary-yellow-hover);
+  color: var(--brand-navy);
+  text-decoration: underline;
+}
+
+/* ------ Danger: the same red as the navbar's logout ------ */
+.btn.btn-danger {
+  background-color: var(--brand-danger);
+  border-color: var(--brand-danger);
+  color: #fff;
+}
+
+.btn.btn-danger:hover,
+.btn.btn-danger:not(:disabled):not(.disabled):active {
+  background-color: var(--brand-danger-hover);
+  border-color: var(--brand-danger-hover);
+  color: #fff;
+  text-decoration: underline;
+}
+
+.btn.btn-outline-danger {
+  border-color: var(--brand-danger);
+  color: var(--brand-danger);
+}
+
+.btn.btn-outline-danger:hover,
+.btn.btn-outline-danger:not(:disabled):not(.disabled):active {
+  background-color: var(--brand-danger);
+  border-color: var(--brand-danger);
+  color: #fff;
+  text-decoration: underline;
+}
+
+.btn.btn-danger:focus,
+.btn.btn-outline-danger:focus {
+  box-shadow: 0 0 0 0.2rem rgba(176, 42, 55, 0.3);
+}
+
+/* ------ Link buttons ------ */
+.btn.btn-link {
+  color: var(--brand-green);
+}
+
+.btn.btn-link:hover {
+  color: var(--brand-green-hover);
 }
 
 .btn-toolbar .btn-label {

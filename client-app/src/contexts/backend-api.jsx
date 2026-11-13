@@ -2,6 +2,7 @@ import {
   getAccountApi,
   // getCommentsApi,
   getFieldsApi,
+  getInventoryApi,
   // getLiteratureReviewsApi,
   // getNotesApi,
   // getPlansApi,
@@ -12,6 +13,7 @@ import {
   // getReactionTableApi,
   // getRegistrationRulesApi,
   // getReportsApi,
+  getSearchApi,
   getSectionsApi,
   getUserApi,
 } from "api";
@@ -75,6 +77,8 @@ export const BackendApiProvider = ({ children }) => {
       // comments: getCommentsApi(baseContext),
       sections: getSectionsApi(baseContext),
       fields: getFieldsApi(baseContext),
+      inventory: getInventoryApi(baseContext),
+      search: getSearchApi(baseContext),
     }),
     [baseContext],
   );

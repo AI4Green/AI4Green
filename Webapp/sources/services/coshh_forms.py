@@ -2,10 +2,9 @@ from sources import models, services
 from sources.extensions import db
 
 
-def get_coshh_form_from_reaction_id(reaction_id):
+def get_coshh_form_from_reaction_pk(reaction_pk):
     return (
         db.session.query(models.COSHHInstance)
-        .join(models.Reaction)
-        .filter(models.Reaction.reaction_id == reaction_id)
+        .filter(models.COSHHInstance.reaction_id == reaction_pk)
         .first()
     )

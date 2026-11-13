@@ -163,15 +163,7 @@ function deleteReaction(reaction) {
 function redirectToReloadReaction(reaction) {
   let workbook = getData(reaction, "workbook");
   let workgroup = getData(reaction, "workgroup");
-  // search results open in new tab, otherwise reloaded reactions open in current tab
-  if (window.location.pathname.split("/")[1] === "search") {
-    window.open(
-      `/sketcher/${workgroup}/${workbook}/${reaction.id}/no`,
-      "_blank",
-    );
-  } else {
-    window.location.href = `/sketcher/${workgroup}/${workbook}/${reaction.id}/no`;
-  }
+  window.location.href = `/sketcher/${workgroup}/${workbook}/${reaction.id}/no`;
 }
 
 /**

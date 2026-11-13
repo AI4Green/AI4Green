@@ -31,7 +31,7 @@ export const CreateOrEditProjectTypeModal = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { projectTypes: action } = useBackendApi();
+  const { coshhForms: action } = useBackendApi();
   const { data: coshhForms, mutate } = useCoshhFormsList();
 
   const { t } = useTranslation();
@@ -62,12 +62,14 @@ export const CreateOrEditProjectTypeModal = () => {
       ? {
           name: coshhForm.name,
           description: coshhForm.description,
+          templateType: "COSHH",
           source: [],
         }
       : {
           name: "",
           description: "",
           source: [],
+          templateType: "COSHH",
         };
   };
 
@@ -78,6 +80,7 @@ export const CreateOrEditProjectTypeModal = () => {
         name: values.name,
         description: values.description,
         sourceId: values.source.length > 0 ? Number(values.source[0]) : null,
+        templateType: values.templateType,
       };
       const response = !projectType
         ? await action.create({ values: model })

@@ -1,4 +1,5 @@
 import { Heading, HStack, Text } from "@chakra-ui/react";
+import { useBackendApi } from "contexts";
 import {
   DraggableListField,
   FileUploadField,
@@ -94,15 +95,23 @@ const DescriptionField = ({ field, isDisabled }) => (
   />
 );
 
-const FileField = ({ field, isDisabled }) => (
-  <FileUploadField
-    name={field.id}
-    title={field.name}
-    accept={field.fieldResponse?.accept ?? [".pdf", ".docx", ".doc"]}
-    isRequired={field.mandatory}
-    isDisabled={isDisabled}
-  />
-);
+const FileField = ({ field, isDisabled, item }) => {
+  const { sections: api } = useBackendApi();
+
+  return (
+    <FileUploadField
+      name={field.id}
+      title={field.name}
+      accept={field.fieldResponse?.accept ?? [".pdf", ".docx", ".doc"]}
+      isRequired={field.mandatory}
+      isDisabled={isDisabled}
+      isMultiple={true}
+      onDownload={async (f) =>
+        (await api.downloadInstanceFile(f.instanceId, f.uuid)).blob()
+      }
+    />
+  );
+};
 
 const ImageFileField = ({ field, isDisabled }) => (
   <ImageUploadField

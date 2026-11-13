@@ -1,5 +1,6 @@
 from flask import (
     Response,
+    abort,
     current_app,
     flash,
     jsonify,
@@ -88,6 +89,9 @@ def request_response(token: str) -> Response:
 
     addenda = services.reaction.get_addenda(reaction)
 
+    # entry function for react
+    vite_entry = services.spa.vite_entry
+
     # check user is a required approver AND a PI in the workgroup
     if (
         current_user.Person in reaction_approval_request.required_approvers
@@ -103,6 +107,7 @@ def request_response(token: str) -> Response:
                 active_workbook=workbook.name,
                 tutorial="no",
                 addenda=addenda,
+                vite_entry=vite_entry,
                 review=True,
             )
         else:
@@ -134,6 +139,12 @@ def review_reaction_approve() -> Response:
             }
         )
 
+    if (
+        approval_request.status.value != "PENDING"
+        or current_user.Person not in approval_request.required_approvers
+    ):
+        abort(403)
+
     request_status = services.reaction.ReactionApprovalRequestResponse(approval_request)
     request_status.approve()
 
@@ -161,6 +172,12 @@ def review_reaction_reject() -> Response:
                 "redirect_url": url_for("main.index"),
             }
         )
+
+    if (
+        approval_request.status.value != "PENDING"
+        or current_user.Person not in approval_request.required_approvers
+    ):
+        abort(403)
 
     request_status = services.reaction.ReactionApprovalRequestResponse(approval_request)
     request_status.reject(request.json.get("comments"))
@@ -192,6 +209,12 @@ def review_reaction_suggest_changes() -> Response:
                 "redirect_url": url_for("main.index"),
             }
         )
+
+    if (
+        approval_request.status.value != "PENDING"
+        or current_user.Person not in approval_request.required_approvers
+    ):
+        abort(403)
 
     request_status = services.reaction.ReactionApprovalRequestResponse(approval_request)
     request_status.suggest_changes(request.json.get("comments"))

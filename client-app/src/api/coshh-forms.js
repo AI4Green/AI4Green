@@ -2,9 +2,10 @@ import { useBackendApi } from "contexts";
 import useSWR from "swr";
 
 export const fetchKeys = {
-  coshhFormsList: "templates",
+  coshhFormsList: "templates?template_type=COSHH",
   coshhForm: (coshhFormId) => `templates/${coshhFormId}`,
   sectionTypesList: "templates/section_types",
+  coshhInstancesList: "template-instances?instance_type=COSHH",
 };
 
 export const getCoshhFormsApi = ({ api }) => ({
@@ -29,6 +30,21 @@ export const useCoshhFormsList = () => {
 
   return useSWR(
     fetchKeys.coshhFormsList,
+    async (url) => {
+      const data = await apiFetcher(url);
+      return data;
+    },
+    {
+      suspense: true,
+    },
+  );
+};
+
+export const useCoshhInstanceList = () => {
+  const { apiFetcher } = useBackendApi();
+
+  return useSWR(
+    fetchKeys.coshhInstancesList,
     async (url) => {
       const data = await apiFetcher(url);
       return data;

@@ -245,6 +245,7 @@ function setupMassListeners() {
     updateReagentAmounts();
     updateReagentMasses();
     updateReagentVolumes();
+    updateSolventVolumes();
   });
 }
 
@@ -259,6 +260,7 @@ function setupAmountListeners() {
     updateReagentAmounts();
     updateReagentMasses();
     updateReagentVolumes();
+    updateSolventVolumes();
   });
 }
 
@@ -281,12 +283,15 @@ function setupAmountUnitListener() {
     updateLimitingReactantAmountOnMassChange();
     updateReactantAmounts();
     updateReagentAmounts();
-    // todo: add reagents and solvents to unit listeners
   });
 
   $("#js-product-amount-unit").on("input change", function () {
     // changing molar unit should change the mass
     updateProductAmounts();
+  });
+
+  $("#js-product-mass-unit").on("input change", function () {
+    updateProductMasses();
   });
 }
 
@@ -337,7 +342,7 @@ function setupConcentrationListeners() {
   $(".js-reactant-concentrations").on("input change", function () {
     updateReactantVolumes();
   });
-  // bind reagent listener to reaction table div to capture any dynamically added rows
+
   $("#js-reagent-table").on(
     "input.reagentEquivalent change.reagentEquivalent",
     ".js-reagent-concentrations",
@@ -352,16 +357,18 @@ function setupConcentrationListeners() {
     "input.reactionConcentration change.reactionConcentration",
     ".js-solvent-concentrations",
     function () {
-      // need to sync all concentrations first
-      let concentration = this.value;
+      const concentration = this.value;
       const numberOfSolvents = getVal($("#js-number-of-solvents"));
 
-      // Sync all concentration inputs
       for (let i = 1; i <= numberOfSolvents; i++) {
         $("#js-solvent-concentration" + i).val(concentration);
-        $("#js-solvent-rounded-concentration" + i).val(
-          roundedNumber(concentration),
-        );
+
+        const $roundedInput = $("#js-solvent-rounded-concentration" + i);
+
+        // Don't overwrite the input the user is currently typing into
+        if (!$roundedInput.is(this)) {
+          $roundedInput.val(concentration);
+        }
       }
 
       updateSolventVolumes();
@@ -465,26 +472,44 @@ function updateSolventVolumes() {
   const limitingReactantAmount = Number(
     getVal($("#js-reactant-amount" + getLimitingReactantTableNumber())),
   );
+
   const numberOfSolvents = Number(getVal($("#js-number-of-solvents")));
   const limitingReactantAmountUnit = getVal($("#js-amount-unit"));
   const solventVolumeUnit = getVal($("#js-solvent-volume-unit"));
 
-  // let totalSolventVolume = 0;
   for (let i = 1; i <= numberOfSolvents; i++) {
-    let concentration = Number(
-      getVal($("#js-solvent-rounded-concentration" + i)),
+    const concentrationValue = getVal(
+      $("#js-solvent-rounded-concentration" + i),
     );
-    // assume equal split of volume between reaction solvents to maintain concentration
-    let totalSolventVolume = calculateSolventVolumeFromConcentration(
+
+    // User may temporarily have an empty value while typing
+    if (concentrationValue === "") {
+      continue;
+    }
+
+    const concentration = Number(concentrationValue);
+
+    // Prevent division by zero / NaN / Infinity
+    if (!Number.isFinite(concentration) || concentration <= 0) {
+      continue;
+    }
+
+    const totalSolventVolume = calculateSolventVolumeFromConcentration(
       limitingReactantAmount,
       concentration,
       limitingReactantAmountUnit,
       solventVolumeUnit,
     );
 
-    let element = $("#js-solvent-volume" + i);
-    element.val(totalSolventVolume / numberOfSolvents);
-    element.val(roundedNumber(totalSolventVolume / numberOfSolvents));
+    const volume = totalSolventVolume / numberOfSolvents;
+
+    // Don't ever put Infinity/NaN into a number input
+    if (!Number.isFinite(volume)) {
+      continue;
+    }
+
+    const element = $("#js-solvent-volume" + i);
+    element.val(roundedNumber(volume));
     applyRequiredStyling(element);
   }
 }
@@ -505,34 +530,70 @@ function updateComponentVolume(component, index) {
 }
 
 function assignVolumeTooltip(calcType, component, index) {
-  console.log("assign tooltip", calcType, component, index);
   const volumeTooltips = {
     concentration: "Calculated from concentration and amount.",
     density: "Calculated from density and mass.",
   };
 
   const $input = $(`#js-${component}-rounded-volume${index}`);
-  console.log("$input length:", $input.length);
-  // Remove any existing icon first
-  $input.next(".calc-method-icon").remove();
-  $input.removeAttr("title");
 
-  if (calcType === "") {
-    // if no volume, break early
+  const previousCalcType = $input.data("calc-type");
+  const previousVolume = $input.data("calculated-volume");
+  const currentVolume = $input.val();
+
+  // Update tooltip
+  if (calcType) {
+    $input.attr("title", volumeTooltips[calcType]);
+  } else {
+    $input.removeAttr("title");
+  }
+
+  // Store current calculation state
+  $input.data("calc-type", calcType);
+  $input.data("calculated-volume", currentVolume);
+
+  // Don't show a toast during initial setup
+  if (previousCalcType === undefined) {
     return;
   }
 
-  const $icon = $(`
-    <span
-      class="calc-method-icon"
-      title="${volumeTooltips[calcType]}"
-      >
-      ℹ️
+  // Only notify if this particular calculation changed
+  const calculationChanged =
+    previousCalcType !== calcType || previousVolume !== currentVolume;
+
+  if (calculationChanged && calcType) {
+    showVolumeCalculationToast($input, calcType);
+  }
+}
+
+function showVolumeCalculationToast($input, calcType) {
+  const messages = {
+    concentration: "Calculated from concentration and amount",
+    density: "Calculated from density and mass",
+  };
+
+  if (!messages[calcType]) {
+    return;
+  }
+
+  const $wrapper = $input.closest(".input-wrapper");
+
+  // Remove an existing toast for this input
+  $wrapper.find(".calculation-toast").remove();
+
+  const $toast = $(`
+    <span class="calculation-toast">
+      ${messages[calcType]}
     </span>
   `);
 
-  $input.after($icon);
-  console.log("icon in DOM:", $(".calc-method-icon").length);
+  $wrapper.append($toast);
+
+  setTimeout(() => {
+    $toast.fadeOut(300, function () {
+      $(this).remove();
+    });
+  }, 2000);
 }
 
 function updateComponentAmount(component, index, limitingReactantAmount) {
@@ -877,42 +938,6 @@ function postReagentData(reagentName, x) {
   });
 }
 
-// function autofillReagentFields2(i) {
-//   const component = "reagent";
-//   let limitingReactantTableNumber = getLimitingReactantTableNumber();
-//   let limitingReactantMassID =
-//     "#js-reactant-rounded-mass" + limitingReactantTableNumber;
-//   let reagentEquivalentID = "#js-reagent-equivalent" + i;
-//   let reagentDensityID = "#js-reagent-density" + i;
-//   let reagentConcentrationID = "#js-reagent-concentration" + i;
-//   const amountMassChangeParameters = [
-//     limitingReactantMassID,
-//     reagentEquivalentID,
-//     "#js-amount-unit",
-//     "#js-mass-unit",
-//   ];
-//   for (const param of amountMassChangeParameters) {
-//     autofillAmount(component, param, i);
-//     autofillRoundedAmount(component, param, i);
-//     autofillMass(component, param, i);
-//     autofillRoundedMass(component, param, i);
-//   }
-//   const volumeChangeParameters = [
-//     limitingReactantMassID,
-//     reagentDensityID,
-//     reagentConcentrationID,
-//     reagentEquivalentID,
-//     "#js-volume-unit",
-//     "#js-mass-unit",
-//   ];
-//   for (const param of volumeChangeParameters) {
-//     autofillVolume(component, param, i);
-//     autofillRoundedVolume(component, param, i);
-//   }
-//   autoRemoveVolume("reagent", "#js-reagent-concentration" + i, i);
-//   autoRemoveVolume("reagent", "#js-reagent-density" + i, i);
-// }
-
 function addNewReagent() {
   // get current number of reagents and plus one
   let $reagentNumber = $("#js-number-of-reagents");
@@ -934,8 +959,7 @@ function addNewReagent() {
     .prop("id", reagentPhysicalFormID)
     .appendTo("#js-reagent-physical-form-dropdown-cell" + reagentNumber);
   autofillReagentData(reagentNumber);
-  // autofillReagentFields2(reagentNumber);
-  // updateStyling();
+
   updateProductTableNumber();
   // update solvent table numbers
   updateSolventTableNumbers();
@@ -1006,7 +1030,6 @@ async function removeReagent(removedReagentNumber) {
       }
       // recreate listener events on the cloned elements with updated ids
       autofillReagentData(j);
-      // updateStyling();
     }
   }
   // update the reagent number before the product+solvent table numbers
@@ -1073,8 +1096,6 @@ function updateProductTableNumber() {
 // function to set up lister events for solvent datalist
 function datalist_initiate(solventInputID, solventDatalistID, solventNumber) {
   autofillSolventData(solventNumber);
-  // autofillSolventFields2();
-  // updateStyling();
   for (let option of document.getElementById(solventDatalistID).options) {
     option.onclick = function () {
       document.getElementById(solventInputID).value = option.value;
@@ -1347,71 +1368,6 @@ function autofillSolventTableNumber(x, changedParameter) {
   });
 }
 
-// Solvent autofill functions
-//Autofill solvent concentration in the hidden field
-// function autofillSolventConcentration(
-//   x,
-//   changedParameter,
-//   limitingReactantTableNumber,
-// ) {
-//   $(changedParameter).on("input change", function () {
-//     let firstReactantAmount = getVal(
-//       $("#js-reactant-amount" + limitingReactantTableNumber),
-//     );
-//     let solventVolumeID = "#js-solvent-volume" + x;
-//     let solventVolume = getVal($(solventVolumeID));
-//     let solventConcentration = 0;
-//     const reactantAmountUnit = getVal($("#js-amount-unit"));
-//     const solventVolumeUnit = getVal($("#js-solvent-volume-unit"));
-//     if (solventVolume > 0) {
-//       // multiply by 1000 to go from concentration in mL to L / decimetres
-//       solventConcentration =
-//         (amountFactor[reactantAmountUnit] * firstReactantAmount * 1000) /
-//         (solventVolume * volumeFactor[solventVolumeUnit]);
-//     }
-//     let solventConcentrationID = "#js-solvent-concentration" + x;
-//     $(solventConcentrationID).val(solventConcentration);
-//   });
-// }
-//
-// //Autofill rounded solvent concentration in the explicit field
-// function autofillRoundedSolventConcentration(x, changedParameter) {
-//   $(changedParameter).on("input change", function () {
-//     let solventConcentrationID = "#js-solvent-concentration" + x;
-//     let solventConcentration = getNum($(solventConcentrationID));
-//     let roundedSolventConcentration = roundedNumber(solventConcentration);
-//     let roundedSolventConcentrationID = "#js-solvent-rounded-concentration" + x;
-//     $(roundedSolventConcentrationID).val(roundedSolventConcentration);
-//   });
-// }
-
-// function autofillSolventFields2() {
-//   let numberOfSolvents = getVal($("#js-number-of-solvents"));
-//   if (numberOfSolvents > 0) {
-//     for (let i = 1; i < numberOfSolvents + 1; i++) {
-//       let limitingReactantTableNumber = getLimitingReactantTableNumber();
-//       let limitingReactantMass =
-//         "#js-reactant-rounded-mass" + limitingReactantTableNumber;
-//       let solventVolumeID = "#js-solvent-volume" + i;
-//       const solventConcentrationParameters = [
-//         limitingReactantMass,
-//         solventVolumeID,
-//         "#js-mass-unit",
-//         "#js-solvent-volume-unit",
-//         ".js-reactant-limiting",
-//       ];
-//       for (const param of solventConcentrationParameters) {
-//         autofillSolventConcentration(i, param, limitingReactantTableNumber);
-//         autofillRoundedSolventConcentration(i, param);
-//       }
-//       // autofillSolventTableNumber(i, ".js-add-reagent");
-//       // autofillSolventTableNumber(i, ".js-remove-reagent");
-//       // autofillSolventTableNumber(i, ".js-add-solvent");
-//       // autofillSolventTableNumber(i, ".js-remove-solvent");
-//     }
-//   }
-// }
-
 function goToSolventGuide(sol_x) {
   let solventName = getVal($("#js-solvent" + sol_x));
   if (solventName) {
@@ -1585,33 +1541,6 @@ function autoChangeRequiredStylingValidCompound(component, loop_value) {
     $(changedStyling).removeClass("readonly-cell");
   }
 }
-
-// function updateStyling() {
-//   for (let i = 1; i < reactionTable.numberOfReactants + 1; i++) {
-//     autoChangeRequiredStyling("#js-reactant-physical-form" + i);
-//     autoChangeRequiredStyling("#js-reactant-rounded-mass" + i);
-//     autoChangeRequiredStyling("#js-reactant-equivalent" + i);
-//     autoChangeRequiredStyling("#js-reactant-rounded-amount" + i);
-//   }
-//   let numberOfReagents = getNum($("#js-number-of-reagents"));
-//   for (let i = 1; i < numberOfReagents + 1; i++) {
-//     autoChangeRequiredStyling("#js-reagent-physical-form" + i);
-//     autoChangeRequiredStyling("#js-reagent-equivalent" + i);
-//     autoChangeRequiredStyling("js-reagent-hazards" + i);
-//     autoChangeRequiredStylingValidCompound("reagent", i);
-//   }
-//   let numberOfSolvents = getNum($("#js-number-of-solvents"));
-//   for (let i = 1; i < numberOfSolvents + 1; i++) {
-//     autoChangeRequiredStyling("#js-solvent-physical-form" + i);
-//     autoChangeRequiredStyling("#js-solvent-volume" + i);
-//     autoChangeRequiredStyling("#js-solvent" + i);
-//     autoChangeRequiredStyling("#js-solvent-rounded-concentration" + i);
-//     autoChangeRequiredStylingValidCompound("solvent", i);
-//   }
-//   for (let i = 1; i < reactionTable.numberOfProducts + 1; i++) {
-//     autoChangeRequiredStyling("#js-product-physical-form" + i);
-//   }
-// }
 
 // utility functions
 function commonGlobalVariables() {

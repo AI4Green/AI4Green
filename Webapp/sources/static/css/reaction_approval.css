@@ -1,5 +1,5 @@
 /* Common Reaction Box Styling */
-[class^="reaction-"] {
+.reaction-approval-status {
     padding: 16px;
     border-radius: 8px;
     font-family: Arial, sans-serif;
@@ -7,7 +7,7 @@
 }
 
 /* Header Section */
-[class^="reaction-"] .header {
+.reaction-approval-status .header {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -15,7 +15,7 @@
 }
 
 /* Input Styling */
-[class^="reaction-"] input {
+.reaction-approval-status input {
     border: none;
     background: transparent;
     font-weight: bold;
@@ -23,7 +23,7 @@
 }
 
 /* Timestamp Styling */
-[class^="reaction-"] .timestamp {
+.reaction-approval-status .timestamp {
     margin-left: auto;
     font-size: 0.9em;
     opacity: 0.7;

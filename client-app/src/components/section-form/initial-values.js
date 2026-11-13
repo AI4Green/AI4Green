@@ -1,5 +1,15 @@
 import { INPUT_TYPES } from "constants";
 
+const parseFileValue = (raw) => {
+  if (!raw) return [];
+  try {
+    const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed) ? parsed : [parsed];
+  } catch {
+    return [];
+  }
+};
+
 const getInitialValue = (field, recordId, sectionId, sectionApis) => {
   const {
     File,
@@ -26,20 +36,12 @@ const getInitialValue = (field, recordId, sectionId, sectionApis) => {
     case File.toUpperCase():
     case ImageFile.toUpperCase(): {
       return {
-        [field.id]: Array.isArray(fieldResponse)
-          ? fieldResponse.map((file) => ({
-              ...file,
-              download: async () => {
-                const response = await sectionApis.downloadSectionFile(
-                  sectionId,
-                  recordId,
-                  file.location,
-                  file.name,
-                );
-                return await response.blob();
-              },
-            }))
-          : [],
+        [field.id]: parseFileValue(fieldResponse).map((meta) => ({
+          name: meta.display_name,
+          uuid: meta.uuid,
+          instanceId: recordId, // plain data, so the download call knows which instance
+          isNew: false,
+        })),
       };
     }
 
@@ -67,6 +69,22 @@ const getInitialValue = (field, recordId, sectionId, sectionApis) => {
     default:
       return { [field.id]: fieldResponse };
   }
+};
+
+/**
+ * Gets a field's saved response: the response record's id and its most recent
+ * value. Uses `??` rather than `||` so falsy answers such as `0` or `false` are
+ * kept instead of being treated as unanswered.
+ * @param {object} field - A template field, including its `fieldResponse` list.
+ * @returns {{ id: (number|null), value: * }} The response id and latest value,
+ *   each `null` when there is no response.
+ */
+export const getLatestResponse = (field) => {
+  const response = field.fieldResponse?.[0];
+  return {
+    id: response?.id ?? null,
+    value: response?.fieldResponseValues?.at(-1)?.value ?? null,
+  };
 };
 
 export const initialValues = (

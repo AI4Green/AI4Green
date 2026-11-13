@@ -2,7 +2,11 @@
 {% macro navbar(current_user, workgroups, notification_number, user_role) %}
     <!-- Skip to content link for accessibility. TODO implement main content on pages-->
     <a href="#main-content" class="sr-only sr-only-focusable">Skip to main content</a>
-    <nav id="main-navbar" class="navbar navbar-expand-md navbar-dark bg-dark sticky-top">
+    <nav id="main-navbar" class="navbar navbar-expand-md navbar-light sticky-top">
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">
+            <img src="{{ url_for('static', filename='img/AI4Green_logo_light_small.png') }}"
+                 alt="AI4Green home" width="348" height="240" class="navbar-logo logo-on-light">
+        </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
                 aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -131,10 +135,17 @@
                                href="{{ url_for('workgroup_membership_summary.workgroup_membership_summary') }}"
                                type="button">
                                 <i class="bi bi-people-fill"></i> Membership Summary</a>
+
                             <a id="coshh-templates" class="dropdown-item"
-                               href="/spa/project-types"
+                               href="/spa/my-coshh-forms"
+                               type="button">
+                                <i class="bi bi-exclamation-diamond"></i> My COSHH Forms </a>
+                            {% if user_role == 'H&S Admin' %}
+                            <a id="coshh-templates" class="dropdown-item"
+                               href="/spa/coshh-form-management"
                                type="button">
                                 <i class="bi bi-exclamation-diamond"></i> Manage COSHH Templates</a>
+                            {% endif %}
 
                             {% if user_role == 'Admin' %}
                                 <a href="{{ url_for('admin_dashboard.admin_dashboard') }}" id="admin_dashboard"
@@ -143,7 +154,7 @@
 
                             <div class="dropdown-divider"></div>
                             <a id="TopNavLoginButton" href="{{ url_for('auth.logout') }}"
-                               class="dropdown-item bg-danger"
+                               class="dropdown-item dropdown-item-danger"
                                type="button"><i class="bi bi-box-arrow-right"></i> Logout</a>
                         </div>
                     </li>

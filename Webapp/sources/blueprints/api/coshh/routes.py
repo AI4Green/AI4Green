@@ -10,7 +10,7 @@ from . import coshh_api_bp
 
 @coshh_api_bp.route("/templates/<int:template_id>/sections", methods=["GET"])
 def get_template_sections(template_id):
-    template = models.Template.query.get(template_id)
+    template = models.COSHHTemplate.query.get(template_id)
     return jsonify(template.sections)
 
 

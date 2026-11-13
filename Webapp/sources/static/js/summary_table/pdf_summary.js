@@ -123,30 +123,6 @@ async function sendPDFToBackend(formData) {
 }
 
 /**
- * Fetch request to backend to get the updated reaction attachments in order for the current reaction.
- */
-function updateFileAttachmentList() {
-  const { workgroup, workbook, reactionID } = getReactionFormVariables();
-  return fetch("/get_file_attachment_list", {
-    method: "POST",
-    body: JSON.stringify({
-      workgroup: workgroup,
-      workbook: workbook,
-      reactionID: reactionID,
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => response.json()) // Parse the JSON response
-    .then((data) => {
-      // empty the list of attachments then repopulate with the response data
-      $("#file-list").empty();
-      showFileAttachmentButtons(data.file_attachments);
-    });
-}
-
-/**
  * Gets the current datetime for UK timezone and formats.
  * @return {string} - formatted datetime string.
  */

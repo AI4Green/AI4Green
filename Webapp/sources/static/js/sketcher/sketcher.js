@@ -181,16 +181,26 @@ async function reloadReaction() {
     document.getElementById("js-reaction-table-data").value,
   );
   if (Object.keys(js_reaction_table_data).includes("reaction_description")) {
-    reloadReactionTable(js_reaction_table_data);
+    await reloadReactionTable(js_reaction_table_data);
+  }
+  await updateFileAttachmentList();
+
+  let js_summary_table_data = JSON.parse($("#js-summary-table-data").val());
+  // load summary table if it has previously been loaded, element sustainability is used because this is autofilled upon load.
+  if (js_summary_table_data["element_sustainability"] !== "undefined") {
+    setTimeout(() => showSummary("reload"), 1000);
   }
   $("#js-load-status").val("loaded");
+  if (ifCurrentUserIsNotCreator()) {
+    controlNonCreatorFunctionality();
+  }
 }
 
 function reloadReactionTable(reactionTableData) {
   let workbook = $("#js-active-workbook").val();
   let workgroup = $("#js-active-workgroup").val();
   let reactionID = $("#js-reaction-id").val();
-  fetch("/reload_reaction_table", {
+  return fetch("/reload_reaction_table", {
     headers: {
       "Content-Type": "application/json",
     },
@@ -287,4 +297,48 @@ function setupSketcherAutosave() {
   if (marvin) {
     setupMarvinAutosave();
   }
+}
+
+/**
+ * When a user reloads a reaction they are not the creator of we disable inputs to prevent them editing the reaction
+ * We enable the options to print a PDF summary and to download/view file attachments.
+ */
+function controlNonCreatorFunctionality() {
+  $("#page-contents :input").prop("disabled", true);
+  $("#print-pdf").prop("disabled", false);
+  $("#file-list").find("*").prop("disabled", false);
+  $(".delete-file-button").prop("disabled", true);
+  // keep the review buttons active for review
+  $("#approve-reaction").prop("disabled", false);
+  $("#suggest-changes").prop("disabled", false);
+  $("#reject-reaction").prop("disabled", false);
+  $("#suggest-comment-modal").find(":disabled").prop("disabled", false);
+  $("#reject-reaction-modal").find(":disabled").prop("disabled", false);
+  // enable collapsable sections
+  $(".section-toggle").prop("disabled", false);
+  $("#reaction-note-button").hide();
+}
+
+/**
+ * Fetch request to backend to get the updated reaction attachments in order for the current reaction.
+ */
+function updateFileAttachmentList() {
+  const { workgroup, workbook, reactionID } = getReactionFormVariables();
+  return fetch("/get_file_attachment_list", {
+    method: "POST",
+    body: JSON.stringify({
+      workgroup: workgroup,
+      workbook: workbook,
+      reactionID: reactionID,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.json()) // Parse the JSON response
+    .then((data) => {
+      // empty the list of attachments then repopulate with the response data
+      $("#file-list").empty();
+      showFileAttachmentButtons(data.file_attachments);
+    });
 }

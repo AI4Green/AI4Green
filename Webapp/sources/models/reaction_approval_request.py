@@ -9,10 +9,12 @@ from .base import Model
 
 
 class ReactionApprovalStatus(Enum):
+    DRAFT = "DRAFT"
     PENDING = "PENDING"
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
     CHANGES_REQUESTED = "CHANGES_REQUESTED"
+    EXPIRED = "EXPIRED"
 
 
 # Association table for the many-to-many relationship between Person and DataExportRequests
