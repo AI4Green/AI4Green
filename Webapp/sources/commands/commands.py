@@ -150,7 +150,7 @@ def update_pubchem() -> None:
 
     for update_date_link in list_of_updates:
         # Download the update.
-        download_url = f"https://ftp.ncbi.nlm.nih.gov/pubchem/Compound/Monthly/{update_date_link}Extras/CID-LCSS.xml.gz"  # noqa: E231
+        download_url = f"https://ftp.ncbi.nlm.nih.gov/pubchem/Compound/Monthly/{update_date_link}Extras/CID-LCSS.xml.gz"
         pubchem_download.download_pubchem_database(download_url, "Pubchem-update")
 
         # Unzip and make changes.

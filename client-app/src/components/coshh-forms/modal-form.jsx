@@ -144,7 +144,7 @@ export const CreateOrEditProjectTypeModal = () => {
               <FormikInput name="name" label="Project type name" isRequired />
               <TextAreaField
                 name="description"
-                label="Project type description"
+                title="Project type description"
               />
               <Text fontSize="xs" color="gray.500" as="i">
                 Optionally import sections and fields from an existing project
