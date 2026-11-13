@@ -364,9 +364,15 @@ export const NavBar = ({
             ))}
           </NavDropdown>
 
-          <NavButton icon={BsSearch} href="/search">
+          {/* the search page is an SPA route, so navigate client side */}
+          <Button
+            as={Link}
+            to="/search"
+            leftIcon={<Icon as={BsSearch} />}
+            {...navItemStyles}
+          >
             Search
-          </NavButton>
+          </Button>
         </HStack>
       )}
 

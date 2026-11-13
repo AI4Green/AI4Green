@@ -241,23 +241,18 @@ def demo() -> Response:
     )
 
 
-@main_bp.route("/search", methods=["GET", "POST"])
+@main_bp.route("/search", methods=["GET"])
 @login_required
 @main_bp.doc(security="sessionAuth")
 def search() -> Response:
     """
-    Renders the search page.
+    Redirects to the search page, which is now part of the React app. Kept so
+    bookmarks and the Jinja navbar's url_for("main.search") still work.
 
     Returns:
-        flask.Response: The rendered search page.
+        flask.Response: A redirect to the React search page.
     """
-    workgroups = get_workgroups()
-    notification_number = get_notification_number()
-    return render_template(
-        "reactions/search.html",
-        workgroups=workgroups,
-        notification_number=notification_number,
-    )
+    return redirect("/spa/search")
 
 
 @main_bp.route("/accept_privacy_policy", methods=["PATCH"])
