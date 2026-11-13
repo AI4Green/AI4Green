@@ -132,7 +132,7 @@ def _read_optional_positive(value: Any, label: str, maximum: float) -> Optional[
     number = _read_number(value, label)
     if number <= 0 or number > maximum:
         raise InventoryValidationError(
-            f"{label} must be more than zero and at most {maximum:g}."  # noqa: E231
+            f"{label} must be more than zero and at most {maximum:g}."
         )
     return float(number)
 
