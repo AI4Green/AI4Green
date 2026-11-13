@@ -7,7 +7,15 @@ import {
   Input,
   Select,
 } from "@chakra-ui/react";
-import { controlProps, focusRing, INV, underline } from "./ui.jsx";
+import { STRUCTURE_MODE_LABELS } from "components/core/structure-sketcher/structure-search-labels.js";
+import {
+  controlProps,
+  focusRing,
+  INV,
+  InvButton,
+  LinkButton,
+  underline,
+} from "./ui.jsx";
 
 /**
  * Labelled filter control.
@@ -75,6 +83,35 @@ export const SegmentButton = ({ isPressed, position, ...props }) => (
   />
 );
 
+/**
+ * Shows the structure search in use, with a button to remove it.
+ * @param {object} props
+ * @param {{ ids: Set<number>, mode: string }} props.structure The search result.
+ * @param {() => void} props.onEdit Opens the structure search again.
+ * @param {() => void} props.onClear Removes the structure filter.
+ */
+const StructureFilterChip = ({ structure, onEdit, onClear }) => (
+  <Flex
+    role="status"
+    align="center"
+    gap="4px"
+    minH="44px"
+    ps="12px"
+    border="1px solid"
+    borderColor={INV.accent}
+    borderRadius="8px"
+    bg={INV.accentSoft}
+    fontSize="14px"
+  >
+    Structure: {STRUCTURE_MODE_LABELS[structure.mode].toLowerCase()} (
+    {structure.ids.size} {structure.ids.size === 1 ? "compound" : "compounds"})
+    <LinkButton onClick={onEdit}>Change</LinkButton>
+    <LinkButton onClick={onClear} aria-label="Clear the structure search">
+      Clear
+    </LinkButton>
+  </Flex>
+);
+
 export default function InventoryFilters({
   filters,
   onChange,
@@ -82,6 +119,7 @@ export default function InventoryFilters({
   suppliers,
   view,
   onViewChange,
+  onOpenStructureSearch,
 }) {
   const set = (key) => (e) =>
     onChange({
@@ -101,6 +139,18 @@ export default function InventoryFilters({
           onChange={set("search")}
         />
       </Field>
+
+      {filters.structure ? (
+        <StructureFilterChip
+          structure={filters.structure}
+          onEdit={onOpenStructureSearch}
+          onClear={() => onChange({ ...filters, structure: null })}
+        />
+      ) : (
+        <InvButton onClick={onOpenStructureSearch}>
+          Search by structure
+        </InvButton>
+      )}
 
       <Field id="inv-location" label="Location">
         <Select

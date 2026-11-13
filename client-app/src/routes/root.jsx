@@ -2,6 +2,7 @@ import { DefaultLayout } from "layouts/default";
 import { ContentPage } from "pages/content";
 import { NotFound } from "pages/error";
 import { Home } from "pages/home";
+import { SearchPage } from "pages/search";
 import { Route, Routes } from "react-router-dom";
 import { CoshhForms } from "./coshh-forms";
 import { COSHH } from "./coshh.jsx";
@@ -26,6 +27,8 @@ export const Root = () => {
 
         <Route path="coshh-form-management/*" element={<CoshhForms />} />
         <Route path="my-coshh-forms/*" element={<COSHH />} />
+
+        <Route path="search" element={<SearchPage />} />
 
         <Route path="inventory/:workgroupName" element={<InventoryPage />} />
         <Route

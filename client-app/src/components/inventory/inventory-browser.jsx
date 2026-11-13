@@ -2,6 +2,7 @@ import { Flex, Grid, HStack, Text } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { daysUntil, EXPIRY_WARNING_DAYS, summarise } from "./utils.jsx";
 import InventoryFilters from "./inventory-filters.jsx";
+import { StructureSearchModal } from "./structure-search-modal.jsx";
 import CompoundTable from "./compound-table.jsx";
 import ContainersTable from "./containers-table.jsx";
 import { Card, EmptyState, INV, InvButton, MOBILE, Muted } from "./ui.jsx";
@@ -28,18 +29,22 @@ const INITIAL_FILTERS = {
   supplier: "",
   status: "",
   showArchived: false,
+  // a structure search's result, `{ ids: Set<number>, mode }`, or null
+  structure: null,
 };
 
 /**
  * Summary figures, filters and a paged table of the AI4Green inventory's
  * compounds or containers.
  * @param {object} props
+ * @param {string} props.workgroupName The workgroup, for structure searches.
  * @param {object[]} props.compounds Compounds, each with containers in `items`.
  * @param {boolean} [props.canEdit] Show the actions that change stock.
  * @param {(action: string, item: object) => void} [props.onItemAction]
  * @param {(wc: object) => void} [props.onAddContainer]
  */
 export default function InventoryBrowser({
+  workgroupName,
   compounds,
   canEdit = false,
   onItemAction,
@@ -48,6 +53,7 @@ export default function InventoryBrowser({
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [view, setView] = useState("compound"); // compound | containers
   const [page, setPage] = useState(0);
+  const [isStructureSearchOpen, setIsStructureSearchOpen] = useState(false);
 
   const updateFilters = (next) => {
     setFilters(next);
@@ -96,6 +102,9 @@ export default function InventoryBrowser({
         ),
       }))
       .filter(({ wc, summary, items }) => {
+        if (filters.structure && !filters.structure.ids.has(wc.id)) {
+          return false;
+        }
         if (itemFilterOn && items.length === 0) return false;
         if (filters.status === "low" && !summary.belowMin) return false;
         if (
@@ -166,7 +175,17 @@ export default function InventoryBrowser({
         suppliers={suppliers}
         view={view}
         onViewChange={updateView}
+        onOpenStructureSearch={() => setIsStructureSearchOpen(true)}
       />
+
+      {isStructureSearchOpen && (
+        <StructureSearchModal
+          workgroupName={workgroupName}
+          initialMode={filters.structure?.mode}
+          onApply={(structure) => updateFilters({ ...filters, structure })}
+          onClose={() => setIsStructureSearchOpen(false)}
+        />
+      )}
 
       <Card overflowX="auto">
         {total === 0 && <EmptyState>No stock matches your search.</EmptyState>}

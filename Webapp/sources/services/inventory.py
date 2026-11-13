@@ -532,6 +532,51 @@ def get_item_history(workgroup: models.WorkGroup, item_id: int) -> List[Dict[str
     return [serialise_ledger_entry(entry) for entry in entries]
 
 
+def search_by_structure(workgroup: models.WorkGroup, data: Dict[str, Any]) -> List[int]:
+    """
+    Finds the workgroup's compounds that match a drawn structure, exactly or
+    as a substructure. Covers the same compounds get_inventory returns.
+
+    Args:
+        workgroup: The workgroup.
+        data: The request body: `smiles` from the sketcher and `mode`
+            ("exact" or "substructure").
+
+    Returns:
+        The matching WorkgroupCompound ids, in ascending order.
+
+    Raises:
+        InventoryValidationError: If the structure can't be searched.
+    """
+    structure_search = services.structure_search
+    try:
+        query = structure_search.build_query(
+            data.get("smiles"), structure_search.read_mode(data.get("mode"))
+        )
+    except structure_search.StructureSearchError as error:
+        raise InventoryValidationError(str(error)) from None
+    if query.is_polymer:
+        raise InventoryValidationError(
+            "Polymer structures can't be searched in the inventory."
+        )
+
+    workgroup_compounds = (
+        db.session.query(models.WorkgroupCompound)
+        .options(
+            joinedload(models.WorkgroupCompound.compound),
+            joinedload(models.WorkgroupCompound.novel_compound),
+        )
+        .filter(models.WorkgroupCompound.workgroup_id == workgroup.id)
+        .order_by(models.WorkgroupCompound.id)
+        .all()
+    )
+    return [
+        wc.id
+        for wc in workgroup_compounds
+        if structure_search.matches(query, wc.chemical.smiles)
+    ]
+
+
 # --- Changing stock ----------------------------------------------------------
 
 
