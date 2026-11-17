@@ -9,5 +9,4 @@ from . import input_types_api_bp
 @login_required
 def get_input_types():
     query = models.InputType.query.all()
-    print([x.to_dict() for x in query])
     return jsonify([x.to_dict() for x in query])
