@@ -1,10 +1,16 @@
 from enum import Enum
+from typing import Any, Dict, Optional
 
 from sources.extensions import db
 from sources.models.section import Section
 
 
 class WorkupStepType(Enum):
+    """
+    Workup step types, from the Open Reaction Database ReactionWorkup.WorkupType.
+    ORD treats purification (chromatography, distillation, crystallisation) as workup too.
+    """
+
     CUSTOM = "CUSTOM"
     ADDITION = "ADDITION"
     ALIQUOT = "ALIQUOT"
@@ -28,7 +34,7 @@ class WorkupStepType(Enum):
 
 class WorkupSection(Section):
     """
-    Workup section contains more information than default section
+    One workup step. Adds the ORD step type and free-text details to a section.
     """
 
     __tablename__ = "WorkupSection"
@@ -43,4 +49,18 @@ class WorkupSection(Section):
 
     details = db.Column(db.Text)
 
-    __mapper_args__ = {"polymorphic_identity": "WorkupSection"}
+    __mapper_args__ = {"polymorphic_identity": "workup_section"}
+
+    def to_dict(self, template_instance_id: Optional[int] = None) -> Dict[str, Any]:
+        """
+        Serialises the step: the section fields plus step type and details.
+
+        Args:
+            template_instance_id: If given, include that instance's responses and added fields.
+
+        Returns:
+            Dictionary representation of the step.
+        """
+        data = super().to_dict(template_instance_id)
+        data.update({"stepType": self.step_type.value, "details": self.details})
+        return data
