@@ -31,6 +31,7 @@ from sources.services.cheminventory import (
 )
 from sources.services.inventory import InventoryNotFoundError, InventoryValidationError
 
+from ..utils import json_body
 from . import inventory_api_bp
 
 EDITOR_ONLY_MESSAGE = (
@@ -77,22 +78,6 @@ def _editor_workgroup(workgroup_name: str) -> models.WorkGroup:
     if not services.inventory.can_edit(workgroup):
         abort(403, EDITOR_ONLY_MESSAGE)
     return workgroup
-
-
-def _json_body() -> Dict[str, Any]:
-    """
-    Reads the request's JSON object body. Anything that isn't JSON is refused,
-    which is what protects these routes from cross-site form posts.
-
-    Returns:
-        The parsed body.
-    """
-    if not request.is_json:
-        abort(415, "Send the request as JSON.")
-    data = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        abort(400, "The request body must be a JSON object.")
-    return data
 
 
 def _require_import_header() -> None:
@@ -204,7 +189,7 @@ def lookup_compound(workgroup_name: str) -> Response:
 def add_item(workgroup_name: str) -> Response:
     """Adds a container, starting to stock the compound if it's new to the workgroup."""
     workgroup = _editor_workgroup(workgroup_name)
-    data = _json_body()
+    data = json_body()
     item = _run(lambda: services.inventory.add_item(workgroup, data))
     return jsonify({"id": item.id}), 201
 
@@ -216,7 +201,7 @@ def add_item(workgroup_name: str) -> Response:
 def adjust_item(workgroup_name: str, item_id: int) -> Response:
     """Sets a container's measured quantity and records the change."""
     workgroup = _editor_workgroup(workgroup_name)
-    data = _json_body()
+    data = json_body()
     _run(lambda: services.inventory.adjust_item(workgroup, item_id, data))
     return jsonify({"message": "Quantity updated"})
 
@@ -226,7 +211,7 @@ def adjust_item(workgroup_name: str, item_id: int) -> Response:
 def move_item(workgroup_name: str, item_id: int) -> Response:
     """Moves a container to another location."""
     workgroup = _editor_workgroup(workgroup_name)
-    data = _json_body()
+    data = json_body()
     _run(lambda: services.inventory.move_item(workgroup, item_id, data))
     return jsonify({"message": "Container moved"})
 
@@ -238,7 +223,7 @@ def move_item(workgroup_name: str, item_id: int) -> Response:
 def dispose_item(workgroup_name: str, item_id: int) -> Response:
     """Disposes of a container: empties and archives it."""
     workgroup = _editor_workgroup(workgroup_name)
-    data = _json_body()
+    data = json_body()
     _run(lambda: services.inventory.dispose_item(workgroup, item_id, data))
     return jsonify({"message": "Container disposed"})
 
@@ -251,7 +236,7 @@ def dispose_item(workgroup_name: str, item_id: int) -> Response:
 def add_location(workgroup_name: str) -> Response:
     """Adds a storage location."""
     workgroup = _editor_workgroup(workgroup_name)
-    data = _json_body()
+    data = json_body()
     location = _run(lambda: services.inventory.add_location(workgroup, data))
     return jsonify(services.inventory.serialise_location(location)), 201
 
@@ -263,7 +248,7 @@ def add_location(workgroup_name: str) -> Response:
 def edit_location(workgroup_name: str, location_id: int) -> Response:
     """Renames a location or changes its description."""
     workgroup = _editor_workgroup(workgroup_name)
-    data = _json_body()
+    data = json_body()
     location = _run(
         lambda: services.inventory.edit_location(workgroup, location_id, data)
     )
@@ -277,7 +262,7 @@ def edit_location(workgroup_name: str, location_id: int) -> Response:
 def set_location_archived(workgroup_name: str, location_id: int) -> Response:
     """Archives or restores a location (`{"isArchived": true | false}`)."""
     workgroup = _editor_workgroup(workgroup_name)
-    data = _json_body()
+    data = json_body()
     location = _run(
         lambda: services.inventory.set_location_archived(workgroup, location_id, data)
     )
@@ -295,7 +280,7 @@ def add_novel_compound(workgroup_name: str) -> Response:
     validated as in the reaction table.
     """
     workgroup = _editor_workgroup(workgroup_name)
-    data = _json_body()
+    data = json_body()
     compound = _run(lambda: services.inventory.add_novel_compound(workgroup, data))
     return jsonify(compound), 201
 
@@ -364,7 +349,7 @@ def search_cheminventory(workgroup_name: str) -> Response:
     to load ChemInventory and this server.
     """
     workgroup = _member_workgroup(workgroup_name)
-    data = _json_body()
+    data = json_body()
     results = _run_cheminventory(lambda: services.cheminventory.search(workgroup, data))
     return jsonify(results)
 
@@ -385,7 +370,7 @@ def save_cheminventory_connection(workgroup_name: str) -> Response:
     the token. The token is checked with ChemInventory before it's saved.
     """
     workgroup = _editor_workgroup(workgroup_name)
-    data = _json_body()
+    data = json_body()
     _run_cheminventory(
         lambda: services.cheminventory.save_connection(workgroup, data),
         token_check=True,
