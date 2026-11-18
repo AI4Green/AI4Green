@@ -25,6 +25,20 @@ class BasePage:
         """
         return self.page.get_by_role("alert").filter(has_text=text)
 
+    def toast(self, text: str) -> Locator:
+        """
+        Find a React (Chakra UI) toast containing the given text.
+
+        Chakra toasts are live regions with role "status", not alerts.
+
+        Args:
+            text: Text the toast should contain.
+
+        Returns:
+            Locator for the matching toast.
+        """
+        return self.page.get_by_role("status").filter(has_text=text)
+
     @property
     def login_link(self) -> Locator:
         """The navbar "Log in" link, shown only to logged-out users."""
