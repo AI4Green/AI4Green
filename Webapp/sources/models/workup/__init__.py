@@ -1,4 +1,3 @@
-from .instance import WorkupInstance
-from .override import InstanceSectionOverride
-from .section import WorkupSection, WorkupStepType
-from .template import WorkupCategory, WorkupTemplate
+from .enums import WorkupCategory, WorkupStepType
+from .step import WorkupStep
+from .template import WorkupTemplate, WorkupTemplateStep
