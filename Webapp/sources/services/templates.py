@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 
 import pytz
 from flask_login import current_user
-from sources import models, services
+from sources import models
 from sources.extensions import db
 
 HS_ADMIN_ROLE = "H&S Admin"
@@ -73,10 +73,8 @@ def is_hs_admin() -> bool:
 
 def can_view(template: models.Template) -> bool:
     """
-    Whether the current user may see a template.
-
-    - Workup templates: members of the template's workbook.
-    - Other (COSHH) templates: H&S admins.
+    Whether the current user may see a template. COSHH templates are managed by
+    H&S admins.
 
     Args:
         template: The template.
@@ -84,8 +82,6 @@ def can_view(template: models.Template) -> bool:
     Returns:
         True if the user may see it.
     """
-    if isinstance(template, models.WorkupTemplate):
-        return services.workbook.is_member(template.workbook)
     return is_hs_admin()
 
 

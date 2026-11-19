@@ -32,6 +32,7 @@ from . import (
     reaction_table,
     requests,
     retrosynthesis,
+    sections,
     solvent,
     solvent_surfer,
     spa,
@@ -44,4 +45,6 @@ from . import (
     utils,
     workbook,
     workgroup,
+    workup,
+    workup_steps,
 )

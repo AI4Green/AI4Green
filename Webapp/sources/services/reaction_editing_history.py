@@ -1,8 +1,9 @@
 from dataclasses import asdict, dataclass
 from datetime import datetime
+from typing import Any, Dict
 
 from flask import current_app, json
-from sources import services
+from sources import models, services
 from sources.services.message_queue.serde import MessageSerdeMixin
 
 
@@ -189,6 +190,34 @@ def delete_file(person, reaction, file_name):
         workbook=reaction.workbook.id,
         reaction=reaction.id,
         field_name="Deleted Files",
+        change_details=change_details,
+        date=datetime.now().strftime("%Y-%m-%d"),
+    )
+    send_message(message)
+
+
+def workup_changed(
+    person: models.Person,
+    reaction: models.Reaction,
+    field_name: str,
+    change_details: Dict[str, Any],
+) -> None:
+    """
+    Record a change to a reaction's workup or purification steps.
+
+    Args:
+        person: The person who made the change.
+        reaction: The reaction whose workup changed.
+        field_name: What happened, e.g. "Workup Step Added".
+        change_details: The category, step type and any changed values.
+    """
+    message = ReactionEditMessage(
+        full_name=person.user.fullname,
+        email=person.user.email,
+        workgroup=reaction.workbook.group,
+        workbook=reaction.workbook.id,
+        reaction=reaction.id,
+        field_name=field_name,
         change_details=change_details,
         date=datetime.now().strftime("%Y-%m-%d"),
     )

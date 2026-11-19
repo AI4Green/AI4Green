@@ -49,10 +49,7 @@ def list_coshh_instances_as_dict() -> List[Dict]:
 
 def can_view(instance: models.TemplateInstance) -> bool:
     """
-    Whether the current user may see an instance.
-
-    - Workup instances: members of the reaction's workbook.
-    - Other (COSHH) instances: the owner.
+    Whether the current user may see an instance (its owner).
 
     Args:
         instance: The instance.
@@ -60,18 +57,12 @@ def can_view(instance: models.TemplateInstance) -> bool:
     Returns:
         True if the user may see it.
     """
-    if isinstance(instance, models.WorkupInstance):
-        return services.workbook.is_member(instance.reaction.workbook)
     return instance.owner_id == current_user.id
 
 
 def can_edit(instance: models.TemplateInstance) -> bool:
     """
-    Whether the current user may change an instance.
-
-    - Workup instances: the reaction's creator, while the reaction isn't locked
-      (the same rule the reaction page uses for its own autosave).
-    - Other (COSHH) instances: the owner.
+    Whether the current user may change an instance (its owner).
 
     Args:
         instance: The instance.
@@ -79,11 +70,4 @@ def can_edit(instance: models.TemplateInstance) -> bool:
     Returns:
         True if the user may change it.
     """
-    if isinstance(instance, models.WorkupInstance):
-        reaction = instance.reaction
-        return (
-            services.workbook.is_member(reaction.workbook)
-            and services.reaction.check_current_user_is_creator(reaction)
-            and reaction.complete != "complete"
-        )
     return instance.owner_id == current_user.id

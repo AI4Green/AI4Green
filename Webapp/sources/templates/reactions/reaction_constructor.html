@@ -138,6 +138,7 @@
                         <div class="card-body">
                             <div
                                 id="coshh-form-root"
+                                data-react-root
                                 data-reaction-id="{{ reaction.reaction_id }}"
                                 data-workgroup-name="{{ active_workgroup }}"
                                 data-workbook-name="{{ active_workbook }}"
@@ -186,7 +187,14 @@
 {#                                    </button>#}
                                 </div>
                                 <div class="subsection-body" id="reaction-workup-list">
-                                    <p class="empty-placeholder">Coming soon...</p>
+                                    <div
+                                        class="workup-form-root"
+                                        data-react-root
+                                        data-category="WORKUP"
+                                        data-reaction-id="{{ reaction.reaction_id }}"
+                                        data-workgroup-name="{{ active_workgroup }}"
+                                        data-workbook-name="{{ active_workbook }}"
+                                    ></div>
                                 </div>
                             </div>
 
@@ -199,9 +207,18 @@
 {#                                    </button>#}
                                 </div>
                                 <div class="subsection-body" id="reaction-purification-list">
-                                    <p class="empty-placeholder">Coming soon...</p>
+                                    <div
+                                        class="workup-form-root"
+                                        data-react-root
+                                        data-category="PURIFICATION"
+                                        data-reaction-id="{{ reaction.reaction_id }}"
+                                        data-workgroup-name="{{ active_workgroup }}"
+                                        data-workbook-name="{{ active_workbook }}"
+                                    ></div>
                                 </div>
                             </div>
+
+                            {{ vite_entry("src/entries/workup-form.jsx") }}
 
                             <!-- Experimental data / file attachments -->
                             <div class="subsection-card" id="reaction-file-attachments">
