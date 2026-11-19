@@ -28,6 +28,14 @@ function autoSaveCheck(e = null, sketcher = false) {
   let listOfClasses = [];
   if (e !== null) {
     listOfClasses = e.currentTarget.classList.value;
+    // embedded React forms (COSHH, workup) save themselves via the API,
+    // so their inputs shouldn't also re-post the whole reaction. Their modals
+    // and menus render in a Chakra portal at the end of <body>, outside the root.
+    if (
+      $(e.currentTarget).closest("[data-react-root], .chakra-portal").length
+    ) {
+      return;
+    }
   }
   let load_status = $("#js-load-status").val();
   let complete_status = $("#js-complete").val();
