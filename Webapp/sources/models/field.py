@@ -1,13 +1,9 @@
-from typing import Any, Dict, Optional
-
 from sources.extensions import db
 
 from .base import Model
 
 
 class Field(Model):
-    """A field in a template section."""
-
     __tablename__ = "Field"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -25,16 +21,7 @@ class Field(Model):
     input_type_id = db.Column(db.Integer, db.ForeignKey("InputType.id"))
     input_type = db.relationship("InputType", back_populates="field")
 
-    def to_dict(self, template_instance_id: Optional[int] = None) -> Dict[str, Any]:
-        """
-        Serialises the field.
-
-        Args:
-            template_instance_id: If given, include only this instance's responses.
-
-        Returns:
-            Dictionary representation of the field.
-        """
+    def to_dict(self, template_instance_id=None):
         return {
             "id": self.id,
             "name": self.name,
