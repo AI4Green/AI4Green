@@ -39,6 +39,18 @@ WORKUP_STEP_TYPES = (
     "DISTILLATION",
     "CRYSTALLISATION",
 )
+WORKUP_MATERIAL_ROLES = (
+    "SOLVENT",
+    "ORGANIC_PHASE",
+    "AQUEOUS_PHASE",
+    "REAGENT",
+    "QUENCH",
+    "DRYING_AGENT",
+    "STATIONARY_PHASE",
+    "ELUENT",
+    "INTERNAL_STANDARD",
+)
+WORKUP_MATERIAL_FATES = ("WASTE", "RECOVERED", "KEPT")
 
 
 def upgrade(engine_name):
@@ -68,6 +80,7 @@ def upgrade_():
             sa.Enum(*WORKUP_STEP_TYPES, name="workupsteptype"),
             nullable=False,
         ),
+        sa.Column("temperature", sa.Numeric(precision=7, scale=2), nullable=True),
         sa.Column("data", sa.JSON(), nullable=False),
         sa.Column("notes", sa.Text(), nullable=False),
         sa.Column("time_of_creation", sa.DateTime(), nullable=False),
@@ -78,6 +91,67 @@ def upgrade_():
     with op.batch_alter_table("WorkupStep", schema=None) as batch_op:
         batch_op.create_index(
             batch_op.f("ix_WorkupStep_reaction_id"), ["reaction_id"], unique=False
+        )
+
+    op.create_table(
+        "WorkupStepMaterial",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("step_id", sa.Integer(), nullable=False),
+        sa.Column("slot", sa.Text(), nullable=False),
+        sa.Column("sort_order", sa.Integer(), nullable=False),
+        sa.Column(
+            "role",
+            sa.Enum(*WORKUP_MATERIAL_ROLES, name="workupmaterialrole"),
+            nullable=False,
+        ),
+        sa.Column(
+            "fate",
+            sa.Enum(*WORKUP_MATERIAL_FATES, name="workupmaterialfate"),
+            server_default="WASTE",
+            nullable=False,
+        ),
+        sa.Column("compound_id", sa.Integer(), nullable=True),
+        sa.Column("novel_compound_id", sa.Integer(), nullable=True),
+        sa.Column("solvent_name", sa.Text(), nullable=True),
+        sa.Column("name", sa.Text(), nullable=False),
+        sa.Column("quantity", sa.Numeric(precision=12, scale=4), nullable=True),
+        sa.Column("unit", sa.String(length=16), nullable=False),
+        # an "exclusive arc": at most one link; none for unidentified materials
+        sa.CheckConstraint(
+            "num_nonnulls(compound_id, novel_compound_id, solvent_name) <= 1",
+            name="ck_workup_step_material_one_source",
+        ),
+        sa.ForeignKeyConstraint(["compound_id"], ["Compound.id"], ondelete="SET NULL"),
+        sa.ForeignKeyConstraint(
+            ["novel_compound_id"], ["NovelCompound.id"], ondelete="SET NULL"
+        ),
+        sa.ForeignKeyConstraint(
+            ["solvent_name"],
+            ["Solvent.name"],
+            onupdate="CASCADE",
+            ondelete="SET NULL",
+        ),
+        sa.ForeignKeyConstraint(["step_id"], ["WorkupStep.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    with op.batch_alter_table("WorkupStepMaterial", schema=None) as batch_op:
+        batch_op.create_index(
+            batch_op.f("ix_WorkupStepMaterial_step_id"), ["step_id"], unique=False
+        )
+        batch_op.create_index(
+            batch_op.f("ix_WorkupStepMaterial_compound_id"),
+            ["compound_id"],
+            unique=False,
+        )
+        batch_op.create_index(
+            batch_op.f("ix_WorkupStepMaterial_novel_compound_id"),
+            ["novel_compound_id"],
+            unique=False,
+        )
+        batch_op.create_index(
+            batch_op.f("ix_WorkupStepMaterial_solvent_name"),
+            ["solvent_name"],
+            unique=False,
         )
 
     op.create_table(
@@ -133,11 +207,20 @@ def downgrade_():
     op.drop_table("WorkupTemplateStep")
     op.drop_table("WorkupTemplate")
 
+    with op.batch_alter_table("WorkupStepMaterial", schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f("ix_WorkupStepMaterial_solvent_name"))
+        batch_op.drop_index(batch_op.f("ix_WorkupStepMaterial_novel_compound_id"))
+        batch_op.drop_index(batch_op.f("ix_WorkupStepMaterial_compound_id"))
+        batch_op.drop_index(batch_op.f("ix_WorkupStepMaterial_step_id"))
+    op.drop_table("WorkupStepMaterial")
+
     with op.batch_alter_table("WorkupStep", schema=None) as batch_op:
         batch_op.drop_index(batch_op.f("ix_WorkupStep_reaction_id"))
     op.drop_table("WorkupStep")
 
     # Postgres enum types outlive the tables that use them, so drop them explicitly
+    op.execute("DROP TYPE IF EXISTS workupmaterialfate")
+    op.execute("DROP TYPE IF EXISTS workupmaterialrole")
     op.execute("DROP TYPE IF EXISTS workupsteptype")
     op.execute("DROP TYPE IF EXISTS workupcategory")
     # ### end Alembic commands ###
