@@ -1,7 +1,6 @@
 """
-Sections API (/api/sections): the sections and fields of a template, edited in the
-template builder canvas. Sections an instance adds for one reaction are handled by
-/api/template-instances instead.
+Sections API (/api/sections): the sections and fields of a COSHH template, edited in
+the template builder canvas.
 
 Access: the user must be allowed to manage the section's template
 (services.templates.can_manage). Writes only accept JSON bodies.
@@ -63,8 +62,8 @@ def get_sections() -> Response:
     """Lists the sections of templates the current user created."""
     query = (
         db.session.query(models.Section)
-        .join(models.Template)
-        .filter(models.Template.creator_id == current_user.id)
+        .join(models.COSHHTemplate)
+        .filter(models.COSHHTemplate.creator_id == current_user.id)
     )
 
     return jsonify([x.to_dict() for x in query.all()])
@@ -73,7 +72,7 @@ def get_sections() -> Response:
 @sections_api_bp.route("/", methods=["POST"])
 @login_required
 def save_new_section() -> Response:
-    """Adds a section (a step, for workup templates) to a template."""
+    """Adds a section to a template."""
     data: Dict[str, Any] = json_body()
     template = _get_manageable_template(data.get("templateId"))
 
@@ -81,8 +80,6 @@ def save_new_section() -> Response:
         name=data.get("name") or "New Section",
         sort_order=data.get("sortOrder"),
         template=template,
-        step_type=data.get("stepType"),
-        details=data.get("details"),
     )
     return jsonify(section.to_dict())
 
@@ -113,7 +110,8 @@ def get_section_by_id(section_id: int) -> Response:
 def get_section_fields(section_id: int) -> Response:
     """Lists a template section's own fields."""
     section = _get_template_section(section_id)
-    return jsonify([x.to_dict() for x in section.fields_for_instance(None)])
+    fields = sorted(section.fields, key=lambda field: field.sort_order or 0)
+    return jsonify([x.to_dict() for x in fields])
 
 
 @sections_api_bp.route("/<int:section_id>/fields", methods=["POST"])
