@@ -73,6 +73,11 @@ def mock_vite_manifest(monkeypatch):
             "css": ["assets/coshh-form-test.css"],
             "isEntry": True,
         },
+        "src/entries/workup-form.jsx": {
+            "file": "assets/workup-form-test.js",
+            "css": ["assets/workup-form-test.css"],
+            "isEntry": True,
+        },
     }
 
     real_open = open
