@@ -61,10 +61,9 @@ from .workgroup import WorkGroup
 from .workgroup_compound import WorkgroupCompound
 from .workgroup_request import WorkGroupRequest
 from .workup import (
-    InstanceSectionOverride,
     WorkupCategory,
-    WorkupInstance,
-    WorkupSection,
+    WorkupStep,
     WorkupStepType,
     WorkupTemplate,
+    WorkupTemplateStep,
 )

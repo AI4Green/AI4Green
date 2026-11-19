@@ -8,7 +8,6 @@ from .base import Model
 class InstanceType(Enum):
     GENERIC = "GENERIC"
     COSHH = "COSHH"
-    WORKUP = "WORKUP"
 
 
 class TemplateInstance(Model):

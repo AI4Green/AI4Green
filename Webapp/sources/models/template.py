@@ -65,12 +65,6 @@ class Template(Model):
         cascade="all, delete-orphan",  # if appropriate
     )
 
-    sections = db.relationship(
-        "Section",
-        back_populates="template",
-        cascade="all, delete-orphan",
-    )
-
     # Polymorphic config, uncomment for additional child template
     __mapper_args__ = {"polymorphic_on": template_type}
 

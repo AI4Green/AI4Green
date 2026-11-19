@@ -6,12 +6,7 @@ from .base import Model
 
 
 class Field(Model):
-    """
-    A field in a section.
-
-    template_instance_id is only set on a field that one workup instance added to a
-    template section. Template fields leave it empty and are shared by every instance.
-    """
+    """A field in a template section."""
 
     __tablename__ = "Field"
 
@@ -22,10 +17,6 @@ class Field(Model):
 
     section_id = db.Column(db.Integer, db.ForeignKey("Section.id"))
     section = db.relationship("Section", back_populates="fields")
-
-    template_instance_id = db.Column(
-        db.Integer, db.ForeignKey("WorkupInstance.id", ondelete="CASCADE")
-    )
 
     field_response = db.relationship("FieldResponse", back_populates="field")
 
@@ -50,7 +41,6 @@ class Field(Model):
             "sortOrder": self.sort_order,
             "mandatory": self.mandatory,
             "section_id": self.section_id,
-            "templateInstanceId": self.template_instance_id,
             "inputType": self.input_type.to_dict(),
             "fieldResponse": [
                 x.to_dict()
