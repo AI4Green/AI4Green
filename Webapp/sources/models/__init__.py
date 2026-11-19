@@ -60,3 +60,13 @@ from .workbook import WorkBook
 from .workgroup import WorkGroup
 from .workgroup_compound import WorkgroupCompound
 from .workgroup_request import WorkGroupRequest
+from .workup import (
+    WorkupCategory,
+    WorkupMaterialFate,
+    WorkupMaterialRole,
+    WorkupStep,
+    WorkupStepMaterial,
+    WorkupStepType,
+    WorkupTemplate,
+    WorkupTemplateStep,
+)
