@@ -1,72 +1,121 @@
-import io
-import uuid
-from datetime import datetime
+"""
+Template instances API (/api/template-instances): a COSHH template filled in for a
+reaction or standalone. Reaction workups have their own routes under /api/workups.
 
-from flask import abort, json, jsonify, request, send_file
-from flask_login import current_user, login_required
+Access (see services.template_instances.can_view / can_edit): only the owner.
+Others get a 403. Writes accept JSON bodies only, except saving field values, which
+needs multipart for file uploads.
+"""
+
+import io
+from typing import Any, Dict
+
+from apiflask import abort
+from flask import Response, json, jsonify, request, send_file
+from flask_login import login_required
 from sources import db, models, services
 
+from ..utils import json_body
 from . import template_instances_api_bp
+
+NOT_OWNER_MESSAGE = "Only the owner can change this form."
+
+
+def _get_instance(instance_id: int) -> models.TemplateInstance:
+    """
+    Gets an instance the current user may see.
+
+    Args:
+        instance_id: The instance id.
+
+    Returns:
+        The instance.
+    """
+    instance = db.session.get(models.TemplateInstance, instance_id)
+    if instance is None:
+        abort(404)
+    if not services.template_instances.can_view(instance):
+        abort(403)
+    return instance
+
+
+def _get_editable_instance(instance_id: int) -> models.TemplateInstance:
+    """
+    Gets an instance the current user may change.
+
+    Args:
+        instance_id: The instance id.
+
+    Returns:
+        The instance.
+    """
+    instance = _get_instance(instance_id)
+    if not services.template_instances.can_edit(instance):
+        abort(403, NOT_OWNER_MESSAGE)
+    return instance
+
+
+def _reaction_from_names(data: Dict[str, Any]) -> models.Reaction:
+    """
+    Gets the reaction named in a request, if the user is a member of its workbook.
+
+    Args:
+        data: Request data with workgroupName, workbookName and reactionId.
+
+    Returns:
+        The reaction.
+    """
+    reaction = services.reaction.get_from_names(
+        str(data.get("workgroupName", "")),
+        str(data.get("workbookName", "")),
+        str(data.get("reactionId", "")),
+    )
+    if reaction is None:
+        abort(404)
+    return reaction
 
 
 @template_instances_api_bp.route("/", methods=["POST"])
 @login_required
-def save_new_instance():
-    data = request.get_json()
-
-    reaction_id = data.get("reactionId", "")
-    workgroup_name = data.get("workgroupName", "")
-    workbook_name = data.get("workbookName", "")
-    template_type = data.get("templateType", "")
-    template_id = data.get("templateId", "")
-    origin = data.get("origin", "")
-    new_instance = {}
-
-    if origin == "standalone":
-        reaction = None
-
-    if origin == "reactionConstructor":
-        workbook = services.workbook.get_workbook_from_group_book_name_combination(
-            workgroup_name, workbook_name
-        )
-
-        # check to make sure current user is owner of reaction
-        reaction = services.reaction.get_from_reaction_id_and_workbook_id(
-            reaction_id, workbook.id
-        )
-
-        if not services.reaction.check_current_user_is_creator(reaction):
-            abort(404)
-
-    # todo: enforce no duplicates
+def save_new_instance() -> Response:
+    """Creates a COSHH form from a template, for a reaction or standalone."""
+    data: Dict[str, Any] = json_body()
+    template_type = data.get("templateType")
+    template_id = data.get("templateId")
+    origin = data.get("origin")
 
     if template_type == "COSHH":
+        reaction = None
+        if origin == "reactionConstructor":
+            reaction = _reaction_from_names(data)
+            if not services.reaction.check_current_user_is_creator(reaction):
+                abort(404)
+        # todo: enforce no duplicates
         new_instance = services.template_instances.add_new_coshh_instance(
             template_id, reaction
         )
+        if new_instance is None:
+            abort(404)
+        return jsonify(new_instance)
 
-    return jsonify(new_instance)
+    abort(400, "Unknown template type.")
 
 
-@template_instances_api_bp.route("/<int:template_id>", methods=["GET"])
+@template_instances_api_bp.route("/<int:instance_id>", methods=["GET"])
 @login_required
-def get_template_instance(template_id):
-    query = models.TemplateInstance.query.get_or_404(template_id)
-    if query.owner_id != current_user.id:
-        abort(403)
-    data = query.to_dict()
-
+def get_template_instance(instance_id: int) -> Response:
+    """Gets one instance with its sections and field values."""
+    instance = _get_instance(instance_id)
+    data = instance.to_dict()
+    data["canEdit"] = services.template_instances.can_edit(instance)
     return jsonify(data)
 
 
 @template_instances_api_bp.route("/<int:instance_id>", methods=["PUT"])
 @login_required
-def save_template_instance(instance_id):
-    instance = db.get_or_404(models.TemplateInstance, instance_id)
-
-    # only the owner can edit
-    if current_user.id != instance.owner_id:
-        abort(403)
+def save_template_instance(instance_id: int) -> Response:
+    """Saves field values (and file uploads) for an instance."""
+    instance = _get_editable_instance(instance_id)
 
     data = request.form
 
@@ -107,10 +156,9 @@ def save_template_instance(instance_id):
     "/<int:instance_id>/files/<file_uuid>", methods=["GET"]
 )
 @login_required
-def download_instance_file(instance_id, file_uuid):
-    instance = db.get_or_404(models.TemplateInstance, instance_id)
-    if current_user.id != instance.owner_id:
-        abort(403)
+def download_instance_file(instance_id: int, file_uuid: str) -> Response:
+    """Downloads a file saved in one of the instance's fields."""
+    instance = _get_instance(instance_id)
 
     meta = services.field_response.find_file_metadata(instance, file_uuid)
     if meta is None:
@@ -122,7 +170,7 @@ def download_instance_file(instance_id, file_uuid):
         services.file_attachments.sha256_from_file_contents(contents)
         != meta["sha256_checksum"]
     ):
-        abort(500, description="Integrity check failed")
+        abort(500, "Integrity check failed")
 
     return send_file(
         io.BytesIO(contents),
@@ -134,11 +182,11 @@ def download_instance_file(instance_id, file_uuid):
 
 @template_instances_api_bp.route("/", methods=["GET"])
 @login_required
-def get_template_instances():
-    instance_type = request.args.get("instance_type", None)
-    instance_list = []
+def get_template_instances() -> Response:
+    """Lists instances of one type (?instance_type=COSHH: the current user's forms)."""
+    instance_type = request.args.get("instance_type")
 
     if instance_type == "COSHH":
-        instance_list = services.template_instances.list_coshh_as_dict()
+        return jsonify(services.template_instances.list_coshh_instances_as_dict())
 
-    return jsonify(instance_list)
+    abort(400, "Unknown instance type.")
