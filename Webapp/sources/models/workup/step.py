@@ -17,8 +17,12 @@ class WorkupStep(Model):
     """
     One step of a reaction's workup or purification.
 
-    The step's values live in `data`, a JSON object whose keys are fixed by the step
-    type (see services.workup_steps.STEP_DEFINITIONS) and validated before saving.
+    A step records three kinds of value, all defined per step type in
+    services.workup_steps.STEP_DEFINITIONS and validated before saving:
+    - `materials`: what was used (solvents, drying agents, ...), as linked rows with
+      amounts, so green chemistry metrics can query them.
+    - `temperature`: in °C, a column of its own so it can be queried too.
+    - `data`: the step's other settings (duration, number of washes, ...) as JSON.
     """
 
     __tablename__ = "WorkupStep"
@@ -42,10 +46,18 @@ class WorkupStep(Model):
     category = db.Column(db.Enum(WorkupCategory), nullable=False)
     sort_order = db.Column(db.Integer, nullable=False)
     step_type = db.Column(db.Enum(WorkupStepType), nullable=False)
+    temperature = db.Column(db.Numeric(7, 2), nullable=True)
     data = db.Column(db.JSON, nullable=False, default=dict)
     notes = db.Column(db.Text, nullable=False, default="")
     time_of_creation = db.Column(db.DateTime, nullable=False, default=_now)
     time_of_update = db.Column(db.DateTime, nullable=False, default=_now, onupdate=_now)
+    materials = db.relationship(
+        "WorkupStepMaterial",
+        order_by="[WorkupStepMaterial.slot, WorkupStepMaterial.sort_order]",
+        back_populates="step",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -59,6 +71,10 @@ class WorkupStep(Model):
             "category": self.category.value,
             "sortOrder": self.sort_order,
             "stepType": self.step_type.value,
+            "temperature": (
+                float(self.temperature) if self.temperature is not None else None
+            ),
             "data": self.data or {},
+            "materials": [material.to_dict() for material in self.materials],
             "notes": self.notes or "",
         }

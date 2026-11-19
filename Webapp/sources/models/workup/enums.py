@@ -37,3 +37,28 @@ class WorkupStepType(Enum):
     OTHER_CHROMATOGRAPHY = "OTHER_CHROMATOGRAPHY"
     DISTILLATION = "DISTILLATION"
     CRYSTALLISATION = "CRYSTALLISATION"
+
+
+class WorkupMaterialRole(Enum):
+    """What a material is doing in a workup step, for green chemistry metrics."""
+
+    SOLVENT = "SOLVENT"
+    ORGANIC_PHASE = "ORGANIC_PHASE"
+    AQUEOUS_PHASE = "AQUEOUS_PHASE"
+    REAGENT = "REAGENT"
+    QUENCH = "QUENCH"
+    DRYING_AGENT = "DRYING_AGENT"
+    STATIONARY_PHASE = "STATIONARY_PHASE"
+    ELUENT = "ELUENT"
+    INTERNAL_STANDARD = "INTERNAL_STANDARD"
+
+
+class WorkupMaterialFate(Enum):
+    """
+    What happens to a material after the step: discarded as waste, recovered for
+    reuse, or kept (e.g. the organic phase carried on to the next step).
+    """
+
+    WASTE = "WASTE"
+    RECOVERED = "RECOVERED"
+    KEPT = "KEPT"
