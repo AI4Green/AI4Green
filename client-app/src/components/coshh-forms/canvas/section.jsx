@@ -73,7 +73,7 @@ export const Section = ({ isCollapsed = false, coshhForm }) => {
   const handleSectionsSubmit = async ({ sections }) => {
     setIsLoading(true);
     const model = {
-      coshhFormId: Number(coshhFormId),
+      templateId: Number(coshhFormId),
       // sectionTypeId: Number(sectionTypeId),
       sections: sections.map((section) => ({
         id: section.id.startsWith("temp") ? null : Number(section.id),

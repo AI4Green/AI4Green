@@ -60,8 +60,8 @@ export const CreateOrEditProjectTypeModal = () => {
   const initialValues = () => {
     return projectType
       ? {
-          name: coshhForm.name,
-          description: coshhForm.description,
+          name: projectType.name,
+          description: projectType.description,
           templateType: "COSHH",
           source: [],
         }

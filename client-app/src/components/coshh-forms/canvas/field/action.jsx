@@ -74,12 +74,12 @@ export const FieldActions = ({ field, fields, setFields, isChild }) => {
 
     const child = {
       id: `temp-child-${Date.now()}`,
-      name: `${field.name} child - ${inputType.name}`,
+      name: `${field.name} child - ${inputType.title}`,
       mandatory: false,
       hidden: true,
       inputType,
       sortOrder: 0,
-      selectFieldOptions: INPUT_TYPES_MAP[inputType.name]?.options || [],
+      selectFieldOptions: INPUT_TYPES_MAP[inputType.title]?.options || [],
       triggerValue,
     };
 
@@ -195,8 +195,8 @@ const FieldEditModal = ({
             )}
           </HStack>
 
-          {field.inputType.name === INPUT_TYPES.Multiple ||
-          field.inputType.name === INPUT_TYPES.Radio ? (
+          {field.inputType.title === INPUT_TYPES.Multiple ||
+          field.inputType.title === INPUT_TYPES.Radio ? (
             <HStack>
               <Text fontSize="sm">Options</Text>
               <Box flex={1}>
@@ -297,8 +297,8 @@ const FieldAddChildModal = ({ isOpen, onClose, handleAddChildSubmit }) => {
                   isRequired
                   options={inputTypes?.map((inputType) => ({
                     label:
-                      INPUT_TYPES_MAP[inputType.name]?.label ||
-                      capitalise(inputType.name),
+                      INPUT_TYPES_MAP[inputType.title]?.label ||
+                      capitalise(inputType.title),
                     value: String(inputType.id),
                   }))}
                 />

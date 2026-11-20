@@ -27,7 +27,7 @@ export const Area = () => {
   const handleAddSection = async () => {
     try {
       const newSection = {
-        projectTypeId: Number(coshhFormId),
+        templateId: Number(coshhFormId),
         name: "New Section",
         sortOrder: sections ? sections.length + 1 : 1,
       };

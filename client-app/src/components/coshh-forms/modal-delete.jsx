@@ -24,7 +24,7 @@ export const DeleteModal = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { projectTypes: action } = useBackendApi();
+  const { coshhForms: action } = useBackendApi();
   const { data: list, mutate } = useCoshhFormsList();
 
   const { t } = useTranslation();
