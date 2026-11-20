@@ -131,3 +131,19 @@ def add_compound_to_recent_list(
         oldest_compound = workbook.recent_compounds[0]
         workbook.recent_compounds.remove(oldest_compound)
     db.session.commit()
+
+
+def is_member(workbook: models.WorkBook) -> bool:
+    """
+    Whether the current user is a member of the workbook.
+
+    Args:
+        workbook: The workbook to check.
+
+    Returns:
+        True if the current user is one of the workbook's users.
+    """
+    return current_user.is_authenticated and any(
+        person.user is not None and person.user.id == current_user.id
+        for person in workbook.users
+    )
