@@ -1,7 +1,5 @@
 import {
-  Button,
   HStack,
-  IconButton,
   Input,
   InputGroup,
   InputRightAddon,
@@ -9,10 +7,12 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
+import { LinkButton } from "components/inventory/ui";
 import { FaPlus, FaTimes } from "react-icons/fa";
 
 import { CompoundPicker, SolventPicker } from "./material-pickers";
 import { emptyMaterial, useStepForm } from "./step-form";
+import { StepIconButton } from "./step-icon-button";
 
 // matches enums in db
 const FATE_LABELS = { WASTE: "Waste", RECOVERED: "Recovered", KEPT: "Kept" };
@@ -111,9 +111,8 @@ const MaterialRow = ({ slot, row, label, onChange, onRemove, isDisabled }) => {
           ))}
         </Select>
         {onRemove && (
-          <IconButton
-            size="xs"
-            variant="ghost"
+          <StepIconButton
+            danger
             icon={<FaTimes />}
             aria-label={`Remove ${label}`}
             onClick={onRemove}
@@ -172,11 +171,11 @@ export const MaterialSlot = ({ slot }) => {
         </Stack>
       ))}
       {slot.multiple && !isDisabled && (
-        <Button
-          size="xs"
-          variant="ghost"
+        <LinkButton
           leftIcon={<FaPlus />}
           alignSelf="flex-start"
+          px={0}
+          minH="32px"
           onClick={() =>
             setMaterials((current) => [
               ...current,
@@ -187,7 +186,7 @@ export const MaterialSlot = ({ slot }) => {
           }
         >
           Add another {slot.label.toLowerCase()}
-        </Button>
+        </LinkButton>
       )}
     </Stack>
   );
