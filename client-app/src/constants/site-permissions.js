@@ -30,10 +30,10 @@ export const PROJECTMANAGEMENT_PERMISSIONS = {
 };
 
 export const PROJECT_TYPE_MANAGEMENT_PERMISSIONS = {
-  CreateProjectTypes: "CreateProjectTypes",
-  EditProjectTypes: "EditProjectTypes",
-  DeleteProjectTypes: "DeleteProjectTypes",
-  ViewProjectTypes: "ViewProjectTypes",
+  CreateProjectTypes: "CreateCoshhTemplates",
+  EditProjectTypes: "EditCoshhTemplates",
+  DeleteProjectTypes: "DeleteCoshhTemplates",
+  ViewProjectTypes: "ViewCoshhTemplates",
 };
 
 export const EXPERIMENTS_PERMISSIONS = {

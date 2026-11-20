@@ -64,7 +64,14 @@ def _upload(content: bytes, filename: str) -> FileStorage:
         (b"abcdef", "", "image/jpeg", "failure"),
         (b"abcdef", "script.exe", "image/jpeg", "failure"),
         (b"abcdef", "picture.jpg", "application/x-dosexec", "failure"),
-        (b"a" * (ATTACHMENT_MAX_BYTES + 1), "big.jpg", "image/jpeg", "failure"),
+        # a short id, as the default one (the whole content) is too long for Windows
+        pytest.param(
+            b"a" * (ATTACHMENT_MAX_BYTES + 1),
+            "big.jpg",
+            "image/jpeg",
+            "failure",
+            id="too-large",
+        ),
     ],
 )
 def test_attachment_validation(
