@@ -1,28 +1,15 @@
+import { HStack, Spinner, Stack, Text, Wrap, WrapItem } from "@chakra-ui/react";
+import { TextAreaField, TextField } from "components/inventory/form-fields";
 import {
-  Alert,
-  AlertIcon,
-  Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  HStack,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Spinner,
-  Stack,
-  Text,
-  Textarea,
-  Wrap,
-  WrapItem,
-} from "@chakra-ui/react";
-import { Field, Form, Formik } from "formik";
-import { useState } from "react";
+  ErrorMessage,
+  INV,
+  InvButton,
+  InvModal,
+  Muted,
+  underline,
+} from "components/inventory/ui";
+import { Form, Formik } from "formik";
+import { useId, useState } from "react";
 import * as Yup from "yup";
 
 import { describeWorkupError } from "./errors";
@@ -36,94 +23,76 @@ const saveTemplateSchema = Yup.object({
   description: Yup.string().max(1000, "Use 1000 characters or fewer."),
 });
 
+/** "workup" -> "Workup", for headings. */
+const capitalise = (text) => text.charAt(0).toUpperCase() + text.slice(1);
+
 /**
  * Asks for a name and description, then saves the card's steps as a template.
  * @param {{ isOpen: boolean, onClose: () => void, onSave: (values: object) => Promise<void>, typeLabel: string }} props
  */
 export const SaveTemplateModal = ({ isOpen, onClose, onSave, typeLabel }) => {
+  const formId = `save-template-${useId()}`;
   const [error, setError] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleClose = () => {
+    setError(null);
+    onClose();
+  };
 
   const handleSubmit = async (values) => {
     setError(null);
+    setIsSaving(true);
     try {
       await onSave({
         name: values.name.trim(),
         description: values.description.trim(),
       });
-      onClose();
+      handleClose();
     } catch (e) {
       console.error(e);
       setError(await describeWorkupError(e));
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />
-      <ModalContent>
-        <Formik
-          initialValues={{ name: "", description: "" }}
-          validationSchema={saveTemplateSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ isSubmitting }) => (
-            <Form noValidate>
-              <ModalHeader>Save {typeLabel} as template</ModalHeader>
-              <ModalCloseButton />
-              <ModalBody>
-                <Stack spacing={3}>
-                  <Text fontSize="sm" color="gray.600">
-                    Saves the steps in order, without the values, so anyone in
-                    this workbook can start from them.
-                  </Text>
-                  <Field name="name">
-                    {({ field, meta }) => (
-                      <FormControl
-                        isRequired
-                        isInvalid={Boolean(meta.touched && meta.error)}
-                      >
-                        <FormLabel>Template name</FormLabel>
-                        <Input {...field} maxLength={200} />
-                        <FormErrorMessage>{meta.error}</FormErrorMessage>
-                      </FormControl>
-                    )}
-                  </Field>
-                  <Field name="description">
-                    {({ field, meta }) => (
-                      <FormControl
-                        isInvalid={Boolean(meta.touched && meta.error)}
-                      >
-                        <FormLabel>Description</FormLabel>
-                        <Textarea {...field} rows={3} maxLength={1000} />
-                        <FormErrorMessage>{meta.error}</FormErrorMessage>
-                      </FormControl>
-                    )}
-                  </Field>
-                  {error && (
-                    <Alert status="error" fontSize="sm">
-                      <AlertIcon />
-                      {error}
-                    </Alert>
-                  )}
-                </Stack>
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="ghost" mr={2} onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button
-                  colorScheme="green"
-                  type="submit"
-                  isLoading={isSubmitting}
-                >
-                  Save template
-                </Button>
-              </ModalFooter>
-            </Form>
-          )}
-        </Formik>
-      </ModalContent>
-    </Modal>
+    <InvModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={`Save ${typeLabel} as template`}
+      actionLabel="Save template"
+      formId={formId}
+      isLoading={isSaving}
+    >
+      {error && <ErrorMessage>{error}</ErrorMessage>}
+      <Formik
+        initialValues={{ name: "", description: "" }}
+        validationSchema={saveTemplateSchema}
+        onSubmit={handleSubmit}
+      >
+        <Stack as={Form} id={formId} noValidate spacing="16px">
+          <Text m={0} color={INV.muted}>
+            Saves the steps in order, without the values, so anyone in this
+            workbook can start from them.
+          </Text>
+          <TextField
+            name="name"
+            label="Template name"
+            maxLength={200}
+            isRequired
+            autoFocus
+          />
+          <TextAreaField
+            name="description"
+            label="Description"
+            rows={3}
+            maxLength={1000}
+          />
+        </Stack>
+      </Formik>
+    </InvModal>
   );
 };
 
@@ -144,51 +113,49 @@ const TemplateRow = ({ template, canUse, onUse, onDelete }) => {
     <Stack
       as="li"
       listStyleType="none"
-      borderWidth="1px"
-      borderRadius="md"
-      p={3}
-      spacing={2}
+      border="1px solid"
+      borderColor={INV.line}
+      borderRadius="12px"
+      p="12px"
+      spacing="8px"
       aria-label={template.name}
     >
-      <HStack align="start">
-        <Stack spacing={0} flex="1">
-          <Text fontWeight="semibold">{template.name}</Text>
+      <HStack align="start" spacing="8px">
+        <Stack spacing="2px" flex="1">
+          <Text m={0} fontWeight={600}>
+            {template.name}
+          </Text>
           {template.description && (
-            <Text fontSize="sm" color="gray.600">
+            <Text m={0} color={INV.muted}>
               {template.description}
             </Text>
           )}
-          {template.creator && (
-            <Text fontSize="xs" color="gray.500">
-              Saved by {template.creator}
-            </Text>
-          )}
+          {template.creator && <Muted>Saved by {template.creator}</Muted>}
         </Stack>
         {canUse && (
-          <Button
-            size="sm"
-            colorScheme="green"
+          <InvButton
+            primary
             onClick={() => run(onUse, "use")}
             isLoading={busy === "use"}
             isDisabled={busy !== null}
           >
             Use
-          </Button>
+          </InvButton>
         )}
         {template.canDelete && (
-          <Button
-            size="sm"
-            variant="ghost"
-            colorScheme="red"
+          <InvButton
+            color={INV.danger}
+            borderColor={INV.danger}
+            _hover={{ bg: INV.dangerSoft, ...underline }}
             onClick={() => run(onDelete, "delete")}
             isLoading={busy === "delete"}
             isDisabled={busy !== null}
           >
             Delete
-          </Button>
+          </InvButton>
         )}
       </HStack>
-      <Wrap spacing={2} fontSize="xs" color="gray.700">
+      <Wrap spacing="8px" fontSize="12px" color={INV.muted}>
         {template.steps.map((stepType, index) => (
           <WrapItem key={`${stepType}-${index}`}>
             <StepTypeLabel stepType={stepType} />
@@ -227,6 +194,11 @@ export const TemplatesModal = ({
 }) => {
   const [error, setError] = useState(null);
 
+  const handleClose = () => {
+    setError(null);
+    onClose();
+  };
+
   const wrap = (action) => async (template) => {
     setError(null);
     try {
@@ -239,24 +211,28 @@ export const TemplatesModal = ({
 
   const handleUse = wrap(async (template) => {
     await onUse(template);
-    onClose();
+    handleClose();
   });
 
   let body;
   if (loadError) {
-    body = <Text>Couldn't load the templates. Try refreshing the page.</Text>;
+    body = (
+      <ErrorMessage mb={0}>
+        Couldn't load the templates. Try refreshing the page.
+      </ErrorMessage>
+    );
   } else if (isLoading) {
-    body = <Spinner />;
+    body = <Spinner color={INV.accent} aria-label="Loading templates" />;
   } else if (!templates?.length) {
     body = (
-      <Text color="gray.600">
+      <Text m={0} color={INV.muted}>
         No {typeLabel} templates in this workbook yet. Add some steps, then use
         "Save as template".
       </Text>
     );
   } else {
     body = (
-      <Stack as="ul" spacing={3} m={0} p={0}>
+      <Stack as="ul" spacing="12px" m={0} p={0}>
         {templates.map((template) => (
           <TemplateRow
             key={template.id}
@@ -271,33 +247,21 @@ export const TemplatesModal = ({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg" scrollBehavior="inside">
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader textTransform="capitalize">
-          {typeLabel} templates
-        </ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <Stack spacing={3}>
-            {canUse && templates?.length > 0 && (
-              <Text fontSize="sm" color="gray.600">
-                Using a template adds its steps after any you already have.
-              </Text>
-            )}
-            {error && (
-              <Alert status="error" fontSize="sm">
-                <AlertIcon />
-                {error}
-              </Alert>
-            )}
-            {body}
-          </Stack>
-        </ModalBody>
-        <ModalFooter>
-          <Button onClick={onClose}>Close</Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+    <InvModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={`${capitalise(typeLabel)} templates`}
+      size="lg"
+    >
+      <Stack spacing="12px">
+        {canUse && templates?.length > 0 && (
+          <Text m={0} color={INV.muted}>
+            Using a template adds its steps after any you already have.
+          </Text>
+        )}
+        {error && <ErrorMessage mb={0}>{error}</ErrorMessage>}
+        {body}
+      </Stack>
+    </InvModal>
   );
 };
