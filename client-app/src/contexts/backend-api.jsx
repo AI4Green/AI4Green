@@ -16,6 +16,7 @@ import {
   getSearchApi,
   getSectionsApi,
   getUserApi,
+  getWorkupApi,
 } from "api";
 import ky from "ky";
 import { createContext, useCallback, useContext, useMemo } from "react";
@@ -79,6 +80,7 @@ export const BackendApiProvider = ({ children }) => {
       fields: getFieldsApi(baseContext),
       inventory: getInventoryApi(baseContext),
       search: getSearchApi(baseContext),
+      workups: getWorkupApi(baseContext),
     }),
     [baseContext],
   );
