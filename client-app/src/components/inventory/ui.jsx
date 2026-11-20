@@ -67,9 +67,14 @@ export const underline = {
 // matches the mockup's (max-width: 720px) breakpoint exactly
 export const MOBILE = "@media (max-width: 720px)";
 
-// variant="unstyled" still gets Chakra's base and size styles, so reset those
+// variant="unstyled" still gets Chakra's base and size styles, so reset those.
+// The border and appearance resets matter on Jinja pages, which mount React
+// without Chakra's CSS reset: their Bootstrap gives buttons the browser's
+// native look.
 const bareButton = {
   variant: "unstyled",
+  appearance: "none",
+  border: "none",
   display: "inline-flex",
   h: "auto",
   minW: 0,
