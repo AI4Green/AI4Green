@@ -177,10 +177,17 @@ export const InvModal = ({
         {title}
       </ModalHeader>
       <ModalCloseButton
-        w="44px"
-        h="44px"
-        top="8px"
-        right="8px"
+        appearance="none"
+        border="none"
+        bg="transparent"
+        borderRadius="6px"
+        color={INV.ink}
+        w="32px"
+        h="32px"
+        fontSize="11px"
+        top="14px"
+        right="14px"
+        _hover={{ bg: INV.accentSoft }}
         _focusVisible={focusRing}
       />
       <ModalBody fontSize="14px">{children}</ModalBody>
