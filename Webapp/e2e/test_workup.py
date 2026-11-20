@@ -26,16 +26,15 @@ def _create_reaction(page: Page, name: str) -> WorkupSection:
 
 def test_user_records_a_wash_step(logged_in_page: Page) -> None:
     """
-    A user adds a wash to a reaction's workup, picks the organic phase from the
-    coloured CHEM21 solvent list and types an aqueous phase that isn't in the
-    database. The step saves itself, so both are still there, and the solvent still
-    linked, when the reaction is opened again.
+    A user adds a wash to a reaction's workup, which opens ready to fill in, picks
+    the organic phase from the coloured CHEM21 solvent list and types an aqueous
+    phase that isn't in the database. The step saves itself, so both are still
+    there, and the solvent still linked, when the reaction is opened again.
     """
     workup = _create_reaction(logged_in_page, "E2E Reaction With Workup")
 
     wash = workup.add_step("Wash")
-    expect(wash).to_be_visible()
-    workup.expand_step(wash)
+    expect(wash.get_by_role("button", name="Collapse step")).to_be_visible()
     # Testanol is a seeded CHEM21 solvent flagged "Hazardous"
     workup.choose_solvent_and_wait_for_save(wash, "Organic phase", "Testa", "Testanol")
     workup.fill_and_wait_for_save(wash, "Aqueous phase", "Brine")
@@ -62,19 +61,16 @@ def test_saved_workup_renders_when_reaction_is_reopened(logged_in_page: Page) ->
     purification = WorkupSection(logged_in_page, "PURIFICATION")
 
     wash = workup.add_step("Wash")
-    workup.expand_step(wash)
     workup.choose_solvent_and_wait_for_save(wash, "Organic phase", "Testa", "Testanol")
     workup.fill_and_wait_for_save(wash, "Aqueous phase", "Brine")
     workup.fill_and_wait_for_save(wash, "Number of washes", "3")
 
     concentration = workup.add_step("Concentration")
-    workup.expand_step(concentration)
     workup.select_and_wait_for_save(concentration, "Method", "Rotary evaporator")
     workup.fill_and_wait_for_save(concentration, "Bath temperature", "40")
     workup.fill_and_wait_for_save(concentration, "Pressure", "50")
 
     column = purification.add_step("Flash chromatography")
-    purification.expand_step(column)
     purification.fill_and_wait_for_save(column, "Gradient", "0-20% EtOAc")
 
     reaction_list = ReactionListPage(logged_in_page)
@@ -89,6 +85,8 @@ def test_saved_workup_renders_when_reaction_is_reopened(logged_in_page: Page) ->
     expect(workup.steps).to_have_count(2)
     wash = workup.step(1, "Wash")
     concentration = workup.step(2, "Concentration")
+    for step in (wash, concentration):
+        expect(step.get_by_role("button", name="Expand step")).to_be_visible()
     expect(wash).to_contain_text("Testanol / 3 × Brine")
     expect(concentration).to_contain_text("Rotary evaporator · 40 °C · 50 mbar")
     expect(purification.steps).to_have_count(1)
@@ -122,7 +120,6 @@ def test_user_reuses_a_workup_as_a_template(logged_in_page: Page) -> None:
     template_name = "E2E Aqueous Workup"
     workup = _create_reaction(logged_in_page, "E2E Workup Template Source")
     wash = workup.add_step("Wash")
-    workup.expand_step(wash)
     workup.fill_and_wait_for_save(wash, "Organic phase", "DCM")
     expect(workup.add_step("Dry with material")).to_be_visible()
 
