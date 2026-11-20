@@ -279,7 +279,7 @@ const NavDropdown = ({ icon, label, children }) => (
 export const NavBar = ({
   brand,
   user,
-  workgroups,
+  workgroups = [],
   notifications,
   isAuthenticated,
 }) => {

@@ -178,7 +178,8 @@ def test_missing_csrf_header_is_refused(
         (b"PK\x03\x04", "stock.csv", "application/zip"),
         (b"a,b\n", "stock.xlsx", "text/csv"),
         (b"a,b\n", "stock.txt", "text/plain"),
-        (b"a" * (1024 * 1024 + 1), "stock.csv", "text/csv"),
+        # a short id, as the default one (the whole content) is too long for Windows
+        pytest.param(b"a" * (1024 * 1024 + 1), "stock.csv", "text/csv", id="too-large"),
     ],
 )
 def test_invalid_files_are_refused(

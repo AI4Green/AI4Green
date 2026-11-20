@@ -190,7 +190,7 @@ def structure_search(workgroup_name: str) -> Response:
     because structures can be too long for a URL; it only reads data.
     """
     workgroup = _member_workgroup(workgroup_name)
-    data = _json_body()
+    data = json_body()
     ids = _run(lambda: services.inventory.search_by_structure(workgroup, data))
     return jsonify({"workgroupCompoundIds": ids})
 
