@@ -1,14 +1,10 @@
 import {
-  Badge,
   Box,
-  Button,
-  ButtonGroup,
   Collapse,
   FormControl,
   FormLabel,
   HStack,
   Icon,
-  IconButton,
   Popover,
   PopoverArrow,
   PopoverBody,
@@ -21,6 +17,7 @@ import {
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
+import { Badge, focusRing, INV, InvButton } from "components/inventory/ui";
 import { useBackendApi } from "contexts";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -33,6 +30,7 @@ import {
 
 import { describeWorkupError } from "./errors";
 import { StepFormContext, materialPayload, materialRow } from "./step-form";
+import { StepIconButton } from "./step-icon-button";
 import { getStepType } from "./step-types";
 
 // how long to wait after the last keystroke before saving
@@ -42,21 +40,21 @@ const AUTOSAVE_DELAY_MS = 800;
 const SaveStatus = ({ status, error }) => {
   if (status === "saving") {
     return (
-      <Text fontSize="xs" color="gray.500" role="status">
+      <Text fontSize="12px" color={INV.muted} role="status">
         Saving…
       </Text>
     );
   }
   if (status === "saved") {
     return (
-      <Text fontSize="xs" color="green.600" role="status">
+      <Text fontSize="12px" color={INV.accent} role="status">
         Saved
       </Text>
     );
   }
   if (status === "error") {
     return (
-      <Text fontSize="xs" color="red.600" role="alert">
+      <Text fontSize="12px" color={INV.danger} role="alert">
         {error}
       </Text>
     );
@@ -79,32 +77,35 @@ const DeleteStepButton = ({ label, onDelete }) => {
   return (
     <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose} placement="left">
       <PopoverTrigger>
-        <IconButton
-          size="xs"
-          variant="ghost"
-          colorScheme="red"
+        <StepIconButton
+          danger
           icon={<FaTrash />}
           aria-label={`Delete ${label} step`}
         />
       </PopoverTrigger>
-      <PopoverContent width="auto">
+      <PopoverContent
+        width="auto"
+        borderRadius="12px"
+        borderColor={INV.line}
+        color={INV.ink}
+        _focusVisible={focusRing}
+      >
         <PopoverArrow />
-        <PopoverBody fontSize="sm">
+        <PopoverBody fontSize="14px">
           Delete this step and anything entered in it?
         </PopoverBody>
-        <PopoverFooter display="flex" justifyContent="flex-end">
-          <ButtonGroup size="xs">
-            <Button variant="ghost" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              colorScheme="red"
-              onClick={handleDelete}
-              isLoading={isDeleting}
-            >
-              Delete
-            </Button>
-          </ButtonGroup>
+        <PopoverFooter
+          display="flex"
+          justifyContent="flex-end"
+          gap="8px"
+          borderColor={INV.line}
+        >
+          <InvButton onClick={onClose} isDisabled={isDeleting}>
+            Cancel
+          </InvButton>
+          <InvButton danger onClick={handleDelete} isLoading={isDeleting}>
+            Delete
+          </InvButton>
         </PopoverFooter>
       </PopoverContent>
     </Popover>
@@ -126,7 +127,9 @@ const DeleteStepButton = ({ label, onDelete }) => {
  *   onMove: (direction: -1 | 1) => Promise<void>,
  *   onDelete: () => Promise<boolean>,
  *   onSaved: (step: object) => void,
- * }} props
+ *   defaultExpanded?: boolean,
+ * }} props `defaultExpanded` opens the card when it first renders, e.g. for a
+ *   step the user has just added; saved steps start collapsed to their summary.
  */
 export const StepCard = ({
   step,
@@ -139,6 +142,7 @@ export const StepCard = ({
   onMove,
   onDelete,
   onSaved,
+  defaultExpanded = false,
 }) => {
   const { workups: api } = useBackendApi();
   const stepType = getStepType(step.stepType);
@@ -154,7 +158,7 @@ export const StepCard = ({
   const [error, setError] = useState(null);
   const isDirty = useRef(false);
   const { isOpen: isExpanded, onToggle } = useDisclosure({
-    defaultIsOpen: false,
+    defaultIsOpen: defaultExpanded,
   });
 
   const form = useMemo(
@@ -223,71 +227,75 @@ export const StepCard = ({
     <Box
       as="section"
       aria-label={`Step ${position}: ${stepType.label}`}
-      borderWidth="1px"
+      bg="white"
+      color={INV.ink}
+      border="1px solid"
+      borderColor={INV.line}
       borderLeftWidth="4px"
       borderLeftColor={`${stepType.color}.400`}
-      borderRadius="md"
-      bg="white"
+      borderRadius="12px"
     >
-      <HStack px={3} py={2} spacing={2}>
-        <IconButton
-          size="xs"
-          variant="ghost"
+      <HStack pl="4px" pr="8px" py="2px" spacing="8px">
+        <StepIconButton
           icon={isExpanded ? <FaChevronDown /> : <FaChevronRight />}
           aria-label={isExpanded ? "Collapse step" : "Expand step"}
           aria-expanded={isExpanded}
           onClick={onToggle}
         />
-        <Badge colorScheme={stepType.color} variant="subtle">
-          {position}
-        </Badge>
-        <Icon as={stepType.icon} color={`${stepType.color}.500`} aria-hidden />
-        <Text as="span" fontWeight="semibold" fontSize="sm">
+        <Badge tone="muted">{position}</Badge>
+        <Icon as={stepType.icon} color={`${stepType.color}.600`} aria-hidden />
+        <Text as="span" fontWeight={600} fontSize="14px" whiteSpace="nowrap">
           {stepType.label}
         </Text>
         {!isExpanded && summary && (
-          <Text as="span" fontSize="sm" color="gray.600" noOfLines={1}>
+          <Text as="span" fontSize="13px" color={INV.muted} noOfLines={1}>
             {summary}
           </Text>
         )}
         <Spacer />
         <SaveStatus status={status} error={error} />
         {canEdit && (
-          <>
-            <IconButton
-              size="xs"
-              variant="ghost"
+          <HStack spacing="0">
+            <StepIconButton
               icon={<FaArrowUp />}
               aria-label="Move step up"
               isDisabled={isFirst}
               onClick={() => onMove(-1)}
             />
-            <IconButton
-              size="xs"
-              variant="ghost"
+            <StepIconButton
               icon={<FaArrowDown />}
               aria-label="Move step down"
               isDisabled={isLast}
               onClick={() => onMove(1)}
             />
             <DeleteStepButton label={stepType.label} onDelete={onDelete} />
-          </>
+          </HStack>
         )}
       </HStack>
 
       <Collapse in={isExpanded} animateOpacity>
-        <Stack px={3} pb={3} spacing={3}>
+        <Stack
+          px="16px"
+          pt="12px"
+          pb="16px"
+          spacing="12px"
+          borderTop="1px solid"
+          borderColor={INV.rowLine}
+        >
           <StepFormContext.Provider value={form}>
             <Component />
           </StepFormContext.Provider>
           <FormControl>
-            <FormLabel fontSize="sm" mb={1}>
+            <FormLabel fontSize="13px" fontWeight={500} mb="4px">
               Notes
             </FormLabel>
             <Textarea
               size="sm"
               rows={2}
               maxLength={5000}
+              borderRadius="8px"
+              borderColor={INV.lineStrong}
+              focusBorderColor={INV.accent}
               value={notes}
               onChange={handleNotesChange}
               isDisabled={!canEdit}

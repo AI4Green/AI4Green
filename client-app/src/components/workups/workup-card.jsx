@@ -1,8 +1,5 @@
 import {
-  Alert,
-  AlertIcon,
   Box,
-  Button,
   HStack,
   Menu,
   MenuButton,
@@ -16,6 +13,13 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { useStepDefinitions, useWorkupSteps, useWorkupTemplates } from "api";
+import {
+  EmptyState,
+  ErrorMessage,
+  INV,
+  InvButton,
+  underline,
+} from "components/inventory/ui";
 import { useBackendApi } from "contexts";
 import { useEffect, useMemo, useState } from "react";
 import { FaChevronDown, FaCopy, FaPlus, FaSave } from "react-icons/fa";
@@ -31,6 +35,13 @@ const CATEGORY_LABELS = { WORKUP: "workup", PURIFICATION: "purification" };
 const NOTICE_DURATION_MS = 4000;
 // for a step type the backend no longer defines: only its notes can be edited
 const EMPTY_DEFINITION = { fields: [], materials: [], temperature: null };
+// menu entries get the same hover/focus underline as the buttons (WCAG 1.4.1)
+const menuItemProps = {
+  fontSize: "14px",
+  color: INV.ink,
+  _hover: { bg: INV.accentSoft, ...underline },
+  _focus: { bg: INV.accentSoft, ...underline },
+};
 
 /** The "Add step" menu: this card's common step types first, then the rest. */
 const AddStepMenu = ({ category, stepTypes, onAdd, isLoading }) => {
@@ -42,31 +53,36 @@ const AddStepMenu = ({ category, stepTypes, onAdd, isLoading }) => {
   return (
     <Menu isLazy>
       <MenuButton
-        as={Button}
-        size="sm"
-        colorScheme="green"
+        as={InvButton}
+        primary
         leftIcon={<FaPlus />}
         rightIcon={<FaChevronDown />}
         isLoading={isLoading}
       >
         Add step
       </MenuButton>
-      <MenuList maxH="60vh" overflowY="auto" zIndex="dropdown">
-        <MenuGroup title="Common">
+      <MenuList
+        maxH="60vh"
+        overflowY="auto"
+        zIndex="dropdown"
+        borderRadius="12px"
+        borderColor={INV.line}
+      >
+        <MenuGroup title="Common" color={INV.muted} fontSize="12px">
           {common.map((type) => (
-            <MenuItem key={type} onClick={() => onAdd(type)}>
+            <MenuItem key={type} onClick={() => onAdd(type)} {...menuItemProps}>
               <StepTypeLabel stepType={type} />
             </MenuItem>
           ))}
         </MenuGroup>
-        <MenuDivider />
-        <MenuGroup title="More">
+        <MenuDivider borderColor={INV.line} />
+        <MenuGroup title="More" color={INV.muted} fontSize="12px">
           {others.map((type) => (
-            <MenuItem key={type} onClick={() => onAdd(type)}>
+            <MenuItem key={type} onClick={() => onAdd(type)} {...menuItemProps}>
               <StepTypeLabel stepType={type} />
             </MenuItem>
           ))}
-          <MenuItem onClick={() => onAdd("CUSTOM")}>
+          <MenuItem onClick={() => onAdd("CUSTOM")} {...menuItemProps}>
             <StepTypeLabel stepType="CUSTOM" />
           </MenuItem>
         </MenuGroup>
@@ -103,6 +119,9 @@ export const WorkupCard = ({ workgroup, workbook, reaction, category }) => {
   const templatesModal = useDisclosure();
   const saveModal = useDisclosure();
   const [isAdding, setIsAdding] = useState(false);
+  // the step the user just added, which opens ready to fill in; steps loaded
+  // with the page stay collapsed
+  const [addedStepId, setAddedStepId] = useState(null);
   const [error, setError] = useState(null);
   // success messages show in the card rather than as Chakra toasts: the reaction
   // page has several React roots, and each one would draw every toast
@@ -116,10 +135,9 @@ export const WorkupCard = ({ workgroup, workbook, reaction, category }) => {
 
   if (steps.error || definitions.error) {
     return (
-      <Alert status="error" fontSize="sm">
-        <AlertIcon />
+      <ErrorMessage mb={0}>
         Couldn't load the {typeLabel}. Try refreshing the page.
-      </Alert>
+      </ErrorMessage>
     );
   }
   if (!steps.data || !definitions.data) {
@@ -146,7 +164,8 @@ export const WorkupCard = ({ workgroup, workbook, reaction, category }) => {
     run(async () => {
       setIsAdding(true);
       try {
-        await api.addStep(reactionNames, category, stepType);
+        const added = await api.addStep(reactionNames, category, stepType);
+        setAddedStepId(added.id);
         await steps.mutate();
       } finally {
         setIsAdding(false);
@@ -209,50 +228,48 @@ export const WorkupCard = ({ workgroup, workbook, reaction, category }) => {
             isLoading={isAdding}
           />
         )}
-        <Button
-          size="sm"
-          variant="outline"
-          leftIcon={<FaCopy />}
-          onClick={templatesModal.onOpen}
-        >
+        <InvButton leftIcon={<FaCopy />} onClick={templatesModal.onOpen}>
           {canEdit ? "Start from template" : "Templates"}
-        </Button>
+        </InvButton>
         {stepList.length > 0 && (
-          <Button
-            size="sm"
-            variant="outline"
-            leftIcon={<FaSave />}
-            onClick={saveModal.onOpen}
-          >
+          <InvButton leftIcon={<FaSave />} onClick={saveModal.onOpen}>
             Save as template
-          </Button>
+          </InvButton>
         )}
       </HStack>
 
       {notice && (
-        <Alert status="success" fontSize="sm" role="status">
-          <AlertIcon />
+        <Text
+          role="status"
+          m={0}
+          px="12px"
+          py="10px"
+          borderRadius="8px"
+          bg={INV.accentSoft}
+          color={INV.accentHover}
+          fontSize="14px"
+        >
           {notice}
-        </Alert>
+        </Text>
       )}
 
-      {error && (
-        <Alert status="error" fontSize="sm">
-          <AlertIcon />
-          {error}
-        </Alert>
-      )}
+      {error && <ErrorMessage mb={0}>{error}</ErrorMessage>}
 
       {stepList.length === 0 ? (
-        <Box borderWidth="1px" borderStyle="dashed" borderRadius="md" p={4}>
-          <Text fontSize="sm" color="gray.600">
+        <Box
+          border="1px dashed"
+          borderColor={INV.lineStrong}
+          borderRadius="12px"
+          bg="white"
+        >
+          <EmptyState py="20px" fontSize="14px">
             {canEdit
               ? `No ${typeLabel} steps yet. Use "Add step" or start from a template.`
               : `No ${typeLabel} steps recorded.`}
-          </Text>
+          </EmptyState>
         </Box>
       ) : (
-        <Stack spacing={2}>
+        <Stack spacing="8px">
           {stepList.map((step, index) => (
             <StepCard
               key={step.id}
@@ -266,6 +283,7 @@ export const WorkupCard = ({ workgroup, workbook, reaction, category }) => {
               onMove={(direction) => handleMove(index, direction)}
               onDelete={() => handleDelete(step)}
               onSaved={handleSaved}
+              defaultExpanded={step.id === addedStepId}
             />
           ))}
         </Stack>
