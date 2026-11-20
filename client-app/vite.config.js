@@ -15,17 +15,11 @@ export default defineConfig({
       input: {
         app: path.resolve(__dirname, "index.html"),
         coshhForm: path.resolve(__dirname, "src/entries/coshh-form.jsx"),
+        workupForm: path.resolve(__dirname, "src/entries/workup-form.jsx"),
       },
     },
   },
   server: {
     port: 8000,
-    // proxy: {
-    //   "/api": {
-    //     target: "http://127.0.0.1:", // use env variable here for deployment
-    //     changeOrigin: true,
-    //     secure: false,
-    //   },
-    // },
   },
 });
