@@ -1,10 +1,10 @@
 import {
+  Flex,
   FormControl,
   FormLabel,
   Input,
   InputGroup,
   InputRightAddon,
-  SimpleGrid,
   Stack,
 } from "@chakra-ui/react";
 import { useId } from "react";
@@ -19,12 +19,16 @@ import { pickFields } from "./step-utils";
  * go where; the inputs read and update the step through useStepForm.
  */
 
+// gaps between side-by-side inputs (Chakra spacing units)
+const COLUMN_GAP = 6;
+const ROW_GAP = 3;
+
 /** The step's temperature in °C (can be below zero). */
 const TemperatureField = () => {
   const { definition, temperature, setTemperature, isDisabled } = useStepForm();
   const id = `workup-temperature-${useId()}`;
   return (
-    <FormControl id={id}>
+    <FormControl id={id} width="150px" maxW="100%">
       <FormLabel fontSize="sm" mb={1}>
         {definition.temperature}
       </FormLabel>
@@ -46,9 +50,11 @@ const TemperatureField = () => {
 };
 
 /**
- * Settings (and the temperature, if asked for) in a responsive grid.
+ * Settings (and the temperature, if asked for) side by side on one line, each
+ * sized to what it holds, wrapping onto the next line when there isn't room.
  * @param {{ keys?: string[], withTemperature?: boolean }} props `keys` picks
- *   and orders the settings; all of them if left out.
+ *   and orders the settings; all of them if left out. The temperature comes
+ *   first.
  */
 const StepSettings = ({ keys, withTemperature = false }) => {
   const { definition, values, setValue, isDisabled } = useStepForm();
@@ -57,7 +63,7 @@ const StepSettings = ({ keys, withTemperature = false }) => {
   if (fields.length === 0 && !showTemperature) return null;
 
   return (
-    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
+    <Flex wrap="wrap" align="flex-end" columnGap={COLUMN_GAP} rowGap={ROW_GAP}>
       {showTemperature && <TemperatureField />}
       {fields.map((field) => (
         <StepFieldInput
@@ -68,7 +74,7 @@ const StepSettings = ({ keys, withTemperature = false }) => {
           isDisabled={isDisabled}
         />
       ))}
-    </SimpleGrid>
+    </Flex>
   );
 };
 
@@ -95,7 +101,58 @@ export const GenericStep = () => (
   </Stack>
 );
 
-/** The method first, then the stationary phase and eluent, then the gradient. */
+/** The material added, then its temperature, addition rate and role. */
+export const AdditionStep = () => (
+  <Stack spacing={3}>
+    <MaterialSlots slots={["material"]} />
+    <StepSettings keys={["rate", "role"]} withTemperature />
+  </Stack>
+);
+
+/** The organic and aqueous phases side by side, then the number of washes. */
+export const WashStep = () => (
+  <Stack spacing={3}>
+    <Flex wrap="wrap" columnGap={COLUMN_GAP + 4} rowGap={ROW_GAP}>
+      <MaterialSlots slots={["organic_phase", "aqueous_phase"]} />
+    </Flex>
+    <StepSettings />
+  </Stack>
+);
+
+// filter media that use a weighed filter aid, so its mass is asked for
+const MEDIA_WITH_FILTER_AID = ["Celite pad", "Silica plug"];
+
+/**
+ * The filtration type, medium and what was kept, then the materials. The
+ * Celite or silica used is only asked for when the medium needs it, or if
+ * one has already been entered (so it isn't hidden when the medium changes).
+ */
+export const FiltrationStep = () => {
+  const { values, materials } = useStepForm();
+  const showFilterAid =
+    MEDIA_WITH_FILTER_AID.includes(values.filter_medium) ||
+    materials.some((row) => row.slot === "filter_aid");
+  return (
+    <Stack spacing={3}>
+      <StepSettings keys={["method", "filter_medium", "phase_kept"]} />
+      <MaterialSlots
+        slots={
+          showFilterAid ? ["filter_aid", "rinse_solvent"] : ["rinse_solvent"]
+        }
+      />
+    </Stack>
+  );
+};
+
+/** The bath temperature, method and pressure on one line. */
+export const ConcentrationStep = () => (
+  <StepSettings keys={["method", "pressure"]} withTemperature />
+);
+
+/**
+ * The method first, then the stationary phase and the eluent (each with its
+ * percentage of the mixture), then the gradient.
+ */
 export const ChromatographyStep = () => (
   <Stack spacing={3}>
     <StepSettings keys={["method"]} />
