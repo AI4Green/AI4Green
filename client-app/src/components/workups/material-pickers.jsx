@@ -164,14 +164,27 @@ const MaterialCombobox = ({
   );
 };
 
+/**
+ * A solvent's CHEM21 flag, in the user's colours.
+ * @param {{ flag: number, colours?: object, title?: string }} props `title`
+ *   is shown on hover, e.g. the solvent's name.
+ */
+export const Chem21Badge = ({ flag, colours, title }) => (
+  <Badge
+    {...flagStyle(flag, colours)}
+    borderWidth="1px"
+    fontSize="2xs"
+    whiteSpace="nowrap"
+    title={title}
+  >
+    {flagLabel(flag)}
+  </Badge>
+);
+
 /** Shows what a material is linked to: its CHEM21 flag, or whether it was found. */
 const LinkIndicator = ({ row, colours }) => {
   if (row.flag) {
-    return (
-      <Badge {...flagStyle(row.flag, colours)} borderWidth="1px" fontSize="2xs">
-        {flagLabel(row.flag)}
-      </Badge>
-    );
+    return <Chem21Badge flag={row.flag} colours={colours} />;
   }
   if (isLinked(row)) {
     return (
