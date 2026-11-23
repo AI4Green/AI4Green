@@ -18,6 +18,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { Badge, focusRing, INV, InvButton } from "components/inventory/ui";
+import { useWorkupSolvents } from "api";
 import { useBackendApi } from "contexts";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -29,6 +30,7 @@ import {
 } from "react-icons/fa";
 
 import { describeWorkupError } from "./errors";
+import { Chem21Badge } from "./material-pickers";
 import { StepFormContext, materialPayload, materialRow } from "./step-form";
 import { StepIconButton } from "./step-icon-button";
 import { getStepType } from "./step-types";
@@ -60,6 +62,29 @@ const SaveStatus = ({ status, error }) => {
     );
   }
   return null;
+};
+
+/**
+ * The CHEM21 flags of a collapsed step's solvents, so they can be seen
+ * without opening the step.
+ * @param {{ materials: object[], workbookNames: object }} props
+ */
+const CollapsedFlags = ({ materials, workbookNames }) => {
+  const { data } = useWorkupSolvents(workbookNames);
+  const flagged = materials.filter((row) => row.flag);
+  if (flagged.length === 0) return null;
+  return (
+    <HStack spacing="4px" flexShrink={0}>
+      {flagged.map((row) => (
+        <Chem21Badge
+          key={row.key}
+          flag={row.flag}
+          colours={data?.colours}
+          title={row.name}
+        />
+      ))}
+    </HStack>
+  );
 };
 
 /** A delete button that asks for confirmation first. */
@@ -251,6 +276,12 @@ export const StepCard = ({
           <Text as="span" fontSize="13px" color={INV.muted} noOfLines={1}>
             {summary}
           </Text>
+        )}
+        {!isExpanded && (
+          <CollapsedFlags
+            materials={materials}
+            workbookNames={form.workbookNames}
+          />
         )}
         <Spacer />
         <SaveStatus status={status} error={error} />
