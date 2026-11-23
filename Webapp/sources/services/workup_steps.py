@@ -37,9 +37,38 @@ MAX_QUANTITY = Decimal("99999999.9999")
 TEXT = "text"
 NUMBER = "number"
 CHOICE = "choice"
+# what the percentages of a mixture (e.g. an eluent) must add up to
+PROPORTION_TOTAL = Decimal("100")
+
+# what a filtration filters through; the front end only asks for the mass of
+# filter aid (the "filter_aid" slot) for a Celite pad or silica plug
+FILTER_MEDIA = (
+    "Filter paper",
+    "Sintered funnel",
+    "Cotton wool",
+    "Glass wool",
+    "Celite pad",
+    "Silica plug",
+    "Other",
+)
 
 SOLVENT_PICKER = "solvent"
 COMPOUND_PICKER = "compound"
+
+# what the material added in an addition step is for
+ADDITION_ROLES = (
+    "Reagent",
+    "Quench",
+    "Internal standard",
+    "Solvent",
+    "Acid",
+    "Base",
+    "Antisolvent",
+    "Catalyst",
+    "Drying agent",
+    "Seed crystal",
+    "Other",
+)
 
 VOLUME_UNITS = ("mL", "L", "µL")
 MASS_UNITS = ("g", "mg", "kg")
@@ -97,6 +126,8 @@ class MaterialSlot:
         units: Allowed units; the first is the default.
         multiple: Whether the slot takes more than one material (e.g. eluent mixtures).
         repeated: Whether the amount is used once per `repeats` (e.g. each wash).
+        proportions: Whether each material has a percentage of the mixture (e.g.
+            90% hexane, 10% EtOAc in an eluent). They must add up to 100.
         default_fate: What happens to the material unless the user says otherwise.
     """
 
@@ -107,6 +138,7 @@ class MaterialSlot:
     units: Tuple[str, ...]
     multiple: bool = False
     repeated: bool = False
+    proportions: bool = False
     default_fate: WorkupMaterialFate = WorkupMaterialFate.WASTE
 
     def to_dict(self) -> Dict[str, Any]:
@@ -119,6 +151,7 @@ class MaterialSlot:
             "units": list(self.units),
             "multiple": self.multiple,
             "repeated": self.repeated,
+            "proportions": self.proportions,
             "defaultFate": self.default_fate.value,
         }
 
@@ -228,11 +261,11 @@ STEP_DEFINITIONS: Dict[WorkupStepType, StepDefinition] = {
         ),
     ),
     WorkupStepType.ADDITION: StepDefinition(
-        fields=(_text("rate", "Addition rate"),),
-        materials=(
-            _compound("material", "Material added", Role.REAGENT, ANY_UNITS),
-            _compound("internal_standard", "Internal standard", Role.INTERNAL_STANDARD),
+        fields=(
+            _text("rate", "Addition rate"),
+            _choice("role", "Role", ADDITION_ROLES),
         ),
+        materials=(_compound("material", "Material added", Role.REAGENT, ANY_UNITS),),
         temperature_label="Temperature",
     ),
     WorkupStepType.ALIQUOT: StepDefinition(
@@ -264,11 +297,12 @@ STEP_DEFINITIONS: Dict[WorkupStepType, StepDefinition] = {
     ),
     WorkupStepType.FILTRATION: StepDefinition(
         fields=(
-            _text("filter_medium", "Filter medium"),
+            _choice("method", "Type", ("Vacuum", "Gravity")),
+            _choice("filter_medium", "Filter medium", FILTER_MEDIA),
             _choice("phase_kept", "Kept", ("Filtrate", "Solid")),
         ),
         materials=(
-            _compound("filter_aid", "Filter aid (e.g. Celite)", Role.REAGENT),
+            _compound("filter_aid", "Celite or silica used", Role.REAGENT),
             _solvent("rinse_solvent", "Rinse solvent"),
         ),
     ),
@@ -322,7 +356,7 @@ STEP_DEFINITIONS: Dict[WorkupStepType, StepDefinition] = {
         fields=(_text("gradient", "Gradient"),),
         materials=(
             _compound("stationary_phase", "Stationary phase", Role.STATIONARY_PHASE),
-            _solvent("eluent", "Eluent", Role.ELUENT, multiple=True),
+            _solvent("eluent", "Eluent", Role.ELUENT, multiple=True, proportions=True),
         ),
     ),
     WorkupStepType.OTHER_CHROMATOGRAPHY: StepDefinition(
@@ -335,7 +369,7 @@ STEP_DEFINITIONS: Dict[WorkupStepType, StepDefinition] = {
         ),
         materials=(
             _compound("stationary_phase", "Stationary phase", Role.STATIONARY_PHASE),
-            _solvent("eluent", "Eluent", Role.ELUENT, multiple=True),
+            _solvent("eluent", "Eluent", Role.ELUENT, multiple=True, proportions=True),
         ),
     ),
     WorkupStepType.DISTILLATION: StepDefinition(
@@ -670,6 +704,56 @@ def _clean_quantity(label: str, value: Any) -> Optional[Decimal]:
     return quantity
 
 
+def _clean_proportion(label: str, value: Any) -> Optional[Decimal]:
+    """
+    Validates a material's percentage of its mixture.
+
+    Args:
+        label: The slot label, for the error message.
+        value: The submitted percentage, or None/"" for none.
+
+    Returns:
+        The percentage rounded to 0.01, or None.
+    """
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return None
+    number = _finite_number(f"{label} percentage", value)
+    if not 0 <= number <= PROPORTION_TOTAL:
+        raise WorkupValidationError(
+            f"{label} percentage must be between 0 and {PROPORTION_TOTAL}."
+        )
+    return Decimal(str(number)).quantize(Decimal("0.01"))
+
+
+def _check_proportions(
+    slot: MaterialSlot, rows: List[models.WorkupStepMaterial]
+) -> None:
+    """
+    Checks that the percentages of a slot's materials are all given, or none are,
+    and that they add up to 100.
+
+    Args:
+        slot: A slot with proportions.
+        rows: The slot's cleaned materials.
+
+    Raises:
+        WorkupValidationError: If only some are given or they don't add up to 100.
+    """
+    given = [row.proportion for row in rows if row.proportion is not None]
+    if not given:
+        return
+    if len(given) < len(rows):
+        raise WorkupValidationError(
+            f"Give a percentage for each {slot.label.lower()}, or for none."
+        )
+    total = sum(given, Decimal("0"))
+    if total != PROPORTION_TOTAL:
+        raise WorkupValidationError(
+            f"{slot.label} percentages must add up to {PROPORTION_TOTAL}%"
+            f" (they add up to {total.normalize():f}%)."
+        )
+
+
 def _clean_material(
     workbook: models.WorkBook,
     slot: MaterialSlot,
@@ -717,6 +801,11 @@ def _clean_material(
         fate = WorkupMaterialFate(material.get("fate") or slot.default_fate.value)
     except ValueError:
         raise WorkupValidationError("Unknown material fate.")
+    proportion = (
+        _clean_proportion(slot.label, material.get("proportion"))
+        if slot.proportions
+        else None
+    )
 
     return models.WorkupStepMaterial(
         slot=slot.slot,
@@ -729,6 +818,7 @@ def _clean_material(
         name=linked_name or name,
         quantity=quantity,
         unit=unit,
+        proportion=proportion,
     )
 
 
@@ -739,8 +829,10 @@ def validate_materials(
     Cleans a step's submitted materials against its slots.
 
     Each material is `{slot, compoundId?, novelCompoundId?, solventName?, name,
-    quantity, unit, fate}`. A linked material takes its name from the linked record;
-    completely empty materials are dropped.
+    quantity, unit, fate, proportion?}`. A linked material takes its name from the
+    linked record; completely empty materials are dropped. `proportion` (a
+    percentage) is only kept for slots with proportions, where the slot's
+    percentages must all be given (or none) and add up to 100.
 
     Args:
         step_type: The step's type.
@@ -780,6 +872,10 @@ def validate_materials(
             raise WorkupValidationError(f"{slot.label} takes one material.")
         count_by_slot[slot.slot] = position
         rows.append(row)
+
+    for slot in definition.materials:
+        if slot.proportions:
+            _check_proportions(slot, [row for row in rows if row.slot == slot.slot])
     return rows
 
 
@@ -811,7 +907,8 @@ def total_quantity(
 def material_summary(material: models.WorkupStepMaterial) -> str:
     """
     A one-line description of a material for the audit log, e.g.
-    "Testanol 20 mL (waste)".
+    "Testanol 20 mL (waste)" or "Hexane 90% 450 mL (waste)". Saving a step uses
+    it to spot changes, so it includes everything the user can edit.
 
     Args:
         material: The material.
@@ -819,13 +916,18 @@ def material_summary(material: models.WorkupStepMaterial) -> str:
     Returns:
         The description.
     """
+    share = (
+        f" {material.proportion.normalize():f}%"
+        if material.proportion is not None
+        else ""
+    )
     amount = (
         f" {material.quantity.normalize():f} {material.unit}"
         if material.quantity is not None
         else ""
     )
     name = material.name or "(unnamed)"
-    return f"{name}{amount} ({material.fate.value.lower()})"
+    return f"{name}{share}{amount} ({material.fate.value.lower()})"
 
 
 # --- Lookups ------------------------------------------------------------------

@@ -241,7 +241,7 @@ def test_step_values_are_cleaned_and_saved(client: FlaskClient) -> None:
         ("WASH", {"repeats": "lots"}),
         ("WASH", {"repeats": True}),
         ("FILTRATION", {"filter_medium": 5}),
-        ("FILTRATION", {"filter_medium": "x" * 501}),
+        ("FILTRATION", {"filter_medium": "Coffee filter"}),
         ("EXTRACTION", {"phase_kept": "Gas"}),
         ("PH_ADJUST", {"target_ph": 15}),
         ("WASH", ["not", "an", "object"]),
@@ -505,6 +505,89 @@ def test_single_slots_take_one_material_but_multiple_slots_take_mixtures(
     assert mixture.status_code == 200, mixture.json
     assert [m["name"] for m in mixture.json["materials"]] == ["Hexane", "EtOAc"]
     assert two_silicas.status_code == 400
+
+
+def test_eluent_percentages_are_saved_with_each_eluent(client: FlaskClient) -> None:
+    """Each eluent keeps its own percentage of the mixture."""
+    login(client)
+    step = _add_step(client, "FLASH_CHROMATOGRAPHY", category="PURIFICATION")
+
+    response = _save(
+        client,
+        step,
+        materials=[
+            {"slot": "eluent", "name": "Hexane", "proportion": "90"},
+            {"slot": "eluent", "name": "EtOAc", "proportion": 10},
+        ],
+    )
+
+    assert response.status_code == 200, response.json
+    assert [(m["name"], m["proportion"]) for m in response.json["materials"]] == [
+        ("Hexane", 90),
+        ("EtOAc", 10),
+    ]
+
+
+def test_changing_only_a_percentage_is_saved(client: FlaskClient) -> None:
+    """A percentage-only change counts as a change, so it isn't skipped."""
+    login(client)
+    step = _add_step(client, "FLASH_CHROMATOGRAPHY", category="PURIFICATION")
+    eluents = [
+        {"slot": "eluent", "name": "Hexane", "proportion": 90},
+        {"slot": "eluent", "name": "EtOAc", "proportion": 10},
+    ]
+    _save(client, step, materials=eluents)
+
+    eluents[0]["proportion"] = 80
+    eluents[1]["proportion"] = 20
+    _save(client, step, materials=eluents)
+
+    saved = _steps(client, category="PURIFICATION")["steps"][0]["materials"]
+    assert [m["proportion"] for m in saved] == [80, 20]
+
+
+@pytest.mark.parametrize(
+    "proportions",
+    [
+        ["90", "20"],  # adds up to 110
+        ["90", ""],  # only some given
+        ["-10", "110"],
+        ["ninety", "10"],
+    ],
+)
+def test_invalid_eluent_percentages_are_rejected(
+    client: FlaskClient, proportions: List[str]
+) -> None:
+    """Percentages must each be 0-100, all be given (or none) and add up to 100."""
+    login(client)
+    step = _add_step(client, "FLASH_CHROMATOGRAPHY", category="PURIFICATION")
+
+    response = _save(
+        client,
+        step,
+        materials=[
+            {"slot": "eluent", "name": name, "proportion": proportion}
+            for name, proportion in zip(("Hexane", "EtOAc"), proportions)
+        ],
+    )
+
+    assert response.status_code == 400
+    assert response.json["message"]
+
+
+def test_percentages_are_ignored_for_slots_without_them(client: FlaskClient) -> None:
+    """Only mixture slots (e.g. eluents) record a percentage."""
+    login(client)
+    step = _add_step(client, "FLASH_CHROMATOGRAPHY", category="PURIFICATION")
+
+    response = _save(
+        client,
+        step,
+        materials=[{"slot": "stationary_phase", "name": "Silica", "proportion": 50}],
+    )
+
+    assert response.status_code == 200, response.json
+    assert response.json["materials"][0]["proportion"] is None
 
 
 def test_fate_defaults_to_the_slot_default(client: FlaskClient) -> None:
