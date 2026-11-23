@@ -16,6 +16,29 @@ import { useId } from "react";
  * validates them when the step is saved.
  */
 
+/*
+ * How wide each kind of field is, so a short value (e.g. the number of washes)
+ * gets a small box rather than stretching across the card.
+ */
+const FIELD_WIDTHS = {
+  number: "100px",
+  numberWithUnit: "150px",
+  choice: "190px",
+  text: "240px",
+};
+
+/**
+ * The width of a field's input.
+ * @param {object} field The field definition.
+ * @returns {string} A CSS width.
+ */
+const fieldWidth = (field) => {
+  if (field.kind === "number") {
+    return field.unit ? FIELD_WIDTHS.numberWithUnit : FIELD_WIDTHS.number;
+  }
+  return FIELD_WIDTHS[field.kind] ?? FIELD_WIDTHS.text;
+};
+
 /**
  * One field's input, chosen by its kind.
  * @param {{ field: object, value: *, onChange: (key: string, value: *) => void, isDisabled: boolean }} props
@@ -76,7 +99,7 @@ export const StepFieldInput = ({ field, value, onChange, isDisabled }) => {
   }
 
   return (
-    <FormControl id={id}>
+    <FormControl id={id} width={fieldWidth(field)} maxW="100%">
       <FormLabel fontSize="sm" mb={1}>
         {field.label}
       </FormLabel>
