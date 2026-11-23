@@ -46,6 +46,7 @@ export const emptyMaterial = (slot) => {
     name: "",
     quantity: "",
     unit: slot.units[0],
+    proportion: "",
     fate: slot.defaultFate,
     flag: null,
   };
@@ -65,6 +66,7 @@ export const materialRow = (material) => ({
   name: material.name,
   quantity: material.quantity ?? "",
   unit: material.unit,
+  proportion: material.proportion ?? "",
   fate: material.fate,
   flag: material.flag,
 });
@@ -83,6 +85,7 @@ export const materialPayload = ({
   quantity,
   unit,
   fate,
+  proportion,
 }) => ({
   slot,
   compoundId,
@@ -92,6 +95,7 @@ export const materialPayload = ({
   quantity,
   unit,
   fate,
+  proportion,
 });
 
 /** The link fields of a material that isn't linked to anything. */

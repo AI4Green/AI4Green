@@ -19,7 +19,14 @@ import {
   FaWind,
 } from "react-icons/fa";
 
-import { ChromatographyStep, GenericStep } from "./step-layouts";
+import {
+  AdditionStep,
+  ChromatographyStep,
+  ConcentrationStep,
+  FiltrationStep,
+  GenericStep,
+  WashStep,
+} from "./step-layouts";
 
 /*
  * How each workup step type looks, keyed by step type (the backend's
@@ -46,13 +53,25 @@ const withUnit = (value, unit) =>
     ? ""
     : `${value}${unit ? ` ${unit}` : ""}`;
 
-/** Describes the named materials in one slot (or all slots), e.g. "Brine 20 mL". */
+/**
+ * Describes the named materials in one slot (or all slots), e.g. "Brine 20 mL"
+ * or "Hexane 90% 450 mL" for a mixture.
+ */
 const materialsText = (materials, slot) =>
   joinParts(
     materials
       .filter((row) => row.name && (!slot || row.slot === slot))
       .map((row) =>
-        joinParts([row.name, withUnit(row.quantity, row.unit)], " "),
+        joinParts(
+          [
+            row.name,
+            row.proportion === "" || row.proportion == null
+              ? ""
+              : `${row.proportion}%`,
+            withUnit(row.quantity, row.unit),
+          ],
+          " ",
+        ),
       ),
     " + ",
   );
@@ -77,9 +96,11 @@ export const STEP_TYPES_MAP = {
     label: "Addition",
     icon: FaFlask,
     color: "blue",
+    Component: AdditionStep,
     summary: ({ values, materials, temperature }) =>
       joinParts([
         materialsText(materials, "material"),
+        values.role,
         values.rate,
         withUnit(temperature, "°C"),
       ]),
@@ -105,6 +126,7 @@ export const STEP_TYPES_MAP = {
     label: "Concentration",
     icon: FaCompressArrowsAlt,
     color: "purple",
+    Component: ConcentrationStep,
     summary: ({ values, temperature }) =>
       joinParts([
         values.method,
@@ -126,8 +148,10 @@ export const STEP_TYPES_MAP = {
     label: "Filtration",
     icon: FaFilter,
     color: "teal",
+    Component: FiltrationStep,
     summary: ({ values, materials }) =>
       joinParts([
+        values.method,
         values.filter_medium,
         materialsText(materials),
         values.phase_kept && `keep ${values.phase_kept.toLowerCase()}`,
@@ -137,6 +161,7 @@ export const STEP_TYPES_MAP = {
     label: "Wash",
     icon: FaTint,
     color: "cyan",
+    Component: WashStep,
     summary: ({ values, materials }) =>
       joinParts(
         [
