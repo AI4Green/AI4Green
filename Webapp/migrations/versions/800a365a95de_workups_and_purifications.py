@@ -116,6 +116,7 @@ def upgrade_():
         sa.Column("name", sa.Text(), nullable=False),
         sa.Column("quantity", sa.Numeric(precision=12, scale=4), nullable=True),
         sa.Column("unit", sa.String(length=16), nullable=False),
+        sa.Column("proportion", sa.Numeric(precision=5, scale=2), nullable=True),
         # an "exclusive arc": at most one link; none for unidentified materials
         sa.CheckConstraint(
             "num_nonnulls(compound_id, novel_compound_id, solvent_name) <= 1",

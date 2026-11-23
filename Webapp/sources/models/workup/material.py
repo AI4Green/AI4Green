@@ -69,6 +69,9 @@ class WorkupStepMaterial(Model):
     name = db.Column(db.Text, nullable=False, default="")
     quantity = db.Column(db.Numeric(12, 4), nullable=True)
     unit = db.Column(db.String(16), nullable=False)
+    # percentage of a mixture, e.g. 90 for the hexane in 90:10 hexane/EtOAc; only
+    # for slots with proportions, where a step's values add up to 100
+    proportion = db.Column(db.Numeric(5, 2), nullable=True)
 
     step = db.relationship("WorkupStep", back_populates="materials")
     compound = db.relationship("Compound")
@@ -108,5 +111,8 @@ class WorkupStepMaterial(Model):
             "name": self.name or "",
             "quantity": float(self.quantity) if self.quantity is not None else None,
             "unit": self.unit,
+            "proportion": (
+                float(self.proportion) if self.proportion is not None else None
+            ),
             "flag": self.chem21_flag,
         }
