@@ -10,9 +10,19 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { LinkButton } from "components/inventory/ui";
+import { useState } from "react";
 import { FaPlus, FaTimes } from "react-icons/fa";
 
 import { CompoundPicker, SolventPicker } from "./material-pickers";
+import {
+  PROPORTION_TOTAL,
+  balanceProportions,
+  hasProportion,
+  isProportionComplete,
+  mixtureVolume,
+  proportionTotal,
+  splitVolume,
+} from "./mixture";
 import { emptyMaterial, useStepForm } from "./step-form";
 import { StepIconButton } from "./step-icon-button";
 
@@ -39,74 +49,71 @@ const RepeatTotal = ({ repeats, row }) => {
   );
 };
 
-// what a mixture's percentages add up to (matches the backend)
-const PROPORTION_TOTAL = 100;
-
-/** Rounds a percentage to 2 decimal places, as the backend stores it. */
-const roundPercentage = (value) => Math.round(value * 100) / 100;
-
-/** Whether a material row has a percentage entered. */
-const hasProportion = (row) =>
-  row.proportion !== "" &&
-  row.proportion !== null &&
-  row.proportion !== undefined;
-
-/** The sum of a slot's entered percentages. */
-const proportionTotal = (rows) =>
-  roundPercentage(
-    rows.reduce((sum, row) => sum + (Number(row.proportion) || 0), 0),
-  );
-
 /**
- * Keeps a mixture's percentages adding up to 100 by setting one row to whatever
- * is left: the last row, or the one before it when the last is being edited
- * (so with two eluents, typing 90 in either sets the other to 10). A single
- * material has no percentage.
- * @param {object[]} rows The slot's material rows, in order.
- * @param {string | null} editedKey The row the user just changed, if any.
- * @returns {object[]} The rows, with the balancing row updated.
+ * An amount with its unit: a fixed unit, or a choice when the slot allows
+ * several.
+ * @param {{
+ *   label: string,
+ *   value: string,
+ *   unit: string,
+ *   units: string[],
+ *   onValueChange: (value: string) => void,
+ *   onUnitChange: (unit: string) => void,
+ *   isDisabled: boolean,
+ * }} props `label` names the inputs for screen readers.
  */
-const balanceProportions = (rows, editedKey) => {
-  if (rows.length < 2) return rows.map((row) => ({ ...row, proportion: "" }));
-  const lastIndex = rows.length - 1;
-  const balanceIndex =
-    rows[lastIndex].key === editedKey ? lastIndex - 1 : lastIndex;
-  const others = proportionTotal(
-    rows.filter((_, index) => index !== balanceIndex),
-  );
-  const remainder = roundPercentage(PROPORTION_TOTAL - others);
-  // leave it to the user if the others already add up to more than 100
-  if (remainder < 0) return rows;
-  return rows.map((row, index) =>
-    index === balanceIndex ? { ...row, proportion: String(remainder) } : row,
-  );
-};
-
-/** The total of a mixture's percentages, in red when it isn't 100. */
-const ProportionTotal = ({ rows }) => {
-  if (!rows.some(hasProportion)) return null;
-  const total = proportionTotal(rows);
-  const isComplete = total === PROPORTION_TOTAL;
-  return (
-    <Text
-      fontSize="xs"
-      color={isComplete ? "gray.600" : "red.600"}
-      role={isComplete ? undefined : "alert"}
-    >
-      Total {total}%{!isComplete && ` (must add up to ${PROPORTION_TOTAL}%)`}
-    </Text>
-  );
-};
+const AmountInput = ({
+  label,
+  value,
+  unit,
+  units,
+  onValueChange,
+  onUnitChange,
+  isDisabled,
+}) => (
+  <InputGroup size="sm" width="auto">
+    <Input
+      type="number"
+      min={0}
+      step="any"
+      inputMode="decimal"
+      aria-label={label}
+      placeholder="Amount"
+      width="100px"
+      value={value}
+      onChange={(e) => onValueChange(e.target.value)}
+      isDisabled={isDisabled}
+    />
+    {units.length === 1 ? (
+      <InputRightAddon>{units[0]}</InputRightAddon>
+    ) : (
+      <Select
+        size="sm"
+        width="auto"
+        aria-label={`${label} unit`}
+        value={unit}
+        onChange={(e) => onUnitChange(e.target.value)}
+        isDisabled={isDisabled}
+      >
+        {units.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </Select>
+    )}
+  </InputGroup>
+);
 
 /**
- * One material: what it is (from the slot's picker), its percentage of the
- * mixture (for slots with proportions), how much was used and what happened to
- * it afterwards.
+ * One material: what it is (from the slot's picker), how much was used and what
+ * happened to it afterwards. In a mixture it has a percentage instead of its
+ * own amount, which comes from the mixture's total volume.
  * @param {{
  *   slot: object,
  *   row: object,
  *   label: string,
- *   showProportion: boolean,
+ *   isMixture: boolean,
  *   onChange: (changes: object) => void,
  *   onRemove?: () => void,
  *   isDisabled: boolean,
@@ -116,29 +123,15 @@ const MaterialRow = ({
   slot,
   row,
   label,
-  showProportion,
+  isMixture,
   onChange,
   onRemove,
   isDisabled,
 }) => {
   const Picker = slot.picker === "solvent" ? SolventPicker : CompoundPicker;
-  const amountInput = (
-    <Input
-      type="number"
-      min={0}
-      step="any"
-      inputMode="decimal"
-      aria-label={`${label} amount`}
-      placeholder="Amount"
-      width="100px"
-      value={row.quantity}
-      onChange={(e) => onChange({ quantity: e.target.value })}
-      isDisabled={isDisabled}
-    />
-  );
 
-  // one line: a name box sized for a typical name, then the amount, unit and
-  // fate, which move under it together if there isn't room
+  // one line: a name box sized for a typical name, then the amount (or
+  // percentage) and fate, which move under it together if there isn't room
   return (
     <Flex wrap="wrap" align="center" gap={2}>
       <Box flex="0 0 280px" maxW="100%" minW={0}>
@@ -150,7 +143,7 @@ const MaterialRow = ({
         />
       </Box>
       <HStack spacing={2} flexShrink={0}>
-        {showProportion && (
+        {isMixture ? (
           <InputGroup size="sm" width="auto">
             <Input
               type="number"
@@ -167,28 +160,17 @@ const MaterialRow = ({
             />
             <InputRightAddon>%</InputRightAddon>
           </InputGroup>
+        ) : (
+          <AmountInput
+            label={`${label} amount`}
+            value={row.quantity}
+            unit={row.unit}
+            units={slot.units}
+            onValueChange={(quantity) => onChange({ quantity })}
+            onUnitChange={(unit) => onChange({ unit })}
+            isDisabled={isDisabled}
+          />
         )}
-        <InputGroup size="sm" width="auto">
-          {amountInput}
-          {slot.units.length === 1 ? (
-            <InputRightAddon>{slot.units[0]}</InputRightAddon>
-          ) : (
-            <Select
-              size="sm"
-              width="auto"
-              aria-label={`${label} unit`}
-              value={row.unit}
-              onChange={(e) => onChange({ unit: e.target.value })}
-              isDisabled={isDisabled}
-            >
-              {slot.units.map((unit) => (
-                <option key={unit} value={unit}>
-                  {unit}
-                </option>
-              ))}
-            </Select>
-          )}
-        </InputGroup>
         <Select
           size="sm"
           width="auto"
@@ -218,10 +200,83 @@ const MaterialRow = ({
   );
 };
 
+/** The total of a mixture's percentages, in red when it isn't 100. */
+const ProportionTotal = ({ rows }) => {
+  if (!rows.some(hasProportion)) return null;
+  const total = proportionTotal(rows);
+  const isComplete = total === PROPORTION_TOTAL;
+  return (
+    <Text
+      fontSize="xs"
+      color={isComplete ? "gray.600" : "red.600"}
+      role={isComplete ? undefined : "alert"}
+    >
+      Total {total}%
+      {!isComplete &&
+        ` (must add up to ${PROPORTION_TOTAL}% to split the volume)`}
+    </Text>
+  );
+};
+
+/**
+ * The volume of a mixture as made up, e.g. 500 mL of 90:10 hexane/EtOAc,
+ * with each material's share of it once the percentages add up to 100.
+ * @param {{
+ *   slot: object,
+ *   rows: object[],
+ *   volume: string,
+ *   onVolumeChange: (volume: string) => void,
+ *   onUnitChange: (unit: string) => void,
+ *   isDisabled: boolean,
+ * }} props
+ */
+const MixtureVolume = ({
+  slot,
+  rows,
+  volume,
+  onVolumeChange,
+  onUnitChange,
+  isDisabled,
+}) => {
+  const unit = rows[0].unit;
+  const shares = isProportionComplete(rows)
+    ? rows
+        .filter((row) => row.name && row.quantity !== "")
+        .map((row) => `${row.name} ${formatAmount(row.quantity)} ${unit}`)
+    : [];
+  return (
+    <Stack spacing={1}>
+      <HStack spacing={3} flexWrap="wrap" align="center">
+        {/* a span, so the reaction page's paragraph margin doesn't push it up */}
+        <Text as="span" fontSize="sm" lineHeight="32px" m={0}>
+          Total volume used:
+        </Text>
+        <AmountInput
+          label={`${slot.label} total volume`}
+          value={volume}
+          unit={unit}
+          units={slot.units}
+          onValueChange={onVolumeChange}
+          onUnitChange={onUnitChange}
+          isDisabled={isDisabled}
+        />
+      </HStack>
+      <ProportionTotal rows={rows} />
+      {shares.length > 0 && (
+        <Text fontSize="xs" color="gray.600">
+          {shares.join(" + ")}
+        </Text>
+      )}
+    </Stack>
+  );
+};
+
 /**
  * A material slot of the step being edited, e.g. a wash's aqueous phase. Shows
  * an empty row until something is entered; slots that take several materials
- * (e.g. an eluent mixture) can add more.
+ * (e.g. an eluent mixture) can add more. In a slot with proportions, two or
+ * more materials make a mixture: each gets a percentage, and one total volume
+ * is split between them.
  * @param {{ slot: object }} props The slot's definition from the backend.
  */
 export const MaterialSlot = ({ slot }) => {
@@ -233,19 +288,35 @@ export const MaterialSlot = ({ slot }) => {
       ? saved
       : [{ ...emptyMaterial(slot), key: `blank-${slot.slot}` }];
   const repeats = slot.repeated ? Number(values.repeats) : 0;
-  const showProportions = slot.proportions && rows.length > 1;
+  const isMixture = Boolean(slot.proportions) && rows.length > 1;
+  // the mixture's volume as typed; each material's amount is worked out from it
+  const [volume, setVolume] = useState(() =>
+    isMixture ? mixtureVolume(saved) : "",
+  );
+
+  /** Applies a change to this slot's rows within all the step's materials. */
+  const updateSlotRows = (current, transform) => {
+    const slotRows = current.filter((item) => item.slot === slot.slot);
+    const updated = new Map(
+      transform(slotRows).map((item) => [item.key, item]),
+    );
+    return current.map((item) => updated.get(item.key) ?? item);
+  };
 
   /**
-   * Rebalances this slot's percentages within all the step's materials.
-   * Only does so once the user has started entering percentages.
+   * Rebalances the percentages (once the user has started entering them) and
+   * splits the mixture's volume between its materials.
    */
-  const rebalance = (current, editedKey) => {
-    const slotRows = current.filter((item) => item.slot === slot.slot);
-    if (!slot.proportions || !slotRows.some(hasProportion)) return current;
-    const balanced = new Map(
-      balanceProportions(slotRows, editedKey).map((item) => [item.key, item]),
-    );
-    return current.map((item) => balanced.get(item.key) ?? item);
+  const settleMixture = (current, editedKey, mixtureVolumeText) => {
+    if (!slot.proportions) return current;
+    return updateSlotRows(current, (slotRows) => {
+      const balanced = slotRows.some(hasProportion)
+        ? balanceProportions(slotRows, editedKey)
+        : slotRows;
+      return balanced.length > 1
+        ? splitVolume(balanced, mixtureVolumeText)
+        : balanced;
+    });
   };
 
   const updateRow = (row, changes) =>
@@ -255,27 +326,54 @@ export const MaterialSlot = ({ slot }) => {
             item.key === row.key ? { ...item, ...changes } : item,
           )
         : [...current, { ...row, ...changes }];
-      return "proportion" in changes ? rebalance(updated, row.key) : updated;
+      return "proportion" in changes
+        ? settleMixture(updated, row.key, volume)
+        : updated;
     });
 
   const removeRow = (row) =>
-    setMaterials((current) =>
-      rebalance(
-        current.filter((item) => item.key !== row.key),
-        null,
-      ),
-    );
+    setMaterials((current) => {
+      const remaining = current.filter((item) => item.key !== row.key);
+      const settled = settleMixture(remaining, null, volume);
+      // the last material left is the whole of what was the mixture
+      if (isMixture && saved.length === 2 && volume !== "") {
+        return updateSlotRows(settled, (slotRows) =>
+          slotRows.map((item) => ({ ...item, quantity: volume })),
+        );
+      }
+      return settled;
+    });
 
-  const addRow = () =>
+  const addRow = () => {
+    // a single material's amount becomes the new mixture's volume
+    const nextVolume = isMixture ? volume : mixtureVolume(saved);
+    setVolume(nextVolume);
     setMaterials((current) =>
-      rebalance(
+      settleMixture(
         [
           ...current,
           // keep the empty row on screen as the first of the two
           ...(saved.length === 0 ? rows : []),
-          emptyMaterial(slot),
+          // in the same unit, as a mixture has one volume
+          { ...emptyMaterial(slot), unit: rows[0].unit },
         ],
         null,
+        nextVolume,
+      ),
+    );
+  };
+
+  const changeVolume = (text) => {
+    setVolume(text);
+    setMaterials((current) =>
+      updateSlotRows(current, (slotRows) => splitVolume(slotRows, text)),
+    );
+  };
+
+  const changeMixtureUnit = (unit) =>
+    setMaterials((current) =>
+      updateSlotRows(current, (slotRows) =>
+        slotRows.map((item) => ({ ...item, unit })),
       ),
     );
 
@@ -290,7 +388,7 @@ export const MaterialSlot = ({ slot }) => {
             slot={slot}
             row={row}
             label={index === 0 ? slot.label : `${slot.label} ${index + 1}`}
-            showProportion={showProportions}
+            isMixture={isMixture}
             onChange={(changes) => updateRow(row, changes)}
             onRemove={saved.includes(row) ? () => removeRow(row) : undefined}
             isDisabled={isDisabled}
@@ -298,7 +396,16 @@ export const MaterialSlot = ({ slot }) => {
           {slot.repeated && <RepeatTotal repeats={repeats} row={row} />}
         </Stack>
       ))}
-      {showProportions && <ProportionTotal rows={rows} />}
+      {isMixture && (
+        <MixtureVolume
+          slot={slot}
+          rows={rows}
+          volume={volume}
+          onVolumeChange={changeVolume}
+          onUnitChange={changeMixtureUnit}
+          isDisabled={isDisabled}
+        />
+      )}
       {slot.multiple && !isDisabled && (
         <LinkButton
           leftIcon={<FaPlus />}
