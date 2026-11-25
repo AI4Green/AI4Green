@@ -26,6 +26,12 @@ from sources.services.inventory import InventoryValidationError
 from sources.services.workup import WorkupNotFoundError
 from sources.services.workup_steps import WorkupValidationError
 
+from ..reaction_access import (
+    can_edit,
+    editable_reaction,
+    member_reaction,
+    member_workbook,
+)
 from ..utils import json_body
 from . import workups_api_bp
 
@@ -69,64 +75,6 @@ def _handle_not_found(error: WorkupNotFoundError) -> Tuple[Response, int]:
     return jsonify({"message": "Not found."}), 404
 
 
-def _member_workbook(workgroup_name: str, workbook_name: str) -> models.WorkBook:
-    """
-    Gets a workbook the current user is a member of.
-
-    Args:
-        workgroup_name: The workgroup name from the URL.
-        workbook_name: The workbook name from the URL.
-
-    Returns:
-        The workbook.
-    """
-    workbook = services.workbook.get_workbook_from_group_book_name_combination(
-        workgroup_name, workbook_name
-    )
-    if workbook is None or not services.workbook.is_member(workbook):
-        abort(404)
-    return workbook
-
-
-def _member_reaction(
-    workgroup_name: str, workbook_name: str, reaction_id: str
-) -> models.Reaction:
-    """
-    Gets a reaction in a workbook the current user is a member of.
-
-    Args:
-        workgroup_name: The workgroup name from the URL.
-        workbook_name: The workbook name from the URL.
-        reaction_id: The reaction code from the URL, e.g. "WB1-001".
-
-    Returns:
-        The reaction.
-    """
-    reaction = services.reaction.get_from_names(
-        workgroup_name, workbook_name, reaction_id
-    )
-    if reaction is None:
-        abort(404)
-    return reaction
-
-
-def _can_edit(reaction: models.Reaction) -> bool:
-    """
-    Whether the current user may change the reaction's workup: its creator, while
-    the reaction isn't locked (the same rule as the reaction page's autosave).
-
-    Args:
-        reaction: The reaction.
-
-    Returns:
-        True if the user may change it.
-    """
-    return (
-        services.reaction.check_current_user_is_creator(reaction)
-        and reaction.complete != "complete"
-    )
-
-
 def _editable_reaction(
     workgroup_name: str, workbook_name: str, reaction_id: str
 ) -> models.Reaction:
@@ -141,10 +89,7 @@ def _editable_reaction(
     Returns:
         The reaction.
     """
-    reaction = _member_reaction(workgroup_name, workbook_name, reaction_id)
-    if not _can_edit(reaction):
-        abort(403, LOCKED_MESSAGE)
-    return reaction
+    return editable_reaction(workgroup_name, workbook_name, reaction_id, LOCKED_MESSAGE)
 
 
 def _steps_response(reaction: models.Reaction, category: models.WorkupCategory) -> Dict:
@@ -160,7 +105,7 @@ def _steps_response(reaction: models.Reaction, category: models.WorkupCategory) 
     """
     return {
         "category": category.value,
-        "canEdit": _can_edit(reaction),
+        "canEdit": can_edit(reaction),
         "steps": [
             step.to_dict() for step in services.workup.list_steps(reaction, category)
         ],
@@ -181,9 +126,24 @@ def get_step_definitions() -> Response:
 @login_required
 def get_steps(workgroup_name: str, workbook_name: str, reaction_id: str) -> Response:
     """Gets a reaction's steps for one category (`?category=WORKUP|PURIFICATION`)."""
-    reaction = _member_reaction(workgroup_name, workbook_name, reaction_id)
+    reaction = member_reaction(workgroup_name, workbook_name, reaction_id)
     category = services.workup.parse_category(request.args.get("category"))
     return jsonify(_steps_response(reaction, category))
+
+
+@workups_api_bp.route(f"{REACTION_URL}/procedure-text", methods=["GET"])
+@login_required
+def get_procedure_text(
+    workgroup_name: str, workbook_name: str, reaction_id: str
+) -> Response:
+    """
+    Gets a category's steps written out as experimental procedure text
+    (`?category=WORKUP|PURIFICATION`).
+    """
+    reaction = member_reaction(workgroup_name, workbook_name, reaction_id)
+    category = services.workup.parse_category(request.args.get("category"))
+    steps = [step.to_dict() for step in services.workup.list_steps(reaction, category)]
+    return jsonify({"text": services.procedure_text.workup_text(steps, category.value)})
 
 
 @workups_api_bp.route(f"{REACTION_URL}/steps", methods=["POST"])
@@ -275,7 +235,7 @@ def save_as_template(
     (`{"category": ..., "name": ..., "description": ...}`). Any workbook member can
     save another member's workup as a template, since it copies no values.
     """
-    reaction = _member_reaction(workgroup_name, workbook_name, reaction_id)
+    reaction = member_reaction(workgroup_name, workbook_name, reaction_id)
     data = json_body()
     category = services.workup.parse_category(data.get("category"))
     template = services.workup.save_as_template(
@@ -294,7 +254,7 @@ def list_solvents(workgroup_name: str, workbook_name: str) -> Response:
     Gets the workbook's solvent list with CHEM21 flags, and the user's CHEM21
     colours, for the coloured solvent picker.
     """
-    workbook = _member_workbook(workgroup_name, workbook_name)
+    workbook = member_workbook(workgroup_name, workbook_name)
     return jsonify(
         {
             "solvents": services.workup_steps.solvent_options(workbook),
@@ -310,7 +270,7 @@ def lookup_compound(workgroup_name: str, workbook_name: str) -> Response:
     Looks a compound up by name or CAS number (`?q=`), in the compound database and
     the user's novel compounds in this workgroup. The same lookup as the inventory.
     """
-    workbook = _member_workbook(workgroup_name, workbook_name)
+    workbook = member_workbook(workgroup_name, workbook_name)
     try:
         result = services.inventory.lookup_compound(
             workbook.WorkGroup, request.args.get("q")
@@ -327,7 +287,7 @@ def lookup_compound(workgroup_name: str, workbook_name: str) -> Response:
 @login_required
 def list_templates(workgroup_name: str, workbook_name: str) -> Response:
     """Lists the workbook's workup templates (`?category=` to filter)."""
-    workbook = _member_workbook(workgroup_name, workbook_name)
+    workbook = member_workbook(workgroup_name, workbook_name)
     category_value = request.args.get("category")
     category = (
         services.workup.parse_category(category_value) if category_value else None
@@ -350,7 +310,7 @@ def delete_template(
     workgroup_name: str, workbook_name: str, template_id: int
 ) -> Response:
     """Deletes a template. Only its creator can; reactions that used it keep their steps."""
-    workbook = _member_workbook(workgroup_name, workbook_name)
+    workbook = member_workbook(workgroup_name, workbook_name)
     template = services.workup.get_template(workbook, template_id)
     if not services.workup.can_delete_template(template):
         abort(403, "Only the person who saved this template can delete it.")
