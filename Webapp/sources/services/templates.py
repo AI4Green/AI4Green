@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import pytz
 from flask_login import current_user
@@ -34,7 +34,7 @@ def create_new_coshh_template(name: str, description: str) -> Dict:
     return new_template.to_dict()
 
 
-def list_coshh_as_dict() -> List[Dict]:
+def list_coshh_templates_as_dict() -> List[Dict]:
     """
     Queries COSHHTemplate table and returns all templates. Templates can only be made by H&S admin.
     Returns:
@@ -45,17 +45,16 @@ def list_coshh_as_dict() -> List[Dict]:
     return [x.to_dict() for x in query.all()]
 
 
-def get_coshh_template_by_id(template_id: int) -> Dict:
+def get_coshh_template_by_id(template_id: int) -> Optional[models.COSHHTemplate]:
     """
     Get COSHHTemplate by template id
     Args:
         template_id: str, the template id
 
     Returns:
-        models.COSHHTemplate
+        models.COSHHTemplate, or None if there is no COSHH template with that id
     """
-    template = db.session.get(models.COSHHTemplate, template_id)
-    return template if template else None
+    return db.session.get(models.COSHHTemplate, template_id)
 
 
 def is_hs_admin() -> bool:
@@ -70,3 +69,33 @@ def is_hs_admin() -> bool:
         and current_user.Role is not None
         and current_user.Role.name == HS_ADMIN_ROLE
     )
+
+
+def can_view(template: models.Template) -> bool:
+    """
+    Whether the current user may see a template. COSHH templates are managed by
+    H&S admins.
+
+    Args:
+        template: The template.
+
+    Returns:
+        True if the user may see it.
+    """
+    return is_hs_admin()
+
+
+def can_manage(template: models.Template) -> bool:
+    """
+    Whether the current user may change a template's sections and fields.
+
+    Same rule as can_view for now; kept separate so it can tighten later
+    (e.g. once publishing/staging is built).
+
+    Args:
+        template: The template.
+
+    Returns:
+        True if the user may change it.
+    """
+    return can_view(template)

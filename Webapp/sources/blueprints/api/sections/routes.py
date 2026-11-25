@@ -1,18 +1,69 @@
-from flask import jsonify, request
-from flask_login import current_user, login_required
-from sources import db, models
+"""
+Sections API (/api/sections): the sections and fields of a COSHH template, edited in
+the template builder canvas.
 
+Access: the user must be allowed to manage the section's template
+(services.templates.can_manage). Writes only accept JSON bodies.
+"""
+
+from typing import Any, Dict
+
+from apiflask import abort
+from flask import Response, jsonify
+from flask_login import current_user, login_required
+from sources import db, models, services
+from sources.services.sections import SectionInUseError
+
+from ..utils import json_body
 from . import sections_api_bp
+
+
+def _get_manageable_template(template_id: Any) -> models.Template:
+    """
+    Gets a template the current user may change.
+
+    Args:
+        template_id: The template id from the request.
+
+    Returns:
+        The template.
+    """
+    try:
+        template = db.session.get(models.Template, int(template_id))
+    except (TypeError, ValueError):
+        abort(400, "templateId is required.")
+    if template is None or not services.templates.can_view(template):
+        abort(404)
+    if not services.templates.can_manage(template):
+        abort(403)
+    return template
+
+
+def _get_template_section(section_id: int) -> models.Section:
+    """
+    Gets a template section whose template the current user may change.
+
+    Args:
+        section_id: The section id.
+
+    Returns:
+        The section.
+    """
+    section = db.session.get(models.Section, section_id)
+    if section is None or section.template_id is None:
+        abort(404)
+    _get_manageable_template(section.template_id)
+    return section
 
 
 @sections_api_bp.route("/", methods=["GET"])
 @login_required
-def get_sections():
-    # get sections per user
+def get_sections() -> Response:
+    """Lists the sections of templates the current user created."""
     query = (
         db.session.query(models.Section)
-        .join(models.Template)
-        .filter(models.Template.creator_id == current_user.id)
+        .join(models.COSHHTemplate)
+        .filter(models.COSHHTemplate.creator_id == current_user.id)
     )
 
     return jsonify([x.to_dict() for x in query.all()])
@@ -20,132 +71,61 @@ def get_sections():
 
 @sections_api_bp.route("/", methods=["POST"])
 @login_required
-def save_new_section():
-    data = request.get_json()
+def save_new_section() -> Response:
+    """Adds a section to a template."""
+    data: Dict[str, Any] = json_body()
+    template = _get_manageable_template(data.get("templateId"))
 
-    name = data.get("name", None)
-    sort_order = data.get("sortOrder", None)
-    template_id = data.get("projectTypeId", None)
-
-    new_section = models.Section.create(
-        name=name,
-        sort_order=sort_order,
-        template_id=template_id,
+    section = services.sections.create_section(
+        name=data.get("name") or "New Section",
+        sort_order=data.get("sortOrder"),
+        template=template,
     )
-
-    db.session.add(new_section)
-    db.session.commit()
-
-    return jsonify(new_section.to_dict())
+    return jsonify(section.to_dict())
 
 
 @sections_api_bp.route("/", methods=["PUT"])
 @login_required
-def update_section():
-    data = request.get_json()
-
-    coshh_form_id = data.get("coshhFormId")
+def update_section() -> Response:
+    """Renames and reorders a template's sections, creating any new ones."""
+    data: Dict[str, Any] = json_body()
+    template = _get_manageable_template(data.get("templateId"))
     sections_data = data.get("sections", [])
+    if not isinstance(sections_data, list):
+        abort(400, "Send the sections as a list.")
 
-    updated_sections = []
-
-    try:
-        for item in sections_data:
-            section_id = item.get("id")
-            name = item.get("name")
-            sort_order = item.get("sortOrder")
-
-            # UPDATE existing section
-            if section_id is not None:
-                section = models.Section.query.get(section_id)
-
-                if not section:
-                    continue  # or raise error if you want strict mode
-
-                section.name = name
-                section.sort_order = sort_order
-
-                updated_sections.append(section)
-
-            # CREATE new section
-            else:
-                section = models.Section.create(
-                    name=name,
-                    sort_order=sort_order,
-                    template_id=coshh_form_id,
-                )
-
-                db.session.add(section)
-                updated_sections.append(section)
-
-        db.session.commit()
-
-        return jsonify({"sections": [s.to_dict() for s in updated_sections]}), 200
-
-    except Exception:
-        db.session.rollback()
-        return jsonify({"error": "Failed to update sections"}), 500
+    updated = services.sections.update_template_sections(template, sections_data)
+    return jsonify({"sections": [s.to_dict() for s in updated]}), 200
 
 
 @sections_api_bp.route("/<int:section_id>", methods=["GET"])
 @login_required
-def get_section_by_id(section_id):
-    section = models.Section.query.get(section_id)
-    return jsonify(section.to_dict)
+def get_section_by_id(section_id: int) -> Response:
+    """Gets one template section."""
+    return jsonify(_get_template_section(section_id).to_dict())
 
 
 @sections_api_bp.route("/<int:section_id>/fields", methods=["GET"])
 @login_required
-def get_section_fields(section_id):
-    section = models.Section.query.get(section_id)
-    return [x.to_dict() for x in section.fields]
+def get_section_fields(section_id: int) -> Response:
+    """Lists a template section's own fields."""
+    section = _get_template_section(section_id)
+    fields = sorted(section.fields, key=lambda field: field.sort_order or 0)
+    return jsonify([x.to_dict() for x in fields])
 
 
 @sections_api_bp.route("/<int:section_id>/fields", methods=["POST"])
 @login_required
-def save_new_fields(section_id):
-    data = request.get_json()
+def save_new_fields(section_id: int) -> Response:
+    """Replaces a template section's fields with the submitted list."""
+    section = _get_template_section(section_id)
+    fields = json_body(allow_list=True)
+    if not isinstance(fields, list):
+        abort(400, "Send the fields as a list.")
 
-    # get all fields with session id
-    existing_fields = models.Section.query.get(section_id).fields
-    existing_ids = {f.id for f in existing_fields}
-
-    # find all ids from front end request
-    incoming_ids = {f.get("id", None) for f in data}
-
-    # identify which ids have been deleted and remove them
-    ids_to_delete = existing_ids - incoming_ids
-    if ids_to_delete:
-        db.session.query(models.Field).filter(
-            models.Field.id.in_(ids_to_delete)
-        ).delete()
-
-    # now update/create remaining fields
-    for f in data:
-        # if an id exists, try to find it
-        fid = f.get("id", None)
-        if fid:
-            query = models.Field.query.filter(models.Field.id == fid)
-            query.update(
-                {
-                    "section_id": section_id,
-                    "name": f.get("name"),
-                    "sort_order": f.get("sortOrder"),
-                    "input_type_id": f.get("inputType"),
-                    "mandatory": f.get("mandatory"),
-                }
-            )
-
-        else:
-            new_field = models.Field.create(
-                section_id=section_id,
-                name=f.get("name"),
-                sort_order=f.get("sortOrder"),
-                input_type_id=f.get("inputType"),
-                mandatory=f.get("mandatory"),
-            )
-            db.session.add(new_field)
-    db.session.commit()
-
+    try:
+        services.sections.save_fields(section, fields)
+    except SectionInUseError as error:
+        abort(409, str(error))
     return jsonify({"message": "success"}), 201
     # todo: handle multiple input fields, create new select_field_options?

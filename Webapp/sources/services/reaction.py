@@ -693,3 +693,29 @@ def get_reaction_details(reaction):
     }
 
     return reaction_details
+
+
+def get_from_names(
+    workgroup_name: str, workbook_name: str, reaction_id: str
+) -> Union[models.Reaction, None]:
+    """
+    Gets a reaction from the names the reaction page sends, if the current user
+    is a member of its workbook.
+
+    Unlike get_current_from_request_*, this doesn't abort, so JSON API routes can
+    return their own 404.
+
+    Args:
+        workgroup_name: The workgroup name.
+        workbook_name: The workbook name.
+        reaction_id: The reaction code, in format WB1-001.
+
+    Returns:
+        The reaction, or None if it doesn't exist or the user isn't a member.
+    """
+    workbook = services.workbook.get_workbook_from_group_book_name_combination(
+        workgroup_name, workbook_name
+    )
+    if workbook is None or not services.workbook.is_member(workbook):
+        return None
+    return get_from_reaction_id_and_workbook_id(reaction_id, workbook.id)
