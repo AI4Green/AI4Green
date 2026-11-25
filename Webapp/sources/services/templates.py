@@ -6,6 +6,8 @@ from flask_login import current_user
 from sources import models
 from sources.extensions import db
 
+HS_ADMIN_ROLE = "H&S Admin"
+
 
 def create_new_coshh_template(name: str, description: str) -> Dict:
     """
@@ -54,3 +56,17 @@ def get_coshh_template_by_id(template_id: int) -> Dict:
     """
     template = db.session.get(models.COSHHTemplate, template_id)
     return template if template else None
+
+
+def is_hs_admin() -> bool:
+    """
+    Whether the current user is an H&S admin, who manages COSHH templates.
+
+    Returns:
+        True for H&S admins.
+    """
+    return (
+        current_user.is_authenticated
+        and current_user.Role is not None
+        and current_user.Role.name == HS_ADMIN_ROLE
+    )

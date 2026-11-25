@@ -12,10 +12,8 @@ Access:
 Errors are JSON (APIFlask) with a `message` the front end can show.
 """
 
-from typing import Any, Dict
-
 from apiflask import abort
-from flask import Response, jsonify, request
+from flask import Response, jsonify
 from flask_login import login_required
 from sources import services
 from sources.services.reaction_search import (
@@ -24,22 +22,8 @@ from sources.services.reaction_search import (
 )
 from sources.services.structure_search import StructureSearchError
 
+from ..utils import json_body
 from . import search_api_bp
-
-
-def _json_body() -> Dict[str, Any]:
-    """
-    Reads the request's JSON object body, refusing anything that isn't JSON.
-
-    Returns:
-        The parsed body.
-    """
-    if not request.is_json:
-        abort(415, "Send the request as JSON.")
-    data = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        abort(400, "The request body must be a JSON object.")
-    return data
 
 
 @search_api_bp.route("/workgroups", methods=["GET"])
@@ -60,7 +44,7 @@ def search_reactions() -> Response:
 
     Returns `{results: [...], truncated}`.
     """
-    data = _json_body()
+    data = json_body()
     try:
         criteria = services.reaction_search.read_criteria(data)
         results = services.reaction_search.search_reactions(criteria)
