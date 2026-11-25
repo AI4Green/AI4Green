@@ -44,6 +44,26 @@ from .reaction_approval_request import (
     reaction_approval_request_approvers,
 )
 from .reaction_data_file import ReactionDataFile
+from .reaction_method import (
+    AdditionDevice,
+    AdditionForm,
+    AdditionSpeed,
+    Atmosphere,
+    EnvironmentType,
+    MethodComponentRole,
+    PressureControl,
+    ReactionAddition,
+    ReactionAdditionComponent,
+    ReactionMethod,
+    ReactionMethodTemplate,
+    StirringMethod,
+    StirringRate,
+    TemperatureControl,
+    VesselAttachment,
+    VesselMaterial,
+    VesselPreparation,
+    VesselType,
+)
 from .reaction_note import ReactionNote
 from .retrosynthesis import Retrosynthesis
 from .role import Role
